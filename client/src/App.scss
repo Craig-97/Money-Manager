@@ -1,0 +1,135 @@
+/*BASE APP STYLES */
+.app {
+  text-align: left;
+  background: #000;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+  padding: 0 1rem;
+
+  h1 {
+    margin: 2rem 0;
+    font-size: 1.75em;
+  }
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  max-width: 1250px;
+
+  /* LOADING AND ERRORS */
+  .loading,
+  .error {
+    text-align: center;
+  }
+
+  /* TOTAL CARDS */
+  .totals {
+    display: grid;
+    grid-template-columns: auto auto auto auto;
+    grid-template-rows: auto auto;
+    grid-gap: 2rem;
+    margin: 0 0 2rem 0;
+
+    @media only screen and (max-width: 1250px) {
+      grid-template-columns: auto auto auto;
+    }
+
+    @media only screen and (max-width: 920px) {
+      grid-template-columns: auto auto;
+    }
+
+    @media only screen and (max-width: 620px) {
+      grid-template-columns: auto;
+    }
+
+    .MuiCard-root {
+      min-width: 275px;
+      max-width: 275px;
+
+      .MuiCardContent-root {
+        padding: 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      @media only screen and (max-width: 620px) {
+        min-width: 100%;
+        max-width: 100%;
+      }
+    }
+  }
+
+  /* OVERVIEW COMPONENTS */
+  .overview {
+    margin: 0 0 4rem;
+    .MuiAppBar-colorDefault {
+      background-color: #424242;
+    }
+
+    .MuiBox-root {
+      background-color: #424242;
+      border-radius: 0 0 4px 4px;
+      font-size: 1rem;
+      font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
+      font-weight: 400;
+      line-height: 1.5;
+      letter-spacing: 0.00938em;
+    }
+
+    .transactions,
+    .upcoming-payments,
+    .monthly-bills {
+      h4 {
+        margin: 0.5rem 0;
+      }
+
+      .transaction,
+      .payment,
+      .bill {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+
+        h3 {
+          margin: 0.25rem 0 0;
+        }
+
+        h5 {
+          margin: 0;
+          font-size: 1em;
+        }
+
+        p {
+          margin: 0;
+          margin-left: 20px;
+          font-size: 1em;
+          font-weight: bold;
+        }
+      }
+
+      .MuiDivider-root {
+        margin: 0.5rem 0;
+      }
+    }
+  }
+}
+
+/* CHROME AUTOCOMPLETE FIX */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px #424242 inset !important;
+  box-shadow: 0 0 0 30px #424242 inset !important;
+}
+
+input:-webkit-autofill {
+  -webkit-text-fill-color: white !important;
+}
