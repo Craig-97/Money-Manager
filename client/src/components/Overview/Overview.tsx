@@ -8,7 +8,7 @@ import { PaymentsDue } from './PaymentsDue';
 import { Transactions } from './Transactions';
 import { TabPanel } from './TabPanel';
 
-export const Overview: React.FC = () => {
+export const Overview = () => {
   const theme = useTheme();
   const [value, setValue] = useState(0);
 

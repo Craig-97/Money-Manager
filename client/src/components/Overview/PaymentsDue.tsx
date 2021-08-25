@@ -3,7 +3,7 @@ import { useAccountContext } from '../../state';
 import { Divider } from '@material-ui/core';
 import { Account } from '../../interfaces';
 
-export const PaymentsDue: React.FC = () => {
+export const PaymentsDue = () => {
   const {
     state: { account }
   } = useAccountContext();

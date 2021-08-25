@@ -9,7 +9,7 @@ import { Overview } from './Overview';
 import { Totals } from './Totals';
 import { GET_ACCOUNT_QUERY } from '../graphql';
 
-export const Homepage: React.FC = () => {
+export const Homepage = () => {
   const { loading, data, error } = useQuery<AccountData>(GET_ACCOUNT_QUERY);
   const {
     state: { account },
