@@ -21,12 +21,8 @@ const App = () => {
           }
         })}
       >
-        <AccountProvider
-          initialState={{
-            account: {}
-          }}
-        >
-          <div className='app'>
+        <AccountProvider>
+          <div className="app">
             <Homepage />
           </div>
         </AccountProvider>

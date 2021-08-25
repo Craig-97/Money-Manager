@@ -12,7 +12,9 @@ import { useAccountContext } from '../../state/account-context';
 import { UPDATE_ACCOUNT_MUTATION, GET_ACCOUNT_QUERY } from '../../graphql';
 
 export const MonthlyIncomePopup = ({ open, setOpen }) => {
-  const [{ account }] = useAccountContext();
+  const {
+    state: { account }
+  } = useAccountContext();
   const { monthlyIncome, id } = account;
   const [value, setValue] = useState('');
   const [updateAccount] = useMutation(UPDATE_ACCOUNT_MUTATION, {
@@ -51,27 +53,35 @@ export const MonthlyIncomePopup = ({ open, setOpen }) => {
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} aria-labelledby='form-dialog-title'>
-      <DialogTitle id='form-dialog-title'>Monthly Income</DialogTitle>
+    <Dialog
+      open={open}
+      onClose={handleClose}
+      aria-labelledby="form-dialog-title"
+    >
+      <DialogTitle id="form-dialog-title">Monthly Income</DialogTitle>
       <DialogContent>
         <DialogContentText>Enter your updated monthly income</DialogContentText>
         <TextField
           InputProps={{
-            startAdornment: <InputAdornment position='start'>£</InputAdornment>
+            startAdornment: <InputAdornment position="start">£</InputAdornment>
           }}
           value={value}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
           autoFocus
-          margin='dense'
-          id='monthly-income'
-          type='number'
+          margin="dense"
+          id="monthly-income"
+          type="number"
           fullWidth
         />
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose}>Cancel</Button>
-        <Button onClick={changeMonthlyIncome} color='secondary' disabled={!value}>
+        <Button
+          onClick={changeMonthlyIncome}
+          color="secondary"
+          disabled={!value}
+        >
           Save
         </Button>
       </DialogActions>

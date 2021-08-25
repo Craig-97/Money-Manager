@@ -1,11 +1,13 @@
-import React, { Fragment, useState, useCallback } from "react";
-import AccountBalanceIcon from "@material-ui/icons/AccountBalance";
-import { BankBalancePopup } from "../Popup";
-import { TotalCard } from "./TotalCard";
-import { useAccountContext } from "../../state/account-context";
+import React, { Fragment, useState, useCallback } from 'react';
+import AccountBalanceIcon from '@material-ui/icons/AccountBalance';
+import { BankBalancePopup } from '../Popup';
+import { TotalCard } from './TotalCard';
+import { useAccountContext } from '../../state/account-context';
 
 export const BankBalanceCard = () => {
-  const [{ account }] = useAccountContext();
+  const {
+    state: { account }
+  } = useAccountContext();
   const { bankBalance } = account;
   const [open, setOpen] = useState(false);
 
@@ -13,7 +15,7 @@ export const BankBalanceCard = () => {
     setOpen(true);
   };
 
-  const updateOpen = useCallback((value) => {
+  const updateOpen = useCallback(value => {
     setOpen(value);
   }, []);
 
@@ -21,7 +23,7 @@ export const BankBalanceCard = () => {
     <Fragment>
       <TotalCard
         classBaseName="bank-balance"
-        title={"BANK TOTAL"}
+        title={'BANK TOTAL'}
         amount={bankBalance}
         onClick={handleClickOpen}
         icon={<AccountBalanceIcon color="primary" style={{ fontSize: 50 }} />}

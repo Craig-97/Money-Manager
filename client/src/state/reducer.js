@@ -1,5 +1,5 @@
 import { events } from '../constants';
-import { getAccountData } from '../mockData/accountData';
+import { getAccountData } from '../mockData';
 
 export const reducer = (state, action) => {
   const { type, data } = action;

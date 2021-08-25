@@ -1,18 +1,18 @@
-import React from "react";
-import AppBar from "@material-ui/core/AppBar";
-import SwipeableViews from "react-swipeable-views";
-import { useTheme } from "@material-ui/core/styles";
-import { OverviewTabs } from "./Tabs";
-import { MonthlyBills } from "./MonthlyBills";
-import { PaymentsDue } from "./PaymentsDue";
-import { Transactions } from "./Transactions";
-import { TabPanel } from "./TabPanel";
+import React, { useState } from 'react';
+import AppBar from '@material-ui/core/AppBar';
+import SwipeableViews from 'react-swipeable-views';
+import { useTheme } from '@material-ui/core/styles';
+import { OverviewTabs } from './Tabs';
+import { MonthlyBills } from './MonthlyBills';
+import { PaymentsDue } from './PaymentsDue';
+import { Transactions } from './Transactions';
+import { TabPanel } from './TabPanel';
 
-export const Overview = () => {
+export const Overview: React.FC = () => {
   const theme = useTheme();
-  const [value, setValue] = React.useState(0);
+  const [value, setValue] = useState(0);
 
-  const handleChangeIndex = (index) => {
+  const handleChangeIndex = (index: number) => {
     setValue(index);
   };
 
@@ -22,7 +22,7 @@ export const Overview = () => {
         <OverviewTabs value={value} setValue={setValue} />
       </AppBar>
       <SwipeableViews
-        axis={theme.direction === "rtl" ? "x-reverse" : "x"}
+        axis={theme.direction === 'rtl' ? 'x-reverse' : 'x'}
         index={value}
         onChangeIndex={handleChangeIndex}
       >

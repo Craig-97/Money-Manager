@@ -1,20 +1,20 @@
-// NEEDED TEMPORARILY
-// eslint-disable-next-line
-import { getAccountData } from '../mockData';
-
 import React, { Fragment, useEffect } from 'react';
+import { AccountData } from '../interfaces';
+import { useAccountContext } from '../state/account-context';
 import { useQuery } from '@apollo/client';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import isEqual from 'lodash/isEqual';
 import { events } from '../constants';
-import { useAccountContext } from '../state/account-context';
 import { Overview } from './Overview';
 import { Totals } from './Totals';
 import { GET_ACCOUNT_QUERY } from '../graphql';
 
-export const Homepage = () => {
-  const { loading, data, error } = useQuery(GET_ACCOUNT_QUERY);
-  const [{ account }, dispatch] = useAccountContext();
+export const Homepage: React.FC = () => {
+  const { loading, data, error } = useQuery<AccountData>(GET_ACCOUNT_QUERY);
+  const {
+    state: { account },
+    dispatch
+  } = useAccountContext();
 
   useEffect(() => {
     if (!isEqual(data, account)) {
@@ -25,10 +25,10 @@ export const Homepage = () => {
 
   return (
     <div>
-      <div className='header'>
+      <div className="header">
         <h1>Money Manager</h1>
       </div>
-      <div className='app-container'>
+      <div className="app-container">
         {!error && !loading && (
           <Fragment>
             <Totals />
@@ -36,11 +36,11 @@ export const Homepage = () => {
           </Fragment>
         )}
         {loading && (
-          <div className='loading'>
+          <div className="loading">
             <CircularProgress />
           </div>
         )}
-        {error && <p className='error'>Error fetching account data</p>}
+        {error && <p className="error">Error fetching account data</p>}
       </div>
     </div>
   );
