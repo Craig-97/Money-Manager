@@ -1,16 +1,17 @@
-import React, { Fragment, useState, useCallback } from 'react';
+import { Fragment, useState, useCallback } from 'react';
 import LocalAtmIcon from '@material-ui/icons/LocalAtm';
 import { useAccountContext } from '../../state/account-context';
 import { MonthlyIncomePopup } from '../Popup';
 import { TotalCard } from './TotalCard';
 import { green } from '@material-ui/core/colors';
+import { Account } from '../../interfaces';
 
 export const MonthlyIncomeCard = () => {
   const {
     state: { account }
   } = useAccountContext();
-  const { monthlyIncome } = account;
-  const [open, setOpen] = useState(false);
+  const { monthlyIncome }: Account = account;
+  const [open, setOpen] = useState<boolean>(false);
 
   const handleClickOpen = () => {
     setOpen(true);

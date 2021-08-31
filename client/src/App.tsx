@@ -1,4 +1,3 @@
-import React from 'react';
 import { Homepage } from './components/Homepage';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import { AccountProvider } from './state/account-context';

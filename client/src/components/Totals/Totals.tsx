@@ -1,4 +1,3 @@
-import React from 'react';
 import AccountBalanceIcon from '@material-ui/icons/AccountBalance';
 import PaymentIcon from '@material-ui/icons/Payment';
 import ReceiptIcon from '@material-ui/icons/Receipt';
@@ -9,6 +8,7 @@ import { green } from '@material-ui/core/colors';
 import { useAccountContext } from '../../state/account-context';
 import { BankBalanceCard } from './BankBalanceCard';
 import { MonthlyIncomeCard } from './MonthlyIncomeCard';
+import { Account } from '../../interfaces';
 
 export const Totals = () => {
   const {
@@ -21,7 +21,7 @@ export const Totals = () => {
     discIncome,
     bankPaydayTotal,
     payDayDiscIncome
-  } = account;
+  }: Account = account;
 
   return (
     <div className="totals">

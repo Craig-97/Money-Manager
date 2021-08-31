@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import AppBar from '@material-ui/core/AppBar';
 import SwipeableViews from 'react-swipeable-views';
 import { useTheme } from '@material-ui/core/styles';
@@ -10,7 +10,7 @@ import { TabPanel } from './TabPanel';
 
 export const Overview = () => {
   const theme = useTheme();
-  const [value, setValue] = useState(0);
+  const [value, setValue] = useState<number>(0);
 
   const handleChangeIndex = (index: number) => {
     setValue(index);

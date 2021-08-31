@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import { Fragment } from 'react';
 import { useAccountContext } from '../../state';
 import { Divider } from '@material-ui/core';
 import { Account } from '../../interfaces';

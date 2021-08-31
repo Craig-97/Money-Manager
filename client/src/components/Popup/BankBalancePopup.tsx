@@ -1,4 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import {
+  useState,
+  useEffect,
+  Dispatch,
+  ChangeEvent,
+  KeyboardEvent
+} from 'react';
 import { useMutation } from '@apollo/client';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
@@ -10,41 +16,47 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import { useAccountContext } from '../../state/account-context';
 import { UPDATE_ACCOUNT_MUTATION, GET_ACCOUNT_QUERY } from '../../graphql';
+import { Account } from '../../interfaces';
 
-export const MonthlyIncomePopup = ({ open, setOpen }) => {
+interface BankBalancePopupProps {
+  open: boolean;
+  setOpen: Dispatch<boolean>;
+}
+
+export const BankBalancePopup = ({ open, setOpen }: BankBalancePopupProps) => {
   const {
     state: { account }
   } = useAccountContext();
-  const { monthlyIncome, id } = account;
-  const [value, setValue] = useState('');
+  const { bankBalance, id }: Account = account;
+  const [value, setValue] = useState<number>();
   const [updateAccount] = useMutation(UPDATE_ACCOUNT_MUTATION, {
     refetchQueries: [{ query: GET_ACCOUNT_QUERY }]
   });
 
   useEffect(() => {
-    if (value !== monthlyIncome) {
-      setValue(monthlyIncome);
+    if (value !== bankBalance) {
+      setValue(bankBalance);
     }
     // eslint-disable-next-line
-  }, [monthlyIncome]);
+  }, [bankBalance]);
 
-  const changeMonthlyIncome = () => {
-    if (value && value !== monthlyIncome) {
+  const changeBankBalance = () => {
+    if (value && value !== bankBalance) {
       updateAccount({
-        variables: { id, account: { monthlyIncome: parseFloat(value) } }
+        variables: { id, account: { bankBalance: value } }
       });
     }
     handleClose();
   };
 
-  const handleChange = event => {
-    setValue(event.target.value);
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setValue(Number(parseFloat(event.target.value).toFixed(2)));
   };
 
-  const handleKeyDown = event => {
+  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter' && value) {
       event.preventDefault();
-      changeMonthlyIncome();
+      changeBankBalance();
     }
   };
 
@@ -58,9 +70,9 @@ export const MonthlyIncomePopup = ({ open, setOpen }) => {
       onClose={handleClose}
       aria-labelledby="form-dialog-title"
     >
-      <DialogTitle id="form-dialog-title">Monthly Income</DialogTitle>
+      <DialogTitle id="form-dialog-title">Bank Total</DialogTitle>
       <DialogContent>
-        <DialogContentText>Enter your updated monthly income</DialogContentText>
+        <DialogContentText>Enter your updated bank total</DialogContentText>
         <TextField
           InputProps={{
             startAdornment: <InputAdornment position="start">£</InputAdornment>
@@ -70,18 +82,14 @@ export const MonthlyIncomePopup = ({ open, setOpen }) => {
           onKeyDown={handleKeyDown}
           autoFocus
           margin="dense"
-          id="monthly-income"
+          id="bank-total"
           type="number"
           fullWidth
         />
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose}>Cancel</Button>
-        <Button
-          onClick={changeMonthlyIncome}
-          color="secondary"
-          disabled={!value}
-        >
+        <Button onClick={changeBankBalance} color="secondary" disabled={!value}>
           Save
         </Button>
       </DialogActions>

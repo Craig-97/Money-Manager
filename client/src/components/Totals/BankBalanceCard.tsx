@@ -1,15 +1,16 @@
-import React, { Fragment, useState, useCallback } from 'react';
+import { Fragment, useState, useCallback } from 'react';
 import AccountBalanceIcon from '@material-ui/icons/AccountBalance';
 import { BankBalancePopup } from '../Popup';
 import { TotalCard } from './TotalCard';
 import { useAccountContext } from '../../state/account-context';
+import { Account } from '../../interfaces';
 
 export const BankBalanceCard = () => {
   const {
     state: { account }
   } = useAccountContext();
-  const { bankBalance } = account;
-  const [open, setOpen] = useState(false);
+  const { bankBalance }: Account = account;
+  const [open, setOpen] = useState<boolean>(false);
 
   const handleClickOpen = () => {
     setOpen(true);
