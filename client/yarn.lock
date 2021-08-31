@@ -12060,11 +12060,6 @@ w3c-xmlserializer@^2.0.0:
   dependencies:
     xml-name-validator "^3.0.0"
 
-wait-for-localhost@^14.13.1:
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/wait-for-localhost/-/wait-for-localhost-4.0.0.tgz#87ea0331a656c818186d2cab8c3da27eb937deaa"
-  integrity sha512-XkP+FzzqJC1zVaB5xK4Z9/IErtszPsns232opPlMaskmBHVudmpSZxv8cTtw6FkXCk78Vw0236Prv35YOwGvfg==
-
 walker@^1.0.7, walker@~1.0.5:
   version "1.0.7"
   resolved "https://registry.yarnpkg.com/walker/-/walker-1.0.7.tgz#2f7f9b8fd10d677262b18a884e28d19618e028fb"
