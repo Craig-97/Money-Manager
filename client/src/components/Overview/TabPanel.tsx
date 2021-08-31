@@ -1,7 +1,8 @@
+import { ReactNode } from 'react';
 import Box from '@material-ui/core/Box';
 
 interface TabPanelProps {
-  children?: any;
+  children?: ReactNode;
   value?: number;
   index?: number;
   dir?: string;

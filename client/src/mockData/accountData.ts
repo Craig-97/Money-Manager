@@ -5,13 +5,14 @@ import {
   getPayDayDiscIncome
 } from '../utils';
 import { transactions } from '.';
+import { Account } from '../interfaces';
 
-export const getAccountData = (account: any) => {
+export const getAccountData = (account: Account) => {
   if (!account) return {};
 
   const { bankBalance, monthlyIncome, bankPaydayTotal, bills, id } = account;
   const billsTotal = getAmountTotal(bills);
-  const paymentsDue = bills.filter((bill: any) => bill.paid === false);
+  const paymentsDue = bills?.filter((bill: any) => bill.paid === false);
   const paymentsDueTotal = getAmountTotal(paymentsDue);
   const discIncome = getDiscIncome(monthlyIncome, billsTotal);
   const bankFreeToSpend = getBankFreeToSpend(bankBalance, paymentsDueTotal);

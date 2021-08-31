@@ -1,4 +1,4 @@
-import { MouseEventHandler } from 'react';
+import { MouseEventHandler, ReactNode } from 'react';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import Typography from '@material-ui/core/Typography';
@@ -8,7 +8,7 @@ interface TotalCardProps {
   classBaseName?: string;
   title?: string;
   amount?: number;
-  icon?: any;
+  icon?: ReactNode;
   onClick?: MouseEventHandler<HTMLButtonElement>;
 }
 

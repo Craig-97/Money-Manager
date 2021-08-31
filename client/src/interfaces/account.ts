@@ -1,9 +1,9 @@
 export interface Account {
   id?: string;
-  bankBalance?: number;
-  monthlyIncome?: number;
+  bankBalance: number;
+  monthlyIncome: number;
   bankPaydayTotal?: number;
-  bills?: Array<any>;
+  bills: Array<any>;
   paymentsDue?: Array<any>;
   billsTotal?: number;
   paymentsDueTotal?: number;
