@@ -1,4 +1,3 @@
-export * from "./transactions";
-export * from "./bills";
-export * from "./paymentsDue";
-export * from "./accountData";
+export * from './transactions';
+export * from './paymentsDue';
+export * from './accountData';

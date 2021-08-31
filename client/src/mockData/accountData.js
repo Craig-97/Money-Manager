@@ -1,11 +1,17 @@
-import { getAmountTotal, getDiscIncome, getBankFreeToSpend, getPayDayDiscIncome } from '../utils';
-import { paymentsDue, bills, transactions } from './';
+import {
+  getAmountTotal,
+  getDiscIncome,
+  getBankFreeToSpend,
+  getPayDayDiscIncome
+} from '../utils';
+import { transactions } from './';
 
 export const getAccountData = account => {
   if (!account) return {};
 
-  const { bankBalance, monthlyIncome, bankPaydayTotal, id } = account;
+  const { bankBalance, monthlyIncome, bankPaydayTotal, bills, id } = account;
   const billsTotal = getAmountTotal(bills);
+  const paymentsDue = bills.filter(bill => bill.paid === false);
   const paymentsDueTotal = getAmountTotal(paymentsDue);
   const discIncome = getDiscIncome(monthlyIncome, billsTotal);
   const bankFreeToSpend = getBankFreeToSpend(bankBalance, paymentsDueTotal);

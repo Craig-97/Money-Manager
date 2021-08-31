@@ -9,6 +9,7 @@ exports.typeDefs = `
     bankBalance: Float!
     monthlyIncome: Float!
     bankPaydayTotal: Float
+    bills: [Bill]
   }
 
   input AccountInput {

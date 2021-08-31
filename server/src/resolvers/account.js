@@ -17,10 +17,15 @@ const updateAccount = async (_, { id, account }) => {
   const mergedAccount = Object.assign(currentAccount, account);
   mergedAccount.__v = mergedAccount.__v + 1;
   const calculatedAccount = calculateAccountValues(mergedAccount);
+
   try {
-    const updatedAccount = await Account.findOneAndUpdate({ _id: id }, calculatedAccount, {
-      new: true
-    });
+    const updatedAccount = await Account.findOneAndUpdate(
+      { _id: id },
+      calculatedAccount,
+      {
+        new: true
+      }
+    );
     return {
       account: updatedAccount,
       success: true
@@ -43,8 +48,8 @@ const deleteAccount = async (_, { id }) => {
 
 exports.resolvers = {
   Query: {
-    accounts: () => Account.find(),
-    account: (_, { id }) => Account.findById(id)
+    accounts: () => Account.find().populate(['bills']),
+    account: (_, { id }) => Account.findById(id).populate(['bills'])
   },
   Mutation: {
     createAccount,

@@ -7,6 +7,11 @@ export const GET_ACCOUNT_QUERY = gql`
       bankBalance
       monthlyIncome
       bankPaydayTotal
+      bills {
+        name
+        amount
+        paid
+      }
     }
   }
 `;
