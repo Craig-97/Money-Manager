@@ -24,7 +24,7 @@ exports.typeDefs = `
 
   type Mutation {
     createAccount(account: AccountInput!): AccountResponse!
-    updateAccount(id: ID!, account: AccountInput!): AccountResponse!
+    editAccount(id: ID!, account: AccountInput!): AccountResponse!
     deleteAccount(id: ID!): AccountResponse!
   }
 `;

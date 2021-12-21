@@ -8,6 +8,7 @@ export const GET_ACCOUNT_QUERY = gql`
       monthlyIncome
       bankPaydayTotal
       bills {
+        id
         name
         amount
         paid

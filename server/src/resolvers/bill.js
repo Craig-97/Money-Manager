@@ -23,17 +23,17 @@ const createBill = async (_, { bill }) => {
   }
 };
 
-const updateBill = async (_, { id, bill }) => {
+const editBill = async (_, { id, bill }) => {
   const currentBill = await Bill.findById(id);
   const mergedBill = Object.assign(currentBill, bill);
   mergedBill.__v = mergedBill.__v + 1;
 
   try {
-    const updatedBill = await Bill.findOneAndUpdate({ _id: id }, mergedBill, {
+    const editdBill = await Bill.findOneAndUpdate({ _id: id }, mergedBill, {
       new: true
     });
     return {
-      bill: updatedBill,
+      bill: editdBill,
       success: true
     };
   } catch (err) {
@@ -54,12 +54,12 @@ const deleteBill = async (_, { id }) => {
 
 exports.resolvers = {
   Query: {
-    bills: () => Bill.find(),
+    bills: () => Bill.find().sort({ amount: 1 }),
     bill: (_, { id }) => Bill.findById(id)
   },
   Mutation: {
     createBill,
-    updateBill,
+    editBill,
     deleteBill
   }
 };

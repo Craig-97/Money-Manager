@@ -15,7 +15,7 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import { useAccountContext } from '../../state/account-context';
-import { UPDATE_ACCOUNT_MUTATION, GET_ACCOUNT_QUERY } from '../../graphql';
+import { EDIT_ACCOUNT_MUTATION, GET_ACCOUNT_QUERY } from '../../graphql';
 import { Account } from '../../interfaces';
 
 interface MonthlyIncomePopupProps {
@@ -32,7 +32,7 @@ export const MonthlyIncomePopup = ({
   } = useAccountContext();
   const { monthlyIncome, id }: Account = account;
   const [value, setValue] = useState<number>();
-  const [updateAccount] = useMutation(UPDATE_ACCOUNT_MUTATION, {
+  const [editAccount] = useMutation(EDIT_ACCOUNT_MUTATION, {
     refetchQueries: [{ query: GET_ACCOUNT_QUERY }]
   });
 
@@ -45,7 +45,7 @@ export const MonthlyIncomePopup = ({
 
   const changeMonthlyIncome = () => {
     if (value && value !== monthlyIncome) {
-      updateAccount({
+      editAccount({
         variables: { id, account: { monthlyIncome: value } }
       });
     }
@@ -75,7 +75,7 @@ export const MonthlyIncomePopup = ({
     >
       <DialogTitle id="form-dialog-title">Monthly Income</DialogTitle>
       <DialogContent>
-        <DialogContentText>Enter your updated monthly income</DialogContentText>
+        <DialogContentText>Enter your Editd monthly income</DialogContentText>
         <TextField
           InputProps={{
             startAdornment: <InputAdornment position="start">£</InputAdornment>

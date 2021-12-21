@@ -15,7 +15,7 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import { useAccountContext } from '../../state/account-context';
-import { UPDATE_ACCOUNT_MUTATION, GET_ACCOUNT_QUERY } from '../../graphql';
+import { EDIT_ACCOUNT_MUTATION, GET_ACCOUNT_QUERY } from '../../graphql';
 import { Account } from '../../interfaces';
 
 interface BankBalancePopupProps {
@@ -29,7 +29,7 @@ export const BankBalancePopup = ({ open, setOpen }: BankBalancePopupProps) => {
   } = useAccountContext();
   const { bankBalance, id }: Account = account;
   const [value, setValue] = useState<number>();
-  const [updateAccount] = useMutation(UPDATE_ACCOUNT_MUTATION, {
+  const [editAccount] = useMutation(EDIT_ACCOUNT_MUTATION, {
     refetchQueries: [{ query: GET_ACCOUNT_QUERY }]
   });
 
@@ -42,7 +42,7 @@ export const BankBalancePopup = ({ open, setOpen }: BankBalancePopupProps) => {
 
   const changeBankBalance = () => {
     if (value && value !== bankBalance) {
-      updateAccount({
+      editAccount({
         variables: { id, account: { bankBalance: value } }
       });
     }
@@ -72,7 +72,7 @@ export const BankBalancePopup = ({ open, setOpen }: BankBalancePopupProps) => {
     >
       <DialogTitle id="form-dialog-title">Bank Total</DialogTitle>
       <DialogContent>
-        <DialogContentText>Enter your updated bank total</DialogContentText>
+        <DialogContentText>Enter your editd bank total</DialogContentText>
         <TextField
           InputProps={{
             startAdornment: <InputAdornment position="start">£</InputAdornment>

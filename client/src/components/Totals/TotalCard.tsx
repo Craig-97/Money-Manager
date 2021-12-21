@@ -10,6 +10,7 @@ interface TotalCardProps {
   amount?: number;
   icon?: ReactNode;
   onClick?: MouseEventHandler<HTMLButtonElement>;
+  disabled?: boolean;
 }
 
 export const TotalCard = ({
@@ -17,11 +18,12 @@ export const TotalCard = ({
   title,
   amount,
   icon,
-  onClick
+  onClick,
+  disabled
 }: TotalCardProps) => (
   <div className={`${classBaseName}-total-card`}>
     <Card>
-      <CardActionArea onClick={onClick}>
+      <CardActionArea onClick={onClick} disabled={disabled}>
         <CardContent>
           <div className="total-card__text">
             <Typography

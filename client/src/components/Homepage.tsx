@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect } from 'react';
+import { Fragment, useEffect } from 'react';
 import { AccountData } from '../interfaces';
 import { useAccountContext } from '../state/account-context';
 import { useQuery } from '@apollo/client';

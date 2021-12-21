@@ -123,6 +123,17 @@
   }
 }
 
+/* FORM CONTROL STYLES */
+.monthly-bills-popup {
+  .MuiFormControl-root {
+    margin-bottom: 20px;
+  }
+
+  .MuiCheckbox-root {
+    padding: 0;
+  }
+}
+
 /* CHROME AUTOCOMPLETE FIX */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,

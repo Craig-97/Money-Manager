@@ -26,7 +26,7 @@ exports.typeDefs = `
 
   type Mutation {
     createBill(bill: BillInput!): BillResponse!
-    updateBill(id: ID!, bill: BillInput!): BillResponse!
+    editBill(id: ID!, bill: BillInput!): BillResponse!
     deleteBill(id: ID!): BillResponse!
   }
 `;
