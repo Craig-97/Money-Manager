@@ -23,6 +23,5 @@ yarn-debug.log*
 yarn-error.log*
 
 # js files
-paymentsDue.js
 transactions.js
 bills.js

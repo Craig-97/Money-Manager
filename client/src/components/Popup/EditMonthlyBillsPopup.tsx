@@ -18,20 +18,10 @@ export const EditMonthlyBillsPopup = ({
   selectedBill
 }: EditMonthlyBillsPopupProps) => {
   const { id, name, amount, paid }: Bill = selectedBill;
-  const { dispatch } = useAccountContext();
+
   const [editBill] = useMutation(EDIT_BILL_MUTATION, {
-    onCompleted: data => onCompleted(data),
     refetchQueries: [{ query: GET_ACCOUNT_QUERY }]
   });
-
-  const onCompleted = (data: any) => {
-    if (data?.editBill) {
-      const {
-        editBill: { bill }
-      } = data;
-      dispatch({ type: events.EDIT_BILL, data: bill });
-    }
-  };
 
   const editNewBill = (bill: Bill) => {
     editBill({
