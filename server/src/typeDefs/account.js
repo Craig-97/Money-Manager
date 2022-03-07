@@ -10,6 +10,7 @@ exports.typeDefs = `
     monthlyIncome: Float!
     bankPaydayTotal: Float
     bills: [Bill]
+    oneOffPayments: [OneOffPayment]
   }
 
   input AccountInput {

@@ -1,5 +1,4 @@
 import Button from '@material-ui/core/Button';
-import Checkbox from '@material-ui/core/Checkbox';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
@@ -14,28 +13,26 @@ import {
   useEffect,
   useState
 } from 'react';
-import { Account, Bill } from '../../interfaces';
+import { Account, OneOffPayment } from '../../interfaces';
 import { useAccountContext } from '../../state/account-context';
 import { getNumberAmount, stringToFixedNumber } from '../../utils';
-interface MonthlyBillsPopupProps {
+interface PaymentsDuePopupProps {
   title: string;
   open: boolean;
   setOpen: Dispatch<boolean>;
   defaultName?: string;
   defaultAmount?: string;
-  defaultPaid?: boolean;
-  onSave: ({ name, amount, paid, account }: Bill) => void;
+  onSave: ({ name, amount, account }: OneOffPayment) => void;
 }
 
-export const MonthlyBillsPopup = ({
+export const PaymentsDuePopup = ({
   title,
   open,
   setOpen,
   defaultName = '',
   defaultAmount = '',
-  defaultPaid = false,
   onSave
-}: MonthlyBillsPopupProps) => {
+}: PaymentsDuePopupProps) => {
   const {
     state: { account }
   } = useAccountContext();
@@ -43,7 +40,6 @@ export const MonthlyBillsPopup = ({
   const { id }: Account = account;
   const [name, setName] = useState<string>('');
   const [amount, setAmount] = useState<string>();
-  const [paid, setPaid] = useState<boolean>(false);
 
   useEffect(() => {
     if (defaultName !== name) {
@@ -54,14 +50,11 @@ export const MonthlyBillsPopup = ({
       setAmount(defaultAmount);
     }
 
-    if (defaultPaid !== paid) {
-      setPaid(defaultPaid);
-    }
     // eslint-disable-next-line
-  }, [defaultName, defaultAmount, defaultPaid]);
+  }, [defaultName, defaultAmount]);
 
   const handleSaveClicked = () => {
-    onSave({ name, amount: getNumberAmount(amount), paid, account: id });
+    onSave({ name, amount: getNumberAmount(amount), account: id });
     handleClose();
   };
 
@@ -78,10 +71,6 @@ export const MonthlyBillsPopup = ({
     }
   };
 
-  const handlePaidChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setPaid(event.target.checked);
-  };
-
   const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter' && name && amount) {
       event.preventDefault();
@@ -93,7 +82,6 @@ export const MonthlyBillsPopup = ({
     setOpen(false);
     setAmount(defaultAmount);
     setName('');
-    setPaid(false);
   };
 
   return (
@@ -101,7 +89,7 @@ export const MonthlyBillsPopup = ({
       open={open}
       onClose={handleClose}
       aria-labelledby="form-dialog-title"
-      className="monthly-bills-popup"
+      className="payments-due-popup"
       maxWidth={'xs'}
       fullWidth
     >
@@ -114,27 +102,21 @@ export const MonthlyBillsPopup = ({
           onKeyDown={handleKeyDown}
           autoFocus
           margin="dense"
-          id="bill-name"
+          id="payment-name"
           fullWidth
         />
         <DialogContentText>Amount</DialogContentText>
         <TextField
-          InputProps={{
-            startAdornment: <InputAdornment position="start">£</InputAdornment>
+          type="number"
+          inputProps={{
+            startadornment: <InputAdornment position="start">£</InputAdornment>
           }}
           value={amount}
           onChange={handleAmountChange}
           onKeyDown={handleKeyDown}
           margin="dense"
-          id="bill-amount"
-          type="number"
+          id="payment-amount"
           fullWidth
-        />
-        <DialogContentText>Paid</DialogContentText>
-        <Checkbox
-          checked={paid}
-          onChange={handlePaidChange}
-          inputProps={{ 'aria-label': 'controlled' }}
         />
       </DialogContent>
       <DialogActions>

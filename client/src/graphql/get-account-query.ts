@@ -13,6 +13,11 @@ export const GET_ACCOUNT_QUERY = gql`
         amount
         paid
       }
+      oneOffPayments {
+        id
+        name
+        amount
+      }
     }
   }
 `;

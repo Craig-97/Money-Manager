@@ -1,6 +1,5 @@
 import { green } from '@material-ui/core/colors';
 import AccountBalanceIcon from '@material-ui/icons/AccountBalance';
-import AccountBalanceWalletIcon from '@material-ui/icons/AccountBalanceWallet';
 import LocalAtmIcon from '@material-ui/icons/LocalAtm';
 import PaymentIcon from '@material-ui/icons/Payment';
 import { Account } from '../../interfaces';
@@ -8,6 +7,7 @@ import { useAccountContext } from '../../state/account-context';
 import { BankBalanceCard } from './BankBalanceCard';
 import { MonthlyBillsCard } from './MonthlyBillsCard';
 import { MonthlyIncomeCard } from './MonthlyIncomeCard';
+import { PaymentsDueCard } from './PaymentsDueCard';
 import { TotalCard } from './TotalCard';
 
 export const Totals = () => {
@@ -16,7 +16,6 @@ export const Totals = () => {
   } = useAccountContext();
   const {
     bankFreeToSpend,
-    paymentsDueTotal,
     discIncome,
     bankPaydayTotal,
     payDayDiscIncome
@@ -32,17 +31,7 @@ export const Totals = () => {
         icon={<PaymentIcon style={{ color: green[500], fontSize: 50 }} />}
         disabled={true}
       />
-      <TotalCard
-        classBaseName="payments-due"
-        title={'PAYMENTS DUE'}
-        amount={paymentsDueTotal}
-        icon={
-          <AccountBalanceWalletIcon
-            color="secondary"
-            style={{ fontSize: 50 }}
-          />
-        }
-      />
+      <PaymentsDueCard />
       <MonthlyBillsCard />
       <TotalCard
         classBaseName="payday-bank-total"

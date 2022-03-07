@@ -4,7 +4,7 @@ export const CREATE_BILL_MUTATION = gql`
   mutation ($bill: BillInput!) {
     createBill(bill: $bill) {
       bill {
-        account
+        id
         name
         amount
         paid

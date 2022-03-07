@@ -6,13 +6,22 @@ export interface Bill {
   account?: string;
 }
 
+export interface OneOffPayment {
+  id?: string;
+  name?: string;
+  amount?: number;
+  oneOff?: boolean;
+  account?: string;
+}
+
 export interface Account {
   id?: string;
   bankBalance: number;
   monthlyIncome: number;
   bankPaydayTotal?: number;
   bills: Array<Bill>;
-  paymentsDue?: Array<any>;
+  paymentsDue?: Array<Bill | OneOffPayment>;
+  oneOffPayments?: Array<OneOffPayment>;
   billsTotal?: number;
   paymentsDueTotal?: number;
   discIncome?: number;

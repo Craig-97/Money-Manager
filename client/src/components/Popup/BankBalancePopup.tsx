@@ -72,7 +72,7 @@ export const BankBalancePopup = ({ open, setOpen }: BankBalancePopupProps) => {
     >
       <DialogTitle id="form-dialog-title">Bank Total</DialogTitle>
       <DialogContent>
-        <DialogContentText>Enter your editd bank total</DialogContentText>
+        <DialogContentText>Enter your updated bank total</DialogContentText>
         <TextField
           InputProps={{
             startAdornment: <InputAdornment position="start">£</InputAdornment>
