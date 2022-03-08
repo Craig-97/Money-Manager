@@ -3,7 +3,13 @@ import { reducer } from './reducer';
 import { AccountData } from '../interfaces';
 
 const initialState = {
-  account: { bankBalance: 0, monthlyIncome: 0, bills: [] }
+  account: {
+    bankBalance: 0,
+    bankPaydayTotal: 0,
+    monthlyIncome: 0,
+    bills: [],
+    oneOffPayments: []
+  }
 };
 
 export const AccountContext = createContext<{

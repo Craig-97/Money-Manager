@@ -16,30 +16,24 @@ export const reducer = (state: any, action: any) => {
         account
       };
     }
-
     case events.CREATE_NEW_BILL: {
       const account = getAccountData(getNewBillAdded(state.account, data));
-
       return {
         ...state,
         account
       };
     }
-
     case events.DELETE_BILL: {
       const account = getAccountData(getBillDeleted(state.account, data));
-
       return {
         ...state,
         account
       };
     }
-
     case events.CREATE_NEW_ONE_OFF_PAYMENT: {
       const account = getAccountData(
         getNewOneOffPaymentAdded(state.account, data)
       );
-
       return {
         ...state,
         account
