@@ -1,4 +1,5 @@
 import Button from '@material-ui/core/Button';
+import IconButton from '@material-ui/core/IconButton';
 import Checkbox from '@material-ui/core/Checkbox';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -7,6 +8,8 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import TextField from '@material-ui/core/TextField';
+import DeleteIcon from '@material-ui/icons/Delete';
+
 import {
   ChangeEvent,
   Dispatch,
@@ -25,6 +28,7 @@ interface MonthlyBillsPopupProps {
   defaultAmount?: string;
   defaultPaid?: boolean;
   onSave: ({ name, amount, paid, account }: Bill) => void;
+  onDelete?: () => void;
 }
 
 export const MonthlyBillsPopup = ({
@@ -34,7 +38,8 @@ export const MonthlyBillsPopup = ({
   defaultName = '',
   defaultAmount = '',
   defaultPaid = false,
-  onSave
+  onSave,
+  onDelete
 }: MonthlyBillsPopupProps) => {
   const {
     state: { account }
@@ -65,6 +70,10 @@ export const MonthlyBillsPopup = ({
     handleClose();
   };
 
+  const handleDeleteClicked = () => {
+    onDelete && onDelete();
+    handleClose();
+  };
   const handleNameChange = (event: ChangeEvent<HTMLInputElement>) => {
     setName(event.target.value);
   };
@@ -105,7 +114,14 @@ export const MonthlyBillsPopup = ({
       maxWidth={'xs'}
       fullWidth
     >
-      <DialogTitle id="form-dialog-title">{title}</DialogTitle>
+      <DialogTitle id="form-dialog-title">
+        {title}
+        {onDelete && (
+          <IconButton onClick={handleDeleteClicked} disabled={!name || !amount}>
+            <DeleteIcon />
+          </IconButton>
+        )}
+      </DialogTitle>
       <DialogContent>
         <DialogContentText>Name</DialogContentText>
         <TextField

@@ -1,6 +1,7 @@
 import {
   getNewBillAdded,
-  getNewOneOffPaymentAdded
+  getNewOneOffPaymentAdded,
+  getBillDeleted
 } from './../utils/selectors';
 import { events } from '../constants';
 import { getAccountData } from '../mockData';
@@ -17,7 +18,16 @@ export const reducer = (state: any, action: any) => {
     }
 
     case events.CREATE_NEW_BILL: {
-      let account = getAccountData(getNewBillAdded(state.account, data));
+      const account = getAccountData(getNewBillAdded(state.account, data));
+
+      return {
+        ...state,
+        account
+      };
+    }
+
+    case events.DELETE_BILL: {
+      const account = getAccountData(getBillDeleted(state.account, data));
 
       return {
         ...state,

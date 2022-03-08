@@ -1,6 +1,5 @@
 import { Account, Bill, OneOffPayment } from '../interfaces';
 
-/* Data selectors */
 export const getAmountTotal = (amounts: Array<any>) =>
   amounts?.reduce((n, { amount }) => n + amount, 0);
 
@@ -26,7 +25,12 @@ export const getPayDayDiscIncome = (
 ) => bankFreeToSpend + discIncome;
 
 export const getNewBillAdded = (account: Account, bill: Bill) => {
-  let newAccount = { ...account, ...{ bills: [...account.bills, bill] } };
+  /* Adds new bill to current bill array and sorts based on amount field */
+  const bills = [...account.bills, bill].sort((a, b) =>
+    (a?.amount || 0) > (b?.amount || 0) ? 1 : -1
+  );
+
+  let newAccount = { ...account, ...{ bills } };
 
   /* Checks if new bill created has been paid this month, 
   if not then it  has to be added to the payments due array */
@@ -37,6 +41,18 @@ export const getNewBillAdded = (account: Account, bill: Bill) => {
   return newAccount;
 };
 
+/* Returns a new bills and paymentsDue array with the passed bill being removed */
+export const getBillDeleted = (account: Account, billId: string) => {
+  const bills = account?.bills?.filter((bill: Bill) => bill.id !== billId);
+
+  const paymentsDue = account?.paymentsDue?.filter(
+    (payment: Bill | OneOffPayment) => payment.id !== billId
+  );
+
+  return { ...account, ...{ bills, paymentsDue } };
+};
+
+/* Adds new one off payment to current payments due array and sorts based on amount field */
 export const getNewOneOffPaymentAdded = (
   account: any,
   oneOffPayment: OneOffPayment

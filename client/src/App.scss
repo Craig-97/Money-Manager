@@ -133,6 +133,12 @@
   .MuiCheckbox-root {
     padding: 0;
   }
+
+  .MuiTypography-root {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
 }
 
 /* CHROME AUTOCOMPLETE FIX */

@@ -1,6 +1,8 @@
 import { Dispatch } from 'react';
 import { useMutation } from '@apollo/client';
-import { CREATE_BILL_MUTATION, GET_ACCOUNT_QUERY } from '../../graphql';
+import { events } from '../../constants';
+import { useAccountContext } from '../../state/account-context';
+import { CREATE_BILL_MUTATION } from '../../graphql';
 import { Bill } from '../../interfaces';
 import { MonthlyBillsPopup } from './MonthlyBillsPopup';
 
@@ -13,9 +15,20 @@ export const AddMonthlyBillsPopup = ({
   open,
   setOpen
 }: AddMonthlyBillsPopupProps) => {
+  const { dispatch } = useAccountContext();
+
   const [createBill] = useMutation(CREATE_BILL_MUTATION, {
-    refetchQueries: [{ query: GET_ACCOUNT_QUERY }]
+    onCompleted: data => onCompleted(data)
   });
+
+  const onCompleted = (data: any) => {
+    if (data?.createBill) {
+      const {
+        createBill: { bill }
+      } = data;
+      dispatch({ type: events.CREATE_NEW_BILL, data: bill });
+    }
+  };
 
   const createNewBill = (bill: Bill) => {
     createBill({
