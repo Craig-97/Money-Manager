@@ -17,7 +17,11 @@ const createOneOffPayment = async (_, { oneOffPayment }) => {
         });
       }
     });
-    return { oneOffPayment: newOneOffPayment, success: true };
+    if (newOneOffPayment) {
+      return { oneOffPayment: newOneOffPayment, success: true };
+    } else {
+      return { success: false };
+    }
   } catch (err) {
     throw err;
   }
@@ -25,6 +29,12 @@ const createOneOffPayment = async (_, { oneOffPayment }) => {
 
 const editOneOffPayment = async (_, { id, oneOffPayment }) => {
   const currentOneOffPayment = await OneOffPayment.findById(id);
+  if (!currentOneOffPayment) {
+    return {
+      success: false
+    };
+  }
+
   const mergedOneOffPayment = Object.assign(
     currentOneOffPayment,
     oneOffPayment
@@ -32,17 +42,24 @@ const editOneOffPayment = async (_, { id, oneOffPayment }) => {
   mergedOneOffPayment.__v = mergedOneOffPayment.__v + 1;
 
   try {
-    const editdOneOffPayment = await OneOffPayment.findOneAndUpdate(
+    const editedOneOffPayment = await OneOffPayment.findOneAndUpdate(
       { _id: id },
       mergedOneOffPayment,
       {
         new: true
       }
     );
-    return {
-      oneOffPayment: editdOneOffPayment,
-      success: true
-    };
+
+    if (editOneOffPayment) {
+      return {
+        oneOffPayment: editedOneOffPayment,
+        success: true
+      };
+    } else {
+      return {
+        success: false
+      };
+    }
   } catch (err) {
     throw err;
   }
@@ -50,10 +67,19 @@ const editOneOffPayment = async (_, { id, oneOffPayment }) => {
 
 const deleteOneOffPayment = async (_, { id }) => {
   try {
-    await OneOffPayment.deleteOne({ _id: id });
-    return {
-      success: true
-    };
+    const oneOffPayment = await OneOffPayment.findById(id);
+    const response = await OneOffPayment.deleteOne({ _id: id });
+    if (response.ok && response.deletedCount == 1 && oneOffPayment) {
+      return {
+        oneOffPayment,
+        success: true
+      };
+    } else {
+      return {
+        oneOffPayment,
+        success: false
+      };
+    }
   } catch (err) {
     throw err;
   }

@@ -17,7 +17,12 @@ const createBill = async (_, { bill }) => {
         });
       }
     });
-    return { bill: newBill, success: true };
+
+    if (newBill) {
+      return { bill: newBill, success: true };
+    } else {
+      return { success: false };
+    }
   } catch (err) {
     throw err;
   }
@@ -25,17 +30,30 @@ const createBill = async (_, { bill }) => {
 
 const editBill = async (_, { id, bill }) => {
   const currentBill = await Bill.findById(id);
+  if (!currentBill) {
+    return {
+      success: false
+    };
+  }
+
   const mergedBill = Object.assign(currentBill, bill);
   mergedBill.__v = mergedBill.__v + 1;
 
   try {
-    const editdBill = await Bill.findOneAndUpdate({ _id: id }, mergedBill, {
+    const editedBill = await Bill.findOneAndUpdate({ _id: id }, mergedBill, {
       new: true
     });
-    return {
-      bill: editdBill,
-      success: true
-    };
+
+    if (editedBill) {
+      return {
+        bill: editedBill,
+        success: true
+      };
+    } else {
+      return {
+        success: false
+      };
+    }
   } catch (err) {
     throw err;
   }
@@ -43,10 +61,16 @@ const editBill = async (_, { id, bill }) => {
 
 const deleteBill = async (_, { id }) => {
   try {
-    await Bill.deleteOne({ _id: id });
-    return {
-      success: true
-    };
+    const response = await Bill.deleteOne({ _id: id });
+    if (response.ok && response.deletedCount == 1) {
+      return {
+        success: true
+      };
+    } else {
+      return {
+        success: false
+      };
+    }
   } catch (err) {
     throw err;
   }

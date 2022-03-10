@@ -14,22 +14,34 @@ const createAccount = async (_, { account }) => {
 
 const editAccount = async (_, { id, account }) => {
   const currentAccount = await Account.findById(id);
+  if (!currentAccount) {
+    return {
+      success: false
+    };
+  }
   const mergedAccount = Object.assign(currentAccount, account);
   mergedAccount.__v = mergedAccount.__v + 1;
   const calculatedAccount = calculateAccountValues(mergedAccount);
 
   try {
-    const editdAccount = await Account.findOneAndUpdate(
+    const editedAccount = await Account.findOneAndUpdate(
       { _id: id },
       calculatedAccount,
       {
         new: true
       }
     );
-    return {
-      account: editdAccount,
-      success: true
-    };
+
+    if (editedAccount) {
+      return {
+        account: editedAccount,
+        success: true
+      };
+    } else {
+      return {
+        success: false
+      };
+    }
   } catch (err) {
     throw err;
   }
@@ -37,10 +49,16 @@ const editAccount = async (_, { id, account }) => {
 
 const deleteAccount = async (_, { id }) => {
   try {
-    await Account.deleteOne({ _id: id });
-    return {
-      success: true
-    };
+    const response = await Account.deleteOne({ _id: id });
+    if (response.ok && response.deletedCount == 1) {
+      return {
+        success: true
+      };
+    } else {
+      return {
+        success: false
+      };
+    }
   } catch (err) {
     throw err;
   }
