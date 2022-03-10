@@ -1,6 +1,7 @@
 import {
   getNewBillAdded,
   getNewOneOffPaymentAdded,
+  getOneOffPaymentDeleted,
   getBillDeleted
 } from './../utils/selectors';
 import { EVENTS } from '../constants';
@@ -25,6 +26,15 @@ export const reducer = (state: any, action: any) => {
     }
     case EVENTS.DELETE_BILL: {
       const account = getAccountData(getBillDeleted(state.account, data));
+      return {
+        ...state,
+        account
+      };
+    }
+    case EVENTS.DELETE_ONE_OFF_PAYMENT: {
+      const account = getAccountData(
+        getOneOffPaymentDeleted(state.account, data)
+      );
       return {
         ...state,
         account

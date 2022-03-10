@@ -10,14 +10,14 @@ export const MonthlyBillsCard = () => {
     state: { account }
   } = useAccountContext();
   const { billsTotal }: Account = account;
-  const [open, setOpen] = useState<boolean>(false);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const handleClickOpen = () => {
-    setOpen(true);
+    setIsOpen(true);
   };
 
-  const updateOpen = useCallback(value => {
-    setOpen(value);
+  const closePopup = useCallback(() => {
+    setIsOpen(false);
   }, []);
 
   return (
@@ -29,7 +29,7 @@ export const MonthlyBillsCard = () => {
         onClick={handleClickOpen}
         icon={<ReceiptIcon color="secondary" style={{ fontSize: 50 }} />}
       />
-      <AddMonthlyBillsPopup open={open} setOpen={updateOpen} />
+      <AddMonthlyBillsPopup isOpen={isOpen} close={closePopup} />
     </Fragment>
   );
 };

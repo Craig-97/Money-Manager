@@ -11,14 +11,14 @@ export const PaymentsDueCard = () => {
   } = useAccountContext();
 
   const { paymentsDueTotal }: Account = account;
-  const [open, setOpen] = useState<boolean>(false);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const handleClickOpen = () => {
-    setOpen(true);
+    setIsOpen(true);
   };
 
-  const updateOpen = useCallback(value => {
-    setOpen(value);
+  const closePopup = useCallback(() => {
+    setIsOpen(false);
   }, []);
 
   return (
@@ -35,7 +35,7 @@ export const PaymentsDueCard = () => {
           />
         }
       />
-      <AddPaymentsDuePopup open={open} setOpen={updateOpen} />
+      <AddPaymentsDuePopup isOpen={isOpen} close={closePopup} />
     </Fragment>
   );
 };

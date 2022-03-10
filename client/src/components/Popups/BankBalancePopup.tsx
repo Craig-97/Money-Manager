@@ -1,9 +1,9 @@
 import {
   useState,
   useEffect,
-  Dispatch,
   ChangeEvent,
-  KeyboardEvent
+  KeyboardEvent,
+  DispatchWithoutAction
 } from 'react';
 import { useMutation } from '@apollo/client';
 import Button from '@material-ui/core/Button';
@@ -19,11 +19,11 @@ import { EDIT_ACCOUNT_MUTATION, GET_ACCOUNT_QUERY } from '../../graphql';
 import { Account } from '../../interfaces';
 
 interface BankBalancePopupProps {
-  open: boolean;
-  setOpen: Dispatch<boolean>;
+  isOpen: boolean;
+  close: DispatchWithoutAction;
 }
 
-export const BankBalancePopup = ({ open, setOpen }: BankBalancePopupProps) => {
+export const BankBalancePopup = ({ isOpen, close }: BankBalancePopupProps) => {
   const {
     state: { account }
   } = useAccountContext();
@@ -46,7 +46,7 @@ export const BankBalancePopup = ({ open, setOpen }: BankBalancePopupProps) => {
         variables: { id, account: { bankBalance: value } }
       });
     }
-    handleClose();
+    close();
   };
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -60,16 +60,8 @@ export const BankBalancePopup = ({ open, setOpen }: BankBalancePopupProps) => {
     }
   };
 
-  const handleClose = () => {
-    setOpen(false);
-  };
-
   return (
-    <Dialog
-      open={open}
-      onClose={handleClose}
-      aria-labelledby="form-dialog-title"
-    >
+    <Dialog open={isOpen} onClose={close} aria-labelledby="form-dialog-title">
       <DialogTitle id="form-dialog-title">Bank Total</DialogTitle>
       <DialogContent>
         <DialogContentText>Enter your updated bank total</DialogContentText>
@@ -88,7 +80,7 @@ export const BankBalancePopup = ({ open, setOpen }: BankBalancePopupProps) => {
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose}>Cancel</Button>
+        <Button onClick={close}>Cancel</Button>
         <Button onClick={changeBankBalance} color="secondary" disabled={!value}>
           Save
         </Button>

@@ -1,4 +1,4 @@
-import { Dispatch } from 'react';
+import { DispatchWithoutAction } from 'react';
 import { useMutation } from '@apollo/client';
 import { EVENTS } from '../../../constants';
 import { useAccountContext } from '../../../state/account-context';
@@ -7,13 +7,13 @@ import { OneOffPayment } from '../../../interfaces';
 import { PaymentsDuePopup } from '../PopupForms';
 
 interface AddPaymentsDuePopupProps {
-  open: boolean;
-  setOpen: Dispatch<boolean>;
+  isOpen: boolean;
+  close: DispatchWithoutAction;
 }
 
 export const AddPaymentsDuePopup = ({
-  open,
-  setOpen
+  isOpen,
+  close
 }: AddPaymentsDuePopupProps) => {
   const { dispatch } = useAccountContext();
 
@@ -39,12 +39,12 @@ export const AddPaymentsDuePopup = ({
     });
   };
 
-  return (
+  return isOpen ? (
     <PaymentsDuePopup
-      title="Add a new payment due"
+      title="Add Upcoming Payment"
       onSave={createNewOneOffPayment}
-      open={open}
-      setOpen={setOpen}
+      isOpen={isOpen}
+      close={close}
     />
-  );
+  ) : null;
 };

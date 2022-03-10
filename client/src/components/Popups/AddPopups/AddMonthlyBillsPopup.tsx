@@ -1,4 +1,4 @@
-import { Dispatch } from 'react';
+import { DispatchWithoutAction } from 'react';
 import { useMutation } from '@apollo/client';
 import { EVENTS } from '../../../constants';
 import { useAccountContext } from '../../../state/account-context';
@@ -7,13 +7,13 @@ import { Bill } from '../../../interfaces';
 import { MonthlyBillsPopup } from '../PopupForms';
 
 interface AddMonthlyBillsPopupProps {
-  open: boolean;
-  setOpen: Dispatch<boolean>;
+  isOpen: boolean;
+  close: DispatchWithoutAction;
 }
 
 export const AddMonthlyBillsPopup = ({
-  open,
-  setOpen
+  isOpen,
+  close
 }: AddMonthlyBillsPopupProps) => {
   const { dispatch } = useAccountContext();
 
@@ -36,12 +36,12 @@ export const AddMonthlyBillsPopup = ({
     });
   };
 
-  return (
+  return isOpen ? (
     <MonthlyBillsPopup
-      title="Add a new monthly bill"
+      title="Add Monthly Bill"
       onSave={createNewBill}
-      open={open}
-      setOpen={setOpen}
+      isOpen={isOpen}
+      close={close}
     />
-  );
+  ) : null;
 };

@@ -1,5 +1,7 @@
 import { Account, Bill, OneOffPayment } from '../interfaces';
 
+/* --------- DATA SELECTORS ---------*/
+
 export const getAmountTotal = (amounts: Array<any>) =>
   amounts?.reduce((n, { amount }) => n + amount, 0);
 
@@ -24,6 +26,8 @@ export const getPayDayDiscIncome = (
   discIncome: number
 ) => bankFreeToSpend + discIncome;
 
+/* --------- REDUCER SELECTORS --------- */
+
 export const getNewBillAdded = (account: Account, bill: Bill) => {
   /* Adds new bill to current bill array and sorts based on amount field */
   const bills = [...account.bills, bill].sort((a, b) =>
@@ -41,13 +45,17 @@ export const getNewBillAdded = (account: Account, bill: Bill) => {
   return newAccount;
 };
 
+/* Returns a paymentsDue array with the passed bill or one off payment id being removed */
+const getFilteredPaymentsDue = (account: Account, id: string) =>
+  account?.paymentsDue?.filter(
+    (payment: Bill | OneOffPayment) => payment.id !== id
+  );
+
 /* Returns a new bills and paymentsDue array with the passed bill being removed */
 export const getBillDeleted = (account: Account, billId: string) => {
   const bills = account?.bills?.filter((bill: Bill) => bill.id !== billId);
 
-  const paymentsDue = account?.paymentsDue?.filter(
-    (payment: Bill | OneOffPayment) => payment.id !== billId
-  );
+  const paymentsDue = getFilteredPaymentsDue(account, billId);
 
   return { ...account, ...{ bills, paymentsDue } };
 };
@@ -62,4 +70,14 @@ export const getNewOneOffPaymentAdded = (
   );
 
   return { ...account, ...{ paymentsDue } };
+};
+
+export const getOneOffPaymentDeleted = (
+  account: Account,
+  paymentId: string
+) => {
+  return {
+    ...account,
+    ...{ paymentsDue: getFilteredPaymentsDue(account, paymentId) }
+  };
 };

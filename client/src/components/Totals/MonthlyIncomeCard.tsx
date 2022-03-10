@@ -11,14 +11,14 @@ export const MonthlyIncomeCard = () => {
     state: { account }
   } = useAccountContext();
   const { monthlyIncome }: Account = account;
-  const [open, setOpen] = useState<boolean>(false);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const handleClickOpen = () => {
-    setOpen(true);
+    setIsOpen(true);
   };
 
-  const updateOpen = useCallback(value => {
-    setOpen(value);
+  const closePopup = useCallback(() => {
+    setIsOpen(false);
   }, []);
 
   return (
@@ -30,7 +30,7 @@ export const MonthlyIncomeCard = () => {
         onClick={handleClickOpen}
         icon={<LocalAtmIcon style={{ color: green[500], fontSize: 50 }} />}
       />
-      <MonthlyIncomePopup open={open} setOpen={updateOpen} />
+      {isOpen && <MonthlyIncomePopup isOpen={isOpen} close={closePopup} />}
     </Fragment>
   );
 };

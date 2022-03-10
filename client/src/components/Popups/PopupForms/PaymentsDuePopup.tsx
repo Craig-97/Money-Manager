@@ -4,11 +4,13 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import IconButton from '@material-ui/core/IconButton';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import TextField from '@material-ui/core/TextField';
+import DeleteIcon from '@material-ui/icons/Delete';
 import {
   ChangeEvent,
-  Dispatch,
+  DispatchWithoutAction,
   KeyboardEvent,
   useEffect,
   useState
@@ -18,20 +20,22 @@ import { useAccountContext } from '../../../state/account-context';
 import { getNumberAmount, stringToFixedNumber } from '../../../utils';
 interface PaymentsDuePopupProps {
   title: string;
-  open: boolean;
-  setOpen: Dispatch<boolean>;
+  isOpen: boolean;
+  close: DispatchWithoutAction;
   defaultName?: string;
   defaultAmount?: string;
   onSave: ({ name, amount, account }: OneOffPayment) => void;
+  onDelete?: DispatchWithoutAction;
 }
 
 export const PaymentsDuePopup = ({
   title,
-  open,
-  setOpen,
+  isOpen,
+  close,
   defaultName = '',
   defaultAmount = '',
-  onSave
+  onSave,
+  onDelete
 }: PaymentsDuePopupProps) => {
   const {
     state: { account }
@@ -58,6 +62,11 @@ export const PaymentsDuePopup = ({
     handleClose();
   };
 
+  const handleDeleteClicked = () => {
+    onDelete && onDelete();
+    close();
+  };
+
   const handleNameChange = (event: ChangeEvent<HTMLInputElement>) => {
     setName(event.target.value);
   };
@@ -79,21 +88,28 @@ export const PaymentsDuePopup = ({
   };
 
   const handleClose = () => {
-    setOpen(false);
+    close();
     setAmount(defaultAmount);
     setName('');
   };
 
   return (
     <Dialog
-      open={open}
+      open={isOpen}
       onClose={handleClose}
       aria-labelledby="form-dialog-title"
       className="payments-due-popup"
       maxWidth={'xs'}
       fullWidth
     >
-      <DialogTitle id="form-dialog-title">{title}</DialogTitle>
+      <DialogTitle id="form-dialog-title">
+        {title}
+        {onDelete && (
+          <IconButton onClick={handleDeleteClicked} disabled={!name || !amount}>
+            <DeleteIcon />
+          </IconButton>
+        )}
+      </DialogTitle>
       <DialogContent>
         <DialogContentText>Name</DialogContentText>
         <TextField
@@ -108,8 +124,8 @@ export const PaymentsDuePopup = ({
         <DialogContentText>Amount</DialogContentText>
         <TextField
           type="number"
-          inputProps={{
-            startadornment: <InputAdornment position="start">£</InputAdornment>
+          InputProps={{
+            startAdornment: <InputAdornment position="start">£</InputAdornment>
           }}
           value={amount}
           onChange={handleAmountChange}

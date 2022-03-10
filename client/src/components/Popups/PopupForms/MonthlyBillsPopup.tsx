@@ -1,18 +1,17 @@
 import Button from '@material-ui/core/Button';
-import IconButton from '@material-ui/core/IconButton';
 import Checkbox from '@material-ui/core/Checkbox';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import IconButton from '@material-ui/core/IconButton';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import TextField from '@material-ui/core/TextField';
 import DeleteIcon from '@material-ui/icons/Delete';
-
 import {
   ChangeEvent,
-  Dispatch,
+  DispatchWithoutAction,
   KeyboardEvent,
   useEffect,
   useState
@@ -23,19 +22,19 @@ import { getNumberAmount, stringToFixedNumber } from '../../../utils';
 
 interface MonthlyBillsPopupProps {
   title: string;
-  open: boolean;
-  setOpen: Dispatch<boolean>;
+  isOpen: boolean;
+  close: DispatchWithoutAction;
   defaultName?: string;
   defaultAmount?: string;
   defaultPaid?: boolean;
   onSave: ({ name, amount, paid, account }: Bill) => void;
-  onDelete?: () => void;
+  onDelete?: DispatchWithoutAction;
 }
 
 export const MonthlyBillsPopup = ({
   title,
-  open,
-  setOpen,
+  isOpen,
+  close,
   defaultName = '',
   defaultAmount = '',
   defaultPaid = false,
@@ -73,8 +72,9 @@ export const MonthlyBillsPopup = ({
 
   const handleDeleteClicked = () => {
     onDelete && onDelete();
-    handleClose();
+    close();
   };
+
   const handleNameChange = (event: ChangeEvent<HTMLInputElement>) => {
     setName(event.target.value);
   };
@@ -100,7 +100,7 @@ export const MonthlyBillsPopup = ({
   };
 
   const handleClose = () => {
-    setOpen(false);
+    close();
     setAmount(defaultAmount);
     setName('');
     setPaid(false);
@@ -108,7 +108,7 @@ export const MonthlyBillsPopup = ({
 
   return (
     <Dialog
-      open={open}
+      open={isOpen}
       onClose={handleClose}
       aria-labelledby="form-dialog-title"
       className="monthly-bills-popup"

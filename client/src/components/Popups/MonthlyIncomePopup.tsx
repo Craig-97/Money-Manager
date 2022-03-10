@@ -1,7 +1,7 @@
 import {
   useState,
   useEffect,
-  Dispatch,
+  DispatchWithoutAction,
   ChangeEvent,
   KeyboardEvent
 } from 'react';
@@ -19,13 +19,13 @@ import { EDIT_ACCOUNT_MUTATION, GET_ACCOUNT_QUERY } from '../../graphql';
 import { Account } from '../../interfaces';
 
 interface MonthlyIncomePopupProps {
-  open: boolean;
-  setOpen: Dispatch<boolean>;
+  isOpen: boolean;
+  close: DispatchWithoutAction;
 }
 
 export const MonthlyIncomePopup = ({
-  open,
-  setOpen
+  isOpen,
+  close
 }: MonthlyIncomePopupProps) => {
   const {
     state: { account }
@@ -49,7 +49,7 @@ export const MonthlyIncomePopup = ({
         variables: { id, account: { monthlyIncome: value } }
       });
     }
-    handleClose();
+    close();
   };
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -63,16 +63,8 @@ export const MonthlyIncomePopup = ({
     }
   };
 
-  const handleClose = () => {
-    setOpen(false);
-  };
-
   return (
-    <Dialog
-      open={open}
-      onClose={handleClose}
-      aria-labelledby="form-dialog-title"
-    >
+    <Dialog open={isOpen} onClose={close} aria-labelledby="form-dialog-title">
       <DialogTitle id="form-dialog-title">Monthly Income</DialogTitle>
       <DialogContent>
         <DialogContentText>Enter your updated monthly income</DialogContentText>
@@ -91,7 +83,7 @@ export const MonthlyIncomePopup = ({
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose}>Cancel</Button>
+        <Button onClick={close}>Cancel</Button>
         <Button
           onClick={changeMonthlyIncome}
           color="secondary"

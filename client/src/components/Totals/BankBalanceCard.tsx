@@ -10,14 +10,14 @@ export const BankBalanceCard = () => {
     state: { account }
   } = useAccountContext();
   const { bankBalance }: Account = account;
-  const [open, setOpen] = useState<boolean>(false);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const handleClickOpen = () => {
-    setOpen(true);
+    setIsOpen(true);
   };
 
-  const updateOpen = useCallback(value => {
-    setOpen(value);
+  const closePopup = useCallback(() => {
+    setIsOpen(false);
   }, []);
 
   return (
@@ -29,7 +29,7 @@ export const BankBalanceCard = () => {
         onClick={handleClickOpen}
         icon={<AccountBalanceIcon color="primary" style={{ fontSize: 50 }} />}
       />
-      <BankBalancePopup open={open} setOpen={updateOpen} />
+      {isOpen && <BankBalancePopup isOpen={isOpen} close={closePopup} />}
     </Fragment>
   );
 };

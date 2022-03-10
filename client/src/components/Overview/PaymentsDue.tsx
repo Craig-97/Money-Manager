@@ -2,7 +2,7 @@ import { Fragment, useCallback, useState } from 'react';
 import { Divider } from '@material-ui/core';
 import { Account, Bill, OneOffPayment } from '../../interfaces';
 import { useAccountContext } from '../../state';
-import { EditMonthlyBillsPopup } from '../Popups';
+import { EditMonthlyBillsPopup, EditPaymentsDuePopup } from '../Popups';
 import { TYPES } from '../../constants';
 
 export const PaymentsDue = () => {
@@ -10,24 +10,19 @@ export const PaymentsDue = () => {
     state: { account }
   } = useAccountContext();
   const { paymentsDue, paymentsDueTotal }: Account = account;
-  const [billOpen, setBillOpen] = useState<boolean>(false);
-  const [paymentOpen, setPaymentOpen] = useState<boolean>(false);
+  const [isOpen, setIsOpen] = useState({ PAYMENT_DUE: false, BILL: false });
   const [selectedPayment, setSelectedPayment] = useState<Bill>({});
 
   const handleClickOpen = (payment: Bill | OneOffPayment) => {
     setSelectedPayment(payment);
 
     payment?.__typename === TYPES.BILL
-      ? setBillOpen(true)
-      : setPaymentOpen(true);
+      ? setIsOpen({ ...isOpen, BILL: true })
+      : setIsOpen({ ...isOpen, PAYMENT_DUE: true });
   };
 
-  const updateBillOpen = useCallback(value => {
-    setBillOpen(value);
-  }, []);
-
-  const updatePaymentOpen = useCallback(value => {
-    setPaymentOpen(value);
+  const closePopup = useCallback(() => {
+    setIsOpen({ PAYMENT_DUE: false, BILL: false });
   }, []);
 
   return (
@@ -57,11 +52,20 @@ export const PaymentsDue = () => {
           <p>£{paymentsDueTotal?.toFixed(2)}</p>
         </div>
       </div>
-      <EditMonthlyBillsPopup
-        open={billOpen}
-        setOpen={updateBillOpen}
-        selectedBill={selectedPayment}
-      />
+      {isOpen.BILL && (
+        <EditMonthlyBillsPopup
+          isOpen={isOpen.BILL}
+          close={closePopup}
+          selectedBill={selectedPayment}
+        />
+      )}
+      {isOpen.PAYMENT_DUE && (
+        <EditPaymentsDuePopup
+          isOpen={isOpen.PAYMENT_DUE}
+          close={closePopup}
+          selectedPayment={selectedPayment}
+        />
+      )}
     </Fragment>
   );
 };

@@ -1,4 +1,4 @@
-import { Dispatch } from 'react';
+import { DispatchWithoutAction } from 'react';
 import { EVENTS } from '../../../constants';
 import { useMutation } from '@apollo/client';
 import { useAccountContext } from '../../../state/account-context';
@@ -11,14 +11,14 @@ import { Bill } from '../../../interfaces';
 import { MonthlyBillsPopup } from '../PopupForms';
 
 interface EditMonthlyBillsPopupProps {
-  open: boolean;
-  setOpen: Dispatch<boolean>;
+  isOpen: boolean;
+  close: DispatchWithoutAction;
   selectedBill: Bill;
 }
 
 export const EditMonthlyBillsPopup = ({
-  open,
-  setOpen,
+  isOpen,
+  close,
   selectedBill
 }: EditMonthlyBillsPopupProps) => {
   const { dispatch } = useAccountContext();
@@ -35,12 +35,8 @@ export const EditMonthlyBillsPopup = ({
   };
 
   const [deleteBill] = useMutation(DELETE_BILL_MUTATION, {
-    onCompleted: () => onDeleteCompleted()
+    onCompleted: () => dispatch({ type: EVENTS.DELETE_BILL, data: id })
   });
-
-  const onDeleteCompleted = () => {
-    dispatch({ type: EVENTS.DELETE_BILL, data: id });
-  };
 
   const deleteSelectedBill = () => {
     deleteBill({
@@ -48,16 +44,16 @@ export const EditMonthlyBillsPopup = ({
     });
   };
 
-  return (
+  return isOpen ? (
     <MonthlyBillsPopup
-      title="Edit monthly bill"
+      title="Edit Monthly Bill"
       onSave={editNewBill}
       onDelete={deleteSelectedBill}
-      open={open}
-      setOpen={setOpen}
+      isOpen={isOpen}
+      close={close}
       defaultName={name}
       defaultAmount={amount?.toString()}
       defaultPaid={paid}
     />
-  );
+  ) : null;
 };
