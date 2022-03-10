@@ -1,6 +1,6 @@
 import { Fragment, useState, useCallback } from 'react';
 import AccountBalanceIcon from '@material-ui/icons/AccountBalance';
-import { BankBalancePopup } from '../Popup';
+import { BankBalancePopup } from '../Popups';
 import { TotalCard } from './TotalCard';
 import { useAccountContext } from '../../state/account-context';
 import { Account } from '../../interfaces';

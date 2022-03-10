@@ -4,6 +4,7 @@ export interface Bill {
   amount?: number;
   paid?: boolean;
   account?: string;
+  __typename?: string;
 }
 
 export interface OneOffPayment {
@@ -12,6 +13,7 @@ export interface OneOffPayment {
   amount?: number;
   oneOff?: boolean;
   account?: string;
+  __typename?: string;
 }
 
 export interface Account {

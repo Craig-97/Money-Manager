@@ -1,10 +1,10 @@
 import { Dispatch } from 'react';
 import { useMutation } from '@apollo/client';
-import { events } from '../../constants';
-import { useAccountContext } from '../../state/account-context';
-import { CREATE_BILL_MUTATION } from '../../graphql';
-import { Bill } from '../../interfaces';
-import { MonthlyBillsPopup } from './MonthlyBillsPopup';
+import { EVENTS } from '../../../constants';
+import { useAccountContext } from '../../../state/account-context';
+import { CREATE_BILL_MUTATION } from '../../../graphql';
+import { Bill } from '../../../interfaces';
+import { MonthlyBillsPopup } from '../PopupForms';
 
 interface AddMonthlyBillsPopupProps {
   open: boolean;
@@ -26,7 +26,7 @@ export const AddMonthlyBillsPopup = ({
       const {
         createBill: { bill }
       } = data;
-      dispatch({ type: events.CREATE_NEW_BILL, data: bill });
+      dispatch({ type: EVENTS.CREATE_NEW_BILL, data: bill });
     }
   };
 

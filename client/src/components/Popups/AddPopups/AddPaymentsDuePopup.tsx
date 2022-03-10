@@ -1,10 +1,10 @@
 import { Dispatch } from 'react';
 import { useMutation } from '@apollo/client';
-import { events } from '../../constants';
-import { useAccountContext } from '../../state/account-context';
-import { CREATE_ONE_OFF_PAYMENT_MUTATION } from '../../graphql';
-import { OneOffPayment } from '../../interfaces';
-import { PaymentsDuePopup } from './PaymentsDuePopup';
+import { EVENTS } from '../../../constants';
+import { useAccountContext } from '../../../state/account-context';
+import { CREATE_ONE_OFF_PAYMENT_MUTATION } from '../../../graphql';
+import { OneOffPayment } from '../../../interfaces';
+import { PaymentsDuePopup } from '../PopupForms';
 
 interface AddPaymentsDuePopupProps {
   open: boolean;
@@ -27,7 +27,7 @@ export const AddPaymentsDuePopup = ({
         createOneOffPayment: { oneOffPayment }
       } = data;
       dispatch({
-        type: events.CREATE_NEW_ONE_OFF_PAYMENT,
+        type: EVENTS.CREATE_NEW_ONE_OFF_PAYMENT,
         data: oneOffPayment
       });
     }

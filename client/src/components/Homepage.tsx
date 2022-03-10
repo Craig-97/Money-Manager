@@ -4,7 +4,7 @@ import { useAccountContext } from '../state/account-context';
 import { useQuery } from '@apollo/client';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import isEqual from 'lodash/isEqual';
-import { events } from '../constants';
+import { EVENTS } from '../constants';
 import { Overview } from './Overview';
 import { Totals } from './Totals';
 import { GET_ACCOUNT_QUERY } from '../graphql';
@@ -18,7 +18,7 @@ export const Homepage = () => {
 
   useEffect(() => {
     if (!isEqual(data, account)) {
-      dispatch({ type: events.GET_ACCOUNT_DETAILS, data });
+      dispatch({ type: EVENTS.GET_ACCOUNT_DETAILS, data });
     }
     // eslint-disable-next-line
   }, [data, dispatch]);

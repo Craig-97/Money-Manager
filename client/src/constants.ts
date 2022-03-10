@@ -1,6 +1,11 @@
-export const events = {
+export const EVENTS = {
   GET_ACCOUNT_DETAILS: 'GET_ACCOUNT_DETAILS',
   CREATE_NEW_BILL: 'CREATE_NEW_BILL',
   DELETE_BILL: 'DELETE_BILL',
   CREATE_NEW_ONE_OFF_PAYMENT: 'CREATE_NEW_ONE_OFF_PAYMENT'
+};
+
+export const TYPES = {
+  BILL: 'Bill',
+  ONEOFFPAYMENT: 'OneOffPayment'
 };

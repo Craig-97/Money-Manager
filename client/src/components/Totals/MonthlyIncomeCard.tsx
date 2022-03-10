@@ -1,7 +1,7 @@
 import { Fragment, useState, useCallback } from 'react';
 import LocalAtmIcon from '@material-ui/icons/LocalAtm';
 import { useAccountContext } from '../../state/account-context';
-import { MonthlyIncomePopup } from '../Popup';
+import { MonthlyIncomePopup } from '../Popups';
 import { TotalCard } from './TotalCard';
 import { green } from '@material-ui/core/colors';
 import { Account } from '../../interfaces';

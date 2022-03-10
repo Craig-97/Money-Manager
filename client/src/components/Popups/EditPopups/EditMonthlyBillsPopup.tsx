@@ -1,14 +1,14 @@
 import { Dispatch } from 'react';
-import { events } from '../../constants';
+import { EVENTS } from '../../../constants';
 import { useMutation } from '@apollo/client';
-import { useAccountContext } from '../../state/account-context';
+import { useAccountContext } from '../../../state/account-context';
 import {
   EDIT_BILL_MUTATION,
   DELETE_BILL_MUTATION,
   GET_ACCOUNT_QUERY
-} from '../../graphql';
-import { Bill } from '../../interfaces';
-import { MonthlyBillsPopup } from './MonthlyBillsPopup';
+} from '../../../graphql';
+import { Bill } from '../../../interfaces';
+import { MonthlyBillsPopup } from '../PopupForms';
 
 interface EditMonthlyBillsPopupProps {
   open: boolean;
@@ -39,7 +39,7 @@ export const EditMonthlyBillsPopup = ({
   });
 
   const onDeleteCompleted = () => {
-    dispatch({ type: events.DELETE_BILL, data: id });
+    dispatch({ type: EVENTS.DELETE_BILL, data: id });
   };
 
   const deleteSelectedBill = () => {

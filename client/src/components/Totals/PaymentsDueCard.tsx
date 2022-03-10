@@ -2,7 +2,7 @@ import AccountBalanceWalletIcon from '@material-ui/icons/AccountBalanceWallet';
 import { Fragment, useCallback, useState } from 'react';
 import { Account } from '../../interfaces';
 import { useAccountContext } from '../../state/account-context';
-import { AddPaymentsDuePopup } from '../Popup';
+import { AddPaymentsDuePopup } from '../Popups';
 import { TotalCard } from './TotalCard';
 
 export const PaymentsDueCard = () => {

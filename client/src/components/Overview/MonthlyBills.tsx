@@ -1,9 +1,8 @@
-import { Fragment, useState, useCallback } from 'react';
-import { useAccountContext } from '../../state';
-import { EditMonthlyBillsPopup } from '../Popup';
+import { Fragment, useCallback, useState } from 'react';
 import { Divider } from '@material-ui/core';
-import { Account } from '../../interfaces';
-import { Bill } from '../../interfaces';
+import { Account, Bill } from '../../interfaces';
+import { useAccountContext } from '../../state';
+import { EditMonthlyBillsPopup } from '../Popups';
 
 export const MonthlyBills = () => {
   const {
@@ -25,15 +24,16 @@ export const MonthlyBills = () => {
   return (
     <Fragment>
       <div className="monthly-bills">
-        {bills?.map(({ id, name, amount, paid }: Bill, index: number) => {
+        {bills?.map(({ id, name, amount, paid }: Bill) => {
           return (
-            <Fragment key={index}>
+            <Fragment key={`${id}-fragment`}>
               <div
+                key={id}
                 className="bill"
                 onClick={() => handleClickOpen({ id, name, amount, paid })}
               >
                 <h5> {name}</h5>
-                <p key={index}>£{amount?.toFixed(2)}</p>
+                <p>£{amount?.toFixed(2)}</p>
               </div>
               <Divider />
             </Fragment>

@@ -75,7 +75,7 @@ export const MonthlyIncomePopup = ({
     >
       <DialogTitle id="form-dialog-title">Monthly Income</DialogTitle>
       <DialogContent>
-        <DialogContentText>Enter your Editd monthly income</DialogContentText>
+        <DialogContentText>Enter your updated monthly income</DialogContentText>
         <TextField
           InputProps={{
             startAdornment: <InputAdornment position="start">£</InputAdornment>
