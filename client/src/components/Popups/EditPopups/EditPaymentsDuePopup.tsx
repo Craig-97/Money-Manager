@@ -35,10 +35,9 @@ export const EditPaymentsDuePopup = ({
 
   const editNewPayment = (oneOffPayment: OneOffPayment) => {
     editPayment({
-      variables: { id, oneOffPayment }
+      variables: { id: paymentId, oneOffPayment }
     });
   };
-
   const [editAccount] = useMutation(EDIT_ACCOUNT_MUTATION, {
     refetchQueries: [{ query: GET_ACCOUNT_QUERY }]
   });
