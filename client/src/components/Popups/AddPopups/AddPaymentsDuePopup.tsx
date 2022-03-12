@@ -1,42 +1,42 @@
 import { DispatchWithoutAction } from 'react';
-import { useMutation } from '@apollo/client';
-import { EVENTS } from '../../../constants';
-import { useAccountContext } from '../../../state/account-context';
-import { CREATE_ONE_OFF_PAYMENT_MUTATION } from '../../../graphql';
-import { OneOffPayment } from '../../../interfaces';
+import { ApolloCache, useMutation } from '@apollo/client';
+import { CREATE_ONE_OFF_PAYMENT_MUTATION, GET_ACCOUNT_QUERY } from '../../../graphql';
+import { AccountData, OneOffPayment } from '../../../interfaces';
 import { PaymentsDuePopup } from '../PopupForms';
-
+import { getNewOneOffPaymentAdded } from '../../../utils';
 interface AddPaymentsDuePopupProps {
   isOpen: boolean;
   close: DispatchWithoutAction;
 }
 
-export const AddPaymentsDuePopup = ({
-  isOpen,
-  close
-}: AddPaymentsDuePopupProps) => {
-  const { dispatch } = useAccountContext();
-
-  const [createOneOffPayment] = useMutation(CREATE_ONE_OFF_PAYMENT_MUTATION, {
-    onCompleted: data => onCompleted(data)
-  });
-
-  const onCompleted = (data: any) => {
-    if (data?.createOneOffPayment) {
-      const {
-        createOneOffPayment: { oneOffPayment }
-      } = data;
-      dispatch({
-        type: EVENTS.CREATE_NEW_ONE_OFF_PAYMENT,
-        data: oneOffPayment
-      });
-    }
-  };
+export const AddPaymentsDuePopup = ({ isOpen, close }: AddPaymentsDuePopupProps) => {
+  const [createOneOffPayment] = useMutation(CREATE_ONE_OFF_PAYMENT_MUTATION);
 
   const createNewOneOffPayment = (oneOffPayment: OneOffPayment) => {
     createOneOffPayment({
-      variables: { oneOffPayment }
+      variables: { oneOffPayment },
+      update: (
+        cache,
+        {
+          data: {
+            createOneOffPayment: { oneOffPayment }
+          }
+        }
+      ) => addPaymentCache(cache, oneOffPayment)
     });
+  };
+
+  const addPaymentCache = (cache: ApolloCache<any>, oneOffPayment: OneOffPayment) => {
+    const data: AccountData | null = cache.readQuery({
+      query: GET_ACCOUNT_QUERY
+    });
+
+    if (data) {
+      cache.writeQuery({
+        query: GET_ACCOUNT_QUERY,
+        data: getNewOneOffPaymentAdded(data?.account, oneOffPayment)
+      });
+    }
   };
 
   return isOpen ? (

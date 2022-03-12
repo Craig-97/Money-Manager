@@ -28,25 +28,20 @@ export const PaymentsDue = () => {
   return (
     <Fragment>
       <div className="upcoming-payments">
-        {paymentsDue?.map(
-          ({ id, name, amount, __typename }: Bill | OneOffPayment) => {
-            return (
-              <Fragment key={`${id}-fragment`}>
-                <div
-                  key={id}
-                  className="payment"
-                  onClick={() =>
-                    handleClickOpen({ id, name, amount, __typename })
-                  }
-                >
-                  <h5> {name}</h5>
-                  <p>£{amount?.toFixed(2)}</p>
-                </div>
-                <Divider />
-              </Fragment>
-            );
-          }
-        )}
+        {paymentsDue?.map(({ id, name, amount, __typename }: Bill | OneOffPayment) => {
+          return (
+            <Fragment key={`${id}-fragment`}>
+              <div
+                key={id}
+                className="payment"
+                onClick={() => handleClickOpen({ id, name, amount, __typename })}>
+                <h5> {name}</h5>
+                <p>£{amount?.toFixed(2)}</p>
+              </div>
+              <Divider />
+            </Fragment>
+          );
+        })}
         <div className="payment">
           <h3>Total</h3>
           <p>£{paymentsDueTotal?.toFixed(2)}</p>

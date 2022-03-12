@@ -61,13 +61,16 @@ const editBill = async (_, { id, bill }) => {
 
 const deleteBill = async (_, { id }) => {
   try {
+    const bill = await Bill.findById(id);
     const response = await Bill.deleteOne({ _id: id });
     if (response.ok && response.deletedCount == 1) {
       return {
+        bill,
         success: true
       };
     } else {
       return {
+        bill,
         success: false
       };
     }

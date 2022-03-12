@@ -2,7 +2,7 @@ import React, { createContext, useContext, useReducer } from 'react';
 import { reducer } from './reducer';
 import { AccountData } from '../interfaces';
 
-const initialState = {
+export const initialState = {
   account: {
     bankBalance: 0,
     bankPaydayTotal: 0,
@@ -23,11 +23,7 @@ export const AccountContext = createContext<{
 export const AccountProvider: React.FC = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  return (
-    <AccountContext.Provider value={{ state, dispatch }}>
-      {children}
-    </AccountContext.Provider>
-  );
+  return <AccountContext.Provider value={{ state, dispatch }}>{children}</AccountContext.Provider>;
 };
 
 export const useAccountContext = () => useContext(AccountContext);

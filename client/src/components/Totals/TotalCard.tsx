@@ -26,18 +26,10 @@ export const TotalCard = ({
       <CardActionArea onClick={onClick} disabled={disabled}>
         <CardContent>
           <div className="total-card__text">
-            <Typography
-              color="textSecondary"
-              gutterBottom
-              style={{ fontWeight: 'bold' }}
-            >
+            <Typography color="textSecondary" gutterBottom style={{ fontWeight: 'bold' }}>
               {title}
             </Typography>
-            <Typography
-              variant="h4"
-              component="h4"
-              style={{ fontWeight: 'bold' }}
-            >
+            <Typography variant="h4" component="h4" style={{ fontWeight: 'bold' }}>
               £{amount}
             </Typography>
           </div>

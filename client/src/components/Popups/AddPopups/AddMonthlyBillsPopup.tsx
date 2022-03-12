@@ -1,39 +1,43 @@
 import { DispatchWithoutAction } from 'react';
-import { useMutation } from '@apollo/client';
-import { EVENTS } from '../../../constants';
-import { useAccountContext } from '../../../state/account-context';
-import { CREATE_BILL_MUTATION } from '../../../graphql';
-import { Bill } from '../../../interfaces';
+import { ApolloCache, useMutation } from '@apollo/client';
+import { CREATE_BILL_MUTATION, GET_ACCOUNT_QUERY } from '../../../graphql';
+import { AccountData, Bill } from '../../../interfaces';
 import { MonthlyBillsPopup } from '../PopupForms';
+import { getNewBillAdded } from '../../../utils';
 
 interface AddMonthlyBillsPopupProps {
   isOpen: boolean;
   close: DispatchWithoutAction;
 }
 
-export const AddMonthlyBillsPopup = ({
-  isOpen,
-  close
-}: AddMonthlyBillsPopupProps) => {
-  const { dispatch } = useAccountContext();
-
-  const [createBill] = useMutation(CREATE_BILL_MUTATION, {
-    onCompleted: data => onCompleted(data)
-  });
-
-  const onCompleted = (data: any) => {
-    if (data?.createBill) {
-      const {
-        createBill: { bill }
-      } = data;
-      dispatch({ type: EVENTS.CREATE_NEW_BILL, data: bill });
-    }
-  };
+export const AddMonthlyBillsPopup = ({ isOpen, close }: AddMonthlyBillsPopupProps) => {
+  const [createBill] = useMutation(CREATE_BILL_MUTATION);
 
   const createNewBill = (bill: Bill) => {
     createBill({
-      variables: { bill }
+      variables: { bill },
+      update: (
+        cache,
+        {
+          data: {
+            createBill: { bill }
+          }
+        }
+      ) => addBillCache(cache, bill)
     });
+  };
+
+  const addBillCache = (cache: ApolloCache<any>, bill: Bill) => {
+    const data: AccountData | null = cache.readQuery({
+      query: GET_ACCOUNT_QUERY
+    });
+
+    if (data) {
+      cache.writeQuery({
+        query: GET_ACCOUNT_QUERY,
+        data: getNewBillAdded(data?.account, bill)
+      });
+    }
   };
 
   return isOpen ? (

@@ -9,13 +9,7 @@ import IconButton from '@material-ui/core/IconButton';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import TextField from '@material-ui/core/TextField';
 import DeleteIcon from '@material-ui/icons/Delete';
-import {
-  ChangeEvent,
-  DispatchWithoutAction,
-  KeyboardEvent,
-  useEffect,
-  useState
-} from 'react';
+import { ChangeEvent, DispatchWithoutAction, KeyboardEvent, useEffect, useState } from 'react';
 import { Account, Bill } from '../../../interfaces';
 import { useAccountContext } from '../../../state/account-context';
 import { getNumberAmount, stringToFixedNumber } from '../../../utils';
@@ -113,8 +107,7 @@ export const MonthlyBillsPopup = ({
       aria-labelledby="form-dialog-title"
       className="monthly-bills-popup"
       maxWidth={'xs'}
-      fullWidth
-    >
+      fullWidth>
       <DialogTitle id="form-dialog-title">
         {title}
         {onDelete && (
@@ -156,11 +149,7 @@ export const MonthlyBillsPopup = ({
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose}>Cancel</Button>
-        <Button
-          onClick={handleSaveClicked}
-          color="secondary"
-          disabled={!name || !amount}
-        >
+        <Button onClick={handleSaveClicked} color="secondary" disabled={!name || !amount}>
           Save
         </Button>
       </DialogActions>

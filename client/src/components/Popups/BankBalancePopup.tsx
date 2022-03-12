@@ -1,10 +1,4 @@
-import {
-  useState,
-  useEffect,
-  ChangeEvent,
-  KeyboardEvent,
-  DispatchWithoutAction
-} from 'react';
+import { useState, useEffect, ChangeEvent, KeyboardEvent, DispatchWithoutAction } from 'react';
 import { useMutation } from '@apollo/client';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';

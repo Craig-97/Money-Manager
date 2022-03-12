@@ -1,14 +1,9 @@
-import { Homepage } from './components/Homepage';
-import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
-import { AccountProvider } from './state/account-context';
-import { ApolloClient, InMemoryCache } from '@apollo/client';
 import { ApolloProvider } from '@apollo/client/react';
+import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
+import { Homepage } from './components/Homepage';
+import { client } from './graphql';
+import { AccountProvider } from './state/account-context';
 import './App.scss';
-
-const client = new ApolloClient({
-  uri: 'http://localhost:4000/graphql',
-  cache: new InMemoryCache()
-});
 
 const App = () => {
   return (

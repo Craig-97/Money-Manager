@@ -8,6 +8,8 @@ import { EVENTS } from '../constants';
 import { Overview } from './Overview';
 import { Totals } from './Totals';
 import { GET_ACCOUNT_QUERY } from '../graphql';
+import { getAccountData } from '../mockData';
+import { initialState } from '../state';
 
 export const Homepage = () => {
   const { loading, data, error } = useQuery<AccountData>(GET_ACCOUNT_QUERY);
@@ -17,8 +19,10 @@ export const Homepage = () => {
   } = useAccountContext();
 
   useEffect(() => {
-    if (!isEqual(data, account)) {
-      dispatch({ type: EVENTS.GET_ACCOUNT_DETAILS, data });
+    const formattedData = data?.account ? getAccountData(data.account) : initialState.account;
+
+    if (!isEqual(formattedData, account)) {
+      dispatch({ type: EVENTS.GET_ACCOUNT_DETAILS, data: formattedData });
     }
     // eslint-disable-next-line
   }, [data, dispatch]);

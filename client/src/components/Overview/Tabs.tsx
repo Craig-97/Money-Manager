@@ -29,14 +29,9 @@ export const OverviewTabs = ({ value, setValue }: OverviewTabsProps) => {
         onChange={handleChange}
         indicatorColor="primary"
         textColor="primary"
-        variant="fullWidth"
-      >
+        variant="fullWidth">
         <Tab label="History" icon={<HistoryIcon />} {...a11yProps(0)} />
-        <Tab
-          label="Upcoming payments"
-          icon={<AccountBalanceWalletIcon />}
-          {...a11yProps(1)}
-        />
+        <Tab label="Upcoming payments" icon={<AccountBalanceWalletIcon />} {...a11yProps(1)} />
         <Tab label="Monthly bills" icon={<ReceiptIcon />} {...a11yProps(2)} />
       </Tabs>
     </Fragment>

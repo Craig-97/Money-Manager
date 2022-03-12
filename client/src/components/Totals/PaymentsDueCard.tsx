@@ -28,12 +28,7 @@ export const PaymentsDueCard = () => {
         title={'PAYMENTS DUE'}
         amount={paymentsDueTotal}
         onClick={handleClickOpen}
-        icon={
-          <AccountBalanceWalletIcon
-            color="secondary"
-            style={{ fontSize: 50 }}
-          />
-        }
+        icon={<AccountBalanceWalletIcon color="secondary" style={{ fontSize: 50 }} />}
       />
       <AddPaymentsDuePopup isOpen={isOpen} close={closePopup} />
     </Fragment>

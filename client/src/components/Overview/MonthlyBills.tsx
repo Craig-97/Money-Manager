@@ -30,8 +30,7 @@ export const MonthlyBills = () => {
               <div
                 key={id}
                 className="bill"
-                onClick={() => handleClickOpen({ id, name, amount, paid })}
-              >
+                onClick={() => handleClickOpen({ id, name, amount, paid })}>
                 <h5> {name}</h5>
                 <p>£{amount?.toFixed(2)}</p>
               </div>
@@ -44,11 +43,7 @@ export const MonthlyBills = () => {
           <p>£{billsTotal?.toFixed(2)}</p>
         </div>
       </div>
-      <EditMonthlyBillsPopup
-        isOpen={isOpen}
-        close={closePopup}
-        selectedBill={selectedBill}
-      />
+      <EditMonthlyBillsPopup isOpen={isOpen} close={closePopup} selectedBill={selectedBill} />
     </Fragment>
   );
 };

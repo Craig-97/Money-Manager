@@ -17,8 +17,7 @@ export const TabPanel = (props: TabPanelProps) => {
       hidden={value !== index}
       id={`full-width-tabpanel-${index}`}
       aria-labelledby={`full-width-tab-${index}`}
-      {...other}
-    >
+      {...other}>
       {value === index && <Box p={3}>{children}</Box>}
     </div>
   );

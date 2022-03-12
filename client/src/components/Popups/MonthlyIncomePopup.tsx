@@ -1,10 +1,4 @@
-import {
-  useState,
-  useEffect,
-  DispatchWithoutAction,
-  ChangeEvent,
-  KeyboardEvent
-} from 'react';
+import { useState, useEffect, DispatchWithoutAction, ChangeEvent, KeyboardEvent } from 'react';
 import { useMutation } from '@apollo/client';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
@@ -17,16 +11,12 @@ import InputAdornment from '@material-ui/core/InputAdornment';
 import { useAccountContext } from '../../state/account-context';
 import { EDIT_ACCOUNT_MUTATION, GET_ACCOUNT_QUERY } from '../../graphql';
 import { Account } from '../../interfaces';
-
 interface MonthlyIncomePopupProps {
   isOpen: boolean;
   close: DispatchWithoutAction;
 }
 
-export const MonthlyIncomePopup = ({
-  isOpen,
-  close
-}: MonthlyIncomePopupProps) => {
+export const MonthlyIncomePopup = ({ isOpen, close }: MonthlyIncomePopupProps) => {
   const {
     state: { account }
   } = useAccountContext();
@@ -84,11 +74,7 @@ export const MonthlyIncomePopup = ({
       </DialogContent>
       <DialogActions>
         <Button onClick={close}>Cancel</Button>
-        <Button
-          onClick={changeMonthlyIncome}
-          color="secondary"
-          disabled={!value}
-        >
+        <Button onClick={changeMonthlyIncome} color="secondary" disabled={!value}>
           Save
         </Button>
       </DialogActions>

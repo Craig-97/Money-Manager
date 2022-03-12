@@ -14,12 +14,7 @@ export const Totals = () => {
   const {
     state: { account }
   } = useAccountContext();
-  const {
-    bankFreeToSpend,
-    discIncome,
-    bankPaydayTotal,
-    payDayDiscIncome
-  }: Account = account;
+  const { bankFreeToSpend, discIncome, bankPaydayTotal, payDayDiscIncome }: Account = account;
 
   return (
     <div className="totals">

@@ -24,8 +24,7 @@ export const Overview = () => {
       <SwipeableViews
         axis={theme.direction === 'rtl' ? 'x-reverse' : 'x'}
         index={value}
-        onChangeIndex={handleChangeIndex}
-      >
+        onChangeIndex={handleChangeIndex}>
         <TabPanel value={value} index={0} dir={theme.direction}>
           <Transactions />
         </TabPanel>

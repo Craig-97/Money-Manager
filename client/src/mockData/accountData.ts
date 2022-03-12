@@ -21,9 +21,7 @@ export const getAccountData = (account: Account) => {
     id
   } = account;
   const billsTotal = getAmountTotal(bills);
-  const paymentsDue = oldPaymentsDue
-    ? oldPaymentsDue
-    : getPaymentsDue(oneOffPayments || [], bills);
+  const paymentsDue = oldPaymentsDue ? oldPaymentsDue : getPaymentsDue(oneOffPayments || [], bills);
   const paymentsDueTotal = getAmountTotal(paymentsDue);
   const discIncome = getDiscIncome(monthlyIncome, billsTotal);
   const bankFreeToSpend = getBankFreeToSpend(bankBalance, paymentsDueTotal);
