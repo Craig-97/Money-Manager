@@ -3,6 +3,8 @@ import { schema } from './schema';
 import express from 'express';
 import { connectToDatabase } from './db/mongodb';
 
+require('dotenv').config();
+
 const startServer = async () => {
   const app = express();
 
@@ -14,9 +16,9 @@ const startServer = async () => {
 
   await connectToDatabase();
 
-  app.listen({ port: 4000 }, () =>
-    console.log(`🚀 Server ready at http://localhost:4000${server.graphqlPath}`)
-  );
+  const PORT = process.env.PORT || 4000;
+
+  app.listen({ port: PORT }, () => console.log(`🚀 Server running on ${PORT}`));
 };
 
 startServer();
