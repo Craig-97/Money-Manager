@@ -1,7 +1,7 @@
-import { ApolloServer } from "apollo-server-express";
-import { schema } from "./schema";
-import express from "express";
-import { connectToDatabase } from "./db/mongodb";
+import { ApolloServer } from 'apollo-server-express';
+import { schema } from './schema';
+import express from 'express';
+import { connectToDatabase } from './db/mongodb';
 
 const startServer = async () => {
   const app = express();

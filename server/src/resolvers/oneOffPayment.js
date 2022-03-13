@@ -35,10 +35,7 @@ const editOneOffPayment = async (_, { id, oneOffPayment }) => {
     };
   }
 
-  const mergedOneOffPayment = Object.assign(
-    currentOneOffPayment,
-    oneOffPayment
-  );
+  const mergedOneOffPayment = Object.assign(currentOneOffPayment, oneOffPayment);
   mergedOneOffPayment.__v = mergedOneOffPayment.__v + 1;
 
   try {

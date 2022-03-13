@@ -5,10 +5,13 @@ import { Account, Bill, OneOffPayment } from '../interfaces';
 export const getAmountTotal = (amounts: Array<any>) =>
   amounts?.reduce((n, { amount }) => n + amount, 0);
 
-export const getPaymentsDue = (oneOffPayments: Array<any>, bills: Array<Bill>) =>
+export const getPaymentsDue = (oneOffPayments: Array<Bill | OneOffPayment>, bills: Array<Bill>) =>
   oneOffPayments
     ?.concat(bills?.filter((bill: Bill) => bill.paid === false))
     .sort((a, b) => ((a?.amount || 0) > (b?.amount || 0) ? 1 : -1));
+
+export const getBills = (bills: Array<Bill>) =>
+  [...bills]?.sort((a, b) => ((a?.amount || 0) > (b?.amount || 0) ? 1 : -1));
 
 export const getDiscIncome = (monthlyIncome: number, billsTotal: number) =>
   monthlyIncome - billsTotal;

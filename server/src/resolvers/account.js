@@ -24,13 +24,9 @@ const editAccount = async (_, { id, account }) => {
   const calculatedAccount = calculateAccountValues(mergedAccount);
 
   try {
-    const editedAccount = await Account.findOneAndUpdate(
-      { _id: id },
-      calculatedAccount,
-      {
-        new: true
-      }
-    );
+    const editedAccount = await Account.findOneAndUpdate({ _id: id }, calculatedAccount, {
+      new: true
+    });
 
     if (editedAccount) {
       return {
@@ -69,10 +65,7 @@ exports.resolvers = {
     accounts: () => Account.find().populate(['bills']),
     account: (_, { id }) =>
       Account.findById(id)
-        .populate({
-          path: 'bills',
-          options: { sort: { amount: 1 } }
-        })
+        .populate({ path: 'bills', options: { sort: { amount: 1 } } })
         .populate({ path: 'oneOffPayments', options: { sort: { amount: 1 } } })
   },
   Mutation: {
