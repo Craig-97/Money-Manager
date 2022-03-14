@@ -1,1 +1,0 @@
-export { Totals } from './Totals';
