@@ -18,14 +18,8 @@ export const Homepage = () => {
     dispatch
   } = useAccountContext();
 
-  console.log('HOMEPAGE RENDERED');
-
   useEffect(() => {
     const formattedData = data?.account ? getAccountData(data.account) : initialState.account;
-
-    console.log('!isEqual(data, account)', !isEqual(formattedData, account));
-    console.log('formattedData', formattedData);
-    console.log('CONTEXT ACCOUNT', account);
 
     if (!isEqual(formattedData, account)) {
       dispatch({ type: EVENTS.GET_ACCOUNT_DETAILS, data: formattedData });

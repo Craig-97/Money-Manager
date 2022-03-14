@@ -5,7 +5,6 @@ import { useTheme } from '@material-ui/core/styles';
 import { OverviewTabs } from './Tabs';
 import { MonthlyBills } from './MonthlyBills';
 import { PaymentsDue } from './PaymentsDue';
-// import { Transactions } from './Transactions';
 import { TabPanel } from './TabPanel';
 
 export const Overview = () => {
@@ -25,9 +24,6 @@ export const Overview = () => {
         axis={theme.direction === 'rtl' ? 'x-reverse' : 'x'}
         index={value}
         onChangeIndex={handleChangeIndex}>
-        {/* <TabPanel value={value} index={0} dir={theme.direction}>
-          <Transactions />
-        </TabPanel> */}
         <TabPanel value={value} index={0} dir={theme.direction}>
           <PaymentsDue />
         </TabPanel>
