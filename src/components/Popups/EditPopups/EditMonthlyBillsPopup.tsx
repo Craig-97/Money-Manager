@@ -1,4 +1,5 @@
 import { useMutation } from '@apollo/client';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import { DispatchWithoutAction } from 'react';
 import {
   deleteBillCache,
@@ -28,7 +29,7 @@ export const EditMonthlyBillsPopup = ({
   const { bankBalance, id }: Account = account;
   const { id: billId, name, amount, paid }: Bill = selectedBill;
 
-  const [editBill] = useMutation(EDIT_BILL_MUTATION, {
+  const [editBill, { loading: billLoading }] = useMutation(EDIT_BILL_MUTATION, {
     onCompleted: data => onEditBillCompleted(data)
   });
 
@@ -38,7 +39,7 @@ export const EditMonthlyBillsPopup = ({
     });
   };
 
-  const [editAccount] = useMutation(EDIT_ACCOUNT_MUTATION);
+  const [editAccount, { loading: accLoading }] = useMutation(EDIT_ACCOUNT_MUTATION);
 
   const onEditBillCompleted = (response: any) => {
     const {
@@ -64,7 +65,7 @@ export const EditMonthlyBillsPopup = ({
     }
   };
 
-  const [deleteBill] = useMutation(DELETE_BILL_MUTATION);
+  const [deleteBill, { loading: delBillLoading }] = useMutation(DELETE_BILL_MUTATION);
 
   const deleteSelectedBill = () => {
     deleteBill({
@@ -79,6 +80,14 @@ export const EditMonthlyBillsPopup = ({
       ) => deleteBillCache(cache, bill)
     });
   };
+
+  if (accLoading || billLoading || delBillLoading) {
+    return (
+      <div className="loading">
+        <CircularProgress />
+      </div>
+    );
+  }
 
   return isOpen ? (
     <MonthlyBillsPopup

@@ -1,31 +1,34 @@
-import { useState, useEffect, ChangeEvent, KeyboardEvent, DispatchWithoutAction } from 'react';
-import { useMutation } from '@apollo/client';
 import Button from '@material-ui/core/Button';
-import TextField from '@material-ui/core/TextField';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import InputAdornment from '@material-ui/core/InputAdornment';
-import { useAccountContext } from '../../state/account-context';
-import { EDIT_ACCOUNT_MUTATION, GET_ACCOUNT_QUERY } from '../../graphql';
+import TextField from '@material-ui/core/TextField';
+import {
+  ChangeEvent,
+  Dispatch,
+  DispatchWithoutAction,
+  KeyboardEvent,
+  useEffect,
+  useState
+} from 'react';
 import { Account } from '../../interfaces';
+import { useAccountContext } from '../../state/account-context';
 
 interface BankBalancePopupProps {
   isOpen: boolean;
   close: DispatchWithoutAction;
+  changeBankBalance: (value: number | undefined) => void;
 }
 
-export const BankBalancePopup = ({ isOpen, close }: BankBalancePopupProps) => {
+export const BankBalancePopup = ({ isOpen, close, changeBankBalance }: BankBalancePopupProps) => {
   const {
     state: { account }
   } = useAccountContext();
-  const { bankBalance, id }: Account = account;
+  const { bankBalance }: Account = account;
   const [value, setValue] = useState<number>();
-  const [editAccount] = useMutation(EDIT_ACCOUNT_MUTATION, {
-    refetchQueries: [{ query: GET_ACCOUNT_QUERY }]
-  });
 
   useEffect(() => {
     if (value !== bankBalance) {
@@ -34,15 +37,6 @@ export const BankBalancePopup = ({ isOpen, close }: BankBalancePopupProps) => {
     // eslint-disable-next-line
   }, [bankBalance]);
 
-  const changeBankBalance = () => {
-    if (value && value !== bankBalance) {
-      editAccount({
-        variables: { id, account: { bankBalance: value } }
-      });
-    }
-    close();
-  };
-
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     setValue(Number(parseFloat(event.target.value).toFixed(2)));
   };
@@ -50,7 +44,7 @@ export const BankBalancePopup = ({ isOpen, close }: BankBalancePopupProps) => {
   const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter' && value) {
       event.preventDefault();
-      changeBankBalance();
+      changeBankBalance(value);
     }
   };
 
@@ -75,7 +69,7 @@ export const BankBalancePopup = ({ isOpen, close }: BankBalancePopupProps) => {
       </DialogContent>
       <DialogActions>
         <Button onClick={close}>Cancel</Button>
-        <Button onClick={changeBankBalance} color="secondary" disabled={!value}>
+        <Button onClick={() => changeBankBalance(value)} color="secondary" disabled={!value}>
           Save
         </Button>
       </DialogActions>

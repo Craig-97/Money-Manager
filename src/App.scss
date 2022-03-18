@@ -50,6 +50,8 @@
     .MuiCard-root {
       min-width: 275px;
       max-width: 275px;
+      min-height: 120px;
+      max-height: 120px;
 
       .MuiCardContent-root {
         padding: 24px;
@@ -61,6 +63,14 @@
       @media only screen and (max-width: 620px) {
         min-width: 100%;
         max-width: 100%;
+      }
+    }
+
+    .loading-total-card {
+      .MuiCard-root {
+        display: flex;
+        justify-content: center;
+        align-items: center;
       }
     }
   }

@@ -1,30 +1,30 @@
-import { useState, useEffect, DispatchWithoutAction, ChangeEvent, KeyboardEvent } from 'react';
-import { useMutation } from '@apollo/client';
 import Button from '@material-ui/core/Button';
-import TextField from '@material-ui/core/TextField';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import InputAdornment from '@material-ui/core/InputAdornment';
-import { useAccountContext } from '../../state/account-context';
-import { EDIT_ACCOUNT_MUTATION, GET_ACCOUNT_QUERY } from '../../graphql';
+import TextField from '@material-ui/core/TextField';
+import { ChangeEvent, DispatchWithoutAction, KeyboardEvent, useEffect, useState } from 'react';
 import { Account } from '../../interfaces';
+import { useAccountContext } from '../../state/account-context';
 interface MonthlyIncomePopupProps {
   isOpen: boolean;
   close: DispatchWithoutAction;
+  changeMonthlyIncome: (value: number | undefined) => void;
 }
 
-export const MonthlyIncomePopup = ({ isOpen, close }: MonthlyIncomePopupProps) => {
+export const MonthlyIncomePopup = ({
+  isOpen,
+  close,
+  changeMonthlyIncome
+}: MonthlyIncomePopupProps) => {
   const {
     state: { account }
   } = useAccountContext();
   const { monthlyIncome, id }: Account = account;
   const [value, setValue] = useState<number>();
-  const [editAccount] = useMutation(EDIT_ACCOUNT_MUTATION, {
-    refetchQueries: [{ query: GET_ACCOUNT_QUERY }]
-  });
 
   useEffect(() => {
     if (value !== monthlyIncome) {
@@ -33,15 +33,6 @@ export const MonthlyIncomePopup = ({ isOpen, close }: MonthlyIncomePopupProps) =
     // eslint-disable-next-line
   }, [monthlyIncome]);
 
-  const changeMonthlyIncome = () => {
-    if (value && value !== monthlyIncome) {
-      editAccount({
-        variables: { id, account: { monthlyIncome: value } }
-      });
-    }
-    close();
-  };
-
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     setValue(Number(parseFloat(event.target.value).toFixed(2)));
   };
@@ -49,7 +40,7 @@ export const MonthlyIncomePopup = ({ isOpen, close }: MonthlyIncomePopupProps) =
   const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter' && value) {
       event.preventDefault();
-      changeMonthlyIncome();
+      changeMonthlyIncome(value);
     }
   };
 
@@ -74,7 +65,7 @@ export const MonthlyIncomePopup = ({ isOpen, close }: MonthlyIncomePopupProps) =
       </DialogContent>
       <DialogActions>
         <Button onClick={close}>Cancel</Button>
-        <Button onClick={changeMonthlyIncome} color="secondary" disabled={!value}>
+        <Button onClick={() => changeMonthlyIncome(value)} color="secondary" disabled={!value}>
           Save
         </Button>
       </DialogActions>

@@ -1,4 +1,5 @@
 import { useMutation } from '@apollo/client';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import { DispatchWithoutAction } from 'react';
 import {
   deletePaymentCache,
@@ -27,7 +28,7 @@ export const EditPaymentsDuePopup = ({
   const { bankBalance, id }: Account = account;
   const { id: paymentId, name, amount }: OneOffPayment = selectedPayment;
 
-  const [editPayment] = useMutation(EDIT_ONE_OFF_PAYMENT_MUTATION);
+  const [editPayment, { loading: paymentLoading }] = useMutation(EDIT_ONE_OFF_PAYMENT_MUTATION);
 
   const editNewPayment = (oneOffPayment: OneOffPayment) => {
     editPayment({
@@ -35,9 +36,12 @@ export const EditPaymentsDuePopup = ({
     });
   };
 
-  const [deletePayment] = useMutation(DELETE_ONE_OFF_PAYMENT_MUTATION, {
-    onCompleted: data => onPaymentDeleted(data)
-  });
+  const [deletePayment, { loading: delPaymentLoading }] = useMutation(
+    DELETE_ONE_OFF_PAYMENT_MUTATION,
+    {
+      onCompleted: data => onPaymentDeleted(data)
+    }
+  );
 
   const deleteSelectedPayment = () => {
     deletePayment({
@@ -53,7 +57,7 @@ export const EditPaymentsDuePopup = ({
     });
   };
 
-  const [editAccount] = useMutation(EDIT_ACCOUNT_MUTATION);
+  const [editAccount, { loading: accLoading }] = useMutation(EDIT_ACCOUNT_MUTATION);
 
   const onPaymentDeleted = (response: any) => {
     const {
@@ -78,6 +82,14 @@ export const EditPaymentsDuePopup = ({
       }
     }
   };
+
+  if (accLoading || paymentLoading || delPaymentLoading) {
+    return (
+      <div className="loading">
+        <CircularProgress />
+      </div>
+    );
+  }
 
   return isOpen ? (
     <PaymentsDuePopup

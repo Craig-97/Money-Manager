@@ -1,16 +1,20 @@
-import { Fragment, useState, useCallback } from 'react';
+import { useMutation } from '@apollo/client';
 import AccountBalanceIcon from '@material-ui/icons/AccountBalance';
-import { BankBalancePopup } from '../Popups';
-import { TotalCard } from './TotalCard';
-import { useAccountContext } from '../../state/account-context';
+import { Fragment, useCallback, useState } from 'react';
+import { editAccountCache, EDIT_ACCOUNT_MUTATION } from '../../graphql';
 import { Account } from '../../interfaces';
+import { useAccountContext } from '../../state/account-context';
+import { BankBalancePopup } from '../Popups';
+import { LoadingCard } from './LoadingCard';
+import { TotalCard } from './TotalCard';
 
 export const BankBalanceCard = () => {
   const {
     state: { account }
   } = useAccountContext();
-  const { bankBalance }: Account = account;
+  const { bankBalance, id }: Account = account;
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [editAccount, { loading }] = useMutation(EDIT_ACCOUNT_MUTATION);
 
   const handleClickOpen = () => {
     setIsOpen(true);
@@ -20,16 +24,43 @@ export const BankBalanceCard = () => {
     setIsOpen(false);
   }, []);
 
+  const changeBankBalance = (value: number | undefined) => {
+    if (value && value !== bankBalance) {
+      editAccount({
+        variables: { id, account: { bankBalance: value } },
+        update: (
+          cache,
+          {
+            data: {
+              editAccount: { account }
+            }
+          }
+        ) => editAccountCache(cache, account)
+      });
+    }
+    setIsOpen(false);
+  };
+
   return (
     <Fragment>
-      <TotalCard
-        classBaseName="bank-balance"
-        title={'BANK TOTAL'}
-        amount={bankBalance}
-        onClick={handleClickOpen}
-        icon={<AccountBalanceIcon color="primary" style={{ fontSize: 50 }} />}
-      />
-      {isOpen && <BankBalancePopup isOpen={isOpen} close={closePopup} />}
+      {!loading ? (
+        <TotalCard
+          classBaseName="bank-balance"
+          title={'BANK TOTAL'}
+          amount={bankBalance}
+          onClick={handleClickOpen}
+          icon={<AccountBalanceIcon color="primary" style={{ fontSize: 50 }} />}
+        />
+      ) : (
+        <LoadingCard />
+      )}
+      {isOpen && (
+        <BankBalancePopup
+          isOpen={isOpen}
+          close={closePopup}
+          changeBankBalance={changeBankBalance}
+        />
+      )}
     </Fragment>
   );
 };

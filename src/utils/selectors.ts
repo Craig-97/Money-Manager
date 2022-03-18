@@ -2,16 +2,22 @@ import { Account, Bill, OneOffPayment } from '../interfaces';
 
 /* --------- DATA SELECTORS ---------*/
 
+const cheapestAscendingSort = (a: Bill | OneOffPayment, b: Bill | OneOffPayment) => {
+  const amount1 = a?.amount || 0;
+  const amount2 = b?.amount || 0;
+
+  return amount1 > amount2 ? 1 : -1;
+};
+
 export const getAmountTotal = (amounts: Array<any>) =>
   amounts?.reduce((n, { amount }) => n + amount, 0);
 
 export const getPaymentsDue = (oneOffPayments: Array<Bill | OneOffPayment>, bills: Array<Bill>) =>
   oneOffPayments
     ?.concat(bills?.filter((bill: Bill) => bill.paid === false))
-    .sort((a, b) => ((a?.amount || 0) > (b?.amount || 0) ? 1 : -1));
+    .sort(cheapestAscendingSort);
 
-export const getBills = (bills: Array<Bill>) =>
-  [...bills]?.sort((a, b) => ((a?.amount || 0) > (b?.amount || 0) ? 1 : -1));
+export const getBills = (bills: Array<Bill>) => [...bills]?.sort(cheapestAscendingSort);
 
 export const getDiscIncome = (monthlyIncome: number, billsTotal: number) =>
   monthlyIncome - billsTotal;
@@ -30,8 +36,8 @@ const getFilteredOneOffPayments = (account: Account, id: string) =>
 
 /* Adds new one off payment to current payments due array and sorts based on amount field */
 export const getNewOneOffPaymentAdded = (account: Account, oneOffPayment: OneOffPayment) => {
-  const oneOffPayments = [...(account.oneOffPayments || []), oneOffPayment].sort((a, b) =>
-    (a?.amount || 0) > (b?.amount || 0) ? 1 : -1
+  const oneOffPayments = [...(account.oneOffPayments || []), oneOffPayment].sort(
+    cheapestAscendingSort
   );
 
   return { account: { ...account, ...{ oneOffPayments } } };
@@ -48,9 +54,7 @@ export const getOneOffPaymentDeleted = (account: Account, paymentId: string) => 
 
 export const getNewBillAdded = (account: Account, bill: Bill) => {
   /* Adds new bill to current bill array and sorts based on amount field */
-  const bills = [...(account.bills || []), bill].sort((a, b) =>
-    (a?.amount || 0) > (b?.amount || 0) ? 1 : -1
-  );
+  const bills = [...(account.bills || []), bill].sort(cheapestAscendingSort);
 
   return { account: { ...account, ...{ bills } } };
 };
