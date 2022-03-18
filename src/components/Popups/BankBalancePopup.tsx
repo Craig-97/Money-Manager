@@ -6,14 +6,7 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import TextField from '@material-ui/core/TextField';
-import {
-  ChangeEvent,
-  Dispatch,
-  DispatchWithoutAction,
-  KeyboardEvent,
-  useEffect,
-  useState
-} from 'react';
+import { ChangeEvent, DispatchWithoutAction, KeyboardEvent, useEffect, useState } from 'react';
 import { Account } from '../../interfaces';
 import { useAccountContext } from '../../state/account-context';
 
