@@ -4,11 +4,13 @@ import { AccountData } from '../interfaces';
 
 export const initialState = {
   account: {
+    id: '',
     bankBalance: 0,
     bankPaydayTotal: 0,
     monthlyIncome: 0,
     bills: [],
-    oneOffPayments: []
+    oneOffPayments: [],
+    notes: []
   }
 };
 

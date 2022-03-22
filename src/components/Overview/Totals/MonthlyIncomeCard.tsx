@@ -1,18 +1,18 @@
 import { useMutation } from '@apollo/client';
-import AccountBalanceIcon from '@material-ui/icons/AccountBalance';
+import LocalAtmIcon from '@material-ui/icons/LocalAtm';
 import { Fragment, useCallback, useState } from 'react';
-import { editAccountCache, EDIT_ACCOUNT_MUTATION } from '../../graphql';
-import { Account } from '../../interfaces';
-import { useAccountContext } from '../../state/account-context';
-import { BankBalancePopup } from '../Popups';
+import { editAccountCache, EDIT_ACCOUNT_MUTATION } from '../../../graphql';
+import { Account } from '../../../interfaces';
+import { useAccountContext } from '../../../state/account-context';
+import { MonthlyIncomePopup } from '../../Popups';
 import { LoadingCard } from './LoadingCard';
 import { TotalCard } from './TotalCard';
 
-export const BankBalanceCard = () => {
+export const MonthlyIncomeCard = () => {
   const {
     state: { account }
   } = useAccountContext();
-  const { bankBalance, id }: Account = account;
+  const { monthlyIncome, id }: Account = account;
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [editAccount, { loading }] = useMutation(EDIT_ACCOUNT_MUTATION);
 
@@ -24,10 +24,10 @@ export const BankBalanceCard = () => {
     setIsOpen(false);
   }, []);
 
-  const changeBankBalance = (value: number | undefined) => {
-    if (value && value !== bankBalance) {
+  const changeMonthlyIncome = (value: number | undefined) => {
+    if (value && value !== monthlyIncome) {
       editAccount({
-        variables: { id, account: { bankBalance: value } },
+        variables: { id, account: { monthlyIncome: value } },
         update: (
           cache,
           {
@@ -45,20 +45,20 @@ export const BankBalanceCard = () => {
     <Fragment>
       {!loading ? (
         <TotalCard
-          classBaseName="bank-balance"
-          title={'BANK TOTAL'}
-          amount={bankBalance}
+          classBaseName="monthly-income"
+          title={'MONTHLY INCOME'}
+          amount={monthlyIncome}
           onClick={handleClickOpen}
-          icon={<AccountBalanceIcon color="primary" style={{ fontSize: 50 }} />}
+          icon={<LocalAtmIcon color="action" />}
         />
       ) : (
         <LoadingCard />
       )}
       {isOpen && (
-        <BankBalancePopup
+        <MonthlyIncomePopup
           isOpen={isOpen}
           close={closePopup}
-          changeBankBalance={changeBankBalance}
+          changeMonthlyIncome={changeMonthlyIncome}
         />
       )}
     </Fragment>

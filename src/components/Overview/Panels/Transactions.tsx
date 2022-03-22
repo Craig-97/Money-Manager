@@ -1,8 +1,8 @@
 import { Fragment } from 'react';
 import { green } from '@material-ui/core/colors';
-import { useAccountContext } from '../../state';
+import { useAccountContext } from '../../../state';
 import { Divider } from '@material-ui/core';
-import { Account } from '../../interfaces';
+import { Account } from '../../../interfaces';
 
 export const Transactions = () => {
   const {

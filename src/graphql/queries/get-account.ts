@@ -18,6 +18,11 @@ export const GET_ACCOUNT_QUERY = gql`
         name
         amount
       }
+      notes {
+        id
+        body
+        createdAt
+      }
     }
   }
 `;

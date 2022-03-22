@@ -19,6 +19,7 @@ export const getAccountData = (account: Account) => {
     bills: unsortedBills,
     oneOffPayments,
     paymentsDue: oldPaymentsDue,
+    notes,
     id
   } = account;
   const bills = getBills(unsortedBills);
@@ -32,6 +33,7 @@ export const getAccountData = (account: Account) => {
   return {
     id,
     bills,
+    notes,
     paymentsDue,
     bankBalance,
     monthlyIncome,

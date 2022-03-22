@@ -1,0 +1,121 @@
+.notes {
+  display: grid;
+  grid-template-columns: auto auto auto auto;
+  grid-template-rows: auto auto;
+  grid-gap: 2rem;
+  margin: 0 0 2rem 0;
+  min-width: $desktop-width;
+  max-width: $desktop-width;
+
+  @media only screen and (max-width: $laptop-breakpoint) {
+    grid-template-columns: auto auto auto;
+    min-width: $laptop-width;
+    max-width: $laptop-width;
+  }
+
+  @media only screen and (max-width: $tablet-breakpoint) {
+    grid-template-columns: auto auto;
+    min-width: $tablet-width;
+    max-width: unset;
+  }
+
+  @media only screen and (max-width: $mobile-breakpoint) {
+    grid-template-columns: auto;
+    min-width: unset;
+  }
+
+  .note {
+    font-family: $font-family;
+    font-size: 1rem;
+    font-weight: 500;
+    min-width: 120px;
+    min-height: 120px;
+    color: #000;
+    background-color: #fef68a;
+    border-radius: 10px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    white-space: pre-wrap;
+
+    @media only screen and (max-width: $tablet-breakpoint) {
+      min-width: unset;
+
+      span {
+        max-width: 208px;
+      }
+    }
+
+    @media only screen and (max-width: $mobile-breakpoint) {
+      max-width: 100%;
+      min-width: unset;
+
+      span {
+        max-width: 263.5px;
+      }
+    }
+
+    textarea {
+      font-size: 1rem;
+      font-family: $font-family;
+      font-weight: 500;
+      border: none;
+      resize: none;
+      background-color: #3f51b5;
+
+      &:focus {
+        outline: none;
+      }
+
+      &::placeholder {
+        color: #fff;
+        opacity: 0.75;
+      }
+    }
+
+    &__footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      .MuiButtonBase-root {
+        margin: 0 0 0 2rem;
+      }
+      .MuiIconButton-root {
+        color: #000;
+
+        &:hover {
+          background-color: rgba(0, 0, 0, 0.23);
+        }
+
+        .MuiTouchRipple-child {
+          background-color: rgba(0, 0, 0, 0.75);
+        }
+      }
+    }
+
+    &--loading {
+      justify-content: center;
+    }
+
+    &--new {
+      min-width: 260px;
+      background-color: #3f51b5;
+
+      @media only screen and (max-width: $laptop-breakpoint) {
+        min-width: unset;
+      }
+    }
+
+    small {
+      color: #000;
+      font-size: 1rem;
+    }
+  }
+}
+
+.notes-header {
+  margin-top: 0;
+  font-size: 1em;
+}

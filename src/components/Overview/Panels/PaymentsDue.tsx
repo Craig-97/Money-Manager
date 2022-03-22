@@ -1,16 +1,16 @@
 import { Fragment, useCallback, useState } from 'react';
 import { Divider } from '@material-ui/core';
-import { Account, Bill, OneOffPayment } from '../../interfaces';
-import { useAccountContext } from '../../state';
-import { EditMonthlyBillsPopup, EditPaymentsDuePopup } from '../Popups';
-import { TYPES } from '../../constants';
+import { Account, Bill, OneOffPayment, Modal } from '../../../interfaces';
+import { useAccountContext } from '../../../state';
+import { EditMonthlyBillsPopup, EditPaymentsDuePopup } from '../../Popups';
+import { TYPES } from '../../../constants';
 
 export const PaymentsDue = () => {
   const {
     state: { account }
   } = useAccountContext();
   const { paymentsDue, paymentsDueTotal }: Account = account;
-  const [isOpen, setIsOpen] = useState({ PAYMENT_DUE: false, BILL: false });
+  const [isOpen, setIsOpen] = useState<Modal>({ PAYMENT_DUE: false, BILL: false });
   const [selectedPayment, setSelectedPayment] = useState<Bill>({});
 
   const handleClickOpen = (payment: Bill | OneOffPayment) => {
@@ -42,9 +42,9 @@ export const PaymentsDue = () => {
             </Fragment>
           );
         })}
-        <div className="payment">
+        <div className="total">
           <h3>Total</h3>
-          <p>£{paymentsDueTotal?.toFixed(2)}</p>
+          <h3>£{paymentsDueTotal?.toFixed(2)}</h3>
         </div>
       </div>
       <EditMonthlyBillsPopup

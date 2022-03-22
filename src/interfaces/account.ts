@@ -16,6 +16,12 @@ export interface OneOffPayment {
   __typename?: string;
 }
 
+export interface Note {
+  id?: string;
+  body?: string;
+  account?: string;
+  createdAt?: string;
+}
 export interface Account {
   id?: string;
   bankBalance: number;
@@ -30,6 +36,7 @@ export interface Account {
   bankFreeToSpend?: number;
   payDayDiscIncome?: number;
   transactions?: Array<any>;
+  notes?: Array<Note>;
 }
 
 export interface AccountData {

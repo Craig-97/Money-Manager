@@ -1,0 +1,19 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  h1 {
+    margin: 2rem 0;
+    font-size: 1.75em;
+  }
+
+  .MuiIconButton-root {
+    margin: 0 0 0 1rem;
+
+    .MuiSvgIcon-root {
+      height: 1.25em;
+      width: 1.25em;
+    }
+  }
+}

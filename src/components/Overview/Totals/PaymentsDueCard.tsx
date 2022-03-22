@@ -1,11 +1,10 @@
-import { ApolloCache, useMutation } from '@apollo/client';
+import { useMutation } from '@apollo/client';
 import AccountBalanceWalletIcon from '@material-ui/icons/AccountBalanceWallet';
 import { Fragment, useCallback, useState } from 'react';
-import { CREATE_ONE_OFF_PAYMENT_MUTATION, GET_ACCOUNT_QUERY } from '../../graphql';
-import { Account, AccountData, OneOffPayment } from '../../interfaces';
-import { useAccountContext } from '../../state/account-context';
-import { getNewOneOffPaymentAdded } from '../../utils';
-import { PaymentsDuePopup } from '../Popups';
+import { addPaymentCache, CREATE_ONE_OFF_PAYMENT_MUTATION } from '../../../graphql';
+import { Account, OneOffPayment } from '../../../interfaces';
+import { useAccountContext } from '../../../state/account-context';
+import { PaymentsDuePopup } from '../../Popups';
 import { LoadingCard } from './LoadingCard';
 import { TotalCard } from './TotalCard';
 
@@ -33,19 +32,6 @@ export const PaymentsDueCard = () => {
     });
   };
 
-  const addPaymentCache = (cache: ApolloCache<any>, oneOffPayment: OneOffPayment) => {
-    const data: AccountData | null = cache.readQuery({
-      query: GET_ACCOUNT_QUERY
-    });
-
-    if (data) {
-      cache.writeQuery({
-        query: GET_ACCOUNT_QUERY,
-        data: getNewOneOffPaymentAdded(data?.account, oneOffPayment)
-      });
-    }
-  };
-
   const handleClickOpen = () => {
     setIsOpen(true);
   };
@@ -62,7 +48,7 @@ export const PaymentsDueCard = () => {
           title={'PAYMENTS DUE'}
           amount={paymentsDueTotal}
           onClick={handleClickOpen}
-          icon={<AccountBalanceWalletIcon color="secondary" style={{ fontSize: 50 }} />}
+          icon={<AccountBalanceWalletIcon color="secondary" />}
         />
       ) : (
         <LoadingCard />

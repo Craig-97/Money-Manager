@@ -1,0 +1,58 @@
+.panels {
+  margin: 0 0 4rem;
+  .MuiAppBar-colorDefault {
+    background-color: #424242;
+  }
+
+  .MuiBox-root {
+    background-color: #424242;
+    border-radius: 0 0 4px 4px;
+    font-size: 1rem;
+    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
+    font-weight: 400;
+    line-height: 1.5;
+    letter-spacing: 0.00938em;
+    max-height: 635px;
+    overflow-y: auto;
+  }
+
+  .transactions,
+  .upcoming-payments,
+  .monthly-bills {
+    h4 {
+      margin: 0.5rem 0;
+    }
+
+    .total,
+    .transaction,
+    .payment,
+    .bill {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+
+      h3 {
+        margin: 0.25rem 0 0;
+        font-size: 1.13em;
+      }
+
+      h5 {
+        margin: 0;
+        font-size: 1em;
+        font-weight: 500;
+      }
+
+      p {
+        margin: 0;
+        margin-left: 20px;
+        font-size: 1em;
+        font-weight: 500;
+      }
+    }
+
+    .MuiDivider-root {
+      margin: 0.5rem 0;
+    }
+  }
+}

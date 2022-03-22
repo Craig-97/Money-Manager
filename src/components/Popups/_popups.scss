@@ -1,0 +1,16 @@
+.payments-due-popup,
+.monthly-bills-popup {
+  .MuiFormControl-root {
+    margin-bottom: 20px;
+  }
+
+  .MuiCheckbox-root {
+    padding: 0;
+  }
+
+  .MuiTypography-root {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+}

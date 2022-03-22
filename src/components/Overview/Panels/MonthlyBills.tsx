@@ -1,8 +1,8 @@
 import { Fragment, useCallback, useState } from 'react';
 import { Divider } from '@material-ui/core';
-import { Account, Bill } from '../../interfaces';
-import { useAccountContext } from '../../state';
-import { EditMonthlyBillsPopup } from '../Popups';
+import { Account, Bill } from '../../../interfaces';
+import { useAccountContext } from '../../../state';
+import { EditMonthlyBillsPopup } from '../../Popups';
 
 export const MonthlyBills = () => {
   const {
@@ -38,9 +38,9 @@ export const MonthlyBills = () => {
             </Fragment>
           );
         })}
-        <div className="bill">
+        <div className="total">
           <h3>Total</h3>
-          <p>£{billsTotal?.toFixed(2)}</p>
+          <h3>£{billsTotal?.toFixed(2)}</h3>
         </div>
       </div>
       <EditMonthlyBillsPopup isOpen={isOpen} close={closePopup} selectedBill={selectedBill} />

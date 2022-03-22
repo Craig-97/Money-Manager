@@ -1,11 +1,10 @@
-import { ApolloCache, useMutation } from '@apollo/client';
+import { useMutation } from '@apollo/client';
 import ReceiptIcon from '@material-ui/icons/Receipt';
 import { Fragment, useCallback, useState } from 'react';
-import { CREATE_BILL_MUTATION, GET_ACCOUNT_QUERY } from '../../graphql';
-import { Account, AccountData, Bill } from '../../interfaces';
-import { useAccountContext } from '../../state/account-context';
-import { getNewBillAdded } from '../../utils';
-import { MonthlyBillsPopup } from '../Popups';
+import { addBillCache, CREATE_BILL_MUTATION } from '../../../graphql';
+import { Account, Bill } from '../../../interfaces';
+import { useAccountContext } from '../../../state/account-context';
+import { MonthlyBillsPopup } from '../../Popups';
 import { LoadingCard } from './LoadingCard';
 import { TotalCard } from './TotalCard';
 
@@ -32,19 +31,6 @@ export const MonthlyBillsCard = () => {
     });
   };
 
-  const addBillCache = (cache: ApolloCache<any>, bill: Bill) => {
-    const data: AccountData | null = cache.readQuery({
-      query: GET_ACCOUNT_QUERY
-    });
-
-    if (data) {
-      cache.writeQuery({
-        query: GET_ACCOUNT_QUERY,
-        data: getNewBillAdded(data?.account, bill)
-      });
-    }
-  };
-
   const handleClickOpen = () => {
     setIsOpen(true);
   };
@@ -61,7 +47,7 @@ export const MonthlyBillsCard = () => {
           title={'MONTHLY BILLS'}
           amount={billsTotal}
           onClick={handleClickOpen}
-          icon={<ReceiptIcon color="secondary" style={{ fontSize: 50 }} />}
+          icon={<ReceiptIcon color="secondary" />}
         />
       ) : (
         <LoadingCard />
