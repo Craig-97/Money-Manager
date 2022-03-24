@@ -1,7 +1,8 @@
-import { Fragment, useCallback, useState } from 'react';
 import { Divider } from '@material-ui/core';
+import { Fragment, useCallback, useState } from 'react';
 import { Account, Bill } from '../../../interfaces';
 import { useAccountContext } from '../../../state';
+import { formatAmount, isNegative } from '../../../utils';
 import { EditMonthlyBillsPopup } from '../../Popups';
 
 export const MonthlyBills = () => {
@@ -32,7 +33,9 @@ export const MonthlyBills = () => {
                 className="bill"
                 onClick={() => handleClickOpen({ id, name, amount, paid })}>
                 <h5> {name}</h5>
-                <p>£{amount?.toFixed(2)}</p>
+                <p className={`${isNegative(amount) ? 'negative' : 'positive'}`}>
+                  {!!isNegative(amount) && `- `}£{formatAmount(amount)}
+                </p>
               </div>
               <Divider />
             </Fragment>
@@ -40,7 +43,9 @@ export const MonthlyBills = () => {
         })}
         <div className="total">
           <h3>Total</h3>
-          <h3>£{billsTotal?.toFixed(2)}</h3>
+          <h3 className={`${isNegative(billsTotal) ? 'negative' : 'positive'}`}>
+            {!!isNegative(billsTotal) && `- `}£{formatAmount(billsTotal)}
+          </h3>
         </div>
       </div>
       <EditMonthlyBillsPopup isOpen={isOpen} close={closePopup} selectedBill={selectedBill} />

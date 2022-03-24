@@ -1,9 +1,10 @@
-import { Fragment, useCallback, useState } from 'react';
 import { Divider } from '@material-ui/core';
-import { Account, Bill, OneOffPayment, Modal } from '../../../interfaces';
-import { useAccountContext } from '../../../state';
-import { EditMonthlyBillsPopup, EditPaymentsDuePopup } from '../../Popups';
+import { Fragment, useCallback, useState } from 'react';
 import { TYPES } from '../../../constants';
+import { Account, Bill, Modal, OneOffPayment } from '../../../interfaces';
+import { useAccountContext } from '../../../state';
+import { formatAmount, isNegative } from '../../../utils';
+import { EditMonthlyBillsPopup, EditPaymentsDuePopup } from '../../Popups';
 
 export const PaymentsDue = () => {
   const {
@@ -36,7 +37,9 @@ export const PaymentsDue = () => {
                 className="payment"
                 onClick={() => handleClickOpen({ id, name, amount, __typename })}>
                 <h5> {name}</h5>
-                <p>£{amount?.toFixed(2)}</p>
+                <p className={`${isNegative(amount) ? 'negative' : 'positive'}`}>
+                  {!!isNegative(amount) && `- `}£{formatAmount(amount)}
+                </p>
               </div>
               <Divider />
             </Fragment>
@@ -44,7 +47,9 @@ export const PaymentsDue = () => {
         })}
         <div className="total">
           <h3>Total</h3>
-          <h3>£{paymentsDueTotal?.toFixed(2)}</h3>
+          <h3 className={`${isNegative(paymentsDueTotal) ? 'negative' : 'positive'}`}>
+            {!!isNegative(paymentsDueTotal) && `- `}£{formatAmount(paymentsDueTotal)}
+          </h3>
         </div>
       </div>
       <EditMonthlyBillsPopup
