@@ -1,0 +1,82 @@
+@use './breakpoints' as *;
+
+/**
+* RESPOND
+* A mixin to handle responsive styling for laptop, tablet and mobile
+*/
+@mixin respond($breakpoint) {
+  @if $breakpoint==laptop {
+    @media only screen and (max-width: $laptop-breakpoint) {
+      @content;
+    }
+  }
+
+  @if $breakpoint==tablet {
+    @media only screen and (max-width: $tablet-breakpoint) {
+      @content;
+    }
+  }
+
+  @if $breakpoint==mobile {
+    @media only screen and (max-width: $mobile-breakpoint) {
+      @content;
+    }
+  }
+}
+
+/**
+* FLEXBOX
+* A mixin to rule complex flexbox layout
+*/
+@mixin flexbox(
+  $display: flex,
+  $direction: row,
+  $placeContent: null,
+  $placeItems: null,
+  $wrap: nowrap,
+  $shrink: 0,
+  $grow: 0,
+  $alignContent: null,
+  $justifyContent: null,
+  $alignItems: null,
+  $justifyItems: null
+) {
+  display: $display;
+  flex-direction: $direction;
+
+  @if $placeContent == null {
+    @if $alignContent {
+      align-content: $alignContent;
+    }
+    @if $justifyContent {
+      justify-content: $justifyContent;
+    }
+  } @else {
+    place-content: $placeContent;
+  }
+
+  @if $placeItems == null {
+    @if $alignItems {
+      align-items: $alignItems;
+    }
+    @if $justifyItems {
+      justify-items: $justifyItems;
+    }
+  } @else {
+    place-items: $placeItems;
+  }
+
+  flex-wrap: $wrap;
+  flex-shrink: $shrink;
+  flex-grow: $grow;
+}
+
+/**
+* BOX-SHADOW
+* A mixin to automatically add all browser box-shadow styles
+*/
+@mixin box-shadow($x: 0, $y: 0, $b: 0, $s: 30px, $c: $background, $i: inset) {
+  -webkit-box-shadow: $x $y $b $s $c $i !important;
+  -moz-box-shadow: $x $y $b $s $c $i !important;
+  box-shadow: $x $y $b $s $c $i !important;
+}

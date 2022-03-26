@@ -1,13 +1,15 @@
+@use '../abstracts' as *;
+
 .panels {
   margin: 0 0 4rem;
   .MuiAppBar-colorDefault {
-    background-color: #424242;
+    background-color: $background;
   }
 
   .MuiBox-root {
-    background-color: #424242;
+    background-color: $background;
     border-radius: 0 0 4px 4px;
-    font-size: 1rem;
+    font-size: $standard;
     font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
     font-weight: 400;
     line-height: 1.5;
@@ -27,32 +29,29 @@
     .transaction,
     .payment,
     .bill {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: space-between;
+      @include flexbox($justifyContent: space-between, $alignItems: center);
 
       h3 {
         margin: 0.25rem 0 0;
-        font-size: 1.13em;
+        font-size: $totals-footer;
       }
 
       h5 {
         margin: 0;
-        font-size: 1em;
+        font-size: $standard;
         font-weight: 500;
       }
 
       p {
-        color: #fff;
+        color: $white;
         margin: 0;
         margin-left: 20px;
-        font-size: 1em;
+        font-size: $standard;
         font-weight: 500;
       }
 
       .negative {
-        color: #4caf50;
+        color: $action;
       }
     }
 

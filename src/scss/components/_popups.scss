@@ -1,3 +1,5 @@
+@use '../abstracts' as *;
+
 .payments-due-popup,
 .monthly-bills-popup {
   .MuiFormControl-root {
@@ -9,8 +11,6 @@
   }
 
   .MuiTypography-root {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    @include flexbox($justifyContent: space-between, $alignItems: center);
   }
 }

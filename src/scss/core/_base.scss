@@ -12,13 +12,11 @@ code {
 }
 
 .app {
+  @include flexbox($alignItems: center, $direction: column);
   text-align: left;
-  background: #000;
+  background-color: $black;
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  font-size: calc(10px + 2vmin);
-  color: #fff;
+  font-size: $base-font-size;
+  color: $white;
   padding: 0 1rem;
 }

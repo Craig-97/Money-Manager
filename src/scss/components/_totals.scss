@@ -7,15 +7,15 @@
   grid-gap: 2rem;
   margin: 0 0 2rem 0;
 
-  @media only screen and (max-width: $laptop-breakpoint) {
+  @include respond(laptop) {
     grid-template-columns: auto auto auto;
   }
 
-  @media only screen and (max-width: $tablet-breakpoint) {
+  @include respond(tablet) {
     grid-template-columns: auto auto;
   }
 
-  @media only screen and (max-width: $mobile-breakpoint) {
+  @include respond(mobile) {
     grid-template-columns: auto;
   }
 
@@ -26,10 +26,8 @@
     max-height: 120px;
 
     .MuiCardContent-root {
+      @include flexbox($justifyContent: space-between, $alignItems: center);
       padding: 24px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
 
       .MuiTypography-h4,
       .MuiTypography-body1 {
@@ -41,15 +39,15 @@
       }
 
       .MuiSvgIcon-colorAction {
-        color: #4caf50;
+        color: $action;
       }
 
       .negative {
-        color: #4caf50;
+        color: $action;
       }
     }
 
-    @media only screen and (max-width: $mobile-breakpoint) {
+    @include respond(mobile) {
       min-width: 100%;
       max-width: 100%;
     }
@@ -57,9 +55,7 @@
 
   .loading-total-card {
     .MuiCard-root {
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      @include flexbox($justifyContent: center, $alignItems: center);
     }
   }
 }

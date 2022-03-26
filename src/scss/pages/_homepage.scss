@@ -1,7 +1,9 @@
+@use '../abstracts' as *;
+
 .page {
   .container {
-    display: flex;
-    flex-direction: column;
+    @include flexbox($direction: column);
+
     max-width: 1250px;
 
     .loading,

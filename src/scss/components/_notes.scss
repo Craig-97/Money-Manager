@@ -9,47 +9,44 @@
   min-width: $desktop-width;
   max-width: $desktop-width;
 
-  @media only screen and (max-width: $laptop-breakpoint) {
+  @include respond(laptop) {
     grid-template-columns: auto auto auto;
     min-width: $laptop-width;
     max-width: $laptop-width;
   }
 
-  @media only screen and (max-width: $tablet-breakpoint) {
+  @include respond(tablet) {
     grid-template-columns: auto auto;
     min-width: $tablet-width;
     max-width: unset;
   }
 
-  @media only screen and (max-width: $mobile-breakpoint) {
+  @include respond(mobile) {
     grid-template-columns: auto;
     min-width: unset;
   }
 
   .note {
+    @include flexbox($justifyContent: space-between, $direction: column);
     font-family: $font-family;
-    font-size: 1rem;
+    font-size: $standard;
     font-weight: 500;
     min-width: 120px;
     min-height: 120px;
-    color: #000;
-    background-color: #fef68a;
+    color: $black;
+    background-color: $note-yellow;
     border-radius: 10px;
     padding: 24px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
     white-space: pre-wrap;
 
-    @media only screen and (max-width: $tablet-breakpoint) {
+    @include respond(tablet) {
       min-width: unset;
-
       span {
         max-width: 208px;
       }
     }
 
-    @media only screen and (max-width: $mobile-breakpoint) {
+    @include respond(mobile) {
       max-width: 100%;
       min-width: unset;
 
@@ -59,40 +56,38 @@
     }
 
     textarea {
-      font-size: 1rem;
+      font-size: $standard;
       font-family: $font-family;
       font-weight: 500;
       border: none;
       resize: none;
-      background-color: #3f51b5;
+      background-color: $primary;
 
       &:focus {
         outline: none;
       }
 
       &::placeholder {
-        color: #fff;
+        color: $white;
         opacity: 0.75;
       }
     }
 
     &__footer {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      @include flexbox($justifyContent: space-between, $alignItems: center);
 
       .MuiButtonBase-root {
         margin: 0 0 0 2rem;
       }
       .MuiIconButton-root {
-        color: #000;
+        color: $black;
 
         &:hover {
-          background-color: rgba(0, 0, 0, 0.23);
+          background-color: $hover-black;
         }
 
         .MuiTouchRipple-child {
-          background-color: rgba(0, 0, 0, 0.75);
+          background-color: $ripple-black;
         }
       }
     }
@@ -103,21 +98,21 @@
 
     &--new {
       min-width: 260px;
-      background-color: #3f51b5;
+      background-color: $primary;
 
-      @media only screen and (max-width: $laptop-breakpoint) {
+      @include respond(laptop) {
         min-width: unset;
       }
     }
 
     small {
-      color: #000;
-      font-size: 1rem;
+      color: $black;
+      font-size: $standard;
     }
   }
 }
 
 .notes-header {
   margin-top: 0;
-  font-size: 1em;
+  font-size: $standard-resize;
 }
