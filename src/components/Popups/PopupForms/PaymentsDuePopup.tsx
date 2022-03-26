@@ -11,7 +11,8 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import { ChangeEvent, DispatchWithoutAction, KeyboardEvent, useEffect, useState } from 'react';
 import { Account, OneOffPayment } from '../../../interfaces';
 import { useAccountContext } from '../../../state/account-context';
-import { getNumberAmount, stringToFixedNumber } from '../../../utils';
+import { getNumberAmount } from '../../../utils';
+
 interface PaymentsDuePopupProps {
   title: string;
   isOpen: boolean;
@@ -66,7 +67,7 @@ export const PaymentsDuePopup = ({
   };
 
   const handleAmountChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const number = stringToFixedNumber(event.target.value);
+    const number = getNumberAmount(event.target.value);
     if (isNaN(number)) {
       setAmount('');
     } else {

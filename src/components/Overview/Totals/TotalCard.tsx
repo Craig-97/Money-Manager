@@ -1,8 +1,9 @@
-import { MouseEventHandler, ReactNode } from 'react';
 import Card from '@material-ui/core/Card';
+import CardActionArea from '@material-ui/core/CardActionArea';
 import CardContent from '@material-ui/core/CardContent';
 import Typography from '@material-ui/core/Typography';
-import CardActionArea from '@material-ui/core/CardActionArea';
+import { MouseEventHandler, ReactNode } from 'react';
+import { isNegative, positiveNumber } from '../../../utils';
 
 interface TotalCardProps {
   classBaseName?: string;
@@ -29,8 +30,11 @@ export const TotalCard = ({
             <Typography color="textSecondary" gutterBottom>
               {title}
             </Typography>
-            <Typography variant="h4" component="h4">
-              £{amount}
+            <Typography
+              className={`${isNegative(amount) ? 'negative' : 'positive'}`}
+              variant="h4"
+              component="h4">
+              {!!isNegative(amount) && `- `}£{positiveNumber(amount)}
             </Typography>
           </div>
           {icon && icon}

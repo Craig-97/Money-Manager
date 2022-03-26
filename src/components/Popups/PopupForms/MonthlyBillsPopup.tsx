@@ -12,7 +12,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import { ChangeEvent, DispatchWithoutAction, KeyboardEvent, useEffect, useState } from 'react';
 import { Account, Bill } from '../../../interfaces';
 import { useAccountContext } from '../../../state/account-context';
-import { getNumberAmount, stringToFixedNumber } from '../../../utils';
+import { getNumberAmount } from '../../../utils';
 
 interface MonthlyBillsPopupProps {
   title: string;
@@ -74,7 +74,7 @@ export const MonthlyBillsPopup = ({
   };
 
   const handleAmountChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const number = stringToFixedNumber(event.target.value);
+    const number = getNumberAmount(event.target.value);
     if (isNaN(number)) {
       setAmount('');
     } else {

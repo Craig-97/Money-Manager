@@ -1,6 +1,6 @@
 import { ApolloClient, InMemoryCache } from '@apollo/client';
 
-// Custom merge function for account queries
+/* Custom merge function for account queries */
 const cache = new InMemoryCache({
   typePolicies: {
     Account: {
