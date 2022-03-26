@@ -1,12 +1,4 @@
-import {
-  getAmountTotal,
-  getDiscIncome,
-  getBankFreeToSpend,
-  getPayDayDiscIncome,
-  getPaymentsDue,
-  getBills,
-  getPaydayTotal
-} from '.';
+import { getAmountTotal, getPaymentsDue, getBills } from '.';
 import { Account } from '../interfaces';
 
 export const getAccountData = (account: Account) => {
@@ -26,10 +18,10 @@ export const getAccountData = (account: Account) => {
   const billsTotal = getAmountTotal(bills);
   const paymentsDue = oldPaymentsDue ? oldPaymentsDue : getPaymentsDue(oneOffPayments || [], bills);
   const paymentsDueTotal = getAmountTotal(paymentsDue);
-  const discIncome = getDiscIncome(monthlyIncome, billsTotal);
-  const bankFreeToSpend = getBankFreeToSpend(bankBalance, paymentsDueTotal);
-  const payDayDiscIncome = getPayDayDiscIncome(bankFreeToSpend, discIncome);
-  const bankPaydayTotal = getPaydayTotal(bankFreeToSpend, monthlyIncome);
+  const discIncome = monthlyIncome - billsTotal;
+  const bankFreeToSpend = bankBalance - paymentsDueTotal;
+  const payDayDiscIncome = bankFreeToSpend + discIncome;
+  const bankPaydayTotal = bankFreeToSpend + monthlyIncome;
 
   return {
     id,

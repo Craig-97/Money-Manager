@@ -19,18 +19,6 @@ export const getPaymentsDue = (oneOffPayments: Array<Bill | OneOffPayment>, bill
 
 export const getBills = (bills: Array<Bill>) => [...bills]?.sort(cheapestAscendingSort);
 
-export const getDiscIncome = (monthlyIncome: number, billsTotal: number) =>
-  monthlyIncome - billsTotal;
-
-export const getBankFreeToSpend = (bankBalance: number, paymentsDueTotal: number) =>
-  bankBalance - paymentsDueTotal;
-
-export const getPayDayDiscIncome = (bankFreeToSpend: number, discIncome: number) =>
-  bankFreeToSpend + discIncome;
-
-export const getPaydayTotal = (bankFreeToSpend: number, monthlyIncome: number) =>
-  bankFreeToSpend + monthlyIncome;
-
 /* --------- UPDATE CACHE SELECTORS --------- */
 
 /* Adds new one off payment to current payments due array and sorts based on amount field */
