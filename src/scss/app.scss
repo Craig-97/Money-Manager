@@ -1,0 +1,11 @@
+/*BASE APP STYLES */
+@use './core/base';
+
+/* PAGE STYLES */
+@use './pages/homepage';
+
+/* COMPONENT STYLES */
+@use './components';
+
+/* MISC STYLES */
+@use './misc/overwrites';

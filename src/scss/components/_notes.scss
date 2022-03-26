@@ -1,3 +1,5 @@
+@use '../abstracts' as *;
+
 .notes {
   display: grid;
   grid-template-columns: auto auto auto auto;

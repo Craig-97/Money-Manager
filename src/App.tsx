@@ -3,7 +3,7 @@ import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import { Homepage } from './components/Homepage';
 import { client } from './graphql';
 import { AccountProvider } from './state/account-context';
-import './App.scss';
+import './scss/app.scss';
 
 const App = () => {
   return (
@@ -13,8 +13,7 @@ const App = () => {
           palette: {
             type: 'dark'
           }
-        })}
-      >
+        })}>
         <AccountProvider>
           <div className="app">
             <Homepage />
