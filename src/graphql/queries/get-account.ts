@@ -6,7 +6,6 @@ export const GET_ACCOUNT_QUERY = gql`
       id
       bankBalance
       monthlyIncome
-      bankPaydayTotal
       bills {
         id
         name

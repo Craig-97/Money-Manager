@@ -6,7 +6,6 @@ export const EDIT_ACCOUNT_MUTATION = gql`
       account {
         bankBalance
         monthlyIncome
-        bankPaydayTotal
       }
       success
     }
