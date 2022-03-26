@@ -9,7 +9,7 @@ import {
   getOneOffPaymentDeleted
 } from '../../utils';
 import { GET_ACCOUNT_QUERY } from '../queries';
-import { getAccountData } from './../../mockData';
+import { getAccountData } from './../../utils';
 
 /* ADDS ONE OFF PAYMENT TO ONEOFFPAYMENTS ARRAY */
 export const addPaymentCache = (cache: ApolloCache<any>, oneOffPayment: OneOffPayment) => {

@@ -5,7 +5,7 @@ import { Fragment, useEffect, useState } from 'react';
 import { EVENTS } from '../constants';
 import { GET_ACCOUNT_QUERY } from '../graphql';
 import { AccountData, Mode } from '../interfaces';
-import { getAccountData } from '../mockData';
+import { getAccountData } from '../utils';
 import { initialState } from '../state';
 import { useAccountContext } from '../state/account-context';
 import { Header } from './Header';

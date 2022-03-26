@@ -35,7 +35,6 @@ export interface Account {
   discIncome?: number;
   bankFreeToSpend?: number;
   payDayDiscIncome?: number;
-  transactions?: Array<any>;
   notes?: Array<Note>;
 }
 
