@@ -1,0 +1,12 @@
+.page {
+  .container {
+    display: flex;
+    flex-direction: column;
+    max-width: 1250px;
+
+    .loading,
+    .error {
+      text-align: center;
+    }
+  }
+}
