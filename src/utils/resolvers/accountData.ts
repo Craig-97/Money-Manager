@@ -1,5 +1,5 @@
-import { getAmountTotal, getPaymentsDue, getBills } from '.';
-import { Account } from '../interfaces';
+import { getAmountTotal, getPaymentsDue, getBills } from '../selectors';
+import { Account } from '../../interfaces';
 
 export const getAccountData = (account: Account) => {
   if (!account) return {};
