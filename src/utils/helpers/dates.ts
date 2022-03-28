@@ -1,5 +1,7 @@
 /* Get date in 'DD/MM/YYYY format from BSON timestamp */
 export const getDateFromTimestamp = (number: number) => new Date(number).toLocaleDateString();
+
+/* Formats a date object into 'Friday, 29 April 2022' format in uppercase*/
 export const formatFullDate = (date: Date) =>
   date
     .toLocaleDateString('default', {
