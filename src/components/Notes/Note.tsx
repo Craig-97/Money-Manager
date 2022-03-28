@@ -1,6 +1,6 @@
 import { useMutation } from '@apollo/client';
-import { CircularProgress, IconButton } from '@material-ui/core';
-import DeleteIcon from '@material-ui/icons/Delete';
+import { CircularProgress, IconButton } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { Fragment } from 'react';
 import { deleteNoteCache, DELETE_NOTE_MUTATION } from '../../graphql';
 import { getDateFromTimestamp } from '../../utils';

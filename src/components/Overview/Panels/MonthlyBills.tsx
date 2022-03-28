@@ -1,4 +1,4 @@
-import { Divider } from '@material-ui/core';
+import { Divider } from '@mui/material';
 import { Fragment, useCallback, useState } from 'react';
 import { Account, Bill } from '../../../interfaces';
 import { useAccountContext } from '../../../state';

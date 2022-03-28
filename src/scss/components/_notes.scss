@@ -34,7 +34,7 @@
     min-width: 120px;
     min-height: 120px;
     color: $black;
-    background-color: $note-yellow;
+    background-color: $yellow-light;
     border-radius: 10px;
     padding: 24px;
     white-space: pre-wrap;
@@ -42,7 +42,7 @@
     @include respond(tablet) {
       min-width: unset;
       span {
-        max-width: 208px;
+        max-width: $note-span-width;
       }
     }
 
@@ -51,7 +51,7 @@
       min-width: unset;
 
       span {
-        max-width: 263.5px;
+        max-width: $note-span-mobile-width;
       }
     }
 
@@ -68,7 +68,7 @@
       }
 
       &::placeholder {
-        color: $white;
+        color: $black;
         opacity: 0.75;
       }
     }
@@ -76,9 +76,24 @@
     &__footer {
       @include flexbox($justifyContent: space-between, $alignItems: center);
 
-      .MuiButtonBase-root {
+      .ghost-button {
         margin: 0 0 0 2rem;
+        color: $ghost-white;
+        border: 1px solid $ghost-white;
+
+        &:hover,
+        &:active,
+        &:hover {
+          color: $ghost-white-hover-text;
+          border: 1px solid $ghost-white-hover-border;
+        }
       }
+
+      .Mui-disabled {
+        color: $ghost-white-disabled-text;
+        border: 1px solid $ghost-white-disabled-border;
+      }
+
       .MuiIconButton-root {
         color: $black;
 
@@ -97,7 +112,7 @@
     }
 
     &--new {
-      min-width: 260px;
+      min-width: $new-note-min-width;
       background-color: $primary;
 
       @include respond(laptop) {
@@ -113,6 +128,6 @@
 }
 
 .notes-header {
-  margin-top: 0;
+  margin: 0 0 2rem 0;
   font-size: $standard-resize;
 }

@@ -1,6 +1,6 @@
-import IconButton from '@material-ui/core/IconButton';
-import NoteRounded from '@material-ui/icons/NoteRounded';
-import ArrowBackRoundedIcon from '@material-ui/icons/ArrowBackRounded';
+import IconButton from '@mui/material/IconButton';
+import NoteRounded from '@mui/icons-material/NoteRounded';
+import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import { DispatchWithoutAction } from 'react';
 import { Mode } from '../../interfaces';
 

@@ -1,7 +1,7 @@
-import Tab from '@material-ui/core/Tab';
-import { default as MaterialTabs } from '@material-ui/core/Tabs';
-import AccountBalanceWalletIcon from '@material-ui/icons/AccountBalanceWallet';
-import ReceiptIcon from '@material-ui/icons/Receipt';
+import Tab from '@mui/material/Tab';
+import { default as MaterialTabs } from '@mui/material/Tabs';
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import ReceiptIcon from '@mui/icons-material/Receipt';
 import { ChangeEvent, Dispatch } from 'react';
 
 interface OverviewTabsProps {

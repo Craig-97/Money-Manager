@@ -1,5 +1,5 @@
 import { useMutation } from '@apollo/client';
-import { Button, CircularProgress } from '@material-ui/core';
+import { Button, CircularProgress } from '@mui/material';
 import { ChangeEvent, Fragment, useState } from 'react';
 import { addNoteCache, CREATE_NOTE_MUTATION } from '../../graphql';
 import { Note } from '../../interfaces';
@@ -56,7 +56,11 @@ export const NewNoteCard = () => {
             onChange={handleChange}></textarea>
           <div className="note__footer">
             <small>{characterLimit - noteText.length} Remaining</small>
-            <Button variant="outlined" onClick={handleSaveClick}>
+            <Button
+              className="ghost-button"
+              variant="outlined"
+              disabled={!noteText}
+              onClick={handleSaveClick}>
               Save
             </Button>
           </div>

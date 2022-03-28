@@ -2,12 +2,14 @@
 
 .panels {
   margin: 0 0 4rem;
-  .MuiAppBar-colorDefault {
-    background-color: $background;
+
+  @include respond(mobile) {
+    max-width: $panel-mobile-width;
   }
 
   .MuiBox-root {
     background-color: $background;
+    background-image: $background-image;
     border-radius: 0 0 4px 4px;
     font-size: $standard;
     font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;

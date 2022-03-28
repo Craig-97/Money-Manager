@@ -1,5 +1,5 @@
 import { useMutation } from '@apollo/client';
-import AccountBalanceIcon from '@material-ui/icons/AccountBalance';
+import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import { Fragment, useCallback, useState } from 'react';
 import { editAccountCache, EDIT_ACCOUNT_MUTATION } from '../../../graphql';
 import { Account } from '../../../interfaces';

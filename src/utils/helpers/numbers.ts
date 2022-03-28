@@ -2,9 +2,6 @@
 export const getNumberAmount = (number: string | undefined) =>
   number ? Number(parseFloat(number).toFixed(2)) : 0;
 
-/* Gets date in 'DD/MM/YYYY format from BSON timestamp */
-export const getDateFromTimestamp = (number: number) => new Date(number).toLocaleDateString();
-
 /* Returns true is number passed is defined and negative */
 export const isNegative = (number: number | undefined) => number && number < 0;
 

@@ -1,6 +1,6 @@
-import AccountBalanceIcon from '@material-ui/icons/AccountBalance';
-import LocalAtmIcon from '@material-ui/icons/LocalAtm';
-import PaymentIcon from '@material-ui/icons/Payment';
+import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
+import LocalAtmIcon from '@mui/icons-material/LocalAtm';
+import PaymentIcon from '@mui/icons-material/Payment';
 import { Account } from '../../../interfaces';
 import { useAccountContext } from '../../../state/account-context';
 import { BankBalanceCard } from './BankBalanceCard';

@@ -1,0 +1,16 @@
+@use '../abstracts/' as *;
+
+.alert {
+  margin: 0 0 2rem 0;
+  align-items: center;
+
+  .MuiAlert-message {
+    @include respond(mobile) {
+      max-width: $alert-text-mobile-width;
+    }
+  }
+
+  .MuiAlert-action {
+    padding: 0;
+  }
+}

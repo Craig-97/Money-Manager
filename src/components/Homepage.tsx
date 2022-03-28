@@ -1,5 +1,5 @@
 import { useQuery } from '@apollo/client';
-import CircularProgress from '@material-ui/core/CircularProgress';
+import CircularProgress from '@mui/material/CircularProgress';
 import isEqual from 'lodash/isEqual';
 import { Fragment, useEffect, useState } from 'react';
 import { EVENTS } from '../constants';

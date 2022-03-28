@@ -1,5 +1,5 @@
 import { useMutation } from '@apollo/client';
-import LocalAtmIcon from '@material-ui/icons/LocalAtm';
+import LocalAtmIcon from '@mui/icons-material/LocalAtm';
 import { Fragment, useCallback, useState } from 'react';
 import { editAccountCache, EDIT_ACCOUNT_MUTATION } from '../../../graphql';
 import { Account } from '../../../interfaces';

@@ -1,5 +1,5 @@
 import { useMutation } from '@apollo/client';
-import AccountBalanceWalletIcon from '@material-ui/icons/AccountBalanceWallet';
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import { Fragment, useCallback, useState } from 'react';
 import { addPaymentCache, CREATE_ONE_OFF_PAYMENT_MUTATION } from '../../../graphql';
 import { Account, OneOffPayment } from '../../../interfaces';

@@ -20,8 +20,8 @@
   }
 
   .MuiCard-root {
-    min-width: 275px;
-    max-width: 275px;
+    min-width: $total-cards-width;
+    max-width: $total-cards-width;
     min-height: 120px;
     max-height: 120px;
 
@@ -48,8 +48,8 @@
     }
 
     @include respond(mobile) {
-      min-width: 100%;
-      max-width: 100%;
+      min-width: unset;
+      max-width: $totals-mobile-width;
     }
   }
 
