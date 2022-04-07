@@ -22,7 +22,11 @@ export const AccountContext = createContext<{
   dispatch: () => null
 });
 
-export const AccountProvider: React.FC = ({ children }) => {
+interface AccountProviderProps {
+  children: React.ReactNode;
+}
+
+export const AccountProvider = ({ children }: AccountProviderProps) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   return <AccountContext.Provider value={{ state, dispatch }}>{children}</AccountContext.Provider>;
