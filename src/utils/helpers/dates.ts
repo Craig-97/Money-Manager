@@ -15,7 +15,7 @@ export const formatFullDate = (date: Date) =>
 /* Get last day of month */
 const getEOM = (date: Date) => new Date(date.getFullYear(), date.getMonth() + 1, 0);
 
-/* Return last of specified day in month of date
+/* Returns last of specified day in month of date
 / ECMAScript day numbering: 0 = Sun, 1 = Mon, etc. */
 const getLastOfDay = (date: Date, day: number) => {
   let lastDay = getEOM(date);
@@ -37,7 +37,7 @@ const addMonths = (date: Date, months: number) => {
 };
 
 /*
- * Return next friday which is payday and if passed date is payday.
+ * Returns next friday which is payday and if passed date is payday.
  */
 export const getPayday = (date: Date) => {
   let eom = getEOM(date);
@@ -56,4 +56,43 @@ export const getPayday = (date: Date) => {
   const next = getLastOfDay(eom, 5);
 
   return { next, isPayday };
+};
+
+/*
+ * Returns a months array in string format based on number prop.
+ * When January is in the array, the year will also be returned
+ */
+export const getNextNumberOfMonthNames = (number: number) => {
+  const now = new Date();
+  let month = now.getMonth();
+  let year = now.getFullYear();
+
+  var names = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December'
+  ];
+
+  var res = [];
+  for (var i = 0; i < number; ++i) {
+    if (names[month] === 'January') {
+      res.push(names[month] + ' ' + year);
+    } else {
+      res.push(names[month]);
+    }
+    if (++month === 12) {
+      month = 0;
+      ++year;
+    }
+  }
+  return res;
 };

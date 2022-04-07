@@ -1,20 +1,23 @@
-import IconButton from '@mui/material/IconButton';
-import NoteRounded from '@mui/icons-material/NoteRounded';
-import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
-import { DispatchWithoutAction } from 'react';
+import { Fragment } from 'react';
 import { Mode } from '../../interfaces';
+import { BackButton, ForecastButton, NotesButton } from './Buttons';
 
 interface HeaderProps {
   mode: Mode;
-  updateMode: DispatchWithoutAction;
+  updateMode: (mode: string) => void;
 }
 
 export const Header = ({ mode, updateMode }: HeaderProps) => (
   <div className="header">
     <h1>Money Manager</h1>
-    <IconButton onClick={updateMode}>
-      {mode.OVERVIEW && <NoteRounded />}
-      {mode.NOTES && <ArrowBackRoundedIcon />}
-    </IconButton>
+    <div>
+      {mode.OVERVIEW && (
+        <Fragment>
+          <ForecastButton updateMode={updateMode} />
+          <NotesButton updateMode={updateMode} />
+        </Fragment>
+      )}
+    </div>
+    {!mode.OVERVIEW && <BackButton updateMode={updateMode} />}
   </div>
 );

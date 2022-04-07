@@ -6,4 +6,5 @@ export interface Modal {
 export interface Mode {
   NOTES: boolean;
   OVERVIEW: boolean;
+  FORECAST: boolean;
 }

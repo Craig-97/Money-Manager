@@ -6,3 +6,9 @@ export const TYPES = {
   BILL: 'Bill',
   ONEOFFPAYMENT: 'OneOffPayment'
 };
+
+export const MODES = {
+  OVERVIEW: 'OVERVIEW',
+  NOTES: 'NOTES',
+  FORECAST: 'FORECAST'
+};

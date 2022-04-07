@@ -1,0 +1,54 @@
+@use '../abstracts' as *;
+
+.forecast {
+  display: grid;
+  grid-template-columns: auto auto;
+  grid-template-rows: auto;
+  grid-gap: 2rem;
+  margin: 0 0 2rem 0;
+  min-width: $desktop-width;
+  max-width: $desktop-width;
+
+  @include respond(laptop) {
+    min-width: $laptop-width;
+    max-width: $laptop-width;
+  }
+
+  @include respond(tablet) {
+    grid-template-rows: auto auto;
+    min-width: $tablet-width;
+    max-width: unset;
+  }
+
+  @include respond(mobile) {
+    grid-template-columns: auto;
+    min-width: unset;
+  }
+
+  .MuiPaper-root {
+    @include respond(mobile) {
+      max-width: $forecast-table-mobile-width;
+      min-width: $forecast-table-mobile-width;
+
+      max-height: 635px;
+      overflow-y: auto;
+    }
+
+    @include respond(mobile-small) {
+      min-width: unset;
+    }
+
+    th {
+      font-weight: bold;
+    }
+
+    td {
+      font-weight: 500;
+    }
+  }
+}
+
+.forecast-header {
+  margin: 0 0 2rem 0;
+  font-size: $standard-resize;
+}

@@ -22,6 +22,12 @@
       @content;
     }
   }
+
+  @if $breakpoint==mobile-small {
+    @media only screen and (max-width: $small-mobile-breakpoint) {
+      @content;
+    }
+  }
 }
 
 /**
