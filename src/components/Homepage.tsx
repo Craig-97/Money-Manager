@@ -4,7 +4,7 @@ import isEqual from 'lodash/isEqual';
 import { Fragment, useEffect, useState } from 'react';
 import { EVENTS, MODES } from '../constants';
 import { GET_ACCOUNT_QUERY } from '../graphql';
-import { AccountData, Mode } from '../interfaces';
+import { AccountData, Mode } from '../types';
 import { initialState } from '../state';
 import { useAccountContext } from '../state/account-context';
 import { getAccountData } from '../utils';

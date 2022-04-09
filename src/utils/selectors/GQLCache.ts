@@ -1,4 +1,4 @@
-import { Account, Bill, Note, OneOffPayment } from '../../interfaces';
+import { Account, Bill, Note, OneOffPayment } from '../../types';
 import { cheapestAscendingSort } from './account';
 
 /* Adds new one off payment to current payments due array and sorts based on amount field */

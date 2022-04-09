@@ -2,7 +2,7 @@ import { useMutation } from '@apollo/client';
 import LocalAtmIcon from '@mui/icons-material/LocalAtm';
 import { Fragment, useCallback, useState } from 'react';
 import { editAccountCache, EDIT_ACCOUNT_MUTATION } from '../../../graphql';
-import { Account } from '../../../interfaces';
+import { Account } from '../../../types';
 import { useAccountContext } from '../../../state/account-context';
 import { MonthlyIncomePopup } from '../../Popups';
 import { LoadingCard } from './LoadingCard';

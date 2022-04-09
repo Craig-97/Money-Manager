@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Account } from '../../interfaces';
+import { Account } from '../../types';
 import { useAccountContext } from '../../state/account-context';
 import { getNextNumberOfMonthNames } from '../../utils';
 import { Table } from '../Table';
@@ -33,7 +33,7 @@ export const PaydayBalanceTable = ({ past = false }: PaydayBalanceTableProps) =>
     [past]
   );
 
-  const months = useMemo(() => getNextNumberOfMonthNames(16), []);
+  const months = useMemo(() => getNextNumberOfMonthNames(24), []);
 
   const data = useMemo(() => {
     let balance = bankFreeToSpend || 0;

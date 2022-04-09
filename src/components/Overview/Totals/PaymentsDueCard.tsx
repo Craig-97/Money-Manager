@@ -2,7 +2,7 @@ import { useMutation } from '@apollo/client';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import { Fragment, useCallback, useState } from 'react';
 import { addPaymentCache, CREATE_ONE_OFF_PAYMENT_MUTATION } from '../../../graphql';
-import { Account, OneOffPayment } from '../../../interfaces';
+import { Account, OneOffPayment } from '../../../types';
 import { useAccountContext } from '../../../state/account-context';
 import { PaymentsDuePopup } from '../../Popups';
 import { LoadingCard } from './LoadingCard';

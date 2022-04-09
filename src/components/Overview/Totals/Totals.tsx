@@ -1,7 +1,7 @@
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import LocalAtmIcon from '@mui/icons-material/LocalAtm';
 import PaymentIcon from '@mui/icons-material/Payment';
-import { Account } from '../../../interfaces';
+import { Account } from '../../../types';
 import { useAccountContext } from '../../../state/account-context';
 import { BankBalanceCard } from './BankBalanceCard';
 import { MonthlyBillsCard } from './MonthlyBillsCard';

@@ -1,5 +1,5 @@
 import { Fragment } from 'react';
-import { Account, Note } from '../../interfaces';
+import { Account, Note } from '../../types';
 import { useAccountContext } from '../../state';
 import { NewNoteCard } from './NewNote';
 import { NoteCard } from './Note';

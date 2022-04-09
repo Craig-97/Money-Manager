@@ -8,7 +8,7 @@ import {
   EDIT_ACCOUNT_MUTATION,
   EDIT_ONE_OFF_PAYMENT_MUTATION
 } from '../../../graphql';
-import { Account, OneOffPayment } from '../../../interfaces';
+import { Account, OneOffPayment } from '../../../types';
 import { useAccountContext } from '../../../state/account-context';
 import { PaymentsDuePopup } from '../PopupForms';
 interface EditPaymentsDuePopupProps {

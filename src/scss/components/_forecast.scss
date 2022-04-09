@@ -30,7 +30,7 @@
       max-width: $forecast-table-mobile-width;
       min-width: $forecast-table-mobile-width;
 
-      max-height: 635px;
+      max-height: 657px;
       overflow-y: auto;
     }
 
@@ -46,6 +46,34 @@
     td {
       font-weight: 500;
       font-size: $standard;
+    }
+
+    .MuiTableFooter-root {
+      bottom: 0;
+      left: 0;
+      position: sticky;
+      z-index: 2;
+      background-color: $background;
+      background-image: $background-image;
+    }
+
+    .MuiTablePagination-spacer {
+      display: none;
+    }
+
+    .MuiTablePagination-root {
+      border-top: 1px solid $table-border;
+      border-bottom: 0;
+      .MuiToolbar-root {
+        @include flexbox($justifyContent: center);
+
+        @include respond(laptop) {
+          display: grid;
+          grid-template-columns: auto auto;
+          align-items: center;
+          justify-content: center;
+        }
+      }
     }
   }
 }

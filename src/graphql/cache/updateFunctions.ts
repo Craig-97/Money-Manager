@@ -1,5 +1,5 @@
 import { ApolloCache } from '@apollo/client';
-import { Account, AccountData, Bill, Note, OneOffPayment } from '../../interfaces';
+import { Account, AccountData, Bill, Note, OneOffPayment } from '../../types';
 import {
   getBillDeleted,
   getNewBillAdded,

@@ -9,7 +9,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 import TextField from '@mui/material/TextField';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { ChangeEvent, DispatchWithoutAction, KeyboardEvent, useEffect, useState } from 'react';
-import { Account, OneOffPayment } from '../../../interfaces';
+import { Account, OneOffPayment } from '../../../types';
 import { useAccountContext } from '../../../state/account-context';
 import { getNumberAmount } from '../../../utils';
 

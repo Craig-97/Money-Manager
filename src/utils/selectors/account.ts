@@ -1,4 +1,4 @@
-import { Bill, OneOffPayment } from '../../interfaces';
+import { Bill, OneOffPayment } from '../../types';
 
 export const cheapestAscendingSort = (a: Bill | OneOffPayment, b: Bill | OneOffPayment) => {
   const amount1 = a?.amount || 0;

@@ -1,5 +1,5 @@
 import { Fragment } from 'react';
-import { Mode } from '../../interfaces';
+import { Mode } from '../../types';
 import { BackButton, ForecastButton, NotesButton } from './Buttons';
 
 interface HeaderProps {

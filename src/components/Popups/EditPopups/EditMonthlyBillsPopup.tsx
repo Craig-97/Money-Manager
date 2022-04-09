@@ -8,7 +8,7 @@ import {
   EDIT_ACCOUNT_MUTATION,
   EDIT_BILL_MUTATION
 } from '../../../graphql';
-import { Account, Bill } from '../../../interfaces';
+import { Account, Bill } from '../../../types';
 import { useAccountContext } from '../../../state';
 import { MonthlyBillsPopup } from '../PopupForms';
 

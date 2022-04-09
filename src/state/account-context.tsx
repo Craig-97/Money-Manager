@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useReducer } from 'react';
 import { reducer } from './reducer';
-import { AccountData } from '../interfaces';
+import { AccountData } from '../types';
 
 export const initialState = {
   account: {
