@@ -21,7 +21,7 @@ export const BankBalancePopup = ({ isOpen, close, changeBankBalance }: BankBalan
     state: { account }
   } = useAccountContext();
   const { bankBalance }: Account = account;
-  const [value, setValue] = useState<number>();
+  const [value, setValue] = useState<number>(bankBalance);
 
   useEffect(() => {
     if (value !== bankBalance) {

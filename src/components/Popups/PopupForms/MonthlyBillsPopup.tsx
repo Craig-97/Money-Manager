@@ -40,9 +40,9 @@ export const MonthlyBillsPopup = ({
   } = useAccountContext();
 
   const { id }: Account = account;
-  const [name, setName] = useState<string>('');
-  const [amount, setAmount] = useState<string>();
-  const [paid, setPaid] = useState<boolean>(false);
+  const [name, setName] = useState<string>(defaultName);
+  const [amount, setAmount] = useState<string>(defaultAmount);
+  const [paid, setPaid] = useState<boolean>(defaultPaid);
 
   useEffect(() => {
     if (defaultName !== name) {

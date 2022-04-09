@@ -40,10 +40,12 @@
 
     th {
       font-weight: bold;
+      font-size: $table-header;
     }
 
     td {
       font-weight: 500;
+      font-size: $standard;
     }
   }
 }

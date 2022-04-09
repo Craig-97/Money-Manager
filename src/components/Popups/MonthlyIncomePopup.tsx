@@ -24,7 +24,7 @@ export const MonthlyIncomePopup = ({
     state: { account }
   } = useAccountContext();
   const { monthlyIncome }: Account = account;
-  const [value, setValue] = useState<number>();
+  const [value, setValue] = useState<number>(monthlyIncome);
 
   useEffect(() => {
     if (value !== monthlyIncome) {

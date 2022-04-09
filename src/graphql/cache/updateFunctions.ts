@@ -9,7 +9,6 @@ import {
   getOneOffPaymentDeleted
 } from '../../utils';
 import { GET_ACCOUNT_QUERY } from '../queries';
-import { getAccountData } from './../../utils';
 
 /* ADDS ONE OFF PAYMENT TO ONEOFFPAYMENTS ARRAY */
 export const addPaymentCache = (cache: ApolloCache<any>, oneOffPayment: OneOffPayment) => {
@@ -101,13 +100,10 @@ export const editAccountCache = (cache: ApolloCache<any>, account: Account) => {
     query: GET_ACCOUNT_QUERY
   });
 
-  const updatedAccount = { ...data?.account, ...account };
-  const accountData = getAccountData(updatedAccount);
-
-  if (accountData) {
+  if (data?.account && account) {
     cache.writeQuery({
       query: GET_ACCOUNT_QUERY,
-      data: { account: accountData }
+      data: { account: { ...data?.account, ...account } }
     });
   }
 };

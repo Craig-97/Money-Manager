@@ -5,10 +5,14 @@ const cache = new InMemoryCache({
   typePolicies: {
     Account: {
       fields: {
+        bills: {
+          merge: (old, incoming) => incoming
+        },
         oneOffPayments: {
-          merge(existing, incoming) {
-            return incoming;
-          }
+          merge: (old, incoming) => incoming
+        },
+        notes: {
+          merge: (old, incoming) => incoming
         }
       }
     }

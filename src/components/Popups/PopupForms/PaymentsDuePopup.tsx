@@ -37,8 +37,8 @@ export const PaymentsDuePopup = ({
   } = useAccountContext();
 
   const { id }: Account = account;
-  const [name, setName] = useState<string>('');
-  const [amount, setAmount] = useState<string>();
+  const [name, setName] = useState<string>(defaultName);
+  const [amount, setAmount] = useState<string>(defaultAmount);
 
   useEffect(() => {
     if (defaultName !== name) {
