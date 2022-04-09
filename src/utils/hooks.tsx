@@ -23,6 +23,7 @@ export const useIsDesktop = () => {
     return () => {
       window.removeEventListener('resize', handleWindowSizeChange);
     };
+    // eslint-disable-next-line
   }, []);
 
   return isDesktop;

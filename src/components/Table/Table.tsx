@@ -46,7 +46,7 @@ export const Table = ({ columns, data, stickyHeader = true }: TableProps) => {
     } else {
       setPageSize(16);
     }
-  }, [isDesktop]);
+  }, [isDesktop, setPageSize]);
 
   const handleChangePage = (event: unknown, newPage: number) => {
     gotoPage(newPage);
