@@ -52,6 +52,13 @@
 
       span {
         max-width: $note-span-mobile-width;
+        min-width: $note-span-mobile-width;
+      }
+    }
+
+    @include respond(mobile-small) {
+      span {
+        min-width: unset;
       }
     }
 

@@ -69,7 +69,7 @@ export const Table = ({ columns, data, stickyHeader = true }: TableProps) => {
           ))}
         </TableHead>
         <TableBody>
-          {page.map((row, i) => {
+          {page.map(row => {
             prepareRow(row);
             return (
               <TableRow
