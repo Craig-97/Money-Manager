@@ -116,6 +116,10 @@
 
     &--loading {
       justify-content: center;
+
+      .MuiCircularProgress-root {
+        min-width: 40px;
+      }
     }
 
     &--new {
