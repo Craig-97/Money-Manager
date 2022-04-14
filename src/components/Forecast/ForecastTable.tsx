@@ -4,11 +4,11 @@ import { useAccountContext } from '../../state/account-context';
 import { getNextNumberOfMonthNames } from '../../utils';
 import { Table } from '../Table';
 
-interface PaydayBalanceTableProps {
+interface ForecastTableProps {
   past?: boolean;
 }
 
-export const PaydayBalanceTable = ({ past = false }: PaydayBalanceTableProps) => {
+export const ForecastTable = ({ past = false }: ForecastTableProps) => {
   const {
     state: { account }
   } = useAccountContext();

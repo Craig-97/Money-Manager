@@ -7,8 +7,8 @@ export const TYPES = {
   ONEOFFPAYMENT: 'OneOffPayment'
 };
 
-export const MODES = {
-  OVERVIEW: 'OVERVIEW',
-  NOTES: 'NOTES',
-  FORECAST: 'FORECAST'
+export const PAGES = {
+  HOMEPAGE: 'Homepage',
+  NOTES: 'Notes',
+  FORECAST: 'Forecast'
 };
