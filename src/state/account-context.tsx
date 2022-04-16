@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useReducer } from 'react';
+import { Account, User } from '../types';
 import { reducer } from './reducer';
-import { AccountData } from '../types';
 
 export const initialState = {
   account: {
@@ -11,11 +11,20 @@ export const initialState = {
     bills: [],
     oneOffPayments: [],
     notes: []
+  },
+  user: {
+    id: '',
+    email: ''
   }
 };
 
+interface AccountContextType {
+  account: Account;
+  user: User;
+}
+
 export const AccountContext = createContext<{
-  state: AccountData;
+  state: AccountContextType;
   dispatch: React.Dispatch<any>;
 }>({
   state: initialState,

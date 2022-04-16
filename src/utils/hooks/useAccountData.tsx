@@ -9,11 +9,15 @@ import { AccountData } from '../../types';
 import { getAccountData } from '../../utils';
 
 export const useAccountData = () => {
-  const { loading, data, error } = useQuery<AccountData>(GET_ACCOUNT_QUERY);
   const {
-    state: { account },
+    state: { account, user },
     dispatch
   } = useAccountContext();
+
+  const { loading, data, error } = useQuery<AccountData>(GET_ACCOUNT_QUERY, {
+    variables: { id: user.id },
+    skip: !user.id
+  });
 
   useEffect(() => {
     const formattedData = data?.account ? getAccountData(data.account) : initialState.account;
@@ -24,5 +28,7 @@ export const useAccountData = () => {
     // eslint-disable-next-line
   }, [data, dispatch]);
 
-  return { loading, data, error };
+  const token = localStorage.getItem('token');
+
+  return { token, loading, data, error };
 };

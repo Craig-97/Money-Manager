@@ -2,7 +2,7 @@ import { gql } from '@apollo/client';
 
 export const GET_ACCOUNT_QUERY = gql`
   query getAccount {
-    account(id: "625855875f9b292c59fe4487") {
+    account(id: $id) {
       id
       bankBalance
       monthlyIncome
