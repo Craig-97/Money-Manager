@@ -1,0 +1,29 @@
+@use '../abstracts' as *;
+
+.loginregister {
+  h1 {
+    text-align: center;
+    padding: 24px;
+    margin: 0;
+    font-size: $header-resize;
+  }
+  .login-panels {
+    min-width: 400px;
+    min-height: 500px;
+
+    @include respond(mobile) {
+      max-width: $login-register-mobile-width;
+      min-width: $login-register-mobile-width;
+    }
+
+    .MuiBox-root {
+      border-radius: 0 0 4px 4px;
+      font-size: $standard;
+      font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
+      font-weight: 400;
+      line-height: 1.5;
+      letter-spacing: 0.00938em;
+      overflow-y: auto;
+    }
+  }
+}

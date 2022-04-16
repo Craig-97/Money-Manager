@@ -5,6 +5,7 @@ import { Loading } from '../components/Loading';
 import { useAccountData } from '../utils';
 import { Forecast } from './Forecast';
 import { Homepage } from './Homepage';
+import { Login } from './Login';
 import { Notes } from './Notes';
 
 export const AppRoutes = () => {
@@ -25,7 +26,7 @@ export const AppRoutes = () => {
             <Route path="/notes" element={<Notes />} />
           </Fragment>
         )}
-        {!token && <Route path="/login" element={<div>LOGIN/REGISTER PAGE</div>} />}
+        {!token && <Route path="/login" element={<Login />} />}
       </Routes>
     </Router>
   );

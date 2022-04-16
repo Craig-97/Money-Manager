@@ -1,14 +1,6 @@
 @use '../abstracts' as *;
 
-.page {
-  .container {
-    @include flexbox($direction: column);
-
-    max-width: 1250px;
-
-    .loading,
-    .error {
-      text-align: center;
-    }
-  }
+.homepage {
+  @include flexbox($direction: column);
+  max-width: 1250px;
 }

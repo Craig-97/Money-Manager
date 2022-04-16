@@ -5,7 +5,6 @@
     @include respond(mobile) {
       max-width: $forecast-table-mobile-width;
       min-width: $forecast-table-mobile-width;
-
       max-height: 657px;
       overflow-y: auto;
     }

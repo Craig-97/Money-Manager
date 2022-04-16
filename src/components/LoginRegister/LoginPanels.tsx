@@ -1,15 +1,11 @@
-import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
-import ReceiptIcon from '@mui/icons-material/Receipt';
 import AppBar from '@mui/material/AppBar';
 import { useTheme } from '@mui/material/styles';
 import Tab from '@mui/material/Tab';
 import { useState } from 'react';
 import SwipeableViews from 'react-swipeable-views';
-import { TabPanel, Tabs } from '../../Tabs';
-import { MonthlyBills } from './MonthlyBills';
-import { PaymentsDue } from './PaymentsDue';
+import { TabPanel, Tabs } from '../Tabs';
 
-export const Panels = () => {
+export const LoginPanels = () => {
   const theme = useTheme();
   const [value, setValue] = useState<number>(0);
 
@@ -18,11 +14,11 @@ export const Panels = () => {
   };
 
   return (
-    <div className="overview-panels">
+    <div className="login-panels">
       <AppBar position="static" color="default">
         <Tabs value={value} setValue={setValue}>
-          <Tab label="Upcoming payments" icon={<AccountBalanceWalletIcon />} />
-          <Tab label="Monthly bills" icon={<ReceiptIcon />} />
+          <Tab label="Login" />
+          <Tab label="Register" />
         </Tabs>
       </AppBar>
       <SwipeableViews
@@ -30,10 +26,10 @@ export const Panels = () => {
         index={value}
         onChangeIndex={handleChangeIndex}>
         <TabPanel value={value} index={0} dir={theme.direction}>
-          <PaymentsDue />
+          LOGIN COMPONENT
         </TabPanel>
         <TabPanel value={value} index={1} dir={theme.direction}>
-          <MonthlyBills />
+          REGISTER COMPONENT
         </TabPanel>
       </SwipeableViews>
     </div>

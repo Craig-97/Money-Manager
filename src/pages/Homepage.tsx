@@ -6,7 +6,7 @@ export const Homepage = () => {
     <div className="page">
       <Header />
       <main>
-        <div className="container">
+        <div className="homepage">
           <Overview />
         </div>
       </main>
