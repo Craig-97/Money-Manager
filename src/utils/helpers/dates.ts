@@ -63,6 +63,7 @@ export const getPayday = (date: Date) => {
  * When January is in the array, the year will also be returned
  */
 export const getNextNumberOfMonthNames = (number: number) => {
+  //TODO update to factor in if payday has already been to exclude current month
   const now = new Date();
   let month = now.getMonth();
   let year = now.getFullYear();

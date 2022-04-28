@@ -8,9 +8,6 @@
     font-size: $header-resize;
   }
   .login-panels {
-    min-width: 400px;
-    min-height: 500px;
-
     @include respond(mobile) {
       max-width: $login-register-mobile-width;
       min-width: $login-register-mobile-width;
@@ -24,6 +21,18 @@
       line-height: 1.5;
       letter-spacing: 0.00938em;
       overflow-y: auto;
+
+      .MuiFormControl-root,
+      .MuiButton-root {
+        margin: 16px 0;
+      }
+
+      input:-webkit-autofill,
+      input:-webkit-autofill:hover,
+      input:-webkit-autofill:focus,
+      input:-webkit-autofill:active {
+        @include box-shadow($x: 0, $y: 0, $b: 0, $s: 30px, $c: #1e1e1e, $i: inset);
+      }
     }
   }
 }
