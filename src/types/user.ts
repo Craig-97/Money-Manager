@@ -3,6 +3,12 @@ export interface User {
   email?: string;
 }
 
-export interface UserData {
-  account: UserData;
+export interface LoginData {
+  login: LoginResponse;
+}
+
+export interface LoginResponse {
+  userId?: string;
+  token?: string;
+  tokenExpiration?: number;
 }

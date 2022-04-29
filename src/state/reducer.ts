@@ -9,6 +9,12 @@ export const reducer = (state: any, action: any) => {
         account: data
       };
     }
+    case EVENTS.LOGIN: {
+      return {
+        ...state,
+        user: { ...data }
+      };
+    }
     default:
       return state;
   }

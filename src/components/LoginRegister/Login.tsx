@@ -1,14 +1,37 @@
+import { useLazyQuery } from '@apollo/client';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
+import { useNavigate } from 'react-router-dom';
+import { EVENTS } from '../../constants';
+import { LOGIN_QUERY } from '../../graphql';
+import { useAccountContext } from '../../state';
+import { LoginData } from '../../types';
 
 export const Login = () => {
+  const navigate = useNavigate();
+  const { dispatch } = useAccountContext();
+  const [loginQuery] = useLazyQuery<LoginData>(LOGIN_QUERY, {
+    onCompleted: data => onLoginCompleted(data)
+  });
+
+  const onLoginCompleted = (response: LoginData) => {
+    const {
+      login: { userId, token }
+    } = response;
+
+    if (userId && token) {
+      localStorage.setItem('token', token);
+
+      dispatch({ type: EVENTS.LOGIN, data: { id: userId } });
+      navigate('/');
+    }
+  };
+
   const onLogin = (e: any) => {
     e.preventDefault();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
-
-    // MAKE GQL CALL TO LOGIN QUERY AND THEN SET TOKEN RESPONSE IN LOCALSTORAGE
-    // THEN REDIRECT REACT ROUTER DOM TO HOMEPAGE
+    loginQuery({ variables: { ...formProps } });
   };
 
   return (
