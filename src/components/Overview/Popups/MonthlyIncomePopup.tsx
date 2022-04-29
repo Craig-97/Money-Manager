@@ -7,8 +7,8 @@ import DialogTitle from '@mui/material/DialogTitle';
 import InputAdornment from '@mui/material/InputAdornment';
 import TextField from '@mui/material/TextField';
 import { ChangeEvent, DispatchWithoutAction, KeyboardEvent, useEffect, useState } from 'react';
-import { Account } from '../../types';
-import { useAccountContext } from '../../state/account-context';
+import { Account } from '../../../types';
+import { useAccountContext } from '../../../state/account-context';
 interface MonthlyIncomePopupProps {
   isOpen: boolean;
   close: DispatchWithoutAction;

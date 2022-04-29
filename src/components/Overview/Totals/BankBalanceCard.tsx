@@ -4,7 +4,7 @@ import { Fragment, useCallback, useState } from 'react';
 import { editAccountCache, EDIT_ACCOUNT_MUTATION } from '../../../graphql';
 import { Account } from '../../../types';
 import { useAccountContext } from '../../../state/account-context';
-import { BankBalancePopup } from '../../Popups';
+import { BankBalancePopup } from '../Popups';
 import { LoadingCard } from './LoadingCard';
 import { TotalCard } from './TotalCard';
 

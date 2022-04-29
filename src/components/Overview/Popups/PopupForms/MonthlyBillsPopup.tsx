@@ -1,4 +1,5 @@
 import Button from '@mui/material/Button';
+import Checkbox from '@mui/material/Checkbox';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
@@ -9,29 +10,31 @@ import InputAdornment from '@mui/material/InputAdornment';
 import TextField from '@mui/material/TextField';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { ChangeEvent, DispatchWithoutAction, KeyboardEvent, useEffect, useState } from 'react';
-import { Account, OneOffPayment } from '../../../types';
-import { useAccountContext } from '../../../state/account-context';
-import { getNumberAmount } from '../../../utils';
+import { Account, Bill } from '../../../../types';
+import { useAccountContext } from '../../../../state/account-context';
+import { getNumberAmount } from '../../../../utils';
 
-interface PaymentsDuePopupProps {
+interface MonthlyBillsPopupProps {
   title: string;
   isOpen: boolean;
   close: DispatchWithoutAction;
   defaultName?: string;
   defaultAmount?: string;
-  onSave: ({ name, amount, account }: OneOffPayment) => void;
+  defaultPaid?: boolean;
+  onSave: ({ name, amount, paid, account }: Bill) => void;
   onDelete?: DispatchWithoutAction;
 }
 
-export const PaymentsDuePopup = ({
+export const MonthlyBillsPopup = ({
   title,
   isOpen,
   close,
   defaultName = '',
   defaultAmount = '',
+  defaultPaid = false,
   onSave,
   onDelete
-}: PaymentsDuePopupProps) => {
+}: MonthlyBillsPopupProps) => {
   const {
     state: { account }
   } = useAccountContext();
@@ -39,6 +42,7 @@ export const PaymentsDuePopup = ({
   const { id }: Account = account;
   const [name, setName] = useState<string>(defaultName);
   const [amount, setAmount] = useState<string>(defaultAmount);
+  const [paid, setPaid] = useState<boolean>(defaultPaid);
 
   useEffect(() => {
     if (defaultName !== name) {
@@ -49,11 +53,14 @@ export const PaymentsDuePopup = ({
       setAmount(defaultAmount);
     }
 
+    if (defaultPaid !== paid) {
+      setPaid(defaultPaid);
+    }
     // eslint-disable-next-line
-  }, [defaultName, defaultAmount]);
+  }, [defaultName, defaultAmount, defaultPaid]);
 
   const handleSaveClicked = () => {
-    onSave({ name, amount: getNumberAmount(amount), account: id });
+    onSave({ name, amount: getNumberAmount(amount), paid, account: id });
     handleClose();
   };
 
@@ -75,6 +82,10 @@ export const PaymentsDuePopup = ({
     }
   };
 
+  const handlePaidChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setPaid(event.target.checked);
+  };
+
   const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter' && name && amount) {
       event.preventDefault();
@@ -86,6 +97,7 @@ export const PaymentsDuePopup = ({
     close();
     setAmount(defaultAmount);
     setName('');
+    setPaid(false);
   };
 
   return (
@@ -93,7 +105,7 @@ export const PaymentsDuePopup = ({
       open={isOpen}
       onClose={handleClose}
       aria-labelledby="form-dialog-title"
-      className="payments-due-popup"
+      className="monthly-bills-popup"
       maxWidth={'xs'}
       fullWidth>
       <DialogTitle id="form-dialog-title">
@@ -112,12 +124,11 @@ export const PaymentsDuePopup = ({
           onKeyDown={handleKeyDown}
           autoFocus
           margin="dense"
-          id="payment-name"
+          id="bill-name"
           fullWidth
         />
         <DialogContentText>Amount</DialogContentText>
         <TextField
-          type="number"
           InputProps={{
             startAdornment: <InputAdornment position="start">£</InputAdornment>
           }}
@@ -125,8 +136,15 @@ export const PaymentsDuePopup = ({
           onChange={handleAmountChange}
           onKeyDown={handleKeyDown}
           margin="dense"
-          id="payment-amount"
+          id="bill-amount"
+          type="number"
           fullWidth
+        />
+        <DialogContentText>Paid</DialogContentText>
+        <Checkbox
+          checked={paid}
+          onChange={handlePaidChange}
+          inputProps={{ 'aria-label': 'controlled' }}
         />
       </DialogContent>
       <DialogActions>

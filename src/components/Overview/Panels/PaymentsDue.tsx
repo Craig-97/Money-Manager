@@ -4,7 +4,7 @@ import { TYPES } from '../../../constants';
 import { Account, Bill, Modal, OneOffPayment } from '../../../types';
 import { useAccountContext } from '../../../state';
 import { formatAmount, isNegative } from '../../../utils';
-import { EditMonthlyBillsPopup, EditPaymentsDuePopup } from '../../Popups';
+import { EditMonthlyBillsPopup, EditPaymentsDuePopup } from '../Popups';
 
 export const PaymentsDue = () => {
   const {

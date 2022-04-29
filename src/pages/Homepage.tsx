@@ -1,12 +1,14 @@
 import { Header } from '../components/Header';
-import { Overview } from '../components/Overview';
+import { Totals, PaydayAlert, Panels } from '../components/Overview';
 
 export const Homepage = () => (
   <div className="page">
     <Header />
     <main>
       <div className="homepage">
-        <Overview />
+        <PaydayAlert />
+        <Totals />
+        <Panels />
       </div>
     </main>
   </div>

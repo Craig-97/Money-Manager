@@ -1,1 +1,1 @@
-export * from './LoginRegister';
+export * from './LoginPanels';
