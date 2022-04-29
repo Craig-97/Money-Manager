@@ -14,6 +14,8 @@ export const formatFullDate = (date: Date) =>
 
 /* Get last day of month */
 const getEOM = (date: Date) => new Date(date.getFullYear(), date.getMonth() + 1, 0);
+/* Get first day of month */
+const getSOM = (date: Date) => new Date(date.getFullYear(), date.getMonth(), 1);
 
 /* Returns last of specified day in month of date
 / ECMAScript day numbering: 0 = Sun, 1 = Mon, etc. */
@@ -44,7 +46,7 @@ export const getPayday = (date: Date) => {
   const lastFriday = getLastOfDay(eom, 5);
   let isPayday = false;
 
-  // If date is within 7 days of eom, increment month
+  // If last friday of the month has already been, increment month
   if (date.getDate() > lastFriday.getDate()) {
     eom = addMonths(eom, 1);
   }
@@ -59,14 +61,30 @@ export const getPayday = (date: Date) => {
 };
 
 /*
+ * Returns start of next month if payday is current day or in the past
+ */
+export const getForecastDate = (date: Date) => {
+  let eom = getEOM(date);
+  const lastFriday = getLastOfDay(eom, 5);
+  let startingDate = date;
+
+  // If last friday of the month has already been, increment month
+  if (date.getDate() >= lastFriday.getDate()) {
+    eom = addMonths(eom, 1);
+    // Get first date of month
+    startingDate = getSOM(eom);
+  }
+
+  return startingDate;
+};
+
+/*
  * Returns a months array in string format based on number prop.
  * When January is in the array, the year will also be returned
  */
-export const getNextNumberOfMonthNames = (number: number) => {
-  //TODO update to factor in if payday has already been to exclude current month
-  const now = new Date();
-  let month = now.getMonth();
-  let year = now.getFullYear();
+export const getNextNumberOfMonths = (date: Date, number: number) => {
+  let month = date.getMonth();
+  let year = date.getFullYear();
 
   var names = [
     'January',

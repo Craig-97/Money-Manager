@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { Account } from '../../types';
 import { useAccountContext } from '../../state/account-context';
-import { getNextNumberOfMonthNames } from '../../utils';
+import { getForecastDate, getNextNumberOfMonths } from '../../utils';
 import { Table } from '../Table';
 
 interface ForecastTableProps {
@@ -33,7 +33,7 @@ export const ForecastTable = ({ past = false }: ForecastTableProps) => {
     [past]
   );
 
-  const months = useMemo(() => getNextNumberOfMonthNames(24), []);
+  const months = useMemo(() => getNextNumberOfMonths(getForecastDate(new Date()), 24), []);
 
   const data = useMemo(() => {
     let balance = bankFreeToSpend || 0;
