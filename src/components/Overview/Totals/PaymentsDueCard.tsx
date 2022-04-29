@@ -10,7 +10,7 @@ import { TotalCard } from './TotalCard';
 
 export const PaymentsDueCard = () => {
   const {
-    state: { account }
+    state: { account, user }
   } = useAccountContext();
 
   const { paymentsDueTotal }: Account = account;
@@ -28,7 +28,7 @@ export const PaymentsDueCard = () => {
             createOneOffPayment: { oneOffPayment }
           }
         }
-      ) => addPaymentCache(cache, oneOffPayment)
+      ) => addPaymentCache(cache, oneOffPayment, user)
     });
   };
 

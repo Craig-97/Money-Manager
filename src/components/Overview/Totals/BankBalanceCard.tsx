@@ -10,7 +10,7 @@ import { TotalCard } from './TotalCard';
 
 export const BankBalanceCard = () => {
   const {
-    state: { account }
+    state: { account, user }
   } = useAccountContext();
   const { bankBalance, id }: Account = account;
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -35,7 +35,7 @@ export const BankBalanceCard = () => {
               editAccount: { account }
             }
           }
-        ) => editAccountCache(cache, account)
+        ) => editAccountCache(cache, account, user)
       });
     }
     setIsOpen(false);

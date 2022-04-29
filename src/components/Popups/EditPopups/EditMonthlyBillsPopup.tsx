@@ -24,7 +24,7 @@ export const EditMonthlyBillsPopup = ({
   selectedBill
 }: EditMonthlyBillsPopupProps) => {
   const {
-    state: { account }
+    state: { account, user }
   } = useAccountContext();
   const { bankBalance, id }: Account = account;
   const { id: billId, name, amount, paid }: Bill = selectedBill;
@@ -59,7 +59,7 @@ export const EditMonthlyBillsPopup = ({
                 editAccount: { account }
               }
             }
-          ) => editAccountCache(cache, account)
+          ) => editAccountCache(cache, account, user)
         });
       }
     }
@@ -77,7 +77,7 @@ export const EditMonthlyBillsPopup = ({
             deleteBill: { bill }
           }
         }
-      ) => deleteBillCache(cache, bill)
+      ) => deleteBillCache(cache, bill, user)
     });
   };
 

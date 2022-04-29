@@ -10,7 +10,7 @@ import { TotalCard } from './TotalCard';
 
 export const MonthlyBillsCard = () => {
   const {
-    state: { account }
+    state: { account, user }
   } = useAccountContext();
   const { billsTotal }: Account = account;
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -27,7 +27,7 @@ export const MonthlyBillsCard = () => {
             createBill: { bill }
           }
         }
-      ) => addBillCache(cache, bill)
+      ) => addBillCache(cache, bill, user)
     });
   };
 

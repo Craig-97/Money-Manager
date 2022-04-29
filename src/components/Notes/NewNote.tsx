@@ -8,7 +8,8 @@ import { useAccountContext } from '../../state';
 export const NewNoteCard = () => {
   const {
     state: {
-      account: { id }
+      account: { id },
+      user
     }
   } = useAccountContext();
 
@@ -27,7 +28,7 @@ export const NewNoteCard = () => {
             createNote: { note }
           }
         }
-      ) => addNoteCache(cache, note)
+      ) => addNoteCache(cache, note, user)
     });
   };
 

@@ -23,7 +23,7 @@ export const EditPaymentsDuePopup = ({
   selectedPayment
 }: EditPaymentsDuePopupProps) => {
   const {
-    state: { account }
+    state: { account, user }
   } = useAccountContext();
   const { bankBalance, id }: Account = account;
   const { id: paymentId, name, amount }: OneOffPayment = selectedPayment;
@@ -53,7 +53,7 @@ export const EditPaymentsDuePopup = ({
             deleteOneOffPayment: { oneOffPayment }
           }
         }
-      ) => deletePaymentCache(cache, oneOffPayment)
+      ) => deletePaymentCache(cache, oneOffPayment, user)
     });
   };
 
@@ -77,7 +77,7 @@ export const EditPaymentsDuePopup = ({
                 editAccount: { account }
               }
             }
-          ) => editAccountCache(cache, account)
+          ) => editAccountCache(cache, account, user)
         });
       }
     }
