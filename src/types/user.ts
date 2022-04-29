@@ -3,6 +3,10 @@ export interface User {
   email?: string;
 }
 
+export interface FindUserData {
+  tokenFindUser: User;
+}
+
 export interface LoginData {
   login: LoginResponse;
 }
