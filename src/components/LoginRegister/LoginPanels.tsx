@@ -4,7 +4,7 @@ import Tab from '@mui/material/Tab';
 import { useState } from 'react';
 import SwipeableViews from 'react-swipeable-views';
 import { TabPanel, Tabs } from '../Tabs';
-import { Login } from './Login';
+import { LoginForm } from './LoginForm';
 import { Register } from './Register';
 
 export const LoginPanels = () => {
@@ -28,7 +28,7 @@ export const LoginPanels = () => {
         index={value}
         onChangeIndex={handleChangeIndex}>
         <TabPanel value={value} index={0} dir={theme.direction}>
-          <Login />
+          <LoginForm />
         </TabPanel>
         <TabPanel value={value} index={1} dir={theme.direction}>
           <Register />

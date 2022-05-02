@@ -8,6 +8,9 @@
     font-size: $header-resize;
   }
   .login-panels {
+    max-width: $login-register-width;
+    min-width: $login-register-width;
+
     @include respond(mobile) {
       max-width: $login-register-mobile-width;
       min-width: $login-register-mobile-width;
