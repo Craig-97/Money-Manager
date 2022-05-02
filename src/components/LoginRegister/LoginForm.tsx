@@ -1,5 +1,4 @@
 import { ApolloError, useLazyQuery } from '@apollo/client';
-import { WifiTetheringErrorSharp } from '@mui/icons-material';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import { useFormik } from 'formik';
