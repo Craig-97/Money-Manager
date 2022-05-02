@@ -79,10 +79,11 @@ export const LoginForm = () => {
         onChange={formik.handleChange}
         error={formik.touched.email && Boolean(formik.errors.email)}
         helperText={formik.touched.email && formik.errors.email}
+        autoComplete="username"
       />
       <TextField
         fullWidth
-        id="password"
+        id="current-password"
         name="password"
         label="Password"
         type="password"
@@ -92,6 +93,7 @@ export const LoginForm = () => {
         onChange={formik.handleChange}
         error={formik.touched.password && Boolean(formik.errors.password)}
         helperText={formik.touched.password && formik.errors.password}
+        autoComplete="current-password"
       />
       <Button
         type="submit"
