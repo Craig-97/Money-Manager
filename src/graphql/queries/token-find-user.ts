@@ -5,6 +5,8 @@ export const FIND_USER_QUERY = gql`
     tokenFindUser {
       id
       email
+      firstName
+      surname
     }
   }
 `;

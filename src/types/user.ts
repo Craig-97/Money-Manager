@@ -1,6 +1,8 @@
 export interface User {
   id?: string;
   email?: string;
+  firstName?: string;
+  surname?: string;
 }
 
 export interface FindUserData {
@@ -12,7 +14,7 @@ export interface LoginData {
 }
 
 export interface LoginResponse {
-  userId?: string;
+  user?: User;
   token?: string;
   tokenExpiration?: number;
 }

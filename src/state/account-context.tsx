@@ -14,7 +14,9 @@ export const initialState = {
   },
   user: {
     id: '',
-    email: ''
+    email: '',
+    firstName: '',
+    surname: ''
   }
 };
 

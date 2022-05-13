@@ -20,13 +20,13 @@ export const LoginForm = () => {
   const onLoginCompleted = (response: LoginData) => {
     if (response) {
       const {
-        login: { userId, token }
+        login: { user, token }
       } = response;
 
-      if (userId && token) {
+      if (user && token) {
         localStorage.setItem('token', token);
 
-        dispatch({ type: EVENTS.LOGIN, data: { id: userId } });
+        dispatch({ type: EVENTS.LOGIN, data: user });
         navigate('/');
       }
     }
