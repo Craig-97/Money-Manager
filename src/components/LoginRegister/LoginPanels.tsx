@@ -12,7 +12,12 @@ export const LoginPanels = () => {
   const [value, setValue] = useState<number>(0);
 
   const handleChangeIndex = (index: number) => {
-    setValue(index);
+    //Swipeable views bug fix
+    if (index > 1) {
+      setValue(1);
+    } else {
+      setValue(index);
+    }
   };
 
   return (

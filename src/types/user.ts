@@ -5,6 +5,10 @@ export interface User {
   surname?: string;
 }
 
+export interface UserData {
+  user: User;
+}
+
 export interface FindUserData {
   tokenFindUser: User;
 }

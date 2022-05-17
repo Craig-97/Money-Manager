@@ -15,6 +15,7 @@ export const PAGES = {
 };
 
 export const ERRORS = {
+  USER_EXISTS: 'User with email already exists',
   INVALID_USER: 'User does not exist',
   INVALID_EMAIL: 'Email address does not exist',
   INVALID_PASSWORD: 'Password is incorrect'
