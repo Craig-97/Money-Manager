@@ -7,7 +7,7 @@ import { ERRORS } from '../../constants';
 import { CREATE_USER_MUTATION } from '../../graphql';
 import { UserData } from '../../types';
 
-export const Register = () => {
+export const RegisterForm = () => {
   const [createUser] = useMutation(CREATE_USER_MUTATION, {
     onCompleted: data => onCreateUserCompleted(data),
     onError: errors => onCreateUserError(errors)
@@ -86,7 +86,6 @@ export const Register = () => {
         helperText={formik.touched.fname && formik.errors.fname}
       />
       <TextField
-        autoFocus
         fullWidth
         id="lname"
         label="Surname"
@@ -99,7 +98,6 @@ export const Register = () => {
         helperText={formik.touched.lname && formik.errors.lname}
       />
       <TextField
-        autoFocus
         fullWidth
         id="email"
         label="Email Address"

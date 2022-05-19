@@ -2,22 +2,23 @@ import AppBar from '@mui/material/AppBar';
 import { useTheme } from '@mui/material/styles';
 import Tab from '@mui/material/Tab';
 import { useState } from 'react';
+import SwipeableViews from 'react-swipeable-views';
 import { TabPanel, Tabs } from '../Tabs';
 import { LoginForm } from './LoginForm';
-import { Register } from './Register';
+import { RegisterForm } from './RegisterForm';
 
 export const LoginPanels = () => {
   const theme = useTheme();
   const [value, setValue] = useState<number>(0);
 
-  // const handleChangeIndex = (index: number) => {
-  //   //Swipeable views bug fix
-  //   if (index > 1) {
-  //     setValue(1);
-  //   } else {
-  //     setValue(index);
-  //   }
-  // };
+  const handleChangeIndex = (index: number) => {
+    // Workaround for https://github.com/mui/material-ui/issues/21614
+    if (index > 1) {
+      setValue(1);
+    } else {
+      setValue(index);
+    }
+  };
 
   return (
     <div className="login-panels">
@@ -27,17 +28,17 @@ export const LoginPanels = () => {
           <Tab label="Register" />
         </Tabs>
       </AppBar>
-      {/* <SwipeableViews
+      <SwipeableViews
         axis={theme.direction === 'rtl' ? 'x-reverse' : 'x'}
         index={value}
-        onChangeIndex={handleChangeIndex}> */}
-      <TabPanel value={value} index={0} dir={theme.direction}>
-        <LoginForm />
-      </TabPanel>
-      <TabPanel value={value} index={1} dir={theme.direction}>
-        <Register />
-      </TabPanel>
-      {/* </SwipeableViews> */}
+        onChangeIndex={handleChangeIndex}>
+        <TabPanel value={value} index={0} dir={theme.direction}>
+          <LoginForm />
+        </TabPanel>
+        <TabPanel value={value} index={1} dir={theme.direction}>
+          <RegisterForm />
+        </TabPanel>
+      </SwipeableViews>
     </div>
   );
 };
