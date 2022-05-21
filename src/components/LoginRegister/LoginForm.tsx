@@ -36,10 +36,10 @@ export const LoginForm = () => {
     formik.setFieldValue('email', formik.values.email, false);
     formik.setFieldValue('password', '', false);
 
-    if (errors.message === ERRORS.INVALID_USER) {
-      formik.setFieldError('email', ERRORS.INVALID_EMAIL);
-    } else if (errors.message === ERRORS.INVALID_PASSWORD) {
-      formik.setFieldError('password', ERRORS.INVALID_PASSWORD);
+    if (errors.message === ERRORS.USER_NOT_FOUND) {
+      formik.setFieldError('email', ERRORS.EMAIL_NOT_FOUND);
+    } else if (errors.message === ERRORS.INCORRECT_PASSWORD) {
+      formik.setFieldError('password', ERRORS.INCORRECT_PASSWORD);
     }
   };
 

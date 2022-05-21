@@ -9,7 +9,7 @@ import { Login } from './Login';
 import { Notes } from './Notes';
 
 export const AppRoutes = () => {
-  const { token, loading, error } = useAccountData();
+  const { token, loading, error, noAccount } = useAccountData();
 
   if (loading) return <Loading />;
   if (error) return <Error error={error} />;
@@ -20,6 +20,7 @@ export const AppRoutes = () => {
         <Route path="*" element={<Navigate to="/login" replace />} />
         {token && (
           <Fragment>
+            {noAccount && <Route path="/" element={<div>SETUP ACCOUNT PAGE</div>} />}
             <Route path="/login" element={<Navigate to="/" replace />} />
             <Route path="/" element={<Homepage />} />
             <Route path="/forecast" element={<Forecast />} />

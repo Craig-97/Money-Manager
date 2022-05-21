@@ -5,12 +5,11 @@ export const LOGIN_QUERY = gql`
     login(email: $email, password: $password) {
       user {
         id
+        email
         firstName
         surname
-        email
       }
       token
-      tokenExpiration
     }
   }
 `;

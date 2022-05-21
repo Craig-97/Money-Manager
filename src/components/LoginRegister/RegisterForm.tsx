@@ -7,21 +7,21 @@ import * as Yup from 'yup';
 import { ERRORS, EVENTS } from '../../constants';
 import { REGISTER_AND_LOGIN_MUTATION } from '../../graphql';
 import { useAccountContext } from '../../state';
-import { LoginData } from '../../types';
+import { RegisterData } from '../../types';
 
 export const RegisterForm = () => {
   const navigate = useNavigate();
   const { dispatch } = useAccountContext();
 
-  const [registerAndLogin, { loading }] = useMutation<LoginData>(REGISTER_AND_LOGIN_MUTATION, {
+  const [registerAndLogin, { loading }] = useMutation<RegisterData>(REGISTER_AND_LOGIN_MUTATION, {
     onCompleted: data => onRegisterAndLoginCompleted(data),
     onError: errors => onRegisterAndLoginError(errors)
   });
 
-  const onRegisterAndLoginCompleted = (response: LoginData) => {
+  const onRegisterAndLoginCompleted = (response: RegisterData) => {
     if (response) {
       const {
-        login: { user, token }
+        registerAndLogin: { user, token }
       } = response;
 
       if (user && token) {

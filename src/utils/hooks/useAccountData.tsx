@@ -1,7 +1,7 @@
 import { useQuery } from '@apollo/client';
 import isEqual from 'lodash/isEqual';
 import { useEffect } from 'react';
-import { EVENTS } from '../../constants';
+import { ERRORS, EVENTS } from '../../constants';
 import { FIND_USER_QUERY, GET_ACCOUNT_QUERY } from '../../graphql';
 import { initialState } from '../../state';
 import { useAccountContext } from '../../state/account-context';
@@ -44,9 +44,12 @@ export const useAccountData = () => {
     // eslint-disable-next-line
   }, [data, dispatch]);
 
+  // Used to determine If user does not have a linked account
+  const noAccount = error?.message === ERRORS.ACCOUNT_NOT_FOUND;
+
   // Combined loading and error states for UI
   const isLoading = userLoading || loading;
-  const isError = userError || error;
+  const isError = userError || (error && !noAccount) ? error : undefined;
 
-  return { token, data, loading: isLoading, error: isError };
+  return { token, data, loading: isLoading, error: isError, noAccount };
 };
