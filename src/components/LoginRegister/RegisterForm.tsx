@@ -1,30 +1,39 @@
 import { ApolloError, useMutation } from '@apollo/client';
-import Button from '@mui/material/Button';
+import LoadingButton from '@mui/lab/LoadingButton';
 import TextField from '@mui/material/TextField';
 import { useFormik } from 'formik';
+import { useNavigate } from 'react-router-dom';
 import * as Yup from 'yup';
-import { ERRORS } from '../../constants';
-import { CREATE_USER_MUTATION } from '../../graphql';
-import { UserData } from '../../types';
+import { ERRORS, EVENTS } from '../../constants';
+import { REGISTER_AND_LOGIN_MUTATION } from '../../graphql';
+import { useAccountContext } from '../../state';
+import { LoginData } from '../../types';
 
 export const RegisterForm = () => {
-  const [createUser] = useMutation(CREATE_USER_MUTATION, {
-    onCompleted: data => onCreateUserCompleted(data),
-    onError: errors => onCreateUserError(errors)
+  const navigate = useNavigate();
+  const { dispatch } = useAccountContext();
+
+  const [registerAndLogin, { loading }] = useMutation<LoginData>(REGISTER_AND_LOGIN_MUTATION, {
+    onCompleted: data => onRegisterAndLoginCompleted(data),
+    onError: errors => onRegisterAndLoginError(errors)
   });
 
-  const onCreateUserCompleted = (response: UserData) => {
+  const onRegisterAndLoginCompleted = (response: LoginData) => {
     if (response) {
-      const { user } = response;
-      console.log('USER RESPONSE', user);
-      // After registering (CreateUser) request is successful
-      // the (Login) request will be fired with your new user details in the background
-      // You will then navigate to a page to enter starting account details
-      // Once you submit your account details you will be navigated to the homepage
+      const {
+        login: { user, token }
+      } = response;
+
+      if (user && token) {
+        localStorage.setItem('token', token);
+
+        dispatch({ type: EVENTS.LOGIN, data: user });
+        navigate('/'); // Navigate to account setup page
+      }
     }
   };
 
-  const onCreateUserError = (errors: ApolloError) => {
+  const onRegisterAndLoginError = (errors: ApolloError) => {
     formik.setFieldValue('email', formik.values.email, false);
 
     if (errors.message === ERRORS.USER_EXISTS) {
@@ -56,7 +65,7 @@ export const RegisterForm = () => {
     },
     validationSchema: validationSchema,
     onSubmit: (values, { setSubmitting }) => {
-      createUser({
+      registerAndLogin({
         variables: {
           user: {
             email: values.email,
@@ -138,14 +147,14 @@ export const RegisterForm = () => {
         helperText={formik.touched.confirmPassword && formik.errors.confirmPassword}
         autoComplete="confirm-password"
       />
-      <Button
+      <LoadingButton
         type="submit"
+        loading={formik.isSubmitting || loading}
         fullWidth
         variant="contained"
-        color="primary"
-        disabled={formik.isSubmitting}>
+        color="primary">
         Register
-      </Button>
+      </LoadingButton>
     </form>
   );
 };

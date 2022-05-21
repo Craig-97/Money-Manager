@@ -1,5 +1,5 @@
 import { ApolloError, useLazyQuery } from '@apollo/client';
-import Button from '@mui/material/Button';
+import LoadingButton from '@mui/lab/LoadingButton';
 import TextField from '@mui/material/TextField';
 import { useFormik } from 'formik';
 import { useNavigate } from 'react-router-dom';
@@ -12,7 +12,7 @@ import { LoginData } from '../../types';
 export const LoginForm = () => {
   const navigate = useNavigate();
   const { dispatch } = useAccountContext();
-  const [loginQuery] = useLazyQuery<LoginData>(LOGIN_QUERY, {
+  const [loginQuery, { loading }] = useLazyQuery<LoginData>(LOGIN_QUERY, {
     onCompleted: data => onLoginCompleted(data),
     onError: errors => onLoginError(errors)
   });
@@ -94,14 +94,14 @@ export const LoginForm = () => {
         helperText={formik.touched.password && formik.errors.password}
         autoComplete="current-password"
       />
-      <Button
+      <LoadingButton
+        loading={formik.isSubmitting || loading}
         type="submit"
         fullWidth
         variant="contained"
-        color="primary"
-        disabled={formik.isSubmitting}>
+        color="primary">
         Sign In
-      </Button>
+      </LoadingButton>
     </form>
   );
 };
