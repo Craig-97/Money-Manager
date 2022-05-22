@@ -28,7 +28,7 @@ export const RegisterForm = () => {
         localStorage.setItem('token', token);
 
         dispatch({ type: EVENTS.LOGIN, data: user });
-        navigate('/'); // Navigate to account setup page
+        navigate('/setup');
       }
     }
   };

@@ -45,11 +45,11 @@ export const useAccountData = () => {
   }, [data, dispatch]);
 
   // Used to determine If user does not have a linked account
-  const noAccount = error?.message === ERRORS.ACCOUNT_NOT_FOUND;
+  const accountExists = error?.message === ERRORS.ACCOUNT_NOT_FOUND ? false : true;
 
   // Combined loading and error states for UI
   const isLoading = userLoading || loading;
-  const isError = userError || (error && !noAccount) ? error : undefined;
+  const isError = userError || (error && accountExists) ? error : undefined;
 
-  return { token, data, loading: isLoading, error: isError, noAccount };
+  return { token, data, loading: isLoading, error: isError, accountExists };
 };
