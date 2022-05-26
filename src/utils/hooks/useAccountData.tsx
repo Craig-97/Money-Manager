@@ -49,7 +49,7 @@ export const useAccountData = () => {
 
   // Combined loading and error states for UI
   const isLoading = userLoading || loading;
-  const isError = userError || (error && accountExists) ? error : undefined;
+  const isError = userError || (error && accountExists ? error : undefined);
 
   return { token, data, loading: isLoading, error: isError, accountExists };
 };
