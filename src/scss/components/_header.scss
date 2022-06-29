@@ -15,4 +15,11 @@
       font-size: $small-icon-size;
     }
   }
+
+  /* TEMP HEADER FIX UNTIL NEW NAV BAR IS INTRODUCED */
+  @include respond(mobile) {
+    .logout-button {
+      display: none;
+    }
+  }
 }
