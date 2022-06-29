@@ -1,12 +1,13 @@
 import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom';
-import { Error } from '../components/ErrorMsg';
+import { AccountRoutes, ProtectedRoutes, PublicRoutes } from './routes';
 import { Loading } from '../components/Loading';
+import { Error } from '../components/ErrorMsg';
 import { useAccountData } from '../utils';
 import { Forecast } from './Forecast';
 import { Homepage } from './Homepage';
 import { Login } from './Login';
 import { Notes } from './Notes';
-import { AccountRoutes, ProtectedRoutes, PublicRoutes } from './routes';
+import { Setup } from './Setup';
 
 export const AppRoutes = () => {
   const { loading, error, accountExists } = useAccountData();
@@ -29,7 +30,7 @@ export const AppRoutes = () => {
             <Route path="/notes" element={<Notes />} />
           </Route>
 
-          <Route path="/setup" element={<div>SETUP ACCOUNT PAGE</div>} />
+          <Route path="/setup" element={<Setup />} />
         </Route>
 
         {/** Public Routes */}
