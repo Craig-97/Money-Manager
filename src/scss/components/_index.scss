@@ -1,7 +1,10 @@
 @forward './header';
-@forward './notes';
-@forward './forecast';
-@forward './panels';
+@forward './note';
 @forward './totals';
+@forward './panels';
 @forward './popups';
 @forward './alert';
+@forward './loading';
+@forward './error';
+@forward './login';
+@forward './forecast_table';

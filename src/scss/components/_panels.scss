@@ -1,6 +1,6 @@
 @use '../abstracts' as *;
 
-.panels {
+.overview-panels {
   margin: 0 0 4rem;
 
   @include respond(mobile) {

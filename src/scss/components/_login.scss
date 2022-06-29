@@ -1,0 +1,41 @@
+@use '../abstracts' as *;
+
+.loginregister {
+  h1 {
+    text-align: center;
+    padding: 24px;
+    margin: 0;
+    font-size: $header-resize;
+  }
+  .login-panels {
+    max-width: $login-register-width;
+    min-width: $login-register-width;
+
+    @include respond(mobile) {
+      max-width: $login-register-mobile-width;
+      min-width: $login-register-mobile-width;
+    }
+
+    .MuiBox-root {
+      border-radius: 0 0 4px 4px;
+      font-size: $standard;
+      font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
+      font-weight: 400;
+      line-height: 1.5;
+      letter-spacing: 0.00938em;
+      overflow-y: auto;
+
+      .MuiFormControl-root,
+      .MuiButton-root {
+        margin: 16px 0;
+      }
+
+      input:-webkit-autofill,
+      input:-webkit-autofill:hover,
+      input:-webkit-autofill:focus,
+      input:-webkit-autofill:active {
+        @include box-shadow($x: 0, $y: 0, $b: 0, $s: 30px, $c: #1e1e1e, $i: inset);
+      }
+    }
+  }
+}

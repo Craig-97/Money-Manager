@@ -1,23 +1,24 @@
 import { Fragment } from 'react';
-import { Mode } from '../../types';
-import { BackButton, ForecastButton, NotesButton } from './Buttons';
+import { useLocation } from 'react-router-dom';
+import { BackButton, ForecastButton, NotesButton, LogoutButton } from './Buttons';
 
-interface HeaderProps {
-  mode: Mode;
-  updateMode: (mode: string) => void;
-}
+export const Header = () => {
+  const { pathname } = useLocation();
 
-export const Header = ({ mode, updateMode }: HeaderProps) => (
-  <div className="header">
-    <h1>Money Manager</h1>
-    <div>
-      {mode.OVERVIEW && (
-        <Fragment>
-          <ForecastButton updateMode={updateMode} />
-          <NotesButton updateMode={updateMode} />
-        </Fragment>
-      )}
+  // Hide Forecast, notes and back button in mobile view, only show logout
+  return (
+    <div className="header">
+      <h1>Money Manager</h1>
+      <div>
+        {pathname === '/' && (
+          <Fragment>
+            <ForecastButton />
+            <NotesButton />
+            <LogoutButton />
+          </Fragment>
+        )}
+      </div>
+      {pathname !== '/' && <BackButton />}
     </div>
-    {!mode.OVERVIEW && <BackButton updateMode={updateMode} />}
-  </div>
-);
+  );
+};

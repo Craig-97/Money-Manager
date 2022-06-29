@@ -4,13 +4,13 @@ import { Fragment, useCallback, useState } from 'react';
 import { editAccountCache, EDIT_ACCOUNT_MUTATION } from '../../../graphql';
 import { Account } from '../../../types';
 import { useAccountContext } from '../../../state/account-context';
-import { BankBalancePopup } from '../../Popups';
+import { BankBalancePopup } from '../Popups';
 import { LoadingCard } from './LoadingCard';
 import { TotalCard } from './TotalCard';
 
 export const BankBalanceCard = () => {
   const {
-    state: { account }
+    state: { account, user }
   } = useAccountContext();
   const { bankBalance, id }: Account = account;
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -35,7 +35,7 @@ export const BankBalanceCard = () => {
               editAccount: { account }
             }
           }
-        ) => editAccountCache(cache, account)
+        ) => editAccountCache(cache, account, user)
       });
     }
     setIsOpen(false);

@@ -3,7 +3,7 @@ import { Fragment, useCallback, useState } from 'react';
 import { Account, Bill } from '../../../types';
 import { useAccountContext } from '../../../state';
 import { formatAmount, isNegative } from '../../../utils';
-import { EditMonthlyBillsPopup } from '../../Popups';
+import { EditMonthlyBillsPopup } from '../Popups';
 
 export const MonthlyBills = () => {
   const {

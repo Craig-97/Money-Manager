@@ -1,11 +1,13 @@
-import { useState } from 'react';
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import ReceiptIcon from '@mui/icons-material/Receipt';
 import AppBar from '@mui/material/AppBar';
-import SwipeableViews from 'react-swipeable-views';
 import { useTheme } from '@mui/material/styles';
-import { Tabs } from './Tabs';
+import Tab from '@mui/material/Tab';
+import { useState } from 'react';
+import SwipeableViews from 'react-swipeable-views';
+import { TabPanel, Tabs } from '../../Tabs';
 import { MonthlyBills } from './MonthlyBills';
 import { PaymentsDue } from './PaymentsDue';
-import { TabPanel } from './TabPanel';
 
 export const Panels = () => {
   const theme = useTheme();
@@ -16,9 +18,12 @@ export const Panels = () => {
   };
 
   return (
-    <div className="panels">
+    <div className="overview-panels">
       <AppBar position="static" color="default">
-        <Tabs value={value} setValue={setValue} />
+        <Tabs value={value} setValue={setValue}>
+          <Tab label="Upcoming payments" icon={<AccountBalanceWalletIcon />} />
+          <Tab label="Monthly bills" icon={<ReceiptIcon />} />
+        </Tabs>
       </AppBar>
       <SwipeableViews
         axis={theme.direction === 'rtl' ? 'x-reverse' : 'x'}

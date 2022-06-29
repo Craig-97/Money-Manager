@@ -1,0 +1,33 @@
+@use '../abstracts' as *;
+
+.notes {
+  display: grid;
+  grid-template-columns: auto auto auto auto;
+  grid-template-rows: auto auto;
+  grid-gap: 2rem;
+  margin: 0 0 2rem 0;
+  min-width: $desktop-width;
+  max-width: $desktop-width;
+
+  @include respond(laptop) {
+    grid-template-columns: auto auto auto;
+    min-width: $laptop-width;
+    max-width: $laptop-width;
+  }
+
+  @include respond(tablet) {
+    grid-template-columns: auto auto;
+    min-width: $tablet-width;
+    max-width: unset;
+  }
+
+  @include respond(mobile) {
+    grid-template-columns: auto;
+    min-width: unset;
+  }
+}
+
+.notes-header {
+  margin: 0 0 2rem 0;
+  font-size: $standard-resize;
+}

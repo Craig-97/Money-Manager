@@ -1,5 +1,5 @@
 import { ApolloCache } from '@apollo/client';
-import { Account, AccountData, Bill, Note, OneOffPayment } from '../../types';
+import { Account, AccountData, Bill, Note, OneOffPayment, User } from '../../types';
 import {
   getBillDeleted,
   getNewBillAdded,
@@ -11,9 +11,14 @@ import {
 import { GET_ACCOUNT_QUERY } from '../queries';
 
 /* ADDS ONE OFF PAYMENT TO ONEOFFPAYMENTS ARRAY */
-export const addPaymentCache = (cache: ApolloCache<any>, oneOffPayment: OneOffPayment) => {
+export const addPaymentCache = (
+  cache: ApolloCache<any>,
+  oneOffPayment: OneOffPayment,
+  user: User
+) => {
   const data: AccountData | null = cache.readQuery({
-    query: GET_ACCOUNT_QUERY
+    query: GET_ACCOUNT_QUERY,
+    variables: { id: user.id }
   });
 
   if (data) {
@@ -25,9 +30,14 @@ export const addPaymentCache = (cache: ApolloCache<any>, oneOffPayment: OneOffPa
 };
 
 /* DELETES ONE OFF PAYMENT FROM ONEOFFPAYMENTS ARRAY */
-export const deletePaymentCache = (cache: ApolloCache<any>, oneOffPayment: OneOffPayment) => {
+export const deletePaymentCache = (
+  cache: ApolloCache<any>,
+  oneOffPayment: OneOffPayment,
+  user: User
+) => {
   const data: AccountData | null = cache.readQuery({
-    query: GET_ACCOUNT_QUERY
+    query: GET_ACCOUNT_QUERY,
+    variables: { id: user.id }
   });
 
   if (data && oneOffPayment?.id) {
@@ -39,9 +49,10 @@ export const deletePaymentCache = (cache: ApolloCache<any>, oneOffPayment: OneOf
 };
 
 /* ADDS BILL TO BILLS ARRAY */
-export const addBillCache = (cache: ApolloCache<any>, bill: Bill) => {
+export const addBillCache = (cache: ApolloCache<any>, bill: Bill, user: User) => {
   const data: AccountData | null = cache.readQuery({
-    query: GET_ACCOUNT_QUERY
+    query: GET_ACCOUNT_QUERY,
+    variables: { id: user.id }
   });
 
   if (data) {
@@ -53,9 +64,10 @@ export const addBillCache = (cache: ApolloCache<any>, bill: Bill) => {
 };
 
 /* DELETES BILL FROM BILLS ARRAY */
-export const deleteBillCache = (cache: ApolloCache<any>, bill: Bill) => {
+export const deleteBillCache = (cache: ApolloCache<any>, bill: Bill, user: User) => {
   const data: AccountData | null = cache.readQuery({
-    query: GET_ACCOUNT_QUERY
+    query: GET_ACCOUNT_QUERY,
+    variables: { id: user.id }
   });
 
   if (data && bill?.id) {
@@ -67,9 +79,10 @@ export const deleteBillCache = (cache: ApolloCache<any>, bill: Bill) => {
 };
 
 /* ADDS NOTE TO NOTES ARRAY */
-export const addNoteCache = (cache: ApolloCache<any>, note: Note) => {
+export const addNoteCache = (cache: ApolloCache<any>, note: Note, user: User) => {
   const data: AccountData | null = cache.readQuery({
-    query: GET_ACCOUNT_QUERY
+    query: GET_ACCOUNT_QUERY,
+    variables: { id: user.id }
   });
 
   if (data) {
@@ -81,9 +94,10 @@ export const addNoteCache = (cache: ApolloCache<any>, note: Note) => {
 };
 
 /* DELETES NOTE FROM NOTES ARRAY */
-export const deleteNoteCache = (cache: ApolloCache<any>, note: Note) => {
+export const deleteNoteCache = (cache: ApolloCache<any>, note: Note, user: User) => {
   const data: AccountData | null = cache.readQuery({
-    query: GET_ACCOUNT_QUERY
+    query: GET_ACCOUNT_QUERY,
+    variables: { id: user.id }
   });
 
   if (data && note?.id) {
@@ -95,9 +109,10 @@ export const deleteNoteCache = (cache: ApolloCache<any>, note: Note) => {
 };
 
 /* TAKES IN UPDATED ACCOUNT FIELDS AND REFORMATS ALL ACCOUNT DATA */
-export const editAccountCache = (cache: ApolloCache<any>, account: Account) => {
+export const editAccountCache = (cache: ApolloCache<any>, account: Account, user: User) => {
   const data: AccountData | null = cache.readQuery({
-    query: GET_ACCOUNT_QUERY
+    query: GET_ACCOUNT_QUERY,
+    variables: { id: user.id }
   });
 
   if (data?.account && account) {

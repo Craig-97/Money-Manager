@@ -4,13 +4,13 @@ import { Fragment, useCallback, useState } from 'react';
 import { addPaymentCache, CREATE_ONE_OFF_PAYMENT_MUTATION } from '../../../graphql';
 import { Account, OneOffPayment } from '../../../types';
 import { useAccountContext } from '../../../state/account-context';
-import { PaymentsDuePopup } from '../../Popups';
+import { PaymentsDuePopup } from '../Popups';
 import { LoadingCard } from './LoadingCard';
 import { TotalCard } from './TotalCard';
 
 export const PaymentsDueCard = () => {
   const {
-    state: { account }
+    state: { account, user }
   } = useAccountContext();
 
   const { paymentsDueTotal }: Account = account;
@@ -28,7 +28,7 @@ export const PaymentsDueCard = () => {
             createOneOffPayment: { oneOffPayment }
           }
         }
-      ) => addPaymentCache(cache, oneOffPayment)
+      ) => addPaymentCache(cache, oneOffPayment, user)
     });
   };
 

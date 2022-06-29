@@ -1,8 +1,8 @@
 import { ApolloProvider } from '@apollo/client/react';
 import { ThemeProvider } from '@mui/material/styles';
-import { Homepage } from './components/Homepage';
-import { client } from './graphql';
 import { AccountProvider } from './state/account-context';
+import { client } from './graphql';
+import { AppRoutes } from './pages';
 import { theme } from './utils';
 import './scss/app.scss';
 
@@ -12,7 +12,7 @@ const App = () => {
       <ThemeProvider theme={theme}>
         <AccountProvider>
           <div className="app">
-            <Homepage />
+            <AppRoutes />
           </div>
         </AccountProvider>
       </ThemeProvider>

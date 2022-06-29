@@ -1,8 +1,9 @@
 import { useMutation } from '@apollo/client';
-import { CircularProgress, IconButton } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { CircularProgress, IconButton } from '@mui/material';
 import { Fragment } from 'react';
 import { deleteNoteCache, DELETE_NOTE_MUTATION } from '../../graphql';
+import { useAccountContext } from '../../state';
 import { getDateFromTimestamp } from '../../utils';
 
 interface NoteProps {
@@ -12,6 +13,9 @@ interface NoteProps {
 }
 
 export const NoteCard = ({ id, body, createdAt }: NoteProps) => {
+  const {
+    state: { user }
+  } = useAccountContext();
   const [deleteNote, { loading }] = useMutation(DELETE_NOTE_MUTATION);
 
   const deleteSelectedNote = () => {
@@ -24,7 +28,7 @@ export const NoteCard = ({ id, body, createdAt }: NoteProps) => {
             deleteNote: { note }
           }
         }
-      ) => deleteNoteCache(cache, note)
+      ) => deleteNoteCache(cache, note, user)
     });
   };
 
