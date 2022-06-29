@@ -28,6 +28,7 @@ export const AppRoutes = () => {
             <Route path="/" element={<Homepage />} />
             <Route path="/forecast" element={<Forecast />} />
             <Route path="/notes" element={<Notes />} />
+            <Route path="setup" element={<Navigate replace to="/" />} />
           </Route>
 
           <Route path="/setup" element={<Setup />} />
