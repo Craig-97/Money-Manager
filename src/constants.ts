@@ -1,6 +1,7 @@
 export const EVENTS = {
   GET_ACCOUNT_DETAILS: 'GET_ACCOUNT_DETAILS',
-  LOGIN: 'LOGIN'
+  LOGIN: 'LOGIN',
+  LOGOUT: 'LOGOUT'
 };
 
 export const TYPES = {

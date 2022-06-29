@@ -1,4 +1,5 @@
 import { EVENTS } from '../constants';
+import { initialState } from './account-context';
 
 export const reducer = (state: any, action: any) => {
   const { type, data } = action;
@@ -13,6 +14,11 @@ export const reducer = (state: any, action: any) => {
       return {
         ...state,
         user: { ...data }
+      };
+    }
+    case EVENTS.LOGOUT: {
+      return {
+        ...initialState
       };
     }
     default:
