@@ -11,7 +11,7 @@ export const LogoutButton = () => {
 
   return (
     <Tooltip title="Logout">
-      <IconButton onClick={() => logout(navigate, client)}>
+      <IconButton className="logout-button" onClick={() => logout(navigate, client)}>
         <Logout />
       </IconButton>
     </Tooltip>
