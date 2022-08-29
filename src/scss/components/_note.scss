@@ -54,7 +54,7 @@
     }
   }
 
-  &__footer {
+  .note__footer {
     @include flexbox($justifyContent: space-between, $alignItems: center);
 
     .ghost-button {

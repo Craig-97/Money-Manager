@@ -2,10 +2,17 @@
 
 .header {
   @include flexbox($justifyContent: space-between, $alignItems: center);
+  @include respond(mobile) {
+    justify-content: center;
+  }
 
   h1 {
     margin: 2rem 0;
     font-size: $header-resize;
+
+    @include respond(mobile) {
+      font-size: $header-mobile;
+    }
   }
 
   .MuiIconButton-root {
@@ -16,9 +23,8 @@
     }
   }
 
-  /* TEMP HEADER FIX UNTIL NEW NAV BAR IS INTRODUCED */
-  @include respond(mobile) {
-    .logout-button {
+  .header__buttons {
+    @include respond(mobile) {
       display: none;
     }
   }
