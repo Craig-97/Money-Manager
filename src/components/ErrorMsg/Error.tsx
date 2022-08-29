@@ -2,6 +2,7 @@ import { ApolloError, useApolloClient } from '@apollo/client';
 import { useAccountContext } from '../../state';
 import { logout } from '../../utils';
 import { getGQLTokenExpired } from '../../utils/selectors/GQLErrors';
+import { Loading } from '../Loading';
 
 interface ErrorProps {
   error: ApolloError;
@@ -15,6 +16,7 @@ export const Error = ({ error }: ErrorProps) => {
   // Expired token errors get automatically logged out
   if (isExpired) {
     logout(undefined, client, dispatch);
+    return <Loading />;
   }
 
   return (
