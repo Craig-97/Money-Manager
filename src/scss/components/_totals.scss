@@ -43,7 +43,7 @@
       }
 
       .negative {
-        color: $action;
+        color: $secondary;
       }
     }
 
@@ -53,8 +53,8 @@
     }
   }
 
-  .bank-balance-total-card,
-  .free-to-spend-total-card {
+  .payments-due-total-card,
+  .monthly-bills-total-card {
     .MuiCard-root .MuiCardContent-root .negative {
       color: $secondary;
     }
