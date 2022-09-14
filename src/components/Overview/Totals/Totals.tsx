@@ -19,7 +19,7 @@ export const Totals = () => {
     <div className="totals">
       <BankBalanceCard />
       <TotalCard
-        classBaseName="free"
+        classBaseName="free-to-spend"
         title={'FREE TO SPEND'}
         amount={bankFreeToSpend}
         icon={<PaymentIcon color="action" />}
@@ -28,7 +28,7 @@ export const Totals = () => {
       <PaymentsDueCard />
       <MonthlyBillsCard />
       <TotalCard
-        classBaseName="payday-bank-total"
+        classBaseName="payday-bank"
         title={'PAYDAY TOTAL'}
         amount={bankPaydayTotal}
         icon={<AccountBalanceIcon color="primary" />}

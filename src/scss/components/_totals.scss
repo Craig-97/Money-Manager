@@ -53,6 +53,13 @@
     }
   }
 
+  .bank-balance-total-card,
+  .free-to-spend-total-card {
+    .MuiCard-root .MuiCardContent-root .negative {
+      color: $red;
+    }
+  }
+
   .loading-total-card {
     .MuiCard-root {
       @include flexbox($justifyContent: center, $alignItems: center);
