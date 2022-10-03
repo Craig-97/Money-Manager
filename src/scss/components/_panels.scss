@@ -1,7 +1,7 @@
 @use '../abstracts' as *;
 
 .overview-panels {
-  margin: 0 0 4rem;
+  margin: 0 0 5.5rem;
 
   @include respond(mobile) {
     max-width: $panel-mobile-width;
