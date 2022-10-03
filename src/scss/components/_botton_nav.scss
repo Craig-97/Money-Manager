@@ -1,0 +1,19 @@
+@use '../abstracts' as *;
+
+.MuiBottomNavigation-root.bottom-nav {
+  @include respond(mobile) {
+    display: flex;
+  }
+  display: none;
+  width: 100%;
+  position: fixed;
+  bottom: 0;
+  z-index: 100;
+  background-image: $background-image;
+  border-top: 1px solid $light-border;
+
+  .MuiSvgIcon-root {
+    height: $bottom-nav-icon;
+    width: $bottom-nav-icon;
+  }
+}
