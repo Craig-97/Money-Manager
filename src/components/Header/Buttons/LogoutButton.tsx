@@ -3,8 +3,8 @@ import { useApolloClient } from '@apollo/client';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import { useNavigate } from 'react-router-dom';
-import { logout } from '../../../utils';
-import { useAccountContext } from '../../../state';
+import { logout } from '~/utils';
+import { useAccountContext } from '~/state';
 
 export const LogoutButton = () => {
   const navigate = useNavigate();

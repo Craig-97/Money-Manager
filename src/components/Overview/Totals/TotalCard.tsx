@@ -3,7 +3,7 @@ import CardActionArea from '@mui/material/CardActionArea';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 import { MouseEventHandler, ReactNode } from 'react';
-import { isNegative, positiveNumber } from '../../../utils';
+import { isNegative, positiveNumber } from '~/utils';
 
 interface TotalCardProps {
   classBaseName?: string;

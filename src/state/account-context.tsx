@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer } from 'react';
-import { Account, User } from '../types';
+import { Account, User } from '~/types';
 import { reducer } from './reducer';
 
 export const initialState = {

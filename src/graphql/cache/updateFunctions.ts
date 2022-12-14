@@ -1,5 +1,5 @@
 import { ApolloCache } from '@apollo/client';
-import { Account, AccountData, Bill, Note, OneOffPayment, User } from '../../types';
+import { Account, AccountData, Bill, Note, OneOffPayment, User } from '~/types';
 import {
   getBillDeleted,
   getNewBillAdded,
@@ -7,7 +7,7 @@ import {
   getNewOneOffPaymentAdded,
   getNoteDeleted,
   getOneOffPaymentDeleted
-} from '../../utils';
+} from '~/utils';
 import { GET_ACCOUNT_QUERY } from '../queries';
 
 /* ADDS ONE OFF PAYMENT TO ONEOFFPAYMENTS ARRAY */

@@ -10,9 +10,9 @@ import InputAdornment from '@mui/material/InputAdornment';
 import TextField from '@mui/material/TextField';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { ChangeEvent, DispatchWithoutAction, KeyboardEvent, useEffect, useState } from 'react';
-import { Account, Bill } from '../../../../types';
-import { useAccountContext } from '../../../../state/account-context';
-import { getNumberAmount } from '../../../../utils';
+import { Account, Bill } from '~/types';
+import { useAccountContext } from '~/state/account-context';
+import { getNumberAmount } from '~/utils';
 
 interface MonthlyBillsPopupProps {
   title: string;

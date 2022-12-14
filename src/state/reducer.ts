@@ -1,4 +1,4 @@
-import { EVENTS } from '../constants';
+import { EVENTS } from '~/constants';
 import { initialState } from './account-context';
 
 export const reducer = (state: any, action: any) => {

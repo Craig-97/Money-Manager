@@ -2,9 +2,9 @@ import { useMutation } from '@apollo/client';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { CircularProgress, IconButton } from '@mui/material';
 import { Fragment } from 'react';
-import { deleteNoteCache, DELETE_NOTE_MUTATION } from '../../graphql';
-import { useAccountContext } from '../../state';
-import { getDateFromTimestamp } from '../../utils';
+import { deleteNoteCache, DELETE_NOTE_MUTATION } from '~/graphql';
+import { useAccountContext } from '~/state';
+import { getDateFromTimestamp } from '~/utils';
 
 interface NoteProps {
   id?: string;

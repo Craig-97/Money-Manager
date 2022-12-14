@@ -1,5 +1,5 @@
 import { getAmountTotal, getPaymentsDue, getBills } from '../selectors';
-import { Account } from '../../types';
+import { Account } from '~/types';
 
 export const getAccountData = (account: Account) => {
   if (!account) return {};

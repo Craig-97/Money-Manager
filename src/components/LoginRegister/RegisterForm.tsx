@@ -4,10 +4,10 @@ import TextField from '@mui/material/TextField';
 import { useFormik } from 'formik';
 import { useNavigate } from 'react-router-dom';
 import * as Yup from 'yup';
-import { ERRORS, EVENTS } from '../../constants';
-import { REGISTER_AND_LOGIN_MUTATION } from '../../graphql';
-import { useAccountContext } from '../../state';
-import { RegisterData } from '../../types';
+import { ERRORS, EVENTS } from '~/constants';
+import { REGISTER_AND_LOGIN_MUTATION } from '~/graphql';
+import { useAccountContext } from '~/state';
+import { RegisterData } from '~/types';
 
 export const RegisterForm = () => {
   const navigate = useNavigate();
