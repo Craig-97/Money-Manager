@@ -1,4 +1,4 @@
-import { LogoutButton } from '../components/Header/Buttons';
+import { LogoutButton } from '~/components/Header/Buttons';
 
 export const Setup = () => {
   return (

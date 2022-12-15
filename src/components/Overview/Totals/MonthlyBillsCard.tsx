@@ -1,9 +1,9 @@
 import { useMutation } from '@apollo/client';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import { Fragment, useCallback, useState } from 'react';
-import { addBillCache, CREATE_BILL_MUTATION } from '../../../graphql';
-import { Account, Bill } from '../../../types';
-import { useAccountContext } from '../../../state/account-context';
+import { addBillCache, CREATE_BILL_MUTATION } from '~/graphql';
+import { Account, Bill } from '~/types';
+import { useAccountContext } from '~/state/account-context';
 import { MonthlyBillsPopup } from '../Popups';
 import { LoadingCard } from './LoadingCard';
 import { TotalCard } from './TotalCard';

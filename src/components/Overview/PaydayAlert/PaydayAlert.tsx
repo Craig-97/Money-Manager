@@ -1,6 +1,6 @@
 import { Alert } from '@mui/material';
 import { useState } from 'react';
-import { formatFullDate, getPayday } from '../../../utils';
+import { formatFullDate, getPayday } from '~/utils';
 
 export const PaydayAlert = () => {
   const { next, isPayday } = getPayday(new Date());

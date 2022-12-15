@@ -9,7 +9,7 @@ import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import { ChangeEvent, useEffect } from 'react';
 import { Column, usePagination, useRowSelect, useSortBy, useTable } from 'react-table';
-import { useIsDesktop } from '../../utils';
+import { useIsDesktop } from '~/utils';
 import { TablePaginationActions } from './TablePaginationActions';
 
 interface TableProps {

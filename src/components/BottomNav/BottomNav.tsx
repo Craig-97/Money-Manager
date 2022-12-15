@@ -7,8 +7,8 @@ import BottomNavigation from '@mui/material/BottomNavigation';
 import BottomNavigationAction from '@mui/material/BottomNavigationAction';
 import { SyntheticEvent, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useAccountContext } from '../../state';
-import { logout } from '../../utils';
+import { useAccountContext } from '~/state';
+import { logout } from '~/utils';
 
 export const BottomNav = () => {
   const client = useApolloClient();

@@ -5,7 +5,7 @@ import { useTheme } from '@mui/material/styles';
 import Tab from '@mui/material/Tab';
 import { useState } from 'react';
 import SwipeableViews from 'react-swipeable-views';
-import { TabPanel, Tabs } from '../../Tabs';
+import { TabPanel, Tabs } from '~/components/Tabs';
 import { MonthlyBills } from './MonthlyBills';
 import { PaymentsDue } from './PaymentsDue';
 

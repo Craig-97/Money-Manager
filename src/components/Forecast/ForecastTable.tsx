@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
-import { Account } from '../../types';
-import { useAccountContext } from '../../state/account-context';
-import { getForecastDate, getNextNumberOfMonths } from '../../utils';
+import { Account } from '~/types';
+import { useAccountContext } from '~/state/account-context';
+import { getForecastDate, getNextNumberOfMonths } from '~/utils';
 import { Table } from '../Table';
 
 interface ForecastTableProps {
