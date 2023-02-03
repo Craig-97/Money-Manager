@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Navigate, Outlet, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom';
 import { AccountRoutes, ProtectedRoutes, PublicRoutes } from './routes';
 import { Loading } from '~/components/Loading';
 import { Error } from '~/components/ErrorMsg';
