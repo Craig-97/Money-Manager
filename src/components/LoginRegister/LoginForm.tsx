@@ -13,8 +13,8 @@ export const LoginForm = () => {
   const navigate = useNavigate();
   const { dispatch } = useAccountContext();
   const [loginQuery, { loading }] = useLazyQuery<LoginData>(LOGIN_QUERY, {
-    onCompleted: data => onLoginCompleted(data),
-    onError: errors => onLoginError(errors)
+    onCompleted: (data: LoginData) => onLoginCompleted(data),
+    onError: (errors: ApolloError) => onLoginError(errors)
   });
 
   const onLoginCompleted = (response: LoginData) => {
