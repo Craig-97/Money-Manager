@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Navigate, Outlet, Route, Routes } from 'react-router-dom';
 import { AccountRoutes, ProtectedRoutes, PublicRoutes } from './routes';
 import { Loading } from '~/components/Loading';
 import { Error } from '~/components/ErrorMsg';
@@ -28,10 +28,8 @@ export const AppRoutes = () => {
             <Route path="/" element={<Homepage />} />
             <Route path="/forecast" element={<Forecast />} />
             <Route path="/notes" element={<Notes />} />
-            <Route path="setup" element={<Navigate replace to="/" />} />
           </Route>
-
-          <Route path="/setup" element={<Setup />} />
+          <Route path="/setup" element={accountExists ? <Navigate replace to="/" /> : <Setup />} />
         </Route>
 
         {/** Public Routes */}
