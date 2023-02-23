@@ -51,7 +51,7 @@ export const RegisterForm = () => {
       .matches(/(?=.*[0-9])/, 'Password must contain a number.'),
     confirmPassword: Yup.string()
       .required(`Confirm Password required`)
-      .oneOf([Yup.ref('password'), null], 'Passwords must match')
+      .oneOf([Yup.ref('password')], 'Passwords must match')
   });
 
   const formik = useFormik({
