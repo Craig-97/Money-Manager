@@ -11,8 +11,7 @@ Work in progress app: https://craig-money-manager.netlify.app/
 
 ### Mobile Preview
 
-![image](https://user-images.githubusercontent.com/41014229/230735145-3bec6012-64ea-4647-9f40-26b066857e6b.png)
-![image](https://user-images.githubusercontent.com/41014229/230735172-dab1532a-07ae-4857-829f-3c6b6aade036.png)
+![image](https://user-images.githubusercontent.com/41014229/230735145-3bec6012-64ea-4647-9f40-26b066857e6b.png) ![image](https://user-images.githubusercontent.com/41014229/230735172-dab1532a-07ae-4857-829f-3c6b6aade036.png)
 
 
 [See Back-end API here](https://github.com/Craig-97/Money-Manager-API)
