@@ -11,6 +11,7 @@ import {
 import { Account, Bill } from '~/types';
 import { useAccountContext } from '~/state';
 import { MonthlyBillsPopup } from '../PopupForms';
+import { useSnackbar } from 'notistack';
 
 interface EditMonthlyBillsPopupProps {
   isOpen: boolean;
@@ -28,14 +29,15 @@ export const EditMonthlyBillsPopup = ({
   } = useAccountContext();
   const { bankBalance, id }: Account = account;
   const { id: billId, name, amount, paid }: Bill = selectedBill;
+  const { enqueueSnackbar } = useSnackbar();
 
-  const [editBill, { loading: billLoading }] = useMutation(EDIT_BILL_MUTATION, {
-    onCompleted: data => onEditBillCompleted(data)
-  });
+  const [editBill, { loading: billLoading }] = useMutation(EDIT_BILL_MUTATION);
 
-  const editNewBill = (bill: Bill) => {
+  const editSelectedBill = (bill: Bill) => {
     editBill({
-      variables: { id: billId, bill }
+      variables: { id: billId, bill },
+      onCompleted: data => onEditBillCompleted(data),
+      onError: err => enqueueSnackbar(err?.message, { variant: 'error' })
     });
   };
 
@@ -59,7 +61,8 @@ export const EditMonthlyBillsPopup = ({
                 editAccount: { account }
               }
             }
-          ) => editAccountCache(cache, account, user)
+          ) => editAccountCache(cache, account, user),
+          onError: err => enqueueSnackbar(err?.message, { variant: 'error' })
         });
       }
     }
@@ -77,7 +80,8 @@ export const EditMonthlyBillsPopup = ({
             deleteBill: { bill }
           }
         }
-      ) => deleteBillCache(cache, bill, user)
+      ) => deleteBillCache(cache, bill, user),
+      onError: err => enqueueSnackbar(err?.message, { variant: 'error' })
     });
   };
 
@@ -92,7 +96,7 @@ export const EditMonthlyBillsPopup = ({
   return isOpen ? (
     <MonthlyBillsPopup
       title="Edit Monthly Bill"
-      onSave={editNewBill}
+      onSave={editSelectedBill}
       onDelete={deleteSelectedBill}
       isOpen={isOpen}
       close={close}

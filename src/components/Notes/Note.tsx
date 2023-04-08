@@ -5,6 +5,7 @@ import { Fragment } from 'react';
 import { deleteNoteCache, DELETE_NOTE_MUTATION } from '~/graphql';
 import { useAccountContext } from '~/state';
 import { getDateFromTimestamp } from '~/utils';
+import { useSnackbar } from 'notistack';
 
 interface NoteProps {
   id?: string;
@@ -16,6 +17,8 @@ export const NoteCard = ({ id, body, createdAt }: NoteProps) => {
   const {
     state: { user }
   } = useAccountContext();
+  const { enqueueSnackbar } = useSnackbar();
+
   const [deleteNote, { loading }] = useMutation(DELETE_NOTE_MUTATION);
 
   const deleteSelectedNote = () => {
@@ -28,7 +31,8 @@ export const NoteCard = ({ id, body, createdAt }: NoteProps) => {
             deleteNote: { note }
           }
         }
-      ) => deleteNoteCache(cache, note, user)
+      ) => deleteNoteCache(cache, note, user),
+      onError: err => enqueueSnackbar(err?.message, { variant: 'error' })
     });
   };
 

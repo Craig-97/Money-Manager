@@ -11,6 +11,8 @@ import {
 import { Account, OneOffPayment } from '~/types';
 import { useAccountContext } from '~/state/account-context';
 import { PaymentsDuePopup } from '../PopupForms';
+import { useSnackbar } from 'notistack';
+
 interface EditPaymentsDuePopupProps {
   isOpen: boolean;
   close: DispatchWithoutAction;
@@ -27,20 +29,19 @@ export const EditPaymentsDuePopup = ({
   } = useAccountContext();
   const { bankBalance, id }: Account = account;
   const { id: paymentId, name, amount }: OneOffPayment = selectedPayment;
+  const { enqueueSnackbar } = useSnackbar();
 
   const [editPayment, { loading: paymentLoading }] = useMutation(EDIT_ONE_OFF_PAYMENT_MUTATION);
 
-  const editNewPayment = (oneOffPayment: OneOffPayment) => {
+  const editSelectedPayment = (oneOffPayment: OneOffPayment) => {
     editPayment({
-      variables: { id: paymentId, oneOffPayment }
+      variables: { id: paymentId, oneOffPayment },
+      onError: err => enqueueSnackbar(err?.message, { variant: 'error' })
     });
   };
 
   const [deletePayment, { loading: delPaymentLoading }] = useMutation(
-    DELETE_ONE_OFF_PAYMENT_MUTATION,
-    {
-      onCompleted: data => onPaymentDeleted(data)
-    }
+    DELETE_ONE_OFF_PAYMENT_MUTATION
   );
 
   const deleteSelectedPayment = () => {
@@ -53,7 +54,9 @@ export const EditPaymentsDuePopup = ({
             deleteOneOffPayment: { oneOffPayment }
           }
         }
-      ) => deletePaymentCache(cache, oneOffPayment, user)
+      ) => deletePaymentCache(cache, oneOffPayment, user),
+      onCompleted: data => onPaymentDeleted(data),
+      onError: err => enqueueSnackbar(err?.message, { variant: 'error' })
     });
   };
 
@@ -77,7 +80,8 @@ export const EditPaymentsDuePopup = ({
                 editAccount: { account }
               }
             }
-          ) => editAccountCache(cache, account, user)
+          ) => editAccountCache(cache, account, user),
+          onError: err => enqueueSnackbar(err?.message, { variant: 'error' })
         });
       }
     }
@@ -94,7 +98,7 @@ export const EditPaymentsDuePopup = ({
   return isOpen ? (
     <PaymentsDuePopup
       title="Edit Upcoming Payment"
-      onSave={editNewPayment}
+      onSave={editSelectedPayment}
       isOpen={isOpen}
       close={close}
       onDelete={deleteSelectedPayment}
