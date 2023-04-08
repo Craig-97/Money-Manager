@@ -2,7 +2,7 @@
 
 Front-end for web app built that tracks finances using React and GraphQL
 
-W.I.P app can be found @ https://craig-money-manager.netlify.app/
+Work in progress app: https://craig-money-manager.netlify.app/
 
 
 
