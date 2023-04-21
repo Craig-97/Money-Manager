@@ -30,7 +30,9 @@ export const Panels = () => {
       </AppBar>
       <Swiper
         ref={swiperRef}
-        slidesPerView={1}
+        slidesPerView="auto"
+        cssMode={true}
+        height={450}
         onSlideChange={swiper => swiper?.activeIndex !== value && setValue(swiper?.activeIndex)}>
         <SwiperSlide>
           <TabPanel value={value} index={0}>

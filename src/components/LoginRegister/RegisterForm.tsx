@@ -8,7 +8,6 @@ import { ERRORS, EVENTS } from '~/constants';
 import { REGISTER_AND_LOGIN_MUTATION } from '~/graphql';
 import { useAccountContext } from '~/state';
 import { RegisterData } from '~/types';
-import { AutoFocusTextField } from './AutoFocusTextField';
 
 export const RegisterForm = () => {
   const navigate = useNavigate();
@@ -82,7 +81,8 @@ export const RegisterForm = () => {
 
   return (
     <form onSubmit={formik.handleSubmit}>
-      <AutoFocusTextField
+      <TextField
+        autoFocus
         fullWidth
         id="fname"
         label="First Name"

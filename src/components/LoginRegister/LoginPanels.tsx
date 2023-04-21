@@ -27,8 +27,9 @@ export const LoginPanels = () => {
         </Tabs>
       </AppBar>
       <Swiper
+        cssMode={true}
         ref={swiperRef}
-        slidesPerView={1}
+        slidesPerView="auto"
         onSlideChange={swiper => swiper?.activeIndex !== value && setValue(swiper?.activeIndex)}>
         <SwiperSlide>
           <TabPanel value={value} index={0}>

@@ -8,7 +8,6 @@ import { ERRORS, EVENTS } from '~/constants';
 import { LOGIN_QUERY } from '~/graphql';
 import { useAccountContext } from '~/state';
 import { LoginData } from '~/types';
-import { AutoFocusTextField } from './AutoFocusTextField';
 
 export const LoginForm = () => {
   const navigate = useNavigate();
@@ -67,7 +66,8 @@ export const LoginForm = () => {
 
   return (
     <form onSubmit={formik.handleSubmit}>
-      <AutoFocusTextField
+      <TextField
+        autoFocus
         fullWidth
         id="email"
         label="Email Address"
