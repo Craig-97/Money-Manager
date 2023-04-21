@@ -13,7 +13,7 @@ const App = () => {
     <ApolloProvider client={client}>
       <ThemeProvider theme={theme}>
         <AccountProvider>
-          <SnackbarProvider anchorOrigin={{ horizontal: 'center', vertical: 'bottom' }}>
+          <SnackbarProvider anchorOrigin={{ horizontal: 'center', vertical: 'top' }}>
             <div className="app">
               <AppRoutes />
             </div>
