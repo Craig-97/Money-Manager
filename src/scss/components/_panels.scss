@@ -7,7 +7,8 @@
     max-width: $panel-mobile-width;
   }
 
-  .MuiBox-root {
+  .tab-panel {
+    padding: 24px;
     background-color: $background;
     background-image: $background-image;
     border-radius: 0 0 4px 4px;
@@ -17,7 +18,6 @@
     line-height: 1.5;
     letter-spacing: 0.00938em;
     max-height: 635px;
-    overflow-y: auto;
   }
 
   .upcoming-payments,

@@ -16,14 +16,14 @@
       min-width: $login-register-mobile-width;
     }
 
-    .MuiBox-root {
+    .tab-panel {
+      padding: 24px;
       border-radius: 0 0 4px 4px;
       font-size: $standard;
       font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
       font-weight: 400;
       line-height: 1.5;
       letter-spacing: 0.00938em;
-      overflow-y: auto;
 
       .MuiFormControl-root,
       .MuiButton-root {
