@@ -63,8 +63,7 @@
       border: 1px solid $ghost-white;
 
       &:hover,
-      &:active,
-      &:hover {
+      &:active {
         color: $ghost-white-hover-text;
         border: 1px solid $ghost-white-hover-border;
       }
