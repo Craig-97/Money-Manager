@@ -3,8 +3,10 @@ import { Bill, OneOffPayment } from '~/types';
 export const cheapestAscendingSort = (a: Bill | OneOffPayment, b: Bill | OneOffPayment) => {
   const amount1 = a?.amount || 0;
   const amount2 = b?.amount || 0;
+  const name1 = a?.name || ''
+  const name2 = b?.name || ''
 
-  return amount1 > amount2 ? 1 : -1;
+  return amount1 - amount2 || name1?.localeCompare(name2)
 };
 
 export const getAmountTotal = (amounts: Array<any>) =>

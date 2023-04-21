@@ -1,5 +1,4 @@
 import { ReactNode } from 'react';
-import Box from '@mui/material/Box';
 
 interface TabPanelProps {
   children?: ReactNode;
@@ -13,12 +12,13 @@ export const TabPanel = (props: TabPanelProps) => {
 
   return (
     <div
+      className="tab-panel"
       role="tabpanel"
       hidden={value !== index}
       id={`full-width-tabpanel-${index}`}
       aria-labelledby={`full-width-tab-${index}`}
       {...other}>
-      {value === index && <Box p={3}>{children}</Box>}
+      {value === index && <div>{children}</div>}
     </div>
   );
 };

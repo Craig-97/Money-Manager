@@ -7,6 +7,7 @@ import { useAccountContext } from '~/state/account-context';
 import { PaymentsDuePopup } from '../Popups';
 import { LoadingCard } from './LoadingCard';
 import { TotalCard } from './TotalCard';
+import { useSnackbar } from 'notistack';
 
 export const PaymentsDueCard = () => {
   const {
@@ -15,6 +16,7 @@ export const PaymentsDueCard = () => {
 
   const { paymentsDueTotal }: Account = account;
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const { enqueueSnackbar } = useSnackbar();
 
   const [createOneOffPayment, { loading }] = useMutation(CREATE_ONE_OFF_PAYMENT_MUTATION);
 
@@ -28,7 +30,8 @@ export const PaymentsDueCard = () => {
             createOneOffPayment: { oneOffPayment }
           }
         }
-      ) => addPaymentCache(cache, oneOffPayment, user)
+      ) => addPaymentCache(cache, oneOffPayment, user),
+      onError: err => enqueueSnackbar(err?.message, { variant: 'error' })
     });
   };
 

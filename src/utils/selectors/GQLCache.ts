@@ -1,7 +1,7 @@
 import { Account, Bill, Note, OneOffPayment } from '~/types';
 import { cheapestAscendingSort } from './account';
 
-/* Adds new one off payment to current payments due array and sorts based on amount field */
+/* Adds new one off payment to current payments due array and sorts based on amount field then alphabetically */
 export const getNewOneOffPaymentAdded = (account: Account, oneOffPayment: OneOffPayment) => {
   const oneOffPayments = [...(account.oneOffPayments || []), oneOffPayment].sort(
     cheapestAscendingSort
@@ -24,7 +24,7 @@ export const getOneOffPaymentDeleted = (account: Account, id: string) => {
   };
 };
 
-/* Adds new bill to current bill array and sorts based on amount field */
+/* Adds new bill to current bill array and sorts based on amount field then alphabetically*/
 export const getNewBillAdded = (account: Account, bill: Bill) => {
   const bills = [...(account.bills || []), bill].sort(cheapestAscendingSort);
 

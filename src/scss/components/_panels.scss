@@ -1,13 +1,15 @@
 @use '../abstracts' as *;
 
 .overview-panels {
-  margin: 0 0 5.5rem;
+  margin-bottom: 32px;
 
   @include respond(mobile) {
+    margin-bottom: 88px;
     max-width: $panel-mobile-width;
   }
 
-  .MuiBox-root {
+  .tab-panel {
+    padding: 24px;
     background-color: $background;
     background-image: $background-image;
     border-radius: 0 0 4px 4px;
@@ -16,18 +18,13 @@
     font-weight: 400;
     line-height: 1.5;
     letter-spacing: 0.00938em;
-    max-height: 635px;
+    max-height: 630px;
     overflow-y: auto;
   }
 
   .upcoming-payments,
   .monthly-bills {
-    h4 {
-      margin: 0.5rem 0;
-    }
-
     .total,
-    .transaction,
     .payment,
     .bill {
       @include flexbox($justifyContent: space-between, $alignItems: center);
@@ -35,6 +32,7 @@
       h3 {
         margin: 0.25rem 0 0;
         font-size: $totals-footer;
+        cursor: default;
       }
 
       h5 {
@@ -49,10 +47,24 @@
         margin-left: 20px;
         font-size: $standard;
         font-weight: 500;
+        cursor: default;
       }
 
       .negative {
         color: $action;
+      }
+    }
+
+    .bill,
+    .payment {
+      h5 {
+        &:hover {
+          cursor: pointer;
+          background: #303030;
+          transform: scale(1.05);
+          padding: 0 5px;
+          border-radius: 8px;
+        }
       }
     }
 

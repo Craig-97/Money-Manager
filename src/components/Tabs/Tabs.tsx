@@ -1,15 +1,15 @@
 import { default as MaterialTabs } from '@mui/material/Tabs';
-import { ChangeEvent, Dispatch, ReactNode } from 'react';
+import { ChangeEvent, ReactNode } from 'react';
 
 interface TabsProps {
   value: number;
-  setValue: Dispatch<number>;
+  onChange: (index: number) => void;
   children?: ReactNode;
 }
 
-export const Tabs = ({ value, setValue, children }: TabsProps) => {
+export const Tabs = ({ value, onChange, children }: TabsProps) => {
   const handleChange = (event: ChangeEvent<{}>, newValue: number) => {
-    setValue(newValue);
+    onChange(newValue);
   };
 
   return (

@@ -7,6 +7,7 @@ import { useAccountContext } from '~/state/account-context';
 import { MonthlyBillsPopup } from '../Popups';
 import { LoadingCard } from './LoadingCard';
 import { TotalCard } from './TotalCard';
+import { useSnackbar } from 'notistack';
 
 export const MonthlyBillsCard = () => {
   const {
@@ -14,6 +15,7 @@ export const MonthlyBillsCard = () => {
   } = useAccountContext();
   const { billsTotal }: Account = account;
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const { enqueueSnackbar } = useSnackbar();
 
   const [createBill, { loading }] = useMutation(CREATE_BILL_MUTATION);
 
@@ -27,7 +29,8 @@ export const MonthlyBillsCard = () => {
             createBill: { bill }
           }
         }
-      ) => addBillCache(cache, bill, user)
+      ) => addBillCache(cache, bill, user),
+      onError: err => enqueueSnackbar(err?.message, { variant: 'error' })
     });
   };
 
