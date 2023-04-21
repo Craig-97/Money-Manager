@@ -24,12 +24,7 @@
 
   .upcoming-payments,
   .monthly-bills {
-    h4 {
-      margin: 0.5rem 0;
-    }
-
     .total,
-    .transaction,
     .payment,
     .bill {
       @include flexbox($justifyContent: space-between, $alignItems: center);
@@ -37,6 +32,7 @@
       h3 {
         margin: 0.25rem 0 0;
         font-size: $totals-footer;
+        cursor: default;
       }
 
       h5 {
@@ -51,10 +47,26 @@
         margin-left: 20px;
         font-size: $standard;
         font-weight: 500;
+        cursor: default;
       }
 
       .negative {
         color: $action;
+      }
+    }
+
+    .bill,
+    .payment {
+      h5 {
+        &:hover,
+        &:active,
+        &:hover {
+          cursor: pointer;
+          background: #303030;
+          transform: scale(1.05);
+          padding: 0 5px;
+          border-radius: 8px;
+        }
       }
     }
 
