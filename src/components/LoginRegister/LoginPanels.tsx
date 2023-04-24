@@ -1,21 +1,20 @@
 import AppBar from '@mui/material/AppBar';
 import Tab from '@mui/material/Tab';
 import { useRef, useState } from 'react';
-import { Swiper, SwiperRef, SwiperSlide } from 'swiper/react';
 import { TabPanel, Tabs } from '../Tabs';
 import { LoginForm } from './LoginForm';
 import { RegisterForm } from './RegisterForm';
+import Slider from 'react-slick';
 
 export const LoginPanels = () => {
   const [value, setValue] = useState<number>(0);
-  const swiperRef = useRef<SwiperRef>(null);
+  const sliderRef = useRef<Slider | null>(null);
 
   const onTabChange = (index: number) => {
     if (index !== value) {
       setValue(index);
+      sliderRef?.current?.slickGoTo(index, true);
     }
-
-    swiperRef?.current?.swiper?.slideTo(index);
   };
 
   return (
@@ -26,22 +25,22 @@ export const LoginPanels = () => {
           <Tab label="Register" />
         </Tabs>
       </AppBar>
-      <Swiper
-        cssMode={true}
-        ref={swiperRef}
-        slidesPerView="auto"
-        onSlideChange={swiper => swiper?.activeIndex !== value && setValue(swiper?.activeIndex)}>
-        <SwiperSlide>
-          <TabPanel value={value} index={0}>
-            <LoginForm />
-          </TabPanel>
-        </SwiperSlide>
-        <SwiperSlide>
-          <TabPanel value={value} index={1}>
-            <RegisterForm />
-          </TabPanel>
-        </SwiperSlide>
-      </Swiper>
+      <Slider
+        ref={sliderRef}
+        speed={350}
+        dots={false}
+        arrows={false}
+        infinite={false}
+        draggable={false}
+        adaptiveHeight
+        beforeChange={(_, newIndex) => newIndex !== value && setValue(newIndex)}>
+        <TabPanel value={value} index={0}>
+          <LoginForm />
+        </TabPanel>
+        <TabPanel value={value} index={1}>
+          <RegisterForm />
+        </TabPanel>
+      </Slider>
     </div>
   );
 };

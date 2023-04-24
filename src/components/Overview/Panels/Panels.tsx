@@ -6,18 +6,17 @@ import { useRef, useState } from 'react';
 import { TabPanel, Tabs } from '~/components/Tabs';
 import { MonthlyBills } from './MonthlyBills';
 import { PaymentsDue } from './PaymentsDue';
-import { Swiper, SwiperRef, SwiperSlide } from 'swiper/react';
+import Slider from 'react-slick';
 
 export const Panels = () => {
   const [value, setValue] = useState<number>(0);
-  const swiperRef = useRef<SwiperRef>(null);
+  const sliderRef = useRef<Slider | null>(null);
 
   const onTabChange = (index: number) => {
     if (index !== value) {
       setValue(index);
+      sliderRef?.current?.slickGoTo(index, true);
     }
-
-    swiperRef?.current?.swiper?.slideTo(index);
   };
 
   return (
@@ -28,23 +27,21 @@ export const Panels = () => {
           <Tab label="Monthly bills" icon={<ReceiptIcon />} />
         </Tabs>
       </AppBar>
-      <Swiper
-        ref={swiperRef}
-        slidesPerView="auto"
-        cssMode={true}
-        height={450}
-        onSlideChange={swiper => swiper?.activeIndex !== value && setValue(swiper?.activeIndex)}>
-        <SwiperSlide>
-          <TabPanel value={value} index={0}>
-            <PaymentsDue />
-          </TabPanel>
-        </SwiperSlide>
-        <SwiperSlide>
-          <TabPanel value={value} index={1}>
-            <MonthlyBills />
-          </TabPanel>
-        </SwiperSlide>
-      </Swiper>
+      <Slider
+        ref={sliderRef}
+        dots={false}
+        arrows={false}
+        infinite={false}
+        draggable={false}
+        adaptiveHeight
+        beforeChange={(_, newIndex) => newIndex !== value && setValue(newIndex)}>
+        <TabPanel value={value} index={0}>
+          <PaymentsDue />
+        </TabPanel>
+        <TabPanel value={value} index={1}>
+          <MonthlyBills />
+        </TabPanel>
+      </Slider>
     </div>
   );
 };
