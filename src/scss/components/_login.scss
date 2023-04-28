@@ -17,6 +17,8 @@
     }
 
     .tab-panel {
+      display: block !important; //overwrite inline react-slick style
+      width: auto !important; //overwrite inline react-slick style
       padding: 24px;
       border-radius: 0 0 4px 4px;
       font-size: $standard;

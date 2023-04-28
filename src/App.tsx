@@ -6,7 +6,6 @@ import { client } from './graphql';
 import { AppRoutes } from './pages';
 import { theme } from './utils';
 import './scss/app.scss';
-import 'swiper/scss';
 
 const App = () => {
   return (
