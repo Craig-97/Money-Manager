@@ -7,11 +7,11 @@ Front-end for web app built that tracks finances using React and GraphQL
 https://craig-money-manager.netlify.app/
 
 
-***Sign-up process is not complete: If you wish to demo the app use the following details:***
+***Sign-up process is not complete. If you wish to demo the app use the following details:***
 
 ```
-email: demo@test.com
-password: waracledemo1
+Email: demo@test.com
+Password: waracledemo1
 ```
 
 ## Desktop Preview
