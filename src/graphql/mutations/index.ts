@@ -1,5 +1,6 @@
 export * from './create-bill';
 export * from './create-note';
+export * from './edit-note';
 export * from './create-one-off-payment';
 export * from './register-and-login';
 export * from './delete-bill';

@@ -1,7 +1,7 @@
 @use '../abstracts' as *;
 
 .note {
-  @include flexbox($justifyContent: space-between, $direction: column);
+  @include flexbox($justifyContent: space-between);
   font-family: $font-family;
   font-size: $standard;
   font-weight: 500;
@@ -13,88 +13,6 @@
   padding: 24px;
   white-space: pre-wrap;
 
-  @include respond(tablet) {
-    min-width: unset;
-    span {
-      max-width: $note-span-width;
-    }
-  }
-
-  @include respond(mobile) {
-    max-width: 100%;
-    min-width: unset;
-
-    span {
-      max-width: $note-span-mobile-width;
-      min-width: $note-span-mobile-width;
-    }
-  }
-
-  @include respond(mobile-small) {
-    span {
-      min-width: unset;
-    }
-  }
-
-  textarea {
-    font-size: $standard;
-    font-family: $font-family;
-    font-weight: 500;
-    border: none;
-    resize: none;
-    background-color: $primary;
-
-    &:focus {
-      outline: none;
-    }
-
-    &::placeholder {
-      color: $black;
-      opacity: 0.75;
-    }
-  }
-
-  .note__footer {
-    @include flexbox($justifyContent: space-between, $alignItems: center);
-
-    .ghost-button {
-      margin: 0 0 0 2rem;
-      color: $ghost-white;
-      border: 1px solid $ghost-white;
-
-      &:hover,
-      &:active {
-        color: $ghost-white-hover-text;
-        border: 1px solid $ghost-white-hover-border;
-      }
-    }
-
-    .Mui-disabled {
-      color: $ghost-white-disabled-text;
-      border: 1px solid $light-border;
-    }
-
-    .MuiIconButton-root {
-      color: $black;
-
-      &:hover {
-        background-color: $hover-black;
-      }
-
-      .MuiTouchRipple-child {
-        background-color: $ripple-black;
-      }
-    }
-  }
-
-  &--loading {
-    justify-content: center;
-
-    .MuiCircularProgress-root {
-      min-width: 40px;
-    }
-  }
-
   &--new {
     min-width: $new-note-min-width;
     background-color: $primary;
@@ -102,10 +20,102 @@
     @include respond(laptop) {
       min-width: unset;
     }
+
+    .note__content .note__textarea {
+      background-color: $primary;
+    }
   }
 
-  small {
-    color: $black;
-    font-size: $standard;
+  .note__content {
+    @include flexbox($justifyContent: space-between, $direction: column);
+    width: 100%;
+
+    @include respond(tablet) {
+      min-width: unset;
+      span {
+        max-width: $note-span-width;
+      }
+    }
+
+    @include respond(mobile) {
+      max-width: 100%;
+      min-width: unset;
+
+      span {
+        max-width: $note-span-mobile-width;
+        min-width: $note-span-mobile-width;
+      }
+    }
+
+    @include respond(mobile-small) {
+      span {
+        min-width: unset;
+      }
+    }
+
+    textarea {
+      font-size: $standard;
+      font-family: $font-family;
+      font-weight: 500;
+      border: none;
+      resize: none;
+      background-color: $yellow-light;
+
+      &:focus {
+        outline: none;
+      }
+
+      &::placeholder {
+        color: $black;
+        opacity: 0.75;
+      }
+    }
+
+    .note__footer {
+      @include flexbox($justifyContent: space-between, $alignItems: center);
+      cursor: default;
+
+      .ghost-button {
+        margin: 0 0 0 2rem;
+        color: $ghost-white;
+        border: 1px solid $ghost-white;
+
+        &:hover,
+        &:active {
+          color: $ghost-white-hover-text;
+          border: 1px solid $ghost-white-hover-border;
+        }
+      }
+
+      .Mui-disabled {
+        color: $ghost-white-disabled-text;
+        border: 1px solid $light-border;
+      }
+
+      .MuiIconButton-root {
+        color: $black;
+
+        &:hover {
+          background-color: $hover-black;
+        }
+
+        .MuiTouchRipple-child {
+          background-color: $ripple-black;
+        }
+      }
+    }
+
+    &--loading {
+      justify-content: center;
+
+      .MuiCircularProgress-root {
+        min-width: 40px;
+      }
+    }
+
+    small {
+      color: $black;
+      font-size: $standard;
+    }
   }
 }

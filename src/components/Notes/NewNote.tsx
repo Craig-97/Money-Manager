@@ -51,8 +51,9 @@ export const NewNoteCard = () => {
   return (
     <div className={`note note--new ${loading && 'note--loading'}`}>
       {!loading ? (
-        <Fragment>
+        <div className="note__content">
           <textarea
+            className="note__textarea"
             rows={5}
             cols={10}
             placeholder="Type to add a note..."
@@ -68,7 +69,7 @@ export const NewNoteCard = () => {
               Save
             </Button>
           </div>
-        </Fragment>
+        </div>
       ) : (
         <div className="loading">
           <CircularProgress color="secondary" />
