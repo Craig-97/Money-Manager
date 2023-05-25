@@ -1,5 +1,5 @@
 import { Divider } from '@mui/material';
-import { Fragment, useCallback, useState } from 'react';
+import { Fragment, useState } from 'react';
 import { Account, Bill } from '~/types';
 import { useAccountContext } from '~/state';
 import { formatAmount, isNegative } from '~/utils';
@@ -17,10 +17,6 @@ export const MonthlyBills = () => {
     setSelectedBill(bill);
     setIsOpen(true);
   };
-
-  const closePopup = useCallback(() => {
-    setIsOpen(false);
-  }, []);
 
   return (
     <Fragment>
@@ -48,7 +44,11 @@ export const MonthlyBills = () => {
           </h3>
         </div>
       </div>
-      <EditMonthlyBillsPopup isOpen={isOpen} close={closePopup} selectedBill={selectedBill} />
+      <EditMonthlyBillsPopup
+        isOpen={isOpen}
+        close={() => setIsOpen(false)}
+        selectedBill={selectedBill}
+      />
     </Fragment>
   );
 };

@@ -1,5 +1,5 @@
 import { Divider } from '@mui/material';
-import { Fragment, useCallback, useState } from 'react';
+import { Fragment, useState } from 'react';
 import { TYPES } from '~/constants';
 import { Account, Bill, Modal, OneOffPayment } from '~/types';
 import { useAccountContext } from '~/state';
@@ -22,9 +22,9 @@ export const PaymentsDue = () => {
       : setIsOpen({ ...isOpen, PAYMENT_DUE: true });
   };
 
-  const closePopup = useCallback(() => {
+  const closePopup = () => {
     setIsOpen({ PAYMENT_DUE: false, BILL: false });
-  }, []);
+  };
 
   return (
     <Fragment>

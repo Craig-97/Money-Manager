@@ -1,6 +1,6 @@
 import { useMutation } from '@apollo/client';
 import LocalAtmIcon from '@mui/icons-material/LocalAtm';
-import { Fragment, useCallback, useState } from 'react';
+import { Fragment, useState } from 'react';
 import { editAccountCache, EDIT_ACCOUNT_MUTATION } from '~/graphql';
 import { Account } from '~/types';
 import { useAccountContext } from '~/state/account-context';
@@ -22,10 +22,6 @@ export const MonthlyIncomeCard = () => {
   const handleClickOpen = () => {
     setIsOpen(true);
   };
-
-  const closePopup = useCallback(() => {
-    setIsOpen(false);
-  }, []);
 
   const changeMonthlyIncome = (value: number | undefined) => {
     if (value && value !== monthlyIncome) {
@@ -61,7 +57,7 @@ export const MonthlyIncomeCard = () => {
       {isOpen && (
         <MonthlyIncomePopup
           isOpen={isOpen}
-          close={closePopup}
+          close={() => setIsOpen(false)}
           changeMonthlyIncome={changeMonthlyIncome}
         />
       )}
