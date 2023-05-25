@@ -1,2 +1,2 @@
-export * from './GQLCache';
 export * from './account';
+export * from './GQLErrors';

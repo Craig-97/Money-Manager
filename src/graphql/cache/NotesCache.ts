@@ -1,0 +1,23 @@
+import { ApolloCache } from '@apollo/client';
+import { Note, User } from '~/types';
+import { getAccountCache, updateAccountCache } from './AccountCache';
+
+/* Adds new note to current note array */
+export const addNoteCache = (cache: ApolloCache<any>, note: Note, user: User) => {
+  const { account } = getAccountCache(cache, user) || {};
+
+  if (account?.notes) {
+    const notes = [...(account.notes || []), note];
+    updateAccountCache(cache, { account: { ...account, ...{ notes } } });
+  }
+};
+
+/* Removes note from current notes array */
+export const deleteNoteCache = (cache: ApolloCache<any>, note: Note, user: User) => {
+  const { account } = getAccountCache(cache, user) || {};
+
+  if (account?.notes && note.id) {
+    const notes = account?.notes?.filter((n: Note) => n.id !== note.id);
+    updateAccountCache(cache, { account: { ...account, ...{ notes } } });
+  }
+};
