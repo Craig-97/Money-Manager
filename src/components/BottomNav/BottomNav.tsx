@@ -22,7 +22,6 @@ export const BottomNav = () => {
   return (
     <BottomNavigation className="bottom-nav" value={value} onChange={onChange}>
       <BottomNavigationAction value={'/'} icon={<HomeIcon />} component={Link} to={'/'} />
-
       <BottomNavigationAction
         value={'/forecast'}
         icon={<UpdateIcon />}
@@ -35,7 +34,6 @@ export const BottomNav = () => {
         component={Link}
         to={'/notes'}
       />
-
       <BottomNavigationAction
         value={'/logout'}
         icon={<Logout />}

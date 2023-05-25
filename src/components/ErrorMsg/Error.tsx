@@ -1,7 +1,7 @@
 import { ApolloError, useApolloClient } from '@apollo/client';
 import { useAccountContext } from '~/state';
 import { logout } from '~/utils';
-import { getGQLTokenExpired } from '~/utils/selectors/GQLErrors';
+import { getGQLTokenExpired } from '~/utils';
 import { Loading } from '../Loading';
 
 interface ErrorProps {
