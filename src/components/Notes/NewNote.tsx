@@ -1,5 +1,5 @@
 import { useMutation } from '@apollo/client';
-import { Button, CircularProgress } from '@mui/material';
+import { Button, Card, CardContent, CircularProgress } from '@mui/material';
 import { ChangeEvent, Fragment, useState } from 'react';
 import { addNoteCache, CREATE_NOTE_MUTATION } from '~/graphql';
 import { Note } from '~/types';
@@ -49,32 +49,33 @@ export const NewNoteCard = () => {
   };
 
   return (
-    <div className={`note note--new ${loading && 'note--loading'}`}>
-      {!loading ? (
-        <div className="note__content">
-          <textarea
-            className="note__textarea"
-            rows={5}
-            cols={10}
-            placeholder="Type to add a note..."
-            value={noteText}
-            onChange={handleChange}></textarea>
-          <div className="note__footer">
-            <small>{characterLimit - noteText.length} Remaining</small>
-            <Button
-              className="ghost-button"
-              variant="outlined"
-              disabled={!noteText}
-              onClick={handleSaveClick}>
-              Save
-            </Button>
+    <Card className={`note note--new ${loading && 'note--loading'}`}>
+      <CardContent className="note__content">
+        {!loading ? (
+          <Fragment>
+            <textarea
+              rows={5}
+              cols={10}
+              placeholder="Type to add a note..."
+              value={noteText}
+              onChange={handleChange}></textarea>
+            <div className="note__footer">
+              <small>{characterLimit - noteText.length} Remaining</small>
+              <Button
+                className="ghost-button"
+                variant="outlined"
+                disabled={!noteText}
+                onClick={handleSaveClick}>
+                Save
+              </Button>
+            </div>
+          </Fragment>
+        ) : (
+          <div className="loading">
+            <CircularProgress color="secondary" />
           </div>
-        </div>
-      ) : (
-        <div className="loading">
-          <CircularProgress color="secondary" />
-        </div>
-      )}
-    </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };

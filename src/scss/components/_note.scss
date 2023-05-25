@@ -1,79 +1,52 @@
 @use '../abstracts' as *;
 
-.note {
-  @include flexbox($justifyContent: space-between);
+.MuiCard-root.note {
   font-family: $font-family;
   font-size: $standard;
-  font-weight: 500;
-  min-width: 120px;
-  min-height: 120px;
-  color: $black;
   background-color: $yellow-light;
+  background-image: unset;
+  font-weight: 500;
+  color: $black;
   border-radius: 10px;
   padding: 24px;
   white-space: pre-wrap;
 
   &--new {
-    min-width: $new-note-min-width;
     background-color: $primary;
 
-    @include respond(laptop) {
-      min-width: unset;
-    }
+    .note__content {
+      textarea {
+        font-size: $standard;
+        font-family: $font-family;
+        font-weight: 500;
+        border: none;
+        resize: none;
+        background-color: $primary;
 
-    .note__content .note__textarea {
-      background-color: $primary;
+        &:focus {
+          outline: none;
+        }
+
+        &::placeholder {
+          color: $black;
+          opacity: 0.75;
+        }
+      }
+
+      .note__footer small {
+        opacity: 100%;
+      }
     }
   }
 
   .note__content {
     @include flexbox($justifyContent: space-between, $direction: column);
-    width: 100%;
-
-    @include respond(tablet) {
-      min-width: unset;
-      span {
-        max-width: $note-span-width;
-      }
-    }
-
-    @include respond(mobile) {
-      max-width: 100%;
-      min-width: unset;
-
-      span {
-        max-width: $note-span-mobile-width;
-        min-width: $note-span-mobile-width;
-      }
-    }
-
-    @include respond(mobile-small) {
-      span {
-        min-width: unset;
-      }
-    }
-
-    textarea {
-      font-size: $standard;
-      font-family: $font-family;
-      font-weight: 500;
-      border: none;
-      resize: none;
-      background-color: $yellow-light;
-
-      &:focus {
-        outline: none;
-      }
-
-      &::placeholder {
-        color: $black;
-        opacity: 0.75;
-      }
-    }
+    height: 100%;
+    min-height: 136px;
+    padding: 0;
 
     .note__footer {
       @include flexbox($justifyContent: space-between, $alignItems: center);
-      cursor: default;
 
       .ghost-button {
         margin: 0 0 0 2rem;
@@ -116,6 +89,7 @@
     small {
       color: $black;
       font-size: $standard;
+      opacity: 85%;
     }
   }
 }
