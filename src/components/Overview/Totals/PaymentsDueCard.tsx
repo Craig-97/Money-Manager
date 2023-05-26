@@ -1,6 +1,6 @@
 import { useMutation } from '@apollo/client';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
-import { Fragment, useCallback, useState } from 'react';
+import { Fragment, useState } from 'react';
 import { addPaymentCache, CREATE_ONE_OFF_PAYMENT_MUTATION } from '~/graphql';
 import { Account, OneOffPayment } from '~/types';
 import { useAccountContext } from '~/state/account-context';
@@ -39,10 +39,6 @@ export const PaymentsDueCard = () => {
     setIsOpen(true);
   };
 
-  const closePopup = useCallback(() => {
-    setIsOpen(false);
-  }, []);
-
   return (
     <Fragment>
       {!loading ? (
@@ -59,7 +55,7 @@ export const PaymentsDueCard = () => {
       <PaymentsDuePopup
         title="Add Upcoming Payment"
         isOpen={isOpen}
-        close={closePopup}
+        close={() => setIsOpen(false)}
         onSave={createNewOneOffPayment}
       />
     </Fragment>

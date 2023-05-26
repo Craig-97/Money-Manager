@@ -1,6 +1,6 @@
 import { useMutation } from '@apollo/client';
 import ReceiptIcon from '@mui/icons-material/Receipt';
-import { Fragment, useCallback, useState } from 'react';
+import { Fragment, useState } from 'react';
 import { addBillCache, CREATE_BILL_MUTATION } from '~/graphql';
 import { Account, Bill } from '~/types';
 import { useAccountContext } from '~/state/account-context';
@@ -38,10 +38,6 @@ export const MonthlyBillsCard = () => {
     setIsOpen(true);
   };
 
-  const closePopup = useCallback(() => {
-    setIsOpen(false);
-  }, []);
-
   return (
     <Fragment>
       {!loading ? (
@@ -58,7 +54,7 @@ export const MonthlyBillsCard = () => {
       <MonthlyBillsPopup
         title="Add Monthly Bill"
         isOpen={isOpen}
-        close={closePopup}
+        close={() => setIsOpen(false)}
         onSave={createNewBill}
       />
     </Fragment>
