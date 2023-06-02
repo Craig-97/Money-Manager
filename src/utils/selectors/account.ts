@@ -10,7 +10,7 @@ export const cheapestAscendingSort = (a: Bill | OneOffPayment, b: Bill | OneOffP
 };
 
 export const getAmountTotal = (amounts: Array<Bill | OneOffPayment>) =>
-  amounts?.reduce((n, { amount }) => (amount ? n + amount : n), 0);
+  amounts?.reduce((n, { amount }) => n + amount!, 0);
 
 export const getPaymentsDue = (oneOffPayments: Array<Bill | OneOffPayment>, bills: Array<Bill>) =>
   oneOffPayments

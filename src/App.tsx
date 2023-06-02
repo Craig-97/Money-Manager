@@ -3,7 +3,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import { SnackbarProvider } from 'notistack';
 import { AccountProvider } from './state/account-context';
 import { client } from './graphql';
-import { AppRoutes } from './pages';
+import { AppRoutes } from './routes';
 import { theme } from './utils';
 import './scss/app.scss';
 
