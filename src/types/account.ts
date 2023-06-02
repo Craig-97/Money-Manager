@@ -1,4 +1,4 @@
-import { OneOffPayment } from './OneOffPayment';
+import { OneOffPayment } from './oneOffPayment';
 import { Bill } from './bill';
 import { Note } from './note';
 import { User } from './user';

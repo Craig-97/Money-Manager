@@ -2,9 +2,14 @@ import { Divider } from '@mui/material';
 import { Fragment, useState } from 'react';
 import { TYPES } from '~/constants';
 import { useAccountContext } from '~/state';
-import { Bill, Modal, OneOffPayment } from '~/types';
+import { Bill, OneOffPayment } from '~/types';
 import { formatAmount, isNegative } from '~/utils';
 import { EditMonthlyBillsPopup, EditPaymentsDuePopup } from '../Popups';
+
+interface Modal {
+  PAYMENT_DUE: boolean;
+  BILL: boolean;
+}
 
 export const PaymentsDue = () => {
   const {
