@@ -1,4 +1,4 @@
-export * from './OneOffPayment';
+export * from './oneOffPayment';
 export * from './account';
 export * from './actions';
 export * from './bill';
