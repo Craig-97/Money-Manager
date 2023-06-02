@@ -1,13 +1,13 @@
 import { NewNoteCard, NoteCard } from '~/components/Notes';
 import { StandardPage } from '~/components/StandardPage';
 import { useAccountContext } from '~/state';
-import { Account, Note } from '~/types';
+import { AccountState, Note } from '~/types';
 
 export const Notes = () => {
   const {
     state: { account }
   } = useAccountContext();
-  const { notes }: Account = account;
+  const { notes }: AccountState = account;
 
   return (
     <StandardPage>

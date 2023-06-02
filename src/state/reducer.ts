@@ -1,13 +1,14 @@
 import { EVENTS } from '~/constants';
+import { AccountContextState, AccountState, Actions } from '~/types';
 import { initialState } from './account-context';
 
-export const reducer = (state: any, action: any) => {
+export const reducer = (state: AccountContextState, action: Actions): AccountContextState => {
   const { type, data } = action;
   switch (type) {
     case EVENTS.GET_ACCOUNT_DETAILS: {
       return {
         ...state,
-        account: data
+        account: data as AccountState
       };
     }
     case EVENTS.LOGIN: {

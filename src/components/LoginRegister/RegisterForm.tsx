@@ -43,9 +43,9 @@ export const RegisterForm = () => {
   };
 
   const validationSchema = Yup.object().shape({
-    fname: Yup.string().required('First name required'),
+    fname: Yup.string().required('First Name required'),
     lname: Yup.string().required('Surname required'),
-    email: Yup.string().email('Invalid email address').required('Email Address Required'),
+    email: Yup.string().email('Invalid Email Address').required('Email Address required'),
     password: Yup.string()
       .required(`Password required`)
       .min(8, 'Password is too short (min is 8 characters)')

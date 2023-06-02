@@ -16,6 +16,11 @@
       min-width: $login-register-mobile-width;
     }
 
+    //overwrites inline react-slick height styling
+    .slick-list {
+      height: auto !important;
+    }
+
     .tab-panel {
       display: block !important; //overwrite inline react-slick style
       width: auto !important; //overwrite inline react-slick style

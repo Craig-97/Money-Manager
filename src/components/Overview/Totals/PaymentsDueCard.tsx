@@ -1,20 +1,19 @@
 import { useMutation } from '@apollo/client';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
-import { Fragment, useCallback, useState } from 'react';
-import { addPaymentCache, CREATE_ONE_OFF_PAYMENT_MUTATION } from '~/graphql';
-import { Account, OneOffPayment } from '~/types';
+import { useSnackbar } from 'notistack';
+import { Fragment, useState } from 'react';
+import { CREATE_ONE_OFF_PAYMENT_MUTATION, addPaymentCache } from '~/graphql';
 import { useAccountContext } from '~/state/account-context';
+import { OneOffPayment } from '~/types';
 import { PaymentsDuePopup } from '../Popups';
 import { LoadingCard } from './LoadingCard';
 import { TotalCard } from './TotalCard';
-import { useSnackbar } from 'notistack';
 
 export const PaymentsDueCard = () => {
   const {
     state: { account, user }
   } = useAccountContext();
-
-  const { paymentsDueTotal }: Account = account;
+  const { paymentsDueTotal } = account;
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const { enqueueSnackbar } = useSnackbar();
 
@@ -39,10 +38,6 @@ export const PaymentsDueCard = () => {
     setIsOpen(true);
   };
 
-  const closePopup = useCallback(() => {
-    setIsOpen(false);
-  }, []);
-
   return (
     <Fragment>
       {!loading ? (
@@ -59,7 +54,7 @@ export const PaymentsDueCard = () => {
       <PaymentsDuePopup
         title="Add Upcoming Payment"
         isOpen={isOpen}
-        close={closePopup}
+        close={() => setIsOpen(false)}
         onSave={createNewOneOffPayment}
       />
     </Fragment>
