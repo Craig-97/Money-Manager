@@ -7,7 +7,6 @@ import DialogTitle from '@mui/material/DialogTitle';
 import InputAdornment from '@mui/material/InputAdornment';
 import TextField from '@mui/material/TextField';
 import { ChangeEvent, DispatchWithoutAction, KeyboardEvent, useEffect, useState } from 'react';
-import { Account } from '~/types';
 import { useAccountContext } from '~/state/account-context';
 
 interface BankBalancePopupProps {
@@ -18,9 +17,11 @@ interface BankBalancePopupProps {
 
 export const BankBalancePopup = ({ isOpen, close, changeBankBalance }: BankBalancePopupProps) => {
   const {
-    state: { account }
+    state: {
+      account: { bankBalance }
+    }
   } = useAccountContext();
-  const { bankBalance }: Account = account;
+
   const [value, setValue] = useState<number>(bankBalance);
 
   useEffect(() => {

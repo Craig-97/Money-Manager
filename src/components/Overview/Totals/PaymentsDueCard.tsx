@@ -1,20 +1,19 @@
 import { useMutation } from '@apollo/client';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import { useSnackbar } from 'notistack';
 import { Fragment, useState } from 'react';
-import { addPaymentCache, CREATE_ONE_OFF_PAYMENT_MUTATION } from '~/graphql';
-import { Account, OneOffPayment } from '~/types';
+import { CREATE_ONE_OFF_PAYMENT_MUTATION, addPaymentCache } from '~/graphql';
 import { useAccountContext } from '~/state/account-context';
+import { OneOffPayment } from '~/types';
 import { PaymentsDuePopup } from '../Popups';
 import { LoadingCard } from './LoadingCard';
 import { TotalCard } from './TotalCard';
-import { useSnackbar } from 'notistack';
 
 export const PaymentsDueCard = () => {
   const {
     state: { account, user }
   } = useAccountContext();
-
-  const { paymentsDueTotal }: Account = account;
+  const { paymentsDueTotal } = account;
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const { enqueueSnackbar } = useSnackbar();
 

@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
-import { Account } from '~/types';
 import { useAccountContext } from '~/state/account-context';
+import { AccountState } from '~/types';
 import { getForecastDate, getNextNumberOfMonths } from '~/utils';
 import { Table } from '../Table';
 
@@ -12,7 +12,7 @@ export const ForecastTable = ({ past = false }: ForecastTableProps) => {
   const {
     state: { account }
   } = useAccountContext();
-  const { bankFreeToSpend, monthlyIncome }: Account = account;
+  const { bankFreeToSpend, monthlyIncome }: AccountState = account;
 
   const columns = useMemo(
     () => [

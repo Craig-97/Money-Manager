@@ -1,19 +1,18 @@
 import { useMutation } from '@apollo/client';
 import LocalAtmIcon from '@mui/icons-material/LocalAtm';
+import { useSnackbar } from 'notistack';
 import { Fragment, useState } from 'react';
-import { editAccountCache, EDIT_ACCOUNT_MUTATION } from '~/graphql';
-import { Account } from '~/types';
+import { EDIT_ACCOUNT_MUTATION, editAccountCache } from '~/graphql';
 import { useAccountContext } from '~/state/account-context';
 import { MonthlyIncomePopup } from '../Popups';
 import { LoadingCard } from './LoadingCard';
 import { TotalCard } from './TotalCard';
-import { useSnackbar } from 'notistack';
 
 export const MonthlyIncomeCard = () => {
   const {
     state: { account, user }
   } = useAccountContext();
-  const { monthlyIncome, id }: Account = account;
+  const { monthlyIncome, id } = account;
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const { enqueueSnackbar } = useSnackbar();
 

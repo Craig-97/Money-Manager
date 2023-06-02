@@ -1,3 +1,4 @@
+import DeleteIcon from '@mui/icons-material/Delete';
 import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
 import Dialog from '@mui/material/Dialog';
@@ -8,10 +9,9 @@ import DialogTitle from '@mui/material/DialogTitle';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import TextField from '@mui/material/TextField';
-import DeleteIcon from '@mui/icons-material/Delete';
 import { ChangeEvent, DispatchWithoutAction, KeyboardEvent, useEffect, useState } from 'react';
-import { Account, Bill } from '~/types';
 import { useAccountContext } from '~/state/account-context';
+import { Bill } from '~/types';
 import { getNumberAmount } from '~/utils';
 
 interface MonthlyBillsPopupProps {
@@ -36,10 +36,11 @@ export const MonthlyBillsPopup = ({
   onDelete
 }: MonthlyBillsPopupProps) => {
   const {
-    state: { account }
+    state: {
+      account: { id }
+    }
   } = useAccountContext();
 
-  const { id }: Account = account;
   const [name, setName] = useState<string>(defaultName);
   const [amount, setAmount] = useState<string>(defaultAmount);
   const [paid, setPaid] = useState<boolean>(defaultPaid);

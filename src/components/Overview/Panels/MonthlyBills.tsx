@@ -1,7 +1,7 @@
 import { Divider } from '@mui/material';
 import { Fragment, useState } from 'react';
-import { Account, Bill } from '~/types';
 import { useAccountContext } from '~/state';
+import { Bill } from '~/types';
 import { formatAmount, isNegative } from '~/utils';
 import { EditMonthlyBillsPopup } from '../Popups';
 
@@ -9,7 +9,7 @@ export const MonthlyBills = () => {
   const {
     state: { account }
   } = useAccountContext();
-  const { bills, billsTotal }: Account = account;
+  const { bills, billsTotal } = account;
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [selectedBill, setSelectedBill] = useState<Bill>({});
 

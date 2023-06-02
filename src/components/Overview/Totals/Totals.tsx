@@ -1,8 +1,8 @@
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import LocalAtmIcon from '@mui/icons-material/LocalAtm';
 import PaymentIcon from '@mui/icons-material/Payment';
-import { Account } from '~/types';
 import { useAccountContext } from '~/state/account-context';
+import { AccountState } from '~/types';
 import { BankBalanceCard } from './BankBalanceCard';
 import { MonthlyBillsCard } from './MonthlyBillsCard';
 import { MonthlyIncomeCard } from './MonthlyIncomeCard';
@@ -13,7 +13,7 @@ export const Totals = () => {
   const {
     state: { account }
   } = useAccountContext();
-  const { bankFreeToSpend, discIncome, bankPaydayTotal, payDayDiscIncome }: Account = account;
+  const { bankFreeToSpend, discIncome, bankPaydayTotal, payDayDiscIncome }: AccountState = account;
 
   return (
     <div className="totals">

@@ -1,19 +1,18 @@
 import { useMutation } from '@apollo/client';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
+import { useSnackbar } from 'notistack';
 import { Fragment, useState } from 'react';
-import { editAccountCache, EDIT_ACCOUNT_MUTATION } from '~/graphql';
-import { Account } from '~/types';
+import { EDIT_ACCOUNT_MUTATION, editAccountCache } from '~/graphql';
 import { useAccountContext } from '~/state/account-context';
 import { BankBalancePopup } from '../Popups';
 import { LoadingCard } from './LoadingCard';
 import { TotalCard } from './TotalCard';
-import { useSnackbar } from 'notistack';
 
 export const BankBalanceCard = () => {
   const {
     state: { account, user }
   } = useAccountContext();
-  const { bankBalance, id }: Account = account;
+  const { bankBalance, id } = account;
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const { enqueueSnackbar } = useSnackbar();
 

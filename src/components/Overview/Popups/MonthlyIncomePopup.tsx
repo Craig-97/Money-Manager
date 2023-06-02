@@ -7,8 +7,9 @@ import DialogTitle from '@mui/material/DialogTitle';
 import InputAdornment from '@mui/material/InputAdornment';
 import TextField from '@mui/material/TextField';
 import { ChangeEvent, DispatchWithoutAction, KeyboardEvent, useEffect, useState } from 'react';
-import { Account } from '~/types';
 import { useAccountContext } from '~/state/account-context';
+import { AccountState } from '~/types';
+
 interface MonthlyIncomePopupProps {
   isOpen: boolean;
   close: DispatchWithoutAction;
@@ -23,7 +24,7 @@ export const MonthlyIncomePopup = ({
   const {
     state: { account }
   } = useAccountContext();
-  const { monthlyIncome }: Account = account;
+  const { monthlyIncome }: AccountState = account;
   const [value, setValue] = useState<number>(monthlyIncome);
 
   useEffect(() => {

@@ -1,3 +1,4 @@
+import DeleteIcon from '@mui/icons-material/Delete';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -7,10 +8,9 @@ import DialogTitle from '@mui/material/DialogTitle';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import TextField from '@mui/material/TextField';
-import DeleteIcon from '@mui/icons-material/Delete';
 import { ChangeEvent, DispatchWithoutAction, KeyboardEvent, useEffect, useState } from 'react';
-import { Account, OneOffPayment } from '~/types';
 import { useAccountContext } from '~/state/account-context';
+import { OneOffPayment } from '~/types';
 import { getNumberAmount } from '~/utils';
 
 interface PaymentsDuePopupProps {
@@ -33,10 +33,11 @@ export const PaymentsDuePopup = ({
   onDelete
 }: PaymentsDuePopupProps) => {
   const {
-    state: { account }
+    state: {
+      account: { id }
+    }
   } = useAccountContext();
 
-  const { id }: Account = account;
   const [name, setName] = useState<string>(defaultName);
   const [amount, setAmount] = useState<string>(defaultAmount);
 
