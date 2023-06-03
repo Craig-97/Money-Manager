@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 export const useIsDesktop = () => {
   const [isDesktop, setIsDesktop] = useState<boolean>(true);
@@ -9,13 +9,13 @@ export const useIsDesktop = () => {
     setIsDesktop(boolean);
   };
 
-  const handleWindowSizeChange = () => {
+  const handleWindowSizeChange = useCallback(() => {
     if (!isDesktopRef.current && window.innerWidth > 1250) {
       setDesktopState(true);
     } else if (isDesktopRef.current && window.innerWidth < 1250) {
       setDesktopState(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     window.addEventListener('resize', handleWindowSizeChange);
@@ -23,8 +23,7 @@ export const useIsDesktop = () => {
     return () => {
       window.removeEventListener('resize', handleWindowSizeChange);
     };
-    // eslint-disable-next-line
-  }, []);
+  }, [handleWindowSizeChange]);
 
   return isDesktop;
 };

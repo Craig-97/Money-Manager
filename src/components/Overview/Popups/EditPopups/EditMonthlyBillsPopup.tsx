@@ -101,7 +101,7 @@ export const EditMonthlyBillsPopup = ({
       isOpen={isOpen}
       close={close}
       defaultName={name}
-      defaultAmount={amount?.toString()}
+      defaultAmount={amount}
       defaultPaid={paid}
     />
   ) : null;

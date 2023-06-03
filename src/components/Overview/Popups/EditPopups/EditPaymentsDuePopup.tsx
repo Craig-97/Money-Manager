@@ -103,7 +103,7 @@ export const EditPaymentsDuePopup = ({
       close={close}
       onDelete={deleteSelectedPayment}
       defaultName={name}
-      defaultAmount={amount?.toString()}
+      defaultAmount={amount}
     />
   ) : null;
 };
