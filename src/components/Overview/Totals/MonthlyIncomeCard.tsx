@@ -4,7 +4,7 @@ import { useSnackbar } from 'notistack';
 import { Fragment, useState } from 'react';
 import { EDIT_ACCOUNT_MUTATION, editAccountCache } from '~/graphql';
 import { useAccountContext } from '~/state/account-context';
-import { MonthlyIncomePopup } from '../Popups';
+import { EnterValuePopup } from '../Popups';
 import { LoadingCard } from './LoadingCard';
 import { TotalCard } from './TotalCard';
 
@@ -22,8 +22,8 @@ export const MonthlyIncomeCard = () => {
     setIsOpen(true);
   };
 
-  const changeMonthlyIncome = (value: number | undefined) => {
-    if (value && value !== monthlyIncome) {
+  const changeMonthlyIncome = (value: number) => {
+    if (!isNaN(value) && value !== monthlyIncome) {
       editAccount({
         variables: { id, account: { monthlyIncome: value } },
         update: (
@@ -54,10 +54,13 @@ export const MonthlyIncomeCard = () => {
         <LoadingCard />
       )}
       {isOpen && (
-        <MonthlyIncomePopup
+        <EnterValuePopup
+          currentValue={monthlyIncome}
           isOpen={isOpen}
           close={() => setIsOpen(false)}
-          changeMonthlyIncome={changeMonthlyIncome}
+          changeValue={changeMonthlyIncome}
+          title="Monthly Income"
+          labelText="Enter your updated monthly income"
         />
       )}
     </Fragment>

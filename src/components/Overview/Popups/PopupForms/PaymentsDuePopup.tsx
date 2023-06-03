@@ -93,7 +93,7 @@ export const PaymentsDuePopup = ({
       <DialogTitle id="form-dialog-title">
         {title}
         {onDelete && (
-          <IconButton onClick={handleDeleteClicked} disabled={!name || !amount}>
+          <IconButton onClick={handleDeleteClicked} disabled={!name || (!amount && amount !== 0)}>
             <DeleteIcon />
           </IconButton>
         )}
@@ -125,7 +125,10 @@ export const PaymentsDuePopup = ({
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose}>Cancel</Button>
-        <Button onClick={handleSaveClicked} color="secondary" disabled={!name || !amount}>
+        <Button
+          onClick={handleSaveClicked}
+          color="secondary"
+          disabled={!name || (!amount && amount !== 0)}>
           Save
         </Button>
       </DialogActions>

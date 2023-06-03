@@ -1,4 +1,3 @@
-export * from './BankBalancePopup';
-export * from './MonthlyIncomePopup';
+export * from './EnterValuePopup';
 export * from './EditPopups';
 export * from './PopupForms';
