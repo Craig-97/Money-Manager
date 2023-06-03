@@ -11,14 +11,13 @@ import TextField from '@mui/material/TextField';
 import { ChangeEvent, DispatchWithoutAction, KeyboardEvent, useEffect, useState } from 'react';
 import { useAccountContext } from '~/state/account-context';
 import { OneOffPayment } from '~/types';
-import { getNumberAmount } from '~/utils';
 
 interface PaymentsDuePopupProps {
   title: string;
   isOpen: boolean;
   close: DispatchWithoutAction;
   defaultName?: string;
-  defaultAmount?: string;
+  defaultAmount?: number | string;
   onSave: ({ name, amount, account }: OneOffPayment) => void;
   onDelete?: DispatchWithoutAction;
 }
@@ -39,7 +38,7 @@ export const PaymentsDuePopup = ({
   } = useAccountContext();
 
   const [name, setName] = useState<string>(defaultName);
-  const [amount, setAmount] = useState<string>(defaultAmount);
+  const [amount, setAmount] = useState<number | string>(defaultAmount);
 
   useEffect(() => {
     if (defaultName !== name) {
@@ -49,12 +48,11 @@ export const PaymentsDuePopup = ({
     if (defaultAmount !== amount) {
       setAmount(defaultAmount);
     }
-
     // eslint-disable-next-line
   }, [defaultName, defaultAmount]);
 
   const handleSaveClicked = () => {
-    onSave({ name, amount: getNumberAmount(amount), account: id });
+    onSave({ name, amount: amount as number, account: id });
     handleClose();
   };
 
@@ -63,16 +61,11 @@ export const PaymentsDuePopup = ({
     close();
   };
 
-  const handleNameChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setName(event.target.value);
-  };
-
   const handleAmountChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const number = getNumberAmount(event.target.value);
-    if (isNaN(number)) {
-      setAmount('');
+    if (!isNaN(event.target.valueAsNumber)) {
+      setAmount(event.target.valueAsNumber);
     } else {
-      setAmount(number.toString());
+      setAmount('');
     }
   };
 
@@ -85,7 +78,7 @@ export const PaymentsDuePopup = ({
 
   const handleClose = () => {
     close();
-    setAmount(defaultAmount);
+    setAmount('');
     setName('');
   };
 
@@ -109,7 +102,7 @@ export const PaymentsDuePopup = ({
         <DialogContentText>Name</DialogContentText>
         <TextField
           value={name}
-          onChange={handleNameChange}
+          onChange={event => setName(event.target.value)}
           onKeyDown={handleKeyDown}
           autoFocus
           margin="dense"
