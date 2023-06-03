@@ -7,46 +7,53 @@ import DialogTitle from '@mui/material/DialogTitle';
 import InputAdornment from '@mui/material/InputAdornment';
 import TextField from '@mui/material/TextField';
 import { ChangeEvent, DispatchWithoutAction, KeyboardEvent, useEffect, useState } from 'react';
-import { useAccountContext } from '~/state/account-context';
 
-interface BankBalancePopupProps {
+interface EnterValuePopupProps {
+  currentValue: number;
   isOpen: boolean;
   close: DispatchWithoutAction;
-  changeBankBalance: (value: number | undefined) => void;
+  changeValue: (value: number) => void;
+  title: string;
+  labelText: string;
 }
 
-export const BankBalancePopup = ({ isOpen, close, changeBankBalance }: BankBalancePopupProps) => {
-  const {
-    state: {
-      account: { bankBalance }
-    }
-  } = useAccountContext();
-
-  const [value, setValue] = useState<number>(bankBalance);
+export const EnterValuePopup = ({
+  currentValue,
+  isOpen,
+  close,
+  changeValue,
+  title,
+  labelText
+}: EnterValuePopupProps) => {
+  const [value, setValue] = useState<number | string>(currentValue);
 
   useEffect(() => {
-    if (value !== bankBalance) {
-      setValue(bankBalance);
+    if (value !== currentValue) {
+      setValue(currentValue);
     }
     // eslint-disable-next-line
-  }, [bankBalance]);
+  }, [currentValue]);
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setValue(Number(parseFloat(event.target.value).toFixed(2)));
+    if (!isNaN(event.target.valueAsNumber)) {
+      setValue(event.target.valueAsNumber);
+    } else {
+      setValue('');
+    }
   };
 
   const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === 'Enter' && value) {
+    if (event.key === 'Enter' && (value || value === 0)) {
       event.preventDefault();
-      changeBankBalance(value);
+      changeValue(value as number);
     }
   };
 
   return (
     <Dialog open={isOpen} onClose={close} aria-labelledby="form-dialog-title">
-      <DialogTitle id="form-dialog-title">Bank Total</DialogTitle>
+      <DialogTitle id="form-dialog-title">{title}</DialogTitle>
       <DialogContent>
-        <DialogContentText>Enter your updated bank total</DialogContentText>
+        <DialogContentText>{labelText}</DialogContentText>
         <TextField
           InputProps={{
             startAdornment: <InputAdornment position="start">£</InputAdornment>
@@ -56,14 +63,17 @@ export const BankBalancePopup = ({ isOpen, close, changeBankBalance }: BankBalan
           onKeyDown={handleKeyDown}
           autoFocus
           margin="dense"
-          id="bank-total"
+          id="total"
           type="number"
           fullWidth
         />
       </DialogContent>
       <DialogActions>
         <Button onClick={close}>Cancel</Button>
-        <Button onClick={() => changeBankBalance(value)} color="secondary" disabled={!value}>
+        <Button
+          onClick={() => changeValue(value as number)}
+          color="secondary"
+          disabled={!value && value !== 0}>
           Save
         </Button>
       </DialogActions>
