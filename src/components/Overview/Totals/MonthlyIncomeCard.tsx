@@ -1,19 +1,18 @@
 import { useMutation } from '@apollo/client';
 import LocalAtmIcon from '@mui/icons-material/LocalAtm';
+import { useSnackbar } from 'notistack';
 import { Fragment, useState } from 'react';
-import { editAccountCache, EDIT_ACCOUNT_MUTATION } from '~/graphql';
-import { Account } from '~/types';
+import { EDIT_ACCOUNT_MUTATION, editAccountCache } from '~/graphql';
 import { useAccountContext } from '~/state/account-context';
-import { MonthlyIncomePopup } from '../Popups';
+import { EnterValuePopup } from '../Popups';
 import { LoadingCard } from './LoadingCard';
 import { TotalCard } from './TotalCard';
-import { useSnackbar } from 'notistack';
 
 export const MonthlyIncomeCard = () => {
   const {
     state: { account, user }
   } = useAccountContext();
-  const { monthlyIncome, id }: Account = account;
+  const { monthlyIncome, id } = account;
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const { enqueueSnackbar } = useSnackbar();
 
@@ -23,8 +22,8 @@ export const MonthlyIncomeCard = () => {
     setIsOpen(true);
   };
 
-  const changeMonthlyIncome = (value: number | undefined) => {
-    if (value && value !== monthlyIncome) {
+  const changeMonthlyIncome = (value: number) => {
+    if (!isNaN(value) && value !== monthlyIncome) {
       editAccount({
         variables: { id, account: { monthlyIncome: value } },
         update: (
@@ -55,10 +54,13 @@ export const MonthlyIncomeCard = () => {
         <LoadingCard />
       )}
       {isOpen && (
-        <MonthlyIncomePopup
+        <EnterValuePopup
+          currentValue={monthlyIncome}
           isOpen={isOpen}
           close={() => setIsOpen(false)}
-          changeMonthlyIncome={changeMonthlyIncome}
+          changeValue={changeMonthlyIncome}
+          title="Monthly Income"
+          labelText="Enter your updated monthly income"
         />
       )}
     </Fragment>

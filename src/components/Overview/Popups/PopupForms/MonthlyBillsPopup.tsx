@@ -1,3 +1,4 @@
+import DeleteIcon from '@mui/icons-material/Delete';
 import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
 import Dialog from '@mui/material/Dialog';
@@ -8,18 +9,16 @@ import DialogTitle from '@mui/material/DialogTitle';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import TextField from '@mui/material/TextField';
-import DeleteIcon from '@mui/icons-material/Delete';
 import { ChangeEvent, DispatchWithoutAction, KeyboardEvent, useEffect, useState } from 'react';
-import { Account, Bill } from '~/types';
 import { useAccountContext } from '~/state/account-context';
-import { getNumberAmount } from '~/utils';
+import { Bill } from '~/types';
 
 interface MonthlyBillsPopupProps {
   title: string;
   isOpen: boolean;
   close: DispatchWithoutAction;
   defaultName?: string;
-  defaultAmount?: string;
+  defaultAmount?: number | string;
   defaultPaid?: boolean;
   onSave: ({ name, amount, paid, account }: Bill) => void;
   onDelete?: DispatchWithoutAction;
@@ -36,12 +35,13 @@ export const MonthlyBillsPopup = ({
   onDelete
 }: MonthlyBillsPopupProps) => {
   const {
-    state: { account }
+    state: {
+      account: { id }
+    }
   } = useAccountContext();
 
-  const { id }: Account = account;
   const [name, setName] = useState<string>(defaultName);
-  const [amount, setAmount] = useState<string>(defaultAmount);
+  const [amount, setAmount] = useState<number | string>(defaultAmount);
   const [paid, setPaid] = useState<boolean>(defaultPaid);
 
   useEffect(() => {
@@ -60,7 +60,7 @@ export const MonthlyBillsPopup = ({
   }, [defaultName, defaultAmount, defaultPaid]);
 
   const handleSaveClicked = () => {
-    onSave({ name, amount: getNumberAmount(amount), paid, account: id });
+    onSave({ name, amount: amount as number, paid, account: id });
     handleClose();
   };
 
@@ -69,21 +69,12 @@ export const MonthlyBillsPopup = ({
     close();
   };
 
-  const handleNameChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setName(event.target.value);
-  };
-
   const handleAmountChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const number = getNumberAmount(event.target.value);
-    if (isNaN(number)) {
-      setAmount('');
+    if (!isNaN(event.target.valueAsNumber)) {
+      setAmount(event.target.valueAsNumber);
     } else {
-      setAmount(number.toString());
+      setAmount('');
     }
-  };
-
-  const handlePaidChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setPaid(event.target.checked);
   };
 
   const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
@@ -95,7 +86,7 @@ export const MonthlyBillsPopup = ({
 
   const handleClose = () => {
     close();
-    setAmount(defaultAmount);
+    setAmount('');
     setName('');
     setPaid(false);
   };
@@ -111,7 +102,7 @@ export const MonthlyBillsPopup = ({
       <DialogTitle id="form-dialog-title">
         {title}
         {onDelete && (
-          <IconButton onClick={handleDeleteClicked} disabled={!name || !amount}>
+          <IconButton onClick={handleDeleteClicked} disabled={!name || (!amount && amount !== 0)}>
             <DeleteIcon />
           </IconButton>
         )}
@@ -120,7 +111,7 @@ export const MonthlyBillsPopup = ({
         <DialogContentText>Name</DialogContentText>
         <TextField
           value={name}
-          onChange={handleNameChange}
+          onChange={event => setName(event.target.value)}
           onKeyDown={handleKeyDown}
           autoFocus
           margin="dense"
@@ -143,13 +134,16 @@ export const MonthlyBillsPopup = ({
         <DialogContentText>Paid</DialogContentText>
         <Checkbox
           checked={paid}
-          onChange={handlePaidChange}
+          onChange={event => setPaid(event.target.checked)}
           inputProps={{ 'aria-label': 'controlled' }}
         />
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose}>Cancel</Button>
-        <Button onClick={handleSaveClicked} color="secondary" disabled={!name || !amount}>
+        <Button
+          onClick={handleSaveClicked}
+          color="secondary"
+          disabled={!name || (!amount && amount !== 0)}>
           Save
         </Button>
       </DialogActions>

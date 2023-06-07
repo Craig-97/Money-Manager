@@ -1,19 +1,18 @@
 import { useMutation } from '@apollo/client';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
+import { useSnackbar } from 'notistack';
 import { Fragment, useState } from 'react';
-import { editAccountCache, EDIT_ACCOUNT_MUTATION } from '~/graphql';
-import { Account } from '~/types';
+import { EDIT_ACCOUNT_MUTATION, editAccountCache } from '~/graphql';
 import { useAccountContext } from '~/state/account-context';
-import { BankBalancePopup } from '../Popups';
+import { EnterValuePopup } from '../Popups';
 import { LoadingCard } from './LoadingCard';
 import { TotalCard } from './TotalCard';
-import { useSnackbar } from 'notistack';
 
 export const BankBalanceCard = () => {
   const {
     state: { account, user }
   } = useAccountContext();
-  const { bankBalance, id }: Account = account;
+  const { bankBalance, id } = account;
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const { enqueueSnackbar } = useSnackbar();
 
@@ -23,8 +22,8 @@ export const BankBalanceCard = () => {
     setIsOpen(true);
   };
 
-  const changeBankBalance = (value: number | undefined) => {
-    if (value && value !== bankBalance) {
+  const changeBankBalance = (value: number) => {
+    if (!isNaN(value) && value !== bankBalance) {
       editAccount({
         variables: { id, account: { bankBalance: value } },
         update: (
@@ -55,10 +54,13 @@ export const BankBalanceCard = () => {
         <LoadingCard />
       )}
       {isOpen && (
-        <BankBalancePopup
+        <EnterValuePopup
+          currentValue={bankBalance}
           isOpen={isOpen}
           close={() => setIsOpen(false)}
-          changeBankBalance={changeBankBalance}
+          changeValue={changeBankBalance}
+          title="Bank Total"
+          labelText="Enter your updated bank total"
         />
       )}
     </Fragment>

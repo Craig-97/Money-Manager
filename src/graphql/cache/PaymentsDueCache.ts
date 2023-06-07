@@ -1,11 +1,11 @@
-import { ApolloCache } from '@apollo/client';
+import { ApolloCache, InMemoryCache } from '@apollo/client';
 import { OneOffPayment, User } from '~/types';
 import { cheapestAscendingSort } from '~/utils';
 import { getAccountCache, updateAccountCache } from './AccountCache';
 
 /* Adds new one off payment to current payments due array */
 export const addPaymentCache = (
-  cache: ApolloCache<any>,
+  cache: ApolloCache<InMemoryCache>,
   oneOffPayment: OneOffPayment,
   user: User
 ) => {
@@ -22,7 +22,7 @@ export const addPaymentCache = (
 
 /* Removes passed one off payment from current payments due array */
 export const deletePaymentCache = (
-  cache: ApolloCache<any>,
+  cache: ApolloCache<InMemoryCache>,
   oneOffPayment: OneOffPayment,
   user: User
 ) => {

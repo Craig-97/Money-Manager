@@ -1,17 +1,17 @@
 import { useMutation } from '@apollo/client';
 import CircularProgress from '@mui/material/CircularProgress';
+import { useSnackbar } from 'notistack';
 import { DispatchWithoutAction } from 'react';
 import {
-  deletePaymentCache,
   DELETE_ONE_OFF_PAYMENT_MUTATION,
-  editAccountCache,
   EDIT_ACCOUNT_MUTATION,
-  EDIT_ONE_OFF_PAYMENT_MUTATION
+  EDIT_ONE_OFF_PAYMENT_MUTATION,
+  deletePaymentCache,
+  editAccountCache
 } from '~/graphql';
-import { Account, OneOffPayment } from '~/types';
 import { useAccountContext } from '~/state/account-context';
+import { OneOffPayment } from '~/types';
 import { PaymentsDuePopup } from '../PopupForms';
-import { useSnackbar } from 'notistack';
 
 interface EditPaymentsDuePopupProps {
   isOpen: boolean;
@@ -27,7 +27,7 @@ export const EditPaymentsDuePopup = ({
   const {
     state: { account, user }
   } = useAccountContext();
-  const { bankBalance, id }: Account = account;
+  const { bankBalance, id } = account;
   const { id: paymentId, name, amount }: OneOffPayment = selectedPayment;
   const { enqueueSnackbar } = useSnackbar();
 
@@ -103,7 +103,7 @@ export const EditPaymentsDuePopup = ({
       close={close}
       onDelete={deleteSelectedPayment}
       defaultName={name}
-      defaultAmount={amount?.toString()}
+      defaultAmount={amount}
     />
   ) : null;
 };

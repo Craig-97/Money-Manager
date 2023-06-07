@@ -1,17 +1,17 @@
 import { useMutation } from '@apollo/client';
 import CircularProgress from '@mui/material/CircularProgress';
+import { useSnackbar } from 'notistack';
 import { DispatchWithoutAction } from 'react';
 import {
-  deleteBillCache,
   DELETE_BILL_MUTATION,
-  editAccountCache,
   EDIT_ACCOUNT_MUTATION,
-  EDIT_BILL_MUTATION
+  EDIT_BILL_MUTATION,
+  deleteBillCache,
+  editAccountCache
 } from '~/graphql';
-import { Account, Bill } from '~/types';
 import { useAccountContext } from '~/state';
+import { Bill } from '~/types';
 import { MonthlyBillsPopup } from '../PopupForms';
-import { useSnackbar } from 'notistack';
 
 interface EditMonthlyBillsPopupProps {
   isOpen: boolean;
@@ -27,7 +27,7 @@ export const EditMonthlyBillsPopup = ({
   const {
     state: { account, user }
   } = useAccountContext();
-  const { bankBalance, id }: Account = account;
+  const { bankBalance, id } = account;
   const { id: billId, name, amount, paid }: Bill = selectedBill;
   const { enqueueSnackbar } = useSnackbar();
 
@@ -101,7 +101,7 @@ export const EditMonthlyBillsPopup = ({
       isOpen={isOpen}
       close={close}
       defaultName={name}
-      defaultAmount={amount?.toString()}
+      defaultAmount={amount}
       defaultPaid={paid}
     />
   ) : null;

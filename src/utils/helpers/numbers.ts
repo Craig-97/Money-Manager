@@ -1,7 +1,3 @@
-/* Returns fixed number or 0 if number is undefined */
-export const getNumberAmount = (number: string | undefined) =>
-  number ? Number(parseFloat(number).toFixed(2)) : 0;
-
 /* Returns true is number passed is defined and negative */
 export const isNegative = (number: number | undefined) => number && number < 0;
 

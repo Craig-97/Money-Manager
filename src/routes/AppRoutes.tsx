@@ -1,13 +1,11 @@
-import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom';
-import { AccountRoutes, ProtectedRoutes, PublicRoutes } from './routes';
-import { Loading } from '~/components/Loading';
+import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import { Error } from '~/components/ErrorMsg';
+import { Loading } from '~/components/Loading';
+import { Forecast, Homepage, Login, Notes, Setup } from '~/pages';
 import { useAccountData } from '~/utils';
-import { Forecast } from './Forecast';
-import { Homepage } from './Homepage';
-import { Login } from './Login';
-import { Notes } from './Notes';
-import { Setup } from './Setup';
+import { AccountRoutes } from './AccountRoutes';
+import { ProtectedRoutes } from './ProtectedRoutes';
+import { PublicRoutes } from './PublicRoutes';
 
 export const AppRoutes = () => {
   const { loading, error, accountExists } = useAccountData();
