@@ -57,7 +57,7 @@ const getClosestWeekday = (date: Date, eom: Date) => {
     const nextMonday = new Date(closestWeekday);
     nextMonday.setDate(closestWeekday.getDate() + ((1 + 7 - closestWeekday.getDay()) % 7));
 
-    // If next monday is still within the same date and year, set closest weekday to next monday otherwise set to last friday
+    // If next monday is still within the same month and year, set closest weekday to next monday otherwise set to last friday */
     if (
       closestWeekday.getMonth() === nextMonday.getMonth() &&
       closestWeekday.getFullYear() === nextMonday.getFullYear()
