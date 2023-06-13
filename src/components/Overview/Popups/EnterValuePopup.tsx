@@ -6,7 +6,7 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import InputAdornment from '@mui/material/InputAdornment';
 import TextField from '@mui/material/TextField';
-import { ChangeEvent, DispatchWithoutAction, KeyboardEvent, useEffect, useState } from 'react';
+import { ChangeEvent, DispatchWithoutAction, KeyboardEvent, useState } from 'react';
 
 interface EnterValuePopupProps {
   currentValue: number;
@@ -26,13 +26,6 @@ export const EnterValuePopup = ({
   labelText
 }: EnterValuePopupProps) => {
   const [value, setValue] = useState<number | string>(currentValue);
-
-  useEffect(() => {
-    if (value !== currentValue) {
-      setValue(currentValue);
-    }
-    // eslint-disable-next-line
-  }, [currentValue]);
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     if (!isNaN(event.target.valueAsNumber)) {

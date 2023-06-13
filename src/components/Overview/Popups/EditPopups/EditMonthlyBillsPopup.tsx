@@ -11,7 +11,7 @@ import {
 } from '~/graphql';
 import { useAccountContext } from '~/state';
 import { Bill } from '~/types';
-import { MonthlyBillsPopup } from '../PopupForms';
+import { MonthlyBillsPopup } from '../FormPopups';
 
 interface EditMonthlyBillsPopupProps {
   isOpen: boolean;
