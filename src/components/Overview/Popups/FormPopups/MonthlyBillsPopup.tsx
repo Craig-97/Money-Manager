@@ -1,5 +1,6 @@
 import DeleteIcon from '@mui/icons-material/Delete';
 import Button from '@mui/material/Button';
+import Checkbox from '@mui/material/Checkbox';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
@@ -8,29 +9,31 @@ import DialogTitle from '@mui/material/DialogTitle';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import TextField from '@mui/material/TextField';
-import { ChangeEvent, DispatchWithoutAction, KeyboardEvent, useEffect, useState } from 'react';
+import { ChangeEvent, DispatchWithoutAction, KeyboardEvent, useState } from 'react';
 import { useAccountContext } from '~/state/account-context';
-import { OneOffPayment } from '~/types';
+import { Bill } from '~/types';
 
-interface PaymentsDuePopupProps {
+interface MonthlyBillsPopupProps {
   title: string;
   isOpen: boolean;
   close: DispatchWithoutAction;
   defaultName?: string;
   defaultAmount?: number | string;
-  onSave: ({ name, amount, account }: OneOffPayment) => void;
+  defaultPaid?: boolean;
+  onSave: ({ name, amount, paid, account }: Bill) => void;
   onDelete?: DispatchWithoutAction;
 }
 
-export const PaymentsDuePopup = ({
+export const MonthlyBillsPopup = ({
   title,
   isOpen,
   close,
   defaultName = '',
   defaultAmount = '',
+  defaultPaid = false,
   onSave,
   onDelete
-}: PaymentsDuePopupProps) => {
+}: MonthlyBillsPopupProps) => {
   const {
     state: {
       account: { id }
@@ -39,20 +42,10 @@ export const PaymentsDuePopup = ({
 
   const [name, setName] = useState<string>(defaultName);
   const [amount, setAmount] = useState<number | string>(defaultAmount);
-
-  useEffect(() => {
-    if (defaultName !== name) {
-      setName(defaultName);
-    }
-
-    if (defaultAmount !== amount) {
-      setAmount(defaultAmount);
-    }
-    // eslint-disable-next-line
-  }, [defaultName, defaultAmount]);
+  const [paid, setPaid] = useState<boolean>(defaultPaid);
 
   const handleSaveClicked = () => {
-    onSave({ name, amount: amount as number, account: id });
+    onSave({ name, amount: amount as number, paid, account: id });
     handleClose();
   };
 
@@ -80,6 +73,7 @@ export const PaymentsDuePopup = ({
     close();
     setAmount('');
     setName('');
+    setPaid(false);
   };
 
   return (
@@ -87,7 +81,7 @@ export const PaymentsDuePopup = ({
       open={isOpen}
       onClose={handleClose}
       aria-labelledby="form-dialog-title"
-      className="payments-due-popup"
+      className="monthly-bills-popup"
       maxWidth={'xs'}
       fullWidth>
       <DialogTitle id="form-dialog-title">
@@ -106,12 +100,11 @@ export const PaymentsDuePopup = ({
           onKeyDown={handleKeyDown}
           autoFocus
           margin="dense"
-          id="payment-name"
+          id="bill-name"
           fullWidth
         />
         <DialogContentText>Amount</DialogContentText>
         <TextField
-          type="number"
           InputProps={{
             startAdornment: <InputAdornment position="start">£</InputAdornment>
           }}
@@ -119,8 +112,15 @@ export const PaymentsDuePopup = ({
           onChange={handleAmountChange}
           onKeyDown={handleKeyDown}
           margin="dense"
-          id="payment-amount"
+          id="bill-amount"
+          type="number"
           fullWidth
+        />
+        <DialogContentText>Paid</DialogContentText>
+        <Checkbox
+          checked={paid}
+          onChange={event => setPaid(event.target.checked)}
+          inputProps={{ 'aria-label': 'controlled' }}
         />
       </DialogContent>
       <DialogActions>
