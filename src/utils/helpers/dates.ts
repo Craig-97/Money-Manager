@@ -41,74 +41,30 @@ const addMonths = (date: Date, months: number) => {
   return d;
 };
 
-/* Returns the closest weekday from a passed in date, prioritises 
-future dates if in same month otherwise will set to previous friday */
-const getClosestWeekday = (date: Date, eom: Date) => {
-  let closestWeekday = new Date(date);
-
-  // If current date is the end of the month then set to last Friday
-  if (date.getDate() === eom.getDate()) {
-    closestWeekday.setDate(closestWeekday.getDate() - ((closestWeekday.getDay() + 2) % 7));
-  }
-
-  // If current date is before the end of the month
-  if (closestWeekday.getDate() < eom.getDate()) {
-    // Find next monday from current date
-    const nextMonday = new Date(closestWeekday);
-    nextMonday.setDate(closestWeekday.getDate() + ((1 + 7 - closestWeekday.getDay()) % 7));
-
-    // If next monday is still within the same month and year, set closest weekday to next monday otherwise set to last friday */
-    if (
-      closestWeekday.getMonth() === nextMonday.getMonth() &&
-      closestWeekday.getFullYear() === nextMonday.getFullYear()
-    ) {
-      closestWeekday = new Date(nextMonday);
-    } else {
-      closestWeekday.setDate(closestWeekday.getDate() - ((closestWeekday.getDay() + 2) % 7));
-    }
-  }
-
-  return closestWeekday;
-};
-
 /*
- * Returns payday on the 28th of the month or closest available weekday
+ * Returns payday on the 28th of the month or previous friday
  */
 export const getPayday = (date: Date) => {
-  let eom = getEOM(date);
   let isPayday = false;
 
   // Sets payday to 28th of this month
   const dateNumber = new Date(date).setDate(28);
   let payday = new Date(dateNumber);
 
-  // Checks if 28th of this month is on the weekend
-  const isPaydayWeekend = isWeekend(payday);
-
-  // If current payday is a weekend find next closest weekday
-  if (isPaydayWeekend) {
-    payday = getClosestWeekday(payday, eom);
-  }
+  // If current payday is a weekend set payday to previous friday
+  if (isWeekend(payday)) payday.setDate(payday.getDate() - ((payday.getDay() + 2) % 7));
 
   // If payday is today then set isPayday to true
-  if (payday.getDate() === date.getDate()) {
-    isPayday = true;
-  }
+  if (payday.getDate() === date.getDate()) isPayday = true;
 
-  // If payday was in the past then find next months payday
+  // If current months payday was in the past then find next months payday
   if (payday.getDate() < date.getDate()) {
-    // Reset eom to next month
-    eom = addMonths(eom, 1);
-
     // Reset payday to 28th of next month
     payday = new Date(dateNumber);
     payday.setMonth(date.getMonth() + 1);
 
-    // If next payday is on a weekend find the closest weekday
-    const isNextPayDayWeekend = isWeekend(payday);
-    if (isNextPayDayWeekend) {
-      payday = getClosestWeekday(payday, eom);
-    }
+    // If next months payday is a weekend set payday to previous friday
+    if (isWeekend(payday)) payday.setDate(payday.getDate() - ((payday.getDay() + 2) % 7));
   }
 
   return { payday, isPayday };
