@@ -11,7 +11,7 @@ import {
 } from '~/graphql';
 import { useAccountContext } from '~/state/account-context';
 import { OneOffPayment } from '~/types';
-import { PaymentsDuePopup } from '../PopupForms';
+import { PaymentsDuePopup } from '../FormPopups';
 
 interface EditPaymentsDuePopupProps {
   isOpen: boolean;

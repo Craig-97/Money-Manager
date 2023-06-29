@@ -12,6 +12,9 @@ export const formatFullDate = (date: Date) =>
     })
     .toUpperCase();
 
+/* Returns boolean based on if passed date is on the weekend */
+const isWeekend = (date: Date) => !(date.getDay() % 6);
+
 /* Get last day of month */
 const getEOM = (date: Date) => new Date(date.getFullYear(), date.getMonth() + 1, 0);
 /* Get first day of month */
@@ -39,25 +42,32 @@ const addMonths = (date: Date, months: number) => {
 };
 
 /*
- * Returns next friday which is payday and if passed date is payday.
+ * Returns payday on the 28th of the month or previous friday
  */
 export const getPayday = (date: Date) => {
-  let eom = getEOM(date);
-  const lastFriday = getLastOfDay(eom, 5);
   let isPayday = false;
 
-  // If last friday of the month has already been, increment month
-  if (date.getDate() > lastFriday.getDate()) {
-    eom = addMonths(eom, 1);
+  // Sets payday to 28th of this month
+  const dateNumber = new Date(date).setDate(28);
+  let payday = new Date(dateNumber);
+
+  // If current payday is a weekend set payday to previous friday
+  if (isWeekend(payday)) payday.setDate(payday.getDate() - ((payday.getDay() + 2) % 7));
+
+  // If payday is today then set isPayday to true
+  if (payday.getDate() === date.getDate()) isPayday = true;
+
+  // If current months payday was in the past then find next months payday
+  if (payday.getDate() < date.getDate()) {
+    // Reset payday to 28th of next month
+    payday = new Date(dateNumber);
+    payday.setMonth(date.getMonth() + 1);
+
+    // If next months payday is a weekend set payday to previous friday
+    if (isWeekend(payday)) payday.setDate(payday.getDate() - ((payday.getDay() + 2) % 7));
   }
 
-  if (date.getDate() === lastFriday.getDate()) {
-    isPayday = true;
-  }
-  // Get next Friday which is payday
-  const next = getLastOfDay(eom, 5);
-
-  return { next, isPayday };
+  return { payday, isPayday };
 };
 
 /*
