@@ -28,7 +28,8 @@ export const NoteEditPopup = ({
 
   const handleSaveClicked = () => {
     body && onSave(body);
-    handleClose();
+    // OG close function to avoid body being reset
+    close();
   };
 
   const handleDeleteClicked = () => {

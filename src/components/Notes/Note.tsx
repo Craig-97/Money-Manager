@@ -60,7 +60,7 @@ export const NoteCard = ({ id, body, createdAt, updatedAt }: NoteProps) => {
     <Fragment>
       <Card className="note">
         <CardContent className="note__content">
-          {!delNoteLoading || editNoteLoading ? (
+          {!delNoteLoading && !editNoteLoading ? (
             <Fragment>
               <span>{body}</span>
               <div className="note__footer">

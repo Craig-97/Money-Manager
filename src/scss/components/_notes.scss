@@ -11,34 +11,6 @@
   padding: 24px;
   white-space: pre-wrap;
 
-  &--new {
-    background-color: $primary;
-
-    .note__content {
-      textarea {
-        font-size: $standard;
-        font-family: $font-family;
-        font-weight: 500;
-        border: none;
-        resize: none;
-        background-color: $primary;
-
-        &:focus {
-          outline: none;
-        }
-
-        &::placeholder {
-          color: $black;
-          opacity: 0.75;
-        }
-      }
-
-      .note__footer small {
-        opacity: 100%;
-      }
-    }
-  }
-
   .note__content {
     @include flexbox($justifyContent: space-between, $direction: column);
     height: 100%;
@@ -76,20 +48,45 @@
           background-color: $ripple-black;
         }
       }
-    }
 
-    &--loading {
-      justify-content: center;
-
-      .MuiCircularProgress-root {
-        min-width: 40px;
+      small {
+        color: $black;
+        font-size: $standard;
+        opacity: 85%;
       }
     }
 
-    small {
-      color: $black;
-      font-size: $standard;
-      opacity: 85%;
+    .loading {
+      @include flexbox($justifyContent: center, $alignItems: center);
+      height: 100%;
+    }
+  }
+
+  &--new {
+    background-color: $primary;
+
+    .note__content {
+      textarea {
+        font-size: $standard;
+        font-family: $font-family;
+        font-weight: 500;
+        border: none;
+        resize: none;
+        background-color: $primary;
+
+        &:focus {
+          outline: none;
+        }
+
+        &::placeholder {
+          color: $black;
+          opacity: 0.75;
+        }
+      }
+
+      .note__footer small {
+        opacity: 100%;
+      }
     }
   }
 }
