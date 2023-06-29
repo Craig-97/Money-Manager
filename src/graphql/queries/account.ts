@@ -21,6 +21,7 @@ export const GET_ACCOUNT_QUERY = gql`
         id
         body
         createdAt
+        updatedAt
       }
     }
   }

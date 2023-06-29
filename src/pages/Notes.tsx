@@ -14,8 +14,8 @@ export const Notes = () => {
       <h4 className="notes-header">Notes</h4>
       <div className="notes">
         <NewNoteCard />
-        {notes?.map(({ id, body, createdAt }: Note) => {
-          return <NoteCard key={id} id={id} body={body} createdAt={createdAt} />;
+        {notes?.map(({ id, ...rest }: Note) => {
+          return <NoteCard key={id} id={id} {...rest} />;
         })}
       </div>
     </StandardPage>

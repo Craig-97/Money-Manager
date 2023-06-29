@@ -1,25 +1,39 @@
 import { useMutation } from '@apollo/client';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { CircularProgress, IconButton } from '@mui/material';
-import { Fragment } from 'react';
-import { deleteNoteCache, DELETE_NOTE_MUTATION } from '~/graphql';
+import EditIcon from '@mui/icons-material/Edit';
+import { Card, CardContent, CircularProgress, IconButton } from '@mui/material';
+import { useSnackbar } from 'notistack';
+import { Fragment, useState } from 'react';
+import { DELETE_NOTE_MUTATION, EDIT_NOTE_MUTATION, deleteNoteCache } from '~/graphql';
 import { useAccountContext } from '~/state';
 import { getDateFromTimestamp } from '~/utils';
-import { useSnackbar } from 'notistack';
+import { NoteEditPopup } from './NoteEditPopup';
 
 interface NoteProps {
   id?: string;
   body?: string;
   createdAt?: string;
+  updatedAt?: string;
 }
 
-export const NoteCard = ({ id, body, createdAt }: NoteProps) => {
+export const NoteCard = ({ id, body, createdAt, updatedAt }: NoteProps) => {
   const {
     state: { user }
   } = useAccountContext();
+
+  const [isOpen, setIsOpen] = useState<boolean>(false);
   const { enqueueSnackbar } = useSnackbar();
 
-  const [deleteNote, { loading }] = useMutation(DELETE_NOTE_MUTATION);
+  const [editNote, { loading: editNoteLoading }] = useMutation(EDIT_NOTE_MUTATION);
+
+  const editSelectedNote = (body: string) => {
+    editNote({
+      variables: { id, note: { body } },
+      onError: err => enqueueSnackbar(err?.message, { variant: 'error' })
+    });
+  };
+
+  const [deleteNote, { loading: delNoteLoading }] = useMutation(DELETE_NOTE_MUTATION);
 
   const deleteSelectedNote = () => {
     deleteNote({
@@ -36,23 +50,44 @@ export const NoteCard = ({ id, body, createdAt }: NoteProps) => {
     });
   };
 
+  const getFooterDate = () => {
+    const dateToUse = updatedAt ? updatedAt : createdAt;
+    return dateToUse && getDateFromTimestamp(parseInt(dateToUse));
+  };
+
   return (
-    <div className={`note ${loading && 'note--loading'}`}>
-      {!loading ? (
-        <Fragment>
-          <span>{body}</span>
-          <div className="note__footer">
-            <small>{createdAt && getDateFromTimestamp(parseInt(createdAt))}</small>
-            <IconButton onClick={deleteSelectedNote}>
-              <DeleteIcon />
-            </IconButton>
-          </div>
-        </Fragment>
-      ) : (
-        <div className="loading">
-          <CircularProgress color="secondary" />
-        </div>
-      )}
-    </div>
+    <Fragment>
+      <Card className="note">
+        <CardContent className="note__content">
+          {!delNoteLoading && !editNoteLoading ? (
+            <Fragment>
+              <span>{body}</span>
+              <div className="note__footer">
+                <small>{getFooterDate()}</small>
+                <div>
+                  <IconButton onClick={() => setIsOpen(true)}>
+                    <EditIcon />
+                  </IconButton>
+                  <IconButton onClick={deleteSelectedNote}>
+                    <DeleteIcon />
+                  </IconButton>
+                </div>
+              </div>
+            </Fragment>
+          ) : (
+            <div className="loading">
+              <CircularProgress color="secondary" />
+            </div>
+          )}
+        </CardContent>
+      </Card>
+      <NoteEditPopup
+        isOpen={isOpen}
+        defaultBody={body}
+        onDelete={deleteSelectedNote}
+        close={() => setIsOpen(false)}
+        onSave={editSelectedNote}
+      />
+    </Fragment>
   );
 };
