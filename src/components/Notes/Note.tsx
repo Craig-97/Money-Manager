@@ -4,10 +4,11 @@ import EditIcon from '@mui/icons-material/Edit';
 import { Card, CardContent, CircularProgress, IconButton } from '@mui/material';
 import { useSnackbar } from 'notistack';
 import { Fragment, useState } from 'react';
-import { DELETE_NOTE_MUTATION, deleteNoteCache } from '~/graphql';
+import { DELETE_NOTE_MUTATION, EDIT_NOTE_MUTATION, deleteNoteCache } from '~/graphql';
 import { useAccountContext } from '~/state';
+import { Note } from '~/types';
 import { getDateFromTimestamp } from '~/utils';
-import { PaymentsDuePopup } from '../Overview';
+import { NoteEditPopup } from './NoteEditPopup';
 
 interface NoteProps {
   id?: string;
@@ -24,7 +25,16 @@ export const NoteCard = ({ id, body, createdAt, updatedAt }: NoteProps) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const { enqueueSnackbar } = useSnackbar();
 
-  const [deleteNote, { loading }] = useMutation(DELETE_NOTE_MUTATION);
+  const [editNote, { loading: editNoteLoading }] = useMutation(EDIT_NOTE_MUTATION);
+
+  const editSelectedNote = (body: string) => {
+    editNote({
+      variables: { id, note: { body } },
+      onError: err => enqueueSnackbar(err?.message, { variant: 'error' })
+    });
+  };
+
+  const [deleteNote, { loading: delNoteLoading }] = useMutation(DELETE_NOTE_MUTATION);
 
   const deleteSelectedNote = () => {
     deleteNote({
@@ -50,7 +60,7 @@ export const NoteCard = ({ id, body, createdAt, updatedAt }: NoteProps) => {
     <Fragment>
       <Card className="note">
         <CardContent className="note__content">
-          {!loading ? (
+          {!delNoteLoading || editNoteLoading ? (
             <Fragment>
               <span>{body}</span>
               <div className="note__footer">
@@ -72,12 +82,12 @@ export const NoteCard = ({ id, body, createdAt, updatedAt }: NoteProps) => {
           )}
         </CardContent>
       </Card>
-
-      <PaymentsDuePopup
-        title="Add Upcoming Payment"
+      <NoteEditPopup
         isOpen={isOpen}
+        defaultBody={body}
+        onDelete={deleteSelectedNote}
         close={() => setIsOpen(false)}
-        onSave={() => console.log('test')}
+        onSave={editSelectedNote}
       />
     </Fragment>
   );

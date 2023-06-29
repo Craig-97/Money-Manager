@@ -1,17 +1,61 @@
 @use '../abstracts' as *;
 
-.payments-due-popup,
-.monthly-bills-popup {
+// Generic popup styling
+.MuiDialog-paper {
+  // Header
+  .MuiDialogTitle-root {
+    @include flexbox($justifyContent: space-between, $alignItems: center);
+    padding: 24px 24px 16px;
+  }
+  //Form body content
+  .MuiDialogContent-root {
+    padding: 0 24px 16px;
+  }
+  // Action footer
+  .MuiDialogActions-root {
+    padding: 0 24px 24px;
+  }
+  // Form control wrapper
   .MuiFormControl-root {
-    margin-bottom: 20px;
+    margin-bottom: 16px;
   }
 
+  // Checkbox
   .MuiCheckbox-root {
     padding: 0;
     margin-top: 8px;
   }
+}
 
-  .MuiTypography-root {
-    @include flexbox($justifyContent: space-between, $alignItems: center);
+.payments-due-popup {
+  // Name field margin
+  .MuiFormControl-root:first-of-type {
+    margin-bottom: 16px;
+  }
+  // Amount final field remove margin
+  .MuiFormControl-root {
+    margin-bottom: 0;
+  }
+}
+
+.note-edit-popup {
+  textarea {
+    width: 98%;
+    min-height: 100px;
+    font-size: $standard;
+    font-family: $font-family;
+    font-weight: 500;
+    resize: none;
+    background-color: $background-light;
+    color: white;
+
+    &:focus {
+      outline: none;
+    }
+
+    &::placeholder {
+      color: white;
+      opacity: 0.75;
+    }
   }
 }
