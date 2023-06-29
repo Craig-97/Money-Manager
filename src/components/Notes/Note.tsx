@@ -6,7 +6,6 @@ import { useSnackbar } from 'notistack';
 import { Fragment, useState } from 'react';
 import { DELETE_NOTE_MUTATION, EDIT_NOTE_MUTATION, deleteNoteCache } from '~/graphql';
 import { useAccountContext } from '~/state';
-import { Note } from '~/types';
 import { getDateFromTimestamp } from '~/utils';
 import { NoteEditPopup } from './NoteEditPopup';
 

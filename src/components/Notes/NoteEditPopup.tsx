@@ -6,7 +6,6 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import IconButton from '@mui/material/IconButton';
 import { ChangeEvent, DispatchWithoutAction, useState } from 'react';
-import { Note } from '~/types';
 
 interface NoteEditPopupProps {
   isOpen: boolean;
