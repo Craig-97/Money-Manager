@@ -1,19 +1,19 @@
-export const EVENTS = {
-  GET_ACCOUNT_DETAILS: 'GET_ACCOUNT_DETAILS',
-  LOGIN: 'LOGIN',
-  LOGOUT: 'LOGOUT'
-};
+export enum TYPES {
+  BILL = 'Bill',
+  ONEOFFPAYMENT = 'OneOffPayment'
+}
 
-export const TYPES = {
-  BILL: 'Bill',
-  ONEOFFPAYMENT: 'OneOffPayment'
-};
+export enum EVENTS {
+  GET_ACCOUNT_DETAILS = 'GET_ACCOUNT_DETAILS',
+  LOGIN = 'LOGIN',
+  LOGOUT = 'LOGOUT'
+}
 
-export const PAGES = {
-  HOMEPAGE: 'Homepage',
-  NOTES: 'Notes',
-  FORECAST: 'Forecast'
-};
+export enum PAGES {
+  HOMEPAGE = 'Homepage',
+  NOTES = 'Notes',
+  FORECAST = 'Forecast'
+}
 
 export const ERRORS = {
   USER_EXISTS: 'User with email already exists',

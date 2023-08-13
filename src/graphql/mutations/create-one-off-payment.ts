@@ -1,7 +1,7 @@
 import { gql } from '@apollo/client';
 
 export const CREATE_ONE_OFF_PAYMENT_MUTATION = gql`
-  mutation ($oneOffPayment: OneOffPaymentInput!) {
+  mutation CreateOneOffPayment($oneOffPayment: OneOffPaymentInput!) {
     createOneOffPayment(oneOffPayment: $oneOffPayment) {
       oneOffPayment {
         id

@@ -10,5 +10,8 @@ export const theme = createTheme({
     secondary: {
       main: pink[500]
     }
+  },
+  shape: {
+    borderRadius: 10
   }
 });

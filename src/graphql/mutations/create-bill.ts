@@ -1,7 +1,7 @@
 import { gql } from '@apollo/client';
 
 export const CREATE_BILL_MUTATION = gql`
-  mutation ($bill: BillInput!) {
+  mutation CreateBill($bill: BillInput!) {
     createBill(bill: $bill) {
       bill {
         id
