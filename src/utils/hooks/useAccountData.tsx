@@ -48,7 +48,7 @@ export const useAccountData = () => {
   const accountExists = error?.message === ERRORS.ACCOUNT_NOT_FOUND ? false : true;
 
   // Combined loading and error states for UI
-  const isLoading = userLoading || loading || !data;
+  const isLoading = userLoading || loading || (token && !data);
   const isError = userError || (error && accountExists ? error : undefined);
 
   return { data, loading: isLoading, error: isError, accountExists };
