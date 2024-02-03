@@ -20,10 +20,7 @@ const cache = new InMemoryCache({
   }
 });
 
-const uri =
-  import.meta.env.NODE_ENV === 'production'
-    ? import.meta.env.VITE_PROD_API_URL
-    : import.meta.env.VITE_DEV_API_URL;
+const uri = import.meta.env.PROD ? import.meta.env.VITE_PROD_API_URL : import.meta.env.VITE_DEV_API_URL;
 
 const httpLink = createHttpLink({
   uri
