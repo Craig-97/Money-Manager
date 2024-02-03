@@ -19,9 +19,9 @@ export const AppRoutes = () => {
         {/* Universal redirect route */}
         <Route path="*" element={<Navigate replace to="/login" />} />
 
-        {/** Protected Routes */}
+        {/* Protected Routes */}
         <Route path="/" element={<ProtectedRoutes />}>
-          {/* Existing Account Routes*/}
+          {/* Existing Account Routes */}
           <Route path="/" element={<AccountRoutes accountExists={accountExists} />}>
             <Route path="/" element={<Homepage />} />
             <Route path="/forecast" element={<Forecast />} />
@@ -30,7 +30,7 @@ export const AppRoutes = () => {
           <Route path="/setup" element={accountExists ? <Navigate replace to="/" /> : <Setup />} />
         </Route>
 
-        {/** Public Routes */}
+        {/* Public Routes */}
         <Route path="/login" element={<PublicRoutes />}>
           <Route path="/login" element={<Login />} />
         </Route>

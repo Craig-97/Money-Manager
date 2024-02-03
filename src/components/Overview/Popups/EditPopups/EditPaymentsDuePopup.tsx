@@ -31,7 +31,7 @@ export const EditPaymentsDuePopup = ({
   const { id: paymentId, name, amount }: OneOffPayment = selectedPayment;
   const { enqueueSnackbar } = useSnackbar();
 
-  const [editPayment, { loading: paymentLoading }] = useMutation(EDIT_ONE_OFF_PAYMENT_MUTATION);
+  const [editPayment, { loading: editPayLoading }] = useMutation(EDIT_ONE_OFF_PAYMENT_MUTATION);
 
   const editSelectedPayment = (oneOffPayment: OneOffPayment) => {
     editPayment({
@@ -40,9 +40,7 @@ export const EditPaymentsDuePopup = ({
     });
   };
 
-  const [deletePayment, { loading: delPaymentLoading }] = useMutation(
-    DELETE_ONE_OFF_PAYMENT_MUTATION
-  );
+  const [deletePayment, { loading: delPayLoading }] = useMutation(DELETE_ONE_OFF_PAYMENT_MUTATION);
 
   const deleteSelectedPayment = () => {
     deletePayment({
@@ -60,7 +58,7 @@ export const EditPaymentsDuePopup = ({
     });
   };
 
-  const [editAccount, { loading: accLoading }] = useMutation(EDIT_ACCOUNT_MUTATION);
+  const [editAccount, { loading: editAccLoading }] = useMutation(EDIT_ACCOUNT_MUTATION);
 
   const onPaymentDeleted = (response: any) => {
     const {
@@ -87,7 +85,7 @@ export const EditPaymentsDuePopup = ({
     }
   };
 
-  if (accLoading || paymentLoading || delPaymentLoading) {
+  if (editAccLoading || editPayLoading || delPayLoading) {
     return (
       <div className="loading">
         <CircularProgress />

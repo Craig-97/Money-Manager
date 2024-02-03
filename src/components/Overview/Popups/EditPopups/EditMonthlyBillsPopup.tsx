@@ -31,7 +31,7 @@ export const EditMonthlyBillsPopup = ({
   const { id: billId, name, amount, paid }: Bill = selectedBill;
   const { enqueueSnackbar } = useSnackbar();
 
-  const [editBill, { loading: billLoading }] = useMutation(EDIT_BILL_MUTATION);
+  const [editBill, { loading: editBillLoading }] = useMutation(EDIT_BILL_MUTATION);
 
   const editSelectedBill = (bill: Bill) => {
     editBill({
@@ -41,7 +41,7 @@ export const EditMonthlyBillsPopup = ({
     });
   };
 
-  const [editAccount, { loading: accLoading }] = useMutation(EDIT_ACCOUNT_MUTATION);
+  const [editAccount, { loading: editAccLoading }] = useMutation(EDIT_ACCOUNT_MUTATION);
 
   const onEditBillCompleted = (response: any) => {
     const {
@@ -85,7 +85,7 @@ export const EditMonthlyBillsPopup = ({
     });
   };
 
-  if (accLoading || billLoading || delBillLoading) {
+  if (editAccLoading || editBillLoading || delBillLoading) {
     return (
       <div className="loading">
         <CircularProgress />

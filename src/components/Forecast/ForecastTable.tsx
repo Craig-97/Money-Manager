@@ -12,7 +12,7 @@ export const ForecastTable = ({ past = false }: ForecastTableProps) => {
   const {
     state: { account }
   } = useAccountContext();
-  const { bankFreeToSpend, monthlyIncome }: AccountState = account;
+  const { bankFreeToSpend, monthlyIncome, billsTotal }: AccountState = account;
 
   const columns = useMemo(
     () => [
@@ -37,7 +37,7 @@ export const ForecastTable = ({ past = false }: ForecastTableProps) => {
 
   const data = useMemo(() => {
     let balance = bankFreeToSpend || 0;
-    const monthlySpend = 1000;
+    const monthlySpend = billsTotal || 1250; // TODO - Configurable via user input
     const moneyLeftOver = monthlyIncome - monthlySpend;
     let newData: Array<object> = [];
 
@@ -51,7 +51,7 @@ export const ForecastTable = ({ past = false }: ForecastTableProps) => {
     });
 
     return newData;
-  }, [bankFreeToSpend, monthlyIncome, months, past]);
+  }, [bankFreeToSpend, monthlyIncome, billsTotal, months, past]);
 
   return <Table columns={columns} data={data} />;
 };

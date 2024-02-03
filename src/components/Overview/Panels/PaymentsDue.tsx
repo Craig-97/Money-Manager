@@ -17,7 +17,7 @@ export const PaymentsDue = () => {
   } = useAccountContext();
   const { paymentsDue, paymentsDueTotal } = account;
   const [isOpen, setIsOpen] = useState<Modal>({ PAYMENT_DUE: false, BILL: false });
-  const [selectedPayment, setSelectedPayment] = useState<Bill>({});
+  const [selectedPayment, setSelectedPayment] = useState<OneOffPayment | Bill>({});
 
   const handleClickOpen = (payment: Bill | OneOffPayment) => {
     setSelectedPayment(payment);
@@ -60,12 +60,12 @@ export const PaymentsDue = () => {
       <EditMonthlyBillsPopup
         isOpen={isOpen.BILL}
         close={closePopup}
-        selectedBill={selectedPayment}
+        selectedBill={selectedPayment as Bill}
       />
       <EditPaymentsDuePopup
         isOpen={isOpen.PAYMENT_DUE}
         close={closePopup}
-        selectedPayment={selectedPayment}
+        selectedPayment={selectedPayment as OneOffPayment}
       />
     </Fragment>
   );
