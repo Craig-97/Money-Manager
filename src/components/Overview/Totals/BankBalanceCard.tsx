@@ -34,6 +34,7 @@ export const BankBalanceCard = () => {
             }
           }
         ) => editAccountCache(cache, account, user),
+        onCompleted: () => enqueueSnackbar('Bank Total updated', { variant: 'success' }),
         onError: err => enqueueSnackbar(err?.message, { variant: 'error' })
       });
     }

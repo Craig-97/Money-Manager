@@ -1,7 +1,8 @@
 import { ApolloProvider } from '@apollo/client/react';
 import { ThemeProvider } from '@mui/material/styles';
-import { SnackbarProvider } from 'notistack';
+import { closeSnackbar, SnackbarProvider } from 'notistack';
 import { AccountProvider } from './state/account-context';
+import { Button } from '@mui/material';
 import { client } from './graphql';
 import { AppRoutes } from './routes';
 import { theme } from './utils';
@@ -12,7 +13,16 @@ const App = () => {
     <ApolloProvider client={client}>
       <ThemeProvider theme={theme}>
         <AccountProvider>
-          <SnackbarProvider anchorOrigin={{ horizontal: 'center', vertical: 'top' }}>
+          <SnackbarProvider
+            anchorOrigin={{ horizontal: 'center', vertical: 'top' }}
+            autoHideDuration={2500}
+            action={key => (
+              <Button
+                onClick={() => closeSnackbar(key)}
+                style={{ color: '#fff', fontSize: '20px' }}>
+                ✖
+              </Button>
+            )}>
             <div className="app">
               <AppRoutes />
             </div>

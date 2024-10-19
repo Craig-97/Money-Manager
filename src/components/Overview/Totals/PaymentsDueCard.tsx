@@ -30,6 +30,7 @@ export const PaymentsDueCard = () => {
           }
         }
       ) => addPaymentCache(cache, oneOffPayment, user),
+      onCompleted: () => enqueueSnackbar(`${oneOffPayment.name} added`, { variant: 'success' }),
       onError: err => enqueueSnackbar(err?.message, { variant: 'error' })
     });
   };

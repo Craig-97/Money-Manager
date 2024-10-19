@@ -36,6 +36,7 @@ export const EditPaymentsDuePopup = ({
   const editSelectedPayment = (oneOffPayment: OneOffPayment) => {
     editPayment({
       variables: { id: paymentId, oneOffPayment },
+      onCompleted: () => enqueueSnackbar(`${oneOffPayment.name} updated`, { variant: 'success' }),
       onError: err => enqueueSnackbar(err?.message, { variant: 'error' })
     });
   };
@@ -60,10 +61,14 @@ export const EditPaymentsDuePopup = ({
 
   const [editAccount, { loading: editAccLoading }] = useMutation(EDIT_ACCOUNT_MUTATION);
 
+  // TODO - Add type for response
   const onPaymentDeleted = (response: any) => {
     const {
       deleteOneOffPayment: { oneOffPayment, success }
     } = response;
+
+    console.log('response', response);
+    enqueueSnackbar(`Payment deleted`, { variant: 'success' });
 
     if (success) {
       const newBalance = bankBalance - oneOffPayment?.amount;

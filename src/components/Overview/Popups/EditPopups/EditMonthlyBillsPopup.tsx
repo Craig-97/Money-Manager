@@ -43,10 +43,13 @@ export const EditMonthlyBillsPopup = ({
 
   const [editAccount, { loading: editAccLoading }] = useMutation(EDIT_ACCOUNT_MUTATION);
 
+  // TODO - Add type for response
   const onEditBillCompleted = (response: any) => {
     const {
       editBill: { bill, success }
     } = response;
+
+    enqueueSnackbar(`${bill.name} updated`, { variant: 'success' });
 
     if (success && !selectedBill?.paid && bill?.paid) {
       const newBalance = bankBalance - bill?.amount;
@@ -81,6 +84,7 @@ export const EditMonthlyBillsPopup = ({
           }
         }
       ) => deleteBillCache(cache, bill, user),
+      onCompleted: () => enqueueSnackbar(`Bill deleted`, { variant: 'success' }),
       onError: err => enqueueSnackbar(err?.message, { variant: 'error' })
     });
   };

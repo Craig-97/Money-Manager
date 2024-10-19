@@ -34,6 +34,7 @@ export const MonthlyIncomeCard = () => {
             }
           }
         ) => editAccountCache(cache, account, user),
+        onCompleted: () => enqueueSnackbar('Monthly Income updated', { variant: 'success' }),
         onError: err => enqueueSnackbar(err?.message, { variant: 'error' })
       });
     }

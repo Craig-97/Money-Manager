@@ -30,6 +30,7 @@ export const MonthlyBillsCard = () => {
           }
         }
       ) => addBillCache(cache, bill, user),
+      onCompleted: () => enqueueSnackbar(`${bill.name} added`, { variant: 'success' }),
       onError: err => enqueueSnackbar(err?.message, { variant: 'error' })
     });
   };
