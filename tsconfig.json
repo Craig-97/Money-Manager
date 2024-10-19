@@ -1,13 +1,14 @@
 {
   "extends": "./tsconfig.paths.json",
   "compilerOptions": {
-    "target": "es6",
+    "target": "ESNext",
     "lib": [
       "dom",
       "dom.iterable",
       "esnext",
       "es2015.promise"
     ],
+    "types": ["vite/client", "vite-plugin-svgr/client"],
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
