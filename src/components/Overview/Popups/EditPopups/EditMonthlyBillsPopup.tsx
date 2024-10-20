@@ -12,6 +12,7 @@ import {
 import { useAccountContext } from '~/state';
 import { Bill } from '~/types';
 import { MonthlyBillsPopup } from '../FormPopups';
+import { useErrorHandler } from '~/hooks';
 
 interface EditMonthlyBillsPopupProps {
   isOpen: boolean;
@@ -30,6 +31,7 @@ export const EditMonthlyBillsPopup = ({
   const { bankBalance, id } = account;
   const { id: billId, name, amount, paid }: Bill = selectedBill;
   const { enqueueSnackbar } = useSnackbar();
+  const handleGQLError = useErrorHandler();
 
   const [editBill, { loading: editBillLoading }] = useMutation(EDIT_BILL_MUTATION);
 
@@ -65,7 +67,7 @@ export const EditMonthlyBillsPopup = ({
               }
             }
           ) => editAccountCache(cache, account, user),
-          onError: err => enqueueSnackbar(err?.message, { variant: 'error' })
+          onError: handleGQLError
         });
       }
     }
@@ -85,7 +87,7 @@ export const EditMonthlyBillsPopup = ({
         }
       ) => deleteBillCache(cache, bill, user),
       onCompleted: () => enqueueSnackbar(`Bill deleted`, { variant: 'success' }),
-      onError: err => enqueueSnackbar(err?.message, { variant: 'error' })
+      onError: handleGQLError
     });
   };
 

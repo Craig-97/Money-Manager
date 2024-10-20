@@ -1,5 +1,4 @@
-import { NewNoteCard, NoteCard } from '~/components/Notes';
-import { StandardPage } from '~/components/StandardPage';
+import { NewNoteCard, NoteCard, StandardPage } from '~/components';
 import { useAccountContext } from '~/state';
 import { AccountState, Note } from '~/types';
 

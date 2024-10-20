@@ -5,6 +5,7 @@ import { addNoteCache, CREATE_NOTE_MUTATION } from '~/graphql';
 import { Note } from '~/types';
 import { useAccountContext } from '~/state';
 import { useSnackbar } from 'notistack';
+import { useErrorHandler } from '~/hooks';
 
 export const NewNoteCard = () => {
   const {
@@ -16,6 +17,7 @@ export const NewNoteCard = () => {
 
   const [noteText, setNoteText] = useState<string>('');
   const { enqueueSnackbar } = useSnackbar();
+  const handleGQLError = useErrorHandler();
   const characterLimit = 200;
 
   const [createNote, { loading }] = useMutation(CREATE_NOTE_MUTATION);
@@ -31,7 +33,7 @@ export const NewNoteCard = () => {
           }
         }
       ) => addNoteCache(cache, note, user),
-      onError: err => enqueueSnackbar(err?.message, { variant: 'error' })
+      onError: handleGQLError
     });
   };
 
