@@ -1,6 +1,5 @@
 import Card from '@mui/material/Card';
-import { LoginPanels } from '~/components/LoginRegister';
-import { StandardPage } from '~/components/StandardPage';
+import { LoginPanels, StandardPage } from '~/components';
 
 export const Login = () => (
   <StandardPage header={false} bottomNav={false}>

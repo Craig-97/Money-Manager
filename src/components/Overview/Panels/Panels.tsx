@@ -5,7 +5,7 @@ import Card from '@mui/material/Card';
 import Tab from '@mui/material/Tab';
 import { useRef, useState } from 'react';
 import Slider from 'react-slick';
-import { TabPanel, Tabs } from '~/components/Tabs';
+import { TabPanel, Tabs } from '~/components';
 import { MonthlyBills } from './MonthlyBills';
 import { PaymentsDue } from './PaymentsDue';
 

@@ -8,6 +8,7 @@ import { DELETE_NOTE_MUTATION, EDIT_NOTE_MUTATION, deleteNoteCache } from '~/gra
 import { useAccountContext } from '~/state';
 import { getDateFromTimestamp } from '~/utils';
 import { NoteEditPopup } from './NoteEditPopup';
+import { useErrorHandler } from '~/hooks';
 
 interface NoteProps {
   id?: string;
@@ -23,13 +24,14 @@ export const NoteCard = ({ id, body, createdAt, updatedAt }: NoteProps) => {
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const { enqueueSnackbar } = useSnackbar();
+  const handleGQLError = useErrorHandler();
 
   const [editNote, { loading: editNoteLoading }] = useMutation(EDIT_NOTE_MUTATION);
 
   const editSelectedNote = (body: string) => {
     editNote({
       variables: { id, note: { body } },
-      onError: err => enqueueSnackbar(err?.message, { variant: 'error' })
+      onError: handleGQLError
     });
   };
 
@@ -46,7 +48,7 @@ export const NoteCard = ({ id, body, createdAt, updatedAt }: NoteProps) => {
           }
         }
       ) => deleteNoteCache(cache, note, user),
-      onError: err => enqueueSnackbar(err?.message, { variant: 'error' })
+      onError: handleGQLError
     });
   };
 

@@ -8,13 +8,17 @@ import { Actions } from '~/types';
 export const logout = (
   navigate: NavigateFunction | undefined,
   client: ApolloClient<object>,
-  dispatch: Dispatch<Actions>
+  dispatch: Dispatch<Actions>,
+  redirectPath?: string
 ) => {
   // Removes login token
   localStorage.removeItem('token');
 
+  // Custom navigation path or default to /login
+  const path = redirectPath ? redirectPath : '/login';
+
   // Navigates to login page
-  navigate ? navigate('/login') : (window.location.pathname = '/login');
+  navigate ? navigate(path) : (window.location.pathname = path);
 
   // Clears React Context
   dispatch({ type: EVENTS.LOGOUT });

@@ -12,6 +12,7 @@ import {
 import { useAccountContext } from '~/state/account-context';
 import { OneOffPayment } from '~/types';
 import { PaymentsDuePopup } from '../FormPopups';
+import { useErrorHandler } from '~/hooks';
 
 interface EditPaymentsDuePopupProps {
   isOpen: boolean;
@@ -30,6 +31,7 @@ export const EditPaymentsDuePopup = ({
   const { bankBalance, id } = account;
   const { id: paymentId, name, amount }: OneOffPayment = selectedPayment;
   const { enqueueSnackbar } = useSnackbar();
+  const handleGQLError = useErrorHandler();
 
   const [editPayment, { loading: editPayLoading }] = useMutation(EDIT_ONE_OFF_PAYMENT_MUTATION);
 
@@ -37,7 +39,7 @@ export const EditPaymentsDuePopup = ({
     editPayment({
       variables: { id: paymentId, oneOffPayment },
       onCompleted: () => enqueueSnackbar(`${oneOffPayment.name} updated`, { variant: 'success' }),
-      onError: err => enqueueSnackbar(err?.message, { variant: 'error' })
+      onError: handleGQLError
     });
   };
 
@@ -55,7 +57,7 @@ export const EditPaymentsDuePopup = ({
         }
       ) => deletePaymentCache(cache, oneOffPayment, user),
       onCompleted: data => onPaymentDeleted(data),
-      onError: err => enqueueSnackbar(err?.message, { variant: 'error' })
+      onError: handleGQLError
     });
   };
 
@@ -84,7 +86,7 @@ export const EditPaymentsDuePopup = ({
               }
             }
           ) => editAccountCache(cache, account, user),
-          onError: err => enqueueSnackbar(err?.message, { variant: 'error' })
+          onError: handleGQLError
         });
       }
     }

@@ -7,6 +7,7 @@ import { initialState } from '~/state';
 import { useAccountContext } from '~/state/account-context';
 import { AccountData, FindUserData } from '~/types';
 import { getAccountData } from '~/utils';
+import { useErrorHandler } from '~/hooks';
 
 export const useAccountData = () => {
   const {
@@ -14,11 +15,13 @@ export const useAccountData = () => {
     dispatch
   } = useAccountContext();
 
+  const handleGQLError = useErrorHandler();
   const token = localStorage.getItem('token');
 
   // Context is cleared on page refresh so need to fetch user id and email
-  const { loading: userLoading, error: userError } = useQuery<FindUserData>(FIND_USER_QUERY, {
-    onCompleted: data => onFindUserCompleted(data),
+  const { loading: userLoading } = useQuery<FindUserData>(FIND_USER_QUERY, {
+    onCompleted: data => data && data.tokenFindUser && onFindUserCompleted(data),
+    onError: handleGQLError,
     skip: !token || Boolean(user.id)
   });
 
@@ -31,7 +34,8 @@ export const useAccountData = () => {
   // Fetches account information once user id is in context
   const { loading, data, error } = useQuery<AccountData>(GET_ACCOUNT_QUERY, {
     variables: { id: user.id },
-    skip: !user.id
+    skip: !user.id,
+    onError: handleGQLError
   });
 
   // If any changes are made to GQL cache then context account data gets updated
@@ -47,9 +51,8 @@ export const useAccountData = () => {
   // Used to determine If user does not have a linked account
   const accountExists = error?.message === ERRORS.ACCOUNT_NOT_FOUND ? false : true;
 
-  // Combined loading and error states for UI
-  const isError = userError || (error && accountExists ? error : undefined);
-  const isLoading = userLoading || loading || (token && !data && !isError);
+  // Combined loading states for UI
+  const isLoading = userLoading || loading || (token && !data);
 
-  return { data, loading: isLoading, error: isError, accountExists };
+  return { data, loading: isLoading, accountExists };
 };

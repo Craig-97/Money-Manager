@@ -8,6 +8,7 @@ import { Bill } from '~/types';
 import { MonthlyBillsPopup } from '../Popups';
 import { LoadingCard } from './LoadingCard';
 import { TotalCard } from './TotalCard';
+import { useErrorHandler } from '~/hooks';
 
 export const MonthlyBillsCard = () => {
   const {
@@ -16,6 +17,7 @@ export const MonthlyBillsCard = () => {
   const { billsTotal } = account;
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const { enqueueSnackbar } = useSnackbar();
+  const handleGQLError = useErrorHandler();
 
   const [createBill, { loading }] = useMutation(CREATE_BILL_MUTATION);
 
@@ -31,7 +33,7 @@ export const MonthlyBillsCard = () => {
         }
       ) => addBillCache(cache, bill, user),
       onCompleted: () => enqueueSnackbar(`${bill.name} added`, { variant: 'success' }),
-      onError: err => enqueueSnackbar(err?.message, { variant: 'error' })
+      onError: handleGQLError
     });
   };
 

@@ -8,6 +8,7 @@ import { OneOffPayment } from '~/types';
 import { PaymentsDuePopup } from '../Popups';
 import { LoadingCard } from './LoadingCard';
 import { TotalCard } from './TotalCard';
+import { useErrorHandler } from '~/hooks';
 
 export const PaymentsDueCard = () => {
   const {
@@ -16,6 +17,7 @@ export const PaymentsDueCard = () => {
   const { paymentsDueTotal } = account;
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const { enqueueSnackbar } = useSnackbar();
+  const handleGQLError = useErrorHandler();
 
   const [createOneOffPayment, { loading }] = useMutation(CREATE_ONE_OFF_PAYMENT_MUTATION);
 
@@ -31,7 +33,7 @@ export const PaymentsDueCard = () => {
         }
       ) => addPaymentCache(cache, oneOffPayment, user),
       onCompleted: () => enqueueSnackbar(`${oneOffPayment.name} added`, { variant: 'success' }),
-      onError: err => enqueueSnackbar(err?.message, { variant: 'error' })
+      onError: handleGQLError
     });
   };
 

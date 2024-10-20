@@ -1,6 +1,7 @@
 import { ApolloProvider } from '@apollo/client/react';
 import { ThemeProvider } from '@mui/material/styles';
 import { closeSnackbar, SnackbarProvider } from 'notistack';
+import { BrowserRouter as Router } from 'react-router-dom';
 import { AccountProvider } from './state/account-context';
 import { Button } from '@mui/material';
 import { client } from './graphql';
@@ -24,7 +25,9 @@ const App = () => {
               </Button>
             )}>
             <div className="app">
-              <AppRoutes />
+              <Router>
+                <AppRoutes />
+              </Router>
             </div>
           </SnackbarProvider>
         </AccountProvider>

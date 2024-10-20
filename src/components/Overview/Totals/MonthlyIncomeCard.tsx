@@ -7,6 +7,7 @@ import { useAccountContext } from '~/state/account-context';
 import { EnterValuePopup } from '../Popups';
 import { LoadingCard } from './LoadingCard';
 import { TotalCard } from './TotalCard';
+import { useErrorHandler } from '~/hooks';
 
 export const MonthlyIncomeCard = () => {
   const {
@@ -15,6 +16,7 @@ export const MonthlyIncomeCard = () => {
   const { monthlyIncome, id } = account;
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const { enqueueSnackbar } = useSnackbar();
+  const handleGQLError = useErrorHandler();
 
   const [editAccount, { loading }] = useMutation(EDIT_ACCOUNT_MUTATION);
 

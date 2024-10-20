@@ -1,5 +1,4 @@
-import { ForecastTable } from '~/components/Forecast';
-import { StandardPage } from '~/components/StandardPage';
+import { ForecastTable, StandardPage } from '~/components';
 
 export const Forecast = () => (
   <StandardPage>

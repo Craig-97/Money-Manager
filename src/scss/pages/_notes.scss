@@ -2,12 +2,12 @@
 
 .notes {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  grid-template-rows: auto auto;
-  grid-gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax($mobile-width, 370px));
+  gap: 2rem;
   margin-bottom: 32px;
   min-width: $desktop-width;
   max-width: $desktop-width;
+  justify-content: center;
 
   @include respond(laptop) {
     min-width: $laptop-width;
@@ -15,13 +15,11 @@
   }
 
   @include respond(tablet) {
-    grid-template-columns: auto auto;
     min-width: $tablet-width;
     max-width: unset;
   }
 
   @include respond(mobile) {
-    grid-template-columns: auto;
     min-width: unset;
     margin-bottom: 88px;
   }
