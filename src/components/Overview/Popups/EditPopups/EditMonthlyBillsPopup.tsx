@@ -51,7 +51,7 @@ export const EditMonthlyBillsPopup = ({
       editBill: { bill, success }
     } = response;
 
-    enqueueSnackbar(`${bill.name} updated`, { variant: 'success' });
+    enqueueSnackbar(`${bill.name} bill updated`, { variant: 'success' });
 
     if (success && !selectedBill?.paid && bill?.paid) {
       const newBalance = bankBalance - bill?.amount;

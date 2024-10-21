@@ -1,4 +1,8 @@
 import DeleteIcon from '@mui/icons-material/Delete';
+import { ChangeEvent, DispatchWithoutAction, KeyboardEvent, useState } from 'react';
+import { useAccountContext } from '~/state/account-context';
+import { Bill } from '~/types';
+import { Tooltip } from '@mui/material';
 import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
 import Dialog from '@mui/material/Dialog';
@@ -9,9 +13,6 @@ import DialogTitle from '@mui/material/DialogTitle';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import TextField from '@mui/material/TextField';
-import { ChangeEvent, DispatchWithoutAction, KeyboardEvent, useState } from 'react';
-import { useAccountContext } from '~/state/account-context';
-import { Bill } from '~/types';
 
 interface MonthlyBillsPopupProps {
   title: string;
@@ -82,14 +83,16 @@ export const MonthlyBillsPopup = ({
       onClose={handleClose}
       aria-labelledby="form-dialog-title"
       className="monthly-bills-popup"
-      maxWidth={'xs'}
+      maxWidth="xs"
       fullWidth>
       <DialogTitle id="form-dialog-title">
         {title}
         {onDelete && (
-          <IconButton onClick={handleDeleteClicked} disabled={!name || (!amount && amount !== 0)}>
-            <DeleteIcon />
-          </IconButton>
+          <Tooltip title="Delete">
+            <IconButton onClick={handleDeleteClicked} disabled={!name || (!amount && amount !== 0)}>
+              <DeleteIcon />
+            </IconButton>
+          </Tooltip>
         )}
       </DialogTitle>
       <DialogContent>

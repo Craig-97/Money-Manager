@@ -32,7 +32,7 @@ export const MonthlyBillsCard = () => {
           }
         }
       ) => addBillCache(cache, bill, user),
-      onCompleted: () => enqueueSnackbar(`${bill.name} added`, { variant: 'success' }),
+      onCompleted: () => enqueueSnackbar(`${bill.name} bill added`, { variant: 'success' }),
       onError: handleGQLError
     });
   };

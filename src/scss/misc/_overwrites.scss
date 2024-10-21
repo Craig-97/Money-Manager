@@ -11,3 +11,10 @@ input:-webkit-autofill:active {
 input:-webkit-autofill {
   -webkit-text-fill-color: $white !important;
 }
+
+// Notistack
+#notistack-snackbar {
+  text-transform: uppercase;
+  font-weight: bold;
+  font-family: $font-family;
+}

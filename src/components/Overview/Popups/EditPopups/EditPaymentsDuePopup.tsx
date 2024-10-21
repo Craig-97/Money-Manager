@@ -38,14 +38,15 @@ export const EditPaymentsDuePopup = ({
   const editSelectedPayment = (oneOffPayment: OneOffPayment) => {
     editPayment({
       variables: { id: paymentId, oneOffPayment },
-      onCompleted: () => enqueueSnackbar(`${oneOffPayment.name} updated`, { variant: 'success' }),
+      onCompleted: () =>
+        enqueueSnackbar(`${oneOffPayment.name} payment updated`, { variant: 'success' }),
       onError: handleGQLError
     });
   };
 
   const [deletePayment, { loading: delPayLoading }] = useMutation(DELETE_ONE_OFF_PAYMENT_MUTATION);
 
-  const deleteSelectedPayment = () => {
+  const deleteSelectedPayment = (paid: boolean) => {
     deletePayment({
       variables: { id: paymentId },
       update: (
@@ -56,25 +57,26 @@ export const EditPaymentsDuePopup = ({
           }
         }
       ) => deletePaymentCache(cache, oneOffPayment, user),
-      onCompleted: data => onPaymentDeleted(data),
+      onCompleted: data => onPaymentDeleted(data, paid),
       onError: handleGQLError
     });
   };
 
   const [editAccount, { loading: editAccLoading }] = useMutation(EDIT_ACCOUNT_MUTATION);
 
-  // TODO - Add type for response
-  const onPaymentDeleted = (response: any) => {
+  const onPaymentDeleted = (response: any, paid: boolean) => {
     const {
       deleteOneOffPayment: { oneOffPayment, success }
     } = response;
 
-    console.log('response', response);
-    enqueueSnackbar(`Payment deleted`, { variant: 'success' });
-
     if (success) {
+      const message = paid
+        ? `£${oneOffPayment.amount} deducted from Bank Total`
+        : 'Payment deleted';
+      enqueueSnackbar(message, { variant: 'success' });
+
       const newBalance = bankBalance - oneOffPayment?.amount;
-      if (!isNaN(newBalance)) {
+      if (!isNaN(newBalance) && paid) {
         // Updates bankBalance automatically when payment is removed
         editAccount({
           variables: { id, account: { bankBalance: newBalance } },

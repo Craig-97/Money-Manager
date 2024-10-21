@@ -32,7 +32,8 @@ export const PaymentsDueCard = () => {
           }
         }
       ) => addPaymentCache(cache, oneOffPayment, user),
-      onCompleted: () => enqueueSnackbar(`${oneOffPayment.name} added`, { variant: 'success' }),
+      onCompleted: () =>
+        enqueueSnackbar(`${oneOffPayment.name} payment added`, { variant: 'success' }),
       onError: handleGQLError
     });
   };
