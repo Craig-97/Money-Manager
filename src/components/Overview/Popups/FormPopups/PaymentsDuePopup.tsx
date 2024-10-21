@@ -1,4 +1,9 @@
 import DeleteIcon from '@mui/icons-material/Delete';
+import PaidIcon from '@mui/icons-material/Paid';
+import { Box, Tooltip } from '@mui/material';
+import { ChangeEvent, DispatchWithoutAction, Fragment, KeyboardEvent, useState } from 'react';
+import { useAccountContext } from '~/state/account-context';
+import { OneOffPayment } from '~/types';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -8,9 +13,6 @@ import DialogTitle from '@mui/material/DialogTitle';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import TextField from '@mui/material/TextField';
-import { ChangeEvent, DispatchWithoutAction, KeyboardEvent, useState } from 'react';
-import { useAccountContext } from '~/state/account-context';
-import { OneOffPayment } from '~/types';
 
 interface PaymentsDuePopupProps {
   title: string;
@@ -19,7 +21,7 @@ interface PaymentsDuePopupProps {
   defaultName?: string;
   defaultAmount?: number | string;
   onSave: ({ name, amount, account }: OneOffPayment) => void;
-  onDelete?: DispatchWithoutAction;
+  onDelete?: (paid: boolean) => void;
 }
 
 export const PaymentsDuePopup = ({
@@ -45,8 +47,8 @@ export const PaymentsDuePopup = ({
     handleClose();
   };
 
-  const handleDeleteClicked = () => {
-    onDelete && onDelete();
+  const handleButtonClicked = (paid: boolean) => {
+    onDelete && onDelete(paid);
     close();
   };
 
@@ -77,15 +79,30 @@ export const PaymentsDuePopup = ({
       onClose={handleClose}
       aria-labelledby="form-dialog-title"
       className="payments-due-popup"
-      maxWidth={'xs'}
+      maxWidth="xs"
       fullWidth>
       <DialogTitle id="form-dialog-title">
         {title}
-        {onDelete && (
-          <IconButton onClick={handleDeleteClicked} disabled={!name || (!amount && amount !== 0)}>
-            <DeleteIcon />
-          </IconButton>
-        )}
+        <Box>
+          {onDelete && (
+            <Fragment>
+              <Tooltip title="Pay">
+                <IconButton
+                  onClick={() => handleButtonClicked(true)}
+                  disabled={!name || (!amount && amount !== 0)}>
+                  <PaidIcon />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Delete">
+                <IconButton
+                  onClick={() => handleButtonClicked(false)}
+                  disabled={!name || (!amount && amount !== 0)}>
+                  <DeleteIcon />
+                </IconButton>
+              </Tooltip>
+            </Fragment>
+          )}
+        </Box>
       </DialogTitle>
       <DialogContent>
         <DialogContentText>Name</DialogContentText>

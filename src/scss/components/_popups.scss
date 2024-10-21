@@ -23,9 +23,10 @@
   }
 }
 
+.monthly-bills-popup,
 .payments-due-popup {
   // Name field margin
-  .MuiFormControl-root:first-of-type {
+  .MuiFormControl-root:not(:last-child) {
     margin-bottom: 16px;
   }
   // Amount final field remove margin
