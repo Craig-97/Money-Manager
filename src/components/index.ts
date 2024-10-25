@@ -8,3 +8,4 @@ export * from './Overview';
 export * from './StandardPage';
 export * from './Table';
 export * from './Tabs';
+export * from './Setup';

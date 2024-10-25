@@ -1,15 +1,21 @@
-import { LogoutButton } from '~/components';
+import { Box, Card, Typography } from '@mui/material';
+import { SetupForm } from '~/components';
 
 export const Setup = () => {
   return (
-    <div style={{ textAlign: 'center' }}>
-      <div style={{ justifyContent: 'center' }} className="header">
-        <h1>Money Manager</h1>
-      </div>
-      <h3>SETUP ACCOUNT PAGE</h3>
-      <h4>WORK IN PROGRESS</h4>
-      <h5>COME BACK LATER</h5>
-      <LogoutButton />
-    </div>
+    <Box sx={{ minHeight: `calc(100svh - 64px)`, display: 'flex', alignItems: 'center', my: 4 }}>
+      <Box sx={{ maxWidth: 600, width: '100%', px: 2 }}>
+        <Card sx={{ p: 3 }}>
+          <Typography variant="h4" gutterBottom align="center">
+            Welcome to <strong>Money Manager</strong>
+          </Typography>
+          <Typography variant="body1" paragraph align="center" color="text.secondary">
+            Let's get your account set up in just a few steps.
+          </Typography>
+
+          <SetupForm />
+        </Card>
+      </Box>
+    </Box>
   );
 };

@@ -27,6 +27,7 @@ export const editAccountCache = (
 ) => {
   const data = getAccountCache(cache, user);
 
+  // TODO - Check if this doesn't call after setup form submitted
   if (data?.account && account) {
     cache.writeQuery({
       query: GET_ACCOUNT_QUERY,

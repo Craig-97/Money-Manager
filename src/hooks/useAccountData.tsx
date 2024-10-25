@@ -19,8 +19,8 @@ export const useAccountData = () => {
   const token = localStorage.getItem('token');
 
   // Context is cleared on page refresh so need to fetch user id and email
-  const { loading: userLoading } = useQuery<FindUserData>(FIND_USER_QUERY, {
-    onCompleted: data => data && data.tokenFindUser && onFindUserCompleted(data),
+  const { loading: userLoading, error: userError } = useQuery<FindUserData>(FIND_USER_QUERY, {
+    onCompleted: data => onFindUserCompleted(data),
     onError: handleGQLError,
     skip: !token || Boolean(user.id)
   });
@@ -28,7 +28,7 @@ export const useAccountData = () => {
   // Updates context with user id and email returned from local storage token
   const onFindUserCompleted = (response: FindUserData) => {
     const { tokenFindUser } = response;
-    dispatch({ type: EVENTS.LOGIN, data: { ...tokenFindUser } });
+    if (!userError) dispatch({ type: EVENTS.LOGIN, data: { ...tokenFindUser } });
   };
 
   // Fetches account information once user id is in context
@@ -52,7 +52,7 @@ export const useAccountData = () => {
   const accountExists = error?.message === ERRORS.ACCOUNT_NOT_FOUND ? false : true;
 
   // Combined loading states for UI
-  const isLoading = userLoading || loading || (token && !data);
+  const isLoading = userLoading || loading || (token && !data && accountExists);
 
   return { data, loading: isLoading, accountExists };
 };

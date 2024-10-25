@@ -23,6 +23,7 @@ export const logout = (
   // Clears React Context
   dispatch({ type: EVENTS.LOGOUT });
 
+  // TODO - Figure out way to stop tokenfinduser firing again after this is called.
   // Clears Apollo Cache
   client.resetStore();
 };

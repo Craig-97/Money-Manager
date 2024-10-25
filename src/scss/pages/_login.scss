@@ -3,5 +3,5 @@
 .login {
   @include flexbox($direction: column, $justifyContent: center);
   max-width: 1250px;
-  min-height: 90vh;
+  height: 100svh;
 }
