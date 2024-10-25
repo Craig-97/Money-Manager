@@ -8,3 +8,10 @@ export interface Bill {
   account?: string;
   __typename?: TYPES.BILL;
 }
+
+export interface EditBillResponse {
+  editBill: {
+    bill: Bill;
+    success: boolean;
+  };
+}

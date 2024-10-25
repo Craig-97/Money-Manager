@@ -10,7 +10,7 @@ import {
   editAccountCache
 } from '~/graphql';
 import { useAccountContext } from '~/state';
-import { Bill } from '~/types';
+import { Bill, EditBillResponse } from '~/types';
 import { MonthlyBillsPopup } from '../FormPopups';
 import { useErrorHandler } from '~/hooks';
 
@@ -45,8 +45,7 @@ export const EditMonthlyBillsPopup = ({
 
   const [editAccount, { loading: editAccLoading }] = useMutation(EDIT_ACCOUNT_MUTATION);
 
-  // TODO - Add type for response
-  const onEditBillCompleted = (response: any) => {
+  const onEditBillCompleted = (response: EditBillResponse) => {
     const {
       editBill: { bill, success }
     } = response;
@@ -54,7 +53,7 @@ export const EditMonthlyBillsPopup = ({
     enqueueSnackbar(`${bill.name} bill updated`, { variant: 'success' });
 
     if (success && !selectedBill?.paid && bill?.paid) {
-      const newBalance = bankBalance - bill?.amount;
+      const newBalance = bankBalance - (bill?.amount || 0);
       if (!isNaN(newBalance)) {
         // Updates bankBalance automatically when bill is marked as paid
         editAccount({

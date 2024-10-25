@@ -10,7 +10,7 @@ import {
   editAccountCache
 } from '~/graphql';
 import { useAccountContext } from '~/state/account-context';
-import { OneOffPayment } from '~/types';
+import { DeletePaymentResponse, OneOffPayment } from '~/types';
 import { PaymentsDuePopup } from '../FormPopups';
 import { useErrorHandler } from '~/hooks';
 
@@ -64,7 +64,7 @@ export const EditPaymentsDuePopup = ({
 
   const [editAccount, { loading: editAccLoading }] = useMutation(EDIT_ACCOUNT_MUTATION);
 
-  const onPaymentDeleted = (response: any, paid: boolean) => {
+  const onPaymentDeleted = (response: DeletePaymentResponse, paid: boolean) => {
     const {
       deleteOneOffPayment: { oneOffPayment, success }
     } = response;
@@ -75,7 +75,7 @@ export const EditPaymentsDuePopup = ({
         : 'Payment deleted';
       enqueueSnackbar(message, { variant: 'success' });
 
-      const newBalance = bankBalance - oneOffPayment?.amount;
+      const newBalance = bankBalance - (oneOffPayment?.amount || 0);
       if (!isNaN(newBalance) && paid) {
         // Updates bankBalance automatically when payment is removed
         editAccount({

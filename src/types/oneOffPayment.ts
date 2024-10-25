@@ -7,3 +7,10 @@ export interface OneOffPayment {
   account?: string;
   __typename?: TYPES.ONEOFFPAYMENT;
 }
+
+export interface DeletePaymentResponse {
+  deleteOneOffPayment: {
+    oneOffPayment: OneOffPayment;
+    success: boolean;
+  };
+}
