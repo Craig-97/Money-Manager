@@ -27,7 +27,7 @@ export const SetupForm = () => {
     onError: handleGQLError,
     onCompleted: () => {
       enqueueSnackbar('Setup completed successfully!', { variant: 'success' });
-      navigate('/'); // TODO - Investigate why it's not navigating to dashboard on success
+      navigate('/');
     },
     update: (
       cache,

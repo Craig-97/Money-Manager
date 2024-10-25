@@ -11,19 +11,18 @@ export const logout = (
   dispatch: Dispatch<Actions>,
   redirectPath?: string
 ) => {
-  // Removes login token
+  // Remove login token
   localStorage.removeItem('token');
 
   // Custom navigation path or default to /login
   const path = redirectPath ? redirectPath : '/login';
 
-  // Navigates to login page
+  // Navigate to login page
   navigate ? navigate(path) : (window.location.pathname = path);
 
   // Clears React Context
   dispatch({ type: EVENTS.LOGOUT });
 
-  // TODO - Figure out way to stop tokenfinduser firing again after this is called.
-  // Clears Apollo Cache
-  client.resetStore();
+  // Clear Apollo Cache without triggering refetches
+  client.clearStore();
 };
