@@ -1,26 +1,27 @@
-import { useState } from 'react';
 import { useMutation } from '@apollo/client';
-import { useSnackbar } from 'notistack';
-import { useAccountContext } from '~/state';
-import { CREATE_ACCOUNT_MUTATION, editAccountCache } from '~/graphql';
-import { useFormik } from 'formik';
-import {
-  Button,
-  Box,
-  Stepper,
-  Step,
-  StepLabel,
-  CircularProgress,
-  useTheme,
-  useMediaQuery,
-  MobileStepper
-} from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import { useErrorHandler } from '~/hooks';
-import { BasicInfoStep, BillsStep, PaymentsStep, PaydayStep, validationSchema } from '~/components';
-import { PaydayType, PayFrequency, SetupFormValues } from '~/types';
+import {
+  Box,
+  Button,
+  CircularProgress,
+  MobileStepper,
+  Step,
+  StepLabel,
+  Stepper,
+  useMediaQuery,
+  useTheme
+} from '@mui/material';
+import { useFormik } from 'formik';
+import { useSnackbar } from 'notistack';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { BasicInfoStep, BillsStep, PaydayStep, PaymentsStep, validationSchema } from '~/components';
+import { CREATE_ACCOUNT_MUTATION, editAccountCache } from '~/graphql';
+import { useErrorHandler } from '~/hooks';
+import { useAccountContext } from '~/state';
+import { PaydayType, PayFrequency, SetupFormValues } from '~/types';
+import { useLogout } from '~/hooks';
 
 const steps = ['Basic Info', 'Monthly Bills', 'Payments Due', 'Payday Setup'];
 
@@ -34,6 +35,7 @@ export const SetupForm = () => {
   } = useAccountContext();
   const handleGQLError = useErrorHandler();
   const [activeStep, setActiveStep] = useState(0);
+  const logout = useLogout();
 
   const [createAccount, { loading }] = useMutation(CREATE_ACCOUNT_MUTATION, {
     onError: handleGQLError,
@@ -134,16 +136,27 @@ export const SetupForm = () => {
             <Button
               size="small"
               onClick={handleNext}
-              disabled={activeStep === steps.length - 1 || !isStepValid()}>
+              disabled={activeStep === steps.length - 1 || !isStepValid()}
+              tabIndex={0}>
               Next
               <ArrowForwardIcon />
             </Button>
           }
           backButton={
-            <Button size="small" onClick={handleBack} disabled={activeStep === 0}>
-              <ArrowBackIcon />
-              Back
-            </Button>
+            activeStep !== 0 ? (
+              <Button size="small" onClick={handleBack} disabled={activeStep === 0} tabIndex={1}>
+                <ArrowBackIcon />
+                Back
+              </Button>
+            ) : (
+              <Button
+                size="small"
+                onClick={() => logout()}
+                startIcon={<ArrowBackIcon />}
+                tabIndex={1}>
+                Logout
+              </Button>
+            )
           }
         />
       ) : (
@@ -160,18 +173,28 @@ export const SetupForm = () => {
         {renderStepContent(activeStep)}
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
-          {!isMobile && (
-            <Button onClick={handleBack} disabled={activeStep === 0} startIcon={<ArrowBackIcon />}>
-              Back
-            </Button>
-          )}
-          <Box sx={{ flex: '1 1 auto' }} />
+          {!isMobile &&
+            (activeStep === 0 ? (
+              <Button onClick={() => logout()} startIcon={<ArrowBackIcon />} tabIndex={1}>
+                Logout
+              </Button>
+            ) : (
+              <Button
+                onClick={handleBack}
+                disabled={activeStep === 0}
+                startIcon={<ArrowBackIcon />}
+                tabIndex={1}>
+                Back
+              </Button>
+            ))}
+
           {activeStep === steps.length - 1 ? (
             <Button
               variant="contained"
               type="submit"
               disabled={loading || !isStepValid()}
-              endIcon={loading ? <CircularProgress size={20} /> : null}>
+              endIcon={loading ? <CircularProgress size={20} /> : null}
+              tabIndex={0}>
               Complete Setup
             </Button>
           ) : (
@@ -180,7 +203,8 @@ export const SetupForm = () => {
                 variant="contained"
                 onClick={handleNext}
                 disabled={!isStepValid()}
-                endIcon={<ArrowForwardIcon />}>
+                endIcon={<ArrowForwardIcon />}
+                tabIndex={0}>
                 Next
               </Button>
             )

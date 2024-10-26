@@ -13,8 +13,10 @@ export const BasicInfoStep = ({ formik }: BasicInfoStepProps) => (
         Enter the total available funds in your bank account.
       </Typography>
       <TextField
-        InputProps={{
-          startAdornment: <InputAdornment position="start">£</InputAdornment>
+        slotProps={{
+          input: {
+            startAdornment: <InputAdornment position="start">£</InputAdornment>
+          }
         }}
         autoFocus
         fullWidth
@@ -35,8 +37,10 @@ export const BasicInfoStep = ({ formik }: BasicInfoStepProps) => (
       Enter your monthly income after tax and deductions.
     </Typography>
     <TextField
-      InputProps={{
-        startAdornment: <InputAdornment position="start">£</InputAdornment>
+      slotProps={{
+        input: {
+          startAdornment: <InputAdornment position="start">£</InputAdornment>
+        }
       }}
       fullWidth
       id="monthlyIncome"

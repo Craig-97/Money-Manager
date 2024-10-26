@@ -56,7 +56,7 @@ export const PaymentsStep = ({ formik }: PaymentsStepProps) => {
         </Box>
       ))}
       {values.oneOffPayments.length < 10 && (
-        <Button variant="outlined" onClick={onAdd} fullWidth sx={{ mt: 1 }}>
+        <Button autoFocus variant="outlined" onClick={onAdd} fullWidth sx={{ mt: 1 }}>
           Add Payment
         </Button>
       )}

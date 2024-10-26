@@ -1,4 +1,3 @@
-import { useApolloClient } from '@apollo/client';
 import HomeIcon from '@mui/icons-material/Home';
 import Logout from '@mui/icons-material/Logout';
 import NoteRounded from '@mui/icons-material/NoteRounded';
@@ -7,13 +6,11 @@ import BottomNavigation from '@mui/material/BottomNavigation';
 import BottomNavigationAction from '@mui/material/BottomNavigationAction';
 import { SyntheticEvent, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useAccountContext } from '~/state';
-import { logout } from '~/utils';
+import { useLogout } from '~/hooks';
 
 export const BottomNav = () => {
-  const client = useApolloClient();
-  const { dispatch } = useAccountContext();
   const [value, setValue] = useState(window.location.pathname);
+  const logout = useLogout();
 
   const onChange = (event: SyntheticEvent, newValue: string) => {
     setValue(newValue);
@@ -34,11 +31,7 @@ export const BottomNav = () => {
         component={Link}
         to={'/notes'}
       />
-      <BottomNavigationAction
-        value={'/logout'}
-        icon={<Logout />}
-        onClick={() => logout(undefined, client, dispatch)}
-      />
+      <BottomNavigationAction value={'/logout'} icon={<Logout />} onClick={() => logout()} />
     </BottomNavigation>
   );
 };

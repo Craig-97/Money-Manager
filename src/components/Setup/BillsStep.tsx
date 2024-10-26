@@ -56,7 +56,7 @@ export const BillsStep = ({ formik }: BillsStepProps) => {
         </Box>
       ))}
       {values.bills.length < 10 && (
-        <Button variant="outlined" onClick={onAdd} fullWidth sx={{ mt: 1 }}>
+        <Button autoFocus variant="outlined" onClick={onAdd} fullWidth sx={{ mt: 1 }}>
           Add Bill
         </Button>
       )}

@@ -1,19 +1,14 @@
 import Logout from '@mui/icons-material/Logout';
-import { useApolloClient } from '@apollo/client';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
-import { useNavigate } from 'react-router-dom';
-import { logout } from '~/utils';
-import { useAccountContext } from '~/state';
+import { useLogout } from '~/hooks';
 
 export const LogoutButton = () => {
-  const navigate = useNavigate();
-  const client = useApolloClient();
-  const { dispatch } = useAccountContext();
+  const logout = useLogout();
 
   return (
     <Tooltip title="Logout">
-      <IconButton className="logout-button" onClick={() => logout(navigate, client, dispatch)}>
+      <IconButton className="logout-button" onClick={() => logout()}>
         <Logout />
       </IconButton>
     </Tooltip>

@@ -90,9 +90,11 @@ export const Table = ({ columns, data, stickyHeader = true }: TableProps) => {
               count={data.length}
               rowsPerPage={pageSize}
               page={pageIndex}
-              SelectProps={{
-                inputProps: { 'aria-label': 'rows per page' },
-                native: true
+              slotProps={{
+                select: {
+                  inputProps: { 'aria-label': 'rows per page' },
+                  native: true
+                }
               }}
               onPageChange={handleChangePage}
               onRowsPerPageChange={handleChangeRowsPerPage}

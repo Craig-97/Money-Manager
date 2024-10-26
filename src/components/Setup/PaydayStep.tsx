@@ -63,6 +63,7 @@ export const PaydayStep = ({ formik }: PaydayStepProps) => {
       <FormControl fullWidth sx={{ mb: 2 }}>
         <InputLabel>Pay Frequency</InputLabel>
         <Select
+          autoFocus
           value={paydayConfig.frequency || ''}
           label="Pay Frequency"
           onChange={handleFrequencyChange}
@@ -102,7 +103,9 @@ export const PaydayStep = ({ formik }: PaydayStepProps) => {
           fullWidth
           label="Day of Month"
           type="number"
-          InputProps={{ inputProps: { min: 1, max: 31 } }}
+          slotProps={{
+            input: { inputProps: { min: 1, max: 31 } }
+          }}
           value={paydayConfig.dayOfMonth || ''}
           onChange={e => setFieldValue('paydayConfig.dayOfMonth', parseInt(e.target.value))}
           error={touched.paydayConfig?.dayOfMonth && Boolean(errors.paydayConfig?.dayOfMonth)}

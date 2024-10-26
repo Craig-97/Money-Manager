@@ -118,8 +118,10 @@ export const PaymentsDuePopup = ({
         <DialogContentText>Amount</DialogContentText>
         <TextField
           type="number"
-          InputProps={{
-            startAdornment: <InputAdornment position="start">£</InputAdornment>
+          slotProps={{
+            input: {
+              startAdornment: <InputAdornment position="start">£</InputAdornment>
+            }
           }}
           value={amount}
           onChange={handleAmountChange}
