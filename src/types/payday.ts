@@ -1,31 +1,26 @@
-export enum PaydayType {
-  SPECIFIC_DATE = 'SPECIFIC_DATE',
-  LAST_WORKING_DAY = 'LAST_WORKING_DAY',
+export enum PayFrequency {
   WEEKLY = 'WEEKLY',
-  BIWEEKLY = 'BIWEEKLY',
-  SPECIFIC_WEEKDAY = 'SPECIFIC_WEEKDAY',
-  LAST_WEEKDAY = 'LAST_WEEKDAY'
+  FORTNIGHTLY = 'FORTNIGHTLY',
+  FOUR_WEEKLY = 'FOUR_WEEKLY',
+  MONTHLY = 'MONTHLY',
+  QUARTERLY = 'QUARTERLY',
+  BIANNUAL = 'BIANNUAL',
+  ANNUAL = 'ANNUAL'
 }
 
-export enum Weekday {
-  SUNDAY = 0,
-  MONDAY = 1,
-  TUESDAY = 2,
-  WEDNESDAY = 3,
-  THURSDAY = 4,
-  FRIDAY = 5,
-  SATURDAY = 6
+export enum PaydayType {
+  LAST_DAY = 'LAST_DAY',
+  LAST_WEEKDAY = 'LAST_WEEKDAY',
+  LAST_FRIDAY = 'LAST_FRIDAY',
+  SET_DAY = 'SET_DAY',
+  SET_DAY_OR_BEFORE = 'SET_DAY_OR_BEFORE'
 }
 
 export interface PaydayConfig {
+  frequency: PayFrequency;
   type: PaydayType;
-  // For SPECIFIC_DATE
   dayOfMonth?: number;
-  // For WEEKLY/BIWEEKLY
-  weekday?: Weekday;
-  startDate?: string; // ISO date string
-  // For SPECIFIC_WEEKDAY
-  weekdayOccurrence?: number; // 1st, 2nd, 3rd, 4th
+  startDate?: string;
 }
 
 export interface PaydayInfo {

@@ -19,10 +19,10 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { useErrorHandler } from '~/hooks';
 import { BasicInfoStep, BillsStep, PaymentsStep, PaydayStep, validationSchema } from '~/components';
-import { PaydayType, SetupFormValues } from '~/types';
+import { PaydayType, PayFrequency, SetupFormValues } from '~/types';
 import { useNavigate } from 'react-router-dom';
 
-const steps = ['Basic Info', 'Monthly Bills', 'One-Off Payments', 'Payday Setup'];
+const steps = ['Basic Info', 'Monthly Bills', 'Payments Due', 'Payday Setup'];
 
 export const SetupForm = () => {
   const { enqueueSnackbar } = useSnackbar();
@@ -59,7 +59,7 @@ export const SetupForm = () => {
       monthlyIncome: '',
       bills: [],
       oneOffPayments: [],
-      paydayConfig: { type: PaydayType.LAST_WORKING_DAY }
+      paydayConfig: { type: PaydayType.LAST_DAY, frequency: PayFrequency.MONTHLY }
     },
     validationSchema,
     onSubmit: async values => {

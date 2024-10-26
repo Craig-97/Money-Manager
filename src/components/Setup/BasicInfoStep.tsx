@@ -27,7 +27,7 @@ export const BasicInfoStep = ({ formik }: BasicInfoStepProps) => (
         onBlur={formik.handleBlur}
         error={formik.touched.bankTotal && Boolean(formik.errors.bankTotal)}
         helperText={formik.touched.bankTotal && formik.errors.bankTotal}
-        margin="dense"
+        margin="normal"
       />
     </Box>
 
@@ -48,7 +48,7 @@ export const BasicInfoStep = ({ formik }: BasicInfoStepProps) => (
       onBlur={formik.handleBlur}
       error={formik.touched.monthlyIncome && Boolean(formik.errors.monthlyIncome)}
       helperText={formik.touched.monthlyIncome && formik.errors.monthlyIncome}
-      margin="dense"
+      margin="normal"
     />
   </Box>
 );
