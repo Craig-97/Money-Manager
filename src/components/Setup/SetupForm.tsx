@@ -4,19 +4,31 @@ import { useSnackbar } from 'notistack';
 import { useAccountContext } from '~/state';
 import { CREATE_ACCOUNT_MUTATION, editAccountCache } from '~/graphql';
 import { useFormik } from 'formik';
-import { Button, Box, Stepper, Step, StepLabel, CircularProgress } from '@mui/material';
+import {
+  Button,
+  Box,
+  Stepper,
+  Step,
+  StepLabel,
+  CircularProgress,
+  useTheme,
+  useMediaQuery,
+  MobileStepper
+} from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { useErrorHandler } from '~/hooks';
-import { BasicInfoStep, BillsStep, PaymentsStep, validationSchema } from '~/components';
-import { SetupFormValues } from '~/types';
+import { BasicInfoStep, BillsStep, PaymentsStep, PaydayStep, validationSchema } from '~/components';
+import { PaydayType, SetupFormValues } from '~/types';
 import { useNavigate } from 'react-router-dom';
 
-const steps = ['Basic Info', 'Monthly Bills', 'One-Off Payments'];
+const steps = ['Basic Info', 'Monthly Bills', 'One-Off Payments', 'Payday Setup'];
 
 export const SetupForm = () => {
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const {
     state: { user }
   } = useAccountContext();
@@ -46,7 +58,8 @@ export const SetupForm = () => {
       bankTotal: '',
       monthlyIncome: '',
       bills: [],
-      oneOffPayments: []
+      oneOffPayments: [],
+      paydayConfig: { type: PaydayType.LAST_WORKING_DAY }
     },
     validationSchema,
     onSubmit: async values => {
@@ -60,6 +73,7 @@ export const SetupForm = () => {
             monthlyIncome: parseFloat(values.monthlyIncome),
             bills: values.bills,
             oneOffPayments: values.oneOffPayments,
+            paydayConfig: values.paydayConfig,
             userId: user.id
           }
         }
@@ -85,6 +99,8 @@ export const SetupForm = () => {
         return formik.values.bills.every(bill => bill.name && bill.amount);
       case 2:
         return formik.values.oneOffPayments.every(payment => payment.name && payment.amount);
+      case 3:
+        return formik.values.paydayConfig.type !== undefined;
       default:
         return false;
     }
@@ -98,6 +114,8 @@ export const SetupForm = () => {
         return <BillsStep formik={formik} />;
       case 2:
         return <PaymentsStep formik={formik} />;
+      case 3:
+        return <PaydayStep formik={formik} />;
       default:
         return null;
     }
@@ -105,21 +123,48 @@ export const SetupForm = () => {
 
   return (
     <>
-      <Stepper activeStep={activeStep} sx={{ my: 4 }}>
-        {steps.map(label => (
-          <Step key={label}>
-            <StepLabel>{label}</StepLabel>
-          </Step>
-        ))}
-      </Stepper>
+      {isMobile ? (
+        <MobileStepper
+          variant="text"
+          steps={steps.length}
+          position="static"
+          activeStep={activeStep}
+          sx={{ background: 'transparent', mb: 4 }}
+          nextButton={
+            <Button
+              size="small"
+              onClick={handleNext}
+              disabled={activeStep === steps.length - 1 || !isStepValid()}>
+              Next
+              <ArrowForwardIcon />
+            </Button>
+          }
+          backButton={
+            <Button size="small" onClick={handleBack} disabled={activeStep === 0}>
+              <ArrowBackIcon />
+              Back
+            </Button>
+          }
+        />
+      ) : (
+        <Stepper activeStep={activeStep} sx={{ my: 4 }} alternativeLabel>
+          {steps.map(label => (
+            <Step key={label}>
+              <StepLabel>{label}</StepLabel>
+            </Step>
+          ))}
+        </Stepper>
+      )}
 
       <form onSubmit={formik.handleSubmit}>
         {renderStepContent(activeStep)}
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
-          <Button onClick={handleBack} disabled={activeStep === 0} startIcon={<ArrowBackIcon />}>
-            Back
-          </Button>
+          {!isMobile && (
+            <Button onClick={handleBack} disabled={activeStep === 0} startIcon={<ArrowBackIcon />}>
+              Back
+            </Button>
+          )}
           <Box sx={{ flex: '1 1 auto' }} />
           {activeStep === steps.length - 1 ? (
             <Button
@@ -130,18 +175,18 @@ export const SetupForm = () => {
               Complete Setup
             </Button>
           ) : (
-            <Button
-              variant="contained"
-              onClick={handleNext}
-              disabled={!isStepValid()}
-              endIcon={<ArrowForwardIcon />}>
-              Next
-            </Button>
+            !isMobile && (
+              <Button
+                variant="contained"
+                onClick={handleNext}
+                disabled={!isStepValid()}
+                endIcon={<ArrowForwardIcon />}>
+                Next
+              </Button>
+            )
           )}
         </Box>
       </form>
     </>
   );
 };
-
-export default SetupForm;

@@ -1,3 +1,5 @@
+import { PaydayConfig, PaydayInfo, PaydayType, Weekday } from '~/types/payday';
+
 /* Get date in 'DD/MM/YYYY format from BSON timestamp */
 export const getDateFromTimestamp = (number: number) => new Date(number).toLocaleDateString();
 
@@ -13,90 +15,146 @@ export const formatFullDate = (date: Date) =>
     .toUpperCase();
 
 /* Returns boolean based on if passed date is on the weekend */
-const isWeekend = (date: Date) => !(date.getDay() % 6);
+const isWeekend = (date: Date) => date.getDay() === 0 || date.getDay() === 6;
 
 /* Get last day of month */
 const getEOM = (date: Date) => new Date(date.getFullYear(), date.getMonth() + 1, 0);
+
 /* Get first day of month */
 const getSOM = (date: Date) => new Date(date.getFullYear(), date.getMonth(), 1);
 
-/* Returns last of specified day in month of date
-/ ECMAScript day numbering: 0 = Sun, 1 = Mon, etc. */
-const getLastOfDay = (date: Date, day: number) => {
-  let lastDay = getEOM(date);
-  // Set to last of specified day
-  lastDay.setDate(lastDay.getDate() - ((lastDay.getDay() + (7 - day)) % 7));
+/* Returns last working day of the month */
+const getLastWorkingDay = (date: Date): Date => {
+  const lastDay = getEOM(date);
+  while (isWeekend(lastDay)) {
+    lastDay.setDate(lastDay.getDate() - 1);
+  }
   return lastDay;
 };
 
-/* Add months to date */
-const addMonths = (date: Date, months: number) => {
-  let d = new Date(date);
-  d.setMonth(d.getMonth() + Number(months));
-  // If new day not equal to old day then have overshot end of
-  // month, so set d to end of previous month
-  if (d.getDate() !== date.getDate()) {
-    d.setDate(0);
-  }
-  return d;
+/* Returns the next occurrence of a specific weekday */
+const getNextWeekday = (date: Date, targetDay: Weekday): Date => {
+  const result = new Date(date);
+  result.setDate(result.getDate() + ((7 + targetDay - date.getDay()) % 7));
+  return result;
 };
 
-/*
- * Returns payday on the 28th of the month or previous friday
- */
-export const getPayday = (date: Date) => {
+/* Returns specific occurrence of weekday in month (1st, 2nd, 3rd, 4th) */
+const getNthWeekday = (date: Date, weekday: Weekday, n: number): Date => {
+  const firstDay = getSOM(date);
+  const firstOccurrence = getNextWeekday(firstDay, weekday);
+  firstOccurrence.setDate(firstOccurrence.getDate() + (n - 1) * 7);
+  return firstOccurrence;
+};
+
+/* Returns last occurrence of specified weekday in month */
+const getLastWeekday = (date: Date, weekday: Weekday): Date => {
+  const lastDay = getEOM(date);
+  while (lastDay.getDay() !== weekday) {
+    lastDay.setDate(lastDay.getDate() - 1);
+  }
+  return lastDay;
+};
+
+/* Returns next payday based on configuration */
+export const getPayday = (date: Date, config: PaydayConfig): PaydayInfo => {
+  const today = new Date(date);
+  let payday = new Date(date);
   let isPayday = false;
 
-  // Sets payday to 28th of this month
-  const dateNumber = new Date(date).setDate(28);
-  let payday = new Date(dateNumber);
+  switch (config.type) {
+    case PaydayType.SPECIFIC_DATE: {
+      payday.setDate(config.dayOfMonth || 1);
+      if (payday < today) {
+        payday.setMonth(payday.getMonth() + 1);
+      }
+      isPayday = today.getDate() === config.dayOfMonth;
+      break;
+    }
 
-  // If current payday is a weekend set payday to previous friday
-  if (isWeekend(payday)) payday.setDate(payday.getDate() - ((payday.getDay() + 2) % 7));
+    case PaydayType.LAST_WORKING_DAY: {
+      payday = getLastWorkingDay(date);
+      if (payday < today) {
+        payday = getLastWorkingDay(new Date(date.getFullYear(), date.getMonth() + 1, 1));
+      }
+      isPayday = today.getTime() === payday.getTime();
+      break;
+    }
 
-  // If payday is today then set isPayday to true
-  if (payday.getDate() === date.getDate()) isPayday = true;
+    case PaydayType.WEEKLY:
+    case PaydayType.BIWEEKLY: {
+      if (!config.startDate || !config.weekday) break;
 
-  // If current months payday was in the past then find next months payday
-  if (payday.getDate() < date.getDate()) {
-    // Reset payday to 28th of next month
-    payday = new Date(dateNumber);
-    payday.setMonth(date.getMonth() + 1);
+      const start = new Date(config.startDate);
+      const weekday = config.weekday;
+      payday = getNextWeekday(today, weekday);
 
-    // If next months payday is a weekend set payday to previous friday
-    if (isWeekend(payday)) payday.setDate(payday.getDate() - ((payday.getDay() + 2) % 7));
+      if (config.type === PaydayType.BIWEEKLY) {
+        const weeks = Math.floor((today.getTime() - start.getTime()) / (7 * 24 * 60 * 60 * 1000));
+        if (weeks % 2 === 1) {
+          payday.setDate(payday.getDate() + 7);
+        }
+      }
+
+      isPayday =
+        today.getDay() === weekday &&
+        (config.type === PaydayType.WEEKLY ||
+          Math.floor((today.getTime() - start.getTime()) / (7 * 24 * 60 * 60 * 1000)) % 2 === 0);
+      break;
+    }
+
+    case PaydayType.SPECIFIC_WEEKDAY: {
+      if (!config.weekday || !config.weekdayOccurrence) break;
+
+      payday = getNthWeekday(date, config.weekday, config.weekdayOccurrence);
+      if (payday < today) {
+        payday = getNthWeekday(
+          new Date(date.getFullYear(), date.getMonth() + 1, 1),
+          config.weekday,
+          config.weekdayOccurrence
+        );
+      }
+      isPayday = today.getTime() === payday.getTime();
+      break;
+    }
+
+    case PaydayType.LAST_WEEKDAY: {
+      if (!config.weekday) break;
+
+      payday = getLastWeekday(date, config.weekday);
+      if (payday < today) {
+        payday = getLastWeekday(
+          new Date(date.getFullYear(), date.getMonth() + 1, 1),
+          config.weekday
+        );
+      }
+      isPayday = today.getTime() === payday.getTime();
+      break;
+    }
   }
 
   return { payday, isPayday };
 };
 
-/*
- * Returns start of next month if payday is current day or in the past
- */
+/* Returns start of next month if payday is current day or in the past */
 export const getForecastDate = (date: Date) => {
-  let eom = getEOM(date);
-  const lastFriday = getLastOfDay(eom, 5);
+  const eom = getEOM(date);
   let startingDate = date;
 
-  // If last friday of the month has already been, increment month
-  if (date.getDate() >= lastFriday.getDate()) {
-    eom = addMonths(eom, 1);
-    // Get first date of month
-    startingDate = getSOM(eom);
+  // If we're past the end of month, increment to next month
+  if (date.getDate() >= eom.getDate()) {
+    startingDate = getSOM(new Date(date.getFullYear(), date.getMonth() + 1, 1));
   }
 
   return startingDate;
 };
 
-/*
- * Returns a months array in string format based on number prop.
- * When January is in the array, the year will also be returned
- */
+/* Returns a months array in string format based on number prop */
 export const getNextNumberOfMonths = (date: Date, number: number) => {
   let month = date.getMonth();
   let year = date.getFullYear();
 
-  var names = [
+  const names = [
     'January',
     'February',
     'March',
@@ -111,8 +169,8 @@ export const getNextNumberOfMonths = (date: Date, number: number) => {
     'December'
   ];
 
-  var res = [];
-  for (var i = 0; i < number; ++i) {
+  const res = [];
+  for (let i = 0; i < number; ++i) {
     if (names[month] === 'January') {
       res.push(names[month] + ' ' + year);
     } else {

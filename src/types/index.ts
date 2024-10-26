@@ -5,3 +5,4 @@ export * from './bill';
 export * from './note';
 export * from './user';
 export * from './setup';
+export * from './payday';
