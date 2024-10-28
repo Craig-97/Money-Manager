@@ -3,7 +3,7 @@ import { useSnackbar } from 'notistack';
 import { useNavigate } from 'react-router-dom';
 import { ERRORS } from '~/constants';
 import { getGQLTokenExpired } from '~/utils';
-import { useLogout } from './useLogout';
+import { useLogout } from './logout';
 
 export const useErrorHandler = () => {
   const { enqueueSnackbar } = useSnackbar();

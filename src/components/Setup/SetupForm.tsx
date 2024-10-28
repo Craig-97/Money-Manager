@@ -1,4 +1,3 @@
-import { useMutation } from '@apollo/client';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import {
@@ -13,47 +12,23 @@ import {
   useTheme
 } from '@mui/material';
 import { useFormik } from 'formik';
-import { useSnackbar } from 'notistack';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { BasicInfoStep, BillsStep, PaydayStep, PaymentsStep, validationSchema } from '~/components';
-import { CREATE_ACCOUNT_MUTATION, editAccountCache } from '~/graphql';
-import { useErrorHandler } from '~/hooks';
+import { useCreateAccount, useLogout } from '~/hooks';
 import { useAccountContext } from '~/state';
 import { PaydayType, PayFrequency, SetupFormValues } from '~/types';
-import { useLogout } from '~/hooks';
 
 const steps = ['Basic Info', 'Monthly Bills', 'Payments Due', 'Payday Setup'];
 
 export const SetupForm = () => {
-  const { enqueueSnackbar } = useSnackbar();
-  const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const {
     state: { user }
   } = useAccountContext();
-  const handleGQLError = useErrorHandler();
   const [activeStep, setActiveStep] = useState(0);
   const logout = useLogout();
-
-  const [createAccount, { loading }] = useMutation(CREATE_ACCOUNT_MUTATION, {
-    onError: handleGQLError,
-    onCompleted: () => {
-      enqueueSnackbar('Setup completed successfully!', { variant: 'success' });
-      navigate('/');
-    },
-    update: (
-      cache,
-      {
-        data: {
-          createAccount: { account }
-        }
-      }
-    ) => {
-      editAccountCache(cache, account, user);
-    }
-  });
+  const { createAccount, loading } = useCreateAccount();
 
   const formik = useFormik<SetupFormValues>({
     initialValues: {
@@ -64,6 +39,9 @@ export const SetupForm = () => {
       paydayConfig: { type: PaydayType.LAST_DAY, frequency: PayFrequency.MONTHLY }
     },
     validationSchema,
+    validateOnMount: true,
+    validateOnChange: true,
+    validateOnBlur: true,
     onSubmit: async values => {
       if (activeStep !== steps.length - 1) {
         return;
@@ -85,7 +63,15 @@ export const SetupForm = () => {
 
   const handleNext = (e: React.MouseEvent) => {
     e.preventDefault();
-    setActiveStep(prevStep => prevStep + 1);
+    formik.validateForm().then(errors => {
+      const currentStepErrors = getStepErrors(errors, activeStep);
+      if (Object.keys(currentStepErrors).length === 0) {
+        setActiveStep(prevStep => prevStep + 1);
+      } else {
+        const touchedFields = getTouchedFields(currentStepErrors);
+        formik.setTouched(touchedFields, false);
+      }
+    });
   };
 
   const handleBack = (e: React.MouseEvent) => {
@@ -96,13 +82,36 @@ export const SetupForm = () => {
   const isStepValid = () => {
     switch (activeStep) {
       case 0:
-        return formik.values.bankTotal && formik.values.monthlyIncome;
+        return (
+          formik.values.bankTotal &&
+          formik.values.monthlyIncome &&
+          !formik.errors.bankTotal &&
+          !formik.errors.monthlyIncome
+        );
       case 1:
-        return formik.values.bills.every(bill => bill.name && bill.amount);
+        return (
+          (formik.values.bills.length === 0 ||
+            formik.values.bills.every(bill => bill.name && bill.amount)) &&
+          !formik.errors.bills
+        );
       case 2:
-        return formik.values.oneOffPayments.every(payment => payment.name && payment.amount);
+        return (
+          (formik.values.oneOffPayments.length === 0 ||
+            formik.values.oneOffPayments.every(payment => payment.name && payment.amount)) &&
+          !formik.errors.oneOffPayments
+        );
       case 3:
-        return formik.values.paydayConfig.type !== undefined;
+        const { paydayConfig } = formik.values;
+        const needsStartDate = paydayConfig.frequency !== PayFrequency.MONTHLY;
+        const needsDayOfMonth = paydayConfig.type === PaydayType.SET_DAY;
+
+        return (
+          paydayConfig.type &&
+          paydayConfig.frequency &&
+          (!needsStartDate || (needsStartDate && paydayConfig.startDate)) &&
+          (!needsDayOfMonth || (needsDayOfMonth && paydayConfig.dayOfMonth)) &&
+          !formik.errors.paydayConfig
+        );
       default:
         return false;
     }
@@ -121,6 +130,33 @@ export const SetupForm = () => {
       default:
         return null;
     }
+  };
+
+  const getStepErrors = (errors: any, step: number) => {
+    switch (step) {
+      case 0:
+        return {
+          ...(errors.bankTotal && { bankTotal: errors.bankTotal }),
+          ...(errors.monthlyIncome && { monthlyIncome: errors.monthlyIncome })
+        };
+      case 1:
+        return errors.bills ? { bills: errors.bills } : {};
+      case 2:
+        return errors.oneOffPayments ? { oneOffPayments: errors.oneOffPayments } : {};
+      case 3:
+        return errors.paydayConfig ? { paydayConfig: errors.paydayConfig } : {};
+      default:
+        return {};
+    }
+  };
+
+  const getTouchedFields = (errors: any): Record<string, boolean> => {
+    return Object.keys(errors).reduce((acc, key) => {
+      if (typeof errors[key] === 'object' && errors[key] !== null) {
+        return { ...acc, [key]: true, ...getTouchedFields(errors[key]) };
+      }
+      return { ...acc, [key]: true };
+    }, {});
   };
 
   return (

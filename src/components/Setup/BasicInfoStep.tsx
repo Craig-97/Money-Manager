@@ -8,8 +8,13 @@ interface BasicInfoStepProps {
 
 export const BasicInfoStep = ({ formik }: BasicInfoStepProps) => (
   <Box sx={{ mt: 2 }}>
+    <Typography variant="body1" sx={{ mb: 3 }}>
+      Let's start by setting up your basic financial information. This will help us calculate your
+      disposable income and track your finances effectively.
+    </Typography>
+
     <Box sx={{ mb: 2 }}>
-      <Typography variant="body2" color="textSecondary">
+      <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
         Enter the total available funds in your bank account.
       </Typography>
       <TextField
@@ -33,7 +38,7 @@ export const BasicInfoStep = ({ formik }: BasicInfoStepProps) => (
       />
     </Box>
 
-    <Typography variant="body2" color="textSecondary">
+    <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
       Enter your monthly income after tax and deductions.
     </Typography>
     <TextField

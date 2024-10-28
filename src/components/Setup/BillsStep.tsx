@@ -1,4 +1,4 @@
-import { Box, TextField, IconButton, Button } from '@mui/material';
+import { Box, TextField, IconButton, Button, Typography } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { FormikErrors, FormikProps } from 'formik';
 import { Bill, SetupFormValues } from '~/types';
@@ -19,12 +19,35 @@ export const BillsStep = ({ formik }: BillsStepProps) => {
   const onRemove = (index: number) => {
     const newBills = values.bills.filter((_, i) => i !== index);
     setFieldValue('bills', newBills);
+
+    if (touched.bills) {
+      const newTouched = [...touched.bills];
+      newTouched.splice(index, 1);
+      formik.setTouched({ ...formik.touched, bills: newTouched });
+    }
+
+    if (errors.bills) {
+      const newErrors = [...(errors.bills as FormikErrors<Bill>[])];
+      newErrors.splice(index, 1);
+      formik.setErrors({ ...errors, bills: newErrors });
+    }
   };
 
   const billErrors = errors.bills as FormikErrors<Bill>[];
 
   return (
     <Box sx={{ mt: 2 }}>
+      <Typography variant="body1" sx={{ mb: 3 }}>
+        Add your regular monthly bills such as rent/mortgage, utilities, subscriptions, and other
+        fixed expenses. This helps us track your monthly commitments and calculate your disposable
+        income.
+      </Typography>
+
+      <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
+        You can add up to 10 bills to get started. For each bill, provide a descriptive name and the
+        monthly amount.
+      </Typography>
+
       {values.bills.map((bill, index) => (
         <Box key={index} sx={{ display: 'flex', gap: 1, mb: 2 }}>
           <TextField
@@ -45,9 +68,7 @@ export const BillsStep = ({ formik }: BillsStepProps) => {
             value={bill.amount}
             onChange={handleChange}
             onBlur={handleBlur}
-            error={
-              touched.bills?.[index]?.amount && Boolean((errors.bills?.[index] as Bill)?.amount)
-            }
+            error={touched.bills?.[index]?.amount && Boolean(billErrors?.[index]?.amount)}
             helperText={touched.bills?.[index]?.amount && billErrors?.[index]?.amount}
           />
           <IconButton onClick={() => onRemove(index)}>

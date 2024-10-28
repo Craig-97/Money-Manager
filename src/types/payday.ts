@@ -10,10 +10,8 @@ export enum PayFrequency {
 
 export enum PaydayType {
   LAST_DAY = 'LAST_DAY',
-  LAST_WEEKDAY = 'LAST_WEEKDAY',
   LAST_FRIDAY = 'LAST_FRIDAY',
-  SET_DAY = 'SET_DAY',
-  SET_DAY_OR_BEFORE = 'SET_DAY_OR_BEFORE'
+  SET_DAY = 'SET_DAY'
 }
 
 export interface PaydayConfig {

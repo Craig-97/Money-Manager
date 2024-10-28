@@ -5,7 +5,8 @@ import {
   InputLabel,
   MenuItem,
   Select,
-  TextField
+  TextField,
+  Typography
 } from '@mui/material';
 import { FormikProps } from 'formik';
 import { PayFrequency, PaydayType, SetupFormValues } from '~/types';
@@ -30,15 +31,17 @@ export const PaydayStep = ({ formik }: PaydayStepProps) => {
 
   const paydayTypes = [
     { value: PaydayType.LAST_DAY, label: 'Last Day' },
-    { value: PaydayType.LAST_WEEKDAY, label: 'Last Weekday' },
     { value: PaydayType.LAST_FRIDAY, label: 'Last Friday' },
-    { value: PaydayType.SET_DAY, label: 'Set Day' },
-    { value: PaydayType.SET_DAY_OR_BEFORE, label: 'Set Day or Previous Workday' }
+    { value: PaydayType.SET_DAY, label: 'Set Day' }
   ];
 
   const handleFrequencyChange = (event: any) => {
     const frequency = event.target.value;
-    setFieldValue('paydayConfig', { ...paydayConfig, frequency });
+    setFieldValue('paydayConfig', {
+      ...paydayConfig,
+      frequency,
+      startDate: frequency !== PayFrequency.MONTHLY ? paydayConfig.startDate : undefined
+    });
   };
 
   const handleTypeChange = (event: any) => {
@@ -46,20 +49,20 @@ export const PaydayStep = ({ formik }: PaydayStepProps) => {
     setFieldValue('paydayConfig', {
       ...paydayConfig,
       type,
-      // Clear dayOfMonth if not SET_DAY or SET_DAY_OR_BEFORE
-      dayOfMonth: [PaydayType.SET_DAY, PaydayType.SET_DAY_OR_BEFORE].includes(type)
-        ? paydayConfig.dayOfMonth
-        : undefined
+      dayOfMonth: type === PaydayType.SET_DAY ? paydayConfig.dayOfMonth : undefined
     });
   };
 
-  const showDayOfMonth = [PaydayType.SET_DAY, PaydayType.SET_DAY_OR_BEFORE].includes(
-    paydayConfig.type
-  );
+  const showDayOfMonth = paydayConfig.type === PaydayType.SET_DAY;
   const isRecurring = paydayConfig.frequency !== PayFrequency.MONTHLY;
 
   return (
     <Box sx={{ mt: 2 }}>
+      <Typography variant="body1" sx={{ mb: 3 }}>
+        Configure your payday settings to help us accurately track your income and forecast your
+        finances. We'll automatically adjust for weekends and bank holidays.
+      </Typography>
+
       <FormControl fullWidth sx={{ mb: 2 }}>
         <InputLabel>Pay Frequency</InputLabel>
         <Select
@@ -80,7 +83,7 @@ export const PaydayStep = ({ formik }: PaydayStepProps) => {
         </FormHelperText>
       </FormControl>
 
-      <FormControl fullWidth sx={{ mb: 2 }}>
+      <FormControl fullWidth sx={{ mb: 1 }}>
         <InputLabel>Payday Type</InputLabel>
         <Select
           value={paydayConfig.type || ''}
@@ -109,12 +112,7 @@ export const PaydayStep = ({ formik }: PaydayStepProps) => {
           value={paydayConfig.dayOfMonth || ''}
           onChange={e => setFieldValue('paydayConfig.dayOfMonth', parseInt(e.target.value))}
           error={touched.paydayConfig?.dayOfMonth && Boolean(errors.paydayConfig?.dayOfMonth)}
-          helperText={
-            (touched.paydayConfig?.dayOfMonth && errors.paydayConfig?.dayOfMonth) ||
-            (paydayConfig.type === PaydayType.SET_DAY_OR_BEFORE
-              ? 'If this day falls on a weekend, payment will be made on the previous workday'
-              : '')
-          }
+          helperText={touched.paydayConfig?.dayOfMonth && errors.paydayConfig?.dayOfMonth}
           sx={{ mb: 2 }}
         />
       )}

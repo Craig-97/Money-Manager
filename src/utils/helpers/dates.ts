@@ -95,15 +95,6 @@ export const getPayday = (date: Date, config: PaydayConfig): PaydayInfo => {
   // Get payday based on type
   switch (config.type) {
     case PaydayType.LAST_DAY: {
-      payday = getEOM(date);
-      if (payday < today) {
-        payday = getEOM(getNextPeriodDate(date));
-      }
-      isPayday = today.getTime() === payday.getTime();
-      break;
-    }
-
-    case PaydayType.LAST_WEEKDAY: {
       payday = getLastWorkingDay(date);
       if (payday < today) {
         payday = getLastWorkingDay(getNextPeriodDate(date));
@@ -125,24 +116,8 @@ export const getPayday = (date: Date, config: PaydayConfig): PaydayInfo => {
       if (!config.dayOfMonth) break;
 
       payday.setDate(config.dayOfMonth);
-      if (payday < today) {
-        payday = getNextPeriodDate(payday);
-        payday.setDate(config.dayOfMonth);
-      }
-      isPayday = today.getDate() === config.dayOfMonth;
-      break;
-    }
-
-    case PaydayType.SET_DAY_OR_BEFORE: {
-      if (!config.dayOfMonth) break;
-
-      // Set initial date to the specified day
-      payday.setDate(config.dayOfMonth);
-
-      // If it falls on weekend, get previous working day
       payday = getNearestPreviousWorkday(payday);
 
-      // If we've passed this month's payday, get next month's
       if (payday < today) {
         payday = getNextPeriodDate(
           new Date(date.getFullYear(), date.getMonth(), config.dayOfMonth)

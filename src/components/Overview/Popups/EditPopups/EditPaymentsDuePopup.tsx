@@ -4,15 +4,13 @@ import { useSnackbar } from 'notistack';
 import { DispatchWithoutAction } from 'react';
 import {
   DELETE_ONE_OFF_PAYMENT_MUTATION,
-  EDIT_ACCOUNT_MUTATION,
   EDIT_ONE_OFF_PAYMENT_MUTATION,
-  deletePaymentCache,
-  editAccountCache
+  deletePaymentCache
 } from '~/graphql';
 import { useAccountContext } from '~/state/account-context';
 import { DeletePaymentResponse, OneOffPayment } from '~/types';
 import { PaymentsDuePopup } from '../FormPopups';
-import { useErrorHandler } from '~/hooks';
+import { useErrorHandler, useEditAccount } from '~/hooks';
 
 interface EditPaymentsDuePopupProps {
   isOpen: boolean;
@@ -28,10 +26,11 @@ export const EditPaymentsDuePopup = ({
   const {
     state: { account, user }
   } = useAccountContext();
-  const { bankBalance, id } = account;
+  const { bankBalance } = account;
   const { id: paymentId, name, amount }: OneOffPayment = selectedPayment;
   const { enqueueSnackbar } = useSnackbar();
   const handleGQLError = useErrorHandler();
+  const { updateAccount, loading: editAccLoading } = useEditAccount();
 
   const [editPayment, { loading: editPayLoading }] = useMutation(EDIT_ONE_OFF_PAYMENT_MUTATION);
 
@@ -62,8 +61,6 @@ export const EditPaymentsDuePopup = ({
     });
   };
 
-  const [editAccount, { loading: editAccLoading }] = useMutation(EDIT_ACCOUNT_MUTATION);
-
   const onPaymentDeleted = (response: DeletePaymentResponse, paid: boolean) => {
     const {
       deleteOneOffPayment: { oneOffPayment, success }
@@ -77,19 +74,7 @@ export const EditPaymentsDuePopup = ({
 
       const newBalance = bankBalance - (oneOffPayment?.amount || 0);
       if (!isNaN(newBalance) && paid) {
-        // Updates bankBalance automatically when payment is removed
-        editAccount({
-          variables: { id, account: { bankBalance: newBalance } },
-          update: (
-            cache,
-            {
-              data: {
-                editAccount: { account }
-              }
-            }
-          ) => editAccountCache(cache, account, user),
-          onError: handleGQLError
-        });
+        updateAccount({ bankBalance: newBalance });
       }
     }
   };

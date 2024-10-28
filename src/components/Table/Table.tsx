@@ -8,18 +8,29 @@ import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import { ChangeEvent, useEffect } from 'react';
-import { Column, usePagination, useRowSelect, useSortBy, useTable } from 'react-table';
-import { useIsDesktop } from '~/hooks';
+import {
+  Column,
+  usePagination,
+  useRowSelect,
+  useSortBy,
+  useTable,
+  TableInstance,
+  TableState,
+  Row,
+  Cell
+} from 'react-table';
 import { TablePaginationActions } from './TablePaginationActions';
+import { useMediaQuery, useTheme } from '@mui/material';
 
-interface TableProps {
-  columns: Array<Column<object>>;
-  data: Array<object>;
+interface TableProps<T extends object> {
+  columns: Array<Column<T>>;
+  data: T[];
   stickyHeader?: boolean;
 }
 
-export const Table = ({ columns, data, stickyHeader = true }: TableProps) => {
-  const isDesktop = useIsDesktop();
+export const Table = <T extends object>({ columns, data, stickyHeader = true }: TableProps<T>) => {
+  const theme = useTheme();
+  const isDesktop = useMediaQuery(theme.breakpoints.up('lg'));
 
   const {
     getTableProps,
@@ -33,12 +44,17 @@ export const Table = ({ columns, data, stickyHeader = true }: TableProps) => {
     {
       columns,
       data,
-      initialState: { pageSize: 16 }
+      initialState: { pageSize: 16 } as Partial<TableState<T>>
     },
     useSortBy,
     usePagination,
     useRowSelect
-  );
+  ) as TableInstance<T> & {
+    page: Row<T>[];
+    gotoPage: (pageIndex: number) => void;
+    setPageSize: (pageSize: number) => void;
+    state: TableState<T> & { pageIndex: number; pageSize: number };
+  };
 
   useEffect(() => {
     if (!isDesktop) {
@@ -69,13 +85,13 @@ export const Table = ({ columns, data, stickyHeader = true }: TableProps) => {
           ))}
         </TableHead>
         <TableBody>
-          {page.map(row => {
+          {page.map((row: Row<T>) => {
             prepareRow(row);
             return (
               <TableRow
                 {...row.getRowProps()}
                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                {row.cells.map(cell => {
+                {row.cells.map((cell: Cell<T>) => {
                   return <TableCell {...cell.getCellProps()}>{cell.render('Cell')}</TableCell>;
                 })}
               </TableRow>

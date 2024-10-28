@@ -1,24 +1,19 @@
-import { useMutation } from '@apollo/client';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
-import { useSnackbar } from 'notistack';
 import { Fragment, useState } from 'react';
-import { EDIT_ACCOUNT_MUTATION, editAccountCache } from '~/graphql';
 import { useAccountContext } from '~/state/account-context';
 import { EnterValuePopup } from '../Popups';
 import { LoadingCard } from './LoadingCard';
 import { TotalCard } from './TotalCard';
-import { useErrorHandler } from '~/hooks';
+import { useEditAccount } from '~/hooks';
 
 export const BankBalanceCard = () => {
   const {
-    state: { account, user }
+    state: { account }
   } = useAccountContext();
-  const { bankBalance, id } = account;
+  const { bankBalance } = account;
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const { enqueueSnackbar } = useSnackbar();
-  const handleGQLError = useErrorHandler();
 
-  const [editAccount, { loading }] = useMutation(EDIT_ACCOUNT_MUTATION);
+  const { updateAccount, loading } = useEditAccount();
 
   const handleClickOpen = () => {
     setIsOpen(true);
@@ -26,19 +21,7 @@ export const BankBalanceCard = () => {
 
   const changeBankBalance = (value: number) => {
     if (!isNaN(value) && value !== bankBalance) {
-      editAccount({
-        variables: { id, account: { bankBalance: value } },
-        update: (
-          cache,
-          {
-            data: {
-              editAccount: { account }
-            }
-          }
-        ) => editAccountCache(cache, account, user),
-        onCompleted: () => enqueueSnackbar('Bank Total updated', { variant: 'success' }),
-        onError: handleGQLError
-      });
+      updateAccount({ bankBalance: value }, { successMessage: 'Bank Total updated' });
     }
     setIsOpen(false);
   };

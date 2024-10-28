@@ -1,4 +1,4 @@
-import { Box, TextField, IconButton, Button } from '@mui/material';
+import { Box, TextField, IconButton, Button, Typography } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { FormikErrors, FormikProps } from 'formik';
 import { OneOffPayment, SetupFormValues } from '~/types';
@@ -19,12 +19,35 @@ export const PaymentsStep = ({ formik }: PaymentsStepProps) => {
   const onRemove = (index: number) => {
     const newPayments = values.oneOffPayments.filter((_, i) => i !== index);
     setFieldValue('oneOffPayments', newPayments);
+
+    if (touched.oneOffPayments) {
+      const newTouched = [...touched.oneOffPayments];
+      newTouched.splice(index, 1);
+      formik.setTouched({ ...formik.touched, bills: newTouched });
+    }
+
+    if (errors.oneOffPayments) {
+      const newErrors = [...(errors.bills as FormikErrors<OneOffPayment>[])];
+      newErrors.splice(index, 1);
+      formik.setErrors({ ...errors, bills: newErrors });
+    }
   };
 
-  const paymentErrors = errors.bills as FormikErrors<OneOffPayment>[];
+  const paymentErrors = errors.oneOffPayments as FormikErrors<OneOffPayment>[];
 
   return (
     <Box sx={{ mt: 2 }}>
+      <Typography variant="body1" sx={{ mb: 3 }}>
+        Add any upcoming one-time payments or expenses that aren't part of your regular monthly
+        bills. This helps us track irregular expenses and maintain an accurate view of your
+        available funds.
+      </Typography>
+
+      <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
+        You can add up to 10 one-off payments to get started. Examples include annual subscriptions,
+        planned purchases, or upcoming expenses.
+      </Typography>
+
       {values.oneOffPayments.map((payment, index) => (
         <Box key={index} sx={{ display: 'flex', gap: 1, mb: 2 }}>
           <TextField

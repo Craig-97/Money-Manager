@@ -2,17 +2,11 @@ import { useMutation } from '@apollo/client';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useSnackbar } from 'notistack';
 import { DispatchWithoutAction } from 'react';
-import {
-  DELETE_BILL_MUTATION,
-  EDIT_ACCOUNT_MUTATION,
-  EDIT_BILL_MUTATION,
-  deleteBillCache,
-  editAccountCache
-} from '~/graphql';
+import { DELETE_BILL_MUTATION, EDIT_BILL_MUTATION, deleteBillCache } from '~/graphql';
 import { useAccountContext } from '~/state';
 import { Bill, EditBillResponse } from '~/types';
 import { MonthlyBillsPopup } from '../FormPopups';
-import { useErrorHandler } from '~/hooks';
+import { useErrorHandler, useEditAccount } from '~/hooks';
 
 interface EditMonthlyBillsPopupProps {
   isOpen: boolean;
@@ -28,7 +22,7 @@ export const EditMonthlyBillsPopup = ({
   const {
     state: { account, user }
   } = useAccountContext();
-  const { bankBalance, id } = account;
+  const { bankBalance } = account;
   const { id: billId, name, amount, paid }: Bill = selectedBill;
   const { enqueueSnackbar } = useSnackbar();
   const handleGQLError = useErrorHandler();
@@ -43,7 +37,7 @@ export const EditMonthlyBillsPopup = ({
     });
   };
 
-  const [editAccount, { loading: editAccLoading }] = useMutation(EDIT_ACCOUNT_MUTATION);
+  const { updateAccount, loading: editAccLoading } = useEditAccount();
 
   const onEditBillCompleted = (response: EditBillResponse) => {
     const {
@@ -55,19 +49,7 @@ export const EditMonthlyBillsPopup = ({
     if (success && !selectedBill?.paid && bill?.paid) {
       const newBalance = bankBalance - (bill?.amount || 0);
       if (!isNaN(newBalance)) {
-        // Updates bankBalance automatically when bill is marked as paid
-        editAccount({
-          variables: { id, account: { bankBalance: newBalance } },
-          update: (
-            cache,
-            {
-              data: {
-                editAccount: { account }
-              }
-            }
-          ) => editAccountCache(cache, account, user),
-          onError: handleGQLError
-        });
+        updateAccount({ bankBalance: newBalance });
       }
     }
   };
