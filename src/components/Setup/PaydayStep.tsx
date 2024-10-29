@@ -11,6 +11,22 @@ import {
 import { FormikProps } from 'formik';
 import { PayFrequency, PaydayType, SetupFormValues } from '~/types';
 
+const frequencies = [
+  { value: PayFrequency.WEEKLY, label: 'Weekly' },
+  { value: PayFrequency.FORTNIGHTLY, label: 'Fortnightly' },
+  { value: PayFrequency.FOUR_WEEKLY, label: '4 Weekly' },
+  { value: PayFrequency.MONTHLY, label: 'Monthly' },
+  { value: PayFrequency.QUARTERLY, label: 'Quarterly' },
+  { value: PayFrequency.BIANNUAL, label: 'Biannual' },
+  { value: PayFrequency.ANNUAL, label: 'Annual' }
+];
+
+const paydayTypes = [
+  { value: PaydayType.LAST_DAY, label: 'Last Day' },
+  { value: PaydayType.LAST_FRIDAY, label: 'Last Friday' },
+  { value: PaydayType.SET_DAY, label: 'Set Day' }
+];
+
 interface PaydayStepProps {
   formik: FormikProps<SetupFormValues>;
 }
@@ -18,22 +34,6 @@ interface PaydayStepProps {
 export const PaydayStep = ({ formik }: PaydayStepProps) => {
   const { values, setFieldValue, errors, touched } = formik;
   const { paydayConfig } = values;
-
-  const frequencies = [
-    { value: PayFrequency.WEEKLY, label: 'Weekly' },
-    { value: PayFrequency.FORTNIGHTLY, label: 'Fortnightly' },
-    { value: PayFrequency.FOUR_WEEKLY, label: '4 Weekly' },
-    { value: PayFrequency.MONTHLY, label: 'Monthly' },
-    { value: PayFrequency.QUARTERLY, label: 'Quarterly' },
-    { value: PayFrequency.BIANNUAL, label: 'Biannual' },
-    { value: PayFrequency.ANNUAL, label: 'Annual' }
-  ];
-
-  const paydayTypes = [
-    { value: PaydayType.LAST_DAY, label: 'Last Day' },
-    { value: PaydayType.LAST_FRIDAY, label: 'Last Friday' },
-    { value: PaydayType.SET_DAY, label: 'Set Day' }
-  ];
 
   const handleFrequencyChange = (event: any) => {
     const frequency = event.target.value;
@@ -124,7 +124,7 @@ export const PaydayStep = ({ formik }: PaydayStepProps) => {
           type="date"
           value={paydayConfig.startDate || ''}
           onChange={e => setFieldValue('paydayConfig.startDate', e.target.value)}
-          InputLabelProps={{ shrink: true }}
+          slotProps={{ inputLabel: { shrink: true } }}
           error={touched.paydayConfig?.startDate && Boolean(errors.paydayConfig?.startDate)}
           helperText={touched.paydayConfig?.startDate && errors.paydayConfig?.startDate}
         />
