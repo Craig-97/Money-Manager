@@ -1,7 +1,7 @@
 import { useQuery } from '@apollo/client';
 import isEqual from 'lodash/isEqual';
 import { useEffect } from 'react';
-import { ERRORS, EVENTS } from '~/constants';
+import { ERRORS, EVENTS } from '~/types';
 import { FIND_USER_QUERY, GET_ACCOUNT_QUERY } from '~/graphql';
 import { initialState } from '~/state';
 import { useAccountContext } from '~/state/account-context';

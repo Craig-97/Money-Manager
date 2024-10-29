@@ -1,4 +1,5 @@
-import { PaydayConfig, PaydayType, PayFrequency } from '~/types/payday';
+import { BankHoliday, PaydayConfig, PAYDAY_TYPE, PAY_FREQUENCY } from '~/types';
+import { getBankHolidays, isBankHoliday } from './bankHolidays';
 
 /* Get date in 'DD/MM/YYYY format from BSON timestamp */
 export const getDateFromTimestamp = (number: number) => new Date(number).toLocaleDateString();
@@ -14,22 +15,31 @@ export const formatFullDate = (date: Date) =>
     })
     .toUpperCase();
 
-/* Returns boolean based on if passed date is on the weekend */
-const isWeekend = (date: Date) => date.getDay() === 0 || date.getDay() === 6;
-
 /* Get last day of month */
 const getEOM = (date: Date) => new Date(date.getFullYear(), date.getMonth() + 1, 0);
 
 /* Get first day of month */
 const getSOM = (date: Date) => new Date(date.getFullYear(), date.getMonth(), 1);
 
-/* Returns last working day of the period */
-const getLastWorkingDay = (date: Date): Date => {
-  const lastDay = getEOM(date);
-  while (isWeekend(lastDay)) {
-    lastDay.setDate(lastDay.getDate() - 1);
+/* Gets the nearest workday if the current date is a bank holiday or a saturday/sunday */
+const getNearestPreviousWorkingDay = (date: Date, bankHolidays: BankHoliday[]): Date => {
+  const result = new Date(date);
+
+  while (
+    result.getDay() === 0 || // Sunday
+    result.getDay() === 6 || // Saturday
+    isBankHoliday(result, bankHolidays)
+  ) {
+    result.setDate(result.getDate() - 1);
   }
-  return lastDay;
+
+  return result;
+};
+
+/* Returns last working day of the period */
+const getLastWorkingDay = async (date: Date, bankHolidays: BankHoliday[]): Promise<Date> => {
+  const lastDay = getEOM(date);
+  return getNearestPreviousWorkingDay(lastDay, bankHolidays);
 };
 
 /* Returns last Friday of the period */
@@ -39,15 +49,6 @@ const getLastFriday = (date: Date): Date => {
     lastDay.setDate(lastDay.getDate() - 1);
   }
   return lastDay;
-};
-
-/* Returns nearest previous working day */
-const getNearestPreviousWorkday = (date: Date): Date => {
-  const result = new Date(date);
-  while (isWeekend(result)) {
-    result.setDate(result.getDate() - 1);
-  }
-  return result;
 };
 
 /* Add months to date */
@@ -64,28 +65,38 @@ const addWeeks = (date: Date, weeks: number): Date => {
   return result;
 };
 
+interface PaydayInfo {
+  payday: Date;
+  isPayday: boolean;
+}
+
 /* Returns next payday based on configuration */
-export const getPayday = (date: Date, config: PaydayConfig): PaydayInfo => {
+export const getPayday = async (date: Date, config: PaydayConfig): Promise<PaydayInfo> => {
   const today = new Date(date);
   let payday = new Date(date);
   let isPayday = false;
 
+  // Fetch bank holidays if region is specified
+  const bankHolidays = config.bankHolidayRegion
+    ? await getBankHolidays(config.bankHolidayRegion)
+    : [];
+
   // Helper to get next period date based on frequency
   const getNextPeriodDate = (currentDate: Date): Date => {
     switch (config.frequency) {
-      case PayFrequency.WEEKLY:
+      case PAY_FREQUENCY.WEEKLY:
         return addWeeks(currentDate, 1);
-      case PayFrequency.FORTNIGHTLY:
+      case PAY_FREQUENCY.FORTNIGHTLY:
         return addWeeks(currentDate, 2);
-      case PayFrequency.FOUR_WEEKLY:
+      case PAY_FREQUENCY.FOUR_WEEKLY:
         return addWeeks(currentDate, 4);
-      case PayFrequency.MONTHLY:
+      case PAY_FREQUENCY.MONTHLY:
         return addMonths(currentDate, 1);
-      case PayFrequency.QUARTERLY:
+      case PAY_FREQUENCY.QUARTERLY:
         return addMonths(currentDate, 3);
-      case PayFrequency.BIANNUAL:
+      case PAY_FREQUENCY.BIANNUAL:
         return addMonths(currentDate, 6);
-      case PayFrequency.ANNUAL:
+      case PAY_FREQUENCY.ANNUAL:
         return addMonths(currentDate, 12);
       default:
         return addMonths(currentDate, 1);
@@ -94,35 +105,39 @@ export const getPayday = (date: Date, config: PaydayConfig): PaydayInfo => {
 
   // Get payday based on type
   switch (config.type) {
-    case PaydayType.LAST_DAY: {
-      payday = getLastWorkingDay(date);
+    case PAYDAY_TYPE.LAST_DAY: {
+      payday = await getLastWorkingDay(date, bankHolidays);
       if (payday < today) {
-        payday = getLastWorkingDay(getNextPeriodDate(date));
+        payday = await getLastWorkingDay(getNextPeriodDate(date), bankHolidays);
       }
       isPayday = today.getTime() === payday.getTime();
       break;
     }
 
-    case PaydayType.LAST_FRIDAY: {
+    case PAYDAY_TYPE.LAST_FRIDAY: {
       payday = getLastFriday(date);
       if (payday < today) {
         payday = getLastFriday(getNextPeriodDate(date));
       }
+      // Adjust for bank holidays
+      if (bankHolidays.length > 0) {
+        payday = getNearestPreviousWorkingDay(payday, bankHolidays);
+      }
       isPayday = today.getTime() === payday.getTime();
       break;
     }
 
-    case PaydayType.SET_DAY: {
+    case PAYDAY_TYPE.SET_DAY: {
       if (!config.dayOfMonth) break;
 
       payday.setDate(config.dayOfMonth);
-      payday = getNearestPreviousWorkday(payday);
+      payday = getNearestPreviousWorkingDay(payday, bankHolidays);
 
       if (payday < today) {
         payday = getNextPeriodDate(
           new Date(date.getFullYear(), date.getMonth(), config.dayOfMonth)
         );
-        payday = getNearestPreviousWorkday(payday);
+        payday = getNearestPreviousWorkingDay(payday, bankHolidays);
       }
 
       isPayday = today.getTime() === payday.getTime();

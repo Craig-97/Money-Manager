@@ -17,20 +17,22 @@ export const BillsStep = ({ formik }: BillsStepProps) => {
   };
 
   const onRemove = (index: number) => {
-    const newBills = values.bills.filter((_, i) => i !== index);
-    setFieldValue('bills', newBills);
-
-    if (touched.bills) {
+    if (touched.bills && touched.bills.length) {
       const newTouched = [...touched.bills];
       newTouched.splice(index, 1);
-      formik.setTouched({ ...formik.touched, bills: newTouched });
+      const updatedTouched = { ...touched, bills: newTouched };
+      formik.setTouched(updatedTouched);
     }
 
-    if (errors.bills) {
+    if (errors.bills && errors.bills.length) {
       const newErrors = [...(errors.bills as FormikErrors<Bill>[])];
       newErrors.splice(index, 1);
-      formik.setErrors({ ...errors, bills: newErrors });
+      const updatedErrors = { ...errors, bills: newErrors };
+      formik.setErrors(updatedErrors);
     }
+
+    const newBills = values.bills.filter((_, i) => i !== index);
+    setFieldValue('bills', newBills);
   };
 
   const billErrors = errors.bills as FormikErrors<Bill>[];

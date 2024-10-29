@@ -1,20 +1,21 @@
 import { Alert } from '@mui/material';
 import { useState } from 'react';
-import { PaydayConfig, PaydayType, PayFrequency } from '~/types';
-import { formatFullDate, getPayday } from '~/utils';
+import { useGetPayday } from '~/hooks';
+import { formatFullDate } from '~/utils';
 
 export const PaydayAlert = () => {
-  const config: PaydayConfig = {
-    type: PaydayType.SET_DAY_OR_BEFORE,
-    frequency: PayFrequency.MONTHLY,
-    dayOfMonth: 28
-  };
-  const { payday, isPayday } = getPayday(new Date(), config);
   const [isOpen, setIsOpen] = useState<boolean>(true);
+  const { paydayInfo, error } = useGetPayday();
 
-  return isOpen ? (
+  if (!isOpen || error || paydayInfo.payday === null) {
+    return null;
+  }
+
+  const { payday, isPayday } = paydayInfo;
+
+  return (
     <Alert className="alert" severity="info" onClose={() => setIsOpen(false)}>
       <strong>{isPayday ? `TODAY IS PAYDAY` : `NEXT PAYDAY IS ${formatFullDate(payday)}`}</strong>
     </Alert>
-  ) : null;
+  );
 };

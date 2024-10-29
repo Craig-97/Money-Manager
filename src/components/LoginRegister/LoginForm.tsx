@@ -4,10 +4,9 @@ import TextField from '@mui/material/TextField';
 import { useFormik } from 'formik';
 import { useNavigate } from 'react-router-dom';
 import * as Yup from 'yup';
-import { ERRORS, EVENTS } from '~/constants';
 import { LOGIN_QUERY } from '~/graphql';
 import { useAccountContext } from '~/state';
-import { LoginData } from '~/types';
+import { ERRORS, EVENTS, LoginData } from '~/types';
 import { AutoFocusTextField } from './AutoFocusTextField';
 
 export const LoginForm = () => {

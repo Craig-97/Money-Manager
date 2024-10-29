@@ -1,5 +1,5 @@
 import * as Yup from 'yup';
-import { PaydayType, PayFrequency } from '~/types/payday';
+import { PAYDAY_TYPE, PAY_FREQUENCY } from '~/types/payday';
 
 export const validationSchema = Yup.object().shape({
   bankTotal: Yup.number()
@@ -34,13 +34,13 @@ export const validationSchema = Yup.object().shape({
     .max(10, 'Maximum of 10 payments allowed'),
   paydayConfig: Yup.object().shape({
     frequency: Yup.string()
-      .oneOf(Object.values(PayFrequency), 'Invalid pay frequency')
+      .oneOf(Object.values(PAY_FREQUENCY), 'Invalid pay frequency')
       .required('Pay frequency is required'),
     type: Yup.string()
-      .oneOf(Object.values(PaydayType), 'Invalid payday type')
+      .oneOf(Object.values(PAYDAY_TYPE), 'Invalid payday type')
       .required('Payday type is required'),
     dayOfMonth: Yup.number().when('type', {
-      is: PaydayType.SET_DAY,
+      is: PAYDAY_TYPE.SET_DAY,
       then: schema =>
         schema
           .required('Day of month is required')
@@ -50,7 +50,7 @@ export const validationSchema = Yup.object().shape({
       otherwise: schema => schema.nullable()
     }),
     startDate: Yup.string().when('frequency', {
-      is: (frequency: PayFrequency) => frequency !== PayFrequency.MONTHLY,
+      is: (frequency: PAY_FREQUENCY) => frequency !== PAY_FREQUENCY.MONTHLY,
       then: schema => schema.required('First pay date is required'),
       otherwise: schema => schema.nullable()
     })

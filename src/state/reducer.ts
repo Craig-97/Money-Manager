@@ -1,4 +1,4 @@
-import { EVENTS } from '~/constants';
+import { EVENTS } from '~/types';
 import { AccountContextState, AccountState, Actions } from '~/types';
 import { initialState } from './account-context';
 

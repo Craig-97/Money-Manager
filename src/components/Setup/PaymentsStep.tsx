@@ -17,20 +17,22 @@ export const PaymentsStep = ({ formik }: PaymentsStepProps) => {
   };
 
   const onRemove = (index: number) => {
-    const newPayments = values.oneOffPayments.filter((_, i) => i !== index);
-    setFieldValue('oneOffPayments', newPayments);
-
-    if (touched.oneOffPayments) {
+    if (touched.oneOffPayments && touched.oneOffPayments.length) {
       const newTouched = [...touched.oneOffPayments];
       newTouched.splice(index, 1);
-      formik.setTouched({ ...formik.touched, bills: newTouched });
+      const updatedTouched = { ...touched, oneOffPayments: newTouched };
+      formik.setTouched(updatedTouched);
     }
 
-    if (errors.oneOffPayments) {
-      const newErrors = [...(errors.bills as FormikErrors<OneOffPayment>[])];
+    if (errors.oneOffPayments && errors.oneOffPayments.length) {
+      const newErrors = [...(errors.oneOffPayments as FormikErrors<OneOffPayment>[])];
       newErrors.splice(index, 1);
-      formik.setErrors({ ...errors, bills: newErrors });
+      const updatedErrors = { ...errors, oneOffPayments: newErrors };
+      formik.setErrors(updatedErrors);
     }
+
+    const newPayments = values.oneOffPayments.filter((_, i) => i !== index);
+    setFieldValue('oneOffPayments', newPayments);
   };
 
   const paymentErrors = errors.oneOffPayments as FormikErrors<OneOffPayment>[];
@@ -38,14 +40,13 @@ export const PaymentsStep = ({ formik }: PaymentsStepProps) => {
   return (
     <Box sx={{ mt: 2 }}>
       <Typography variant="body1" sx={{ mb: 3 }}>
-        Add any upcoming one-time payments or expenses that aren't part of your regular monthly
-        bills. This helps us track irregular expenses and maintain an accurate view of your
-        available funds.
+        Add any upcoming one-time payments such as planned purchases, or upcoming expenses. This
+        helps us track irregular expenses and maintain an accurate view of your available funds.
       </Typography>
 
       <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
-        You can add up to 10 one-off payments to get started. Examples include annual subscriptions,
-        planned purchases, or upcoming expenses.
+        You can add up to 10 one-off payments to get started. For each payment, provide a
+        descriptive name and the amount.
       </Typography>
 
       {values.oneOffPayments.map((payment, index) => (

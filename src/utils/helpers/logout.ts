@@ -1,7 +1,7 @@
 import { ApolloClient } from '@apollo/client';
 import { Dispatch } from 'react';
 import { NavigateFunction } from 'react-router-dom';
-import { EVENTS } from '~/constants';
+import { EVENTS } from '~/types';
 import { Actions } from '~/types';
 
 // Logout the current user, redirect them to the login page and clear the apollo store

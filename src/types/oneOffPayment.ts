@@ -1,11 +1,11 @@
-import { TYPES } from '~/constants';
+import { PAYMENT_TYPES } from './payment';
 
 export interface OneOffPayment {
   id?: string;
   name?: string;
   amount?: number;
   account?: string;
-  __typename?: TYPES.ONEOFFPAYMENT;
+  __typename?: PAYMENT_TYPES.ONEOFFPAYMENT;
 }
 
 export interface DeletePaymentResponse {

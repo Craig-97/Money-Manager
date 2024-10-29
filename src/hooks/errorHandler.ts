@@ -1,7 +1,7 @@
 import { ApolloError } from '@apollo/client';
 import { useSnackbar } from 'notistack';
 import { useNavigate } from 'react-router-dom';
-import { ERRORS } from '~/constants';
+import { ERRORS } from '~/types';
 import { getGQLTokenExpired } from '~/utils';
 import { useLogout } from './logout';
 

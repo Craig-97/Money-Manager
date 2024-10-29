@@ -9,22 +9,28 @@ import {
   Typography
 } from '@mui/material';
 import { FormikProps } from 'formik';
-import { PayFrequency, PaydayType, SetupFormValues } from '~/types';
+import { PAY_FREQUENCY, PAYDAY_TYPE, SetupFormValues, BANK_HOLIDAY_REGION } from '~/types';
 
 const frequencies = [
-  { value: PayFrequency.WEEKLY, label: 'Weekly' },
-  { value: PayFrequency.FORTNIGHTLY, label: 'Fortnightly' },
-  { value: PayFrequency.FOUR_WEEKLY, label: '4 Weekly' },
-  { value: PayFrequency.MONTHLY, label: 'Monthly' },
-  { value: PayFrequency.QUARTERLY, label: 'Quarterly' },
-  { value: PayFrequency.BIANNUAL, label: 'Biannual' },
-  { value: PayFrequency.ANNUAL, label: 'Annual' }
+  { value: PAY_FREQUENCY.WEEKLY, label: 'Weekly' },
+  { value: PAY_FREQUENCY.FORTNIGHTLY, label: 'Fortnightly' },
+  { value: PAY_FREQUENCY.FOUR_WEEKLY, label: '4 Weekly' },
+  { value: PAY_FREQUENCY.MONTHLY, label: 'Monthly' },
+  { value: PAY_FREQUENCY.QUARTERLY, label: 'Quarterly' },
+  { value: PAY_FREQUENCY.BIANNUAL, label: 'Biannual' },
+  { value: PAY_FREQUENCY.ANNUAL, label: 'Annual' }
 ];
 
 const paydayTypes = [
-  { value: PaydayType.LAST_DAY, label: 'Last Day' },
-  { value: PaydayType.LAST_FRIDAY, label: 'Last Friday' },
-  { value: PaydayType.SET_DAY, label: 'Set Day' }
+  { value: PAYDAY_TYPE.LAST_DAY, label: 'Last Day' },
+  { value: PAYDAY_TYPE.LAST_FRIDAY, label: 'Last Friday' },
+  { value: PAYDAY_TYPE.SET_DAY, label: 'Set Day' }
+];
+
+const bankHolidayRegions = [
+  { value: BANK_HOLIDAY_REGION.SCOTLAND, label: 'Scotland' },
+  { value: BANK_HOLIDAY_REGION.ENGLAND_AND_WALES, label: 'England & Wales' },
+  { value: BANK_HOLIDAY_REGION.NORTHERN_IRELAND, label: 'Northern Ireland' }
 ];
 
 interface PaydayStepProps {
@@ -40,7 +46,7 @@ export const PaydayStep = ({ formik }: PaydayStepProps) => {
     setFieldValue('paydayConfig', {
       ...paydayConfig,
       frequency,
-      startDate: frequency !== PayFrequency.MONTHLY ? paydayConfig.startDate : undefined
+      startDate: frequency !== PAY_FREQUENCY.MONTHLY ? paydayConfig.startDate : undefined
     });
   };
 
@@ -49,18 +55,22 @@ export const PaydayStep = ({ formik }: PaydayStepProps) => {
     setFieldValue('paydayConfig', {
       ...paydayConfig,
       type,
-      dayOfMonth: type === PaydayType.SET_DAY ? paydayConfig.dayOfMonth : undefined
+      dayOfMonth: type === PAYDAY_TYPE.SET_DAY ? paydayConfig.dayOfMonth : undefined
     });
   };
 
-  const showDayOfMonth = paydayConfig.type === PaydayType.SET_DAY;
-  const isRecurring = paydayConfig.frequency !== PayFrequency.MONTHLY;
+  const handleRegionChange = (event: any) => {
+    setFieldValue('paydayConfig.bankHolidayRegion', event.target.value);
+  };
+
+  const showDayOfMonth = paydayConfig.type === PAYDAY_TYPE.SET_DAY;
+  const isRecurring = paydayConfig.frequency !== PAY_FREQUENCY.MONTHLY;
 
   return (
     <Box sx={{ mt: 2 }}>
       <Typography variant="body1" sx={{ mb: 3 }}>
-        Configure your payday settings to help us accurately track your income and forecast your
-        finances. We'll automatically adjust for weekends and bank holidays.
+        Configure your payday settings to help us accurately track your income, forecast your
+        finances and generate alerts. We'll automatically adjust for weekends and bank holidays.
       </Typography>
 
       <FormControl fullWidth sx={{ mb: 2 }}>
@@ -83,7 +93,7 @@ export const PaydayStep = ({ formik }: PaydayStepProps) => {
         </FormHelperText>
       </FormControl>
 
-      <FormControl fullWidth sx={{ mb: 1 }}>
+      <FormControl fullWidth sx={{ mb: 2 }}>
         <InputLabel>Payday Type</InputLabel>
         <Select
           value={paydayConfig.type || ''}
@@ -99,6 +109,20 @@ export const PaydayStep = ({ formik }: PaydayStepProps) => {
         <FormHelperText error={touched.paydayConfig?.type && Boolean(errors.paydayConfig?.type)}>
           {touched.paydayConfig?.type && errors.paydayConfig?.type}
         </FormHelperText>
+      </FormControl>
+
+      <FormControl fullWidth sx={{ mb: 2 }}>
+        <InputLabel>Bank Holiday Region</InputLabel>
+        <Select
+          value={paydayConfig.bankHolidayRegion || ''}
+          label="Bank Holiday Region"
+          onChange={handleRegionChange}>
+          {bankHolidayRegions.map(region => (
+            <MenuItem key={region.value} value={region.value}>
+              {region.label}
+            </MenuItem>
+          ))}
+        </Select>
       </FormControl>
 
       {showDayOfMonth && (

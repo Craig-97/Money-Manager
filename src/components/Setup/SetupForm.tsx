@@ -11,14 +11,47 @@ import {
   useMediaQuery,
   useTheme
 } from '@mui/material';
-import { useFormik } from 'formik';
+import { FormikProps, useFormik } from 'formik';
 import { useState } from 'react';
 import { BasicInfoStep, BillsStep, PaydayStep, PaymentsStep, validationSchema } from '~/components';
 import { useCreateAccount, useLogout } from '~/hooks';
 import { useAccountContext } from '~/state';
-import { PaydayType, PayFrequency, SetupFormValues } from '~/types';
+import { BANK_HOLIDAY_REGION, PAYDAY_TYPE, PAY_FREQUENCY, SetupFormValues } from '~/types';
 
 const steps = ['Basic Info', 'Monthly Bills', 'Payments Due', 'Payday Setup'];
+
+const getStepErrors = (errors: any, step: number) => {
+  switch (step) {
+    case 0:
+      return {
+        ...(errors.bankTotal && { bankTotal: errors.bankTotal }),
+        ...(errors.monthlyIncome && { monthlyIncome: errors.monthlyIncome })
+      };
+    case 1:
+      return errors.bills ? { bills: errors.bills } : {};
+    case 2:
+      return errors.oneOffPayments ? { oneOffPayments: errors.oneOffPayments } : {};
+    case 3:
+      return errors.paydayConfig ? { paydayConfig: errors.paydayConfig } : {};
+    default:
+      return {};
+  }
+};
+
+const renderStepContent = (step: number, formik: FormikProps<SetupFormValues>) => {
+  switch (step) {
+    case 0:
+      return <BasicInfoStep formik={formik} />;
+    case 1:
+      return <BillsStep formik={formik} />;
+    case 2:
+      return <PaymentsStep formik={formik} />;
+    case 3:
+      return <PaydayStep formik={formik} />;
+    default:
+      return null;
+  }
+};
 
 export const SetupForm = () => {
   const theme = useTheme();
@@ -36,12 +69,13 @@ export const SetupForm = () => {
       monthlyIncome: '',
       bills: [],
       oneOffPayments: [],
-      paydayConfig: { type: PaydayType.LAST_DAY, frequency: PayFrequency.MONTHLY }
+      paydayConfig: {
+        type: PAYDAY_TYPE.LAST_DAY,
+        frequency: PAY_FREQUENCY.MONTHLY,
+        bankHolidayRegion: BANK_HOLIDAY_REGION.SCOTLAND
+      }
     },
     validationSchema,
-    validateOnMount: true,
-    validateOnChange: true,
-    validateOnBlur: true,
     onSubmit: async values => {
       if (activeStep !== steps.length - 1) {
         return;
@@ -67,9 +101,6 @@ export const SetupForm = () => {
       const currentStepErrors = getStepErrors(errors, activeStep);
       if (Object.keys(currentStepErrors).length === 0) {
         setActiveStep(prevStep => prevStep + 1);
-      } else {
-        const touchedFields = getTouchedFields(currentStepErrors);
-        formik.setTouched(touchedFields, false);
       }
     });
   };
@@ -98,12 +129,12 @@ export const SetupForm = () => {
         return (
           (formik.values.oneOffPayments.length === 0 ||
             formik.values.oneOffPayments.every(payment => payment.name && payment.amount)) &&
-          !formik.errors.oneOffPayments
+          !formik.errors.oneOffPayments // Possible fix for TODO #1 is for last two checks here to be inside the && inside of first 2
         );
       case 3:
         const { paydayConfig } = formik.values;
-        const needsStartDate = paydayConfig.frequency !== PayFrequency.MONTHLY;
-        const needsDayOfMonth = paydayConfig.type === PaydayType.SET_DAY;
+        const needsStartDate = paydayConfig.frequency !== PAY_FREQUENCY.MONTHLY;
+        const needsDayOfMonth = paydayConfig.type === PAYDAY_TYPE.SET_DAY;
 
         return (
           paydayConfig.type &&
@@ -115,48 +146,6 @@ export const SetupForm = () => {
       default:
         return false;
     }
-  };
-
-  const renderStepContent = (step: number) => {
-    switch (step) {
-      case 0:
-        return <BasicInfoStep formik={formik} />;
-      case 1:
-        return <BillsStep formik={formik} />;
-      case 2:
-        return <PaymentsStep formik={formik} />;
-      case 3:
-        return <PaydayStep formik={formik} />;
-      default:
-        return null;
-    }
-  };
-
-  const getStepErrors = (errors: any, step: number) => {
-    switch (step) {
-      case 0:
-        return {
-          ...(errors.bankTotal && { bankTotal: errors.bankTotal }),
-          ...(errors.monthlyIncome && { monthlyIncome: errors.monthlyIncome })
-        };
-      case 1:
-        return errors.bills ? { bills: errors.bills } : {};
-      case 2:
-        return errors.oneOffPayments ? { oneOffPayments: errors.oneOffPayments } : {};
-      case 3:
-        return errors.paydayConfig ? { paydayConfig: errors.paydayConfig } : {};
-      default:
-        return {};
-    }
-  };
-
-  const getTouchedFields = (errors: any): Record<string, boolean> => {
-    return Object.keys(errors).reduce((acc, key) => {
-      if (typeof errors[key] === 'object' && errors[key] !== null) {
-        return { ...acc, [key]: true, ...getTouchedFields(errors[key]) };
-      }
-      return { ...acc, [key]: true };
-    }, {});
   };
 
   return (
@@ -206,7 +195,7 @@ export const SetupForm = () => {
       )}
 
       <form onSubmit={formik.handleSubmit}>
-        {renderStepContent(activeStep)}
+        {renderStepContent(activeStep, formik)}
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
           {!isMobile &&

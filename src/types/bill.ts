@@ -1,4 +1,4 @@
-import { TYPES } from '~/constants';
+import { TYPES } from '~/types';
 
 export interface Bill {
   id?: string;
@@ -6,7 +6,7 @@ export interface Bill {
   amount?: number;
   paid?: boolean;
   account?: string;
-  __typename?: TYPES.BILL;
+  __typename?: PAYMENT_TYPES.BILL;
 }
 
 export interface EditBillResponse {
