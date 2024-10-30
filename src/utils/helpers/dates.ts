@@ -73,44 +73,36 @@ interface PaydayInfo {
 /* Returns next payday based on configuration */
 export const getPayday = async (date: Date, config: PaydayConfig): Promise<PaydayInfo> => {
   const today = new Date(date);
-  let payday = new Date(date);
-  let isPayday = false;
-
-  // Fetch bank holidays if region is specified
   const bankHolidays = config.bankHolidayRegion
     ? await getBankHolidays(config.bankHolidayRegion)
     : [];
 
-  // Helper to get next period date based on frequency
+  let payday = new Date(date);
+  let isPayday = false;
+
   const getNextPeriodDate = (currentDate: Date): Date => {
-    switch (config.frequency) {
-      case PAY_FREQUENCY.WEEKLY:
-        return addWeeks(currentDate, 1);
-      case PAY_FREQUENCY.FORTNIGHTLY:
-        return addWeeks(currentDate, 2);
-      case PAY_FREQUENCY.FOUR_WEEKLY:
-        return addWeeks(currentDate, 4);
-      case PAY_FREQUENCY.MONTHLY:
-        return addMonths(currentDate, 1);
-      case PAY_FREQUENCY.QUARTERLY:
-        return addMonths(currentDate, 3);
-      case PAY_FREQUENCY.BIANNUAL:
-        return addMonths(currentDate, 6);
-      case PAY_FREQUENCY.ANNUAL:
-        return addMonths(currentDate, 12);
-      default:
-        return addMonths(currentDate, 1);
-    }
+    const periodMap: Record<PAY_FREQUENCY, number> = {
+      [PAY_FREQUENCY.WEEKLY]: 1,
+      [PAY_FREQUENCY.FORTNIGHTLY]: 2,
+      [PAY_FREQUENCY.FOUR_WEEKLY]: 4,
+      [PAY_FREQUENCY.MONTHLY]: 1,
+      [PAY_FREQUENCY.QUARTERLY]: 3,
+      [PAY_FREQUENCY.BIANNUAL]: 6,
+      [PAY_FREQUENCY.ANNUAL]: 12
+    };
+
+    const periods = periodMap[config.frequency] ?? 1;
+    return config.frequency.includes('WEEKLY')
+      ? addWeeks(currentDate, periods)
+      : addMonths(currentDate, periods);
   };
 
-  // Get payday based on type
   switch (config.type) {
     case PAYDAY_TYPE.LAST_DAY: {
       payday = await getLastWorkingDay(date, bankHolidays);
       if (payday < today) {
         payday = await getLastWorkingDay(getNextPeriodDate(date), bankHolidays);
       }
-      isPayday = today.getTime() === payday.getTime();
       break;
     }
 
@@ -119,11 +111,9 @@ export const getPayday = async (date: Date, config: PaydayConfig): Promise<Payda
       if (payday < today) {
         payday = getLastFriday(getNextPeriodDate(date));
       }
-      // Adjust for bank holidays
       if (bankHolidays.length > 0) {
         payday = getNearestPreviousWorkingDay(payday, bankHolidays);
       }
-      isPayday = today.getTime() === payday.getTime();
       break;
     }
 
@@ -134,17 +124,14 @@ export const getPayday = async (date: Date, config: PaydayConfig): Promise<Payda
       payday = getNearestPreviousWorkingDay(payday, bankHolidays);
 
       if (payday < today) {
-        payday = getNextPeriodDate(
-          new Date(date.getFullYear(), date.getMonth(), config.dayOfMonth)
-        );
-        payday = getNearestPreviousWorkingDay(payday, bankHolidays);
+        const nextMonth = new Date(date.getFullYear(), date.getMonth(), config.dayOfMonth);
+        payday = getNearestPreviousWorkingDay(getNextPeriodDate(nextMonth), bankHolidays);
       }
-
-      isPayday = today.getTime() === payday.getTime();
       break;
     }
   }
 
+  isPayday = today.getTime() === payday.getTime();
   return { payday, isPayday };
 };
 

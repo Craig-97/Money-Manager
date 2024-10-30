@@ -2,37 +2,29 @@ import { Box, TextField, IconButton, Button, Typography } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { FormikErrors, FormikProps } from 'formik';
 import { Bill, SetupFormValues } from '~/types';
+import { handleAddArrayItem, handleRemoveArrayItem } from '~/utils';
 
 interface BillsStepProps {
   formik: FormikProps<SetupFormValues>;
 }
 
 export const BillsStep = ({ formik }: BillsStepProps) => {
-  const { values, handleChange, handleBlur, setFieldValue, touched, errors } = formik;
+  const { values, handleChange, handleBlur, touched, errors } = formik;
 
   const onAdd = () => {
-    if (values.bills.length < 10) {
-      setFieldValue('bills', [...values.bills, { name: '', amount: '' }]);
-    }
+    handleAddArrayItem<Bill>({
+      formik,
+      fieldName: 'bills',
+      newItem: { name: '', amount: 0 }
+    });
   };
 
   const onRemove = (index: number) => {
-    if (touched.bills && touched.bills.length) {
-      const newTouched = [...touched.bills];
-      newTouched.splice(index, 1);
-      const updatedTouched = { ...touched, bills: newTouched };
-      formik.setTouched(updatedTouched);
-    }
-
-    if (errors.bills && errors.bills.length) {
-      const newErrors = [...(errors.bills as FormikErrors<Bill>[])];
-      newErrors.splice(index, 1);
-      const updatedErrors = { ...errors, bills: newErrors };
-      formik.setErrors(updatedErrors);
-    }
-
-    const newBills = values.bills.filter((_, i) => i !== index);
-    setFieldValue('bills', newBills);
+    handleRemoveArrayItem<Bill>({
+      formik,
+      fieldName: 'bills',
+      index
+    });
   };
 
   const billErrors = errors.bills as FormikErrors<Bill>[];

@@ -2,37 +2,29 @@ import { Box, TextField, IconButton, Button, Typography } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { FormikErrors, FormikProps } from 'formik';
 import { OneOffPayment, SetupFormValues } from '~/types';
+import { handleAddArrayItem, handleRemoveArrayItem } from '~/utils';
 
 interface PaymentsStepProps {
   formik: FormikProps<SetupFormValues>;
 }
 
 export const PaymentsStep = ({ formik }: PaymentsStepProps) => {
-  const { values, handleChange, handleBlur, setFieldValue, touched, errors } = formik;
+  const { values, handleChange, handleBlur, touched, errors } = formik;
 
   const onAdd = () => {
-    if (values.oneOffPayments.length < 10) {
-      setFieldValue('oneOffPayments', [...values.oneOffPayments, { name: '', amount: '' }]);
-    }
+    handleAddArrayItem<OneOffPayment>({
+      formik,
+      fieldName: 'oneOffPayments',
+      newItem: { name: '', amount: 0 }
+    });
   };
 
   const onRemove = (index: number) => {
-    if (touched.oneOffPayments && touched.oneOffPayments.length) {
-      const newTouched = [...touched.oneOffPayments];
-      newTouched.splice(index, 1);
-      const updatedTouched = { ...touched, oneOffPayments: newTouched };
-      formik.setTouched(updatedTouched);
-    }
-
-    if (errors.oneOffPayments && errors.oneOffPayments.length) {
-      const newErrors = [...(errors.oneOffPayments as FormikErrors<OneOffPayment>[])];
-      newErrors.splice(index, 1);
-      const updatedErrors = { ...errors, oneOffPayments: newErrors };
-      formik.setErrors(updatedErrors);
-    }
-
-    const newPayments = values.oneOffPayments.filter((_, i) => i !== index);
-    setFieldValue('oneOffPayments', newPayments);
+    handleRemoveArrayItem<OneOffPayment>({
+      formik,
+      fieldName: 'oneOffPayments',
+      index
+    });
   };
 
   const paymentErrors = errors.oneOffPayments as FormikErrors<OneOffPayment>[];

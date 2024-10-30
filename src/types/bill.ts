@@ -1,4 +1,4 @@
-import { TYPES } from '~/types';
+import { PAYMENT_TYPES } from '~/types';
 
 export interface Bill {
   id?: string;
