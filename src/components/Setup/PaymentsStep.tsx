@@ -1,4 +1,5 @@
 import { Box, TextField, IconButton, Button, Typography } from '@mui/material';
+import InputAdornment from '@mui/material/InputAdornment';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { FormikErrors, FormikProps } from 'formik';
 import { OneOffPayment, SetupFormValues } from '~/types';
@@ -56,6 +57,11 @@ export const PaymentsStep = ({ formik }: PaymentsStepProps) => {
           <TextField
             fullWidth
             name={`oneOffPayments.${index}.amount`}
+            slotProps={{
+              input: {
+                startAdornment: <InputAdornment position="start">£</InputAdornment>
+              }
+            }}
             label="Amount"
             type="number"
             value={payment.amount}

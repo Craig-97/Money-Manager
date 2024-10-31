@@ -1,4 +1,5 @@
 import { Box, TextField, IconButton, Button, Typography } from '@mui/material';
+import InputAdornment from '@mui/material/InputAdornment';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { FormikErrors, FormikProps } from 'formik';
 import { Bill, SetupFormValues } from '~/types';
@@ -57,6 +58,11 @@ export const BillsStep = ({ formik }: BillsStepProps) => {
           <TextField
             fullWidth
             name={`bills.${index}.amount`}
+            slotProps={{
+              input: {
+                startAdornment: <InputAdornment position="start">£</InputAdornment>
+              }
+            }}
             label="Amount"
             type="number"
             value={bill.amount}
