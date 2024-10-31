@@ -9,30 +9,14 @@ import {
   Typography
 } from '@mui/material';
 import { FormikProps } from 'formik';
-import { PAY_FREQUENCY, PAYDAY_TYPE, SetupFormValues, BANK_HOLIDAY_REGION } from '~/types';
-
-const frequencies = [
-  { value: PAY_FREQUENCY.WEEKLY, label: 'Weekly' },
-  { value: PAY_FREQUENCY.FORTNIGHTLY, label: 'Fortnightly' },
-  { value: PAY_FREQUENCY.FOUR_WEEKLY, label: '4 Weekly' },
-  { value: PAY_FREQUENCY.MONTHLY, label: 'Monthly' },
-  { value: PAY_FREQUENCY.QUARTERLY, label: 'Quarterly' },
-  { value: PAY_FREQUENCY.BIANNUAL, label: 'Biannual' },
-  { value: PAY_FREQUENCY.ANNUAL, label: 'Annual' }
-];
-
-const paydayTypes = [
-  { value: PAYDAY_TYPE.LAST_DAY, label: 'Last Day' },
-  { value: PAYDAY_TYPE.LAST_FRIDAY, label: 'Last Friday' },
-  { value: PAYDAY_TYPE.SET_DAY, label: 'Set Day' }
-];
-
-const bankHolidayRegions = [
-  { value: BANK_HOLIDAY_REGION.SCOTLAND, label: 'Scotland' },
-  { value: BANK_HOLIDAY_REGION.ENGLAND_AND_WALES, label: 'England & Wales' },
-  { value: BANK_HOLIDAY_REGION.NORTHERN_IRELAND, label: 'Northern Ireland' }
-];
-
+import { SetupFormValues } from '~/types';
+import { PAY_FREQUENCY, PAYDAY_TYPE } from '~/constants';
+import {
+  getFrequencyOptions,
+  getWeekdayOptions,
+  getBankHolidayRegionOptions,
+  getPaydayTypeOptions
+} from '~/utils';
 interface PaydayStepProps {
   formik: FormikProps<SetupFormValues>;
 }
@@ -46,7 +30,10 @@ export const PaydayStep = ({ formik }: PaydayStepProps) => {
     setFieldValue('paydayConfig', {
       ...paydayConfig,
       frequency,
-      startDate: frequency !== PAY_FREQUENCY.MONTHLY ? paydayConfig.startDate : undefined
+      type: frequency === PAY_FREQUENCY.WEEKLY ? PAYDAY_TYPE.SET_WEEKDAY : PAYDAY_TYPE.LAST_DAY,
+      firstPayDate: frequency === PAY_FREQUENCY.MONTHLY ? undefined : paydayConfig.firstPayDate,
+      dayOfMonth: undefined,
+      weekday: frequency === PAY_FREQUENCY.WEEKLY ? paydayConfig.weekday : undefined
     });
   };
 
@@ -55,7 +42,8 @@ export const PaydayStep = ({ formik }: PaydayStepProps) => {
     setFieldValue('paydayConfig', {
       ...paydayConfig,
       type,
-      dayOfMonth: type === PAYDAY_TYPE.SET_DAY ? paydayConfig.dayOfMonth : undefined
+      dayOfMonth: type === PAYDAY_TYPE.SET_DAY ? paydayConfig.dayOfMonth : undefined,
+      weekday: type === PAYDAY_TYPE.SET_WEEKDAY ? paydayConfig.weekday : undefined
     });
   };
 
@@ -64,7 +52,10 @@ export const PaydayStep = ({ formik }: PaydayStepProps) => {
   };
 
   const showDayOfMonth = paydayConfig.type === PAYDAY_TYPE.SET_DAY;
+  const showWeekday = paydayConfig.type === PAYDAY_TYPE.SET_WEEKDAY;
   const isRecurring = paydayConfig.frequency !== PAY_FREQUENCY.MONTHLY;
+
+  console.log(formik.values);
 
   return (
     <Box sx={{ mt: 2 }}>
@@ -81,9 +72,9 @@ export const PaydayStep = ({ formik }: PaydayStepProps) => {
           label="Pay Frequency"
           onChange={handleFrequencyChange}
           error={touched.paydayConfig?.frequency && Boolean(errors.paydayConfig?.frequency)}>
-          {frequencies.map(freq => (
-            <MenuItem key={freq.value} value={freq.value}>
-              {freq.label}
+          {getFrequencyOptions().map(({ value, label }) => (
+            <MenuItem key={value} value={value}>
+              {label}
             </MenuItem>
           ))}
         </Select>
@@ -100,7 +91,7 @@ export const PaydayStep = ({ formik }: PaydayStepProps) => {
           label="Payday Type"
           onChange={handleTypeChange}
           error={touched.paydayConfig?.type && Boolean(errors.paydayConfig?.type)}>
-          {paydayTypes.map(type => (
+          {getPaydayTypeOptions(paydayConfig.frequency).map(type => (
             <MenuItem key={type.value} value={type.value}>
               {type.label}
             </MenuItem>
@@ -117,9 +108,9 @@ export const PaydayStep = ({ formik }: PaydayStepProps) => {
           value={paydayConfig.bankHolidayRegion || ''}
           label="Bank Holiday Region"
           onChange={handleRegionChange}>
-          {bankHolidayRegions.map(region => (
-            <MenuItem key={region.value} value={region.value}>
-              {region.label}
+          {getBankHolidayRegionOptions().map(({ value, label }) => (
+            <MenuItem key={value} value={value}>
+              {label}
             </MenuItem>
           ))}
         </Select>
@@ -141,16 +132,37 @@ export const PaydayStep = ({ formik }: PaydayStepProps) => {
         />
       )}
 
+      {showWeekday && (
+        <FormControl fullWidth sx={{ mb: 2 }}>
+          <InputLabel>Day of Week</InputLabel>
+          <Select
+            value={paydayConfig.weekday || ''}
+            label="Day of Week"
+            onChange={e => setFieldValue('paydayConfig.weekday', e.target.value)}
+            error={touched.paydayConfig?.weekday && Boolean(errors.paydayConfig?.weekday)}>
+            {getWeekdayOptions().map(({ value, label }) => (
+              <MenuItem key={value} value={value}>
+                {label}
+              </MenuItem>
+            ))}
+          </Select>
+          <FormHelperText
+            error={touched.paydayConfig?.weekday && Boolean(errors.paydayConfig?.weekday)}>
+            {touched.paydayConfig?.weekday && errors.paydayConfig?.weekday}
+          </FormHelperText>
+        </FormControl>
+      )}
+
       {isRecurring && (
         <TextField
           fullWidth
           label="First Pay Date"
           type="date"
-          value={paydayConfig.startDate || ''}
-          onChange={e => setFieldValue('paydayConfig.startDate', e.target.value)}
+          value={paydayConfig.firstPayDate || ''}
+          onChange={e => setFieldValue('paydayConfig.firstPayDate', e.target.value)}
           slotProps={{ inputLabel: { shrink: true } }}
-          error={touched.paydayConfig?.startDate && Boolean(errors.paydayConfig?.startDate)}
-          helperText={touched.paydayConfig?.startDate && errors.paydayConfig?.startDate}
+          error={touched.paydayConfig?.firstPayDate && Boolean(errors.paydayConfig?.firstPayDate)}
+          helperText={touched.paydayConfig?.firstPayDate && errors.paydayConfig?.firstPayDate}
         />
       )}
     </Box>

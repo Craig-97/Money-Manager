@@ -4,10 +4,11 @@ import TextField from '@mui/material/TextField';
 import { useFormik } from 'formik';
 import { useNavigate } from 'react-router-dom';
 import * as Yup from 'yup';
-import { ERRORS, EVENTS, RegisterData } from '~/types';
+import { RegisterData } from '~/types';
 import { REGISTER_AND_LOGIN_MUTATION } from '~/graphql';
 import { useAccountContext } from '~/state';
 import { AutoFocusTextField } from './AutoFocusTextField';
+import { ERRORS, EVENTS } from '~/constants';
 
 export const RegisterForm = () => {
   const navigate = useNavigate();

@@ -6,8 +6,9 @@ import { useNavigate } from 'react-router-dom';
 import * as Yup from 'yup';
 import { LOGIN_QUERY } from '~/graphql';
 import { useAccountContext } from '~/state';
-import { ERRORS, EVENTS, LoginData } from '~/types';
+import { LoginData } from '~/types';
 import { AutoFocusTextField } from './AutoFocusTextField';
+import { ERRORS, EVENTS } from '~/constants';
 
 export const LoginForm = () => {
   const navigate = useNavigate();

@@ -14,9 +14,10 @@ import {
 import { FormikProps, useFormik } from 'formik';
 import { useState } from 'react';
 import { BasicInfoStep, BillsStep, PaydayStep, PaymentsStep, validationSchema } from '~/components';
+import { BANK_HOLIDAY_REGION, PAY_FREQUENCY, PAYDAY_TYPE } from '~/constants';
 import { useCreateAccount, useLogout } from '~/hooks';
 import { useAccountContext } from '~/state';
-import { BANK_HOLIDAY_REGION, PAYDAY_TYPE, PAY_FREQUENCY, SetupFormValues } from '~/types';
+import { SetupFormValues } from '~/types';
 
 const steps = ['Basic Info', 'Monthly Bills', 'Payments Due', 'Payday Setup'];
 
@@ -139,7 +140,7 @@ export const SetupForm = () => {
         return (
           paydayConfig.type &&
           paydayConfig.frequency &&
-          (!needsStartDate || (needsStartDate && paydayConfig.startDate)) &&
+          (!needsStartDate || (needsStartDate && paydayConfig.firstPayDate)) &&
           (!needsDayOfMonth || (needsDayOfMonth && paydayConfig.dayOfMonth)) &&
           !formik.errors.paydayConfig
         );

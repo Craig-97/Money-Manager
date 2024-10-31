@@ -1,27 +1,17 @@
-import { BANK_HOLIDAY_REGION } from './bankHolidays';
+import { PAY_FREQUENCY, PAYDAY_TYPE, WEEKDAY } from '~/constants';
+import { BankHolidayRegion } from './bankHolidays';
 
-export enum PAY_FREQUENCY {
-  WEEKLY = 'WEEKLY',
-  FORTNIGHTLY = 'FORTNIGHTLY',
-  FOUR_WEEKLY = 'FOUR_WEEKLY',
-  MONTHLY = 'MONTHLY',
-  QUARTERLY = 'QUARTERLY',
-  BIANNUAL = 'BIANNUAL',
-  ANNUAL = 'ANNUAL'
-}
-
-export enum PAYDAY_TYPE {
-  LAST_DAY = 'LAST_DAY',
-  LAST_FRIDAY = 'LAST_FRIDAY',
-  SET_DAY = 'SET_DAY'
-}
+export type PayFrequency = (typeof PAY_FREQUENCY)[keyof typeof PAY_FREQUENCY];
+export type PaydayType = (typeof PAYDAY_TYPE)[keyof typeof PAYDAY_TYPE];
+export type Weekday = (typeof WEEKDAY)[keyof typeof WEEKDAY];
 
 export interface PaydayConfig {
-  frequency: PAY_FREQUENCY;
-  type: PAYDAY_TYPE;
+  frequency: PayFrequency;
+  type: PaydayType;
   dayOfMonth?: number;
-  startDate?: string;
-  bankHolidayRegion?: BANK_HOLIDAY_REGION;
+  weekday?: Weekday;
+  firstPayDate?: string;
+  bankHolidayRegion?: BankHolidayRegion;
 }
 
 export interface PaydayInfo {

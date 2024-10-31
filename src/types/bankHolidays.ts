@@ -1,8 +1,6 @@
-export enum BANK_HOLIDAY_REGION {
-  ENGLAND_AND_WALES = 'england-and-wales',
-  SCOTLAND = 'scotland',
-  NORTHERN_IRELAND = 'northern-ireland'
-}
+import { BANK_HOLIDAY_REGION } from '~/constants';
+
+export type BankHolidayRegion = (typeof BANK_HOLIDAY_REGION)[keyof typeof BANK_HOLIDAY_REGION];
 
 export interface BankHoliday {
   title: string;

@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react';
-import { BANK_HOLIDAY_REGION, PAY_FREQUENCY, PAYDAY_TYPE, PaydayConfig } from '~/types';
+import { BANK_HOLIDAY_REGION, PAY_FREQUENCY, PAYDAY_TYPE } from '~/constants';
+import { PaydayConfig } from '~/types';
 import { getPayday } from '~/utils';
 
 export const useGetPayday = () => {
-  const [paydayInfo, setPaydayInfo] = useState<{ payday: Date | null; isPayday: boolean | null }>({
-    payday: null,
-    isPayday: null
-  });
+  const [paydayInfo, setPaydayInfo] = useState<{ payday: string | null; isPayday: boolean | null }>(
+    {
+      payday: null,
+      isPayday: null
+    }
+  );
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -16,6 +19,7 @@ export const useGetPayday = () => {
       type: PAYDAY_TYPE.SET_DAY,
       frequency: PAY_FREQUENCY.MONTHLY,
       dayOfMonth: 28,
+      weekday: undefined,
       bankHolidayRegion: BANK_HOLIDAY_REGION.SCOTLAND
     };
 

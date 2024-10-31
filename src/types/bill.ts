@@ -1,4 +1,4 @@
-import { PAYMENT_TYPES } from '~/types';
+import { PAYMENT_TYPE } from '../types';
 
 export interface Bill {
   id?: string;
@@ -6,7 +6,7 @@ export interface Bill {
   amount?: number;
   paid?: boolean;
   account?: string;
-  __typename?: PAYMENT_TYPES.BILL;
+  __typename?: PAYMENT_TYPE['BILL'];
 }
 
 export interface EditBillResponse {

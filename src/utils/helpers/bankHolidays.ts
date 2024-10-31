@@ -1,8 +1,8 @@
-import { BankHoliday, BANK_HOLIDAY_REGION } from '~/types';
+import { BankHoliday, BankHolidayRegion } from '~/types';
 
 const BANK_HOLIDAYS_API = 'https://www.gov.uk/bank-holidays.json';
 
-export const getBankHolidays = async (region: BANK_HOLIDAY_REGION): Promise<BankHoliday[]> => {
+export const getBankHolidays = async (region: BankHolidayRegion): Promise<BankHoliday[]> => {
   try {
     const response = await fetch(BANK_HOLIDAYS_API);
     const data = await response.json();

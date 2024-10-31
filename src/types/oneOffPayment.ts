@@ -1,11 +1,11 @@
-import { PAYMENT_TYPES } from './payment';
+import { PAYMENT_TYPE } from '~/types';
 
 export interface OneOffPayment {
   id?: string;
   name?: string;
   amount?: number;
   account?: string;
-  __typename?: PAYMENT_TYPES.ONEOFFPAYMENT;
+  __typename?: PAYMENT_TYPE['ONEOFFPAYMENT'];
 }
 
 export interface DeletePaymentResponse {
