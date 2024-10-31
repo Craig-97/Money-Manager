@@ -36,7 +36,7 @@ const adjustForNonWorkingDays = (date: Date, bankHolidays: BankHoliday[]): Date 
     result.getDay() === 6 || // Saturday
     (bankHolidays.length > 0 && isBankHoliday(result, bankHolidays))
   ) {
-    result.setDate(result.getDate() - 1);
+    result.setDate(result.getUTCDate() - 1);
   }
 
   return result;
@@ -46,23 +46,35 @@ const adjustForNonWorkingDays = (date: Date, bankHolidays: BankHoliday[]): Date 
 const getLastFriday = (date: Date): Date => {
   const lastDay = getEOM(date);
   while (lastDay.getDay() !== 5) {
-    lastDay.setDate(lastDay.getDate() - 1);
+    lastDay.setDate(lastDay.getUTCDate() - 1);
   }
   return lastDay;
 };
 
-/* Add months to date */
+/* Add months to date - used UTC to avoid any timezone-induced shifts*/
 const addMonths = (date: Date, periods: number): Date => {
-  const result = new Date(date);
-  result.setDate(1); // Set to start of month
-  result.setMonth(result.getMonth() + periods);
-  return result;
+  const year = date.getUTCFullYear();
+  const month = date.getUTCMonth();
+  const day = date.getUTCDate();
+
+  // Calculate target year and month
+  const targetMonth = month + periods;
+  const targetYear = year + Math.floor(targetMonth / 12);
+  const adjustedMonth = targetMonth % 12;
+
+  // Find the last day of the target month
+  const lastDayInTargetMonth = new Date(Date.UTC(targetYear, adjustedMonth + 1, 0)).getUTCDate();
+
+  // Determine final day, preferring the original day unless it exceeds the last day of the target month
+  const finalDay = Math.min(day, lastDayInTargetMonth);
+
+  return new Date(Date.UTC(targetYear, adjustedMonth, finalDay));
 };
 
 /* Add weeks to date */
 const addWeeks = (date: Date, weeks: number): Date => {
   const result = new Date(date);
-  result.setDate(result.getDate() + weeks * 7);
+  result.setDate(result.getUTCDate() + weeks * 7);
   return result;
 };
 
@@ -87,7 +99,7 @@ const getNextWeekday = (date: Date, weekday: Weekday): Date => {
   const currentDay = result.getDay();
   const daysToAdd = (targetDay + 7 - currentDay) % 7;
 
-  result.setDate(result.getDate() + daysToAdd);
+  result.setDate(result.getUTCDate() + daysToAdd);
   return result;
 };
 
@@ -199,7 +211,7 @@ export const getForecastDate = (date: Date) => {
   let startingDate = date;
 
   // If we're past the end of month, increment to next month
-  if (date.getDate() >= eom.getDate()) {
+  if (date.getUTCDate() >= eom.getUTCDate()) {
     startingDate = getSOM(new Date(date.getFullYear(), date.getMonth() + 1, 1));
   }
 

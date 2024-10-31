@@ -133,31 +133,31 @@ describe('getPayday', () => {
         firstPay: '2024-01-31',
         nextPay: '2024-02-14',
         description: 'should add 14 days'
+      },
+      {
+        freq: PAY_FREQUENCY.FOUR_WEEKLY,
+        firstPay: '2024-01-31',
+        nextPay: '2024-02-28',
+        description: 'should add 28 days'
+      },
+      {
+        freq: PAY_FREQUENCY.QUARTERLY,
+        firstPay: '2024-01-31',
+        nextPay: '2024-04-30',
+        description: 'should add 3 months'
+      },
+      {
+        freq: PAY_FREQUENCY.BIANNUAL,
+        firstPay: '2024-01-31',
+        nextPay: '2024-07-31',
+        description: 'should add 6 months'
+      },
+      {
+        freq: PAY_FREQUENCY.ANNUAL,
+        firstPay: '2024-01-31',
+        nextPay: '2025-01-31',
+        description: 'should add 12 months'
       }
-      //   {
-      //   freq: PAY_FREQUENCY.FOUR_WEEKLY,
-      //   firstPay: '2024-01-31',
-      //   nextPay: '2024-02-28',
-      //   description: 'should add 28 days'
-      // },
-      // {
-      //   freq: PAY_FREQUENCY.QUARTERLY,
-      //   firstPay: '2024-01-31',
-      //   nextPay: '2024-04-30',
-      //   description: 'should add 3 months'
-      // },
-      // {
-      //   freq: PAY_FREQUENCY.BIANNUAL,
-      //   firstPay: '2024-01-31',
-      //   nextPay: '2024-07-31',
-      //   description: 'should add 6 months'
-      // },
-      // {
-      //   freq: PAY_FREQUENCY.ANNUAL,
-      //   firstPay: '2024-01-31',
-      //   nextPay: '2025-01-31',
-      //   description: 'should add 12 months'
-      // }
     ];
 
     testCases.forEach(({ freq, firstPay, nextPay, description }) => {
@@ -168,7 +168,7 @@ describe('getPayday', () => {
           firstPayDate: firstPay
         };
 
-        it(`should calculate next ${freq.toLowerCase()} payday`, async () => {
+        it(`should calculate next ${freq.toLowerCase()} payday (${description})`, async () => {
           const today = new Date('2024-01-15');
           const result = await getPayday(today, config);
           expect(result.payday).toBe(firstPay);
