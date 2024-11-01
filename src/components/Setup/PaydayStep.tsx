@@ -55,8 +55,6 @@ export const PaydayStep = ({ formik }: PaydayStepProps) => {
   const showWeekday = paydayConfig.type === PAYDAY_TYPE.SET_WEEKDAY;
   const isRecurring = paydayConfig.frequency !== PAY_FREQUENCY.MONTHLY;
 
-  console.log(formik.values);
-
   return (
     <Box sx={{ mt: 2 }}>
       <Typography variant="body1" sx={{ mb: 3 }}>

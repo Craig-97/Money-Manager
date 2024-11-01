@@ -20,6 +20,7 @@ export const useGetPayday = () => {
       frequency: PAY_FREQUENCY.MONTHLY,
       dayOfMonth: 28,
       weekday: undefined,
+      firstPayDate: undefined,
       bankHolidayRegion: BANK_HOLIDAY_REGION.SCOTLAND
     };
 
