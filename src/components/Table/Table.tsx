@@ -77,9 +77,15 @@ export const Table = <T extends object>({ columns, data, stickyHeader = true }: 
       <MaterialTable stickyHeader={stickyHeader} {...getTableProps()}>
         <TableHead>
           {headerGroups.map(headerGroup => (
-            <TableRow {...headerGroup.getHeaderGroupProps()}>
+            <TableRow
+              key={headerGroup.getHeaderGroupProps().key}
+              {...(({ key, ...rest }) => rest)(headerGroup.getHeaderGroupProps())}>
               {headerGroup.headers.map(column => (
-                <TableCell {...column.getHeaderProps()}>{column.render('Header')}</TableCell>
+                <TableCell
+                  key={column.getHeaderProps().key}
+                  {...(({ key, ...rest }) => rest)(column.getHeaderProps())}>
+                  {column.render('Header')}
+                </TableCell>
               ))}
             </TableRow>
           ))}
@@ -89,10 +95,17 @@ export const Table = <T extends object>({ columns, data, stickyHeader = true }: 
             prepareRow(row);
             return (
               <TableRow
-                {...row.getRowProps()}
+                key={row.getRowProps().key}
+                {...(({ key, ...rest }) => rest)(row.getRowProps())}
                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                 {row.cells.map((cell: Cell<T>) => {
-                  return <TableCell {...cell.getCellProps()}>{cell.render('Cell')}</TableCell>;
+                  return (
+                    <TableCell
+                      key={cell.getCellProps().key}
+                      {...(({ key, ...rest }) => rest)(cell.getCellProps())}>
+                      {cell.render('Cell')}
+                    </TableCell>
+                  );
                 })}
               </TableRow>
             );
