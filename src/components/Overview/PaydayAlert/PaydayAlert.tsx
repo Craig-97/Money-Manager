@@ -1,4 +1,4 @@
-import { Alert } from '@mui/material';
+import { Alert, Skeleton } from '@mui/material';
 import { useState } from 'react';
 import { useGetPayday } from '~/hooks';
 import { formatFullDate } from '~/utils';
@@ -11,15 +11,26 @@ const setAlertClosedStatus = (status: boolean) =>
 
 export const PaydayAlert = () => {
   const [isOpen, setIsOpen] = useState<boolean>(() => !getAlertClosedStatus());
-  const { paydayInfo, error } = useGetPayday();
+  const { paydayInfo, loading, error } = useGetPayday();
 
   const handleClose = () => {
     setIsOpen(false);
     setAlertClosedStatus(true);
   };
 
-  if (!isOpen || error || paydayInfo.payday === null) {
+  if (!isOpen || error) {
     return null;
+  }
+
+  if (loading || paydayInfo.payday === null) {
+    return (
+      <Skeleton
+        width="100%"
+        height={48}
+        sx={{ m: '0 0 2rem 0', transform: 'none', bgcolor: 'rgb(7, 19, 24)' }}>
+        <Alert severity="info"></Alert>
+      </Skeleton>
+    );
   }
 
   const { payday, isPayday } = paydayInfo;

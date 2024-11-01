@@ -18,6 +18,14 @@ export const CREATE_ACCOUNT_MUTATION = gql`
           name
           amount
         }
+        payday {
+          frequency
+          type
+          dayOfMonth
+          weekday
+          firstPayDate
+          bankHolidayRegion
+        }
       }
       success
     }
