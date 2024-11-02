@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { getPayday } from './dates';
 import { PAY_FREQUENCY, PAYDAY_TYPE, WEEKDAY, BANK_HOLIDAY_REGION } from '~/constants';
-import { PaydayConfig } from '~/types';
+import { Payday } from '~/types';
 
 // Mock bank holidays utility
 vi.mock('./bankHolidays', async importOriginal => {
@@ -28,20 +28,20 @@ describe('getPayday', () => {
   const mockDate = (dateString: string) => new Date(dateString);
 
   // Base configs for each frequency type
-  const baseWeeklyConfig: PaydayConfig = {
+  const baseWeeklyConfig: Payday = {
     frequency: PAY_FREQUENCY.WEEKLY,
     type: PAYDAY_TYPE.SET_WEEKDAY,
     weekday: WEEKDAY.FRIDAY,
     firstPayDate: '2024-03-11'
   };
 
-  const baseRecurringConfig: PaydayConfig = {
+  const baseRecurringConfig: Payday = {
     frequency: PAY_FREQUENCY.FORTNIGHTLY,
     type: PAYDAY_TYPE.LAST_DAY,
     firstPayDate: '2024-06-28'
   };
 
-  const baseMonthlyConfig: PaydayConfig = {
+  const baseMonthlyConfig: Payday = {
     frequency: PAY_FREQUENCY.MONTHLY,
     type: PAYDAY_TYPE.LAST_DAY
   };
@@ -167,7 +167,7 @@ describe('getPayday', () => {
       });
 
       describe('LAST_FRIDAY type', () => {
-        const config: PaydayConfig = {
+        const config: Payday = {
           frequency,
           type: PAYDAY_TYPE.LAST_FRIDAY,
           firstPayDate: '2024-03-15'
@@ -223,7 +223,7 @@ describe('getPayday', () => {
       //     WEEKDAY.FRIDAY
       //   ].forEach(weekday => {
       //     describe(`${weekday} payments`, () => {
-      //       const config: PaydayConfig = {
+      //       const config: Payday = {
       //         frequency,
       //         type: PAYDAY_TYPE.SET_WEEKDAY,
       //         weekday,
@@ -322,7 +322,7 @@ describe('getPayday', () => {
   //     });
 
   //     describe('LAST_FRIDAY type', () => {
-  //       const config: PaydayConfig = {
+  //       const config: Payday = {
   //         frequency,
   //         type: PAYDAY_TYPE.LAST_FRIDAY
   //       };
@@ -347,7 +347,7 @@ describe('getPayday', () => {
   //     describe('SET_DAY type', () => {
   //       [1, 15, 28, 31].forEach(dayOfMonth => {
   //         describe(`Day ${dayOfMonth} payments`, () => {
-  //           const config: PaydayConfig = {
+  //           const config: Payday = {
   //             frequency,
   //             type: PAYDAY_TYPE.SET_DAY,
   //             dayOfMonth

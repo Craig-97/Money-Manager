@@ -9,6 +9,7 @@ import { REGISTER_AND_LOGIN_MUTATION } from '~/graphql';
 import { useAccountContext } from '~/state';
 import { AutoFocusTextField } from './AutoFocusTextField';
 import { ERRORS, EVENTS } from '~/constants';
+import { getGQLErrorCode } from '~/utils';
 
 export const RegisterForm = () => {
   const navigate = useNavigate();
@@ -36,9 +37,10 @@ export const RegisterForm = () => {
 
   const onRegisterAndLoginError = (errors: ApolloError) => {
     formik.setFieldValue('email', formik.values.email, false);
+    const errorCode = getGQLErrorCode(errors);
 
-    if (errors.message === ERRORS.USER_EXISTS) {
-      formik.setFieldError('email', ERRORS.USER_EXISTS);
+    if (errorCode === ERRORS.USER_EXISTS) {
+      formik.setFieldError('email', errors.message);
     }
   };
 

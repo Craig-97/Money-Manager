@@ -33,7 +33,7 @@ const getStepErrors = (errors: any, step: number) => {
     case 2:
       return errors.oneOffPayments ? { oneOffPayments: errors.oneOffPayments } : {};
     case 3:
-      return errors.paydayConfig ? { paydayConfig: errors.paydayConfig } : {};
+      return errors.payday ? { payday: errors.payday } : {};
     default:
       return {};
   }
@@ -70,7 +70,7 @@ export const SetupForm = () => {
       monthlyIncome: '',
       bills: [],
       oneOffPayments: [],
-      paydayConfig: {
+      payday: {
         type: PAYDAY_TYPE.LAST_DAY,
         frequency: PAY_FREQUENCY.MONTHLY,
         bankHolidayRegion: BANK_HOLIDAY_REGION.SCOTLAND
@@ -88,7 +88,7 @@ export const SetupForm = () => {
             monthlyIncome: parseFloat(values.monthlyIncome),
             bills: values.bills,
             oneOffPayments: values.oneOffPayments,
-            paydayConfig: values.paydayConfig,
+            payday: values.payday,
             userId: user.id
           }
         }
@@ -133,16 +133,16 @@ export const SetupForm = () => {
           !formik.errors.oneOffPayments // Possible fix for TODO #1 is for last two checks here to be inside the && inside of first 2
         );
       case 3:
-        const { paydayConfig } = formik.values;
-        const needsStartDate = paydayConfig.frequency !== PAY_FREQUENCY.MONTHLY;
-        const needsDayOfMonth = paydayConfig.type === PAYDAY_TYPE.SET_DAY;
+        const { payday } = formik.values;
+        const needsStartDate = payday.frequency !== PAY_FREQUENCY.MONTHLY;
+        const needsDayOfMonth = payday.type === PAYDAY_TYPE.SET_DAY;
 
         return (
-          paydayConfig.type &&
-          paydayConfig.frequency &&
-          (!needsStartDate || (needsStartDate && paydayConfig.firstPayDate)) &&
-          (!needsDayOfMonth || (needsDayOfMonth && paydayConfig.dayOfMonth)) &&
-          !formik.errors.paydayConfig
+          payday.type &&
+          payday.frequency &&
+          (!needsStartDate || (needsStartDate && payday.firstPayDate)) &&
+          (!needsDayOfMonth || (needsDayOfMonth && payday.dayOfMonth)) &&
+          !formik.errors.payday
         );
       default:
         return false;

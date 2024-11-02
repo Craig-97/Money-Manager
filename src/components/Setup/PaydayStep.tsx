@@ -23,37 +23,37 @@ interface PaydayStepProps {
 
 export const PaydayStep = ({ formik }: PaydayStepProps) => {
   const { values, setFieldValue, errors, touched } = formik;
-  const { paydayConfig } = values;
+  const { payday } = values;
 
   const handleFrequencyChange = (event: any) => {
     const frequency = event.target.value;
-    setFieldValue('paydayConfig', {
-      ...paydayConfig,
+    setFieldValue('payday', {
+      ...payday,
       frequency,
       type: frequency === PAY_FREQUENCY.WEEKLY ? PAYDAY_TYPE.SET_WEEKDAY : PAYDAY_TYPE.LAST_DAY,
-      firstPayDate: frequency === PAY_FREQUENCY.MONTHLY ? undefined : paydayConfig.firstPayDate,
+      firstPayDate: frequency === PAY_FREQUENCY.MONTHLY ? undefined : payday.firstPayDate,
       dayOfMonth: undefined,
-      weekday: frequency === PAY_FREQUENCY.WEEKLY ? paydayConfig.weekday : undefined
+      weekday: frequency === PAY_FREQUENCY.WEEKLY ? payday.weekday : undefined
     });
   };
 
   const handleTypeChange = (event: any) => {
     const type = event.target.value;
-    setFieldValue('paydayConfig', {
-      ...paydayConfig,
+    setFieldValue('payday', {
+      ...payday,
       type,
-      dayOfMonth: type === PAYDAY_TYPE.SET_DAY ? paydayConfig.dayOfMonth : undefined,
-      weekday: type === PAYDAY_TYPE.SET_WEEKDAY ? paydayConfig.weekday : undefined
+      dayOfMonth: type === PAYDAY_TYPE.SET_DAY ? payday.dayOfMonth : undefined,
+      weekday: type === PAYDAY_TYPE.SET_WEEKDAY ? payday.weekday : undefined
     });
   };
 
   const handleRegionChange = (event: any) => {
-    setFieldValue('paydayConfig.bankHolidayRegion', event.target.value);
+    setFieldValue('payday.bankHolidayRegion', event.target.value);
   };
 
-  const showDayOfMonth = paydayConfig.type === PAYDAY_TYPE.SET_DAY;
-  const showWeekday = paydayConfig.type === PAYDAY_TYPE.SET_WEEKDAY;
-  const isRecurring = paydayConfig.frequency !== PAY_FREQUENCY.MONTHLY;
+  const showDayOfMonth = payday.type === PAYDAY_TYPE.SET_DAY;
+  const showWeekday = payday.type === PAYDAY_TYPE.SET_WEEKDAY;
+  const isRecurring = payday.frequency !== PAY_FREQUENCY.MONTHLY;
 
   return (
     <Box sx={{ mt: 2 }}>
@@ -66,44 +66,43 @@ export const PaydayStep = ({ formik }: PaydayStepProps) => {
         <InputLabel>Pay Frequency</InputLabel>
         <Select
           autoFocus
-          value={paydayConfig.frequency || ''}
+          value={payday.frequency || ''}
           label="Pay Frequency"
           onChange={handleFrequencyChange}
-          error={touched.paydayConfig?.frequency && Boolean(errors.paydayConfig?.frequency)}>
+          error={touched.payday?.frequency && Boolean(errors.payday?.frequency)}>
           {getFrequencyOptions().map(({ value, label }) => (
             <MenuItem key={value} value={value}>
               {label}
             </MenuItem>
           ))}
         </Select>
-        <FormHelperText
-          error={touched.paydayConfig?.frequency && Boolean(errors.paydayConfig?.frequency)}>
-          {touched.paydayConfig?.frequency && errors.paydayConfig?.frequency}
+        <FormHelperText error={touched.payday?.frequency && Boolean(errors.payday?.frequency)}>
+          {touched.payday?.frequency && errors.payday?.frequency}
         </FormHelperText>
       </FormControl>
 
       <FormControl fullWidth sx={{ mb: 2 }}>
         <InputLabel>Payday Type</InputLabel>
         <Select
-          value={paydayConfig.type || ''}
+          value={payday.type || ''}
           label="Payday Type"
           onChange={handleTypeChange}
-          error={touched.paydayConfig?.type && Boolean(errors.paydayConfig?.type)}>
-          {getPaydayTypeOptions(paydayConfig.frequency).map(type => (
+          error={touched.payday?.type && Boolean(errors.payday?.type)}>
+          {getPaydayTypeOptions(payday.frequency).map(type => (
             <MenuItem key={type.value} value={type.value}>
               {type.label}
             </MenuItem>
           ))}
         </Select>
-        <FormHelperText error={touched.paydayConfig?.type && Boolean(errors.paydayConfig?.type)}>
-          {touched.paydayConfig?.type && errors.paydayConfig?.type}
+        <FormHelperText error={touched.payday?.type && Boolean(errors.payday?.type)}>
+          {touched.payday?.type && errors.payday?.type}
         </FormHelperText>
       </FormControl>
 
       <FormControl fullWidth sx={{ mb: 2 }}>
         <InputLabel>Bank Holiday Region</InputLabel>
         <Select
-          value={paydayConfig.bankHolidayRegion || ''}
+          value={payday.bankHolidayRegion || ''}
           label="Bank Holiday Region"
           onChange={handleRegionChange}>
           {getBankHolidayRegionOptions().map(({ value, label }) => (
@@ -122,10 +121,10 @@ export const PaydayStep = ({ formik }: PaydayStepProps) => {
           slotProps={{
             input: { inputProps: { min: 1, max: 31 } }
           }}
-          value={paydayConfig.dayOfMonth || ''}
-          onChange={e => setFieldValue('paydayConfig.dayOfMonth', parseInt(e.target.value))}
-          error={touched.paydayConfig?.dayOfMonth && Boolean(errors.paydayConfig?.dayOfMonth)}
-          helperText={touched.paydayConfig?.dayOfMonth && errors.paydayConfig?.dayOfMonth}
+          value={payday.dayOfMonth || ''}
+          onChange={e => setFieldValue('payday.dayOfMonth', parseInt(e.target.value))}
+          error={touched.payday?.dayOfMonth && Boolean(errors.payday?.dayOfMonth)}
+          helperText={touched.payday?.dayOfMonth && errors.payday?.dayOfMonth}
           sx={{ mb: 2 }}
         />
       )}
@@ -134,19 +133,18 @@ export const PaydayStep = ({ formik }: PaydayStepProps) => {
         <FormControl fullWidth sx={{ mb: 2 }}>
           <InputLabel>Day of Week</InputLabel>
           <Select
-            value={paydayConfig.weekday || ''}
+            value={payday.weekday || ''}
             label="Day of Week"
-            onChange={e => setFieldValue('paydayConfig.weekday', e.target.value)}
-            error={touched.paydayConfig?.weekday && Boolean(errors.paydayConfig?.weekday)}>
+            onChange={e => setFieldValue('payday.weekday', e.target.value)}
+            error={touched.payday?.weekday && Boolean(errors.payday?.weekday)}>
             {getWeekdayOptions().map(({ value, label }) => (
               <MenuItem key={value} value={value}>
                 {label}
               </MenuItem>
             ))}
           </Select>
-          <FormHelperText
-            error={touched.paydayConfig?.weekday && Boolean(errors.paydayConfig?.weekday)}>
-            {touched.paydayConfig?.weekday && errors.paydayConfig?.weekday}
+          <FormHelperText error={touched.payday?.weekday && Boolean(errors.payday?.weekday)}>
+            {touched.payday?.weekday && errors.payday?.weekday}
           </FormHelperText>
         </FormControl>
       )}
@@ -156,11 +154,11 @@ export const PaydayStep = ({ formik }: PaydayStepProps) => {
           fullWidth
           label="First Pay Date"
           type="date"
-          value={paydayConfig.firstPayDate || ''}
-          onChange={e => setFieldValue('paydayConfig.firstPayDate', e.target.value)}
+          value={payday.firstPayDate || ''}
+          onChange={e => setFieldValue('payday.firstPayDate', e.target.value)}
           slotProps={{ inputLabel: { shrink: true } }}
-          error={touched.paydayConfig?.firstPayDate && Boolean(errors.paydayConfig?.firstPayDate)}
-          helperText={touched.paydayConfig?.firstPayDate && errors.paydayConfig?.firstPayDate}
+          error={touched.payday?.firstPayDate && Boolean(errors.payday?.firstPayDate)}
+          helperText={touched.payday?.firstPayDate && errors.payday?.firstPayDate}
         />
       )}
     </Box>

@@ -5,7 +5,7 @@ import { FIND_USER_QUERY, GET_ACCOUNT_QUERY } from '~/graphql';
 import { initialState } from '~/state';
 import { useAccountContext } from '~/state/account-context';
 import { AccountData, FindUserData } from '~/types';
-import { getAccountData } from '~/utils';
+import { getAccountData, getGQLErrorCode } from '~/utils';
 import { useErrorHandler } from '~/hooks';
 import { ERRORS, EVENTS } from '~/constants';
 
@@ -49,7 +49,8 @@ export const useAccountData = () => {
   }, [data, dispatch]);
 
   // Used to determine If user does not have a linked account
-  const accountExists = error?.message === ERRORS.ACCOUNT_NOT_FOUND ? false : true;
+  const errorCode = getGQLErrorCode(error);
+  const accountExists = errorCode === ERRORS.ACCOUNT_NOT_LINKED ? false : true;
 
   // Combined loading states for UI
   const isLoading = userLoading || loading || (token && !data && accountExists);

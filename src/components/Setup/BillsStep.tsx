@@ -16,7 +16,7 @@ export const BillsStep = ({ formik }: BillsStepProps) => {
     handleAddArrayItem<Bill>({
       formik,
       fieldName: 'bills',
-      newItem: { name: '', amount: 0 }
+      newItem: { name: '', amount: 0, paid: false }
     });
   };
 

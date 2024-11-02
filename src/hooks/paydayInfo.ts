@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { BANK_HOLIDAY_REGION, PAY_FREQUENCY, PAYDAY_TYPE } from '~/constants';
-import { PaydayConfig } from '~/types';
+import { Payday } from '~/types';
 import { getPayday } from '~/utils';
 
-const config: PaydayConfig = {
+const config: Payday = {
   type: PAYDAY_TYPE.SET_DAY,
   frequency: PAY_FREQUENCY.MONTHLY,
   dayOfMonth: 28,

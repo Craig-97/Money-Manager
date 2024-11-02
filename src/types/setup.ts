@@ -1,14 +1,14 @@
 import { FormikProps } from 'formik';
 import { Bill } from './bill';
 import { OneOffPayment } from './oneOffPayment';
-import { PaydayConfig } from './payday';
+import { Payday } from './payday';
 
 export interface SetupFormValues {
   bankTotal: string;
   monthlyIncome: string;
   bills: Bill[];
   oneOffPayments: OneOffPayment[];
-  paydayConfig: PaydayConfig;
+  payday: Payday;
 }
 
 export interface StepProps {

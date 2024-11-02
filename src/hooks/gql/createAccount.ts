@@ -17,7 +17,6 @@ export const useCreateAccount = () => {
     onError: handleGQLError,
     onCompleted: () => {
       enqueueSnackbar('Setup completed successfully!', { variant: 'success' });
-      navigate('/');
     },
     update: (
       cache,
@@ -28,6 +27,7 @@ export const useCreateAccount = () => {
       }
     ) => {
       editAccountCache(cache, account, user);
+      navigate('/');
     }
   });
 

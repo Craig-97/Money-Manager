@@ -9,6 +9,7 @@ import { useAccountContext } from '~/state';
 import { LoginData } from '~/types';
 import { AutoFocusTextField } from './AutoFocusTextField';
 import { ERRORS, EVENTS } from '~/constants';
+import { getGQLErrorCode } from '~/utils';
 
 export const LoginForm = () => {
   const navigate = useNavigate();
@@ -36,11 +37,12 @@ export const LoginForm = () => {
   const onLoginError = (errors: ApolloError) => {
     formik.setFieldValue('email', formik.values.email, false);
     formik.setFieldValue('password', '', false);
+    const errorCode = getGQLErrorCode(errors);
 
-    if (errors.message === ERRORS.USER_NOT_FOUND) {
-      formik.setFieldError('email', ERRORS.EMAIL_NOT_FOUND);
-    } else if (errors.message === ERRORS.INCORRECT_PASSWORD) {
-      formik.setFieldError('password', ERRORS.INCORRECT_PASSWORD);
+    if (errorCode === ERRORS.USER_EMAIL_NOT_FOUND) {
+      formik.setFieldError('email', errors.message);
+    } else if (errorCode === ERRORS.INVALID_CREDENTIALS) {
+      formik.setFieldError('password', errors.message);
     }
   };
 

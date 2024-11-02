@@ -33,7 +33,7 @@ export const validationSchema = Yup.object().shape({
       })
     )
     .max(10, 'Maximum of 10 payments allowed'),
-  paydayConfig: Yup.object().shape({
+  payday: Yup.object().shape({
     frequency: Yup.string()
       .oneOf(Object.values(PAY_FREQUENCY), 'Invalid pay frequency')
       .required('Pay frequency is required'),

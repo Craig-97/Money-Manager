@@ -5,7 +5,7 @@ import {
   PAYDAY_TYPE,
   WEEKDAY
 } from '~/constants';
-import { BankHoliday, PaydayConfig, PayFrequency, Weekday } from '~/types';
+import { BankHoliday, Payday, PayFrequency, Weekday } from '~/types';
 import { getBankHolidays, isBankHoliday } from './bankHolidays';
 
 const UK_TIMEZONE = 'Europe/London';
@@ -140,7 +140,7 @@ interface PaydayInfo {
 }
 
 /* Get payday for a given date based on configuration */
-const getPaydayForDate = (baseDate: Date, config: PaydayConfig): Date => {
+const getPaydayForDate = (baseDate: Date, config: Payday): Date => {
   let result = new Date(baseDate);
 
   switch (config.type) {
@@ -181,7 +181,7 @@ const getNextPayPeriod = (date: Date, frequency: PayFrequency): Date => {
 };
 
 /* Returns next payday based on configuration */
-export const getPayday = async (date: Date, config: PaydayConfig): Promise<PaydayInfo> => {
+export const getPayday = async (date: Date, config: Payday): Promise<PaydayInfo> => {
   // Normalize the input date to start of day in UK time
   const today = normalizeToUKDate(date);
 
