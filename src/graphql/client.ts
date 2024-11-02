@@ -20,7 +20,9 @@ const cache = new InMemoryCache({
   }
 });
 
-const uri = import.meta.env.PROD ? import.meta.env.VITE_PROD_API_URL : import.meta.env.VITE_DEV_API_URL;
+const uri = import.meta.env.PROD
+  ? import.meta.env.VITE_PROD_API_URL
+  : import.meta.env.VITE_DEV_API_URL;
 
 const httpLink = createHttpLink({
   uri
@@ -40,5 +42,6 @@ const authLink = setContext((_, { headers }) => {
 
 export const client = new ApolloClient({
   link: authLink.concat(httpLink),
-  cache
+  cache,
+  connectToDevTools: !import.meta.env.PROD
 });

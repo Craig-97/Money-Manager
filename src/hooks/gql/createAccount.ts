@@ -1,32 +1,22 @@
-import { useMutation } from '@apollo/client';
+import { useApolloClient, useMutation } from '@apollo/client';
 import { useSnackbar } from 'notistack';
 import { useNavigate } from 'react-router-dom';
-import { CREATE_ACCOUNT_MUTATION, editAccountCache } from '~/graphql';
+import { CREATE_ACCOUNT_MUTATION, GET_ACCOUNT_QUERY } from '~/graphql';
 import { useErrorHandler } from '~/hooks';
-import { useAccountContext } from '~/state';
 
 export const useCreateAccount = () => {
-  const {
-    state: { user }
-  } = useAccountContext();
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
   const handleGQLError = useErrorHandler();
+  const client = useApolloClient();
 
   const [createAccount, { loading }] = useMutation(CREATE_ACCOUNT_MUTATION, {
     onError: handleGQLError,
-    onCompleted: () => {
+    onCompleted: async () => {
       enqueueSnackbar('Setup completed successfully!', { variant: 'success' });
-    },
-    update: (
-      cache,
-      {
-        data: {
-          createAccount: { account }
-        }
-      }
-    ) => {
-      editAccountCache(cache, account, user);
+      await client.refetchQueries({
+        include: [GET_ACCOUNT_QUERY]
+      });
       navigate('/');
     }
   });

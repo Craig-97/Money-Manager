@@ -20,6 +20,11 @@ export const useErrorHandler = () => {
       return;
     }
 
+    // Clear token if user not found in case of account deletion
+    if (errorCode === ERRORS.USER_NOT_FOUND) {
+      localStorage.removeItem('token');
+    }
+
     if (error.networkError || errorCode === ERRORS.USER_NOT_FOUND) {
       navigate('/error', { state: { error } });
       return;
