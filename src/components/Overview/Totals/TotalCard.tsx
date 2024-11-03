@@ -1,3 +1,4 @@
+import { Box } from '@mui/material';
 import Card from '@mui/material/Card';
 import CardActionArea from '@mui/material/CardActionArea';
 import CardContent from '@mui/material/CardContent';
@@ -22,7 +23,9 @@ export const TotalCard = ({
   onClick,
   disabled
 }: TotalCardProps) => (
-  <div className={`${classBaseName}-total-card`}>
+  <Box
+    className={`${classBaseName}-total-card`}
+    sx={{ width: { mobile: '100%', sm: '275px' }, flexGrow: 1 }}>
     <Card>
       <CardActionArea onClick={onClick} disabled={disabled}>
         <CardContent>
@@ -41,5 +44,5 @@ export const TotalCard = ({
         </CardContent>
       </CardActionArea>
     </Card>
-  </div>
+  </Box>
 );

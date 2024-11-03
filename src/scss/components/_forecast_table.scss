@@ -1,55 +1,43 @@
 @use '../abstracts' as *;
 
-.forecast {
-  .MuiPaper-root {
-    @include respond(mobile) {
-      max-width: $forecast-table-mobile-width;
-      min-width: $forecast-table-mobile-width;
-      max-height: 657px;
-      overflow-y: auto;
-    }
+.forecast-table {
+  th {
+    font-weight: bold;
+    font-size: $table-header;
+    padding: 16px 24px;
+  }
 
-    @include respond(mobile-small) {
-      min-width: unset;
-    }
+  td {
+    font-weight: 500;
+    font-size: $standard;
+    padding: 16px 24px;
+  }
 
-    th {
-      font-weight: bold;
-      font-size: $table-header;
-      padding: 16px 24px;
-    }
+  .MuiTableFooter-root {
+    bottom: 0;
+    left: 0;
+    position: sticky;
+    z-index: 2;
+  }
 
-    td {
-      font-weight: 500;
-      font-size: $standard;
-      padding: 16px 24px;
-    }
+  .MuiTablePagination-spacer {
+    display: none;
+  }
 
-    .MuiTableFooter-root {
-      bottom: 0;
-      left: 0;
-      position: sticky;
-      z-index: 2;
-    }
+  .MuiTablePagination-root {
+    border-top: 1px solid $table-border;
+    border-bottom: 0;
+    padding: 0;
 
-    .MuiTablePagination-spacer {
-      display: none;
-    }
+    .MuiToolbar-root {
+      @include flexbox($justifyContent: center);
+      background-color: $background;
 
-    .MuiTablePagination-root {
-      border-top: 1px solid $table-border;
-      border-bottom: 0;
-      padding: 0;
-
-      .MuiToolbar-root {
-        @include flexbox($justifyContent: center);
-
-        @include respond(laptop) {
-          display: grid;
-          grid-template-columns: auto auto;
-          align-items: center;
-          justify-content: center;
-        }
+      @include respond(laptop) {
+        display: grid;
+        grid-template-columns: auto auto;
+        align-items: center;
+        justify-content: center;
       }
     }
   }

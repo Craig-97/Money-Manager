@@ -1,5 +1,5 @@
 import { useMutation } from '@apollo/client';
-import { Button, Card, CardContent, CircularProgress } from '@mui/material';
+import { Button, Card, CardContent, CircularProgress, Typography } from '@mui/material';
 import { ChangeEvent, Fragment, useState } from 'react';
 import { addNoteCache, CREATE_NOTE_MUTATION } from '~/graphql';
 import { Note } from '~/types';
@@ -45,7 +45,7 @@ export const NewNoteCard = () => {
   };
 
   return (
-    <Card className={`note note--new ${loading && 'note--loading'}`}>
+    <Card className={`note note--new ${loading && 'note--loading'}`} sx={{ bgcolor: '#2196f3' }}>
       <CardContent className="note__content">
         {!loading ? (
           <Fragment>
@@ -56,7 +56,14 @@ export const NewNoteCard = () => {
               value={noteText}
               onChange={handleChange}></textarea>
             <div className="note__footer">
-              <small>{characterLimit - noteText.length} Remaining</small>
+              <Typography
+                variant="caption"
+                component="small"
+                fontWeight={500}
+                fontSize="1rem"
+                sx={{ opacity: 100 }}>
+                {characterLimit - noteText.length} Remaining
+              </Typography>
               <Button
                 className="ghost-button"
                 variant="outlined"

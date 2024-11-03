@@ -1,14 +1,14 @@
 @use '../abstracts' as *;
 
 .MuiCard-root.note {
-  font-family: $font-family;
   font-size: $standard;
-  background-color: $yellow-light;
   background-image: unset;
   font-weight: 500;
   color: $black;
   padding: 24px;
   white-space: pre-wrap;
+  flex-grow: 1;
+  width: 285px;
 
   .note__content {
     @include flexbox($justifyContent: space-between, $direction: column);
@@ -47,12 +47,6 @@
           background-color: $ripple-black;
         }
       }
-
-      small {
-        color: $black;
-        font-size: $standard;
-        opacity: 85%;
-      }
     }
 
     .loading {
@@ -61,31 +55,21 @@
     }
   }
 
-  &--new {
+  &--new .note__content textarea {
+    font-family: $font-family;
+    font-size: $standard;
+    font-weight: 500;
+    border: none;
+    resize: none;
     background-color: $primary;
 
-    .note__content {
-      textarea {
-        font-size: $standard;
-        font-family: $font-family;
-        font-weight: 500;
-        border: none;
-        resize: none;
-        background-color: $primary;
+    &:focus {
+      outline: none;
+    }
 
-        &:focus {
-          outline: none;
-        }
-
-        &::placeholder {
-          color: $black;
-          opacity: 0.75;
-        }
-      }
-
-      .note__footer small {
-        opacity: 100%;
-      }
+    &::placeholder {
+      color: $black;
+      opacity: 0.75;
     }
   }
 }

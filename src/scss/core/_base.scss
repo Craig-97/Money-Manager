@@ -2,23 +2,16 @@
 
 body {
   margin: 0;
-  font-family: $font-family;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-code {
-  font-family: $code-font-family;
-}
-
 .app {
-  @include flexbox($alignItems: center, $direction: column);
   text-align: left;
   background-color: $black;
   min-height: 100vh;
   font-size: $base-font-size;
   color: $white;
-  padding: 0 1rem;
   overflow-x: hidden;
   overflow-y: auto;
 }

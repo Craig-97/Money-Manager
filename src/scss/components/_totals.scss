@@ -1,27 +1,12 @@
 @use '../abstracts' as *;
 
 .totals {
-  display: grid;
-  grid-template-columns: auto auto auto auto;
-  grid-template-rows: auto auto;
-  grid-gap: 2rem;
+  display: flex;
+  flex-wrap: wrap;
   margin: 0 0 2rem 0;
-
-  @include respond(laptop) {
-    grid-template-columns: auto auto auto;
-  }
-
-  @include respond(tablet) {
-    grid-template-columns: auto auto;
-  }
-
-  @include respond(mobile) {
-    grid-template-columns: auto;
-  }
+  gap: 2rem;
 
   .MuiCard-root {
-    min-width: $total-cards-width;
-    max-width: $total-cards-width;
     min-height: 120px;
     max-height: 120px;
 
@@ -45,11 +30,6 @@
       .negative {
         color: $secondary;
       }
-    }
-
-    @include respond(mobile) {
-      min-width: unset;
-      max-width: $totals-mobile-width;
     }
   }
 

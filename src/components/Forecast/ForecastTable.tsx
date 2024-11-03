@@ -3,6 +3,7 @@ import { useAccountContext } from '~/state/account-context';
 import { AccountState } from '~/types';
 import { getForecastDate, getNextNumberOfMonths } from '~/utils';
 import { Table } from '../Table';
+import { Box } from '@mui/material';
 
 interface ForecastTableProps {
   past?: boolean;
@@ -51,5 +52,27 @@ export const ForecastTable = ({ past = false }: ForecastTableProps) => {
     return newData;
   }, [bankFreeToSpend, monthlyIncome, billsTotal, months, past]);
 
-  return <Table columns={columns} data={data} />;
+  return (
+    <Box
+      className="forecast-table"
+      sx={{
+        display: 'flex',
+        borderRadius: 1,
+        flex: 1,
+        maxWidth: { mobile: 'calc(100svw - 48px)', sm: '50%' },
+        minWidth: { mobile: 'calc(100svw - 48px)', sm: '25%' },
+
+        '& .MuiPaper-root': {
+          '@media (max-width: 600px)': {
+            maxHeight: 657,
+            overflowY: 'auto'
+          },
+          '@media (max-width: 480px)': {
+            minWidth: 'unset'
+          }
+        }
+      }}>
+      <Table columns={columns} data={data} />
+    </Box>
+  );
 };

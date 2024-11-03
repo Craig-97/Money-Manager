@@ -44,7 +44,7 @@ export const Table = <T extends object>({ columns, data, stickyHeader = true }: 
     {
       columns,
       data,
-      initialState: { pageSize: 16 } as Partial<TableState<T>>
+      initialState: { pageSize: 12 } as Partial<TableState<T>>
     },
     useSortBy,
     usePagination,
@@ -60,7 +60,7 @@ export const Table = <T extends object>({ columns, data, stickyHeader = true }: 
     if (!isDesktop) {
       setPageSize(8);
     } else {
-      setPageSize(16);
+      setPageSize(12);
     }
   }, [isDesktop, setPageSize]);
 
@@ -114,7 +114,7 @@ export const Table = <T extends object>({ columns, data, stickyHeader = true }: 
         <TableFooter>
           <TableRow>
             <TablePagination
-              rowsPerPageOptions={[8, 16, { label: 'All', value: data.length }]}
+              rowsPerPageOptions={[8, 12, 16, { label: 'All', value: data.length }]}
               colSpan={0}
               count={data.length}
               rowsPerPage={pageSize}

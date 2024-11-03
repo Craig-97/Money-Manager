@@ -28,7 +28,7 @@ export const PaydayAlert = () => {
       <Skeleton
         width="100%"
         height={48}
-        sx={{ m: '0 0 2rem 0', transform: 'none', bgcolor: 'rgb(7, 19, 24)' }}>
+        sx={{ mb: 4, transform: 'none', bgcolor: 'rgb(7, 19, 24)' }}>
         <Alert severity="info"></Alert>
       </Skeleton>
     );

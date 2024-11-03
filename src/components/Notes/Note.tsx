@@ -1,7 +1,7 @@
 import { useMutation } from '@apollo/client';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import { Card, CardContent, CircularProgress, IconButton } from '@mui/material';
+import { Card, CardContent, CircularProgress, IconButton, Typography } from '@mui/material';
 import { Fragment, useState } from 'react';
 import { DELETE_NOTE_MUTATION, EDIT_NOTE_MUTATION, deleteNoteCache } from '~/graphql';
 import { useAccountContext } from '~/state';
@@ -55,13 +55,22 @@ export const NoteCard = ({ id, body, createdAt, updatedAt }: NoteProps) => {
 
   return (
     <Fragment>
-      <Card className="note">
+      <Card className="note" sx={{ bgcolor: '#fff176' }}>
         <CardContent className="note__content">
           {!delNoteLoading && !editNoteLoading ? (
             <Fragment>
-              <span>{body}</span>
+              <Typography variant="body1" fontWeight={500}>
+                {body}
+              </Typography>
               <div className="note__footer">
-                <small>{getFooterDate()}</small>
+                <Typography
+                  variant="caption"
+                  component="small"
+                  fontWeight={500}
+                  fontSize="1rem"
+                  sx={{ opacity: 85 }}>
+                  {getFooterDate()}
+                </Typography>
                 <div>
                   <IconButton onClick={() => setIsOpen(true)}>
                     <EditIcon />

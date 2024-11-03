@@ -53,7 +53,7 @@ export const NoteEditPopup = ({
       onClose={handleClose}
       aria-labelledby="form-dialog-title"
       className="note-edit-popup"
-      maxWidth={'xs'}
+      maxWidth="xs"
       fullWidth>
       <DialogTitle id="form-dialog-title">
         Edit Note
@@ -63,6 +63,7 @@ export const NoteEditPopup = ({
           </IconButton>
         )}
       </DialogTitle>
+      {/* TODO: Fix font family for textarea */}
       <DialogContent>
         <textarea
           rows={5}

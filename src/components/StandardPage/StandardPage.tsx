@@ -1,19 +1,35 @@
-import { Fragment } from 'react/jsx-runtime';
+import { Box } from '@mui/material';
+import { Fragment } from 'react';
+import { useLocation } from 'react-router-dom';
+import { Sidebar } from '../Sidebar';
 import { BottomNav } from '../BottomNav';
-import { Header } from '../Header';
 
 interface StandardPageProps {
   children?: React.ReactNode;
-  header?: Boolean;
   bottomNav?: Boolean;
 }
 
-export const StandardPage = ({ children, header = true, bottomNav = true }: StandardPageProps) => (
-  <Fragment>
-    <div className="page">
-      {header && <Header />}
-      <main>{children}</main>
-    </div>
-    {bottomNav && <BottomNav />}
-  </Fragment>
-);
+const PUBLIC_ROUTES = ['/login', '/setup', '/session-expired'];
+
+export const StandardPage = ({ children, bottomNav = true }: StandardPageProps) => {
+  const { pathname } = useLocation();
+  const showSidebar = !PUBLIC_ROUTES.includes(pathname);
+  //TODO - Sidebar open state doesn't persist on nav item click - should be handled here so it does
+
+  return (
+    <Fragment>
+      <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+        {showSidebar && <Sidebar />}
+        <Box
+          component="main"
+          sx={{
+            flexGrow: 1,
+            width: showSidebar ? { sm: `calc(100% - 280px)` } : '100%'
+          }}>
+          {children}
+        </Box>
+      </Box>
+      {bottomNav && <BottomNav />}
+    </Fragment>
+  );
+};
