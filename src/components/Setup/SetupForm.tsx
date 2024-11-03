@@ -18,6 +18,7 @@ import { BANK_HOLIDAY_REGION, PAY_FREQUENCY, PAYDAY_TYPE } from '~/constants';
 import { useCreateAccount, useLogout } from '~/hooks';
 import { useAccountContext } from '~/state';
 import { SetupFormValues } from '~/types';
+import * as Yup from 'yup';
 
 const steps = ['Basic Info', 'Monthly Bills', 'Payments Due', 'Payday Setup'];
 
@@ -77,6 +78,28 @@ export const SetupForm = () => {
       }
     },
     validationSchema,
+    validate: values => {
+      try {
+        validationSchema.validateSync(values, {
+          context: {
+            bills: values.bills,
+            oneOffPayments: values.oneOffPayments
+          }
+        });
+        return {}; // Return empty object if validation passes
+      } catch (err) {
+        if (err instanceof Yup.ValidationError) {
+          const errors: Record<string, string> = {};
+          err.inner.forEach(error => {
+            if (error.path) {
+              errors[error.path] = error.message;
+            }
+          });
+          return errors;
+        }
+        return {}; // Return empty object for unexpected errors
+      }
+    },
     onSubmit: async values => {
       if (activeStep !== steps.length - 1) {
         return;
@@ -130,7 +153,7 @@ export const SetupForm = () => {
         return (
           (formik.values.oneOffPayments.length === 0 ||
             formik.values.oneOffPayments.every(payment => payment.name && payment.amount)) &&
-          !formik.errors.oneOffPayments // Possible fix for TODO #1 is for last two checks here to be inside the && inside of first 2
+          !formik.errors.oneOffPayments
         );
       case 3:
         const { payday } = formik.values;
