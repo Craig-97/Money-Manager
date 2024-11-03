@@ -1,19 +1,15 @@
 import { useQuery } from '@apollo/client';
 import isEqual from 'lodash/isEqual';
 import { useEffect } from 'react';
+import { ERRORS, EVENTS } from '~/constants';
 import { FIND_USER_QUERY, GET_ACCOUNT_QUERY } from '~/graphql';
-import { initialState } from '~/state';
+import { useErrorHandler } from '~/hooks';
 import { useAccountContext } from '~/state/account-context';
 import { AccountData, FindUserData } from '~/types';
 import { getAccountData, getGQLErrorCode } from '~/utils';
-import { useErrorHandler } from '~/hooks';
-import { ERRORS, EVENTS } from '~/constants';
 
 export const useAccountData = () => {
-  const {
-    state: { account, user },
-    dispatch
-  } = useAccountContext();
+  const { account, user, dispatch } = useAccountContext();
 
   const handleGQLError = useErrorHandler();
   const token = localStorage.getItem('token');
@@ -40,7 +36,7 @@ export const useAccountData = () => {
 
   // If any changes are made to GQL cache then context account data gets updated
   useEffect(() => {
-    const formattedData = data?.account ? getAccountData(data.account) : initialState.account;
+    const formattedData = getAccountData(data?.account);
 
     if (!isEqual(formattedData, account)) {
       dispatch({ type: EVENTS.GET_ACCOUNT_DETAILS, data: formattedData });

@@ -12,9 +12,7 @@ interface Modal {
 }
 
 export const PaymentsDue = () => {
-  const {
-    state: { account }
-  } = useAccountContext();
+  const { account } = useAccountContext();
   const { paymentsDue, paymentsDueTotal } = account;
   const [isOpen, setIsOpen] = useState<Modal>({ PAYMENT_DUE: false, BILL: false });
   const [selectedPayment, setSelectedPayment] = useState<OneOffPayment | Bill>({});

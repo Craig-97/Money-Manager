@@ -3,9 +3,7 @@ import { useAccountContext } from '~/state';
 import { AccountState, Note } from '~/types';
 
 export const Notes = () => {
-  const {
-    state: { account }
-  } = useAccountContext();
+  const { account } = useAccountContext();
   const { notes }: AccountState = account;
 
   return (

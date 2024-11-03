@@ -23,9 +23,7 @@ export const EditPaymentsDuePopup = ({
   close,
   selectedPayment
 }: EditPaymentsDuePopupProps) => {
-  const {
-    state: { account, user }
-  } = useAccountContext();
+  const { account, user } = useAccountContext();
   const { bankBalance } = account;
   const { id: paymentId, name, amount }: OneOffPayment = selectedPayment;
   const { enqueueSnackbar } = useSnackbar();

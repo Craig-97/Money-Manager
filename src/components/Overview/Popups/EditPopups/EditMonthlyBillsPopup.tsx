@@ -19,9 +19,7 @@ export const EditMonthlyBillsPopup = ({
   close,
   selectedBill
 }: EditMonthlyBillsPopupProps) => {
-  const {
-    state: { account, user }
-  } = useAccountContext();
+  const { account, user } = useAccountContext();
   const { bankBalance } = account;
   const { id: billId, name, amount, paid }: Bill = selectedBill;
   const { enqueueSnackbar } = useSnackbar();

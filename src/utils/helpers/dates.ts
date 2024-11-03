@@ -140,10 +140,10 @@ interface PaydayInfo {
 }
 
 /* Get payday for a given date based on configuration */
-const getPaydayForDate = (baseDate: Date, config: Payday): Date => {
+const getPaydayForDate = (baseDate: Date, paydayConfig: Payday): Date => {
   let result = new Date(baseDate);
 
-  switch (config.type) {
+  switch (paydayConfig.type) {
     case PAYDAY_TYPE.LAST_DAY:
       result = getEOM(result);
       break;
@@ -151,15 +151,15 @@ const getPaydayForDate = (baseDate: Date, config: Payday): Date => {
       result = getLastFriday(result);
       break;
     case PAYDAY_TYPE.SET_DAY:
-      if (config.dayOfMonth) {
+      if (paydayConfig.dayOfMonth) {
         result = new Date(
-          Date.UTC(result.getUTCFullYear(), result.getUTCMonth(), config.dayOfMonth)
+          Date.UTC(result.getUTCFullYear(), result.getUTCMonth(), paydayConfig.dayOfMonth)
         );
       }
       break;
     case PAYDAY_TYPE.SET_WEEKDAY:
-      if (config.weekday) {
-        result = getNextWeekday(result, config.weekday);
+      if (paydayConfig.weekday) {
+        result = getNextWeekday(result, paydayConfig.weekday);
       }
       break;
   }
@@ -181,17 +181,17 @@ const getNextPayPeriod = (date: Date, frequency: PayFrequency): Date => {
 };
 
 /* Returns next payday based on configuration */
-export const getPayday = async (date: Date, config: Payday): Promise<PaydayInfo> => {
+export const getPayday = async (date: Date, paydayConfig: Payday): Promise<PaydayInfo> => {
   // Normalize the input date to start of day in UK time
   const today = normalizeToUKDate(date);
 
-  const bankHolidays = config.bankHolidayRegion
-    ? await getBankHolidays(config.bankHolidayRegion)
+  const bankHolidays = paydayConfig.bankHolidayRegion
+    ? await getBankHolidays(paydayConfig.bankHolidayRegion)
     : [];
 
   // Handle payday calculations based on firstPayDate if it exists
-  if (config.firstPayDate) {
-    const firstPayDate = normalizeToUKDate(new Date(config.firstPayDate));
+  if (paydayConfig.firstPayDate) {
+    const firstPayDate = normalizeToUKDate(new Date(paydayConfig.firstPayDate));
 
     // Case 1: First pay date is in the future - use it directly
     if (firstPayDate >= today) {
@@ -204,17 +204,17 @@ export const getPayday = async (date: Date, config: Payday): Promise<PaydayInfo>
 
     // Case 2: First pay date is in the past and frequency is non-monthly
     // Calculate next payday based on the recurring pattern from firstPayDate
-    if (config.frequency !== PAY_FREQUENCY.MONTHLY) {
+    if (paydayConfig.frequency !== PAY_FREQUENCY.MONTHLY) {
       // Find the next occurrence after today by adding periods
 
-      let nextPay = getNextPayPeriod(firstPayDate, config.frequency);
+      let nextPay = getNextPayPeriod(firstPayDate, paydayConfig.frequency);
 
-      if (config.type === PAYDAY_TYPE.SET_WEEKDAY && config.weekday) {
-        nextPay = getNextWeekday(nextPay, config.weekday);
+      if (paydayConfig.type === PAYDAY_TYPE.SET_WEEKDAY && paydayConfig.weekday) {
+        nextPay = getNextWeekday(nextPay, paydayConfig.weekday);
       }
 
       while (nextPay <= today) {
-        nextPay = getNextPayPeriod(nextPay, config.frequency);
+        nextPay = getNextPayPeriod(nextPay, paydayConfig.frequency);
       }
 
       const payday = adjustForNonWorkingDays(nextPay, bankHolidays);
@@ -227,12 +227,12 @@ export const getPayday = async (date: Date, config: Payday): Promise<PaydayInfo>
   }
 
   // Find the next payday from current date and adjust for non-working days
-  let payday = adjustForNonWorkingDays(getPaydayForDate(today, config), bankHolidays);
+  let payday = adjustForNonWorkingDays(getPaydayForDate(today, paydayConfig), bankHolidays);
 
   // If the calculated payday is in the past or today, move to next period
   if (payday <= today) {
-    const nextPeriod = getNextPayPeriod(today, config.frequency);
-    const nextPayday = getPaydayForDate(nextPeriod, config);
+    const nextPeriod = getNextPayPeriod(today, paydayConfig.frequency);
+    const nextPayday = getPaydayForDate(nextPeriod, paydayConfig);
     payday = adjustForNonWorkingDays(nextPayday, bankHolidays);
   }
 

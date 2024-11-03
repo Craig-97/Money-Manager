@@ -9,9 +9,7 @@ interface ForecastTableProps {
 }
 
 export const ForecastTable = ({ past = false }: ForecastTableProps) => {
-  const {
-    state: { account }
-  } = useAccountContext();
+  const { account } = useAccountContext();
   const { bankFreeToSpend, monthlyIncome, billsTotal }: AccountState = account;
 
   const columns = useMemo(

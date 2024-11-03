@@ -6,9 +6,7 @@ import { formatAmount, isNegative } from '~/utils';
 import { EditMonthlyBillsPopup } from '../Popups';
 
 export const MonthlyBills = () => {
-  const {
-    state: { account }
-  } = useAccountContext();
+  const { account } = useAccountContext();
   const { bills, billsTotal } = account;
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [selectedBill, setSelectedBill] = useState<Bill>({});

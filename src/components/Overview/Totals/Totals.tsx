@@ -10,9 +10,7 @@ import { PaymentsDueCard } from './PaymentsDueCard';
 import { TotalCard } from './TotalCard';
 
 export const Totals = () => {
-  const {
-    state: { account }
-  } = useAccountContext();
+  const { account } = useAccountContext();
   const { bankFreeToSpend, discIncome, bankPaydayTotal, payDayDiscIncome }: AccountState = account;
 
   return (

@@ -1,10 +1,20 @@
 import { Account } from '~/types';
 import { getAmountTotal, getBills, getPaymentsDue } from '../selectors';
+import { AccountState } from '~/types';
+import { initialState } from '~/state/account-context';
 
-export const getAccountData = (account: Account) => {
-  if (!account) return {};
+export const getAccountData = (account?: Account): AccountState => {
+  if (!account) return initialState.account;
 
-  const { bankBalance, monthlyIncome, bills: unsortedBills, oneOffPayments, notes, id } = account;
+  const {
+    bankBalance,
+    monthlyIncome,
+    bills: unsortedBills,
+    oneOffPayments,
+    notes,
+    id,
+    payday
+  } = account;
 
   const bills = getBills(unsortedBills);
   const billsTotal = getAmountTotal(bills);
@@ -27,6 +37,7 @@ export const getAccountData = (account: Account) => {
     bankPaydayTotal,
     discIncome,
     bankFreeToSpend,
-    payDayDiscIncome
+    payDayDiscIncome,
+    paydayConfig: payday
   };
 };

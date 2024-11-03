@@ -4,19 +4,13 @@ import { ChangeEvent, Fragment, useState } from 'react';
 import { addNoteCache, CREATE_NOTE_MUTATION } from '~/graphql';
 import { Note } from '~/types';
 import { useAccountContext } from '~/state';
-import { useSnackbar } from 'notistack';
 import { useErrorHandler } from '~/hooks';
 
 export const NewNoteCard = () => {
-  const {
-    state: {
-      account: { id },
-      user
-    }
-  } = useAccountContext();
+  const { account, user } = useAccountContext();
+  const { id } = account;
 
   const [noteText, setNoteText] = useState<string>('');
-  const { enqueueSnackbar } = useSnackbar();
   const handleGQLError = useErrorHandler();
   const characterLimit = 200;
 

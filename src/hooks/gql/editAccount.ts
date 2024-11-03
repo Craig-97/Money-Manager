@@ -10,9 +10,7 @@ interface EditAccountInput {
 }
 
 export const useEditAccount = () => {
-  const {
-    state: { account, user }
-  } = useAccountContext();
+  const { account, user } = useAccountContext();
   const { id } = account;
   const { enqueueSnackbar } = useSnackbar();
   const handleGQLError = useErrorHandler();

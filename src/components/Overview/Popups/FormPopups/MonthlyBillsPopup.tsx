@@ -35,11 +35,8 @@ export const MonthlyBillsPopup = ({
   onSave,
   onDelete
 }: MonthlyBillsPopupProps) => {
-  const {
-    state: {
-      account: { id }
-    }
-  } = useAccountContext();
+  const { account } = useAccountContext();
+  const { id } = account;
 
   const [name, setName] = useState<string>(defaultName);
   const [amount, setAmount] = useState<number>(defaultAmount);

@@ -12,17 +12,18 @@ const setAlertClosedStatus = (status: boolean) =>
 export const PaydayAlert = () => {
   const [isOpen, setIsOpen] = useState<boolean>(() => !getAlertClosedStatus());
   const { paydayInfo, loading, error } = useGetPayday();
+  const { payday, isPayday } = paydayInfo;
 
   const handleClose = () => {
     setIsOpen(false);
     setAlertClosedStatus(true);
   };
 
-  if (!isOpen || error) {
+  if (!isOpen || error || (!loading && !payday)) {
     return null;
   }
 
-  if (loading || paydayInfo.payday === null) {
+  if (loading || !payday) {
     return (
       <Skeleton
         width="100%"
@@ -32,8 +33,6 @@ export const PaydayAlert = () => {
       </Skeleton>
     );
   }
-
-  const { payday, isPayday } = paydayInfo;
 
   return (
     <Alert className="alert" severity="info" onClose={handleClose}>

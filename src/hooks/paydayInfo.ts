@@ -1,16 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import { BANK_HOLIDAY_REGION, PAY_FREQUENCY, PAYDAY_TYPE } from '~/constants';
-import { Payday } from '~/types';
+import { client } from '~/graphql';
+import { GET_ACCOUNT_QUERY } from '~/graphql';
+import { useAccountContext } from '~/state';
 import { getPayday } from '~/utils';
-
-const config: Payday = {
-  type: PAYDAY_TYPE.SET_DAY,
-  frequency: PAY_FREQUENCY.MONTHLY,
-  dayOfMonth: 28,
-  weekday: undefined,
-  firstPayDate: undefined,
-  bankHolidayRegion: BANK_HOLIDAY_REGION.SCOTLAND
-};
 
 interface PaydayInfo {
   payday: string | null;
@@ -18,21 +10,31 @@ interface PaydayInfo {
 }
 
 export const useGetPayday = () => {
+  const { account, user } = useAccountContext();
+  const { paydayConfig } = account;
   const [paydayInfo, setPaydayInfo] = useState<PaydayInfo>({ payday: null, isPayday: null });
-  const [loading, setLoading] = useState(true);
+
+  // Check if the user has a payday configuration from the GraphQL cache
+  // to prevent component pop-in when using paydayConfig from context
+  const queryData = client.readQuery({
+    query: GET_ACCOUNT_QUERY,
+    variables: { id: user.id }
+  });
+  const hasPaydayConfig = Boolean(queryData?.account?.payday);
+
+  const [loading, setLoading] = useState<boolean>(hasPaydayConfig);
   const [error, setError] = useState<string | null>(null);
   const hasFetched = useRef(false);
 
   useEffect(() => {
-    if (hasFetched.current) return;
+    if (hasFetched.current || !paydayConfig) return;
 
     const fetchPayday = async () => {
       try {
-        const result = await getPayday(new Date(), config);
+        const result = await getPayday(new Date(), paydayConfig);
         setPaydayInfo({ payday: result.payday, isPayday: result.isPayday });
       } catch (error) {
         setError('Failed to fetch payday information.');
-        console.error('Error fetching payday:', error);
       } finally {
         setLoading(false);
         hasFetched.current = true;
@@ -40,7 +42,7 @@ export const useGetPayday = () => {
     };
 
     fetchPayday();
-  }, []);
+  }, [paydayConfig]);
 
   return { paydayInfo, loading, error };
 };

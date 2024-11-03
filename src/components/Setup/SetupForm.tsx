@@ -58,9 +58,7 @@ const renderStepContent = (step: number, formik: FormikProps<SetupFormValues>) =
 export const SetupForm = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const {
-    state: { user }
-  } = useAccountContext();
+  const { user } = useAccountContext();
   const [activeStep, setActiveStep] = useState(0);
   const logout = useLogout();
   const { createAccount, loading } = useCreateAccount();

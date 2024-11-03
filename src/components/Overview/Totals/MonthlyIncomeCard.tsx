@@ -7,9 +7,7 @@ import { TotalCard } from './TotalCard';
 import { useEditAccount } from '~/hooks';
 
 export const MonthlyIncomeCard = () => {
-  const {
-    state: { account }
-  } = useAccountContext();
+  const { account } = useAccountContext();
   const { monthlyIncome } = account;
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
