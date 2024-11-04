@@ -1,11 +1,12 @@
+import { SyntheticEvent } from 'react';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import HomeIcon from '@mui/icons-material/Home';
 import Logout from '@mui/icons-material/Logout';
 import NoteRounded from '@mui/icons-material/NoteRounded';
 import UpdateIcon from '@mui/icons-material/Update';
 import BottomNavigation from '@mui/material/BottomNavigation';
 import BottomNavigationAction from '@mui/material/BottomNavigationAction';
-import { SyntheticEvent, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { useLogout } from '~/hooks';
 
 export const BottomNav = () => {

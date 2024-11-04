@@ -1,12 +1,12 @@
-import { Box } from '@mui/material';
 import { Fragment } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Sidebar } from '../Sidebar';
+import { Box } from '@mui/material';
 import { BottomNav } from '../BottomNav';
+import { Sidebar } from '../Sidebar';
 
 interface StandardPageProps {
   children?: React.ReactNode;
-  bottomNav?: Boolean;
+  bottomNav?: boolean;
 }
 
 const PUBLIC_ROUTES = ['/login', '/setup', '/session-expired'];

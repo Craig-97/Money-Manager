@@ -1,3 +1,8 @@
+import { ChangeEvent } from 'react';
+import { useEffect } from 'react';
+import { Column, TableInstance, TableState, Row, Cell } from 'react-table';
+import { usePagination, useRowSelect, useSortBy, useTable } from 'react-table';
+import { useMediaQuery, useTheme } from '@mui/material';
 import Paper from '@mui/material/Paper';
 import MaterialTable from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -7,20 +12,7 @@ import TableFooter from '@mui/material/TableFooter';
 import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
-import { ChangeEvent, useEffect } from 'react';
-import {
-  Column,
-  usePagination,
-  useRowSelect,
-  useSortBy,
-  useTable,
-  TableInstance,
-  TableState,
-  Row,
-  Cell
-} from 'react-table';
 import { TablePaginationActions } from './TablePaginationActions';
-import { useMediaQuery, useTheme } from '@mui/material';
 
 interface TableProps<T extends object> {
   columns: Array<Column<T>>;

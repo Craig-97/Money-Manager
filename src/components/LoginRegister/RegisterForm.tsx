@@ -1,14 +1,15 @@
-import { ApolloError, useMutation } from '@apollo/client';
-import LoadingButton from '@mui/lab/LoadingButton';
-import TextField from '@mui/material/TextField';
 import { useFormik } from 'formik';
 import { useNavigate } from 'react-router-dom';
 import * as Yup from 'yup';
-import { RegisterData } from '~/types';
-import { REGISTER_AND_LOGIN_MUTATION } from '~/graphql';
-import { useAccountContext } from '~/state';
+import { ApolloError } from '@apollo/client';
+import { useMutation } from '@apollo/client';
+import LoadingButton from '@mui/lab/LoadingButton';
+import TextField from '@mui/material/TextField';
 import { AutoFocusTextField } from './AutoFocusTextField';
 import { ERRORS, EVENTS } from '~/constants';
+import { REGISTER_AND_LOGIN_MUTATION } from '~/graphql';
+import { useAccountContext } from '~/state';
+import { RegisterData } from '~/types';
 import { getGQLErrorCode } from '~/utils';
 
 export const RegisterForm = () => {

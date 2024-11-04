@@ -1,8 +1,8 @@
-import { useMutation } from '@apollo/client';
 import { useSnackbar } from 'notistack';
+import { useMutation } from '@apollo/client';
 import { EDIT_ACCOUNT_MUTATION, editAccountCache } from '~/graphql';
-import { useAccountContext } from '~/state';
 import { useErrorHandler } from '~/hooks';
+import { useAccountContext } from '~/state';
 
 interface EditAccountInput {
   bankBalance?: number;

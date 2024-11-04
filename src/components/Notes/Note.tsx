@@ -1,13 +1,13 @@
+import { Fragment, useState } from 'react';
 import { useMutation } from '@apollo/client';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import { Card, CardContent, CircularProgress, IconButton, Typography } from '@mui/material';
-import { Fragment, useState } from 'react';
+import { NoteEditPopup } from './NoteEditPopup';
 import { DELETE_NOTE_MUTATION, EDIT_NOTE_MUTATION, deleteNoteCache } from '~/graphql';
+import { useErrorHandler } from '~/hooks';
 import { useAccountContext } from '~/state';
 import { getDateFromTimestamp } from '~/utils';
-import { NoteEditPopup } from './NoteEditPopup';
-import { useErrorHandler } from '~/hooks';
 
 interface NoteProps {
   id?: string;

@@ -1,12 +1,12 @@
-import CloseIcon from '@mui/icons-material/Close';
-import { ApolloProvider } from '@apollo/client/react';
-import { ThemeProvider } from '@mui/material/styles';
 import { closeSnackbar, SnackbarProvider } from 'notistack';
 import { BrowserRouter as Router } from 'react-router-dom';
-import { AccountProvider } from './state/account-context';
+import { ApolloProvider } from '@apollo/client/react';
+import CloseIcon from '@mui/icons-material/Close';
 import { IconButton } from '@mui/material';
+import { ThemeProvider } from '@mui/material/styles';
 import { client } from './graphql';
 import { AppRoutes } from './routes';
+import { AccountProvider } from './state/account-context';
 import { theme } from './utils';
 import './scss/app.scss';
 

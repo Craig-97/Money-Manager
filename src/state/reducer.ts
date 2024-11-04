@@ -1,6 +1,6 @@
-import { AccountContextState, Actions } from '~/types';
 import { initialState } from './account-context';
 import { EVENTS } from '~/constants';
+import { AccountContextState, Actions } from '~/types';
 
 export const reducer = (state: AccountContextState, action: Actions): AccountContextState => {
   switch (action.type) {

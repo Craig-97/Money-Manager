@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Dashboard, Logout, MenuOpen, NoteRounded, Settings, Update } from '@mui/icons-material';
 import {
   Avatar,
@@ -16,8 +18,6 @@ import {
   useMediaQuery,
   useTheme
 } from '@mui/material';
-import { useEffect, useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useLogout } from '~/hooks';
 import { useAccountContext } from '~/state';
 

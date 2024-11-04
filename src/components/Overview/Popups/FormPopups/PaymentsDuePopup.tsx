@@ -1,9 +1,8 @@
+import { ChangeEvent, DispatchWithoutAction, KeyboardEvent } from 'react';
+import { Fragment, useState } from 'react';
 import DeleteIcon from '@mui/icons-material/Delete';
 import PaidIcon from '@mui/icons-material/Paid';
 import { Box, Tooltip } from '@mui/material';
-import { ChangeEvent, DispatchWithoutAction, Fragment, KeyboardEvent, useState } from 'react';
-import { useAccountContext } from '~/state/account-context';
-import { OneOffPayment } from '~/types';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -13,6 +12,8 @@ import DialogTitle from '@mui/material/DialogTitle';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import TextField from '@mui/material/TextField';
+import { useAccountContext } from '~/state/account-context';
+import { OneOffPayment } from '~/types';
 
 interface PaymentsDuePopupProps {
   title: string;
@@ -44,7 +45,7 @@ export const PaymentsDuePopup = ({
   };
 
   const handleButtonClicked = (paid: boolean) => {
-    onDelete && onDelete(paid);
+    if (onDelete) onDelete(paid);
     close();
   };
 
@@ -71,6 +72,7 @@ export const PaymentsDuePopup = ({
 
   return (
     <Dialog
+      disableRestoreFocus
       open={isOpen}
       onClose={handleClose}
       aria-labelledby="form-dialog-title"

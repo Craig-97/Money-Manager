@@ -1,3 +1,5 @@
+import { ChangeEvent, DispatchWithoutAction } from 'react';
+import { useState } from 'react';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
@@ -5,7 +7,6 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import IconButton from '@mui/material/IconButton';
-import { ChangeEvent, DispatchWithoutAction, useState } from 'react';
 
 interface NoteEditPopupProps {
   isOpen: boolean;
@@ -26,13 +27,13 @@ export const NoteEditPopup = ({
   const characterLimit = 200;
 
   const handleSaveClicked = () => {
-    body && onSave(body);
+    if (body) onSave(body);
     // OG close function to avoid body being reset
     close();
   };
 
   const handleDeleteClicked = () => {
-    onDelete && onDelete();
+    if (onDelete) onDelete();
     handleClose();
   };
 
@@ -49,6 +50,7 @@ export const NoteEditPopup = ({
 
   return (
     <Dialog
+      disableRestoreFocus
       open={isOpen}
       onClose={handleClose}
       aria-labelledby="form-dialog-title"

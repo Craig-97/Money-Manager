@@ -1,7 +1,7 @@
+import { FormikErrors, FormikProps } from 'formik';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { Box, TextField, IconButton, Button, Typography } from '@mui/material';
 import InputAdornment from '@mui/material/InputAdornment';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { FormikErrors, FormikProps } from 'formik';
 import { OneOffPayment, SetupFormValues } from '~/types';
 import { handleAddArrayItem, handleRemoveArrayItem } from '~/utils';
 

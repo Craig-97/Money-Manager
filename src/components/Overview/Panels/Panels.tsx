@@ -1,13 +1,13 @@
+import { useRef, useState } from 'react';
+import Slider from 'react-slick';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import AppBar from '@mui/material/AppBar';
 import Card from '@mui/material/Card';
 import Tab from '@mui/material/Tab';
-import { useRef, useState } from 'react';
-import Slider from 'react-slick';
-import { TabPanel, Tabs } from '~/components';
 import { MonthlyBills } from './MonthlyBills';
 import { PaymentsDue } from './PaymentsDue';
+import { TabPanel, Tabs } from '~/components';
 
 export const Panels = () => {
   const [value, setValue] = useState<number>(0);

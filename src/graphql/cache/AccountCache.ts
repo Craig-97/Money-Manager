@@ -1,6 +1,6 @@
 import { ApolloCache, InMemoryCache } from '@apollo/client';
-import { Account, AccountData, User } from '~/types';
 import { GET_ACCOUNT_QUERY } from '../queries';
+import { Account, AccountData, User } from '~/types';
 
 /* Returns account query cached data */
 export const getAccountCache = (

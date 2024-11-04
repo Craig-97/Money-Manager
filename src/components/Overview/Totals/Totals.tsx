@@ -1,13 +1,13 @@
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import LocalAtmIcon from '@mui/icons-material/LocalAtm';
 import PaymentIcon from '@mui/icons-material/Payment';
-import { useAccountContext } from '~/state/account-context';
-import { AccountState } from '~/types';
 import { BankBalanceCard } from './BankBalanceCard';
 import { MonthlyBillsCard } from './MonthlyBillsCard';
 import { MonthlyIncomeCard } from './MonthlyIncomeCard';
 import { PaymentsDueCard } from './PaymentsDueCard';
 import { TotalCard } from './TotalCard';
+import { useAccountContext } from '~/state/account-context';
+import { AccountState } from '~/types';
 
 export const Totals = () => {
   const { account } = useAccountContext();

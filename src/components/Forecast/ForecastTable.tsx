@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
+import { Box } from '@mui/material';
+import { Table } from '../Table';
 import { useAccountContext } from '~/state/account-context';
 import { AccountState } from '~/types';
 import { getForecastDate, getNextNumberOfMonths } from '~/utils';
-import { Table } from '../Table';
-import { Box } from '@mui/material';
 
 interface ForecastTableProps {
   past?: boolean;

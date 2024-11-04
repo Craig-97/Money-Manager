@@ -1,6 +1,7 @@
-import { Dispatch, ReactNode, createContext, useContext, useReducer } from 'react';
-import { AccountContextState, Actions } from '~/types';
+import { Dispatch, ReactNode } from 'react';
+import { createContext, useContext, useReducer } from 'react';
 import { reducer } from './reducer';
+import { AccountContextState, Actions } from '~/types';
 
 export const initialState: AccountContextState = {
   account: {

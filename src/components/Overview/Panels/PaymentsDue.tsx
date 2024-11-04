@@ -1,10 +1,10 @@
-import { Divider } from '@mui/material';
 import { Fragment, useState } from 'react';
+import { Divider } from '@mui/material';
+import { EditMonthlyBillsPopup, EditPaymentsDuePopup } from '../Popups';
+import { PAYMENT_TYPES } from '~/constants';
 import { useAccountContext } from '~/state';
 import { Bill, OneOffPayment } from '~/types';
 import { formatAmount, isNegative } from '~/utils';
-import { EditMonthlyBillsPopup, EditPaymentsDuePopup } from '../Popups';
-import { PAYMENT_TYPES } from '~/constants';
 
 interface Modal {
   PAYMENT_DUE: boolean;
@@ -20,9 +20,11 @@ export const PaymentsDue = () => {
   const handleClickOpen = (payment: Bill | OneOffPayment) => {
     setSelectedPayment(payment);
 
-    payment?.__typename === PAYMENT_TYPES.BILL
-      ? setIsOpen({ ...isOpen, BILL: true })
-      : setIsOpen({ ...isOpen, PAYMENT_DUE: true });
+    setIsOpen({
+      ...isOpen,
+      BILL: payment?.__typename === PAYMENT_TYPES.BILL,
+      PAYMENT_DUE: payment?.__typename !== PAYMENT_TYPES.BILL
+    });
   };
 
   const closePopup = () => {

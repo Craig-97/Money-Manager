@@ -1,5 +1,5 @@
-import { Box, Button, Typography } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { Box, Button, Typography } from '@mui/material';
 
 export const Error = () => {
   const navigate = useNavigate();

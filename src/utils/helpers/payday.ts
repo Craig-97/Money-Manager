@@ -1,6 +1,6 @@
 import { PAY_FREQUENCY, PAYDAY_TYPE_OPTIONS, WEEKDAY } from '~/constants';
 import { BANK_HOLIDAY_REGION } from '~/constants/bankHolidays';
-import type { PayFrequency } from '~/types';
+import { PayFrequency } from '~/types';
 
 const formatLabel = (value: string) => {
   // Handles special cases first

@@ -1,14 +1,14 @@
+import { Fragment, useState } from 'react';
+import { useSnackbar } from 'notistack';
 import { useMutation } from '@apollo/client';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
-import { useSnackbar } from 'notistack';
-import { Fragment, useState } from 'react';
-import { CREATE_ONE_OFF_PAYMENT_MUTATION, addPaymentCache } from '~/graphql';
-import { useAccountContext } from '~/state/account-context';
-import { OneOffPayment } from '~/types';
 import { PaymentsDuePopup } from '../Popups';
 import { LoadingCard } from './LoadingCard';
 import { TotalCard } from './TotalCard';
+import { CREATE_ONE_OFF_PAYMENT_MUTATION, addPaymentCache } from '~/graphql';
 import { useErrorHandler } from '~/hooks';
+import { useAccountContext } from '~/state/account-context';
+import { OneOffPayment } from '~/types';
 
 export const PaymentsDueCard = () => {
   const { account, user } = useAccountContext();

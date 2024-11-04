@@ -33,7 +33,7 @@ export const useGetPayday = () => {
       try {
         const result = await getPayday(new Date(), paydayConfig);
         setPaydayInfo({ payday: result.payday, isPayday: result.isPayday });
-      } catch (error) {
+      } catch (_error) {
         setError('Failed to fetch payday information.');
       } finally {
         setLoading(false);

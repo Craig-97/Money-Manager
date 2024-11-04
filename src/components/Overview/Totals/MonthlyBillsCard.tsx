@@ -1,14 +1,14 @@
+import { Fragment, useState } from 'react';
+import { useSnackbar } from 'notistack';
 import { useMutation } from '@apollo/client';
 import ReceiptIcon from '@mui/icons-material/Receipt';
-import { useSnackbar } from 'notistack';
-import { Fragment, useState } from 'react';
-import { CREATE_BILL_MUTATION, addBillCache } from '~/graphql';
-import { useAccountContext } from '~/state/account-context';
-import { Bill } from '~/types';
 import { MonthlyBillsPopup } from '../Popups';
 import { LoadingCard } from './LoadingCard';
 import { TotalCard } from './TotalCard';
+import { CREATE_BILL_MUTATION, addBillCache } from '~/graphql';
 import { useErrorHandler } from '~/hooks';
+import { useAccountContext } from '~/state/account-context';
+import { Bill } from '~/types';
 
 export const MonthlyBillsCard = () => {
   const { account, user } = useAccountContext();

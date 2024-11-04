@@ -1,5 +1,5 @@
-import { Alert, Skeleton } from '@mui/material';
 import { useState } from 'react';
+import { Alert, Skeleton } from '@mui/material';
 import { useGetPayday } from '~/hooks';
 import { formatFullDate } from '~/utils';
 

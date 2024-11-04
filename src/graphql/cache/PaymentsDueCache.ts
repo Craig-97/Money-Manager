@@ -1,7 +1,7 @@
 import { ApolloCache, InMemoryCache } from '@apollo/client';
+import { getAccountCache, updateAccountCache } from './AccountCache';
 import { OneOffPayment, User } from '~/types';
 import { cheapestAscendingSort } from '~/utils';
-import { getAccountCache, updateAccountCache } from './AccountCache';
 
 /* Adds new one off payment to current payments due array */
 export const addPaymentCache = (

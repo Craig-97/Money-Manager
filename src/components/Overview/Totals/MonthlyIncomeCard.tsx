@@ -1,10 +1,10 @@
-import LocalAtmIcon from '@mui/icons-material/LocalAtm';
 import { Fragment, useState } from 'react';
-import { useAccountContext } from '~/state/account-context';
+import LocalAtmIcon from '@mui/icons-material/LocalAtm';
 import { EnterValuePopup } from '../Popups';
 import { LoadingCard } from './LoadingCard';
 import { TotalCard } from './TotalCard';
 import { useEditAccount } from '~/hooks';
+import { useAccountContext } from '~/state/account-context';
 
 export const MonthlyIncomeCard = () => {
   const { account } = useAccountContext();

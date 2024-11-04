@@ -1,6 +1,6 @@
 import { ApolloCache, InMemoryCache } from '@apollo/client';
-import { Note, User } from '~/types';
 import { getAccountCache, updateAccountCache } from './AccountCache';
+import { Note, User } from '~/types';
 
 /* Adds new note to current note array */
 export const addNoteCache = (cache: ApolloCache<InMemoryCache>, note: Note, user: User) => {

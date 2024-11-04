@@ -1,6 +1,6 @@
-import { ApolloClient } from '@apollo/client';
 import { Dispatch } from 'react';
 import { NavigateFunction } from 'react-router-dom';
+import { ApolloClient } from '@apollo/client';
 import { EVENTS } from '~/constants';
 import { Actions } from '~/types';
 

@@ -1,10 +1,10 @@
-import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import { Fragment, useState } from 'react';
-import { useAccountContext } from '~/state/account-context';
+import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import { EnterValuePopup } from '../Popups';
 import { LoadingCard } from './LoadingCard';
 import { TotalCard } from './TotalCard';
 import { useEditAccount } from '~/hooks';
+import { useAccountContext } from '~/state/account-context';
 
 export const BankBalanceCard = () => {
   const { account } = useAccountContext();

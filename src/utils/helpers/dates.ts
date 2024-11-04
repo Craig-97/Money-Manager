@@ -1,3 +1,4 @@
+import { getBankHolidays, isBankHoliday } from './bankHolidays';
 import {
   PAY_FREQUENCY,
   PAYDAY_MONTH_FREQUENCIES,
@@ -6,7 +7,6 @@ import {
   WEEKDAY
 } from '~/constants';
 import { BankHoliday, Payday, PayFrequency, Weekday } from '~/types';
-import { getBankHolidays, isBankHoliday } from './bankHolidays';
 
 const UK_TIMEZONE = 'Europe/London';
 

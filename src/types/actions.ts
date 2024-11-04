@@ -1,6 +1,6 @@
-import { EVENTS } from '~/constants';
 import { AccountState } from './account';
 import { User } from './user';
+import { EVENTS } from '~/constants';
 
 export type GetAccountDetailsAction = {
   type: typeof EVENTS.GET_ACCOUNT_DETAILS;

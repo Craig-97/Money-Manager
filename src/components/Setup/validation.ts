@@ -2,7 +2,7 @@ import * as Yup from 'yup';
 import { PAY_FREQUENCY, PAYDAY_TYPE, WEEKDAY } from '~/constants';
 import { PayFrequency } from '~/types';
 
-const uniqueNameValidator = (items: any[], name: string, path: string) => {
+const uniqueNameValidator = (items: { name: string }[], name: string, path: string) => {
   if (!name) return true; // Empty names are handled by required validation
 
   // Extract the current index from the path (e.g., "bills[0].name" -> 0)

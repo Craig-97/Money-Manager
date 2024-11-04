@@ -1,6 +1,6 @@
-import { useQuery } from '@apollo/client';
-import isEqual from 'lodash/isEqual';
 import { useEffect } from 'react';
+import isEqual from 'lodash.isequal';
+import { useQuery } from '@apollo/client';
 import { ERRORS, EVENTS } from '~/constants';
 import { FIND_USER_QUERY, GET_ACCOUNT_QUERY } from '~/graphql';
 import { useErrorHandler } from '~/hooks';
@@ -41,7 +41,6 @@ export const useAccountData = () => {
     if (!isEqual(formattedData, account)) {
       dispatch({ type: EVENTS.GET_ACCOUNT_DETAILS, data: formattedData });
     }
-    // eslint-disable-next-line
   }, [data, dispatch]);
 
   // Used to determine If user does not have a linked account

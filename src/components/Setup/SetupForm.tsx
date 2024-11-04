@@ -1,3 +1,7 @@
+import { MouseEvent, useState } from 'react';
+import { FormikProps, FormikErrors } from 'formik';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import {
@@ -11,18 +15,15 @@ import {
   useMediaQuery,
   useTheme
 } from '@mui/material';
-import { FormikProps, useFormik } from 'formik';
-import { useState } from 'react';
 import { BasicInfoStep, BillsStep, PaydayStep, PaymentsStep, validationSchema } from '~/components';
 import { BANK_HOLIDAY_REGION, PAY_FREQUENCY, PAYDAY_TYPE } from '~/constants';
 import { useCreateAccount, useLogout } from '~/hooks';
 import { useAccountContext } from '~/state';
 import { SetupFormValues } from '~/types';
-import * as Yup from 'yup';
 
 const steps = ['Basic Info', 'Monthly Bills', 'Payments Due', 'Payday Setup'];
 
-const getStepErrors = (errors: any, step: number) => {
+const getStepErrors = (errors: FormikErrors<SetupFormValues>, step: number) => {
   switch (step) {
     case 0:
       return {
@@ -117,7 +118,7 @@ export const SetupForm = () => {
     }
   });
 
-  const handleNext = (e: React.MouseEvent) => {
+  const handleNext = (e: MouseEvent) => {
     e.preventDefault();
     formik.validateForm().then(errors => {
       const currentStepErrors = getStepErrors(errors, activeStep);
@@ -127,7 +128,7 @@ export const SetupForm = () => {
     });
   };
 
-  const handleBack = (e: React.MouseEvent) => {
+  const handleBack = (e: MouseEvent) => {
     e.preventDefault();
     setActiveStep(prevStep => prevStep - 1);
   };

@@ -1,7 +1,6 @@
+import { ChangeEvent, DispatchWithoutAction, KeyboardEvent } from 'react';
+import { useState } from 'react';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { ChangeEvent, DispatchWithoutAction, KeyboardEvent, useState } from 'react';
-import { useAccountContext } from '~/state/account-context';
-import { Bill } from '~/types';
 import { Tooltip } from '@mui/material';
 import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
@@ -13,6 +12,8 @@ import DialogTitle from '@mui/material/DialogTitle';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import TextField from '@mui/material/TextField';
+import { useAccountContext } from '~/state/account-context';
+import { Bill } from '~/types';
 
 interface MonthlyBillsPopupProps {
   title: string;
@@ -48,7 +49,7 @@ export const MonthlyBillsPopup = ({
   };
 
   const handleDeleteClicked = () => {
-    onDelete && onDelete();
+    if (onDelete) onDelete();
     close();
   };
 
@@ -76,6 +77,7 @@ export const MonthlyBillsPopup = ({
 
   return (
     <Dialog
+      disableRestoreFocus
       open={isOpen}
       onClose={handleClose}
       aria-labelledby="form-dialog-title"

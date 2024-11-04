@@ -1,10 +1,11 @@
+import { ChangeEvent } from 'react';
+import { Fragment, useState } from 'react';
 import { useMutation } from '@apollo/client';
 import { Button, Card, CardContent, CircularProgress, Typography } from '@mui/material';
-import { ChangeEvent, Fragment, useState } from 'react';
 import { addNoteCache, CREATE_NOTE_MUTATION } from '~/graphql';
-import { Note } from '~/types';
-import { useAccountContext } from '~/state';
 import { useErrorHandler } from '~/hooks';
+import { useAccountContext } from '~/state';
+import { Note } from '~/types';
 
 export const NewNoteCard = () => {
   const { account, user } = useAccountContext();

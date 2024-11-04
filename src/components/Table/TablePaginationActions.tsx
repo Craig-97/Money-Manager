@@ -1,10 +1,10 @@
-import LastPageIcon from '@mui/icons-material/LastPage';
+import { MouseEvent } from 'react';
 import FirstPageIcon from '@mui/icons-material/FirstPage';
-import IconButton from '@mui/material/IconButton';
 import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
+import LastPageIcon from '@mui/icons-material/LastPage';
+import IconButton from '@mui/material/IconButton';
 import { useTheme } from '@mui/material/styles';
-import { MouseEvent } from 'react';
 
 interface TablePaginationActionsProps {
   count: number;

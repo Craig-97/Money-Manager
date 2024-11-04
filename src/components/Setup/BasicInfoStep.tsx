@@ -1,5 +1,5 @@
-import { Box, InputAdornment, TextField, Typography } from '@mui/material';
 import { FormikProps } from 'formik';
+import { Box, InputAdornment, TextField, Typography } from '@mui/material';
 import { SetupFormValues } from '~/types';
 
 interface BasicInfoStepProps {

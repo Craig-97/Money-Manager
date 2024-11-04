@@ -1,5 +1,6 @@
-import TextField, { TextFieldProps } from '@mui/material/TextField';
 import { useEffect, useRef } from 'react';
+import { TextFieldProps } from '@mui/material/TextField';
+import TextField from '@mui/material/TextField';
 
 /* Created to avoid autoFocus animation issues with react-slick and Material UI Tabs */
 export const AutoFocusTextField = (props: TextFieldProps) => {

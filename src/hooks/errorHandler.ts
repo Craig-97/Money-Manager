@@ -1,9 +1,9 @@
-import { ApolloError } from '@apollo/client';
 import { useSnackbar } from 'notistack';
 import { useNavigate } from 'react-router-dom';
-import { getGQLErrorCode, getGQLTokenExpired } from '~/utils';
+import { ApolloError } from '@apollo/client';
 import { useLogout } from './logout';
 import { ERRORS } from '~/constants';
+import { getGQLErrorCode, getGQLTokenExpired } from '~/utils';
 
 export const useErrorHandler = () => {
   const { enqueueSnackbar } = useSnackbar();

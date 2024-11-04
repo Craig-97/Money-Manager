@@ -1,5 +1,5 @@
-import { PAY_FREQUENCY, PAYDAY_TYPE, WEEKDAY } from '~/constants';
 import { BankHolidayRegion } from './bankHolidays';
+import { PAY_FREQUENCY, PAYDAY_TYPE, WEEKDAY } from '~/constants';
 
 export type PayFrequency = (typeof PAY_FREQUENCY)[keyof typeof PAY_FREQUENCY];
 export type PaydayType = (typeof PAYDAY_TYPE)[keyof typeof PAYDAY_TYPE];

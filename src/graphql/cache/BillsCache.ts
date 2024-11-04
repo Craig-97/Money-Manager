@@ -1,7 +1,7 @@
 import { ApolloCache, InMemoryCache } from '@apollo/client';
+import { getAccountCache, updateAccountCache } from './AccountCache';
 import { Bill, User } from '~/types';
 import { cheapestAscendingSort } from '~/utils';
-import { getAccountCache, updateAccountCache } from './AccountCache';
 
 /* Adds new bill to current bill array */
 export const addBillCache = (cache: ApolloCache<InMemoryCache>, bill: Bill, user: User) => {

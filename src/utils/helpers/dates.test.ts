@@ -41,10 +41,10 @@ describe('getPayday', () => {
     firstPayDate: '2024-06-28'
   };
 
-  const baseMonthlyConfig: Payday = {
-    frequency: PAY_FREQUENCY.MONTHLY,
-    type: PAYDAY_TYPE.LAST_DAY
-  };
+  // const baseMonthlyConfig: Payday = {
+  //   frequency: PAY_FREQUENCY.MONTHLY,
+  //   type: PAYDAY_TYPE.LAST_DAY
+  // };
 
   // Test matrix for WEEKLY payments
   describe('Weekly Payments', () => {
