@@ -34,7 +34,14 @@ export const Bills = () => {
   return (
     <StandardPage>
       <Box sx={{ maxWidth: '1196px', m: '0 auto', p: 3 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            mb: 3,
+            width: { mobile: 'calc(100svw - 48px)', sm: 'auto' }
+          }}>
           <Typography variant="h4" fontWeight={700}>
             Bills
           </Typography>
@@ -49,7 +56,13 @@ export const Bills = () => {
 
         <BillsStats bills={account.bills} />
 
-        <Card sx={{ mt: 3, p: 2 }}>
+        <Card
+          sx={{
+            mt: 3,
+            p: 2,
+            width: { mobile: 'calc(100svw - 24px)', sm: 'auto' },
+            mb: { mobile: 10 }
+          }}>
           <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
             <Tabs value={view} onChange={handleViewChange}>
               <Tab label="Upcoming" value="upcoming" />
