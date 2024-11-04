@@ -35,10 +35,8 @@ const COLLAPSED_DRAWER_WIDTH = 82;
 
 const NAV_ITEMS = [
   { path: '/', label: 'Dashboard', icon: <Dashboard /> },
-  { path: '/notes', label: 'Notes', icon: <NoteRounded /> },
   { path: '/forecast', label: 'Forecast', icon: <Update /> },
-  { path: '/bills', label: 'Bills', icon: <Receipt /> },
-  { path: '/payments', label: 'Payments Due', icon: <AccountBalanceWallet /> }
+  { path: '/notes', label: 'Notes', icon: <NoteRounded /> }
 ];
 
 export const Sidebar = () => {
