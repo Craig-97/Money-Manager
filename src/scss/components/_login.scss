@@ -12,8 +12,8 @@
     min-width: $login-register-width;
 
     @include respond(mobile) {
-      max-width: $login-register-mobile-width;
       min-width: $login-register-mobile-width;
+      width: calc(100svw - 48px);
     }
 
     //overwrites inline react-slick height styling

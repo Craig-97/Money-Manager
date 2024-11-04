@@ -1,7 +1,0 @@
-@use '../abstracts' as *;
-
-.login {
-  @include flexbox($direction: column, $justifyContent: center, $alignItems: center);
-  max-width: 1250px;
-  height: 100svh;
-}
