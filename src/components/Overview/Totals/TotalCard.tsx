@@ -1,4 +1,3 @@
-import { Box } from '@mui/material';
 import Card from '@mui/material/Card';
 import CardActionArea from '@mui/material/CardActionArea';
 import CardContent from '@mui/material/CardContent';
@@ -23,26 +22,24 @@ export const TotalCard = ({
   onClick,
   disabled
 }: TotalCardProps) => (
-  <Box
+  <Card
     className={`${classBaseName}-total-card`}
     sx={{ width: { mobile: '100%', sm: '275px' }, flexGrow: 1 }}>
-    <Card>
-      <CardActionArea onClick={onClick} disabled={disabled}>
-        <CardContent>
-          <div className="total-card__text">
-            <Typography color="textSecondary" gutterBottom>
-              {title}
-            </Typography>
-            <Typography
-              className={`${isNegative(amount) ? 'negative' : 'positive'}`}
-              variant="h4"
-              component="h4">
-              {!!isNegative(amount) && `- `}£{positiveNumber(amount)}
-            </Typography>
-          </div>
-          {icon && icon}
-        </CardContent>
-      </CardActionArea>
-    </Card>
-  </Box>
+    <CardActionArea onClick={onClick} disabled={disabled}>
+      <CardContent>
+        <div className="total-card__text">
+          <Typography color="textSecondary" gutterBottom>
+            {title}
+          </Typography>
+          <Typography
+            className={`${isNegative(amount) ? 'negative' : 'positive'}`}
+            variant="h4"
+            component="h4">
+            {!!isNegative(amount) && `- `}£{positiveNumber(amount)}
+          </Typography>
+        </div>
+        {icon && icon}
+      </CardContent>
+    </CardActionArea>
+  </Card>
 );

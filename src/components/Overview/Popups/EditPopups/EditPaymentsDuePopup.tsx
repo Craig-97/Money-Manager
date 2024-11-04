@@ -1,5 +1,6 @@
 import { useMutation } from '@apollo/client';
 import CircularProgress from '@mui/material/CircularProgress';
+import { Box } from '@mui/material';
 import { useSnackbar } from 'notistack';
 import { DispatchWithoutAction } from 'react';
 import {
@@ -79,9 +80,9 @@ export const EditPaymentsDuePopup = ({
 
   if (editAccLoading || editPayLoading || delPayLoading) {
     return (
-      <div className="loading">
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <CircularProgress />
-      </div>
+      </Box>
     );
   }
 
