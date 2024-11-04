@@ -1,13 +1,4 @@
-import {
-  AccountBalanceWallet,
-  Dashboard,
-  Logout,
-  MenuOpen,
-  NoteRounded,
-  Receipt,
-  Settings,
-  Update
-} from '@mui/icons-material';
+import { Dashboard, Logout, MenuOpen, NoteRounded, Settings, Update } from '@mui/icons-material';
 import {
   Avatar,
   Box,
@@ -25,7 +16,7 @@ import {
   useMediaQuery,
   useTheme
 } from '@mui/material';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useLogout } from '~/hooks';
 import { useAccountContext } from '~/state';
@@ -63,8 +54,6 @@ export const Sidebar = () => {
   const handleLogout = () => {
     logout();
   };
-
-  // TODO: Sidebar open state doesn't persist on nav item click
 
   const drawer = (
     <Box

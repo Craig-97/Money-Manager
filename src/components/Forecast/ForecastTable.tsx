@@ -36,7 +36,7 @@ export const ForecastTable = ({ past = false }: ForecastTableProps) => {
 
   const data = useMemo(() => {
     let balance = bankFreeToSpend || 0;
-    const monthlySpend = billsTotal || 1250; // TODO - Configurable via user input
+    const monthlySpend = billsTotal || 1250;
     const moneyLeftOver = monthlyIncome - monthlySpend;
     let newData: Array<object> = [];
 

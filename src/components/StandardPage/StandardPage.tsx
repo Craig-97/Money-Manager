@@ -14,7 +14,6 @@ const PUBLIC_ROUTES = ['/login', '/setup', '/session-expired'];
 export const StandardPage = ({ children, bottomNav = true }: StandardPageProps) => {
   const { pathname } = useLocation();
   const showSidebar = !PUBLIC_ROUTES.includes(pathname);
-  //TODO - Sidebar open state doesn't persist on nav item click - should be handled here so it does
 
   return (
     <Fragment>

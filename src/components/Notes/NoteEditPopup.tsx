@@ -63,7 +63,6 @@ export const NoteEditPopup = ({
           </IconButton>
         )}
       </DialogTitle>
-      {/* TODO: Fix font family for textarea */}
       <DialogContent>
         <textarea
           rows={5}
