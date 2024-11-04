@@ -16,6 +16,7 @@ const App = () => {
       <ThemeProvider theme={theme}>
         <AccountProvider>
           <SnackbarProvider
+            classes={{ containerRoot: 'notistack-container' }}
             anchorOrigin={{ horizontal: 'center', vertical: 'top' }}
             autoHideDuration={2500}
             action={key => (
