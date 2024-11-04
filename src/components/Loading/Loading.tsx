@@ -1,5 +1,6 @@
 import CircularProgress from '@mui/material/CircularProgress';
 
+//TODO - Fix typography so correct font is used
 export const Loading = () => (
   <div className="app-loading">
     <CircularProgress />

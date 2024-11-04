@@ -2,6 +2,7 @@ import { Box } from '@mui/material';
 import Card from '@mui/material/Card';
 import { LoginPanels, StandardPage } from '~/components';
 
+//TODO - Fix typography so correct font is used for heading
 export const Login = () => (
   <StandardPage bottomNav={false}>
     <Box sx={{ maxWidth: '1196px', m: '0 auto' }}>

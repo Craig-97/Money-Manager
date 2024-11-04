@@ -1,6 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { Loading } from '~/components';
-import { Forecast, Homepage, Login, Notes, SessionExpired, Setup, Error } from '~/pages';
+import { Forecast, Homepage, Login, Notes, SessionExpired, Setup, Error, Bills } from '~/pages';
 import { useAccountData } from '~/hooks';
 import { AccountRoutes } from './AccountRoutes';
 import { ProtectedRoutes } from './ProtectedRoutes';
@@ -23,6 +23,7 @@ export const AppRoutes = () => {
           <Route path="/" element={<Homepage />} />
           <Route path="/forecast" element={<Forecast />} />
           <Route path="/notes" element={<Notes />} />
+          <Route path="/bills" element={<Bills />} />
         </Route>
         <Route path="/setup" element={accountExists ? <Navigate replace to="/" /> : <Setup />} />
       </Route>

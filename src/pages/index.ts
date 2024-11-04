@@ -5,3 +5,4 @@ export * from './Notes';
 export * from './Setup';
 export * from './Error';
 export * from './SessionExpired';
+export * from './Bills';

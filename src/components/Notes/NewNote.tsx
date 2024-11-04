@@ -45,7 +45,9 @@ export const NewNoteCard = () => {
   };
 
   return (
-    <Card className={`note note--new ${loading && 'note--loading'}`} sx={{ bgcolor: '#2196f3' }}>
+    <Card
+      className={`note note--new ${loading && 'note--loading'}`}
+      sx={{ bgcolor: '#2196f3', maxWidth: 'xs' }}>
       <CardContent className="note__content">
         {!loading ? (
           <Fragment>

@@ -35,9 +35,9 @@ const COLLAPSED_DRAWER_WIDTH = 82;
 
 const NAV_ITEMS = [
   { path: '/', label: 'Dashboard', icon: <Dashboard /> },
+  { path: '/bills', label: 'Bills', icon: <Receipt /> },
   { path: '/notes', label: 'Notes', icon: <NoteRounded /> },
   { path: '/forecast', label: 'Forecast', icon: <Update /> },
-  { path: '/bills', label: 'Bills', icon: <Receipt /> },
   { path: '/payments', label: 'Payments Due', icon: <AccountBalanceWallet /> }
 ];
 
@@ -65,8 +65,6 @@ export const Sidebar = () => {
   const handleLogout = () => {
     logout();
   };
-
-  // TODO: Sidebar open state doesn't persist on nav item click
 
   const drawer = (
     <Box
