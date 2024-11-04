@@ -35,7 +35,21 @@ export const PaydayAlert = () => {
   }
 
   return (
-    <Alert className="alert" severity="info" onClose={handleClose}>
+    <Alert
+      sx={{
+        mb: 4,
+        alignItems: 'center'
+      }}
+      className="alert"
+      severity="info"
+      onClose={handleClose}
+      slotProps={{
+        closeButton: {
+          sx: {
+            padding: 0
+          }
+        }
+      }}>
       <strong>{isPayday ? `TODAY IS PAYDAY` : `NEXT PAYDAY IS ${formatFullDate(payday)}`}</strong>
     </Alert>
   );
