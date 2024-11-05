@@ -55,7 +55,9 @@ export const NoteCard = ({ id, body, createdAt, updatedAt }: NoteProps) => {
 
   return (
     <Fragment>
-      <Card className="note" sx={{ bgcolor: '#fff176' }}>
+      <Card
+        className="note"
+        sx={{ bgcolor: '#fff176', maxWidth: { xs: '100%', lg: '312px' }, width: '312px' }}>
         <CardContent className="note__content">
           {!delNoteLoading && !editNoteLoading ? (
             <Fragment>

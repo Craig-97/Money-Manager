@@ -8,7 +8,6 @@
   padding: 24px;
   white-space: pre-wrap;
   flex-grow: 1;
-  width: 285px;
 
   .note__content {
     @include flexbox($justifyContent: space-between, $direction: column);
