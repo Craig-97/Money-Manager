@@ -11,9 +11,7 @@ import { TotalCard } from './TotalCard';
 import { useErrorHandler } from '~/hooks';
 
 export const PaymentsDueCard = () => {
-  const {
-    state: { account, user }
-  } = useAccountContext();
+  const { account, user } = useAccountContext();
   const { paymentsDueTotal } = account;
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const { enqueueSnackbar } = useSnackbar();

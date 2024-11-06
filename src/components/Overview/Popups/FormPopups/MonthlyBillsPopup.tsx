@@ -19,7 +19,7 @@ interface MonthlyBillsPopupProps {
   isOpen: boolean;
   close: DispatchWithoutAction;
   defaultName?: string;
-  defaultAmount?: number | string;
+  defaultAmount?: number;
   defaultPaid?: boolean;
   onSave: ({ name, amount, paid, account }: Bill) => void;
   onDelete?: DispatchWithoutAction;
@@ -30,23 +30,20 @@ export const MonthlyBillsPopup = ({
   isOpen,
   close,
   defaultName = '',
-  defaultAmount = '',
+  defaultAmount = 0,
   defaultPaid = false,
   onSave,
   onDelete
 }: MonthlyBillsPopupProps) => {
-  const {
-    state: {
-      account: { id }
-    }
-  } = useAccountContext();
+  const { account } = useAccountContext();
+  const { id } = account;
 
   const [name, setName] = useState<string>(defaultName);
-  const [amount, setAmount] = useState<number | string>(defaultAmount);
+  const [amount, setAmount] = useState<number>(defaultAmount);
   const [paid, setPaid] = useState<boolean>(defaultPaid);
 
   const handleSaveClicked = () => {
-    onSave({ name, amount: amount as number, paid, account: id });
+    onSave({ name, amount, paid, account: id });
     handleClose();
   };
 
@@ -59,7 +56,7 @@ export const MonthlyBillsPopup = ({
     if (!isNaN(event.target.valueAsNumber)) {
       setAmount(event.target.valueAsNumber);
     } else {
-      setAmount('');
+      setAmount(0);
     }
   };
 
@@ -72,7 +69,7 @@ export const MonthlyBillsPopup = ({
 
   const handleClose = () => {
     close();
-    setAmount('');
+    setAmount(0);
     setName('');
     setPaid(false);
   };
@@ -108,8 +105,10 @@ export const MonthlyBillsPopup = ({
         />
         <DialogContentText>Amount</DialogContentText>
         <TextField
-          InputProps={{
-            startAdornment: <InputAdornment position="start">£</InputAdornment>
+          slotProps={{
+            input: {
+              startAdornment: <InputAdornment position="start">£</InputAdornment>
+            }
           }}
           value={amount}
           onChange={handleAmountChange}

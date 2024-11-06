@@ -23,6 +23,14 @@ export const GET_ACCOUNT_QUERY = gql`
         createdAt
         updatedAt
       }
+      payday {
+        frequency
+        type
+        dayOfMonth
+        weekday
+        firstPayDate
+        bankHolidayRegion
+      }
     }
   }
 `;

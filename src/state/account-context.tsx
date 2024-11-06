@@ -10,6 +10,7 @@ export const initialState: AccountContextState = {
     monthlyIncome: 0,
     bills: [],
     paymentsDue: [],
+    paydayConfig: undefined,
     notes: []
   },
   user: {
@@ -21,10 +22,12 @@ export const initialState: AccountContextState = {
 };
 
 export const AccountContext = createContext<{
-  state: AccountContextState;
+  account: AccountContextState['account'];
+  user: AccountContextState['user'];
   dispatch: Dispatch<Actions>;
 }>({
-  state: initialState,
+  account: initialState.account,
+  user: initialState.user,
   dispatch: () => null
 });
 
@@ -33,9 +36,13 @@ interface AccountProviderProps {
 }
 
 export const AccountProvider = ({ children }: AccountProviderProps) => {
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const [{ account, user }, dispatch] = useReducer(reducer, initialState);
 
-  return <AccountContext.Provider value={{ state, dispatch }}>{children}</AccountContext.Provider>;
+  return (
+    <AccountContext.Provider value={{ account, user, dispatch }}>
+      {children}
+    </AccountContext.Provider>
+  );
 };
 
 export const useAccountContext = () => useContext(AccountContext);

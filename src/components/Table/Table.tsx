@@ -8,18 +8,29 @@ import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import { ChangeEvent, useEffect } from 'react';
-import { Column, usePagination, useRowSelect, useSortBy, useTable } from 'react-table';
-import { useIsDesktop } from '~/hooks';
+import {
+  Column,
+  usePagination,
+  useRowSelect,
+  useSortBy,
+  useTable,
+  TableInstance,
+  TableState,
+  Row,
+  Cell
+} from 'react-table';
 import { TablePaginationActions } from './TablePaginationActions';
+import { useMediaQuery, useTheme } from '@mui/material';
 
-interface TableProps {
-  columns: Array<Column<object>>;
-  data: Array<object>;
+interface TableProps<T extends object> {
+  columns: Array<Column<T>>;
+  data: T[];
   stickyHeader?: boolean;
 }
 
-export const Table = ({ columns, data, stickyHeader = true }: TableProps) => {
-  const isDesktop = useIsDesktop();
+export const Table = <T extends object>({ columns, data, stickyHeader = true }: TableProps<T>) => {
+  const theme = useTheme();
+  const isDesktop = useMediaQuery(theme.breakpoints.up('lg'));
 
   const {
     getTableProps,
@@ -33,12 +44,17 @@ export const Table = ({ columns, data, stickyHeader = true }: TableProps) => {
     {
       columns,
       data,
-      initialState: { pageSize: 16 }
+      initialState: { pageSize: 16 } as Partial<TableState<T>>
     },
     useSortBy,
     usePagination,
     useRowSelect
-  );
+  ) as TableInstance<T> & {
+    page: Row<T>[];
+    gotoPage: (pageIndex: number) => void;
+    setPageSize: (pageSize: number) => void;
+    state: TableState<T> & { pageIndex: number; pageSize: number };
+  };
 
   useEffect(() => {
     if (!isDesktop) {
@@ -61,22 +77,35 @@ export const Table = ({ columns, data, stickyHeader = true }: TableProps) => {
       <MaterialTable stickyHeader={stickyHeader} {...getTableProps()}>
         <TableHead>
           {headerGroups.map(headerGroup => (
-            <TableRow {...headerGroup.getHeaderGroupProps()}>
+            <TableRow
+              key={headerGroup.getHeaderGroupProps().key}
+              {...(({ key, ...rest }) => rest)(headerGroup.getHeaderGroupProps())}>
               {headerGroup.headers.map(column => (
-                <TableCell {...column.getHeaderProps()}>{column.render('Header')}</TableCell>
+                <TableCell
+                  key={column.getHeaderProps().key}
+                  {...(({ key, ...rest }) => rest)(column.getHeaderProps())}>
+                  {column.render('Header')}
+                </TableCell>
               ))}
             </TableRow>
           ))}
         </TableHead>
         <TableBody>
-          {page.map(row => {
+          {page.map((row: Row<T>) => {
             prepareRow(row);
             return (
               <TableRow
-                {...row.getRowProps()}
+                key={row.getRowProps().key}
+                {...(({ key, ...rest }) => rest)(row.getRowProps())}
                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                {row.cells.map(cell => {
-                  return <TableCell {...cell.getCellProps()}>{cell.render('Cell')}</TableCell>;
+                {row.cells.map((cell: Cell<T>) => {
+                  return (
+                    <TableCell
+                      key={cell.getCellProps().key}
+                      {...(({ key, ...rest }) => rest)(cell.getCellProps())}>
+                      {cell.render('Cell')}
+                    </TableCell>
+                  );
                 })}
               </TableRow>
             );
@@ -90,9 +119,11 @@ export const Table = ({ columns, data, stickyHeader = true }: TableProps) => {
               count={data.length}
               rowsPerPage={pageSize}
               page={pageIndex}
-              SelectProps={{
-                inputProps: { 'aria-label': 'rows per page' },
-                native: true
+              slotProps={{
+                select: {
+                  inputProps: { 'aria-label': 'rows per page' },
+                  native: true
+                }
               }}
               onPageChange={handleChangePage}
               onRowsPerPageChange={handleChangeRowsPerPage}

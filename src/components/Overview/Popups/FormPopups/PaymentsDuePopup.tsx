@@ -19,7 +19,7 @@ interface PaymentsDuePopupProps {
   isOpen: boolean;
   close: DispatchWithoutAction;
   defaultName?: string;
-  defaultAmount?: number | string;
+  defaultAmount?: number;
   onSave: ({ name, amount, account }: OneOffPayment) => void;
   onDelete?: (paid: boolean) => void;
 }
@@ -29,21 +29,17 @@ export const PaymentsDuePopup = ({
   isOpen,
   close,
   defaultName = '',
-  defaultAmount = '',
+  defaultAmount = 0,
   onSave,
   onDelete
 }: PaymentsDuePopupProps) => {
-  const {
-    state: {
-      account: { id }
-    }
-  } = useAccountContext();
-
+  const { account } = useAccountContext();
+  const { id } = account;
   const [name, setName] = useState<string>(defaultName);
-  const [amount, setAmount] = useState<number | string>(defaultAmount);
+  const [amount, setAmount] = useState<number>(defaultAmount);
 
   const handleSaveClicked = () => {
-    onSave({ name, amount: amount as number, account: id });
+    onSave({ name, amount, account: id });
     handleClose();
   };
 
@@ -56,7 +52,7 @@ export const PaymentsDuePopup = ({
     if (!isNaN(event.target.valueAsNumber)) {
       setAmount(event.target.valueAsNumber);
     } else {
-      setAmount('');
+      setAmount(0);
     }
   };
 
@@ -69,7 +65,7 @@ export const PaymentsDuePopup = ({
 
   const handleClose = () => {
     close();
-    setAmount('');
+    setAmount(0);
     setName('');
   };
 
@@ -118,8 +114,10 @@ export const PaymentsDuePopup = ({
         <DialogContentText>Amount</DialogContentText>
         <TextField
           type="number"
-          InputProps={{
-            startAdornment: <InputAdornment position="start">£</InputAdornment>
+          slotProps={{
+            input: {
+              startAdornment: <InputAdornment position="start">£</InputAdornment>
+            }
           }}
           value={amount}
           onChange={handleAmountChange}

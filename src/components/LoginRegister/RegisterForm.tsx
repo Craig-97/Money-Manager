@@ -4,11 +4,12 @@ import TextField from '@mui/material/TextField';
 import { useFormik } from 'formik';
 import { useNavigate } from 'react-router-dom';
 import * as Yup from 'yup';
-import { ERRORS, EVENTS } from '~/constants';
+import { RegisterData } from '~/types';
 import { REGISTER_AND_LOGIN_MUTATION } from '~/graphql';
 import { useAccountContext } from '~/state';
-import { RegisterData } from '~/types';
 import { AutoFocusTextField } from './AutoFocusTextField';
+import { ERRORS, EVENTS } from '~/constants';
+import { getGQLErrorCode } from '~/utils';
 
 export const RegisterForm = () => {
   const navigate = useNavigate();
@@ -36,9 +37,10 @@ export const RegisterForm = () => {
 
   const onRegisterAndLoginError = (errors: ApolloError) => {
     formik.setFieldValue('email', formik.values.email, false);
+    const errorCode = getGQLErrorCode(errors);
 
-    if (errors.message === ERRORS.USER_EXISTS) {
-      formik.setFieldError('email', ERRORS.USER_EXISTS);
+    if (errorCode === ERRORS.USER_EXISTS) {
+      formik.setFieldError('email', errors.message);
     }
   };
 
@@ -91,6 +93,7 @@ export const RegisterForm = () => {
         margin="normal"
         value={formik.values.fname}
         onChange={formik.handleChange}
+        onBlur={formik.handleBlur}
         error={formik.touched.fname && Boolean(formik.errors.fname)}
         helperText={formik.touched.fname && formik.errors.fname}
       />
@@ -103,6 +106,7 @@ export const RegisterForm = () => {
         margin="normal"
         value={formik.values.lname}
         onChange={formik.handleChange}
+        onBlur={formik.handleBlur}
         error={formik.touched.lname && Boolean(formik.errors.lname)}
         helperText={formik.touched.lname && formik.errors.lname}
       />
@@ -115,6 +119,7 @@ export const RegisterForm = () => {
         margin="normal"
         value={formik.values.email}
         onChange={formik.handleChange}
+        onBlur={formik.handleBlur}
         error={formik.touched.email && Boolean(formik.errors.email)}
         helperText={formik.touched.email && formik.errors.email}
         autoComplete="username"
@@ -129,6 +134,7 @@ export const RegisterForm = () => {
         margin="normal"
         value={formik.values.password}
         onChange={formik.handleChange}
+        onBlur={formik.handleBlur}
         error={formik.touched.password && Boolean(formik.errors.password)}
         helperText={formik.touched.password && formik.errors.password}
         autoComplete="current-password"
@@ -143,6 +149,7 @@ export const RegisterForm = () => {
         margin="normal"
         value={formik.values.confirmPassword}
         onChange={formik.handleChange}
+        onBlur={formik.handleBlur}
         error={formik.touched.confirmPassword && Boolean(formik.errors.confirmPassword)}
         helperText={formik.touched.confirmPassword && formik.errors.confirmPassword}
         autoComplete="confirm-password"

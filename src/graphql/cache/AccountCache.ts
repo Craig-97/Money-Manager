@@ -27,10 +27,13 @@ export const editAccountCache = (
 ) => {
   const data = getAccountCache(cache, user);
 
-  if (data?.account && account) {
+  // Handles when a new account is setup and no existing account data is cached
+  const accountData = data?.account ? { ...data.account, ...account } : account;
+
+  if (accountData) {
     cache.writeQuery({
       query: GET_ACCOUNT_QUERY,
-      data: { account: { ...data?.account, ...account } }
+      data: { account: accountData }
     });
   }
 };

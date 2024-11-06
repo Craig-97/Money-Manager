@@ -11,9 +11,7 @@ import { TotalCard } from './TotalCard';
 import { useErrorHandler } from '~/hooks';
 
 export const MonthlyBillsCard = () => {
-  const {
-    state: { account, user }
-  } = useAccountContext();
+  const { account, user } = useAccountContext();
   const { billsTotal } = account;
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const { enqueueSnackbar } = useSnackbar();

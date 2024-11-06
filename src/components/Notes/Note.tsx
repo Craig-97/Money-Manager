@@ -2,7 +2,6 @@ import { useMutation } from '@apollo/client';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import { Card, CardContent, CircularProgress, IconButton } from '@mui/material';
-import { useSnackbar } from 'notistack';
 import { Fragment, useState } from 'react';
 import { DELETE_NOTE_MUTATION, EDIT_NOTE_MUTATION, deleteNoteCache } from '~/graphql';
 import { useAccountContext } from '~/state';
@@ -18,12 +17,9 @@ interface NoteProps {
 }
 
 export const NoteCard = ({ id, body, createdAt, updatedAt }: NoteProps) => {
-  const {
-    state: { user }
-  } = useAccountContext();
+  const { user } = useAccountContext();
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const { enqueueSnackbar } = useSnackbar();
   const handleGQLError = useErrorHandler();
 
   const [editNote, { loading: editNoteLoading }] = useMutation(EDIT_NOTE_MUTATION);

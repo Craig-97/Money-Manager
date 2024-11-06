@@ -1,4 +1,4 @@
-import { TYPES } from '~/constants';
+import { PAYMENT_TYPE } from '../types';
 
 export interface Bill {
   id?: string;
@@ -6,5 +6,12 @@ export interface Bill {
   amount?: number;
   paid?: boolean;
   account?: string;
-  __typename?: TYPES.BILL;
+  __typename?: PAYMENT_TYPE['BILL'];
+}
+
+export interface EditBillResponse {
+  editBill: {
+    bill: Bill;
+    success: boolean;
+  };
 }
