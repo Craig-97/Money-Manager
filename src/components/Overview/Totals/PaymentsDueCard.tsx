@@ -3,7 +3,7 @@ import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import { PaymentsDuePopup } from '../Popups';
 import { TotalCard } from './TotalCard';
 import { useCreatePayment } from '~/hooks';
-import { useAccountContext } from '~/state/account-context';
+import { useAccountContext } from '~/state';
 import { OneOffPayment } from '~/types';
 
 export const PaymentsDueCard = () => {

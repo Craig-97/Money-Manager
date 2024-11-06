@@ -6,9 +6,9 @@ import { IconButton } from '@mui/material';
 import { ThemeProvider } from '@mui/material/styles';
 import { client } from './graphql';
 import { AppRoutes } from './routes';
-import { AccountProvider } from './state/account-context';
-import { theme } from './utils';
-import './scss/app.scss';
+import { AccountProvider } from './state';
+import { theme } from './styles';
+import './styles/app.scss';
 
 const App = () => {
   return (

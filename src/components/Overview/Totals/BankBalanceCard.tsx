@@ -3,7 +3,7 @@ import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import { EnterValuePopup } from '../Popups';
 import { TotalCard } from './TotalCard';
 import { useEditAccount } from '~/hooks';
-import { useAccountContext } from '~/state/account-context';
+import { useAccountContext } from '~/state';
 
 export const BankBalanceCard = () => {
   const { account } = useAccountContext();

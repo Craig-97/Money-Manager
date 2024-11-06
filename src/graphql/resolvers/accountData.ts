@@ -1,7 +1,7 @@
-import { getAmountTotal, getBills, getPaymentsDue } from '../selectors';
-import { initialState } from '~/state/account-context';
+import { initialState } from '~/state';
 import { Account } from '~/types';
 import { AccountState } from '~/types';
+import { getAmountTotal, getBills, getPaymentsDue } from '~/utils';
 
 export const getAccountData = (account?: Account): AccountState => {
   if (!account) return initialState.account;

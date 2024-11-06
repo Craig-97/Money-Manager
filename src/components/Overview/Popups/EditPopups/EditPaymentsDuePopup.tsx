@@ -1,6 +1,6 @@
 import { PaymentsDuePopup } from '../FormPopups';
 import { useEditAccount, useEditPayment, useDeletePayment } from '~/hooks';
-import { useAccountContext } from '~/state/account-context';
+import { useAccountContext } from '~/state';
 import { OneOffPayment } from '~/types';
 
 interface EditPaymentsDuePopupProps {

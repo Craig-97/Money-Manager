@@ -3,7 +3,7 @@ import ReceiptIcon from '@mui/icons-material/Receipt';
 import { MonthlyBillsPopup } from '../Popups';
 import { TotalCard } from './TotalCard';
 import { useCreateBill } from '~/hooks';
-import { useAccountContext } from '~/state/account-context';
+import { useAccountContext } from '~/state';
 import { Bill } from '~/types';
 
 export const MonthlyBillsCard = () => {

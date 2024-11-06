@@ -13,7 +13,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import InputAdornment from '@mui/material/InputAdornment';
 import TextField from '@mui/material/TextField';
 import { LoadingIconButton } from '~/components/LoadingIconButton';
-import { useAccountContext } from '~/state/account-context';
+import { useAccountContext } from '~/state';
 import { Bill } from '~/types';
 
 interface MonthlyBillsPopupProps {

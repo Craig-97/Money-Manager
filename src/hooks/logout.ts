@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useApolloClient } from '@apollo/client';
-import { logout as logoutHelper } from '~/utils/helpers/logout';
 import { useAccountContext } from '~/state';
+import { logout as logoutHelper } from '~/utils';
 
 export const useLogout = () => {
   const navigate = useNavigate();

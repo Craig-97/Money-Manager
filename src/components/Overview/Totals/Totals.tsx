@@ -6,7 +6,7 @@ import { MonthlyBillsCard } from './MonthlyBillsCard';
 import { MonthlyIncomeCard } from './MonthlyIncomeCard';
 import { PaymentsDueCard } from './PaymentsDueCard';
 import { TotalCard } from './TotalCard';
-import { useAccountContext } from '~/state/account-context';
+import { useAccountContext } from '~/state';
 import { AccountState } from '~/types';
 
 export const Totals = () => {

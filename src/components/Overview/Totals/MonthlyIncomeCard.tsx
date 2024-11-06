@@ -4,7 +4,7 @@ import { EnterValuePopup } from '../Popups';
 import { LoadingCard } from './LoadingCard';
 import { TotalCard } from './TotalCard';
 import { useEditAccount } from '~/hooks';
-import { useAccountContext } from '~/state/account-context';
+import { useAccountContext } from '~/state';
 
 export const MonthlyIncomeCard = () => {
   const { account } = useAccountContext();

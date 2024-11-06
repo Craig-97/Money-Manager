@@ -2,11 +2,11 @@ import { useEffect } from 'react';
 import isEqual from 'lodash.isequal';
 import { useQuery } from '@apollo/client';
 import { ERRORS, EVENTS } from '~/constants';
-import { FIND_USER_QUERY, GET_ACCOUNT_QUERY } from '~/graphql';
+import { FIND_USER_QUERY, GET_ACCOUNT_QUERY, getAccountData } from '~/graphql';
 import { useErrorHandler } from '~/hooks';
-import { useAccountContext } from '~/state/account-context';
+import { useAccountContext } from '~/state';
 import { AccountData, FindUserData } from '~/types';
-import { getAccountData, getGQLErrorCode } from '~/utils';
+import { getGQLErrorCode } from '~/utils';
 
 export const useAccountData = () => {
   const { account, user, dispatch } = useAccountContext();
