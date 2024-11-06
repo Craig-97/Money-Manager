@@ -1,61 +1,36 @@
 import { useFormik } from 'formik';
-import { useNavigate } from 'react-router-dom';
 import * as Yup from 'yup';
 import { ApolloError } from '@apollo/client';
-import { useMutation } from '@apollo/client';
 import LoadingButton from '@mui/lab/LoadingButton';
 import TextField from '@mui/material/TextField';
 import { AutoFocusTextField } from './AutoFocusTextField';
-import { ERRORS, EVENTS } from '~/constants';
-import { REGISTER_AND_LOGIN_MUTATION } from '~/graphql';
-import { useAccountContext } from '~/state';
-import { RegisterData } from '~/types';
+import { ERRORS } from '~/constants';
+import { useRegister } from '~/hooks';
 import { getGQLErrorCode } from '~/utils';
 
+const validationSchema = Yup.object().shape({
+  fname: Yup.string().required('First Name required'),
+  lname: Yup.string().required('Surname required'),
+  email: Yup.string().email('Invalid Email Address').required('Email Address required'),
+  password: Yup.string()
+    .required(`Password required`)
+    .min(8, 'Password is too short (min is 8 characters)')
+    .matches(/(?=.*[0-9])/, 'Password must contain a number.'),
+  confirmPassword: Yup.string()
+    .required(`Confirm Password required`)
+    .oneOf([Yup.ref('password')], 'Passwords must match')
+});
+
 export const RegisterForm = () => {
-  const navigate = useNavigate();
-  const { dispatch } = useAccountContext();
+  const { register, loading } = useRegister({
+    onError: (errors: ApolloError) => {
+      formik.setFieldValue('email', formik.values.email, false);
+      const errorCode = getGQLErrorCode(errors);
 
-  const [registerAndLogin, { loading }] = useMutation<RegisterData>(REGISTER_AND_LOGIN_MUTATION, {
-    onCompleted: data => onRegisterAndLoginCompleted(data),
-    onError: errors => onRegisterAndLoginError(errors)
-  });
-
-  const onRegisterAndLoginCompleted = (response: RegisterData) => {
-    if (response) {
-      const {
-        registerAndLogin: { user, token }
-      } = response;
-
-      if (user && token) {
-        localStorage.setItem('token', token);
-
-        dispatch({ type: EVENTS.LOGIN, data: user });
-        navigate('/setup');
+      if (errorCode === ERRORS.USER_EXISTS) {
+        formik.setFieldError('email', errors.message);
       }
     }
-  };
-
-  const onRegisterAndLoginError = (errors: ApolloError) => {
-    formik.setFieldValue('email', formik.values.email, false);
-    const errorCode = getGQLErrorCode(errors);
-
-    if (errorCode === ERRORS.USER_EXISTS) {
-      formik.setFieldError('email', errors.message);
-    }
-  };
-
-  const validationSchema = Yup.object().shape({
-    fname: Yup.string().required('First Name required'),
-    lname: Yup.string().required('Surname required'),
-    email: Yup.string().email('Invalid Email Address').required('Email Address required'),
-    password: Yup.string()
-      .required(`Password required`)
-      .min(8, 'Password is too short (min is 8 characters)')
-      .matches(/(?=.*[0-9])/, 'Password must contain a number.'),
-    confirmPassword: Yup.string()
-      .required(`Confirm Password required`)
-      .oneOf([Yup.ref('password')], 'Passwords must match')
   });
 
   const formik = useFormik({
@@ -69,15 +44,11 @@ export const RegisterForm = () => {
     },
     validationSchema: validationSchema,
     onSubmit: (values, { setSubmitting }) => {
-      registerAndLogin({
-        variables: {
-          user: {
-            email: values.email,
-            password: values.password,
-            firstName: values.fname,
-            surname: values.lname
-          }
-        }
+      register({
+        email: values.email,
+        password: values.password,
+        firstName: values.fname,
+        surname: values.lname
       });
       setSubmitting(false);
     }

@@ -23,7 +23,7 @@ export const getAccountData = (account?: Account): AccountState => {
   const discIncome = monthlyIncome - billsTotal;
   const bankFreeToSpend = bankBalance - paymentsDueTotal;
   const payDayDiscIncome = bankFreeToSpend + discIncome;
-  const bankPaydayTotal = bankFreeToSpend + monthlyIncome;
+  const bankPaydayBalance = bankFreeToSpend + monthlyIncome;
 
   return {
     id,
@@ -34,7 +34,7 @@ export const getAccountData = (account?: Account): AccountState => {
     monthlyIncome,
     billsTotal,
     paymentsDueTotal,
-    bankPaydayTotal,
+    bankPaydayBalance,
     discIncome,
     bankFreeToSpend,
     payDayDiscIncome,

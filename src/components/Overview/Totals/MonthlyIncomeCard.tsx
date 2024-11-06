@@ -19,7 +19,10 @@ export const MonthlyIncomeCard = () => {
 
   const changeMonthlyIncome = (value: number) => {
     if (!isNaN(value) && value !== monthlyIncome) {
-      updateAccount({ monthlyIncome: value }, { successMessage: 'Monthly Income updated' });
+      updateAccount({
+        input: { monthlyIncome: value },
+        options: { successMessage: 'Monthly Income updated' }
+      });
     }
     setIsOpen(false);
   };
@@ -29,7 +32,7 @@ export const MonthlyIncomeCard = () => {
       {!loading ? (
         <TotalCard
           classBaseName="monthly-income"
-          title={'MONTHLY INCOME'}
+          title="MONTHLY INCOME"
           amount={monthlyIncome}
           onClick={handleClickOpen}
           icon={<LocalAtmIcon color="action" />}

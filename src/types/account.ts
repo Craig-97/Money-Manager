@@ -8,7 +8,7 @@ export interface AccountState {
   id?: string;
   bankBalance: number;
   monthlyIncome: number;
-  bankPaydayTotal?: number;
+  bankPaydayBalance?: number;
   bills: Array<Bill>;
   paymentsDue?: Array<Bill | OneOffPayment>;
   billsTotal?: number;

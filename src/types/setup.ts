@@ -4,7 +4,7 @@ import { OneOffPayment } from './oneOffPayment';
 import { Payday } from './payday';
 
 export interface SetupFormValues {
-  bankTotal: string;
+  bankBalance: string;
   monthlyIncome: string;
   bills: Bill[];
   oneOffPayments: OneOffPayment[];

@@ -1,40 +1,49 @@
-import { ChangeEvent, DispatchWithoutAction } from 'react';
+import { ChangeEvent, useEffect } from 'react';
 import { useState } from 'react';
 import DeleteIcon from '@mui/icons-material/Delete';
+import LoadingButton from '@mui/lab/LoadingButton';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
-import IconButton from '@mui/material/IconButton';
+import { LoadingIconButton } from '../LoadingIconButton';
 
 interface NoteEditPopupProps {
   isOpen: boolean;
-  close: DispatchWithoutAction;
+  close: () => void;
   defaultBody?: string;
   onSave: (body: string) => void;
-  onDelete?: DispatchWithoutAction;
+  onDelete?: () => void;
+  loading?: boolean;
 }
+
+type LoadingAction = 'save' | 'delete' | null;
 
 export const NoteEditPopup = ({
   isOpen,
   close,
   defaultBody = '',
   onSave,
-  onDelete
+  onDelete,
+  loading = false
 }: NoteEditPopupProps) => {
   const [body, setBody] = useState<string>(defaultBody);
+  const [loadingAction, setLoadingAction] = useState<LoadingAction>(null);
   const characterLimit = 200;
 
   const handleSaveClicked = () => {
-    if (body) onSave(body);
-    // OG close function to avoid body being reset
-    close();
+    if (body) {
+      setLoadingAction('save');
+      onSave(body);
+    }
   };
 
   const handleDeleteClicked = () => {
-    if (onDelete) onDelete();
-    handleClose();
+    if (onDelete) {
+      setLoadingAction('delete');
+      onDelete();
+    }
   };
 
   const handleChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
@@ -48,6 +57,12 @@ export const NoteEditPopup = ({
     setBody(defaultBody);
   };
 
+  useEffect(() => {
+    if (!loading) {
+      setLoadingAction(null);
+    }
+  }, [loading]);
+
   return (
     <Dialog
       disableRestoreFocus
@@ -60,9 +75,13 @@ export const NoteEditPopup = ({
       <DialogTitle id="form-dialog-title">
         Edit Note
         {onDelete && (
-          <IconButton onClick={handleDeleteClicked} disabled={!body}>
-            <DeleteIcon />
-          </IconButton>
+          <LoadingIconButton
+            tooltip="Delete"
+            onClick={() => handleDeleteClicked()}
+            disabled={loading || !body}
+            loading={loading && loadingAction === 'delete'}
+            icon={<DeleteIcon />}
+          />
         )}
       </DialogTitle>
       <DialogContent>
@@ -75,9 +94,14 @@ export const NoteEditPopup = ({
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose}>Cancel</Button>
-        <Button onClick={handleSaveClicked} color="secondary" disabled={!body}>
+        <LoadingButton
+          onClick={handleSaveClicked}
+          loading={loading && loadingAction === 'save'}
+          disabled={loading || !body}
+          color="secondary"
+          variant="text">
           Save
-        </Button>
+        </LoadingButton>
       </DialogActions>
     </Dialog>
   );

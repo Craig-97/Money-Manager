@@ -1,21 +1,11 @@
-import { DispatchWithoutAction } from 'react';
-import { useSnackbar } from 'notistack';
-import { useMutation } from '@apollo/client';
-import { Box } from '@mui/material';
-import CircularProgress from '@mui/material/CircularProgress';
 import { PaymentsDuePopup } from '../FormPopups';
-import {
-  DELETE_ONE_OFF_PAYMENT_MUTATION,
-  EDIT_ONE_OFF_PAYMENT_MUTATION,
-  deletePaymentCache
-} from '~/graphql';
-import { useErrorHandler, useEditAccount } from '~/hooks';
+import { useEditAccount, useEditPayment, useDeletePayment } from '~/hooks';
 import { useAccountContext } from '~/state/account-context';
-import { DeletePaymentResponse, OneOffPayment } from '~/types';
+import { OneOffPayment } from '~/types';
 
 interface EditPaymentsDuePopupProps {
   isOpen: boolean;
-  close: DispatchWithoutAction;
+  close: () => void;
   selectedPayment: OneOffPayment;
 }
 
@@ -27,74 +17,38 @@ export const EditPaymentsDuePopup = ({
   const { account, user } = useAccountContext();
   const { bankBalance } = account;
   const { id: paymentId, name, amount }: OneOffPayment = selectedPayment;
-  const { enqueueSnackbar } = useSnackbar();
-  const handleGQLError = useErrorHandler();
-  const { updateAccount, loading: editAccLoading } = useEditAccount();
 
-  const [editPayment, { loading: editPayLoading }] = useMutation(EDIT_ONE_OFF_PAYMENT_MUTATION);
+  const { editSelectedPayment, loading: editPayLoading } = useEditPayment(close);
+  const { deleteSelectedPayment, loading: delPayLoading } = useDeletePayment(close);
+  const { loading: editAccLoading } = useEditAccount();
 
-  const editSelectedPayment = (oneOffPayment: OneOffPayment) => {
-    editPayment({
-      variables: { id: paymentId, oneOffPayment },
-      onCompleted: () =>
-        enqueueSnackbar(`${oneOffPayment.name} payment updated`, { variant: 'success' }),
-      onError: handleGQLError
-    });
-  };
-
-  const [deletePayment, { loading: delPayLoading }] = useMutation(DELETE_ONE_OFF_PAYMENT_MUTATION);
-
-  const deleteSelectedPayment = (paid: boolean) => {
-    deletePayment({
-      variables: { id: paymentId },
-      update: (
-        cache,
-        {
-          data: {
-            deleteOneOffPayment: { oneOffPayment }
-          }
-        }
-      ) => deletePaymentCache(cache, oneOffPayment, user),
-      onCompleted: data => onPaymentDeleted(data, paid),
-      onError: handleGQLError
-    });
-  };
-
-  const onPaymentDeleted = (response: DeletePaymentResponse, paid: boolean) => {
-    const {
-      deleteOneOffPayment: { oneOffPayment, success }
-    } = response;
-
-    if (success) {
-      const message = paid
-        ? `£${oneOffPayment.amount} deducted from Bank Total`
-        : 'Payment deleted';
-      enqueueSnackbar(message, { variant: 'success' });
-
-      const newBalance = bankBalance - (oneOffPayment?.amount || 0);
-      if (!isNaN(newBalance) && paid) {
-        updateAccount({ bankBalance: newBalance });
-      }
+  const handleEditPayment = (oneOffPayment: OneOffPayment) => {
+    if (paymentId) {
+      editSelectedPayment({ paymentId, payment: oneOffPayment });
     }
   };
 
-  if (editAccLoading || editPayLoading || delPayLoading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
+  const handleDeletePayment = (paid: boolean) => {
+    if (paymentId) {
+      deleteSelectedPayment({
+        paymentId,
+        user,
+        paid,
+        currentBankBalance: bankBalance
+      });
+    }
+  };
 
   return isOpen ? (
     <PaymentsDuePopup
       title="Edit Upcoming Payment"
-      onSave={editSelectedPayment}
+      onSave={handleEditPayment}
       isOpen={isOpen}
       close={close}
-      onDelete={deleteSelectedPayment}
+      onDelete={handleDeletePayment}
       defaultName={name}
       defaultAmount={amount}
+      loading={editAccLoading || editPayLoading || delPayLoading}
     />
   ) : null;
 };

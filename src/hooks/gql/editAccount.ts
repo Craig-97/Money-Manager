@@ -9,6 +9,13 @@ interface EditAccountInput {
   monthlyIncome?: number;
 }
 
+interface UpdateAccountParams {
+  input: EditAccountInput;
+  options?: {
+    successMessage?: string;
+  };
+}
+
 export const useEditAccount = () => {
   const { account, user } = useAccountContext();
   const { id } = account;
@@ -17,12 +24,7 @@ export const useEditAccount = () => {
 
   const [editAccount, { loading }] = useMutation(EDIT_ACCOUNT_MUTATION);
 
-  const updateAccount = (
-    input: EditAccountInput,
-    options?: {
-      successMessage?: string;
-    }
-  ) => {
+  const updateAccount = ({ input, options }: UpdateAccountParams) => {
     return editAccount({
       variables: { id, account: input },
       update: (

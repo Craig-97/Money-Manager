@@ -25,15 +25,15 @@ export const BasicInfoStep = ({ formik }: BasicInfoStepProps) => (
         }}
         autoFocus
         fullWidth
-        id="bankTotal"
-        name="bankTotal"
-        label="Bank Total"
+        id="bankBalance"
+        name="bankBalance"
+        label="Bank Balance"
         type="number"
-        value={formik.values.bankTotal}
+        value={formik.values.bankBalance}
         onChange={formik.handleChange}
         onBlur={formik.handleBlur}
-        error={formik.touched.bankTotal && Boolean(formik.errors.bankTotal)}
-        helperText={formik.touched.bankTotal && formik.errors.bankTotal}
+        error={formik.touched.bankBalance && Boolean(formik.errors.bankBalance)}
+        helperText={formik.touched.bankBalance && formik.errors.bankBalance}
         margin="normal"
       />
     </Box>

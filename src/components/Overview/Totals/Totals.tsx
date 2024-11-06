@@ -11,14 +11,15 @@ import { AccountState } from '~/types';
 
 export const Totals = () => {
   const { account } = useAccountContext();
-  const { bankFreeToSpend, discIncome, bankPaydayTotal, payDayDiscIncome }: AccountState = account;
+  const { bankFreeToSpend, discIncome, bankPaydayBalance, payDayDiscIncome }: AccountState =
+    account;
 
   return (
     <div className="totals">
       <BankBalanceCard />
       <TotalCard
         classBaseName="free-to-spend"
-        title={'FREE TO SPEND'}
+        title="FREE TO SPEND"
         amount={bankFreeToSpend}
         icon={<PaymentIcon color="action" />}
         disabled={true}
@@ -27,14 +28,14 @@ export const Totals = () => {
       <MonthlyBillsCard />
       <TotalCard
         classBaseName="payday-bank"
-        title={'PAYDAY TOTAL'}
-        amount={bankPaydayTotal}
+        title="PAYDAY BALANCE"
+        amount={bankPaydayBalance}
         icon={<AccountBalanceIcon color="primary" />}
         disabled={true}
       />
       <TotalCard
         classBaseName="payday-discretionary"
-        title={'PAYDAY DISC'}
+        title="PAYDAY DISC"
         amount={payDayDiscIncome}
         icon={<PaymentIcon color="action" />}
         disabled={true}
@@ -42,7 +43,7 @@ export const Totals = () => {
       <MonthlyIncomeCard />
       <TotalCard
         classBaseName="monthly-discretionary"
-        title={'DISC INCOME'}
+        title="DISC INCOME"
         amount={discIncome}
         icon={<LocalAtmIcon color="action" />}
         disabled={true}

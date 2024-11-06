@@ -1,29 +1,33 @@
-import { ChangeEvent, DispatchWithoutAction, KeyboardEvent } from 'react';
+import { ChangeEvent, KeyboardEvent, useEffect } from 'react';
 import { Fragment, useState } from 'react';
 import DeleteIcon from '@mui/icons-material/Delete';
 import PaidIcon from '@mui/icons-material/Paid';
-import { Box, Tooltip } from '@mui/material';
+import { LoadingButton } from '@mui/lab';
+import { Box } from '@mui/material';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import TextField from '@mui/material/TextField';
+import { LoadingIconButton } from '~/components/LoadingIconButton/LoadingIconButton';
 import { useAccountContext } from '~/state/account-context';
 import { OneOffPayment } from '~/types';
 
 interface PaymentsDuePopupProps {
   title: string;
   isOpen: boolean;
-  close: DispatchWithoutAction;
+  close: () => void;
   defaultName?: string;
   defaultAmount?: number;
   onSave: ({ name, amount, account }: OneOffPayment) => void;
   onDelete?: (paid: boolean) => void;
+  loading?: boolean;
 }
+
+type LoadingAction = 'save' | 'pay' | 'delete' | null;
 
 export const PaymentsDuePopup = ({
   title,
@@ -32,21 +36,25 @@ export const PaymentsDuePopup = ({
   defaultName = '',
   defaultAmount = 0,
   onSave,
-  onDelete
+  onDelete,
+  loading = false
 }: PaymentsDuePopupProps) => {
   const { account } = useAccountContext();
   const { id } = account;
   const [name, setName] = useState<string>(defaultName);
   const [amount, setAmount] = useState<number>(defaultAmount);
+  const [loadingAction, setLoadingAction] = useState<LoadingAction>(null);
 
   const handleSaveClicked = () => {
+    setLoadingAction('save');
     onSave({ name, amount, account: id });
-    handleClose();
   };
 
   const handleButtonClicked = (paid: boolean) => {
-    if (onDelete) onDelete(paid);
-    close();
+    if (onDelete) {
+      setLoadingAction(paid ? 'pay' : 'delete');
+      onDelete(paid);
+    }
   };
 
   const handleAmountChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -70,6 +78,12 @@ export const PaymentsDuePopup = ({
     setName('');
   };
 
+  useEffect(() => {
+    if (!loading) {
+      setLoadingAction(null);
+    }
+  }, [loading]);
+
   return (
     <Dialog
       disableRestoreFocus
@@ -84,20 +98,20 @@ export const PaymentsDuePopup = ({
         <Box>
           {onDelete && (
             <Fragment>
-              <Tooltip title="Pay">
-                <IconButton
-                  onClick={() => handleButtonClicked(true)}
-                  disabled={!name || (!amount && amount !== 0)}>
-                  <PaidIcon />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="Delete">
-                <IconButton
-                  onClick={() => handleButtonClicked(false)}
-                  disabled={!name || (!amount && amount !== 0)}>
-                  <DeleteIcon />
-                </IconButton>
-              </Tooltip>
+              <LoadingIconButton
+                tooltip="Pay"
+                onClick={() => handleButtonClicked(true)}
+                disabled={loading || !name || (!amount && amount !== 0)}
+                loading={loading && loadingAction === 'pay'}
+                icon={<PaidIcon />}
+              />
+              <LoadingIconButton
+                tooltip="Delete"
+                onClick={() => handleButtonClicked(false)}
+                disabled={loading || !name || (!amount && amount !== 0)}
+                loading={loading && loadingAction === 'delete'}
+                icon={<DeleteIcon />}
+              />
             </Fragment>
           )}
         </Box>
@@ -108,6 +122,7 @@ export const PaymentsDuePopup = ({
           value={name}
           onChange={event => setName(event.target.value)}
           onKeyDown={handleKeyDown}
+          disabled={loading}
           autoFocus
           margin="dense"
           id="payment-name"
@@ -124,19 +139,24 @@ export const PaymentsDuePopup = ({
           value={amount}
           onChange={handleAmountChange}
           onKeyDown={handleKeyDown}
+          disabled={loading}
           margin="dense"
           id="payment-amount"
           fullWidth
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose}>Cancel</Button>
-        <Button
-          onClick={handleSaveClicked}
-          color="secondary"
-          disabled={!name || (!amount && amount !== 0)}>
-          Save
+        <Button onClick={handleClose} disabled={loading}>
+          Cancel
         </Button>
+        <LoadingButton
+          onClick={handleSaveClicked}
+          loading={loading && loadingAction === 'save'}
+          disabled={loading || !name || (!amount && amount !== 0)}
+          color="secondary"
+          variant="text">
+          Save
+        </LoadingButton>
       </DialogActions>
     </Dialog>
   );

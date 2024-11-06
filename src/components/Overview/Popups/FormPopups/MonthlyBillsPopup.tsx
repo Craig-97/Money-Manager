@@ -1,7 +1,8 @@
-import { ChangeEvent, DispatchWithoutAction, KeyboardEvent } from 'react';
+import { ChangeEvent, KeyboardEvent } from 'react';
 import { useState } from 'react';
+import { useEffect } from 'react';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { Tooltip } from '@mui/material';
+import { LoadingButton } from '@mui/lab';
 import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
 import Dialog from '@mui/material/Dialog';
@@ -9,22 +10,25 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import TextField from '@mui/material/TextField';
+import { LoadingIconButton } from '~/components/LoadingIconButton';
 import { useAccountContext } from '~/state/account-context';
 import { Bill } from '~/types';
 
 interface MonthlyBillsPopupProps {
   title: string;
   isOpen: boolean;
-  close: DispatchWithoutAction;
+  close: () => void;
   defaultName?: string;
   defaultAmount?: number;
   defaultPaid?: boolean;
   onSave: ({ name, amount, paid, account }: Bill) => void;
-  onDelete?: DispatchWithoutAction;
+  onDelete?: () => void;
+  loading?: boolean;
 }
+
+type LoadingAction = 'save' | 'delete' | null;
 
 export const MonthlyBillsPopup = ({
   title,
@@ -34,7 +38,8 @@ export const MonthlyBillsPopup = ({
   defaultAmount = 0,
   defaultPaid = false,
   onSave,
-  onDelete
+  onDelete,
+  loading = false
 }: MonthlyBillsPopupProps) => {
   const { account } = useAccountContext();
   const { id } = account;
@@ -42,15 +47,18 @@ export const MonthlyBillsPopup = ({
   const [name, setName] = useState<string>(defaultName);
   const [amount, setAmount] = useState<number>(defaultAmount);
   const [paid, setPaid] = useState<boolean>(defaultPaid);
+  const [loadingAction, setLoadingAction] = useState<LoadingAction>(null);
 
   const handleSaveClicked = () => {
+    setLoadingAction('save');
     onSave({ name, amount, paid, account: id });
-    handleClose();
   };
 
   const handleDeleteClicked = () => {
-    if (onDelete) onDelete();
-    close();
+    if (onDelete) {
+      setLoadingAction('delete');
+      onDelete();
+    }
   };
 
   const handleAmountChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -75,6 +83,12 @@ export const MonthlyBillsPopup = ({
     setPaid(false);
   };
 
+  useEffect(() => {
+    if (!loading) {
+      setLoadingAction(null);
+    }
+  }, [loading]);
+
   return (
     <Dialog
       disableRestoreFocus
@@ -87,11 +101,13 @@ export const MonthlyBillsPopup = ({
       <DialogTitle id="form-dialog-title">
         {title}
         {onDelete && (
-          <Tooltip title="Delete">
-            <IconButton onClick={handleDeleteClicked} disabled={!name || (!amount && amount !== 0)}>
-              <DeleteIcon />
-            </IconButton>
-          </Tooltip>
+          <LoadingIconButton
+            tooltip="Delete"
+            onClick={() => handleDeleteClicked()}
+            disabled={loading || !name || (!amount && amount !== 0)}
+            loading={loading && loadingAction === 'delete'}
+            icon={<DeleteIcon />}
+          />
         )}
       </DialogTitle>
       <DialogContent>
@@ -128,13 +144,17 @@ export const MonthlyBillsPopup = ({
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose}>Cancel</Button>
-        <Button
-          onClick={handleSaveClicked}
-          color="secondary"
-          disabled={!name || (!amount && amount !== 0)}>
-          Save
+        <Button onClick={handleClose} disabled={loading}>
+          Cancel
         </Button>
+        <LoadingButton
+          onClick={handleSaveClicked}
+          loading={loading && loadingAction === 'save'}
+          disabled={loading || !name || (!amount && amount !== 0)}
+          color="secondary"
+          variant="text">
+          Save
+        </LoadingButton>
       </DialogActions>
     </Dialog>
   );

@@ -28,11 +28,11 @@
           color: $ghost-white-hover-text;
           border: 1px solid $ghost-white-hover-border;
         }
-      }
 
-      .Mui-disabled {
-        color: $ghost-white-disabled-text;
-        border: 1px solid $light-border;
+        &:disabled {
+          color: $ghost-white-disabled-text;
+          border: 1px solid $light-border;
+        }
       }
 
       .MuiIconButton-root {

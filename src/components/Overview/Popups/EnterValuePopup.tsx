@@ -1,5 +1,6 @@
-import { ChangeEvent, DispatchWithoutAction, KeyboardEvent } from 'react';
+import { ChangeEvent, KeyboardEvent } from 'react';
 import { useState } from 'react';
+import { LoadingButton } from '@mui/lab';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -12,10 +13,11 @@ import TextField from '@mui/material/TextField';
 interface EnterValuePopupProps {
   currentValue: number;
   isOpen: boolean;
-  close: DispatchWithoutAction;
+  close: () => void;
   changeValue: (value: number) => void;
   title: string;
   labelText: string;
+  loading?: boolean;
 }
 
 export const EnterValuePopup = ({
@@ -24,7 +26,8 @@ export const EnterValuePopup = ({
   close,
   changeValue,
   title,
-  labelText
+  labelText,
+  loading = false
 }: EnterValuePopupProps) => {
   const [value, setValue] = useState<number | string>(currentValue);
 
@@ -65,13 +68,17 @@ export const EnterValuePopup = ({
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={close}>Cancel</Button>
-        <Button
-          onClick={() => changeValue(value as number)}
-          color="secondary"
-          disabled={!value && value !== 0}>
-          Save
+        <Button onClick={close} disabled={loading}>
+          Cancel
         </Button>
+        <LoadingButton
+          onClick={() => changeValue(value as number)}
+          loading={loading}
+          disabled={loading || (!value && value !== 0)}
+          color="secondary"
+          variant="text">
+          Save
+        </LoadingButton>
       </DialogActions>
     </Dialog>
   );

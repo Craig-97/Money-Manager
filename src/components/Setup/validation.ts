@@ -15,9 +15,9 @@ const uniqueNameValidator = (items: { name: string }[], name: string, path: stri
 };
 
 export const validationSchema = Yup.object().shape({
-  bankTotal: Yup.number()
-    .typeError('Bank total must be a number')
-    .required('Bank total is required')
+  bankBalance: Yup.number()
+    .typeError('Bank balance must be a number')
+    .required('Bank balance is required')
     .moreThan(0, 'Must be greater than 0'),
   monthlyIncome: Yup.number()
     .typeError('Monthly income must be a number')

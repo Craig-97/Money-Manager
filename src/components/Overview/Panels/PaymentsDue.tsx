@@ -27,10 +27,6 @@ export const PaymentsDue = () => {
     });
   };
 
-  const closePopup = () => {
-    setIsOpen({ PAYMENT_DUE: false, BILL: false });
-  };
-
   return (
     <Fragment>
       <div className="upcoming-payments">
@@ -59,12 +55,12 @@ export const PaymentsDue = () => {
       </div>
       <EditMonthlyBillsPopup
         isOpen={isOpen.BILL}
-        close={closePopup}
+        close={() => setIsOpen({ PAYMENT_DUE: false, BILL: false })}
         selectedBill={selectedPayment as Bill}
       />
       <EditPaymentsDuePopup
         isOpen={isOpen.PAYMENT_DUE}
-        close={closePopup}
+        close={() => setIsOpen({ PAYMENT_DUE: false, BILL: false })}
         selectedPayment={selectedPayment as OneOffPayment}
       />
     </Fragment>

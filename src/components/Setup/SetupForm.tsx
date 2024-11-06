@@ -27,7 +27,7 @@ const getStepErrors = (errors: FormikErrors<SetupFormValues>, step: number) => {
   switch (step) {
     case 0:
       return {
-        ...(errors.bankTotal && { bankTotal: errors.bankTotal }),
+        ...(errors.bankBalance && { bankBalance: errors.bankBalance }),
         ...(errors.monthlyIncome && { monthlyIncome: errors.monthlyIncome })
       };
     case 1:
@@ -66,7 +66,7 @@ export const SetupForm = () => {
 
   const formik = useFormik<SetupFormValues>({
     initialValues: {
-      bankTotal: '',
+      bankBalance: '',
       monthlyIncome: '',
       bills: [],
       oneOffPayments: [],
@@ -106,7 +106,7 @@ export const SetupForm = () => {
       await createAccount({
         variables: {
           account: {
-            bankBalance: parseFloat(values.bankTotal),
+            bankBalance: parseFloat(values.bankBalance),
             monthlyIncome: parseFloat(values.monthlyIncome),
             bills: values.bills,
             oneOffPayments: values.oneOffPayments,
@@ -137,9 +137,9 @@ export const SetupForm = () => {
     switch (activeStep) {
       case 0:
         return (
-          formik.values.bankTotal &&
+          formik.values.bankBalance &&
           formik.values.monthlyIncome &&
-          !formik.errors.bankTotal &&
+          !formik.errors.bankBalance &&
           !formik.errors.monthlyIncome
         );
       case 1:

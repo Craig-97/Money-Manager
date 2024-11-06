@@ -5,6 +5,7 @@ import typescript from '@typescript-eslint/eslint-plugin';
 import typescriptParser from '@typescript-eslint/parser';
 import globals from 'globals';
 import prettier from 'eslint-plugin-prettier';
+import unusedImports from 'eslint-plugin-unused-imports';
 
 export default [
   {
@@ -22,7 +23,8 @@ export default [
       react: reactPlugin,
       'react-hooks': reactHooksPlugin,
       import: importPlugin,
-      prettier: prettier
+      prettier: prettier,
+      'unused-imports': unusedImports
     },
     rules: {
       'prettier/prettier': 'error',
@@ -99,6 +101,17 @@ export default [
             order: 'asc',
             caseInsensitive: true
           }
+        }
+      ],
+      'unused-imports/no-unused-imports': 'error',
+      'unused-imports/no-unused-vars': [
+        'warn',
+        {
+          vars: 'all',
+          args: 'after-used',
+          argsIgnorePattern: '^(_|key$)',
+          varsIgnorePattern: '^(_|key$)',
+          caughtErrorsIgnorePattern: '^_'
         }
       ]
     },

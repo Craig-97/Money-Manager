@@ -7,7 +7,7 @@ export const initialState: AccountContextState = {
   account: {
     id: '',
     bankBalance: 0,
-    bankPaydayTotal: 0,
+    bankPaydayBalance: 0,
     monthlyIncome: 0,
     bills: [],
     paymentsDue: [],
