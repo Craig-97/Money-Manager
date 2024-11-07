@@ -10,7 +10,7 @@ import { AccountProvider } from './state';
 import { theme } from './styles';
 import './styles/app.scss';
 
-const App = () => {
+export const App = () => {
   return (
     <ApolloProvider client={client}>
       <ThemeProvider theme={theme}>
@@ -35,5 +35,3 @@ const App = () => {
     </ApolloProvider>
   );
 };
-
-export default App;

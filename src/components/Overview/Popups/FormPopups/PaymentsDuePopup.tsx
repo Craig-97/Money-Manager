@@ -81,8 +81,14 @@ export const PaymentsDuePopup = ({
   useEffect(() => {
     if (!loading) {
       setLoadingAction(null);
+
+      // Reset form values after save
+      if (loadingAction === 'save') {
+        setAmount(0);
+        setName('');
+      }
     }
-  }, [loading]);
+  }, [loading, loadingAction]);
 
   return (
     <Dialog

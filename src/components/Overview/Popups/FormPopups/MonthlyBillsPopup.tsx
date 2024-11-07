@@ -86,8 +86,15 @@ export const MonthlyBillsPopup = ({
   useEffect(() => {
     if (!loading) {
       setLoadingAction(null);
+
+      // Reset form values after save
+      if (loadingAction === 'save') {
+        setAmount(0);
+        setName('');
+        setPaid(false);
+      }
     }
-  }, [loading]);
+  }, [loading, loadingAction]);
 
   return (
     <Dialog

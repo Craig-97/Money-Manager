@@ -14,8 +14,10 @@ export const useGetPayday = () => {
   const { paydayConfig } = account;
   const [paydayInfo, setPaydayInfo] = useState<PaydayInfo>({ payday: null, isPayday: null });
 
-  // Check if the user has a payday configuration from the GraphQL cache
-  // to prevent component pop-in when using paydayConfig from context
+  /**
+   * Checks if the user has a payday configuration from the GraphQL cache
+   * to prevent component pop-in when using paydayConfig from context.
+   */
   const queryData = client.readQuery({
     query: GET_ACCOUNT_QUERY,
     variables: { id: user.id }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Dashboard, Logout, MenuOpen, NoteRounded, Settings, Update } from '@mui/icons-material';
 import {
@@ -18,8 +18,9 @@ import {
   useMediaQuery,
   useTheme
 } from '@mui/material';
-import { useLogout } from '~/hooks';
-import { useAccountContext } from '~/state';
+import { useLogout, useSidebarState } from '~/hooks';
+import { useAccountContext, useSidebarStore } from '~/state';
+
 
 const DRAWER_WIDTH = 280;
 const COLLAPSED_DRAWER_WIDTH = 82;
@@ -34,26 +35,15 @@ export const Sidebar = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isBelowMd = useMediaQuery(theme.breakpoints.down('md'));
-  const [isCollapsed, setIsCollapsed] = useState(isBelowMd);
-  const [mobileOpen, setMobileOpen] = useState(false);
   const { pathname } = useLocation();
+  const { user } = useAccountContext();
+  const { isOpen, setSidebarIsOpen } = useSidebarStore();
   const navigate = useNavigate();
   const logout = useLogout();
-  const { user } = useAccountContext();
+  const drawerWidth = !isOpen ? COLLAPSED_DRAWER_WIDTH : DRAWER_WIDTH;
+  useSidebarState();
 
-  const drawerWidth = isCollapsed ? COLLAPSED_DRAWER_WIDTH : DRAWER_WIDTH;
 
-  useEffect(() => {
-    setIsCollapsed(isBelowMd);
-  }, [isBelowMd]);
-
-  const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
-  };
-
-  const handleLogout = () => {
-    logout();
-  };
 
   const drawer = (
     <Box
@@ -67,13 +57,13 @@ export const Sidebar = () => {
         <IconButton
           onClick={() => {
             if (!isBelowMd) {
-              setIsCollapsed(prev => !prev);
+              setSidebarIsOpen(!isOpen);
             }
           }}
           sx={{ display: { sm: 'none', md: 'flex' } }}>
-          <MenuOpen sx={{ transform: isCollapsed ? 'rotate(180deg)' : 'none' }} />
+          <MenuOpen sx={{ transform: !isOpen ? 'rotate(180deg)' : 'none' }} />
         </IconButton>
-        {!isCollapsed && (
+        {isOpen && (
           <Typography variant="h6" noWrap component="div" fontWeight={700}>
             Money Manager
           </Typography>
@@ -89,21 +79,20 @@ export const Sidebar = () => {
               component={Link}
               to={path}
               selected={pathname === path}
-              onClick={() => isMobile && handleDrawerToggle()}
               sx={{
                 minHeight: 48,
-                justifyContent: isCollapsed ? 'center' : 'initial',
+                justifyContent: !isOpen ? 'center' : 'initial',
                 px: 2.5
               }}>
               <ListItemIcon
                 sx={{
                   minWidth: 0,
-                  mr: isCollapsed ? 0 : 3,
+                  mr: !isOpen ? 0 : 3,
                   justifyContent: 'center'
                 }}>
                 {icon}
               </ListItemIcon>
-              {!isCollapsed && (
+              {isOpen && (
                 <ListItemText
                   primary={label}
                   primaryTypographyProps={{ sx: { fontWeight: 500 } }}
@@ -118,7 +107,7 @@ export const Sidebar = () => {
 
       <Box sx={{ p: 2 }}>
         <Stack
-          direction={isCollapsed ? 'column' : 'row'}
+          direction={!isOpen ? 'column' : 'row'}
           spacing={2}
           alignItems="center"
           justifyContent="space-between">
@@ -127,7 +116,7 @@ export const Sidebar = () => {
               {user.firstName?.[0]}
               {user.surname?.[0]}
             </Avatar>
-            {!isCollapsed && (
+            {isOpen && (
               <Box>
                 <Typography variant="subtitle2">
                   {user.firstName} {user.surname}
@@ -142,7 +131,7 @@ export const Sidebar = () => {
               </IconButton>
             </Tooltip>
             <Tooltip title="Logout">
-              <IconButton onClick={handleLogout} color="inherit">
+              <IconButton onClick={() => logout()} color="inherit">
                 <Logout fontSize="small" />
               </IconButton>
             </Tooltip>
@@ -161,8 +150,8 @@ export const Sidebar = () => {
       }}>
       <Drawer
         variant={isMobile ? 'temporary' : 'permanent'}
-        open={isMobile ? mobileOpen : true}
-        onClose={handleDrawerToggle}
+        open={isOpen}
+        onClose={() => setSidebarIsOpen(false)}
         ModalProps={{
           keepMounted: true
         }}
