@@ -11,26 +11,3 @@ input:-webkit-autofill:active {
 input:-webkit-autofill {
   -webkit-text-fill-color: $white !important;
 }
-
-// Notistack
-#notistack-snackbar {
-  text-transform: uppercase;
-  font-weight: bold;
-  font-family: $font-family;
-}
-
-.notistack-container {
-  transform: translateX(-50%);
-
-  @media (min-width: 920px) {
-    transform: none;
-  }
-
-  @include respond(tablet) {
-    transform: translateX(-35%);
-  }
-
-  @include respond(mobile) {
-    transform: translateX(-50%);
-  }
-}

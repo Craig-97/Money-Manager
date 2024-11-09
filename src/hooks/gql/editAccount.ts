@@ -1,7 +1,7 @@
-import { useSnackbar } from 'notistack';
 import { useMutation } from '@apollo/client';
 import { EDIT_ACCOUNT_MUTATION, editAccountCache } from '~/graphql';
 import { useErrorHandler } from '~/hooks';
+import { useSnackbar } from '~/state';
 import { useAccountContext } from '~/state';
 
 interface EditAccountInput {

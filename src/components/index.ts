@@ -9,3 +9,4 @@ export * from './Table';
 export * from './Tabs';
 export * from './Setup';
 export * from './Sidebar';
+export * from './SnackbarAlert';

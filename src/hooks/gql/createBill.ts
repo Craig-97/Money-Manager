@@ -1,7 +1,7 @@
-import { useSnackbar } from 'notistack';
 import { useMutation } from '@apollo/client';
 import { useErrorHandler } from '../errorHandler';
 import { CREATE_BILL_MUTATION, addBillCache } from '~/graphql';
+import { useSnackbar } from '~/state';
 import { Bill } from '~/types';
 import { User } from '~/types';
 

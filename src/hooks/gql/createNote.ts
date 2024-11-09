@@ -1,6 +1,7 @@
 import { useMutation } from '@apollo/client';
 import { useErrorHandler } from '../errorHandler';
 import { CREATE_NOTE_MUTATION, addNoteCache } from '~/graphql';
+import { useSnackbar } from '~/state';
 import { Note, User } from '~/types';
 
 interface CreateNoteParams {
@@ -9,6 +10,7 @@ interface CreateNoteParams {
 }
 
 export const useCreateNote = () => {
+  const { enqueueSnackbar } = useSnackbar();
   const handleGQLError = useErrorHandler();
   const [createNote, { loading }] = useMutation(CREATE_NOTE_MUTATION);
 
@@ -23,7 +25,10 @@ export const useCreateNote = () => {
           }
         }
       ) => addNoteCache(cache, note, user),
-      onError: handleGQLError
+      onError: handleGQLError,
+      onCompleted: () => {
+        enqueueSnackbar('Note created successfully!', { variant: 'success' });
+      }
     });
   };
 

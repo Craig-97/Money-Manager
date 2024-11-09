@@ -1,4 +1,3 @@
-import { useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Dashboard, Logout, MenuOpen, NoteRounded, Settings, Update } from '@mui/icons-material';
 import {
@@ -21,9 +20,8 @@ import {
 import { useLogout, useSidebarState } from '~/hooks';
 import { useAccountContext, useSidebarStore } from '~/state';
 
-
-const DRAWER_WIDTH = 280;
-const COLLAPSED_DRAWER_WIDTH = 82;
+export const DRAWER_WIDTH = 280;
+export const COLLAPSED_DRAWER_WIDTH = 82;
 
 const NAV_ITEMS = [
   { path: '/', label: 'Dashboard', icon: <Dashboard /> },
@@ -42,8 +40,6 @@ export const Sidebar = () => {
   const logout = useLogout();
   const drawerWidth = !isOpen ? COLLAPSED_DRAWER_WIDTH : DRAWER_WIDTH;
   useSidebarState();
-
-
 
   const drawer = (
     <Box

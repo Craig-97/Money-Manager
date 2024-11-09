@@ -1,8 +1,8 @@
-import { useSnackbar } from 'notistack';
 import { useMutation } from '@apollo/client';
 import { useEditAccount } from './editAccount';
 import { useErrorHandler } from '../errorHandler';
 import { DELETE_ONE_OFF_PAYMENT_MUTATION, deletePaymentCache } from '~/graphql';
+import { useSnackbar } from '~/state';
 import { DeletePaymentResponse, User } from '~/types';
 
 interface DeleteSelectedPaymentProps {

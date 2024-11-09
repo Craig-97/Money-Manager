@@ -1,8 +1,8 @@
-import { useSnackbar } from 'notistack';
 import { useNavigate } from 'react-router-dom';
 import { useApolloClient, useMutation } from '@apollo/client';
 import { CREATE_ACCOUNT_MUTATION, GET_ACCOUNT_QUERY } from '~/graphql';
 import { useErrorHandler } from '~/hooks';
+import { useSnackbar } from '~/state';
 
 export const useCreateAccount = () => {
   const { enqueueSnackbar } = useSnackbar();

@@ -1,7 +1,7 @@
-import { useSnackbar } from 'notistack';
 import { useMutation } from '@apollo/client';
 import { useErrorHandler } from '../errorHandler';
 import { EDIT_ONE_OFF_PAYMENT_MUTATION } from '~/graphql';
+import { useSnackbar } from '~/state';
 import { OneOffPayment } from '~/types';
 
 interface EditSelectedPaymentProps {

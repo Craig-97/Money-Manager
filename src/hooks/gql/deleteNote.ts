@@ -1,7 +1,7 @@
-import { useSnackbar } from 'notistack';
 import { useMutation } from '@apollo/client';
 import { useErrorHandler } from '../errorHandler';
 import { DELETE_NOTE_MUTATION, deleteNoteCache } from '~/graphql';
+import { useSnackbar } from '~/state';
 import { User } from '~/types';
 
 interface UseDeleteNoteProps {

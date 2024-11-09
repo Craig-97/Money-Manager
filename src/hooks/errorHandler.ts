@@ -1,8 +1,8 @@
-import { useSnackbar } from 'notistack';
 import { useNavigate } from 'react-router-dom';
 import { ApolloError } from '@apollo/client';
 import { useLogout } from './logout';
 import { ERRORS } from '~/constants';
+import { useSnackbar } from '~/state';
 import { getGQLErrorCode, getGQLTokenExpired } from '~/utils';
 
 export const useErrorHandler = () => {

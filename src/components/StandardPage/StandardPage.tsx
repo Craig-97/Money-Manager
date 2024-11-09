@@ -20,10 +20,14 @@ export const StandardPage = ({ children, bottomNav = true }: StandardPageProps) 
       <Box sx={{ display: 'flex', minHeight: '100vh' }}>
         {showSidebar && <Sidebar />}
         <Box
+          id="main"
           component="main"
           sx={{
             flexGrow: 1,
-            width: showSidebar ? { sm: `calc(100% - 280px)` } : '100%'
+            width: showSidebar ? { sm: `calc(100% - 280px)` } : '100%',
+            position: 'relative',
+            height: '100%',
+            overflow: 'auto'
           }}>
           {children}
         </Box>

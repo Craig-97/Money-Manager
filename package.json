@@ -45,7 +45,6 @@
     "formik": "^2.4.6",
     "graphql": "^16.9.0",
     "lodash.isequal": "^4.5.0",
-    "notistack": "^3.0.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.27.0",

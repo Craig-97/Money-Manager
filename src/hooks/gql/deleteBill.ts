@@ -1,7 +1,7 @@
-import { useSnackbar } from 'notistack';
 import { useMutation } from '@apollo/client';
 import { useErrorHandler } from '../errorHandler';
 import { DELETE_BILL_MUTATION, deleteBillCache } from '~/graphql';
+import { useSnackbar } from '~/state';
 import { User } from '~/types';
 
 interface DeleteSelectedBillProps {

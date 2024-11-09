@@ -1,7 +1,7 @@
-import { useSnackbar } from 'notistack';
 import { useMutation } from '@apollo/client';
 import { useEditAccount } from './editAccount';
 import { EDIT_BILL_MUTATION } from '~/graphql';
+import { useSnackbar } from '~/state';
 import { Bill, EditBillResponse } from '~/types';
 
 interface EditSelectedBillProps {
