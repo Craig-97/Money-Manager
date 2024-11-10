@@ -22,9 +22,7 @@ export const TotalCard = ({
   onClick,
   disabled
 }: TotalCardProps) => (
-  <Card
-    className={`${classBaseName}-total-card`}
-    sx={{ width: { mobile: '100%', sm: '275px' }, flexGrow: 1 }}>
+  <Card className={`${classBaseName}-total-card`}>
     <CardActionArea onClick={onClick} disabled={disabled}>
       <CardContent>
         <div className="total-card__text">

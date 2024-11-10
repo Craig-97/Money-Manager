@@ -3,7 +3,6 @@ import { useLocation } from 'react-router-dom';
 import { Box } from '@mui/material';
 import { BottomNav } from '../BottomNav';
 import { Sidebar } from '../Sidebar';
-
 interface StandardPageProps {
   children?: React.ReactNode;
   bottomNav?: boolean;
@@ -23,8 +22,7 @@ export const StandardPage = ({ children, bottomNav = true }: StandardPageProps) 
           id="main"
           component="main"
           sx={{
-            flexGrow: 1,
-            width: showSidebar ? { sm: `calc(100% - 280px)` } : '100%',
+            width: '100%',
             position: 'relative',
             height: '100%',
             overflow: 'auto'

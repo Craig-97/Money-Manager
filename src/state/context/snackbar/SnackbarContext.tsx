@@ -7,7 +7,7 @@ import { SnackbarContextType, SnackbarMessage, SnackbarVariant } from '~/types';
 
 const SnackbarContext = createContext<SnackbarContextType | undefined>(undefined);
 
-export const SnackbarProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const SnackbarProvider = ({ children }: { children: React.ReactNode }) => {
   const [messages, setMessages] = useState<SnackbarMessage[]>([]);
   const { container, isLoading } = useSnackbarContainer();
   const isOpen = useSidebarStore(state => state.isOpen);

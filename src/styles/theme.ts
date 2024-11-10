@@ -29,10 +29,10 @@ export const theme = createTheme({
     values: {
       mobile: 0,
       xs: 345,
-      sm: 620,
-      md: 920,
-      lg: 1250,
-      xl: 1536
+      sm: 660,
+      md: 1185,
+      lg: 1385,
+      xl: 1920
     }
   },
   typography: {

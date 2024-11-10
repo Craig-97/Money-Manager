@@ -3,7 +3,7 @@ import { Panels, PaydayAlert, Totals, StandardPage } from '~/components';
 
 export const Homepage = () => (
   <StandardPage>
-    <Box sx={{ maxWidth: '1196px', m: '0 auto', p: 3 }}>
+    <Box sx={{ m: '0 auto', p: { mobile: 3, sm: 4 } }}>
       <PaydayAlert />
       <Totals />
       <Panels />

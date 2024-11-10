@@ -1,11 +1,6 @@
 @use '../abstracts' as *;
 
 .totals {
-  display: flex;
-  flex-wrap: wrap;
-  margin: 0 0 2rem 0;
-  gap: 2rem;
-
   .MuiCard-root {
     min-height: 120px;
     max-height: 120px;

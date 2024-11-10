@@ -32,7 +32,7 @@ const NAV_ITEMS = [
 export const Sidebar = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isBelowMd = useMediaQuery(theme.breakpoints.down('md'));
+  const isBelowLg = useMediaQuery(theme.breakpoints.down('lg'));
   const { pathname } = useLocation();
   const { user } = useAccountContext();
   const { isOpen, setSidebarIsOpen } = useSidebarStore();
@@ -52,11 +52,11 @@ export const Sidebar = () => {
       <Box sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
         <IconButton
           onClick={() => {
-            if (!isBelowMd) {
+            if (!isBelowLg) {
               setSidebarIsOpen(!isOpen);
             }
           }}
-          sx={{ display: { sm: 'none', md: 'flex' } }}>
+          sx={{ display: { sm: 'none', lg: 'flex' } }}>
           <MenuOpen sx={{ transform: !isOpen ? 'rotate(180deg)' : 'none' }} />
         </IconButton>
         {isOpen && (

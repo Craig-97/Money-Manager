@@ -9,12 +9,12 @@ import { useSidebarStore } from '~/state';
  */
 export const useSidebarState = () => {
   const theme = useTheme();
-  const isBelowMd = useMediaQuery(theme.breakpoints.down('md'));
+  const isBelowLg = useMediaQuery(theme.breakpoints.down('lg'));
   const { setSidebarIsOpen } = useSidebarStore();
-  const wasBelow = useRef(isBelowMd);
+  const wasBelow = useRef(isBelowLg);
 
   useEffect(() => {
-    if (isBelowMd) {
+    if (isBelowLg) {
       setSidebarIsOpen(false);
     } else {
       if (wasBelow.current) {
@@ -25,6 +25,6 @@ export const useSidebarState = () => {
         setSidebarIsOpen(parsedIsOpen);
       }
     }
-    wasBelow.current = isBelowMd;
-  }, [isBelowMd, setSidebarIsOpen]);
-}; 
+    wasBelow.current = isBelowLg;
+  }, [isBelowLg, setSidebarIsOpen]);
+};

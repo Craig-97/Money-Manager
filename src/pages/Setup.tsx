@@ -6,7 +6,7 @@ export const Setup = () => (
     <Box
       sx={{
         maxWidth: '1196px',
-        minHeight: `calc(100svh - 64px)`,
+        minHeight: { mobile: 'calc(100svh - 48px)', sm: 'calc(100svh - 64px)' },
         m: '0 auto',
         display: 'flex',
         justifyContent: 'center'

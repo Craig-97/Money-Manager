@@ -18,7 +18,17 @@ export const BottomNav = () => {
   };
 
   return (
-    <BottomNavigation className="bottom-nav" value={value} onChange={onChange}>
+    <BottomNavigation
+      className="bottom-nav"
+      value={value}
+      onChange={onChange}
+      sx={{
+        display: { mobile: 'flex', sm: 'none' },
+        width: '100%',
+        position: 'fixed',
+        bottom: 0,
+        zIndex: 100
+      }}>
       <BottomNavigationAction value={'/'} icon={<HomeIcon />} component={Link} to={'/'} />
       <BottomNavigationAction
         value={'/forecast'}

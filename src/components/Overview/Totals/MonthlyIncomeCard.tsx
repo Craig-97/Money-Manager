@@ -1,7 +1,6 @@
 import { Fragment, useState } from 'react';
 import LocalAtmIcon from '@mui/icons-material/LocalAtm';
 import { EnterValuePopup } from '../Popups';
-import { LoadingCard } from './LoadingCard';
 import { TotalCard } from './TotalCard';
 import { useEditAccount } from '~/hooks';
 import { useAccountContext } from '~/state';
@@ -17,9 +16,9 @@ export const MonthlyIncomeCard = () => {
     setIsOpen(true);
   };
 
-  const changeMonthlyIncome = (value: number) => {
+  const changeMonthlyIncome = async (value: number) => {
     if (!isNaN(value) && value !== monthlyIncome) {
-      updateAccount({
+      await updateAccount({
         input: { monthlyIncome: value },
         options: { successMessage: 'Monthly Income updated' }
       });
@@ -29,17 +28,13 @@ export const MonthlyIncomeCard = () => {
 
   return (
     <Fragment>
-      {!loading ? (
-        <TotalCard
-          classBaseName="monthly-income"
-          title="MONTHLY INCOME"
-          amount={monthlyIncome}
-          onClick={handleClickOpen}
-          icon={<LocalAtmIcon color="action" />}
-        />
-      ) : (
-        <LoadingCard />
-      )}
+      <TotalCard
+        classBaseName="monthly-income"
+        title="MONTHLY INCOME"
+        amount={monthlyIncome}
+        onClick={handleClickOpen}
+        icon={<LocalAtmIcon color="action" />}
+      />
       {isOpen && (
         <EnterValuePopup
           currentValue={monthlyIncome}
@@ -48,6 +43,7 @@ export const MonthlyIncomeCard = () => {
           changeValue={changeMonthlyIncome}
           title="Monthly Income"
           labelText="Enter your updated monthly income"
+          loading={loading}
         />
       )}
     </Fragment>
