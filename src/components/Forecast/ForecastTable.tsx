@@ -1,7 +1,7 @@
+import { useShallow } from 'zustand/react/shallow';
 import { Box } from '@mui/material';
 import { Table } from '../Table';
-import { useAccountContext } from '~/state';
-import { AccountState } from '~/types';
+import { useAccountStore } from '~/state';
 import { getTableColumns, getMonthsList, calculateForecastData } from '~/utils';
 
 interface ForecastTableProps {
@@ -9,8 +9,10 @@ interface ForecastTableProps {
 }
 
 export const ForecastTable = ({ past = false }: ForecastTableProps) => {
-  const { account } = useAccountContext();
-  const { bankFreeToSpend, monthlyIncome, billsTotal }: AccountState = account;
+  const [bankFreeToSpend, monthlyIncome, billsTotal] = useAccountStore(
+    useShallow(s => [s.account.bankFreeToSpend, s.account.monthlyIncome, s.account.billsTotal])
+  );
+
   const initialBalance = bankFreeToSpend ?? 0;
   const monthlySpend = billsTotal ?? 1250;
   const monthlyNet = monthlyIncome - monthlySpend;

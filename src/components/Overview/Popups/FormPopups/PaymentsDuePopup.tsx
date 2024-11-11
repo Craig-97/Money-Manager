@@ -1,19 +1,20 @@
-import { ChangeEvent, KeyboardEvent, useEffect } from 'react';
-import { Fragment, useState } from 'react';
+import { ChangeEvent, KeyboardEvent, Fragment, useState, useEffect } from 'react';
 import DeleteIcon from '@mui/icons-material/Delete';
 import PaidIcon from '@mui/icons-material/Paid';
 import { LoadingButton } from '@mui/lab';
-import { Box } from '@mui/material';
-import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
-import InputAdornment from '@mui/material/InputAdornment';
-import TextField from '@mui/material/TextField';
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  InputAdornment,
+  TextField
+} from '@mui/material';
 import { LoadingIconButton } from '~/components/LoadingIconButton/LoadingIconButton';
-import { useAccountContext } from '~/state';
+import { useAccountStore } from '~/state';
 import { OneOffPayment } from '~/types';
 
 interface PaymentsDuePopupProps {
@@ -39,8 +40,7 @@ export const PaymentsDuePopup = ({
   onDelete,
   loading = false
 }: PaymentsDuePopupProps) => {
-  const { account } = useAccountContext();
-  const { id } = account;
+  const id = useAccountStore(s => s.account.id);
   const [name, setName] = useState<string>(defaultName);
   const [amount, setAmount] = useState<number>(defaultAmount);
   const [loadingAction, setLoadingAction] = useState<LoadingAction>(null);

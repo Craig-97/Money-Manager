@@ -1,22 +1,21 @@
 import { useMutation } from '@apollo/client';
 import { useErrorHandler } from '../errorHandler';
 import { CREATE_BILL_MUTATION, addBillCache } from '~/graphql';
-import { useSnackbar } from '~/state';
+import { useSnackbar, useUserContext } from '~/state';
 import { Bill } from '~/types';
-import { User } from '~/types';
 
 interface CreateBillParams {
   bill: Bill;
-  user: User;
 }
 
 export const useCreateBill = (onSuccess?: () => void) => {
+  const { user } = useUserContext();
   const { enqueueSnackbar } = useSnackbar();
   const handleGQLError = useErrorHandler();
 
   const [createBill, { loading }] = useMutation(CREATE_BILL_MUTATION);
 
-  const createNewBill = ({ bill, user }: CreateBillParams) => {
+  const createNewBill = ({ bill }: CreateBillParams) => {
     createBill({
       variables: { bill },
       update: (

@@ -3,11 +3,10 @@ import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import { EnterValuePopup } from '../Popups';
 import { TotalCard } from './TotalCard';
 import { useEditAccount } from '~/hooks';
-import { useAccountContext } from '~/state';
+import { useAccountStore } from '~/state';
 
 export const BankBalanceCard = () => {
-  const { account } = useAccountContext();
-  const { bankBalance } = account;
+  const bankBalance = useAccountStore(s => s.account.bankBalance);
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const { updateAccount, loading } = useEditAccount();

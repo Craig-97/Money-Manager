@@ -2,7 +2,7 @@ import { useMutation } from '@apollo/client';
 import { EDIT_ACCOUNT_MUTATION, editAccountCache } from '~/graphql';
 import { useErrorHandler } from '~/hooks';
 import { useSnackbar } from '~/state';
-import { useAccountContext } from '~/state';
+import { useAccountStore, useUserContext } from '~/state';
 
 interface EditAccountInput {
   bankBalance?: number;
@@ -17,8 +17,8 @@ interface UpdateAccountParams {
 }
 
 export const useEditAccount = () => {
-  const { account, user } = useAccountContext();
-  const { id } = account;
+  const { user } = useUserContext();
+  const id = useAccountStore(s => s.account.id);
   const { enqueueSnackbar } = useSnackbar();
   const handleGQLError = useErrorHandler();
 

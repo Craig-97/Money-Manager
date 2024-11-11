@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useMutation, ApolloError } from '@apollo/client';
 import { EVENTS } from '~/constants';
 import { REGISTER_AND_LOGIN_MUTATION } from '~/graphql';
-import { useAccountContext } from '~/state';
+import { useUserContext } from '~/state';
 import { RegisterData } from '~/types';
 
 interface RegisterUser {
@@ -18,7 +18,7 @@ interface UseRegisterProps {
 
 export const useRegister = ({ onError }: UseRegisterProps) => {
   const navigate = useNavigate();
-  const { dispatch } = useAccountContext();
+  const { dispatch } = useUserContext();
 
   const [registerAndLogin, { loading }] = useMutation<RegisterData>(REGISTER_AND_LOGIN_MUTATION, {
     onCompleted: data => {

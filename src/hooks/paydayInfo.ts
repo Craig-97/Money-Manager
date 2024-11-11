@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { client } from '~/graphql';
 import { GET_ACCOUNT_QUERY } from '~/graphql';
-import { useAccountContext } from '~/state';
+import { useAccountStore, useUserContext } from '~/state';
 import { getPayday } from '~/utils';
 
 interface PaydayInfo {
@@ -10,8 +10,8 @@ interface PaydayInfo {
 }
 
 export const useGetPayday = () => {
-  const { account, user } = useAccountContext();
-  const { paydayConfig } = account;
+  const { user } = useUserContext();
+  const paydayConfig = useAccountStore(s => s.account?.paydayConfig ?? null);
   const [paydayInfo, setPaydayInfo] = useState<PaydayInfo>({ payday: null, isPayday: null });
 
   /**

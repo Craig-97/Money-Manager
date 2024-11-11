@@ -8,13 +8,13 @@ import TextField from '@mui/material/TextField';
 import { AutoFocusTextField } from './AutoFocusTextField';
 import { ERRORS, EVENTS } from '~/constants';
 import { LOGIN_QUERY } from '~/graphql';
-import { useAccountContext } from '~/state';
+import { useUserContext } from '~/state';
 import { LoginData } from '~/types';
 import { getGQLErrorCode } from '~/utils';
 
 export const LoginForm = () => {
   const navigate = useNavigate();
-  const { dispatch } = useAccountContext();
+  const { dispatch } = useUserContext();
   const [loginQuery, { loading }] = useLazyQuery<LoginData>(LOGIN_QUERY, {
     onCompleted: data => onLoginCompleted(data),
     onError: errors => onLoginError(errors)

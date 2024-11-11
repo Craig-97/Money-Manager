@@ -3,12 +3,12 @@ import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import { PaymentsDuePopup } from '../Popups';
 import { TotalCard } from './TotalCard';
 import { useCreatePayment } from '~/hooks';
-import { useAccountContext } from '~/state';
+import { useAccountStore, useUserContext } from '~/state';
 import { OneOffPayment } from '~/types';
 
 export const PaymentsDueCard = () => {
-  const { account, user } = useAccountContext();
-  const { paymentsDueTotal } = account;
+  const { user } = useUserContext();
+  const paymentsDueTotal = useAccountStore(s => s.account.paymentsDueTotal);
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const { createNewPayment, loading } = useCreatePayment(() => setIsOpen(false));

@@ -1,11 +1,10 @@
 import { Box, Typography } from '@mui/material';
 import { NewNoteCard, NoteCard, StandardPage } from '~/components';
-import { useAccountContext } from '~/state';
-import { AccountState, Note } from '~/types';
+import { useAccountStore } from '~/state';
+import { Note } from '~/types';
 
 export const Notes = () => {
-  const { account } = useAccountContext();
-  const { notes }: AccountState = account;
+  const notes = useAccountStore(s => s.account.notes);
 
   return (
     <StandardPage>

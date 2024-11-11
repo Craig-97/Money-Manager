@@ -3,11 +3,10 @@ import LocalAtmIcon from '@mui/icons-material/LocalAtm';
 import { EnterValuePopup } from '../Popups';
 import { TotalCard } from './TotalCard';
 import { useEditAccount } from '~/hooks';
-import { useAccountContext } from '~/state';
+import { useAccountStore } from '~/state';
 
 export const MonthlyIncomeCard = () => {
-  const { account } = useAccountContext();
-  const { monthlyIncome } = account;
+  const monthlyIncome = useAccountStore(s => s.account.monthlyIncome);
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const { updateAccount, loading } = useEditAccount();

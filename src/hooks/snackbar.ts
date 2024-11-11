@@ -18,7 +18,7 @@ export const useSnackbarContainer = () => {
     };
 
     findContainer();
-  }, []);
+  }, [window.location.href]);
 
   return { container, isLoading };
 };

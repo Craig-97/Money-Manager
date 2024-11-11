@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState } from 'react';
 import { Portal } from '@mui/material';
-import { useSidebarStore } from '../../sidebar';
+import { useSidebarStore } from '../../stores/sidebar';
 import { SnackbarAlert } from '~/components';
 import { useSnackbarContainer } from '~/hooks';
 import { SnackbarContextType, SnackbarMessage, SnackbarVariant } from '~/types';

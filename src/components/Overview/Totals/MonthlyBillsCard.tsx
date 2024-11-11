@@ -3,18 +3,17 @@ import ReceiptIcon from '@mui/icons-material/Receipt';
 import { MonthlyBillsPopup } from '../Popups';
 import { TotalCard } from './TotalCard';
 import { useCreateBill } from '~/hooks';
-import { useAccountContext } from '~/state';
+import { useAccountStore } from '~/state';
 import { Bill } from '~/types';
 
 export const MonthlyBillsCard = () => {
-  const { account, user } = useAccountContext();
-  const { billsTotal } = account;
+  const billsTotal = useAccountStore(s => s.account.billsTotal);
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const { createNewBill, loading } = useCreateBill(() => setIsOpen(false));
 
   const handleCreateBill = (bill: Bill) => {
-    createNewBill({ bill, user });
+    createNewBill({ bill });
   };
 
   return (

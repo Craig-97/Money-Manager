@@ -3,16 +3,17 @@ import { useEditAccount } from './editAccount';
 import { useErrorHandler } from '../errorHandler';
 import { DELETE_ONE_OFF_PAYMENT_MUTATION, deletePaymentCache } from '~/graphql';
 import { useSnackbar } from '~/state';
-import { DeletePaymentResponse, User } from '~/types';
+import { useUserContext } from '~/state';
+import { DeletePaymentResponse } from '~/types';
 
 interface DeleteSelectedPaymentProps {
   paymentId: string;
-  user: User;
   paid: boolean;
   currentBankBalance: number;
 }
 
 export const useDeletePayment = (onSuccess?: () => void) => {
+  const { user } = useUserContext();
   const { enqueueSnackbar } = useSnackbar();
   const handleGQLError = useErrorHandler();
   const { updateAccount } = useEditAccount();
@@ -21,7 +22,6 @@ export const useDeletePayment = (onSuccess?: () => void) => {
 
   const deleteSelectedPayment = ({
     paymentId,
-    user,
     paid,
     currentBankBalance
   }: DeleteSelectedPaymentProps) => {

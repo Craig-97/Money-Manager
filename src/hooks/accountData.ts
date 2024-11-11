@@ -4,12 +4,13 @@ import { useQuery } from '@apollo/client';
 import { ERRORS, EVENTS } from '~/constants';
 import { FIND_USER_QUERY, GET_ACCOUNT_QUERY, getAccountData } from '~/graphql';
 import { useErrorHandler } from '~/hooks';
-import { useAccountContext } from '~/state';
+import { useAccountStore, useUserContext } from '~/state';
 import { AccountData, FindUserData } from '~/types';
 import { getGQLErrorCode } from '~/utils';
 
 export const useAccountData = () => {
-  const { account, user, dispatch } = useAccountContext();
+  const { user, dispatch } = useUserContext();
+  const { account, setAccount } = useAccountStore();
 
   const handleGQLError = useErrorHandler();
   const token = localStorage.getItem('token');
@@ -24,7 +25,7 @@ export const useAccountData = () => {
   // Updates context with user id and email returned from local storage token
   const onFindUserCompleted = (response: FindUserData) => {
     const { tokenFindUser } = response;
-    if (!userError) dispatch({ type: EVENTS.LOGIN, data: { ...tokenFindUser } });
+    if (!userError) dispatch({ type: EVENTS.LOGIN, data: tokenFindUser });
   };
 
   // Fetches account information once user id is in context
@@ -34,14 +35,15 @@ export const useAccountData = () => {
     onError: handleGQLError
   });
 
-  // If any changes are made to GQL cache then context account data gets updated
+  // If any changes are made to GQL cache then account store gets updated
   useEffect(() => {
     const formattedData = getAccountData(data?.account);
 
+    // Only update if we have valid formatted data and it's different from current
     if (!isEqual(formattedData, account)) {
-      dispatch({ type: EVENTS.GET_ACCOUNT_DETAILS, data: formattedData });
+      setAccount(formattedData);
     }
-  }, [data, dispatch]);
+  }, [data, setAccount]);
 
   // Used to determine If user does not have a linked account
   const errorCode = getGQLErrorCode(error);

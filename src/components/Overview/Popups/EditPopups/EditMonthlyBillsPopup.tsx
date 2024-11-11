@@ -1,6 +1,6 @@
 import { MonthlyBillsPopup } from '../FormPopups';
 import { useEditBill, useDeleteBill } from '~/hooks';
-import { useAccountContext } from '~/state';
+import { useAccountStore } from '~/state';
 import { Bill } from '~/types';
 
 interface EditMonthlyBillsPopupProps {
@@ -14,8 +14,7 @@ export const EditMonthlyBillsPopup = ({
   close,
   selectedBill
 }: EditMonthlyBillsPopupProps) => {
-  const { account, user } = useAccountContext();
-  const { bankBalance } = account;
+  const bankBalance = useAccountStore(s => s.account.bankBalance);
   const { id: billId, name, amount, paid }: Bill = selectedBill;
 
   const { editSelectedBill, loading: editBillLoading } = useEditBill(close);
@@ -33,12 +32,7 @@ export const EditMonthlyBillsPopup = ({
   };
 
   const handleDeleteBill = () => {
-    if (billId) {
-      deleteSelectedBill({
-        billId,
-        user
-      });
-    }
+    if (billId) deleteSelectedBill({ billId });
   };
 
   return isOpen ? (

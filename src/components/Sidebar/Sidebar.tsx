@@ -18,7 +18,7 @@ import {
   useTheme
 } from '@mui/material';
 import { useLogout, useSidebarState } from '~/hooks';
-import { useAccountContext, useSidebarStore } from '~/state';
+import { useSidebarStore, useUserContext } from '~/state';
 
 export const DRAWER_WIDTH = 280;
 export const COLLAPSED_DRAWER_WIDTH = 82;
@@ -34,7 +34,7 @@ export const Sidebar = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isBelowLg = useMediaQuery(theme.breakpoints.down('lg'));
   const { pathname } = useLocation();
-  const { user } = useAccountContext();
+  const { user } = useUserContext();
   const { isOpen, setSidebarIsOpen } = useSidebarStore();
   const navigate = useNavigate();
   const logout = useLogout();

@@ -1,6 +1,6 @@
 import { PaymentsDuePopup } from '../FormPopups';
 import { useEditAccount, useEditPayment, useDeletePayment } from '~/hooks';
-import { useAccountContext } from '~/state';
+import { useAccountStore } from '~/state';
 import { OneOffPayment } from '~/types';
 
 interface EditPaymentsDuePopupProps {
@@ -14,8 +14,7 @@ export const EditPaymentsDuePopup = ({
   close,
   selectedPayment
 }: EditPaymentsDuePopupProps) => {
-  const { account, user } = useAccountContext();
-  const { bankBalance } = account;
+  const bankBalance = useAccountStore(s => s.account.bankBalance);
   const { id: paymentId, name, amount }: OneOffPayment = selectedPayment;
 
   const { editSelectedPayment, loading: editPayLoading } = useEditPayment(close);
@@ -32,7 +31,6 @@ export const EditPaymentsDuePopup = ({
     if (paymentId) {
       deleteSelectedPayment({
         paymentId,
-        user,
         paid,
         currentBankBalance: bankBalance
       });

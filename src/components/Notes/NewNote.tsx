@@ -2,11 +2,10 @@ import { ChangeEvent, Fragment, useState } from 'react';
 import { LoadingButton } from '@mui/lab';
 import { Card, CardContent, Typography } from '@mui/material';
 import { useCreateNote } from '~/hooks';
-import { useAccountContext } from '~/state';
+import { useAccountStore } from '~/state';
 
 export const NewNoteCard = () => {
-  const { account, user } = useAccountContext();
-  const { id } = account;
+  const id = useAccountStore(s => s.account.id);
   const [noteText, setNoteText] = useState<string>('');
   const characterLimit = 200;
 
@@ -21,8 +20,7 @@ export const NewNoteCard = () => {
   const handleSaveClick = () => {
     if (noteText.trim().length > 0) {
       createNewNote({
-        note: { account: id, body: noteText },
-        user
+        note: { account: id, body: noteText }
       });
       setNoteText('');
     }

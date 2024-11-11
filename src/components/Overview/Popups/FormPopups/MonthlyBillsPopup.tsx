@@ -1,19 +1,19 @@
-import { ChangeEvent, KeyboardEvent } from 'react';
-import { useState } from 'react';
-import { useEffect } from 'react';
+import { ChangeEvent, KeyboardEvent, useState, useEffect } from 'react';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { LoadingButton } from '@mui/lab';
-import Button from '@mui/material/Button';
-import Checkbox from '@mui/material/Checkbox';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
-import InputAdornment from '@mui/material/InputAdornment';
-import TextField from '@mui/material/TextField';
+import {
+  Button,
+  Checkbox,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  InputAdornment,
+  TextField
+} from '@mui/material';
 import { LoadingIconButton } from '~/components/LoadingIconButton';
-import { useAccountContext } from '~/state';
+import { useAccountStore } from '~/state';
 import { Bill } from '~/types';
 
 interface MonthlyBillsPopupProps {
@@ -41,9 +41,7 @@ export const MonthlyBillsPopup = ({
   onDelete,
   loading = false
 }: MonthlyBillsPopupProps) => {
-  const { account } = useAccountContext();
-  const { id } = account;
-
+  const id = useAccountStore(s => s.account.id);
   const [name, setName] = useState<string>(defaultName);
   const [amount, setAmount] = useState<number>(defaultAmount);
   const [paid, setPaid] = useState<boolean>(defaultPaid);

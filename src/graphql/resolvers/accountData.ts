@@ -1,10 +1,10 @@
-import { initialState } from '~/state';
+import { initialAccountState } from '~/state';
 import { Account } from '~/types';
 import { AccountState } from '~/types';
 import { getAmountTotal, getBills, getPaymentsDue } from '~/utils';
 
 export const getAccountData = (account?: Account): AccountState => {
-  if (!account) return initialState.account;
+  if (!account) return initialAccountState;
 
   const {
     bankBalance,

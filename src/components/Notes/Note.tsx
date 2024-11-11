@@ -5,7 +5,6 @@ import { Card, CardContent, IconButton, Typography } from '@mui/material';
 import { NoteEditPopup } from './NoteEditPopup';
 import { LoadingIconButton } from '../LoadingIconButton';
 import { useDeleteNote, useEditNote } from '~/hooks';
-import { useAccountContext } from '~/state';
 import { getDateFromTimestamp } from '~/utils';
 
 interface NoteProps {
@@ -21,7 +20,6 @@ const getFooterDate = (createdAt?: string, updatedAt?: string) => {
 };
 
 export const NoteCard = ({ id, body, createdAt, updatedAt }: NoteProps) => {
-  const { user } = useAccountContext();
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const handleClose = () => {
@@ -30,7 +28,6 @@ export const NoteCard = ({ id, body, createdAt, updatedAt }: NoteProps) => {
 
   const { editSelectedNote, loading: editNoteLoading } = useEditNote({ onSuccess: handleClose });
   const { deleteSelectedNote, loading: delNoteLoading } = useDeleteNote({
-    user,
     onSuccess: handleClose
   });
 
@@ -39,7 +36,7 @@ export const NoteCard = ({ id, body, createdAt, updatedAt }: NoteProps) => {
   };
 
   const handleDeleteNote = () => {
-    if (id) deleteSelectedNote(id);
+    if (id) deleteSelectedNote({ noteId: id });
   };
 
   return (

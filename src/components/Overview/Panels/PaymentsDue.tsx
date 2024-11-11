@@ -1,8 +1,9 @@
 import { Fragment, useState } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { Divider } from '@mui/material';
 import { EditMonthlyBillsPopup, EditPaymentsDuePopup } from '../Popups';
 import { PAYMENT_TYPES } from '~/constants';
-import { useAccountContext } from '~/state';
+import { useAccountStore } from '~/state';
 import { Bill, OneOffPayment } from '~/types';
 import { formatAmount, isNegative } from '~/utils';
 
@@ -12,10 +13,12 @@ interface Modal {
 }
 
 export const PaymentsDue = () => {
-  const { account } = useAccountContext();
-  const { paymentsDue, paymentsDueTotal } = account;
   const [isOpen, setIsOpen] = useState<Modal>({ PAYMENT_DUE: false, BILL: false });
   const [selectedPayment, setSelectedPayment] = useState<OneOffPayment | Bill>({});
+
+  const [paymentsDue, paymentsDueTotal] = useAccountStore(
+    useShallow(s => [s.account.paymentsDue, s.account.paymentsDueTotal])
+  );
 
   const handleClickOpen = (payment: Bill | OneOffPayment) => {
     setSelectedPayment(payment);

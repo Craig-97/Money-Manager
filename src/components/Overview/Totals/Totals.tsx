@@ -1,3 +1,4 @@
+import { useShallow } from 'zustand/react/shallow';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import LocalAtmIcon from '@mui/icons-material/LocalAtm';
 import PaymentIcon from '@mui/icons-material/Payment';
@@ -7,13 +8,17 @@ import { MonthlyBillsCard } from './MonthlyBillsCard';
 import { MonthlyIncomeCard } from './MonthlyIncomeCard';
 import { PaymentsDueCard } from './PaymentsDueCard';
 import { TotalCard } from './TotalCard';
-import { useAccountContext } from '~/state';
-import { AccountState } from '~/types';
+import { useAccountStore } from '~/state';
 
 export const Totals = () => {
-  const { account } = useAccountContext();
-  const { bankFreeToSpend, discIncome, bankPaydayBalance, payDayDiscIncome }: AccountState =
-    account;
+  const [bankFreeToSpend, discIncome, bankPaydayBalance, payDayDiscIncome] = useAccountStore(
+    useShallow(s => [
+      s.account.bankFreeToSpend,
+      s.account.discIncome,
+      s.account.bankPaydayBalance,
+      s.account.payDayDiscIncome
+    ])
+  );
 
   return (
     <Grid

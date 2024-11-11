@@ -1,13 +1,15 @@
 import { Fragment, useState } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { Divider } from '@mui/material';
 import { EditMonthlyBillsPopup } from '../Popups';
-import { useAccountContext } from '~/state';
+import { useAccountStore } from '~/state';
 import { Bill } from '~/types';
 import { formatAmount, isNegative } from '~/utils';
 
 export const MonthlyBills = () => {
-  const { account } = useAccountContext();
-  const { bills, billsTotal } = account;
+  const [bills, billsTotal] = useAccountStore(
+    useShallow(s => [s.account.bills, s.account.billsTotal])
+  );
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [selectedBill, setSelectedBill] = useState<Bill>({});
 

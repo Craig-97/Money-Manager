@@ -1,21 +1,20 @@
 import { useMutation } from '@apollo/client';
 import { useErrorHandler } from '../errorHandler';
 import { DELETE_BILL_MUTATION, deleteBillCache } from '~/graphql';
-import { useSnackbar } from '~/state';
-import { User } from '~/types';
+import { useSnackbar, useUserContext } from '~/state';
 
 interface DeleteSelectedBillProps {
   billId: string;
-  user: User;
 }
 
 export const useDeleteBill = (onSuccess?: () => void) => {
+  const { user } = useUserContext();
   const { enqueueSnackbar } = useSnackbar();
   const handleGQLError = useErrorHandler();
 
   const [deleteBill, { loading }] = useMutation(DELETE_BILL_MUTATION);
 
-  const deleteSelectedBill = ({ billId, user }: DeleteSelectedBillProps) => {
+  const deleteSelectedBill = ({ billId }: DeleteSelectedBillProps) => {
     deleteBill({
       variables: { id: billId },
       update: (
