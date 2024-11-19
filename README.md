@@ -10,8 +10,8 @@ https://craig-money-manager.netlify.app/
 ***Sign-up process is not complete. If you wish to demo the app use the following details:***
 
 ```
-Email: demo@test.com
-Password: waracledemo1
+Email: testing@account.com
+Password: Test123!
 ```
 
 ## Desktop Preview
