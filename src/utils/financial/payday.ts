@@ -1,21 +1,7 @@
+import { formatLabel } from './shared';
 import { PAY_FREQUENCY, PAYDAY_TYPE_OPTIONS, WEEKDAY } from '~/constants';
 import { BANK_HOLIDAY_REGION } from '~/constants/bankHolidays';
 import { PayFrequency } from '~/types';
-
-const formatLabel = (value: string) => {
-  // Handles special cases first
-  if (value === 'FOUR_WEEKLY') return '4 Weekly';
-
-  // General case: convert "SNAKE_CASE" to "Title Case"
-  return value
-    .toLowerCase()
-    .split('_')
-    .map(word => {
-      if (word === 'and') return '&';
-      return word.charAt(0).toUpperCase() + word.slice(1);
-    })
-    .join(' ');
-};
 
 export const getFrequencyOptions = () =>
   Object.values(PAY_FREQUENCY).map(value => ({

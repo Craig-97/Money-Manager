@@ -27,10 +27,10 @@ export const Totals = () => {
       spacing={4}
       columns={{ mobile: 1, sm: 2, md: 4 }}
       sx={{ mb: 4 }}>
-      <Grid size={{ mobile: 1, sm: 1, md: 1 }}>
+      <Grid size={1}>
         <BankBalanceCard />
       </Grid>
-      <Grid size={{ mobile: 1, sm: 1, md: 1 }}>
+      <Grid size={1}>
         <TotalCard
           classBaseName="free-to-spend"
           title="FREE TO SPEND"
@@ -39,13 +39,13 @@ export const Totals = () => {
           disabled={true}
         />
       </Grid>
-      <Grid size={{ mobile: 1, sm: 1, md: 1 }}>
+      <Grid size={1}>
         <PaymentsDueCard />
       </Grid>
-      <Grid size={{ mobile: 1, sm: 1, md: 1 }}>
+      <Grid size={1}>
         <MonthlyBillsCard />
       </Grid>
-      <Grid size={{ mobile: 1, sm: 1, md: 1 }}>
+      <Grid size={1}>
         <TotalCard
           classBaseName="payday-bank"
           title="PAYDAY BALANCE"
@@ -54,7 +54,7 @@ export const Totals = () => {
           disabled={true}
         />
       </Grid>
-      <Grid size={{ mobile: 1, sm: 1, md: 1 }}>
+      <Grid size={1}>
         <TotalCard
           classBaseName="payday-discretionary"
           title="PAYDAY DISC"
@@ -63,10 +63,10 @@ export const Totals = () => {
           disabled={true}
         />
       </Grid>
-      <Grid size={{ mobile: 1, sm: 1, md: 1 }}>
+      <Grid size={1}>
         <MonthlyIncomeCard />
       </Grid>
-      <Grid size={{ mobile: 1, sm: 1, md: 1 }}>
+      <Grid size={1}>
         <TotalCard
           classBaseName="monthly-discretionary"
           title="DISC INCOME"

@@ -2,13 +2,13 @@ import { useNavigate } from 'react-router-dom';
 import { ApolloError } from '@apollo/client';
 import { useLogout } from './logout';
 import { ERRORS } from '~/constants';
-import { useSnackbar } from '~/state';
+import { useSafeSnackbar } from '~/hooks';
 import { getGQLErrorCode, getGQLTokenExpired } from '~/utils';
 
 export const useErrorHandler = () => {
-  const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
   const logout = useLogout();
+  const enqueueSnackbar = useSafeSnackbar();
 
   const handleGQLError = (error: ApolloError) => {
     // Ignore account not found error as this is used to navigate to setup page
@@ -30,8 +30,10 @@ export const useErrorHandler = () => {
       return;
     }
 
-    // For soft errors, display a snackbar
-    enqueueSnackbar(error.message, { variant: 'error' });
+    // For soft errors, display a snackbar if available
+    if (enqueueSnackbar) {
+      enqueueSnackbar(error.message, { variant: 'error' });
+    }
   };
 
   return handleGQLError;

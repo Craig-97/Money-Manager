@@ -12,6 +12,14 @@ import { useUserContext } from '~/state';
 import { LoginData } from '~/types';
 import { getGQLErrorCode } from '~/utils';
 
+const validationSchema = Yup.object().shape({
+  email: Yup.string().email('Invalid email address').required('Email Address required'),
+  password: Yup.string()
+    .required(`Password required`)
+    .min(8, 'Password is too short (min is 8 characters)')
+    .matches(/(?=.*[0-9])/, 'Password must contain a number.')
+});
+
 export const LoginForm = () => {
   const navigate = useNavigate();
   const { dispatch } = useUserContext();
@@ -47,14 +55,6 @@ export const LoginForm = () => {
     }
   };
 
-  const validationSchema = Yup.object().shape({
-    email: Yup.string().email('Invalid email address').required('Email Address required'),
-    password: Yup.string()
-      .required(`Password required`)
-      .min(8, 'Password is too short (min is 8 characters)')
-      .matches(/(?=.*[0-9])/, 'Password must contain a number.')
-  });
-
   const formik = useFormik({
     validateOnChange: false,
     initialValues: {
@@ -71,30 +71,24 @@ export const LoginForm = () => {
   return (
     <form onSubmit={formik.handleSubmit}>
       <AutoFocusTextField
+        {...formik.getFieldProps('email')}
         fullWidth
         id="email"
         label="Email Address"
-        name="email"
         variant="outlined"
         margin="normal"
-        value={formik.values.email}
-        onChange={formik.handleChange}
-        onBlur={formik.handleBlur}
         error={formik.touched.email && Boolean(formik.errors.email)}
         helperText={formik.touched.email && formik.errors.email}
         autoComplete="username"
       />
       <TextField
+        {...formik.getFieldProps('password')}
         fullWidth
         id="current-password"
-        name="password"
         label="Password"
         type="password"
         variant="outlined"
         margin="normal"
-        value={formik.values.password}
-        onChange={formik.handleChange}
-        onBlur={formik.handleBlur}
         error={formik.touched.password && Boolean(formik.errors.password)}
         helperText={formik.touched.password && formik.errors.password}
         autoComplete="current-password"

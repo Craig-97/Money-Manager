@@ -1,5 +1,5 @@
 import * as Yup from 'yup';
-import { PAY_FREQUENCY, PAYDAY_TYPE, WEEKDAY } from '~/constants';
+import { PAY_FREQUENCY, PAYDAY_TYPE, PAYMENT_CATEGORY, PAYMENT_TYPE, WEEKDAY } from '~/constants';
 import { PayFrequency } from '~/types';
 
 const uniqueNameValidator = (items: { name: string }[], name: string, path: string) => {
@@ -75,7 +75,16 @@ export const validationSchema = Yup.object().shape({
         amount: Yup.number()
           .required('Amount is required')
           .typeError('Amount must be a number')
-          .moreThan(0, 'Must be greater than 0')
+          .moreThan(0, 'Must be greater than 0'),
+        dueDate: Yup.date()
+          .required('Due date is required')
+          .typeError('Due date must be a valid date'),
+        type: Yup.string()
+          .required('Type is required')
+          .oneOf(Object.values(PAYMENT_TYPE), 'Invalid payment type'),
+        category: Yup.string()
+          .required('Category is required')
+          .oneOf(Object.values(PAYMENT_CATEGORY), 'Invalid payment category')
       })
     )
     .max(10, 'Maximum of 10 payments allowed'),

@@ -4,3 +4,4 @@ export * from './payday';
 export * from './pages';
 export * from './payment';
 export * from './bankHolidays';
+export * from './oneOffPayment';

@@ -2,7 +2,7 @@ import { Fragment, useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { Divider } from '@mui/material';
 import { EditMonthlyBillsPopup, EditPaymentsDuePopup } from '../Popups';
-import { PAYMENT_TYPES } from '~/constants';
+import { PAYMENT_TYPENAME } from '~/constants';
 import { useAccountStore } from '~/state';
 import { Bill, OneOffPayment } from '~/types';
 import { formatAmount, isNegative } from '~/utils';
@@ -25,8 +25,8 @@ export const PaymentsDue = () => {
 
     setIsOpen({
       ...isOpen,
-      BILL: payment?.__typename === PAYMENT_TYPES.BILL,
-      PAYMENT_DUE: payment?.__typename !== PAYMENT_TYPES.BILL
+      BILL: payment?.__typename === PAYMENT_TYPENAME.BILL,
+      PAYMENT_DUE: payment?.__typename !== PAYMENT_TYPENAME.BILL
     });
   };
 

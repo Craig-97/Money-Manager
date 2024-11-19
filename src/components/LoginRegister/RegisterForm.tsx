@@ -57,71 +57,56 @@ export const RegisterForm = () => {
   return (
     <form onSubmit={formik.handleSubmit}>
       <AutoFocusTextField
+        {...formik.getFieldProps('fname')}
         fullWidth
         id="fname"
         label="First Name"
-        name="fname"
         variant="outlined"
         margin="normal"
-        value={formik.values.fname}
-        onChange={formik.handleChange}
-        onBlur={formik.handleBlur}
         error={formik.touched.fname && Boolean(formik.errors.fname)}
         helperText={formik.touched.fname && formik.errors.fname}
       />
       <TextField
+        {...formik.getFieldProps('lname')}
         fullWidth
         id="lname"
         label="Surname"
-        name="lname"
         variant="outlined"
         margin="normal"
-        value={formik.values.lname}
-        onChange={formik.handleChange}
-        onBlur={formik.handleBlur}
         error={formik.touched.lname && Boolean(formik.errors.lname)}
         helperText={formik.touched.lname && formik.errors.lname}
       />
       <TextField
+        {...formik.getFieldProps('email')}
         fullWidth
         id="email"
         label="Email Address"
-        name="email"
         variant="outlined"
         margin="normal"
-        value={formik.values.email}
-        onChange={formik.handleChange}
-        onBlur={formik.handleBlur}
         error={formik.touched.email && Boolean(formik.errors.email)}
         helperText={formik.touched.email && formik.errors.email}
         autoComplete="username"
       />
       <TextField
+        {...formik.getFieldProps('password')}
         fullWidth
         id="current-password"
-        name="password"
         label="Password"
         type="password"
         variant="outlined"
         margin="normal"
-        value={formik.values.password}
-        onChange={formik.handleChange}
-        onBlur={formik.handleBlur}
         error={formik.touched.password && Boolean(formik.errors.password)}
         helperText={formik.touched.password && formik.errors.password}
         autoComplete="current-password"
       />
       <TextField
+        {...formik.getFieldProps('confirmPassword')}
         fullWidth
         id="confirm-password"
-        name="confirmPassword"
         label="Confirm Password"
         type="password"
         variant="outlined"
         margin="normal"
-        value={formik.values.confirmPassword}
-        onChange={formik.handleChange}
-        onBlur={formik.handleBlur}
         error={formik.touched.confirmPassword && Boolean(formik.errors.confirmPassword)}
         helperText={formik.touched.confirmPassword && formik.errors.confirmPassword}
         autoComplete="confirm-password"

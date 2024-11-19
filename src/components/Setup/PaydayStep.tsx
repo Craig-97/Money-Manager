@@ -157,7 +157,11 @@ export const PaydayStep = ({ formik }: PaydayStepProps) => {
           type="date"
           value={payday.firstPayDate || ''}
           onChange={e => setFieldValue('payday.firstPayDate', e.target.value)}
-          slotProps={{ inputLabel: { shrink: true } }}
+          sx={{
+            '& input::-webkit-calendar-picker-indicator': {
+              filter: 'invert(1)'
+            }
+          }}
           error={touched.payday?.firstPayDate && Boolean(errors.payday?.firstPayDate)}
           helperText={touched.payday?.firstPayDate && errors.payday?.firstPayDate}
         />

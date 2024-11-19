@@ -291,3 +291,9 @@ export const getNextNumberOfMonths = (date: Date, number: number) => {
   }
   return res;
 };
+
+/* Returns a date 7 days from now */
+export const getNextWeekDate = (): string => {
+  const nextWeek = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+  return nextWeek.toISOString().split('T')[0];
+};

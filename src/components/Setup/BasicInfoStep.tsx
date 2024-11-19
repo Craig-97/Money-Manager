@@ -18,20 +18,16 @@ export const BasicInfoStep = ({ formik }: BasicInfoStepProps) => (
         Enter the total available funds in your bank account.
       </Typography>
       <TextField
+        {...formik.getFieldProps('bankBalance')}
+        autoFocus
+        fullWidth
+        label="Bank Balance"
+        type="number"
         slotProps={{
           input: {
             startAdornment: <InputAdornment position="start">£</InputAdornment>
           }
         }}
-        autoFocus
-        fullWidth
-        id="bankBalance"
-        name="bankBalance"
-        label="Bank Balance"
-        type="number"
-        value={formik.values.bankBalance}
-        onChange={formik.handleChange}
-        onBlur={formik.handleBlur}
         error={formik.touched.bankBalance && Boolean(formik.errors.bankBalance)}
         helperText={formik.touched.bankBalance && formik.errors.bankBalance}
         margin="normal"

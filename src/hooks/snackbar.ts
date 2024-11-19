@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useSnackbar } from '~/state';
 
 export const useSnackbarContainer = () => {
   const [container, setContainer] = useState<HTMLElement | null>(null);
@@ -21,4 +22,12 @@ export const useSnackbarContainer = () => {
   }, [window.location.href]);
 
   return { container, isLoading };
+};
+
+export const useSafeSnackbar = () => {
+  try {
+    return useSnackbar().enqueueSnackbar;
+  } catch {
+    return () => undefined;
+  }
 };
