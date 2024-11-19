@@ -10,7 +10,7 @@ interface BillsStepProps {
 }
 
 export const BillsStep = ({ formik }: BillsStepProps) => {
-  const { values, handleChange, handleBlur, touched, errors } = formik;
+  const { values, touched, errors } = formik;
 
   const onAdd = () => {
     handleAddArrayItem<Bill>({
