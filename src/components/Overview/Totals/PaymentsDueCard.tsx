@@ -1,5 +1,5 @@
 import { Fragment, useState } from 'react';
-import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import PaymentOutlinedIcon from '@mui/icons-material/PaymentOutlined';
 import { PaymentsDuePopup } from '../Popups';
 import { TotalCard } from './TotalCard';
 import { useCreatePayment } from '~/hooks';
@@ -8,7 +8,7 @@ import { OneOffPayment } from '~/types';
 
 export const PaymentsDueCard = () => {
   const { user } = useUserContext();
-  const paymentsDueTotal = useAccountStore(s => s.account.paymentsDueTotal);
+  const paymentsDueTotal = useAccountStore(s => s.account.paymentsDueTotal ?? 0);
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const { createNewPayment, loading } = useCreatePayment(() => setIsOpen(false));
@@ -20,11 +20,11 @@ export const PaymentsDueCard = () => {
   return (
     <Fragment>
       <TotalCard
-        classBaseName="payments-due"
         title="PAYMENTS DUE"
         amount={paymentsDueTotal}
         onClick={() => setIsOpen(true)}
-        icon={<AccountBalanceWalletIcon color="secondary" />}
+        icon={<PaymentOutlinedIcon />}
+        iconColor="secondary"
       />
       <PaymentsDuePopup
         title="Add Upcoming Payment"

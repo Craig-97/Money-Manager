@@ -1,3 +1,4 @@
+import { PaymentType } from './oneOffPayment';
 import { PaymentTypeName } from './payment';
 
 export interface Bill {
@@ -6,6 +7,7 @@ export interface Bill {
   amount?: number;
   paid?: boolean;
   account?: string;
+  type?: PaymentType;
   __typename?: PaymentTypeName['BILL'];
 }
 

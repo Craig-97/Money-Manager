@@ -25,13 +25,11 @@
   }
 
   .MuiTablePagination-root {
-    border-top: 1px solid $table-border;
     border-bottom: 0;
     padding: 0;
 
     .MuiToolbar-root {
       @include flexbox($justifyContent: center);
-      background-color: $background;
 
       @include respond(laptop) {
         display: grid;

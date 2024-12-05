@@ -16,7 +16,7 @@
   .tab-panel {
     display: block !important; //overwrite inline react-slick style
     width: auto !important; //overwrite inline react-slick style
-    padding: 24px;
+    padding: 24px 0;
     font-size: $standard;
     font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
     font-weight: 400;
@@ -24,56 +24,5 @@
     letter-spacing: 0.00938em;
     max-height: 630px;
     overflow-y: auto;
-  }
-
-  .upcoming-payments,
-  .monthly-bills {
-    .total,
-    .payment,
-    .bill {
-      @include flexbox($justifyContent: space-between, $alignItems: center);
-
-      h3 {
-        margin: 0.25rem 0 0;
-        font-size: $totals-footer;
-        cursor: default;
-      }
-
-      h5 {
-        margin: 0;
-        font-size: $standard;
-        font-weight: 500;
-      }
-
-      p {
-        color: $white;
-        margin: 0;
-        margin-left: 20px;
-        font-size: $standard;
-        font-weight: 500;
-        cursor: default;
-      }
-
-      .negative {
-        color: $action;
-      }
-    }
-
-    .bill,
-    .payment {
-      h5 {
-        &:hover {
-          cursor: pointer;
-          background: #303030;
-          transform: scale(1.05);
-          padding: 0 5px;
-          border-radius: 8px;
-        }
-      }
-    }
-
-    .MuiDivider-root {
-      margin: 0.5rem 0;
-    }
   }
 }

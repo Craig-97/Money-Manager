@@ -1,10 +1,10 @@
-import { Fragment } from 'react';
+import { Fragment, ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Box } from '@mui/material';
 import { BottomNav } from '../BottomNav';
 import { Sidebar } from '../Sidebar';
 interface StandardPageProps {
-  children?: React.ReactNode;
+  children?: ReactNode;
   bottomNav?: boolean;
 }
 

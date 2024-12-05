@@ -1,7 +1,8 @@
 import { useShallow } from 'zustand/react/shallow';
-import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
-import LocalAtmIcon from '@mui/icons-material/LocalAtm';
-import PaymentIcon from '@mui/icons-material/Payment';
+import AccountBalanceWalletOutlinedIcon from '@mui/icons-material/AccountBalanceWalletOutlined';
+import CalendarTodayOutlinedIcon from '@mui/icons-material/CalendarTodayOutlined';
+import PaidOutlinedIcon from '@mui/icons-material/PaidOutlined';
+import SavingsOutlinedIcon from '@mui/icons-material/SavingsOutlined';
 import Grid from '@mui/material/Grid2';
 import { BankBalanceCard } from './BankBalanceCard';
 import { MonthlyBillsCard } from './MonthlyBillsCard';
@@ -21,21 +22,16 @@ export const Totals = () => {
   );
 
   return (
-    <Grid
-      className="totals"
-      container
-      spacing={4}
-      columns={{ mobile: 1, sm: 2, md: 4 }}
-      sx={{ mb: 4 }}>
+    <Grid container spacing={4} columns={{ mobile: 1, sm: 2, md: 4 }} sx={{ mb: 4 }}>
       <Grid size={1}>
         <BankBalanceCard />
       </Grid>
       <Grid size={1}>
         <TotalCard
-          classBaseName="free-to-spend"
           title="FREE TO SPEND"
           amount={bankFreeToSpend}
-          icon={<PaymentIcon color="action" />}
+          icon={<AccountBalanceWalletOutlinedIcon />}
+          iconColor="success"
           disabled={true}
         />
       </Grid>
@@ -47,19 +43,19 @@ export const Totals = () => {
       </Grid>
       <Grid size={1}>
         <TotalCard
-          classBaseName="payday-bank"
           title="PAYDAY BALANCE"
           amount={bankPaydayBalance}
-          icon={<AccountBalanceIcon color="primary" />}
+          icon={<CalendarTodayOutlinedIcon />}
+          iconColor="primary"
           disabled={true}
         />
       </Grid>
       <Grid size={1}>
         <TotalCard
-          classBaseName="payday-discretionary"
           title="PAYDAY DISC"
           amount={payDayDiscIncome}
-          icon={<PaymentIcon color="action" />}
+          icon={<SavingsOutlinedIcon />}
+          iconColor="success"
           disabled={true}
         />
       </Grid>
@@ -68,10 +64,10 @@ export const Totals = () => {
       </Grid>
       <Grid size={1}>
         <TotalCard
-          classBaseName="monthly-discretionary"
           title="DISC INCOME"
           amount={discIncome}
-          icon={<LocalAtmIcon color="action" />}
+          icon={<PaidOutlinedIcon />}
+          iconColor="success"
           disabled={true}
         />
       </Grid>

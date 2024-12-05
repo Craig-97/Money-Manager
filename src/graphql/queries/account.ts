@@ -16,6 +16,9 @@ export const GET_ACCOUNT_QUERY = gql`
         id
         name
         amount
+        dueDate
+        type
+        category
       }
       notes {
         id

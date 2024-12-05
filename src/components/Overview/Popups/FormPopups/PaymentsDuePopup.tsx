@@ -23,18 +23,14 @@ import { LoadingIconButton } from '~/components/LoadingIconButton';
 import { PAYMENT_CATEGORY } from '~/constants';
 import { PAYMENT_TYPE } from '~/constants';
 import { useAccountStore } from '~/state';
-import { OneOffPayment, PaymentCategory, PaymentType } from '~/types';
-import { getOneOffCategoryOptions, getNextWeekDate } from '~/utils';
+import { OneOffPayment } from '~/types';
+import { getOneOffCategoryOptions, getNextWeekDate, getInputDateFromTimestamp } from '~/utils';
 
 interface PaymentsDuePopupProps {
   title: string;
   isOpen: boolean;
   close: () => void;
-  defaultName?: string;
-  defaultAmount?: number;
-  defaultDueDate?: string;
-  defaultType?: PaymentType;
-  defaultCategory?: PaymentCategory;
+  defaultValues?: Partial<OneOffPayment>;
   onSave: (payment: OneOffPayment) => void;
   onDelete?: (paid: boolean) => void;
   loading?: boolean;
@@ -54,11 +50,7 @@ export const PaymentsDuePopup = ({
   title,
   isOpen,
   close,
-  defaultName = '',
-  defaultAmount = 0,
-  defaultDueDate = getNextWeekDate(),
-  defaultType = PAYMENT_TYPE.EXPENSE,
-  defaultCategory = PAYMENT_CATEGORY.OTHER,
+  defaultValues = {},
   onSave,
   onDelete,
   loading = false
@@ -68,11 +60,13 @@ export const PaymentsDuePopup = ({
 
   const formik = useFormik({
     initialValues: {
-      name: defaultName,
-      amount: defaultAmount,
-      dueDate: defaultDueDate,
-      type: defaultType,
-      category: defaultCategory
+      name: defaultValues.name ?? '',
+      amount: defaultValues.amount ?? 0,
+      dueDate: defaultValues.dueDate
+        ? getInputDateFromTimestamp(defaultValues.dueDate)
+        : getNextWeekDate(),
+      type: defaultValues.type ?? PAYMENT_TYPE.EXPENSE,
+      category: defaultValues.category ?? PAYMENT_CATEGORY.OTHER
     },
     validationSchema,
     validateOnMount: true,

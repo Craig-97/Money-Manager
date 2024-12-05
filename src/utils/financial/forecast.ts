@@ -9,22 +9,6 @@ export interface ForecastCalculationParams {
   past: boolean;
 }
 
-export const getTableColumns = (past: boolean) => [
-  {
-    Header: `${past ? 'Before Payday Balance' : 'Payday Balance'}`,
-    columns: [
-      {
-        Header: 'Month',
-        accessor: 'month'
-      },
-      {
-        Header: 'Amount',
-        accessor: 'amount'
-      }
-    ]
-  }
-];
-
 export const getMonthsList = () => getNextNumberOfMonths(getForecastDate(new Date()), 24);
 
 export const calculateForecastData = ({
@@ -45,10 +29,59 @@ export const calculateForecastData = ({
         balance = initialBalance + monthlyIncome + monthlyNet * index;
       }
 
+      // Calculate percentage change
+      let percentageChange;
+      if (index > 0) {
+        const previousBalance = past
+          ? initialBalance + monthlyNet * (index - 1)
+          : initialBalance + monthlyIncome + monthlyNet * (index - 1);
+
+        const change = ((balance - previousBalance) / Math.abs(previousBalance)) * 100;
+
+        // If both numbers are negative and the balance is decreasing (getting more negative)
+        if (balance < 0 && previousBalance < 0 && balance < previousBalance) {
+          percentageChange = -Math.abs(change);
+        } else {
+          percentageChange = change;
+        }
+      }
+
       return {
         month,
-        amount: `£${balance.toLocaleString()}`
+        amount: `£${balance.toLocaleString()}`,
+        percentageChange: percentageChange?.toFixed(1)
       };
     }) ?? []
   );
+};
+
+export interface ForecastProjections {
+  oneYearProjection: number;
+  monthlyGrowth: string;
+  oneYearGrowth: string;
+}
+
+interface CalculateProjectionsParams {
+  bankFreeToSpend: number;
+  bankPaydayBalance: number;
+  monthlyIncome: number;
+  monthlySpend: number;
+}
+
+export const calculateProjections = ({
+  bankFreeToSpend,
+  monthlyIncome,
+  monthlySpend
+}: CalculateProjectionsParams): ForecastProjections => {
+  const monthlyNet = monthlyIncome - monthlySpend;
+  const oneYearProjection = bankFreeToSpend + monthlyNet * 12;
+  const monthlyChange = monthlyNet / bankFreeToSpend;
+  const monthlyGrowth = (monthlyChange * 100).toFixed(2);
+  const oneYearGrowth = ((oneYearProjection / bankFreeToSpend - 1) * 100).toFixed(0);
+
+  return {
+    oneYearProjection,
+    monthlyGrowth,
+    oneYearGrowth
+  };
 };

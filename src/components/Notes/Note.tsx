@@ -16,7 +16,7 @@ interface NoteProps {
 
 const getFooterDate = (createdAt?: string, updatedAt?: string) => {
   const dateToUse = updatedAt ? updatedAt : createdAt;
-  return dateToUse && getDateFromTimestamp(parseInt(dateToUse));
+  return dateToUse ? getDateFromTimestamp(dateToUse) : '';
 };
 
 export const NoteCard = ({ id, body, createdAt, updatedAt }: NoteProps) => {

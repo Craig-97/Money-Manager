@@ -7,9 +7,11 @@ import NoteRounded from '@mui/icons-material/NoteRounded';
 import UpdateIcon from '@mui/icons-material/Update';
 import BottomNavigation from '@mui/material/BottomNavigation';
 import BottomNavigationAction from '@mui/material/BottomNavigationAction';
+import { useTheme } from '@mui/material/styles';
 import { useLogout } from '~/hooks';
 
 export const BottomNav = () => {
+  const theme = useTheme();
   const [value, setValue] = useState(window.location.pathname);
   const logout = useLogout();
 
@@ -27,7 +29,8 @@ export const BottomNav = () => {
         width: '100%',
         position: 'fixed',
         bottom: 0,
-        zIndex: 100
+        zIndex: 100,
+        borderTop: `1px solid ${theme.palette.divider}`
       }}>
       <BottomNavigationAction value={'/'} icon={<HomeIcon />} component={Link} to={'/'} />
       <BottomNavigationAction

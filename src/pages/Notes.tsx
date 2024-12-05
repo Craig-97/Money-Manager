@@ -8,8 +8,8 @@ export const Notes = () => {
 
   return (
     <StandardPage>
-      <Box sx={{ maxWidth: '1196px', m: '0 auto', p: 3 }}>
-        <Typography variant="h4" fontWeight={700} sx={{ mb: 2 }}>
+      <Box sx={{ m: '0 auto', p: { mobile: 3, sm: 4 } }}>
+        <Typography variant="h4" fontWeight={700} sx={{ mb: 4 }}>
           Notes
         </Typography>
         <Box

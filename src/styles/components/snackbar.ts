@@ -1,6 +1,7 @@
 import { Theme } from '@mui/material';
 import { COLLAPSED_DRAWER_WIDTH } from '~/components';
 import { DRAWER_WIDTH } from '~/components';
+import { SnackbarVariant } from '~/types';
 
 export const snackbarStyles = (theme: Theme, isOpen: boolean, index: number) => ({
   position: 'fixed',
@@ -27,7 +28,7 @@ export const snackbarStyles = (theme: Theme, isOpen: boolean, index: number) => 
   }
 });
 
-export const alertStyles = {
+export const alertStyles = ({ variant }: { variant: SnackbarVariant }) => ({
   width: '100%',
   '& .MuiAlert-message': {
     textTransform: 'uppercase',
@@ -41,5 +42,6 @@ export const alertStyles = {
   },
   '& .MuiAlert-action': {
     color: 'white'
-  }
-};
+  },
+  backgroundColor: `${variant}.dark`
+});

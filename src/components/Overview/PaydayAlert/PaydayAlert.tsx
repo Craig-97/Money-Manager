@@ -28,7 +28,11 @@ export const PaydayAlert = () => {
       <Skeleton
         width="100%"
         height={48}
-        sx={{ mb: 4, transform: 'none', bgcolor: 'rgb(7, 19, 24)' }}>
+        sx={{
+          mb: 4,
+          transform: 'none',
+          bgcolor: 'rgba(147, 51, 234, 0.1)' // Subtle purple loading state
+        }}>
         <Alert severity="info"></Alert>
       </Skeleton>
     );
@@ -38,19 +42,46 @@ export const PaydayAlert = () => {
     <Alert
       sx={{
         mb: 4,
-        alignItems: 'center'
+        alignItems: 'center',
+        backgroundColor: 'background.paper',
+        backgroundImage: 'linear-gradient(rgba(147, 51, 234, 0.15), rgba(147, 51, 234, 0.15))',
+        color: 'white',
+        '& .MuiAlert-action': {
+          padding: '0 8px',
+          alignItems: 'center',
+          '& .MuiIconButton-root': {
+            color: 'rgba(255, 255, 255, 0.8)',
+            '&:hover': {
+              backgroundColor: 'rgba(255, 255, 255, 0.1)'
+            }
+          }
+        },
+        '& .MuiAlert-icon': {
+          color: 'rgba(255, 255, 255, 0.9)'
+        },
+        boxShadow: 1,
+        '& .MuiAlert-message': {
+          fontWeight: 500,
+          fontSize: {
+            mobile: '0.75rem',
+            sm: '0.875rem'
+          },
+          textAlign: {
+            mobile: 'center',
+            sm: 'left'
+          },
+          width: {
+            mobile: '100%',
+            sm: 'auto'
+          }
+        }
       }}
       className="alert"
       severity="info"
-      onClose={handleClose}
-      slotProps={{
-        closeButton: {
-          sx: {
-            padding: 0
-          }
-        }
-      }}>
-      <strong>{isPayday ? `TODAY IS PAYDAY` : `NEXT PAYDAY IS ${formatFullDate(payday)}`}</strong>
+      onClose={handleClose}>
+      <strong>
+        {isPayday ? '🎉 TODAY IS PAYDAY 🎉' : `NEXT PAYDAY IS ${formatFullDate(payday)}`}
+      </strong>
     </Alert>
   );
 };

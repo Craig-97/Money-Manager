@@ -27,8 +27,22 @@ const normalizeToUKDate = (date: Date): Date => {
 };
 
 /* Get date in 'DD/MM/YYYY format from BSON timestamp */
-export const getDateFromTimestamp = (number: number) =>
-  normalizeToUKDate(new Date(number)).toISOString().split('T')[0];
+export const getDateFromTimestamp = (timestamp?: string) => {
+  if (!timestamp) return '';
+  const date = new Date(parseInt(timestamp.toString()));
+  return normalizeToUKDate(date).toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  });
+};
+
+/* Get date in 'DD/MM/YYYY format from BSON timestamp */
+export const getInputDateFromTimestamp = (timestamp?: string) => {
+  if (!timestamp) return '';
+  const date = new Date(parseInt(timestamp.toString()));
+  return date.toISOString().split('T')[0];
+};
 
 /* Formats a date string into 'Friday, 29 April 2022' format in uppercase*/
 export const formatFullDate = (date: string) => {
@@ -296,4 +310,37 @@ export const getNextNumberOfMonths = (date: Date, number: number) => {
 export const getNextWeekDate = (): string => {
   const nextWeek = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
   return nextWeek.toISOString().split('T')[0];
+};
+
+/* Format date as "FRI 12TH NOV" style */
+export const formatShortDate = (date: string | Date): string => {
+  if (!date) return '';
+
+  const d = date instanceof Date ? date : new Date(date);
+
+  // Get day suffix (TH, ST, ND, RD)
+  const getDaySuffix = (day: number): string => {
+    if (day > 3 && day < 21) return 'TH';
+    switch (day % 10) {
+      case 1:
+        return 'ST';
+      case 2:
+        return 'ND';
+      case 3:
+        return 'RD';
+      default:
+        return 'TH';
+    }
+  };
+
+  return d
+    .toLocaleDateString('en-GB', {
+      weekday: 'short',
+      day: 'numeric',
+      month: 'short',
+      timeZone: UK_TIMEZONE
+    })
+    .toUpperCase()
+    .replace(/(\d+)/, `$1${getDaySuffix(d.getDate())}`)
+    .replace(',', '');
 };

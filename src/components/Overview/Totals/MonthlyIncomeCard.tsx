@@ -1,5 +1,5 @@
 import { Fragment, useState } from 'react';
-import LocalAtmIcon from '@mui/icons-material/LocalAtm';
+import PaidOutlinedIcon from '@mui/icons-material/PaidOutlined';
 import { EnterValuePopup } from '../Popups';
 import { TotalCard } from './TotalCard';
 import { useEditAccount } from '~/hooks';
@@ -28,11 +28,11 @@ export const MonthlyIncomeCard = () => {
   return (
     <Fragment>
       <TotalCard
-        classBaseName="monthly-income"
         title="MONTHLY INCOME"
         amount={monthlyIncome}
         onClick={handleClickOpen}
-        icon={<LocalAtmIcon color="action" />}
+        icon={<PaidOutlinedIcon />}
+        iconColor="success"
       />
       {isOpen && (
         <EnterValuePopup

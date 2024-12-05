@@ -15,7 +15,7 @@ export const EditPaymentsDuePopup = ({
   selectedPayment
 }: EditPaymentsDuePopupProps) => {
   const bankBalance = useAccountStore(s => s.account.bankBalance);
-  const { id: paymentId, name, amount }: OneOffPayment = selectedPayment;
+  const { id: paymentId, name, amount, type, dueDate, category }: OneOffPayment = selectedPayment;
 
   const { editSelectedPayment, loading: editPayLoading } = useEditPayment(close);
   const { deleteSelectedPayment, loading: delPayLoading } = useDeletePayment(close);
@@ -44,8 +44,7 @@ export const EditPaymentsDuePopup = ({
       isOpen={isOpen}
       close={close}
       onDelete={handleDeletePayment}
-      defaultName={name}
-      defaultAmount={amount}
+      defaultValues={selectedPayment}
       loading={editAccLoading || editPayLoading || delPayLoading}
     />
   ) : null;

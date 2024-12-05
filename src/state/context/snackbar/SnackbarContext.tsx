@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import { createContext, ReactNode, useContext, useState } from 'react';
 import { Portal } from '@mui/material';
 import { useSidebarStore } from '../../stores/sidebar';
 import { SnackbarAlert } from '~/components';
@@ -7,7 +7,7 @@ import { SnackbarContextType, SnackbarMessage, SnackbarVariant } from '~/types';
 
 const SnackbarContext = createContext<SnackbarContextType | undefined>(undefined);
 
-export const SnackbarProvider = ({ children }: { children: React.ReactNode }) => {
+export const SnackbarProvider = ({ children }: { children: ReactNode }) => {
   const [messages, setMessages] = useState<SnackbarMessage[]>([]);
   const { container, isLoading } = useSnackbarContainer();
   const isOpen = useSidebarStore(state => state.isOpen);

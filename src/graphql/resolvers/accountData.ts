@@ -1,7 +1,7 @@
 import { initialAccountState } from '~/state';
 import { Account } from '~/types';
 import { AccountState } from '~/types';
-import { getAmountTotal, getBills, getPaymentsDue } from '~/utils';
+import { getAmountTotal, getPaymentTypeTotal, getBills, getPaymentsDue } from '~/utils';
 
 export const getAccountData = (account?: Account): AccountState => {
   if (!account) return initialAccountState;
@@ -19,7 +19,7 @@ export const getAccountData = (account?: Account): AccountState => {
   const bills = getBills(unsortedBills);
   const billsTotal = getAmountTotal(bills);
   const paymentsDue = getPaymentsDue(oneOffPayments || [], bills);
-  const paymentsDueTotal = getAmountTotal(paymentsDue);
+  const paymentsDueTotal = getPaymentTypeTotal(paymentsDue);
   const discIncome = monthlyIncome - billsTotal;
   const bankFreeToSpend = bankBalance - paymentsDueTotal;
   const payDayDiscIncome = bankFreeToSpend + discIncome;

@@ -22,7 +22,14 @@ export const Panels = () => {
 
   return (
     <Card className="overview-panels">
-      <AppBar position="static" color="default">
+      <AppBar
+        position="static"
+        elevation={0}
+        sx={{
+          backgroundColor: 'background.paper',
+          borderBottom: 1,
+          borderColor: 'divider'
+        }}>
         <Tabs value={value} onChange={onTabChange}>
           <Tab label="Upcoming payments" icon={<AccountBalanceWalletIcon />} />
           <Tab label="Monthly bills" icon={<ReceiptIcon />} />

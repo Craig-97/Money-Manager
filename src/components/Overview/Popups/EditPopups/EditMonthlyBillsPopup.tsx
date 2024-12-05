@@ -15,7 +15,7 @@ export const EditMonthlyBillsPopup = ({
   selectedBill
 }: EditMonthlyBillsPopupProps) => {
   const bankBalance = useAccountStore(s => s.account.bankBalance);
-  const { id: billId, name, amount, paid }: Bill = selectedBill;
+  const { id: billId } = selectedBill;
 
   const { editSelectedBill, loading: editBillLoading } = useEditBill(close);
   const { deleteSelectedBill, loading: deleteBillLoading } = useDeleteBill(close);
@@ -42,9 +42,7 @@ export const EditMonthlyBillsPopup = ({
       onDelete={handleDeleteBill}
       isOpen={isOpen}
       close={close}
-      defaultName={name}
-      defaultAmount={amount}
-      defaultPaid={paid}
+      defaultValues={selectedBill}
       loading={editBillLoading || deleteBillLoading}
     />
   ) : null;

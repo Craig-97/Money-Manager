@@ -1,5 +1,5 @@
 import { Fragment, useState } from 'react';
-import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
+import AccountBalanceOutlinedIcon from '@mui/icons-material/AccountBalanceOutlined';
 import { EnterValuePopup } from '../Popups';
 import { TotalCard } from './TotalCard';
 import { useEditAccount } from '~/hooks';
@@ -28,11 +28,11 @@ export const BankBalanceCard = () => {
   return (
     <Fragment>
       <TotalCard
-        classBaseName="bank-balance"
         title="BANK BALANCE"
         amount={bankBalance}
         onClick={handleClickOpen}
-        icon={<AccountBalanceIcon color="primary" />}
+        icon={<AccountBalanceOutlinedIcon />}
+        iconColor="primary"
       />
       {isOpen && (
         <EnterValuePopup

@@ -1,5 +1,5 @@
 import { Fragment, useState } from 'react';
-import ReceiptIcon from '@mui/icons-material/Receipt';
+import ReceiptLongOutlinedIcon from '@mui/icons-material/ReceiptLongOutlined';
 import { MonthlyBillsPopup } from '../Popups';
 import { TotalCard } from './TotalCard';
 import { useCreateBill } from '~/hooks';
@@ -19,11 +19,11 @@ export const MonthlyBillsCard = () => {
   return (
     <Fragment>
       <TotalCard
-        classBaseName="monthly-bills"
         title="MONTHLY BILLS"
         amount={billsTotal}
         onClick={() => setIsOpen(true)}
-        icon={<ReceiptIcon color="secondary" />}
+        icon={<ReceiptLongOutlinedIcon />}
+        iconColor="secondary"
       />
       <MonthlyBillsPopup
         title="Add Monthly Bill"

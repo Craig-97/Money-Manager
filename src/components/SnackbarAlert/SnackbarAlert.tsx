@@ -27,7 +27,7 @@ export const SnackbarAlert = ({ message, index, isOpen, onClose }: SnackbarAlert
       severity={message.variant}
       elevation={6}
       variant="filled"
-      sx={alertStyles}>
+      sx={alertStyles({ variant: message.variant })}>
       {message.message}
     </Alert>
   </Snackbar>
