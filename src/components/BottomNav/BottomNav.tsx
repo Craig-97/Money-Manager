@@ -17,6 +17,8 @@ export const BottomNav = () => {
 
   const onChange = (event: SyntheticEvent, newValue: string) => {
     setValue(newValue);
+    // Scroll to top when changing pages
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (

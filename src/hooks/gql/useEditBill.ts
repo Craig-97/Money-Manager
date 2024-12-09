@@ -1,5 +1,5 @@
 import { useMutation } from '@apollo/client';
-import { useEditAccount } from './editAccount';
+import { useEditAccount } from './useEditAccount';
 import { EDIT_BILL_MUTATION } from '~/graphql';
 import { useSnackbar } from '~/state';
 import { Bill, EditBillResponse } from '~/types';

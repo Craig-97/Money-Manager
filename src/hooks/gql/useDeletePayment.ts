@@ -1,6 +1,6 @@
 import { useMutation } from '@apollo/client';
-import { useEditAccount } from './editAccount';
-import { useErrorHandler } from '../errorHandler';
+import { useEditAccount } from './useEditAccount';
+import { useErrorHandler } from '../useErrorHandler';
 import { DELETE_ONE_OFF_PAYMENT_MUTATION, deletePaymentCache } from '~/graphql';
 import { useSnackbar } from '~/state';
 import { useUserContext } from '~/state';

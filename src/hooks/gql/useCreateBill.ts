@@ -1,5 +1,5 @@
 import { useMutation } from '@apollo/client';
-import { useErrorHandler } from '../errorHandler';
+import { useErrorHandler } from '../useErrorHandler';
 import { CREATE_BILL_MUTATION, addBillCache } from '~/graphql';
 import { useSnackbar, useUserContext } from '~/state';
 import { Bill } from '~/types';

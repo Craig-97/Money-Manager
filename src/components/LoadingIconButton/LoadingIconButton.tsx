@@ -6,7 +6,7 @@ import Tooltip from '@mui/material/Tooltip';
 interface LoadingIconButtonProps extends Omit<IconButtonProps, 'children'> {
   loading?: boolean;
   icon: ReactElement;
-  tooltip: string;
+  tooltip?: string;
   progressColor?: string;
 }
 

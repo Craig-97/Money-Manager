@@ -31,8 +31,8 @@ export const getDateFromTimestamp = (timestamp?: string) => {
   if (!timestamp) return '';
   const date = new Date(parseInt(timestamp.toString()));
   return normalizeToUKDate(date).toLocaleDateString('en-GB', {
-    day: '2-digit',
-    month: '2-digit',
+    day: 'numeric',
+    month: 'short',
     year: 'numeric'
   });
 };

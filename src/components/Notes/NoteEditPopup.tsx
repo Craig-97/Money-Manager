@@ -76,7 +76,6 @@ export const NoteEditPopup = ({
         Edit Note
         {onDelete && (
           <LoadingIconButton
-            tooltip="Delete"
             onClick={() => handleDeleteClicked()}
             disabled={loading || !body}
             loading={loading && loadingAction === 'delete'}

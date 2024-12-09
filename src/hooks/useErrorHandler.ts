@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { ApolloError } from '@apollo/client';
-import { useLogout } from './logout';
+import { useLogout } from './useLogout';
 import { ERRORS } from '~/constants';
 import { useSafeSnackbar } from '~/hooks';
 import { getGQLErrorCode, getGQLTokenExpired } from '~/utils';

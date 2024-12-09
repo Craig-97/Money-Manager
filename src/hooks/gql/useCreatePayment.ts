@@ -1,5 +1,5 @@
 import { useMutation } from '@apollo/client';
-import { useErrorHandler } from '../errorHandler';
+import { useErrorHandler } from '../useErrorHandler';
 import { CREATE_ONE_OFF_PAYMENT_MUTATION, addPaymentCache } from '~/graphql';
 import { useSnackbar } from '~/state';
 import { OneOffPayment, User } from '~/types';

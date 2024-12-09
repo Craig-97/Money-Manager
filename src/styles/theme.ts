@@ -9,6 +9,17 @@ declare module '@mui/material/styles' {
     xl: true;
     mobile: true;
   }
+
+  interface Palette {
+    notes: {
+      colors: string[];
+    };
+  }
+  interface PaletteOptions {
+    notes?: {
+      colors: string[];
+    };
+  }
 }
 
 export const theme = createTheme({
@@ -42,7 +53,16 @@ export const theme = createTheme({
       primary: '#FFFFFF',
       secondary: '#E9D5FF'
     },
-    divider: 'rgba(233, 213, 255, 0.08)'
+    divider: 'rgba(233, 213, 255, 0.08)',
+    notes: {
+      colors: [
+        '#FF7B7B', // Coral
+        '#FFD93D', // Yellow
+        '#4ADE80', // Green
+        '#60A5FA', // Blue
+        '#A78BFA' // Purple
+      ]
+    }
   },
   components: {
     MuiDialog: {
