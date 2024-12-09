@@ -23,18 +23,24 @@ export const NotesControls = ({
         display: 'flex',
         flexDirection: { mobile: 'column', sm: 'row' },
         justifyContent: { sm: 'space-between' },
-        alignItems: { sm: 'center' },
-        gap: { mobile: 3, sm: 0 },
+        alignItems: { sm: 'flex-start', md: 'center' },
+        gap: 3,
         mb: 4
       }}>
-      <Box sx={{ display: 'flex', gap: 2 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          gap: 3,
+          flex: { sm: 1, md: 'unset' },
+          flexWrap: { sm: 'wrap', md: 'nowrap' }
+        }}>
         <TextField
           placeholder="Search notes..."
           size="small"
           value={searchQuery}
           onChange={e => onSearchChange(e.target.value)}
           sx={{
-            minWidth: { sm: 300 },
+            minWidth: { md: 300 },
             flex: { mobile: 1, sm: 'unset' },
             '& .MuiOutlinedInput-root': {
               backgroundColor: 'background.paper',
@@ -62,8 +68,8 @@ export const NotesControls = ({
           value={sortBy}
           onChange={e => onSortChange(e.target.value as SortOption)}
           sx={{
-            minWidth: 160,
             backgroundColor: 'background.paper',
+            whiteSpace: 'nowrap',
             '& .MuiOutlinedInput-root': {
               '&:hover fieldset': {
                 borderColor: 'primary.main'
@@ -72,8 +78,8 @@ export const NotesControls = ({
           }}>
           <MenuItem value="created-desc">Newest</MenuItem>
           <MenuItem value="created-asc">Oldest</MenuItem>
-          <MenuItem value="updated-desc">Last Updated Desc</MenuItem>
-          <MenuItem value="updated-asc">Last Updated Asc</MenuItem>
+          <MenuItem value="updated-desc">Last Updated</MenuItem>
+          <MenuItem value="updated-asc">Last Updated (Asc)</MenuItem>
         </Select>
       </Box>
       <Button
@@ -83,7 +89,9 @@ export const NotesControls = ({
           height: '40px',
           p: '8px 16px',
           borderRadius: 1,
-          gap: 1
+          gap: 1,
+          whiteSpace: 'nowrap',
+          minWidth: 'fit-content'
         }}>
         <Add />
         <Box sx={{ display: { sm: 'block' } }}>Add Note</Box>
