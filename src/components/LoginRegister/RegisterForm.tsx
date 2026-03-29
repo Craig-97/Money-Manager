@@ -1,6 +1,6 @@
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import LoadingButton from '@mui/lab/LoadingButton';
+import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import { AutoFocusTextField } from './AutoFocusTextField';
 import { ERRORS } from '~/constants';
@@ -112,14 +112,14 @@ export const RegisterForm = () => {
         helperText={formik.touched.confirmPassword && formik.errors.confirmPassword}
         autoComplete="confirm-password"
       />
-      <LoadingButton
+      <Button
         type="submit"
         loading={formik.isSubmitting || loading}
         fullWidth
         variant="contained"
         color="primary">
         Register
-      </LoadingButton>
+      </Button>
     </form>
   );
 };

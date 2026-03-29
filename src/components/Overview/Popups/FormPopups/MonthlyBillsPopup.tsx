@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { LoadingButton } from '@mui/lab';
 import {
   Button,
   Checkbox,
@@ -150,13 +149,13 @@ export const MonthlyBillsPopup = ({
           <Button onClick={handleClose} disabled={loading} color="secondary" variant="outlined">
             Cancel
           </Button>
-          <LoadingButton
+          <Button
             type="submit"
             loading={loading && loadingAction === 'save'}
             disabled={loading || !formik.isValid}
             variant="contained">
             Save
-          </LoadingButton>
+          </Button>
         </DialogActions>
       </form>
     </Dialog>

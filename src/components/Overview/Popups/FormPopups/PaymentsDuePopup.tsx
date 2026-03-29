@@ -3,7 +3,6 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import DeleteIcon from '@mui/icons-material/Delete';
 import PaidIcon from '@mui/icons-material/Paid';
-import { LoadingButton } from '@mui/lab';
 import {
   Box,
   Button,
@@ -227,13 +226,13 @@ export const PaymentsDuePopup = ({
           <Button onClick={handleClose} disabled={loading} color="secondary" variant="outlined">
             Cancel
           </Button>
-          <LoadingButton
+          <Button
             type="submit"
             loading={loading && loadingAction === 'save'}
             disabled={loading || !formik.isValid}
             variant="contained">
             Save
-          </LoadingButton>
+          </Button>
         </DialogActions>
       </form>
     </Dialog>

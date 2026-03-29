@@ -1,7 +1,6 @@
 import { ChangeEvent, useEffect } from 'react';
 import { useState } from 'react';
 import DeleteIcon from '@mui/icons-material/Delete';
-import LoadingButton from '@mui/lab/LoadingButton';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -93,14 +92,14 @@ export const NoteEditPopup = ({
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose}>Cancel</Button>
-        <LoadingButton
+        <Button
           onClick={handleSaveClicked}
           loading={loading && loadingAction === 'save'}
           disabled={loading || !body}
           color="secondary"
           variant="text">
           Save
-        </LoadingButton>
+        </Button>
       </DialogActions>
     </Dialog>
   );

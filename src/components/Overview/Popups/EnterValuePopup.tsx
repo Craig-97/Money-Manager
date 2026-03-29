@@ -1,6 +1,5 @@
 import { ChangeEvent, KeyboardEvent } from 'react';
 import { useState } from 'react';
-import { LoadingButton } from '@mui/lab';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -71,14 +70,14 @@ export const EnterValuePopup = ({
         <Button onClick={close} disabled={loading}>
           Cancel
         </Button>
-        <LoadingButton
+        <Button
           onClick={() => changeValue(value as number)}
           loading={loading}
           disabled={loading || (!value && value !== 0)}
           color="secondary"
           variant="text">
           Save
-        </LoadingButton>
+        </Button>
       </DialogActions>
     </Dialog>
   );

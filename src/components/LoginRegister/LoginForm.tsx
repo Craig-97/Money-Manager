@@ -2,7 +2,7 @@ import { useFormik } from 'formik';
 import { useNavigate } from 'react-router-dom';
 import * as Yup from 'yup';
 import { useLazyQuery } from '@apollo/client/react';
-import LoadingButton from '@mui/lab/LoadingButton';
+import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import { AutoFocusTextField } from './AutoFocusTextField';
 import { ERRORS, EVENTS } from '~/constants';
@@ -93,14 +93,14 @@ export const LoginForm = () => {
         helperText={formik.touched.password && formik.errors.password}
         autoComplete="current-password"
       />
-      <LoadingButton
+      <Button
         loading={formik.isSubmitting || loading}
         type="submit"
         fullWidth
         variant="contained"
         color="primary">
         Sign In
-      </LoadingButton>
+      </Button>
     </form>
   );
 };
