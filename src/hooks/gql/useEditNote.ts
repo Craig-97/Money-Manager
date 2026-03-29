@@ -1,4 +1,4 @@
-import { useMutation } from '@apollo/client';
+import { useMutation } from '@apollo/client/react';
 import { useErrorHandler } from '../useErrorHandler';
 import { EDIT_NOTE_MUTATION } from '~/graphql';
 import { useSnackbar } from '~/state';

@@ -1,20 +1,31 @@
-import { useMutation } from '@apollo/client';
+import { useMutation } from '@apollo/client/react';
 import { useErrorHandler } from '../useErrorHandler';
 import { DELETE_NOTE_MUTATION, deleteNoteCache } from '~/graphql';
 import { useSnackbar } from '~/state';
 import { useUserContext } from '~/state';
+import { Note } from '~/types';
+
+interface DeleteNoteResult {
+  deleteNote: {
+    note: Note;
+  };
+}
 
 export const useDeleteNote = ({ onSuccess }: { onSuccess?: () => void }) => {
   const { user } = useUserContext();
   const { enqueueSnackbar } = useSnackbar();
   const handleGQLError = useErrorHandler();
 
-  const [deleteNote, { loading }] = useMutation(DELETE_NOTE_MUTATION);
+  const [deleteNote, { loading }] = useMutation<DeleteNoteResult>(DELETE_NOTE_MUTATION);
 
   const deleteSelectedNote = ({ noteId }: { noteId: string }) => {
     deleteNote({
       variables: { id: noteId },
-      update: (cache, { data: { deleteNote } }) => deleteNoteCache(cache, deleteNote.note, user),
+      update: (cache, { data }) => {
+        const note = data?.deleteNote?.note;
+        if (!note) return;
+        deleteNoteCache(cache, note, user);
+      },
       onCompleted: () => {
         enqueueSnackbar('Note deleted', { variant: 'success' });
         onSuccess?.();

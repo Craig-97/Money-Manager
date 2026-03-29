@@ -1,10 +1,17 @@
-import { useMutation } from '@apollo/client';
+import { useMutation } from '@apollo/client/react';
 import { useEditAccount } from './useEditAccount';
 import { useErrorHandler } from '../useErrorHandler';
 import { DELETE_ONE_OFF_PAYMENT_MUTATION, deletePaymentCache } from '~/graphql';
 import { useSnackbar } from '~/state';
 import { useUserContext } from '~/state';
-import { DeletePaymentResponse } from '~/types';
+import { DeletePaymentResponse, OneOffPayment } from '~/types';
+
+interface DeleteOffPaymentResult {
+  deleteOneOffPayment: {
+    oneOffPayment: OneOffPayment;
+    success: boolean;
+  };
+}
 
 interface DeleteSelectedPaymentProps {
   paymentId: string;
@@ -18,7 +25,9 @@ export const useDeletePayment = (onSuccess?: () => void) => {
   const handleGQLError = useErrorHandler();
   const { updateAccount } = useEditAccount();
 
-  const [deletePayment, { loading }] = useMutation(DELETE_ONE_OFF_PAYMENT_MUTATION);
+  const [deletePayment, { loading }] = useMutation<DeleteOffPaymentResult>(
+    DELETE_ONE_OFF_PAYMENT_MUTATION
+  );
 
   const deleteSelectedPayment = ({
     paymentId,
@@ -27,14 +36,11 @@ export const useDeletePayment = (onSuccess?: () => void) => {
   }: DeleteSelectedPaymentProps) => {
     deletePayment({
       variables: { id: paymentId },
-      update: (
-        cache,
-        {
-          data: {
-            deleteOneOffPayment: { oneOffPayment }
-          }
-        }
-      ) => deletePaymentCache(cache, oneOffPayment, user),
+      update: (cache, { data }) => {
+        const payment = data?.deleteOneOffPayment?.oneOffPayment;
+        if (!payment) return;
+        deletePaymentCache(cache, payment, user);
+      },
       onCompleted: (data: DeletePaymentResponse) => {
         onPaymentDeleted(data, paid, currentBankBalance);
         onSuccess?.();

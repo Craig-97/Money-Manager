@@ -4,11 +4,11 @@ import TextField from '@mui/material/TextField';
 
 /* Created to avoid autoFocus animation issues with react-slick and Material UI Tabs */
 export const AutoFocusTextField = (props: TextFieldProps) => {
-  const inputRef = useRef<HTMLInputElement>();
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
-      inputRef?.current?.focus();
+      inputRef.current?.focus();
     }, 250); // 250+ avoids any animation issues
 
     return () => {

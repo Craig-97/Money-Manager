@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { useApolloClient } from '@apollo/client';
+import { useApolloClient } from '@apollo/client/react';
 import { EVENTS } from '~/constants';
 import { useAccountStore, useUserContext } from '~/state';
 

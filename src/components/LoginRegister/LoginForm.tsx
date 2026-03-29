@@ -1,8 +1,7 @@
 import { useFormik } from 'formik';
 import { useNavigate } from 'react-router-dom';
 import * as Yup from 'yup';
-import { ApolloError } from '@apollo/client';
-import { useLazyQuery } from '@apollo/client';
+import { useLazyQuery } from '@apollo/client/react';
 import LoadingButton from '@mui/lab/LoadingButton';
 import TextField from '@mui/material/TextField';
 import { AutoFocusTextField } from './AutoFocusTextField';
@@ -23,10 +22,7 @@ const validationSchema = Yup.object().shape({
 export const LoginForm = () => {
   const navigate = useNavigate();
   const { dispatch } = useUserContext();
-  const [loginQuery, { loading }] = useLazyQuery<LoginData>(LOGIN_QUERY, {
-    onCompleted: data => onLoginCompleted(data),
-    onError: errors => onLoginError(errors)
-  });
+  const [loginQuery, { loading }] = useLazyQuery<LoginData>(LOGIN_QUERY);
 
   const onLoginCompleted = (response: LoginData) => {
     if (response) {
@@ -43,15 +39,17 @@ export const LoginForm = () => {
     }
   };
 
-  const onLoginError = (errors: ApolloError) => {
+  const onLoginError = (error: unknown) => {
     formik.setFieldValue('email', formik.values.email, false);
     formik.setFieldValue('password', '', false);
-    const errorCode = getGQLErrorCode(errors);
+    const errorCode = getGQLErrorCode(error);
+
+    const message = error instanceof Error ? error.message : 'An error occurred during login';
 
     if (errorCode === ERRORS.USER_EMAIL_NOT_FOUND) {
-      formik.setFieldError('email', errors.message);
+      formik.setFieldError('email', message);
     } else if (errorCode === ERRORS.INVALID_CREDENTIALS) {
-      formik.setFieldError('password', errors.message);
+      formik.setFieldError('password', message);
     }
   };
 
@@ -62,8 +60,10 @@ export const LoginForm = () => {
       password: ''
     },
     validationSchema: validationSchema,
-    onSubmit: (values, { setSubmitting }) => {
-      loginQuery({ variables: { ...values } });
+    onSubmit: async (values, { setSubmitting }) => {
+      const { data, error } = await loginQuery({ variables: { ...values } });
+      if (data) onLoginCompleted(data);
+      if (error) onLoginError(error);
       setSubmitting(false);
     }
   });

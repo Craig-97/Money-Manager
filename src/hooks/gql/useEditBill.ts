@@ -1,8 +1,15 @@
-import { useMutation } from '@apollo/client';
+import { useMutation } from '@apollo/client/react';
 import { useEditAccount } from './useEditAccount';
 import { EDIT_BILL_MUTATION } from '~/graphql';
 import { useSnackbar } from '~/state';
 import { Bill, EditBillResponse } from '~/types';
+
+interface EditBillResult {
+  editBill: {
+    bill: Bill;
+    success: boolean;
+  };
+}
 
 interface EditSelectedBillProps {
   billId: string;
@@ -15,7 +22,7 @@ export const useEditBill = (onSuccess?: () => void) => {
   const { enqueueSnackbar } = useSnackbar();
   const { updateAccount } = useEditAccount();
 
-  const [editBill, { loading }] = useMutation(EDIT_BILL_MUTATION);
+  const [editBill, { loading }] = useMutation<EditBillResult>(EDIT_BILL_MUTATION);
 
   const editSelectedBill = ({
     billId,

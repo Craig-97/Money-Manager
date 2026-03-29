@@ -1,12 +1,16 @@
-import { ApolloError } from '@apollo/client';
+import { CombinedGraphQLErrors } from '@apollo/client';
 import { ERRORS } from '~/constants';
 
-const getGQLErrorExtensions = (error: ApolloError) => error?.graphQLErrors?.[0]?.extensions;
+export const getGQLErrorCode = (error: unknown): keyof typeof ERRORS | '' => {
+  if (CombinedGraphQLErrors.is(error)) {
+    return (error.errors[0].extensions?.code as keyof typeof ERRORS) ?? '';
+  }
+  return '';
+};
 
-export const getGQLErrorCode = (error?: ApolloError) =>
-  (error && (getGQLErrorExtensions(error)?.code as keyof typeof ERRORS)) || '';
-
-export const getGQLTokenExpired = (error: ApolloError) => {
-  const extensions = getGQLErrorExtensions(error);
-  return extensions?.expired;
+export const getGQLTokenExpired = (error: unknown): boolean | undefined => {
+  if (CombinedGraphQLErrors.is(error)) {
+    return Boolean(error.errors[0].extensions?.expired);
+  }
+  return undefined;
 };

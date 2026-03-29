@@ -69,9 +69,10 @@ export const SpendingImpactChart = ({ customMonthlySpend }: SpendingImpactChartP
                 fontSize: '0.875rem',
                 padding: '8px 12px'
               }}
-              formatter={(value: number) => {
-                const label = value >= 0 ? 'Savings' : 'Loss';
-                return [`£${Math.abs(value)}`, label];
+              formatter={value => {
+                const num = typeof value === 'number' ? value : 0;
+                const label = num >= 0 ? 'Savings' : 'Loss';
+                return [`£${Math.abs(num)}`, label];
               }}
               labelFormatter={(label, payload) => {
                 if (payload && payload[0]) {

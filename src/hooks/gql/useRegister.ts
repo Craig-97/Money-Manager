@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { useMutation, ApolloError } from '@apollo/client';
+import { useMutation } from '@apollo/client/react';
 import { EVENTS } from '~/constants';
 import { REGISTER_AND_LOGIN_MUTATION } from '~/graphql';
 import { useUserContext } from '~/state';
@@ -13,7 +13,7 @@ interface RegisterUser {
 }
 
 interface UseRegisterProps {
-  onError: (error: ApolloError) => void;
+  onError: (error: unknown) => void;
 }
 
 export const useRegister = ({ onError }: UseRegisterProps) => {

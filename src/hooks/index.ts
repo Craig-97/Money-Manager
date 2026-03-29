@@ -6,3 +6,4 @@ export * from './useLogout';
 export * from './gql';
 export * from './useSnackbar';
 export * from './useFilterNotes';
+export * from './useGQLEffect';

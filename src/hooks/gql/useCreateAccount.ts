@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { useApolloClient, useMutation } from '@apollo/client';
+import { useApolloClient, useMutation } from '@apollo/client/react';
 import { CREATE_ACCOUNT_MUTATION, GET_ACCOUNT_QUERY } from '~/graphql';
 import { useErrorHandler } from '~/hooks';
 import { useSnackbar } from '~/state';

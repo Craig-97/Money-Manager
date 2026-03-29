@@ -1,4 +1,4 @@
-import { useMutation } from '@apollo/client';
+import { useMutation } from '@apollo/client/react';
 import { useErrorHandler } from '../useErrorHandler';
 import { CREATE_NOTE_MUTATION, addNoteCache } from '~/graphql';
 import { useSnackbar, useUserContext } from '~/state';
@@ -9,17 +9,27 @@ interface CreateNoteParams {
   onSuccess?: () => void;
 }
 
+interface CreateNoteResult {
+  createNote: {
+    note: Note;
+  };
+}
+
 export const useCreateNote = () => {
   const { user } = useUserContext();
   const { enqueueSnackbar } = useSnackbar();
   const handleGQLError = useErrorHandler();
 
-  const [createNote, { loading }] = useMutation(CREATE_NOTE_MUTATION);
+  const [createNote, { loading }] = useMutation<CreateNoteResult>(CREATE_NOTE_MUTATION);
 
   const createNewNote = ({ note, onSuccess }: CreateNoteParams) => {
     createNote({
       variables: { note },
-      update: (cache, { data: { createNote } }) => addNoteCache(cache, createNote.note, user),
+      update: (cache, { data }) => {
+        const note = data?.createNote?.note;
+        if (!note) return;
+        addNoteCache(cache, note, user);
+      },
       onCompleted: () => {
         enqueueSnackbar('Note created', { variant: 'success' });
         onSuccess?.();

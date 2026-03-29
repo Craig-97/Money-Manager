@@ -1,10 +1,10 @@
-import { ApolloCache, InMemoryCache } from '@apollo/client';
+import { ApolloCache } from '@apollo/client';
 import { getAccountCache, updateAccountCache } from './AccountCache';
 import { Bill, User } from '~/types';
 import { cheapestAscendingSort } from '~/utils';
 
 /* Adds new bill to current bill array */
-export const addBillCache = (cache: ApolloCache<InMemoryCache>, bill: Bill, user: User) => {
+export const addBillCache = (cache: ApolloCache, bill: Bill, user: User) => {
   const { account } = getAccountCache(cache, user) || {};
 
   if (account?.bills) {
@@ -14,7 +14,7 @@ export const addBillCache = (cache: ApolloCache<InMemoryCache>, bill: Bill, user
 };
 
 /* Removes bill from current bills array */
-export const deleteBillCache = (cache: ApolloCache<InMemoryCache>, bill: Bill, user: User) => {
+export const deleteBillCache = (cache: ApolloCache, bill: Bill, user: User) => {
   const { account } = getAccountCache(cache, user) || {};
 
   if (account?.bills && bill.id) {

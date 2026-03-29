@@ -1,6 +1,5 @@
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { ApolloError } from '@apollo/client';
 import LoadingButton from '@mui/lab/LoadingButton';
 import TextField from '@mui/material/TextField';
 import { AutoFocusTextField } from './AutoFocusTextField';
@@ -23,12 +22,14 @@ const validationSchema = Yup.object().shape({
 
 export const RegisterForm = () => {
   const { register, loading } = useRegister({
-    onError: (errors: ApolloError) => {
+    onError: (error: unknown) => {
       formik.setFieldValue('email', formik.values.email, false);
-      const errorCode = getGQLErrorCode(errors);
+      const errorCode = getGQLErrorCode(error);
 
       if (errorCode === ERRORS.USER_EXISTS) {
-        formik.setFieldError('email', errors.message);
+        const message = error instanceof Error ? error.message : 'User already exists';
+
+        formik.setFieldError('email', message);
       }
     }
   });

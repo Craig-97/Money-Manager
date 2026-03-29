@@ -18,7 +18,7 @@ import {
   Select,
   TextField
 } from '@mui/material';
-import Grid from '@mui/material/Grid2';
+import Grid from '@mui/material/Grid';
 import { LoadingIconButton } from '~/components/LoadingIconButton';
 import { PAYMENT_CATEGORY } from '~/constants';
 import { PAYMENT_TYPE } from '~/constants';

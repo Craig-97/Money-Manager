@@ -3,7 +3,7 @@ import AccountBalanceWalletOutlinedIcon from '@mui/icons-material/AccountBalance
 import CalendarTodayOutlinedIcon from '@mui/icons-material/CalendarTodayOutlined';
 import PaidOutlinedIcon from '@mui/icons-material/PaidOutlined';
 import SavingsOutlinedIcon from '@mui/icons-material/SavingsOutlined';
-import Grid from '@mui/material/Grid2';
+import Grid from '@mui/material/Grid';
 import { BankBalanceCard } from './BankBalanceCard';
 import { MonthlyBillsCard } from './MonthlyBillsCard';
 import { MonthlyIncomeCard } from './MonthlyIncomeCard';

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { client } from '~/graphql';
 import { GET_ACCOUNT_QUERY } from '~/graphql';
 import { useAccountStore, useUserContext } from '~/state';
+import { AccountData } from '~/types';
 import { getPayday } from '~/utils';
 
 interface PaydayInfo {
@@ -18,7 +19,7 @@ export const useGetPayday = () => {
    * Checks if the user has a payday configuration from the GraphQL cache
    * to prevent component pop-in when using paydayConfig from context.
    */
-  const queryData = client.readQuery({
+  const queryData = client.readQuery<AccountData>({
     query: GET_ACCOUNT_QUERY,
     variables: { id: user.id }
   });
