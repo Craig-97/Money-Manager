@@ -15,7 +15,6 @@ export const EditPaymentsDuePopup = ({
   selectedPayment
 }: EditPaymentsDuePopupProps) => {
   const bankBalance = useAccountStore(s => s.account.bankBalance);
-  // name, amount, type, dueDate, category missing
   const { id: paymentId }: OneOffPayment = selectedPayment;
 
   const { editSelectedPayment, loading: editPayLoading } = useEditPayment(close);
@@ -23,9 +22,7 @@ export const EditPaymentsDuePopup = ({
   const { loading: editAccLoading } = useEditAccount();
 
   const handleEditPayment = (oneOffPayment: OneOffPayment) => {
-    if (paymentId) {
-      editSelectedPayment({ paymentId, payment: oneOffPayment });
-    }
+    if (paymentId) editSelectedPayment({ paymentId, payment: oneOffPayment });
   };
 
   const handleDeletePayment = (paid: boolean) => {
