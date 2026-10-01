@@ -60,7 +60,7 @@ export const Sidebar = () => {
           <MenuOpen sx={{ transform: !isOpen ? 'rotate(180deg)' : 'none' }} />
         </IconButton>
         {isOpen && (
-          <Typography variant="h6" noWrap component="div" fontWeight={700}>
+          <Typography variant="h6" noWrap component="div" sx={{ fontWeight: 700 }}>
             Money Manager
           </Typography>
         )}
@@ -91,7 +91,7 @@ export const Sidebar = () => {
               {isOpen && (
                 <ListItemText
                   primary={label}
-                  primaryTypographyProps={{ sx: { fontWeight: 500 } }}
+                  slotProps={{ primary: { sx: { fontWeight: 500 } } }}
                 />
               )}
             </ListItemButton>
@@ -105,8 +105,7 @@ export const Sidebar = () => {
         <Stack
           direction={!isOpen ? 'column' : 'row'}
           spacing={2}
-          alignItems="center"
-          justifyContent="space-between">
+          sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Avatar sx={{ width: 32, height: 32 }}>
               {user.firstName?.[0]}

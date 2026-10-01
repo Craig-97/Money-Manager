@@ -17,10 +17,10 @@ export const Notes = () => {
     <StandardPage>
       <Box sx={{ m: '0 auto', p: { mobile: 3, sm: 4 } }}>
         <Box sx={{ mb: 4 }}>
-          <Typography variant="h4" fontWeight={700} sx={{ mb: 1 }}>
+          <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
             Notes
           </Typography>
-          <Typography variant="body1" fontWeight={500} color="text.secondary">
+          <Typography variant="body1" color="text.secondary" sx={{ fontWeight: 500 }}>
             Keep track of important notes and reminders
           </Typography>
         </Box>

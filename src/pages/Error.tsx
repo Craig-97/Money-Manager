@@ -19,10 +19,10 @@ export const Error = () => {
         minHeight: '75vh',
         textAlign: 'center'
       }}>
-      <Typography variant="h4" textTransform="uppercase" fontWeight="bold" sx={{ pb: 2 }}>
+      <Typography variant="h4" sx={{ textTransform: 'uppercase', fontWeight: 'bold', pb: 2 }}>
         {error?.name}
       </Typography>
-      <Typography variant="h6" textTransform="uppercase" sx={{ pb: 2 }}>
+      <Typography variant="h6" sx={{ textTransform: 'uppercase', pb: 2 }}>
         {error?.message}
       </Typography>
       <Button onClick={() => navigate('/')} size="large" variant="outlined">

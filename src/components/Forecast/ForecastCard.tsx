@@ -40,22 +40,19 @@ export const ForecastCard = ({
           }}>
           {icon}
         </Box>
-        <Typography variant="body1" color="text.secondary" fontWeight={700} gutterBottom>
+        <Typography variant="body1" color="text.secondary" gutterBottom sx={{ fontWeight: 700 }}>
           {title}
         </Typography>
         <Typography
           variant="h4"
           component="div"
-          fontWeight={700}
-          sx={valueColor ? { color: `${valueColor}.main` } : undefined}>
+          sx={{ fontWeight: 700, ...(valueColor && { color: `${valueColor}.main` }) }}>
           {value}
         </Typography>
         <Typography
           variant="body2"
           color="text.secondary"
-          fontWeight={500}
-          fontSize="0.875rem"
-          sx={{ opacity: 0.5 }}>
+          sx={{ fontSize: '0.875rem', fontWeight: 500, opacity: 0.5 }}>
           {subtitle}
         </Typography>
       </CardContent>

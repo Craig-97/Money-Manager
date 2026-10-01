@@ -38,7 +38,7 @@ export const SpendingImpactChart = ({ customMonthlySpend }: SpendingImpactChartP
 
   return (
     <Box sx={{ mt: 4 }}>
-      <Typography variant="body1" color="text.secondary" fontWeight={700} gutterBottom>
+      <Typography variant="body1" color="text.secondary" gutterBottom sx={{ fontWeight: 700 }}>
         Impact compared to current monthly bills
       </Typography>
 
@@ -128,9 +128,7 @@ export const SpendingImpactChart = ({ customMonthlySpend }: SpendingImpactChartP
       <Typography
         variant="body2"
         color="text.secondary"
-        fontWeight={500}
-        fontSize="0.875rem"
-        sx={{ mt: 2, textAlign: 'center', opacity: 0.5 }}>
+        sx={{ fontSize: '0.875rem', fontWeight: 500, mt: 2, textAlign: 'center', opacity: 0.5 }}>
         {isPositiveImpact
           ? `You could save £${monthlyDifference} per month`
           : `You would spend £${monthlyDifference} more per month`}

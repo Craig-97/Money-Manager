@@ -14,13 +14,13 @@ export const SessionExpired = () => {
         minHeight: '75vh',
         textAlign: 'center'
       }}>
-      <Typography variant="h4" textTransform="uppercase" fontWeight="bold" sx={{ pb: 2 }}>
+      <Typography variant="h4" sx={{ textTransform: 'uppercase', fontWeight: 'bold', pb: 2 }}>
         Session Expired
       </Typography>
-      <Typography variant="h6" textTransform="uppercase">
+      <Typography variant="h6" sx={{ textTransform: 'uppercase' }}>
         Your session has expired
       </Typography>
-      <Typography variant="h6" textTransform="uppercase" sx={{ pb: 3 }}>
+      <Typography variant="h6" sx={{ textTransform: 'uppercase', pb: 3 }}>
         Please log in again
       </Typography>
       <Button onClick={() => navigate('/login')} size="large" variant="outlined">

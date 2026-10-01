@@ -105,7 +105,7 @@ export const MonthlyProjection = ({ customMonthlySpend }: MonthlyProjectionProps
           <Typography variant="h6" gutterBottom>
             Balance Projection
           </Typography>
-          <Typography variant="body2" color="text.secondary" fontWeight={500} sx={{ mb: 3 }}>
+          <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500, mb: 3 }}>
             Monthly balance forecast based on configured spend
           </Typography>
 

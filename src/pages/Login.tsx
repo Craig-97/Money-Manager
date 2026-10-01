@@ -13,7 +13,7 @@ export const Login = () => (
           height: '100vh'
         }}>
         <Card className="loginregister">
-          <Typography variant="h1" fontWeight={700}>
+          <Typography variant="h1" sx={{ fontWeight: 700 }}>
             Money Manager
           </Typography>
           <LoginPanels />

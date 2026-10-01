@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CheckOutlined, CloseOutlined, DeleteOutline, EditOutlined } from '@mui/icons-material';
+import { CheckOutlined, CloseOutlined, DeleteOutlined, EditOutlined } from '@mui/icons-material';
 import { Box, Card, CardContent, IconButton, TextField, Typography, useTheme } from '@mui/material';
 import { LoadingIconButton } from '../LoadingIconButton';
 import { useDeleteNote, useEditNote } from '~/hooks';
@@ -169,7 +169,7 @@ export const NoteCard = ({ id, body, createdAt, updatedAt, index }: NoteProps) =
                 <LoadingIconButton
                   onClick={handleDelete}
                   loading={deleteLoading}
-                  icon={<DeleteOutline />}
+                  icon={<DeleteOutlined />}
                   sx={{ color: 'black' }}
                   progressColor="black"
                 />
