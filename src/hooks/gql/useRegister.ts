@@ -3,7 +3,6 @@ import { useMutation } from '@apollo/client/react';
 import { EVENTS } from '~/constants';
 import { REGISTER_AND_LOGIN_MUTATION } from '~/graphql';
 import { useUserContext } from '~/state';
-import { RegisterData } from '~/types';
 
 interface RegisterUser {
   email: string;
@@ -20,7 +19,7 @@ export const useRegister = ({ onError }: UseRegisterProps) => {
   const navigate = useNavigate();
   const { dispatch } = useUserContext();
 
-  const [registerAndLogin, { loading }] = useMutation<RegisterData>(REGISTER_AND_LOGIN_MUTATION, {
+  const [registerAndLogin, { loading }] = useMutation(REGISTER_AND_LOGIN_MUTATION, {
     onCompleted: data => {
       if (data) {
         const {

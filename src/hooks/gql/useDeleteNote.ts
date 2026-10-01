@@ -3,20 +3,13 @@ import { useErrorHandler } from '../useErrorHandler';
 import { DELETE_NOTE_MUTATION, deleteNoteCache } from '~/graphql';
 import { useSnackbar } from '~/state';
 import { useUserContext } from '~/state';
-import { Note } from '~/types';
-
-interface DeleteNoteResult {
-  deleteNote: {
-    note: Note;
-  };
-}
 
 export const useDeleteNote = ({ onSuccess }: { onSuccess?: () => void }) => {
   const { user } = useUserContext();
   const { enqueueSnackbar } = useSnackbar();
   const handleGQLError = useErrorHandler();
 
-  const [deleteNote, { loading }] = useMutation<DeleteNoteResult>(DELETE_NOTE_MUTATION);
+  const [deleteNote, { loading }] = useMutation(DELETE_NOTE_MUTATION);
 
   const deleteSelectedNote = ({ noteId }: { noteId: string }) => {
     deleteNote({

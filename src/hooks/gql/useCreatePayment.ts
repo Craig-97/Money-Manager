@@ -9,19 +9,11 @@ interface CreatePaymentParams {
   user: User;
 }
 
-interface CreateOneOffPaymentResult {
-  createOneOffPayment: {
-    oneOffPayment: OneOffPayment;
-  };
-}
-
 export const useCreatePayment = (onSuccess?: () => void) => {
   const { enqueueSnackbar } = useSnackbar();
   const handleGQLError = useErrorHandler();
 
-  const [createOneOffPayment, { loading }] = useMutation<CreateOneOffPaymentResult>(
-    CREATE_ONE_OFF_PAYMENT_MUTATION
-  );
+  const [createOneOffPayment, { loading }] = useMutation(CREATE_ONE_OFF_PAYMENT_MUTATION);
 
   const createNewPayment = ({ oneOffPayment, user }: CreatePaymentParams) => {
     createOneOffPayment({

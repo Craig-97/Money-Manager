@@ -9,18 +9,12 @@ interface CreateNoteParams {
   onSuccess?: () => void;
 }
 
-interface CreateNoteResult {
-  createNote: {
-    note: Note;
-  };
-}
-
 export const useCreateNote = () => {
   const { user } = useUserContext();
   const { enqueueSnackbar } = useSnackbar();
   const handleGQLError = useErrorHandler();
 
-  const [createNote, { loading }] = useMutation<CreateNoteResult>(CREATE_NOTE_MUTATION);
+  const [createNote, { loading }] = useMutation(CREATE_NOTE_MUTATION);
 
   const createNewNote = ({ note, onSuccess }: CreateNoteParams) => {
     createNote({

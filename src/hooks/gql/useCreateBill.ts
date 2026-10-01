@@ -4,12 +4,6 @@ import { CREATE_BILL_MUTATION, addBillCache } from '~/graphql';
 import { useSnackbar, useUserContext } from '~/state';
 import { Bill } from '~/types';
 
-interface CreateBillResult {
-  createBill: {
-    bill: Bill;
-  };
-}
-
 interface CreateBillParams {
   bill: Bill;
 }
@@ -19,7 +13,7 @@ export const useCreateBill = (onSuccess?: () => void) => {
   const { enqueueSnackbar } = useSnackbar();
   const handleGQLError = useErrorHandler();
 
-  const [createBill, { loading }] = useMutation<CreateBillResult>(CREATE_BILL_MUTATION);
+  const [createBill, { loading }] = useMutation(CREATE_BILL_MUTATION);
 
   const createNewBill = ({ bill }: CreateBillParams) => {
     createBill({

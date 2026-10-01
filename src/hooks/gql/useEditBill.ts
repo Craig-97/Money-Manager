@@ -4,13 +4,6 @@ import { EDIT_BILL_MUTATION } from '~/graphql';
 import { useSnackbar } from '~/state';
 import { Bill, EditBillResponse } from '~/types';
 
-interface EditBillResult {
-  editBill: {
-    bill: Bill;
-    success: boolean;
-  };
-}
-
 interface EditSelectedBillProps {
   billId: string;
   bill: Bill;
@@ -22,7 +15,7 @@ export const useEditBill = (onSuccess?: () => void) => {
   const { enqueueSnackbar } = useSnackbar();
   const { updateAccount } = useEditAccount();
 
-  const [editBill, { loading }] = useMutation<EditBillResult>(EDIT_BILL_MUTATION);
+  const [editBill, { loading }] = useMutation(EDIT_BILL_MUTATION);
 
   const editSelectedBill = ({
     billId,

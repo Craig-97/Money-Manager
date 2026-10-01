@@ -3,7 +3,6 @@ import { EDIT_ACCOUNT_MUTATION, editAccountCache } from '~/graphql';
 import { useErrorHandler } from '~/hooks';
 import { useSnackbar } from '~/state';
 import { useAccountStore, useUserContext } from '~/state';
-import { Account } from '~/types';
 
 interface EditAccountInput {
   bankBalance?: number;
@@ -17,19 +16,13 @@ interface UpdateAccountParams {
   };
 }
 
-interface EditAccountResult {
-  editAccount: {
-    account: Account;
-  };
-}
-
 export const useEditAccount = () => {
   const { user } = useUserContext();
   const id = useAccountStore(s => s.account.id);
   const { enqueueSnackbar } = useSnackbar();
   const handleGQLError = useErrorHandler();
 
-  const [editAccount, { loading }] = useMutation<EditAccountResult>(EDIT_ACCOUNT_MUTATION);
+  const [editAccount, { loading }] = useMutation(EDIT_ACCOUNT_MUTATION);
 
   // Resolves to whether the update succeeded. Errors are already reported through onError,
   // so the rejection is swallowed to avoid an unhandled promise rejection

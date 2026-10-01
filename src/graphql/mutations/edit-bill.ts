@@ -1,6 +1,16 @@
-import { gql } from '@apollo/client';
+import { gql, TypedDocumentNode } from '@apollo/client';
+import { Bill } from '~/types';
 
-export const EDIT_BILL_MUTATION = gql`
+export interface EditBillResult {
+  editBill: { bill: Bill; success: boolean };
+}
+
+export interface EditBillVariables {
+  id: string;
+  bill: Bill;
+}
+
+export const EDIT_BILL_MUTATION: TypedDocumentNode<EditBillResult, EditBillVariables> = gql`
   mutation EditBill($id: ID!, $bill: BillInput!) {
     editBill(id: $id, bill: $bill) {
       bill {

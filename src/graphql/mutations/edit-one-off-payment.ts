@@ -1,6 +1,19 @@
-import { gql } from '@apollo/client';
+import { gql, TypedDocumentNode } from '@apollo/client';
+import { OneOffPayment } from '~/types';
 
-export const EDIT_ONE_OFF_PAYMENT_MUTATION = gql`
+export interface EditOneOffPaymentResult {
+  editOneOffPayment: { oneOffPayment: OneOffPayment; success: boolean };
+}
+
+export interface EditOneOffPaymentVariables {
+  id: string;
+  oneOffPayment: OneOffPayment;
+}
+
+export const EDIT_ONE_OFF_PAYMENT_MUTATION: TypedDocumentNode<
+  EditOneOffPaymentResult,
+  EditOneOffPaymentVariables
+> = gql`
   mutation EditOneOffPayment($id: ID!, $oneOffPayment: OneOffPaymentInput!) {
     editOneOffPayment(id: $id, oneOffPayment: $oneOffPayment) {
       oneOffPayment {

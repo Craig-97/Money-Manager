@@ -1,12 +1,12 @@
 import { useEffect } from 'react';
 import isEqual from 'lodash.isequal';
-import { useQuery } from '@apollo/client/react';
+import { skipToken, useQuery } from '@apollo/client/react';
 import { useGQLEffect } from './useGQLEffect';
 import { ERRORS, EVENTS } from '~/constants';
 import { FIND_USER_QUERY, GET_ACCOUNT_QUERY, getAccountData } from '~/graphql';
 import { useErrorHandler } from '~/hooks';
 import { useAccountStore, useUserContext } from '~/state';
-import { AccountData, FindUserData } from '~/types';
+import { FindUserData } from '~/types';
 import { getGQLErrorCode } from '~/utils';
 
 export const useAccountData = () => {
@@ -21,9 +21,7 @@ export const useAccountData = () => {
     loading: userLoading,
     error: userError,
     data: userData
-  } = useQuery<FindUserData>(FIND_USER_QUERY, {
-    skip: !token || Boolean(user.id)
-  });
+  } = useQuery(FIND_USER_QUERY, !token || user.id ? skipToken : undefined);
 
   // Updates context with user id and email returned from local storage token
   const onFindUserSuccess = (response: FindUserData) => {
@@ -39,10 +37,10 @@ export const useAccountData = () => {
   });
 
   // Fetches account information once user id is in context
-  const { loading, data, error } = useQuery<AccountData>(GET_ACCOUNT_QUERY, {
-    variables: { id: user.id },
-    skip: !user.id
-  });
+  const { loading, data, error } = useQuery(
+    GET_ACCOUNT_QUERY,
+    user.id ? { variables: { id: user.id } } : skipToken
+  );
 
   useGQLEffect({ data, error, onError: handleGQLError });
 

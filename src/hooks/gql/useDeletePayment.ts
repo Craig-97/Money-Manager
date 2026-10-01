@@ -4,14 +4,7 @@ import { useErrorHandler } from '../useErrorHandler';
 import { DELETE_ONE_OFF_PAYMENT_MUTATION, deletePaymentCache } from '~/graphql';
 import { useSnackbar } from '~/state';
 import { useUserContext } from '~/state';
-import { DeletePaymentResponse, OneOffPayment } from '~/types';
-
-interface DeleteOffPaymentResult {
-  deleteOneOffPayment: {
-    oneOffPayment: OneOffPayment;
-    success: boolean;
-  };
-}
+import { DeletePaymentResponse } from '~/types';
 
 interface DeleteSelectedPaymentProps {
   paymentId: string;
@@ -25,9 +18,7 @@ export const useDeletePayment = (onSuccess?: () => void) => {
   const handleGQLError = useErrorHandler();
   const { updateAccount } = useEditAccount();
 
-  const [deletePayment, { loading }] = useMutation<DeleteOffPaymentResult>(
-    DELETE_ONE_OFF_PAYMENT_MUTATION
-  );
+  const [deletePayment, { loading }] = useMutation(DELETE_ONE_OFF_PAYMENT_MUTATION);
 
   const deleteSelectedPayment = ({
     paymentId,

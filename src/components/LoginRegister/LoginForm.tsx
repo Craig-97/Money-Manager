@@ -22,7 +22,7 @@ const validationSchema = Yup.object().shape({
 export const LoginForm = () => {
   const navigate = useNavigate();
   const { dispatch } = useUserContext();
-  const [loginQuery, { loading }] = useLazyQuery<LoginData>(LOGIN_QUERY);
+  const [loginQuery, { loading }] = useLazyQuery(LOGIN_QUERY);
 
   const onLoginCompleted = (response: LoginData) => {
     if (response) {

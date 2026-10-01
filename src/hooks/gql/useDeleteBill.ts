@@ -2,16 +2,9 @@ import { useMutation } from '@apollo/client/react';
 import { useErrorHandler } from '../useErrorHandler';
 import { DELETE_BILL_MUTATION, deleteBillCache } from '~/graphql';
 import { useSnackbar, useUserContext } from '~/state';
-import { Bill } from '~/types';
 
 interface DeleteSelectedBillProps {
   billId: string;
-}
-
-interface DeleteBillResult {
-  deleteBill: {
-    bill: Bill;
-  };
 }
 
 export const useDeleteBill = (onSuccess?: () => void) => {
@@ -19,7 +12,7 @@ export const useDeleteBill = (onSuccess?: () => void) => {
   const { enqueueSnackbar } = useSnackbar();
   const handleGQLError = useErrorHandler();
 
-  const [deleteBill, { loading }] = useMutation<DeleteBillResult>(DELETE_BILL_MUTATION);
+  const [deleteBill, { loading }] = useMutation(DELETE_BILL_MUTATION);
 
   const deleteSelectedBill = ({ billId }: DeleteSelectedBillProps) => {
     deleteBill({
