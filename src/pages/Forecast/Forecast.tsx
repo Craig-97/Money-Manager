@@ -1,20 +1,17 @@
-import { useState, useEffect, ChangeEvent } from 'react';
+import { useState, ChangeEvent } from 'react';
 import { Box, Card, CardContent, Typography, TextField, InputAdornment } from '@mui/material';
 import { ForecastCards, StandardPage, MonthlyProjection, SpendingImpactChart } from '~/components';
 import { useAccountStore } from '~/state';
 
 export const Forecast = () => {
   const billsTotal = useAccountStore(state => state.account.billsTotal);
-  const [monthlySpend, setMonthlySpend] = useState('0');
-
-  // Update monthlySpend when billsTotal becomes available
-  useEffect(() => {
-    if (billsTotal) setMonthlySpend(billsTotal.toString());
-  }, [billsTotal]);
+  // Until the user types a value, default to the bills total once it becomes available
+  const [enteredSpend, setEnteredSpend] = useState<string | null>(null);
+  const monthlySpend = enteredSpend ?? (billsTotal ? billsTotal.toString() : '0');
 
   const handleSpendChange = (event: ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value.replace(/[^0-9]/g, '');
-    setMonthlySpend(value);
+    setEnteredSpend(value);
   };
 
   return (

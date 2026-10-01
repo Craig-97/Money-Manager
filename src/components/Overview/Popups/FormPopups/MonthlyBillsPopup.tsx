@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -46,6 +46,7 @@ export const MonthlyBillsPopup = ({
 }: MonthlyBillsPopupProps) => {
   const id = useAccountStore(s => s.account.id);
   const [loadingAction, setLoadingAction] = useState<LoadingAction>(null);
+  const savedRef = useRef(false);
 
   const formik = useFormik({
     initialValues: {
@@ -57,6 +58,7 @@ export const MonthlyBillsPopup = ({
     validateOnMount: true,
     onSubmit: values => {
       setLoadingAction('save');
+      savedRef.current = true;
       onSave({ ...values, account: id });
     }
   });
@@ -73,16 +75,13 @@ export const MonthlyBillsPopup = ({
     formik.resetForm();
   };
 
+  // Reset form values once a save has finished
   useEffect(() => {
-    if (!loading) {
-      setLoadingAction(null);
-
-      // Reset form values after save
-      if (loadingAction === 'save') {
-        formik.resetForm();
-      }
+    if (!loading && savedRef.current) {
+      savedRef.current = false;
+      formik.resetForm();
     }
-  }, [loading, loadingAction]);
+  }, [loading, formik]);
 
   return (
     <Dialog

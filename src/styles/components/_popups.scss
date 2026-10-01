@@ -33,25 +33,3 @@
     margin-bottom: 0;
   }
 }
-
-.note-edit-popup {
-  textarea {
-    font-family: $font-family;
-    width: 98%;
-    min-height: 100px;
-    font-size: $standard;
-    font-weight: 500;
-    resize: none;
-    background-color: $background-light;
-    color: white;
-
-    &:focus {
-      outline: none;
-    }
-
-    &::placeholder {
-      color: white;
-      opacity: 0.75;
-    }
-  }
-}

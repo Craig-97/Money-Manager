@@ -25,6 +25,7 @@ export default [
       'unused-imports': unusedImports
     },
     rules: {
+      ...reactHooksPlugin.configs.flat.recommended.rules,
       'prettier/prettier': 'error',
       ...typescript.configs.recommended.rules,
       'no-unused-vars': 'off',

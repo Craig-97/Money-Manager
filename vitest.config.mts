@@ -5,9 +5,10 @@ import { configDefaults } from 'vitest/config';
 import path from 'path';
 
 export default defineConfig({
-  plugins: [react(), ...(process.env.REACT_COMPILER ? [babel({ presets: [reactCompilerPreset()] })] : [])],
+  plugins: [react(), babel({ presets: [reactCompilerPreset()] })],
   test: {
     globals: true,
+    testTimeout: 15000,
     environment: 'jsdom',
     setupFiles: './src/setupTests.ts',
     css: true,
