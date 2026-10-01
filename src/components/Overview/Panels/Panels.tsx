@@ -1,13 +1,13 @@
+import { useRef, useState } from 'react';
+import Slider from 'react-slick';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import AppBar from '@mui/material/AppBar';
 import Card from '@mui/material/Card';
 import Tab from '@mui/material/Tab';
-import { useRef, useState } from 'react';
-import Slider from 'react-slick';
-import { TabPanel, Tabs } from '~/components';
 import { MonthlyBills } from './MonthlyBills';
 import { PaymentsDue } from './PaymentsDue';
+import { TabPanel, Tabs } from '~/components';
 
 export const Panels = () => {
   const [value, setValue] = useState<number>(0);
@@ -22,7 +22,14 @@ export const Panels = () => {
 
   return (
     <Card className="overview-panels">
-      <AppBar position="static" color="default">
+      <AppBar
+        position="static"
+        elevation={0}
+        sx={{
+          backgroundColor: 'background.paper',
+          borderBottom: 1,
+          borderColor: 'divider'
+        }}>
         <Tabs value={value} onChange={onTabChange}>
           <Tab label="Upcoming payments" icon={<AccountBalanceWalletIcon />} />
           <Tab label="Monthly bills" icon={<ReceiptIcon />} />

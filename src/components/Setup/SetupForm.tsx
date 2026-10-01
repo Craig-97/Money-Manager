@@ -1,3 +1,6 @@
+import { MouseEvent, useState } from 'react';
+import { FormikErrors, FormikProps, useFormik } from 'formik';
+import * as Yup from 'yup';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import {
@@ -11,22 +14,19 @@ import {
   useMediaQuery,
   useTheme
 } from '@mui/material';
-import { FormikProps, useFormik } from 'formik';
-import { useState } from 'react';
-import { BasicInfoStep, BillsStep, PaydayStep, PaymentsStep, validationSchema } from '~/components';
+import { BasicInfoStep, BillsStep, PaymentsStep, PaydayStep, validationSchema } from '~/components';
 import { BANK_HOLIDAY_REGION, PAY_FREQUENCY, PAYDAY_TYPE } from '~/constants';
 import { useCreateAccount, useLogout } from '~/hooks';
-import { useAccountContext } from '~/state';
+import { useUserContext } from '~/state';
 import { SetupFormValues } from '~/types';
-import * as Yup from 'yup';
 
 const steps = ['Basic Info', 'Monthly Bills', 'Payments Due', 'Payday Setup'];
 
-const getStepErrors = (errors: any, step: number) => {
+const getStepErrors = (errors: FormikErrors<SetupFormValues>, step: number) => {
   switch (step) {
     case 0:
       return {
-        ...(errors.bankTotal && { bankTotal: errors.bankTotal }),
+        ...(errors.bankBalance && { bankBalance: errors.bankBalance }),
         ...(errors.monthlyIncome && { monthlyIncome: errors.monthlyIncome })
       };
     case 1:
@@ -56,16 +56,16 @@ const renderStepContent = (step: number, formik: FormikProps<SetupFormValues>) =
 };
 
 export const SetupForm = () => {
+  const { user } = useUserContext();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const { user } = useAccountContext();
   const [activeStep, setActiveStep] = useState(0);
   const logout = useLogout();
   const { createAccount, loading } = useCreateAccount();
 
   const formik = useFormik<SetupFormValues>({
     initialValues: {
-      bankTotal: '',
+      bankBalance: '',
       monthlyIncome: '',
       bills: [],
       oneOffPayments: [],
@@ -105,7 +105,7 @@ export const SetupForm = () => {
       await createAccount({
         variables: {
           account: {
-            bankBalance: parseFloat(values.bankTotal),
+            bankBalance: parseFloat(values.bankBalance),
             monthlyIncome: parseFloat(values.monthlyIncome),
             bills: values.bills,
             oneOffPayments: values.oneOffPayments,
@@ -117,7 +117,7 @@ export const SetupForm = () => {
     }
   });
 
-  const handleNext = (e: React.MouseEvent) => {
+  const handleNext = (e: MouseEvent) => {
     e.preventDefault();
     formik.validateForm().then(errors => {
       const currentStepErrors = getStepErrors(errors, activeStep);
@@ -127,7 +127,7 @@ export const SetupForm = () => {
     });
   };
 
-  const handleBack = (e: React.MouseEvent) => {
+  const handleBack = (e: MouseEvent) => {
     e.preventDefault();
     setActiveStep(prevStep => prevStep - 1);
   };
@@ -136,9 +136,9 @@ export const SetupForm = () => {
     switch (activeStep) {
       case 0:
         return (
-          formik.values.bankTotal &&
+          formik.values.bankBalance &&
           formik.values.monthlyIncome &&
-          !formik.errors.bankTotal &&
+          !formik.errors.bankBalance &&
           !formik.errors.monthlyIncome
         );
       case 1:

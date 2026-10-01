@@ -1,141 +1,240 @@
+import { useState, useEffect, Fragment } from 'react';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
 import DeleteIcon from '@mui/icons-material/Delete';
 import PaidIcon from '@mui/icons-material/Paid';
-import { Box, Tooltip } from '@mui/material';
-import { ChangeEvent, DispatchWithoutAction, Fragment, KeyboardEvent, useState } from 'react';
-import { useAccountContext } from '~/state/account-context';
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  InputAdornment,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField
+} from '@mui/material';
+import Grid from '@mui/material/Grid';
+import { LoadingIconButton } from '~/components/LoadingIconButton';
+import { PAYMENT_CATEGORY } from '~/constants';
+import { PAYMENT_TYPE } from '~/constants';
+import { useAccountStore } from '~/state';
 import { OneOffPayment } from '~/types';
-import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
-import IconButton from '@mui/material/IconButton';
-import InputAdornment from '@mui/material/InputAdornment';
-import TextField from '@mui/material/TextField';
+import { getOneOffCategoryOptions, getNextWeekDate, getInputDateFromTimestamp } from '~/utils';
 
 interface PaymentsDuePopupProps {
   title: string;
   isOpen: boolean;
-  close: DispatchWithoutAction;
-  defaultName?: string;
-  defaultAmount?: number;
-  onSave: ({ name, amount, account }: OneOffPayment) => void;
+  close: () => void;
+  defaultValues?: Partial<OneOffPayment>;
+  onSave: (payment: OneOffPayment) => void;
   onDelete?: (paid: boolean) => void;
+  loading?: boolean;
 }
+
+type LoadingAction = 'save' | 'pay' | 'delete' | null;
+
+const validationSchema = Yup.object({
+  name: Yup.string().required('Name is required'),
+  amount: Yup.number().required('Amount is required'),
+  dueDate: Yup.string().required('Due date is required'),
+  type: Yup.string().required('Type is required'),
+  category: Yup.string().required('Category is required')
+});
 
 export const PaymentsDuePopup = ({
   title,
   isOpen,
   close,
-  defaultName = '',
-  defaultAmount = 0,
+  defaultValues = {},
   onSave,
-  onDelete
+  onDelete,
+  loading = false
 }: PaymentsDuePopupProps) => {
-  const { account } = useAccountContext();
-  const { id } = account;
-  const [name, setName] = useState<string>(defaultName);
-  const [amount, setAmount] = useState<number>(defaultAmount);
+  const id = useAccountStore(s => s.account.id);
+  const [loadingAction, setLoadingAction] = useState<LoadingAction>(null);
 
-  const handleSaveClicked = () => {
-    onSave({ name, amount, account: id });
-    handleClose();
-  };
+  const formik = useFormik({
+    initialValues: {
+      name: defaultValues.name ?? '',
+      amount: defaultValues.amount ?? 0,
+      dueDate: defaultValues.dueDate
+        ? getInputDateFromTimestamp(defaultValues.dueDate)
+        : getNextWeekDate(),
+      type: defaultValues.type ?? PAYMENT_TYPE.EXPENSE,
+      category: defaultValues.category ?? PAYMENT_CATEGORY.OTHER
+    },
+    validationSchema,
+    validateOnMount: true,
+    onSubmit: values => {
+      setLoadingAction('save');
+      onSave({ ...values, account: id });
+    }
+  });
 
   const handleButtonClicked = (paid: boolean) => {
-    onDelete && onDelete(paid);
-    close();
-  };
-
-  const handleAmountChange = (event: ChangeEvent<HTMLInputElement>) => {
-    if (!isNaN(event.target.valueAsNumber)) {
-      setAmount(event.target.valueAsNumber);
-    } else {
-      setAmount(0);
-    }
-  };
-
-  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === 'Enter' && name && amount) {
-      event.preventDefault();
-      handleSaveClicked();
+    if (onDelete) {
+      setLoadingAction(paid ? 'pay' : 'delete');
+      onDelete(paid);
     }
   };
 
   const handleClose = () => {
     close();
-    setAmount(0);
-    setName('');
+    formik.resetForm();
   };
+
+  useEffect(() => {
+    if (!loading) {
+      setLoadingAction(null);
+
+      // Reset form values after save
+      if (loadingAction === 'save') {
+        formik.resetForm();
+      }
+    }
+  }, [loading, loadingAction]);
 
   return (
     <Dialog
+      disableRestoreFocus
       open={isOpen}
       onClose={handleClose}
       aria-labelledby="form-dialog-title"
       className="payments-due-popup"
-      maxWidth="xs"
+      maxWidth="sm"
       fullWidth>
       <DialogTitle id="form-dialog-title">
         {title}
         <Box>
           {onDelete && (
             <Fragment>
-              <Tooltip title="Pay">
-                <IconButton
-                  onClick={() => handleButtonClicked(true)}
-                  disabled={!name || (!amount && amount !== 0)}>
-                  <PaidIcon />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="Delete">
-                <IconButton
-                  onClick={() => handleButtonClicked(false)}
-                  disabled={!name || (!amount && amount !== 0)}>
-                  <DeleteIcon />
-                </IconButton>
-              </Tooltip>
+              <LoadingIconButton
+                tooltip="Pay"
+                onClick={() => handleButtonClicked(true)}
+                disabled={loading || !formik.isValid}
+                loading={loading && loadingAction === 'pay'}
+                icon={<PaidIcon />}
+              />
+              <LoadingIconButton
+                tooltip="Delete"
+                onClick={() => handleButtonClicked(false)}
+                disabled={loading || !formik.isValid}
+                loading={loading && loadingAction === 'delete'}
+                icon={<DeleteIcon />}
+              />
             </Fragment>
           )}
         </Box>
       </DialogTitle>
-      <DialogContent>
-        <DialogContentText>Name</DialogContentText>
-        <TextField
-          value={name}
-          onChange={event => setName(event.target.value)}
-          onKeyDown={handleKeyDown}
-          autoFocus
-          margin="dense"
-          id="payment-name"
-          fullWidth
-        />
-        <DialogContentText>Amount</DialogContentText>
-        <TextField
-          type="number"
-          slotProps={{
-            input: {
-              startAdornment: <InputAdornment position="start">£</InputAdornment>
-            }
-          }}
-          value={amount}
-          onChange={handleAmountChange}
-          onKeyDown={handleKeyDown}
-          margin="dense"
-          id="payment-amount"
-          fullWidth
-        />
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={handleClose}>Cancel</Button>
-        <Button
-          onClick={handleSaveClicked}
-          color="secondary"
-          disabled={!name || (!amount && amount !== 0)}>
-          Save
-        </Button>
-      </DialogActions>
+      <form onSubmit={formik.handleSubmit}>
+        <DialogContent>
+          <Grid container spacing={2} columns={{ mobile: 1, sm: 2 }}>
+            <Grid size={{ mobile: 1, sm: 2 }}>
+              <TextField
+                {...formik.getFieldProps('name')}
+                error={formik.touched.name && Boolean(formik.errors.name)}
+                helperText={formik.touched.name && formik.errors.name}
+                disabled={loading}
+                autoFocus
+                margin="dense"
+                label="Name"
+                id="payment-name"
+                fullWidth
+              />
+            </Grid>
+
+            <Grid size={1}>
+              <TextField
+                {...formik.getFieldProps('amount')}
+                type="number"
+                error={formik.touched.amount && Boolean(formik.errors.amount)}
+                helperText={formik.touched.amount && formik.errors.amount}
+                slotProps={{
+                  input: {
+                    startAdornment: <InputAdornment position="start">£</InputAdornment>
+                  }
+                }}
+                disabled={loading}
+                margin="dense"
+                label="Amount"
+                id="payment-amount"
+                fullWidth
+              />
+            </Grid>
+
+            <Grid size={1}>
+              <TextField
+                {...formik.getFieldProps('dueDate')}
+                type="date"
+                error={formik.touched.dueDate && Boolean(formik.errors.dueDate)}
+                helperText={formik.touched.dueDate && formik.errors.dueDate}
+                disabled={loading}
+                margin="dense"
+                label="Due Date"
+                id="payment-due-date"
+                fullWidth
+                sx={{
+                  '& input::-webkit-calendar-picker-indicator': {
+                    filter: 'invert(1)'
+                  }
+                }}
+              />
+            </Grid>
+
+            <Grid size={1}>
+              <FormControl fullWidth margin="dense">
+                <InputLabel id="payment-type-label">Type</InputLabel>
+                <Select
+                  {...formik.getFieldProps('type')}
+                  labelId="payment-type-label"
+                  id="payment-type"
+                  label="Type"
+                  disabled={loading}>
+                  {Object.entries(PAYMENT_TYPE).map(([key, value]) => (
+                    <MenuItem key={key} value={value}>
+                      {key.charAt(0) + key.slice(1).toLowerCase()}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+
+            <Grid size={1}>
+              <FormControl fullWidth margin="dense">
+                <InputLabel id="payment-category-label">Category</InputLabel>
+                <Select
+                  {...formik.getFieldProps('category')}
+                  labelId="payment-category-label"
+                  id="payment-category"
+                  label="Category"
+                  disabled={loading}>
+                  {getOneOffCategoryOptions().map(({ value, label }) => (
+                    <MenuItem key={value} value={value}>
+                      {label}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+          </Grid>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} disabled={loading} color="secondary" variant="outlined">
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            loading={loading && loadingAction === 'save'}
+            disabled={loading || !formik.isValid}
+            variant="contained">
+            Save
+          </Button>
+        </DialogActions>
+      </form>
     </Dialog>
   );
 };

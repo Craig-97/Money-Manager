@@ -1,8 +1,8 @@
 import * as Yup from 'yup';
-import { PAY_FREQUENCY, PAYDAY_TYPE, WEEKDAY } from '~/constants';
+import { PAY_FREQUENCY, PAYDAY_TYPE, PAYMENT_CATEGORY, PAYMENT_TYPE, WEEKDAY } from '~/constants';
 import { PayFrequency } from '~/types';
 
-const uniqueNameValidator = (items: any[], name: string, path: string) => {
+const uniqueNameValidator = (items: { name: string }[], name: string, path: string) => {
   if (!name) return true; // Empty names are handled by required validation
 
   // Extract the current index from the path (e.g., "bills[0].name" -> 0)
@@ -15,9 +15,9 @@ const uniqueNameValidator = (items: any[], name: string, path: string) => {
 };
 
 export const validationSchema = Yup.object().shape({
-  bankTotal: Yup.number()
-    .typeError('Bank total must be a number')
-    .required('Bank total is required')
+  bankBalance: Yup.number()
+    .typeError('Bank balance must be a number')
+    .required('Bank balance is required')
     .moreThan(0, 'Must be greater than 0'),
   monthlyIncome: Yup.number()
     .typeError('Monthly income must be a number')
@@ -75,7 +75,16 @@ export const validationSchema = Yup.object().shape({
         amount: Yup.number()
           .required('Amount is required')
           .typeError('Amount must be a number')
-          .moreThan(0, 'Must be greater than 0')
+          .moreThan(0, 'Must be greater than 0'),
+        dueDate: Yup.date()
+          .required('Due date is required')
+          .typeError('Due date must be a valid date'),
+        type: Yup.string()
+          .required('Type is required')
+          .oneOf(Object.values(PAYMENT_TYPE), 'Invalid payment type'),
+        category: Yup.string()
+          .required('Category is required')
+          .oneOf(Object.values(PAYMENT_CATEGORY), 'Invalid payment category')
       })
     )
     .max(10, 'Maximum of 10 payments allowed'),

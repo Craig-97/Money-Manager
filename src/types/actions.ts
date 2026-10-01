@@ -1,11 +1,5 @@
-import { EVENTS } from '~/constants';
-import { AccountState } from './account';
 import { User } from './user';
-
-export type GetAccountDetailsAction = {
-  type: typeof EVENTS.GET_ACCOUNT_DETAILS;
-  data: AccountState;
-};
+import { EVENTS } from '~/constants';
 
 export type LoginAction = {
   type: typeof EVENTS.LOGIN;
@@ -17,4 +11,4 @@ export type LogoutAction = {
 };
 
 // Combine into a discriminated union
-export type Actions = GetAccountDetailsAction | LoginAction | LogoutAction;
+export type Actions = LoginAction | LogoutAction;

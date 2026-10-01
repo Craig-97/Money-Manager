@@ -1,3 +1,4 @@
+import { FormikProps } from 'formik';
 import {
   Box,
   FormControl,
@@ -8,14 +9,14 @@ import {
   TextField,
   Typography
 } from '@mui/material';
-import { FormikProps } from 'formik';
-import { SetupFormValues } from '~/types';
+import { SelectChangeEvent } from '@mui/material/Select';
 import { PAY_FREQUENCY, PAYDAY_TYPE } from '~/constants';
+import { SetupFormValues } from '~/types';
 import {
-  getFrequencyOptions,
-  getWeekdayOptions,
   getBankHolidayRegionOptions,
-  getPaydayTypeOptions
+  getFrequencyOptions,
+  getPaydayTypeOptions,
+  getWeekdayOptions
 } from '~/utils';
 interface PaydayStepProps {
   formik: FormikProps<SetupFormValues>;
@@ -25,7 +26,7 @@ export const PaydayStep = ({ formik }: PaydayStepProps) => {
   const { values, setFieldValue, errors, touched } = formik;
   const { payday } = values;
 
-  const handleFrequencyChange = (event: any) => {
+  const handleFrequencyChange = (event: SelectChangeEvent) => {
     const frequency = event.target.value;
     setFieldValue('payday', {
       ...payday,
@@ -37,7 +38,7 @@ export const PaydayStep = ({ formik }: PaydayStepProps) => {
     });
   };
 
-  const handleTypeChange = (event: any) => {
+  const handleTypeChange = (event: SelectChangeEvent) => {
     const type = event.target.value;
     setFieldValue('payday', {
       ...payday,
@@ -47,7 +48,7 @@ export const PaydayStep = ({ formik }: PaydayStepProps) => {
     });
   };
 
-  const handleRegionChange = (event: any) => {
+  const handleRegionChange = (event: SelectChangeEvent) => {
     setFieldValue('payday.bankHolidayRegion', event.target.value);
   };
 
@@ -156,7 +157,11 @@ export const PaydayStep = ({ formik }: PaydayStepProps) => {
           type="date"
           value={payday.firstPayDate || ''}
           onChange={e => setFieldValue('payday.firstPayDate', e.target.value)}
-          slotProps={{ inputLabel: { shrink: true } }}
+          sx={{
+            '& input::-webkit-calendar-picker-indicator': {
+              filter: 'invert(1)'
+            }
+          }}
           error={touched.payday?.firstPayDate && Boolean(errors.payday?.firstPayDate)}
           helperText={touched.payday?.firstPayDate && errors.payday?.firstPayDate}
         />

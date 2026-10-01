@@ -7,6 +7,9 @@ export const CREATE_ONE_OFF_PAYMENT_MUTATION = gql`
         id
         name
         amount
+        dueDate
+        type
+        category
       }
       success
     }

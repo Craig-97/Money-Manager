@@ -1,4 +1,3 @@
-import { PAYMENT_TYPES } from '~/constants';
+import { PAYMENT_TYPENAME } from '~/constants';
 
-export type PaymentType = (typeof PAYMENT_TYPES)[keyof typeof PAYMENT_TYPES];
-export type PAYMENT_TYPE = typeof PAYMENT_TYPES;
+export type PaymentTypeName = typeof PAYMENT_TYPENAME;

@@ -1,7 +1,7 @@
+import { FormikErrors, FormikProps } from 'formik';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { Box, TextField, IconButton, Button, Typography } from '@mui/material';
 import InputAdornment from '@mui/material/InputAdornment';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { FormikErrors, FormikProps } from 'formik';
 import { Bill, SetupFormValues } from '~/types';
 import { handleAddArrayItem, handleRemoveArrayItem } from '~/utils';
 
@@ -10,7 +10,7 @@ interface BillsStepProps {
 }
 
 export const BillsStep = ({ formik }: BillsStepProps) => {
-  const { values, handleChange, handleBlur, touched, errors } = formik;
+  const { values, touched, errors } = formik;
 
   const onAdd = () => {
     handleAddArrayItem<Bill>({
@@ -46,28 +46,22 @@ export const BillsStep = ({ formik }: BillsStepProps) => {
       {values.bills.map((bill, index) => (
         <Box key={index} sx={{ display: 'flex', gap: 1, mb: 2 }}>
           <TextField
+            {...formik.getFieldProps(`bills.${index}.name`)}
             fullWidth
-            name={`bills.${index}.name`}
             label="Bill Name"
-            value={bill.name}
-            onChange={handleChange}
-            onBlur={handleBlur}
             error={touched.bills?.[index]?.name && Boolean(billErrors?.[index]?.name)}
             helperText={touched.bills?.[index]?.name && billErrors?.[index]?.name}
           />
           <TextField
+            {...formik.getFieldProps(`bills.${index}.amount`)}
             fullWidth
-            name={`bills.${index}.amount`}
+            label="Amount"
+            type="number"
             slotProps={{
               input: {
                 startAdornment: <InputAdornment position="start">£</InputAdornment>
               }
             }}
-            label="Amount"
-            type="number"
-            value={bill.amount}
-            onChange={handleChange}
-            onBlur={handleBlur}
             error={touched.bills?.[index]?.amount && Boolean(billErrors?.[index]?.amount)}
             helperText={touched.bills?.[index]?.amount && billErrors?.[index]?.amount}
           />

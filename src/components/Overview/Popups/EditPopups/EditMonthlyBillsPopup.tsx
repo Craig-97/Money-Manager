@@ -1,16 +1,11 @@
-import { useMutation } from '@apollo/client';
-import CircularProgress from '@mui/material/CircularProgress';
-import { useSnackbar } from 'notistack';
-import { DispatchWithoutAction } from 'react';
-import { DELETE_BILL_MUTATION, EDIT_BILL_MUTATION, deleteBillCache } from '~/graphql';
-import { useAccountContext } from '~/state';
-import { Bill, EditBillResponse } from '~/types';
 import { MonthlyBillsPopup } from '../FormPopups';
-import { useErrorHandler, useEditAccount } from '~/hooks';
+import { useEditBill, useDeleteBill } from '~/hooks';
+import { useAccountStore } from '~/state';
+import { Bill } from '~/types';
 
 interface EditMonthlyBillsPopupProps {
   isOpen: boolean;
-  close: DispatchWithoutAction;
+  close: () => void;
   selectedBill: Bill;
 }
 
@@ -19,75 +14,36 @@ export const EditMonthlyBillsPopup = ({
   close,
   selectedBill
 }: EditMonthlyBillsPopupProps) => {
-  const { account, user } = useAccountContext();
-  const { bankBalance } = account;
-  const { id: billId, name, amount, paid }: Bill = selectedBill;
-  const { enqueueSnackbar } = useSnackbar();
-  const handleGQLError = useErrorHandler();
+  const bankBalance = useAccountStore(s => s.account.bankBalance);
+  const { id: billId } = selectedBill;
 
-  const [editBill, { loading: editBillLoading }] = useMutation(EDIT_BILL_MUTATION);
+  const { editSelectedBill, loading: editBillLoading } = useEditBill(close);
+  const { deleteSelectedBill, loading: deleteBillLoading } = useDeleteBill(close);
 
-  const editSelectedBill = (bill: Bill) => {
-    editBill({
-      variables: { id: billId, bill },
-      onCompleted: data => onEditBillCompleted(data),
-      onError: err => enqueueSnackbar(err?.message, { variant: 'error' })
-    });
-  };
-
-  const { updateAccount, loading: editAccLoading } = useEditAccount();
-
-  const onEditBillCompleted = (response: EditBillResponse) => {
-    const {
-      editBill: { bill, success }
-    } = response;
-
-    enqueueSnackbar(`${bill.name} bill updated`, { variant: 'success' });
-
-    if (success && !selectedBill?.paid && bill?.paid) {
-      const newBalance = bankBalance - (bill?.amount || 0);
-      if (!isNaN(newBalance)) {
-        updateAccount({ bankBalance: newBalance });
-      }
+  const handleEditBill = (bill: Bill) => {
+    if (billId) {
+      editSelectedBill({
+        billId,
+        bill,
+        currentBankBalance: bankBalance,
+        isPreviouslyPaid: selectedBill.paid
+      });
     }
   };
 
-  const [deleteBill, { loading: delBillLoading }] = useMutation(DELETE_BILL_MUTATION);
-
-  const deleteSelectedBill = () => {
-    deleteBill({
-      variables: { id: billId },
-      update: (
-        cache,
-        {
-          data: {
-            deleteBill: { bill }
-          }
-        }
-      ) => deleteBillCache(cache, bill, user),
-      onCompleted: () => enqueueSnackbar(`Bill deleted`, { variant: 'success' }),
-      onError: handleGQLError
-    });
+  const handleDeleteBill = () => {
+    if (billId) deleteSelectedBill({ billId });
   };
-
-  if (editAccLoading || editBillLoading || delBillLoading) {
-    return (
-      <div className="loading">
-        <CircularProgress />
-      </div>
-    );
-  }
 
   return isOpen ? (
     <MonthlyBillsPopup
       title="Edit Monthly Bill"
-      onSave={editSelectedBill}
-      onDelete={deleteSelectedBill}
+      onSave={handleEditBill}
+      onDelete={handleDeleteBill}
       isOpen={isOpen}
       close={close}
-      defaultName={name}
-      defaultAmount={amount}
-      defaultPaid={paid}
+      defaultValues={selectedBill}
+      loading={editBillLoading || deleteBillLoading}
     />
   ) : null;
 };

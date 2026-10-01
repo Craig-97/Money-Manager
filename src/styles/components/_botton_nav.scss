@@ -1,0 +1,8 @@
+@use '../abstracts' as *;
+
+.MuiBottomNavigation-root.bottom-nav {
+  .MuiSvgIcon-root {
+    height: $bottom-nav-icon;
+    width: $bottom-nav-icon;
+  }
+}

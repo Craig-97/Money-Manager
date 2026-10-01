@@ -1,3 +1,4 @@
+import { PAYMENT_TYPE } from '~/constants';
 import { Bill, OneOffPayment } from '~/types';
 
 export const cheapestAscendingSort = (a: Bill | OneOffPayment, b: Bill | OneOffPayment) => {
@@ -11,6 +12,15 @@ export const cheapestAscendingSort = (a: Bill | OneOffPayment, b: Bill | OneOffP
 
 export const getAmountTotal = (amounts: Array<Bill | OneOffPayment>) =>
   amounts?.reduce((n, { amount }) => n + amount!, 0);
+
+export const getPaymentTypeTotal = (payments: Array<Bill | OneOffPayment>) => {
+  if (!payments?.length) return 0;
+
+  return payments.reduce((total, payment) => {
+    const amount = payment.amount || 0;
+    return payment.type === PAYMENT_TYPE.EXPENSE ? total + amount : total - amount;
+  }, 0);
+};
 
 export const getPaymentsDue = (oneOffPayments: Array<Bill | OneOffPayment>, bills: Array<Bill>) =>
   oneOffPayments

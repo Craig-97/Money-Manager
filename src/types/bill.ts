@@ -1,4 +1,5 @@
-import { PAYMENT_TYPE } from '../types';
+import { PaymentType } from './oneOffPayment';
+import { PaymentTypeName } from './payment';
 
 export interface Bill {
   id?: string;
@@ -6,7 +7,8 @@ export interface Bill {
   amount?: number;
   paid?: boolean;
   account?: string;
-  __typename?: PAYMENT_TYPE['BILL'];
+  type?: PaymentType;
+  __typename?: PaymentTypeName['BILL'];
 }
 
 export interface EditBillResponse {

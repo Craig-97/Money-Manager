@@ -1,14 +1,12 @@
-import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import { Fragment, useState } from 'react';
-import { useAccountContext } from '~/state/account-context';
+import AccountBalanceOutlinedIcon from '@mui/icons-material/AccountBalanceOutlined';
 import { EnterValuePopup } from '../Popups';
-import { LoadingCard } from './LoadingCard';
 import { TotalCard } from './TotalCard';
 import { useEditAccount } from '~/hooks';
+import { useAccountStore } from '~/state';
 
 export const BankBalanceCard = () => {
-  const { account } = useAccountContext();
-  const { bankBalance } = account;
+  const bankBalance = useAccountStore(s => s.account.bankBalance);
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const { updateAccount, loading } = useEditAccount();
@@ -17,34 +15,34 @@ export const BankBalanceCard = () => {
     setIsOpen(true);
   };
 
-  const changeBankBalance = (value: number) => {
+  const changeBankBalance = async (value: number) => {
     if (!isNaN(value) && value !== bankBalance) {
-      updateAccount({ bankBalance: value }, { successMessage: 'Bank Total updated' });
+      await updateAccount({
+        input: { bankBalance: value },
+        options: { successMessage: 'Bank Balance updated' }
+      });
+      setIsOpen(false);
     }
-    setIsOpen(false);
   };
 
   return (
     <Fragment>
-      {!loading ? (
-        <TotalCard
-          classBaseName="bank-balance"
-          title={'BANK TOTAL'}
-          amount={bankBalance}
-          onClick={handleClickOpen}
-          icon={<AccountBalanceIcon color="primary" />}
-        />
-      ) : (
-        <LoadingCard />
-      )}
+      <TotalCard
+        title="BANK BALANCE"
+        amount={bankBalance}
+        onClick={handleClickOpen}
+        icon={<AccountBalanceOutlinedIcon />}
+        iconColor="primary"
+      />
       {isOpen && (
         <EnterValuePopup
           currentValue={bankBalance}
           isOpen={isOpen}
           close={() => setIsOpen(false)}
           changeValue={changeBankBalance}
-          title="Bank Total"
-          labelText="Enter your updated bank total"
+          title="Bank Balance"
+          labelText="Enter your updated bank balance"
+          loading={loading}
         />
       )}
     </Fragment>

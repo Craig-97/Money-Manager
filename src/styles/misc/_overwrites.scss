@@ -1,0 +1,13 @@
+@use '../abstracts' as *;
+
+/* CHROME AUTOCOMPLETE FIX */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  @include box-shadow($x: 0, $y: 0, $b: 0, $s: 30px, $c: $background-light, $i: inset);
+}
+
+input:-webkit-autofill {
+  -webkit-text-fill-color: #fff !important;
+}

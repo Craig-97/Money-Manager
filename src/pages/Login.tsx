@@ -1,13 +1,24 @@
-import Card from '@mui/material/Card';
+import { Box, Card, Typography } from '@mui/material';
 import { LoginPanels, StandardPage } from '~/components';
 
 export const Login = () => (
-  <StandardPage header={false} bottomNav={false}>
-    <div className="login">
-      <Card className="loginregister">
-        <h1>Money Manager</h1>
-        <LoginPanels />
-      </Card>
-    </div>
+  <StandardPage bottomNav={false}>
+    <Box sx={{ maxWidth: '1196px', m: '0 auto' }}>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh'
+        }}>
+        <Card className="loginregister">
+          <Typography variant="h1" sx={{ fontWeight: 700 }}>
+            Money Manager
+          </Typography>
+          <LoginPanels />
+        </Card>
+      </Box>
+    </Box>
   </StandardPage>
 );

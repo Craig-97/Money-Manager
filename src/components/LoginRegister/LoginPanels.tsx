@@ -1,10 +1,10 @@
+import { useRef, useState } from 'react';
+import Slider from 'react-slick';
 import AppBar from '@mui/material/AppBar';
 import Tab from '@mui/material/Tab';
-import { useRef, useState } from 'react';
 import { TabPanel, Tabs } from '../Tabs';
 import { LoginForm } from './LoginForm';
 import { RegisterForm } from './RegisterForm';
-import Slider from 'react-slick';
 
 export const LoginPanels = () => {
   const [value, setValue] = useState<number>(0);

@@ -1,5 +1,5 @@
-import { Box, InputAdornment, TextField, Typography } from '@mui/material';
 import { FormikProps } from 'formik';
+import { Box, InputAdornment, TextField, Typography } from '@mui/material';
 import { SetupFormValues } from '~/types';
 
 interface BasicInfoStepProps {
@@ -18,22 +18,18 @@ export const BasicInfoStep = ({ formik }: BasicInfoStepProps) => (
         Enter the total available funds in your bank account.
       </Typography>
       <TextField
+        {...formik.getFieldProps('bankBalance')}
+        autoFocus
+        fullWidth
+        label="Bank Balance"
+        type="number"
         slotProps={{
           input: {
             startAdornment: <InputAdornment position="start">£</InputAdornment>
           }
         }}
-        autoFocus
-        fullWidth
-        id="bankTotal"
-        name="bankTotal"
-        label="Bank Total"
-        type="number"
-        value={formik.values.bankTotal}
-        onChange={formik.handleChange}
-        onBlur={formik.handleBlur}
-        error={formik.touched.bankTotal && Boolean(formik.errors.bankTotal)}
-        helperText={formik.touched.bankTotal && formik.errors.bankTotal}
+        error={formik.touched.bankBalance && Boolean(formik.errors.bankBalance)}
+        helperText={formik.touched.bankBalance && formik.errors.bankBalance}
         margin="normal"
       />
     </Box>
