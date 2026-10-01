@@ -1,17 +1,21 @@
 import { ApolloClient, InMemoryCache, HttpLink } from '@apollo/client';
 import { SetContextLink } from '@apollo/client/link/context';
 
-const cache = new InMemoryCache({
-  typePolicies: {
-    Account: {
-      fields: {
-        bills: { merge: (old, incoming) => incoming },
-        oneOffPayments: { merge: (old, incoming) => incoming },
-        notes: { merge: (old, incoming) => incoming }
+// Exported so tests can build a cache with the same merge behaviour as the app
+export const createCache = () =>
+  new InMemoryCache({
+    typePolicies: {
+      Account: {
+        fields: {
+          bills: { merge: (old, incoming) => incoming },
+          oneOffPayments: { merge: (old, incoming) => incoming },
+          notes: { merge: (old, incoming) => incoming }
+        }
       }
     }
-  }
-});
+  });
+
+const cache = createCache();
 
 const uri = import.meta.env.PROD
   ? import.meta.env.VITE_PROD_API_URL
