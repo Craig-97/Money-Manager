@@ -61,10 +61,16 @@ export const LoginForm = () => {
     },
     validationSchema: validationSchema,
     onSubmit: async (values, { setSubmitting }) => {
-      const { data, error } = await loginQuery({ variables: { ...values } });
-      if (data) onLoginCompleted(data);
-      if (error) onLoginError(error);
-      setSubmitting(false);
+      // Apollo Client 4 rejects the lazy query promise when the API returns errors (wrong
+      // password, unknown email) instead of resolving with an `error`, so handle it in the catch
+      try {
+        const { data } = await loginQuery({ variables: { ...values } });
+        if (data) onLoginCompleted(data);
+      } catch (error) {
+        onLoginError(error);
+      } finally {
+        setSubmitting(false);
+      }
     }
   });
 

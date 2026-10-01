@@ -43,10 +43,7 @@ describe('Login', () => {
     expect(await screen.findByText('Password must contain a number.')).toBeInTheDocument();
   });
 
-  // Known bug: Apollo Client 4's lazy query function rejects on GraphQL errors, but LoginForm
-  // expects { data, error } back, so the failure is unhandled and no message is shown.
-  // it.fails passes while the bug exists and starts failing once it is fixed.
-  it.fails('shows an error under the email when the user does not exist', async () => {
+  it('shows an error under the email when the user does not exist', async () => {
     const api = createFakeApi();
     api.failNext('Login', 'USER_EMAIL_NOT_FOUND', 'We could not find a user with that email');
     const { user } = await openLogin(api);
@@ -59,8 +56,7 @@ describe('Login', () => {
     expect(localStorage.getItem('token')).toBeNull();
   });
 
-  // Known bug: same unhandled rejection as above
-  it.fails('shows an error under the password and clears it when it is incorrect', async () => {
+  it('shows an error under the password and clears it when it is incorrect', async () => {
     const api = createFakeApi();
     api.failNext('Login', 'INVALID_CREDENTIALS', 'Password is incorrect');
     const { user } = await openLogin(api);
