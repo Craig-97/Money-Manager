@@ -1,0 +1,347 @@
+type Query {
+  users: [User!]!
+  user(id: ID): User
+  login(email: String!, password: String!): AuthData!
+  tokenFindUser: User
+  accounts: [Account!]!
+  account(id: ID): Account
+  bills(accountId: ID!): [Bill!]!
+  bill(id: ID): Bill
+  oneOffPayments(accountId: ID!): [OneOffPayment!]!
+  oneOffPayment(id: ID): OneOffPayment
+  recurringPayments(accountId: ID!): [RecurringPayment!]!
+  recurringPayment(id: ID!): RecurringPayment
+  notes(accountId: ID!): [Note!]!
+  note(id: ID): Note
+  paydays: [Payday!]!
+  payday(id: ID): Payday
+}
+
+type User {
+  id: ID!
+  account: ID
+  email: String!
+  firstName: String!
+  surname: String!
+}
+
+input UserInput {
+  email: String!
+  password: String!
+  account: ID
+  firstName: String!
+  surname: String!
+}
+
+type UserResponse {
+  user: User
+  account: ID
+  success: Boolean
+}
+
+type AuthData {
+  user: User!
+  token: String!
+  tokenExpiration: Int!
+}
+
+type Mutation {
+  registerAndLogin(user: UserInput): AuthData!
+  createUser(user: UserInput!): UserResponse!
+  editUser(id: ID!, user: UserInput!): UserResponse!
+  deleteUser(id: ID!): UserResponse!
+  createAccount(account: CreateAccountInput!): AccountResponse!
+  editAccount(id: ID!, account: EditAccountInput!): AccountResponse!
+  deleteAccount(id: ID!): AccountResponse!
+  createBill(bill: BillInput!): BillResponse!
+  editBill(id: ID!, bill: BillInput!): BillResponse!
+  deleteBill(id: ID!): BillResponse!
+  batchUpdateBills(input: BatchBillUpdateInput!): BatchBillResponse!
+  batchDeleteBills(ids: [ID!]!): BatchDeleteResponse!
+  createOneOffPayment(oneOffPayment: OneOffPaymentInput!): OneOffPaymentResponse!
+  editOneOffPayment(id: ID!, oneOffPayment: OneOffPaymentInput!): OneOffPaymentResponse!
+  deleteOneOffPayment(id: ID!): OneOffPaymentResponse!
+  batchDeleteOneOffPayments(ids: [ID!]!): BatchOneOffPaymentResponse!
+  createRecurringPayment(input: CreateRecurringPaymentInput!): RecurringPaymentResponse!
+  updateRecurringPayment(id: ID!, input: UpdateRecurringPaymentInput!): RecurringPaymentResponse!
+  deleteRecurringPayment(id: ID!): RecurringPaymentResponse!
+  batchUpdateRecurringPayments(input: [BatchUpdateRecurringPaymentInput!]!): BatchRecurringPaymentResponse!
+  batchDeleteRecurringPayments(ids: [ID!]!): BatchDeleteResponse!
+  createNote(note: NoteInput!): NoteResponse!
+  editNote(id: ID!, note: NoteInput!): NoteResponse!
+  deleteNote(id: ID!): NoteResponse!
+  createPayday(payday: PaydayInput!): PaydayResponse!
+  editPayday(id: ID!, payday: PaydayInput!): PaydayResponse!
+  deletePayday(id: ID!): PaydayResponse!
+}
+
+type Account {
+  id: ID!
+  user: User
+  bankBalance: Float!
+  monthlyIncome: Float!
+  bills: [Bill]
+  oneOffPayments: [OneOffPayment]
+  notes: [Note]
+  payday: Payday
+}
+
+input CreateAccountInput {
+  bankBalance: Float!
+  monthlyIncome: Float!
+  bills: [BillInput]
+  oneOffPayments: [OneOffPaymentInput]
+  payday: PaydayInput
+  userId: ID!
+}
+
+input EditAccountInput {
+  bankBalance: Float
+  monthlyIncome: Float
+}
+
+type AccountResponse {
+  account: Account
+  success: Boolean
+}
+
+type Bill {
+  id: ID!
+  account: ID!
+  name: String!
+  amount: Float!
+  paid: Boolean!
+}
+
+input BillInput {
+  account: ID
+  name: String
+  amount: Float
+  paid: Boolean
+}
+
+input BatchBillUpdateInput {
+  ids: [ID!]!
+  paid: Boolean!
+}
+
+type BillResponse {
+  bill: Bill
+  success: Boolean
+}
+
+type BatchBillResponse {
+  bills: [Bill]!
+  success: Boolean!
+  updatedCount: Int!
+}
+
+type BatchDeleteResponse {
+  success: Boolean!
+  deletedCount: Int!
+}
+
+enum PaymentType {
+  INCOME
+  EXPENSE
+}
+
+enum PaymentCategory {
+  MORTGAGE
+  RENT
+  UTILITIES
+  HOME_MAINTENANCE
+  VEHICLE
+  TRANSPORT
+  LOAN
+  CREDIT_CARD
+  SAVINGS
+  INVESTMENT
+  INSURANCE
+  HEALTHCARE
+  CHILDCARE
+  EDUCATION
+  SUBSCRIPTION
+  MEMBERSHIP
+  FOOD
+  CHARITY
+  BUSINESS
+  OTHER
+  TRANSFER
+  FEES
+  TAXES
+  HOME
+  TRAVEL
+  SHOPPING
+  ENTERTAINMENT
+  GIFT
+  PETS
+  SALARY
+}
+
+type OneOffPayment {
+  id: ID!
+  account: ID!
+  name: String!
+  amount: Float!
+  dueDate: String!
+  type: PaymentType!
+  category: PaymentCategory!
+}
+
+input OneOffPaymentInput {
+  account: ID
+  name: String
+  amount: Float
+  dueDate: String
+  type: PaymentType
+  category: PaymentCategory
+}
+
+type OneOffPaymentResponse {
+  oneOffPayment: OneOffPayment
+  success: Boolean
+}
+
+type BatchOneOffPaymentResponse {
+  oneOffPayments: [OneOffPayment]!
+  success: Boolean!
+  deletedCount: Int!
+}
+
+enum PaymentFrequency {
+  WEEKLY
+  BIWEEKLY
+  MONTHLY
+  QUARTERLY
+  ANNUALLY
+}
+
+type RecurringPayment {
+  id: ID!
+  name: String!
+  amount: Float!
+  account: Account!
+  category: PaymentCategory!
+  frequency: PaymentFrequency!
+  type: PaymentType!
+  firstPaymentDate: String!
+  lastPaymentDate: String
+}
+
+input CreateRecurringPaymentInput {
+  name: String!
+  amount: Float!
+  accountId: ID!
+  category: PaymentCategory!
+  frequency: PaymentFrequency!
+  type: PaymentType!
+  firstPaymentDate: String!
+  lastPaymentDate: String
+}
+
+input UpdateRecurringPaymentInput {
+  name: String
+  amount: Float
+  category: PaymentCategory
+  frequency: PaymentFrequency
+  type: PaymentType
+  firstPaymentDate: String
+  lastPaymentDate: String
+}
+
+input BatchUpdateRecurringPaymentInput {
+  id: ID!
+  name: String
+  amount: Float
+  category: PaymentCategory
+  frequency: PaymentFrequency
+  type: PaymentType
+  firstPaymentDate: String
+  lastPaymentDate: String
+}
+
+type BatchRecurringPaymentResponse {
+  recurringPayments: [RecurringPayment!]!
+  success: Boolean!
+}
+
+type RecurringPaymentResponse {
+  recurringPayment: RecurringPayment
+  success: Boolean!
+}
+
+type Note {
+  id: ID!
+  account: ID!
+  body: String!
+  createdAt: String!
+  updatedAt: String!
+}
+
+input NoteInput {
+  account: ID
+  body: String
+}
+
+type NoteResponse {
+  note: Note
+  success: Boolean
+}
+
+enum PayFrequency {
+  WEEKLY
+  FORTNIGHTLY
+  FOUR_WEEKLY
+  MONTHLY
+  QUARTERLY
+  BIANNUAL
+  ANNUAL
+}
+
+enum PaydayType {
+  LAST_DAY
+  LAST_FRIDAY
+  SET_DAY
+  SET_WEEKDAY
+}
+
+enum Weekday {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+}
+
+enum BankHolidayRegion {
+  ENGLAND_AND_WALES
+  SCOTLAND
+  NORTHERN_IRELAND
+}
+
+type Payday {
+  id: ID!
+  account: ID!
+  frequency: PayFrequency!
+  type: PaydayType!
+  dayOfMonth: Int
+  weekday: Weekday
+  firstPayDate: String
+  bankHolidayRegion: BankHolidayRegion
+}
+
+input PaydayInput {
+  account: ID
+  frequency: PayFrequency!
+  type: PaydayType!
+  dayOfMonth: Int
+  weekday: Weekday
+  firstPayDate: String
+  bankHolidayRegion: BankHolidayRegion
+}
+
+type PaydayResponse {
+  payday: Payday
+  success: Boolean
+}

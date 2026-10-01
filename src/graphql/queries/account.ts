@@ -1,7 +1,8 @@
 import { gql, TypedDocumentNode } from '@apollo/client';
+import { AccountQueryVariables } from '../generated';
 import { AccountData } from '~/types';
 
-export const GET_ACCOUNT_QUERY: TypedDocumentNode<AccountData, { id?: string }> = gql`
+export const GET_ACCOUNT_QUERY: TypedDocumentNode<AccountData, AccountQueryVariables> = gql`
   query Account($id: ID) {
     account(id: $id) {
       id

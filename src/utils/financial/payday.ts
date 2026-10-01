@@ -10,12 +10,10 @@ export const getFrequencyOptions = () =>
   }));
 
 export const getWeekdayOptions = () =>
-  Object.values(WEEKDAY)
-    .filter(value => value !== 'SATURDAY' && value !== 'SUNDAY')
-    .map(value => ({
-      value,
-      label: formatLabel(value)
-    }));
+  Object.values(WEEKDAY).map(value => ({
+    value,
+    label: formatLabel(value)
+  }));
 
 export const getBankHolidayRegionOptions = () =>
   Object.values(BANK_HOLIDAY_REGION).map(value => ({

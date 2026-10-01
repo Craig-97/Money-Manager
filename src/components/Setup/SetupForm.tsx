@@ -99,7 +99,7 @@ export const SetupForm = () => {
       }
     },
     onSubmit: async values => {
-      if (activeStep !== steps.length - 1) {
+      if (activeStep !== steps.length - 1 || !user.id) {
         return;
       }
       await createAccount({

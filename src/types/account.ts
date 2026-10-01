@@ -5,7 +5,7 @@ import { Payday } from './payday';
 import { User } from './user';
 
 export interface AccountState {
-  id?: string;
+  id: string;
   bankBalance: number;
   monthlyIncome: number;
   bankPaydayBalance?: number;

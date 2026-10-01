@@ -1,13 +1,10 @@
 import { gql, TypedDocumentNode } from '@apollo/client';
+import { RegisterAndLoginMutationVariables } from '../generated';
 import { RegisterData } from '~/types';
-
-export interface RegisterAndLoginVariables {
-  user: { email: string; password: string; firstName: string; surname: string };
-}
 
 export const REGISTER_AND_LOGIN_MUTATION: TypedDocumentNode<
   RegisterData,
-  RegisterAndLoginVariables
+  RegisterAndLoginMutationVariables
 > = gql`
   mutation RegisterAndLogin($user: UserInput!) {
     registerAndLogin(user: $user) {

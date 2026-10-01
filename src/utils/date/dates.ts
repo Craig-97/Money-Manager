@@ -130,9 +130,7 @@ const getWeekdayNumber = (weekday: Weekday): number => {
     [WEEKDAY.TUESDAY]: 2,
     [WEEKDAY.WEDNESDAY]: 3,
     [WEEKDAY.THURSDAY]: 4,
-    [WEEKDAY.FRIDAY]: 5,
-    [WEEKDAY.SATURDAY]: 6,
-    [WEEKDAY.SUNDAY]: 0
+    [WEEKDAY.FRIDAY]: 5
   };
   return weekdayMap[weekday];
 };

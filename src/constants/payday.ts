@@ -1,5 +1,6 @@
-import { PayFrequency } from '~/types';
+import { PayFrequency, PaydayType, Weekday } from '~/types';
 
+// `satisfies` keeps these in step with the API's enums, so a value the API rejects won't compile
 export const PAY_FREQUENCY = {
   WEEKLY: 'WEEKLY',
   FORTNIGHTLY: 'FORTNIGHTLY',
@@ -8,24 +9,22 @@ export const PAY_FREQUENCY = {
   QUARTERLY: 'QUARTERLY',
   BIANNUAL: 'BIANNUAL',
   ANNUAL: 'ANNUAL'
-} as const;
+} as const satisfies { [K in PayFrequency]: K };
 
 export const PAYDAY_TYPE = {
   LAST_DAY: 'LAST_DAY',
   LAST_FRIDAY: 'LAST_FRIDAY',
   SET_DAY: 'SET_DAY',
   SET_WEEKDAY: 'SET_WEEKDAY'
-} as const;
+} as const satisfies { [K in PaydayType]: K };
 
 export const WEEKDAY = {
   MONDAY: 'MONDAY',
   TUESDAY: 'TUESDAY',
   WEDNESDAY: 'WEDNESDAY',
   THURSDAY: 'THURSDAY',
-  FRIDAY: 'FRIDAY',
-  SATURDAY: 'SATURDAY',
-  SUNDAY: 'SUNDAY'
-} as const;
+  FRIDAY: 'FRIDAY'
+} as const satisfies { [K in Weekday]: K };
 
 export const PAYDAY_TYPE_OPTIONS = {
   WEEKLY: [{ value: PAYDAY_TYPE.SET_WEEKDAY }],
