@@ -2,6 +2,9 @@
   "name": "money-manager",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
     "start:local": "concurrently --kill-others \"npm run start:api\"  \"npm run start\"",
     "start:api": "npm run start --prefix ~/Money-Manager-API",
