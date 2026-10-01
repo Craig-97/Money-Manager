@@ -54,6 +54,7 @@ export const useAccountData = () => {
     if (!isEqual(formattedData, account)) {
       setAccount(formattedData);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, setAccount]);
 
   // Used to determine If user does not have a linked account
