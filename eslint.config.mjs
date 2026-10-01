@@ -1,5 +1,4 @@
-import importPlugin from 'eslint-plugin-import';
-import reactPlugin from 'eslint-plugin-react';
+import importPlugin from 'eslint-plugin-import-x';
 import reactHooksPlugin from 'eslint-plugin-react-hooks';
 import typescript from '@typescript-eslint/eslint-plugin';
 import typescriptParser from '@typescript-eslint/parser';
@@ -20,9 +19,8 @@ export default [
     },
     plugins: {
       '@typescript-eslint': typescript,
-      react: reactPlugin,
       'react-hooks': reactHooksPlugin,
-      import: importPlugin,
+      'import-x': importPlugin,
       prettier: prettier,
       'unused-imports': unusedImports
     },
@@ -47,9 +45,8 @@ export default [
         }
       ],
       '@typescript-eslint/no-empty-function': 'warn',
-      // React and import rules
-      'react/react-in-jsx-scope': 'off',
-      'import/order': [
+      // Import rules
+      'import-x/order': [
         'error',
         {
           groups: ['builtin', 'external', 'internal', ['sibling', 'parent'], 'index', 'unknown'],
@@ -114,11 +111,6 @@ export default [
           caughtErrorsIgnorePattern: '^_'
         }
       ]
-    },
-    settings: {
-      react: {
-        version: 'detect'
-      }
     }
   }
 ];
