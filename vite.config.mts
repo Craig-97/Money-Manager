@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import svgrPlugin from 'vite-plugin-svgr';
-import reactRefresh from '@vitejs/plugin-react';
+import reactRefresh, { reactCompilerPreset } from '@vitejs/plugin-react';
+import babel from '@rolldown/plugin-babel';
 
 export default defineConfig({
   resolve: {
@@ -23,6 +24,7 @@ export default defineConfig({
   },
   plugins: [
     reactRefresh(),
+    babel({ presets: [reactCompilerPreset()] }),
     svgrPlugin({
       svgrOptions: {
         icon: true
