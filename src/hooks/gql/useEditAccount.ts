@@ -31,21 +31,28 @@ export const useEditAccount = () => {
 
   const [editAccount, { loading }] = useMutation<EditAccountResult>(EDIT_ACCOUNT_MUTATION);
 
-  const updateAccount = ({ input, options }: UpdateAccountParams) => {
-    return editAccount({
-      variables: { id, account: input },
-      update: (cache, { data }) => {
-        const account = data?.editAccount?.account;
-        if (!account) return;
-        editAccountCache(cache, account, user);
-      },
-      onCompleted: () => {
-        if (options?.successMessage) {
-          enqueueSnackbar(options.successMessage, { variant: 'success' });
-        }
-      },
-      onError: handleGQLError
-    });
+  // Resolves to whether the update succeeded. Errors are already reported through onError,
+  // so the rejection is swallowed to avoid an unhandled promise rejection
+  const updateAccount = async ({ input, options }: UpdateAccountParams): Promise<boolean> => {
+    try {
+      await editAccount({
+        variables: { id, account: input },
+        update: (cache, { data }) => {
+          const account = data?.editAccount?.account;
+          if (!account) return;
+          editAccountCache(cache, account, user);
+        },
+        onCompleted: () => {
+          if (options?.successMessage) {
+            enqueueSnackbar(options.successMessage, { variant: 'success' });
+          }
+        },
+        onError: handleGQLError
+      });
+      return true;
+    } catch {
+      return false;
+    }
   };
 
   return { updateAccount, loading };

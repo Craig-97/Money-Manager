@@ -17,11 +17,11 @@ export const BankBalanceCard = () => {
 
   const changeBankBalance = async (value: number) => {
     if (!isNaN(value) && value !== bankBalance) {
-      await updateAccount({
+      const updated = await updateAccount({
         input: { bankBalance: value },
         options: { successMessage: 'Bank Balance updated' }
       });
-      setIsOpen(false);
+      if (updated) setIsOpen(false);
     }
   };
 

@@ -17,12 +17,12 @@ export const MonthlyIncomeCard = () => {
 
   const changeMonthlyIncome = async (value: number) => {
     if (!isNaN(value) && value !== monthlyIncome) {
-      await updateAccount({
+      const updated = await updateAccount({
         input: { monthlyIncome: value },
         options: { successMessage: 'Monthly Income updated' }
       });
+      if (updated) setIsOpen(false);
     }
-    setIsOpen(false);
   };
 
   return (

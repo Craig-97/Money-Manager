@@ -2,9 +2,15 @@ import { screen, waitFor } from '@testing-library/react';
 import { createFakeApi } from '~/test/fakeApi';
 import { renderApp } from '~/test/renderApp';
 
+// The first field is focused by a 250ms timer (AutoFocusTextField). If a test starts typing before it
+// fires, focus jumps back mid-typing and characters land in the wrong field
+const waitForAutoFocus = (label: string) =>
+  waitFor(() => expect(screen.getByLabelText(label)).toHaveFocus());
+
 const openLogin = async (api = createFakeApi()) => {
   const app = renderApp({ route: '/login', token: null, api });
   await screen.findByRole('button', { name: 'Sign In' });
+  await waitForAutoFocus('Email Address');
   return app;
 };
 
@@ -29,7 +35,9 @@ describe('Login', () => {
     await user.click(screen.getByRole('button', { name: 'Sign In' }));
 
     expect(await screen.findByText('Invalid email address')).toBeInTheDocument();
-    expect(screen.getByText('Password is too short (min is 8 characters)')).toBeInTheDocument();
+    expect(
+      await screen.findByText('Password is too short (min is 8 characters)')
+    ).toBeInTheDocument();
     expect(api.callsTo('Login')).toHaveLength(0);
   });
 
@@ -76,6 +84,7 @@ describe('Register', () => {
     const app = await openLogin(api);
     await app.user.click(screen.getByRole('tab', { name: 'Register' }));
     await screen.findByLabelText('First Name');
+    await waitForAutoFocus('First Name');
     return app;
   };
 

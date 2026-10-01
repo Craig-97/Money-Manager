@@ -143,3 +143,50 @@ describe('Editing and deleting a note', () => {
     expect(within(document.body).getByText('Call the bank')).toBeInTheDocument();
   });
 });
+
+describe('Note error handling', () => {
+  const ERROR = 'Something went wrong on the server';
+
+  it('keeps the new note card open and shows the error when creating fails', async () => {
+    const { user, api } = await openNotes();
+    api.failNext('CreateNote', 'SERVER_ERROR', ERROR);
+
+    await user.click(screen.getByRole('button', { name: 'Add Note' }));
+    await user.type(
+      screen.getByPlaceholderText('Start typing your note here...'),
+      'Pay the gas bill'
+    );
+    await user.click(iconButton('CheckOutlinedIcon'));
+
+    expect(await screen.findByText(ERROR)).toBeInTheDocument();
+    expect(api.db.account!.notes).toHaveLength(2);
+    expect(screen.getByPlaceholderText('Start typing your note here...')).toHaveValue(
+      'Pay the gas bill'
+    );
+  });
+
+  it('keeps the original note and shows the error when editing fails', async () => {
+    const { user, api } = await openNotes();
+    api.failNext('EditNote', 'SERVER_ERROR', ERROR);
+
+    await user.click(iconButton('EditOutlinedIcon', 0));
+    const field = screen.getByDisplayValue('Call the bank');
+    await user.clear(field);
+    await user.type(field, 'Renew insurance');
+    await user.click(iconButton('CheckOutlinedIcon'));
+
+    expect(await screen.findByText(ERROR)).toBeInTheDocument();
+    expect(api.db.account!.notes.find(n => n.id === 'note-2')!.body).toBe('Call the bank');
+  });
+
+  it('keeps the note and shows the error when deleting fails', async () => {
+    const { user, api } = await openNotes();
+    api.failNext('DeleteNote', 'SERVER_ERROR', ERROR);
+
+    await user.click(iconButton('DeleteOutlinedIcon', 1));
+
+    expect(await screen.findByText(ERROR)).toBeInTheDocument();
+    expect(screen.getByText('Buy milk')).toBeInTheDocument();
+    expect(api.db.account!.notes).toHaveLength(2);
+  });
+});
