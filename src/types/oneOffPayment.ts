@@ -1,8 +1,8 @@
 import { PaymentTypeName } from './payment';
-import { PAYMENT_CATEGORY, PAYMENT_TYPE } from '~/constants';
+import { OneOffPaymentCategory as PaymentCategory, PaymentType } from '~/graphql/generated';
 
-export type PaymentCategory = (typeof PAYMENT_CATEGORY)[keyof typeof PAYMENT_CATEGORY];
-export type PaymentType = (typeof PAYMENT_TYPE)[keyof typeof PAYMENT_TYPE];
+// The API's enums are the source of truth for these
+export type { PaymentCategory, PaymentType };
 
 export interface OneOffPayment {
   id?: string;

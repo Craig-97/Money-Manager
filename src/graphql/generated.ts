@@ -31,10 +31,32 @@ export type NoteInput = {
   body?: string | null | undefined;
 };
 
+export type OneOffPaymentCategory =
+  | 'BUSINESS'
+  | 'CHARITY'
+  | 'EDUCATION'
+  | 'ENTERTAINMENT'
+  | 'FEES'
+  | 'FOOD'
+  | 'GIFT'
+  | 'HEALTHCARE'
+  | 'HOME'
+  | 'INVESTMENT'
+  | 'OTHER'
+  | 'PETS'
+  | 'SALARY'
+  | 'SHOPPING'
+  | 'TAXES'
+  | 'TRANSFER'
+  | 'TRANSPORT'
+  | 'TRAVEL'
+  | 'UTILITIES'
+  | 'VEHICLE';
+
 export type OneOffPaymentInput = {
   account?: string | number | null | undefined;
   amount?: number | null | undefined;
-  category?: PaymentCategory | null | undefined;
+  category?: OneOffPaymentCategory | null | undefined;
   dueDate?: string | null | undefined;
   name?: string | null | undefined;
   type?: PaymentType | null | undefined;
@@ -54,38 +76,6 @@ export type PaydayInput = {
 };
 
 export type PaydayType = 'LAST_DAY' | 'LAST_FRIDAY' | 'SET_DAY' | 'SET_WEEKDAY';
-
-export type PaymentCategory =
-  | 'BUSINESS'
-  | 'CHARITY'
-  | 'CHILDCARE'
-  | 'CREDIT_CARD'
-  | 'EDUCATION'
-  | 'ENTERTAINMENT'
-  | 'FEES'
-  | 'FOOD'
-  | 'GIFT'
-  | 'HEALTHCARE'
-  | 'HOME'
-  | 'HOME_MAINTENANCE'
-  | 'INSURANCE'
-  | 'INVESTMENT'
-  | 'LOAN'
-  | 'MEMBERSHIP'
-  | 'MORTGAGE'
-  | 'OTHER'
-  | 'PETS'
-  | 'RENT'
-  | 'SALARY'
-  | 'SAVINGS'
-  | 'SHOPPING'
-  | 'SUBSCRIPTION'
-  | 'TAXES'
-  | 'TRANSFER'
-  | 'TRANSPORT'
-  | 'TRAVEL'
-  | 'UTILITIES'
-  | 'VEHICLE';
 
 export type PaymentType = 'EXPENSE' | 'INCOME';
 
@@ -159,7 +149,7 @@ export type CreateOneOffPaymentMutation = {
       amount: number;
       dueDate: string;
       type: PaymentType;
-      category: PaymentCategory;
+      category: OneOffPaymentCategory;
     } | null;
   };
 };
@@ -241,7 +231,7 @@ export type EditOneOffPaymentMutation = {
       amount: number;
       dueDate: string;
       type: PaymentType;
-      category: PaymentCategory;
+      category: OneOffPaymentCategory;
     } | null;
   };
 };
@@ -273,7 +263,7 @@ export type AccountQuery = {
       amount: number;
       dueDate: string;
       type: PaymentType;
-      category: PaymentCategory;
+      category: OneOffPaymentCategory;
     } | null> | null;
     notes: Array<{ id: string; body: string; createdAt: string; updatedAt: string } | null> | null;
     payday: {
