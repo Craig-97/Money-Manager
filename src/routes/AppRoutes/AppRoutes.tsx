@@ -1,7 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
-import { AccountRoutes } from './AccountRoutes';
-import { ProtectedRoutes } from './ProtectedRoutes';
-import { PublicRoutes } from './PublicRoutes';
+import { AccountRoutes } from '../AccountRoutes';
+import { ProtectedRoutes } from '../ProtectedRoutes';
+import { PublicRoutes } from '../PublicRoutes';
 import { Loading } from '~/components';
 import { useAccountData } from '~/hooks';
 import { Forecast, Homepage, Login, Notes, SessionExpired, Setup, Error } from '~/pages';
