@@ -18,6 +18,7 @@ export type CreateAccountInput = {
   monthlyIncome: number;
   oneOffPayments?: Array<OneOffPaymentInput | null | undefined> | null | undefined;
   payday?: PaydayInput | null | undefined;
+  recurringPayments?: Array<RecurringPaymentInput | null | undefined> | null | undefined;
   userId: string | number;
 };
 
@@ -77,7 +78,42 @@ export type PaydayInput = {
 
 export type PaydayType = 'LAST_DAY' | 'LAST_FRIDAY' | 'SET_DAY' | 'SET_WEEKDAY';
 
+export type PaymentFrequency = 'ANNUALLY' | 'BIWEEKLY' | 'MONTHLY' | 'QUARTERLY' | 'WEEKLY';
+
 export type PaymentType = 'EXPENSE' | 'INCOME';
+
+export type RecurringPaymentCategory =
+  | 'BUSINESS'
+  | 'CHARITY'
+  | 'CHILDCARE'
+  | 'CREDIT_CARD'
+  | 'EDUCATION'
+  | 'FOOD'
+  | 'HEALTHCARE'
+  | 'HOME_MAINTENANCE'
+  | 'INSURANCE'
+  | 'INVESTMENT'
+  | 'LOAN'
+  | 'MEMBERSHIP'
+  | 'MORTGAGE'
+  | 'OTHER'
+  | 'RENT'
+  | 'SAVINGS'
+  | 'SUBSCRIPTION'
+  | 'TAX'
+  | 'TRANSPORT'
+  | 'UTILITIES'
+  | 'VEHICLE';
+
+export type RecurringPaymentInput = {
+  amount: number;
+  category: RecurringPaymentCategory;
+  firstPaymentDate: string;
+  frequency: PaymentFrequency;
+  lastPaymentDate?: string | null | undefined;
+  name: string;
+  type: PaymentType;
+};
 
 export type UserInput = {
   account?: string | number | null | undefined;

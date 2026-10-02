@@ -3,6 +3,7 @@ type Query {
   user(id: ID): User
   login(email: String!, password: String!): AuthData!
   tokenFindUser: User
+  passwordResetTokenValid(token: String!): Boolean!
   accounts: [Account!]!
   account(id: ID): Account
   bills(accountId: ID!): [Bill!]!
@@ -45,8 +46,14 @@ type AuthData {
   tokenExpiration: Int!
 }
 
+type PasswordResetResponse {
+  success: Boolean!
+}
+
 type Mutation {
   registerAndLogin(user: UserInput): AuthData!
+  requestPasswordReset(email: String!): PasswordResetResponse!
+  resetPassword(token: String!, password: String!): AuthData!
   createUser(user: UserInput!): UserResponse!
   editUser(id: ID!, user: UserInput!): UserResponse!
   deleteUser(id: ID!): UserResponse!
@@ -82,6 +89,7 @@ type Account {
   monthlyIncome: Float!
   bills: [Bill]
   oneOffPayments: [OneOffPayment]
+  recurringPayments: [RecurringPayment]
   notes: [Note]
   payday: Payday
 }
@@ -91,6 +99,7 @@ input CreateAccountInput {
   monthlyIncome: Float!
   bills: [BillInput]
   oneOffPayments: [OneOffPaymentInput]
+  recurringPayments: [RecurringPaymentInput]
   payday: PaydayInput
   userId: ID!
 }
@@ -204,6 +213,7 @@ enum RecurringPaymentCategory {
   RENT
   UTILITIES
   HOME_MAINTENANCE
+  TAX
   VEHICLE
   TRANSPORT
   LOAN
@@ -246,6 +256,16 @@ input CreateRecurringPaymentInput {
   name: String!
   amount: Float!
   accountId: ID!
+  category: RecurringPaymentCategory!
+  frequency: PaymentFrequency!
+  type: PaymentType!
+  firstPaymentDate: String!
+  lastPaymentDate: String
+}
+
+input RecurringPaymentInput {
+  name: String!
+  amount: Float!
   category: RecurringPaymentCategory!
   frequency: PaymentFrequency!
   type: PaymentType!
