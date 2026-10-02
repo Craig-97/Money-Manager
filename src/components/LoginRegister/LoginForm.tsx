@@ -48,7 +48,7 @@ export const LoginForm = () => {
 
     if (errorCode === ERRORS.USER_EMAIL_NOT_FOUND) {
       formik.setFieldError('email', message);
-    } else if (errorCode === ERRORS.INVALID_CREDENTIALS) {
+    } else if (errorCode === ERRORS.INVALID_CREDENTIALS || errorCode === ERRORS.TOO_MANY_REQUESTS) {
       formik.setFieldError('password', message);
     }
   };

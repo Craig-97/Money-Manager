@@ -77,6 +77,19 @@ describe('Login', () => {
     expect(screen.getByLabelText('Password')).toHaveValue('');
     expect(screen.getByLabelText('Email Address')).toHaveValue('test@example.com');
   });
+
+  it('shows the wait under the password when there have been too many attempts', async () => {
+    const api = createFakeApi();
+    api.failNext('Login', 'TOO_MANY_REQUESTS', 'Too many attempts. Try again in 15 minutes.');
+    const { user } = await openLogin(api);
+
+    await user.type(screen.getByLabelText('Email Address'), 'test@example.com');
+    await user.type(screen.getByLabelText('Password'), 'password1');
+    await user.click(screen.getByRole('button', { name: 'Sign In' }));
+
+    expect(await screen.findByText('Too many attempts. Try again in 15 minutes.')).toBeInTheDocument();
+    expect(localStorage.getItem('token')).toBeNull();
+  });
 });
 
 describe('Register', () => {
