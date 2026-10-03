@@ -10,8 +10,10 @@
 
   --font-sans: 'Plus Jakarta Sans Variable', system-ui, sans-serif;
 
-  /* md (48rem / 768px) is where the mobile layout hands over to the desktop one.
-     wide (1101px) is where the sidebar expands from the icon rail by default. */
+  /* Breakpoints are in rem so they follow the browser's text size; px values at the default 16px.
+     md (Tailwind's 48rem = 768px): the mobile layout hands over to the desktop one.
+     wide (68.8125rem = 1101px): the sidebar expands from the icon rail by default.
+     Keep in step with src/constants/media.ts. */
   --breakpoint-wide: 68.8125rem;
 
   --animate-fade-in: fade-in 0.12s ease-out;
