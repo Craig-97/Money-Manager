@@ -4,8 +4,6 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { BrandMark } from '~/components/ui/BrandMark';
 import { Button } from '~/components/ui/Button';
-import { Spinner } from '~/components/ui/Spinner';
-import { cn } from '~/lib/cn';
 import { getErrorMessage } from '~/lib/errors';
 import { useAuthStore } from '~/state/auth';
 import { SignInField } from './components';
@@ -98,20 +96,10 @@ export const SignIn = () => {
             type="submit"
             variant="accent"
             size="xl"
-            disabled={isSubmitting}
+            loading={isSubmitting}
+            loadingText="Signing in…"
             className="mt-1.5 w-full">
-            {/* Both labels share one grid cell so the button keeps its size; only one is shown */}
-            <span className="grid [&>*]:col-start-1 [&>*]:row-start-1">
-              <span aria-hidden={isSubmitting} className={cn(isSubmitting && 'invisible')}>
-                Sign in
-              </span>
-              <span
-                aria-hidden={!isSubmitting}
-                className={cn('flex items-center gap-2.5', !isSubmitting && 'invisible')}>
-                <Spinner />
-                Signing in…
-              </span>
-            </span>
+            Sign in
           </Button>
         </form>
       </div>

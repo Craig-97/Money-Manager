@@ -6,6 +6,8 @@ const VARIANTS = {
   accent: 'border-transparent bg-accent text-on-accent hover:brightness-110',
   solid: 'border-transparent bg-pill-active-bg text-pill-active-text hover:brightness-[.92]',
   danger: 'border-transparent bg-expense-bg text-expense hover:border-expense',
+  // The red "Delete" in dialog footers
+  dangerGhost: 'border-transparent bg-transparent text-expense hover:bg-expense-bg',
   ghost: 'border-transparent bg-transparent text-muted hover:bg-hover hover:text-text'
 } as const;
 
@@ -25,7 +27,7 @@ export const buttonVariants = ({
   className
 }: { variant?: ButtonVariant; size?: ButtonSize; className?: string } = {}) =>
   cn(
-    'inline-flex cursor-pointer items-center justify-center gap-2 rounded-full border leading-none font-semibold whitespace-nowrap no-underline transition-[background-color,border-color,color,filter] disabled:cursor-not-allowed disabled:opacity-60',
+    'inline-flex cursor-pointer items-center justify-center gap-2 rounded-full border leading-none font-semibold whitespace-nowrap no-underline transition-[background-color,border-color,color,filter] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:brightness-100',
     VARIANTS[variant],
     SIZES[size],
     className

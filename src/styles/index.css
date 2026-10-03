@@ -17,10 +17,52 @@
   --breakpoint-wide: 68.8125rem;
 
   --animate-fade-in: fade-in 0.12s ease-out;
+  --animate-fade-out: fade-out 0.12s ease-in forwards;
+  --animate-dialog-in: dialog-in 0.18s ease-out;
+  --animate-dialog-out: dialog-out 0.12s ease-in forwards;
+  --animate-sheet-in: sheet-in 0.24s cubic-bezier(0.32, 0.72, 0, 1);
+  --animate-sheet-out: sheet-out 0.18s ease-in forwards;
+  --animate-shimmer: shimmer 1.4s ease-in-out infinite;
 
   @keyframes fade-in {
     from {
       opacity: 0;
+    }
+  }
+  @keyframes fade-out {
+    to {
+      opacity: 0;
+    }
+  }
+  /* Only scale: dialogs are centred with the translate property, which this leaves alone */
+  @keyframes dialog-in {
+    from {
+      opacity: 0;
+      scale: 0.96;
+    }
+  }
+  @keyframes dialog-out {
+    to {
+      opacity: 0;
+      scale: 0.96;
+    }
+  }
+  @keyframes sheet-in {
+    from {
+      transform: translateY(100%);
+    }
+  }
+  @keyframes sheet-out {
+    to {
+      transform: translateY(100%);
+    }
+  }
+  @keyframes shimmer {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(100%);
     }
   }
 }

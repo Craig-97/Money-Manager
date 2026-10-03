@@ -24,6 +24,11 @@ if (!globalThis.ResizeObserver) {
 
 window.scrollTo = noop;
 
+// Radix Select and menus use pointer capture and scroll the highlighted option into view
+Element.prototype.hasPointerCapture ??= () => false;
+Element.prototype.releasePointerCapture ??= noop;
+Element.prototype.scrollIntoView ??= noop;
+
 // Keep tests independent: storage, the viewport and the document's theme are shared global state
 afterEach(() => {
   cleanup();
