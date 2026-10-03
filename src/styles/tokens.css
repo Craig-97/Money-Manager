@@ -1,0 +1,85 @@
+/*
+ * Design B colour tokens. Values come straight from the design's tokens() function.
+ * The theme is set by `data-theme` on <html>, and the accent by the `--accent` custom property,
+ * both applied by index.html before the app loads and kept in sync by usePrefsSync.
+ */
+:root,
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  --accent: #7c3aed;
+  --bg: #0e1013;
+  --surface: #171a1f;
+  --surface-2: #1d2128;
+  --hover: #20252d;
+  --border: #252a31;
+  --border-strong: #353b45;
+  --track: #262b33;
+  --text: #f2f4f7;
+  --muted: #9aa1ad;
+  --faint: #6b7280;
+  --income: #4ade80;
+  --income-bg: #13301e;
+  --expense: #ff7a7a;
+  --expense-bg: #3d1a1c;
+  /* The design mixes the accent towards white / the surface colour in sRGB */
+  --accent-text: color-mix(in srgb, var(--accent) 50%, #ffffff);
+  --accent-soft: color-mix(in srgb, var(--accent) 22%, #171a1f);
+  --on-accent: #ffffff;
+  --hero-bg: var(--accent);
+  --hero-text: #ffffff;
+  --hero-muted: rgb(255 255 255 / 0.78);
+  --hero-chip: rgb(255 255 255 / 0.16);
+  --pill-active-bg: #f2f4f7;
+  --pill-active-text: #0e1013;
+  --nav-bg: #20242b;
+  --nav-icon: #9aa1ad;
+  --nav-active-bg: #f2f4f7;
+  --nav-active-text: #0e1013;
+  --overlay: rgb(5 6 8 / 0.72);
+  --scrim: rgb(0 0 0 / 0.4);
+  --shadow: rgb(0 0 0 / 0.7);
+}
+
+[data-theme='light'] {
+  color-scheme: light;
+
+  --bg: #eef0f3;
+  --surface: #ffffff;
+  --surface-2: #f6f7f9;
+  --hover: #f1f3f6;
+  --border: #e1e4ea;
+  --border-strong: #cdd2da;
+  --track: #e4e7ec;
+  --text: #111318;
+  --muted: #5b6170;
+  --faint: #9096a3;
+  --income: #15803d;
+  --income-bg: #dcfce7;
+  --expense: #c81e1e;
+  --expense-bg: #fde2e2;
+  --accent-text: color-mix(in srgb, var(--accent) 75%, #000000);
+  --accent-soft: color-mix(in srgb, var(--accent) 14%, #ffffff);
+  --hero-bg: #111318;
+  --hero-muted: #b4b9c6;
+  --hero-chip: #23262e;
+  --pill-active-bg: #111318;
+  --pill-active-text: #ffffff;
+  --nav-bg: #111318;
+  --nav-icon: #b4b9c6;
+  --nav-active-bg: #ffffff;
+  --nav-active-text: #111318;
+  --overlay: rgb(17 19 24 / 0.45);
+  --shadow: rgb(17 19 24 / 0.28);
+}
+
+/* The blue accent has hand-tuned text and soft colours in the design instead of the mixed ones */
+[data-theme='dark'][data-accent='blue'] {
+  --accent-text: #9db5ff;
+  --accent-soft: #1e2a4a;
+}
+
+[data-theme='light'][data-accent='blue'] {
+  --accent-text: #2448c9;
+  --accent-soft: #e3e9fb;
+}

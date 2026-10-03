@@ -1,0 +1,94 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/plus-jakarta-sans';
+@import './tokens.css';
+
+@theme {
+  /* Only the design's colours: drop Tailwind's default palette so off-palette colours can't creep in */
+  --color-*: initial;
+  --color-white: #ffffff;
+  --color-black: #000000;
+
+  --font-sans: 'Plus Jakarta Sans Variable', system-ui, sans-serif;
+
+  /* md (48rem / 768px) is where the mobile layout hands over to the desktop one.
+     wide (1101px) is where the sidebar expands from the icon rail by default. */
+  --breakpoint-wide: 68.8125rem;
+
+  --animate-fade-in: fade-in 0.12s ease-out;
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+  }
+}
+
+/* Map the theme tokens to Tailwind colours, e.g. bg-surface, text-muted, border-border-strong */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-hover: var(--hover);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-track: var(--track);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-income: var(--income);
+  --color-income-bg: var(--income-bg);
+  --color-expense: var(--expense);
+  --color-expense-bg: var(--expense-bg);
+  --color-accent: var(--accent);
+  --color-accent-text: var(--accent-text);
+  --color-accent-soft: var(--accent-soft);
+  --color-on-accent: var(--on-accent);
+  --color-hero-bg: var(--hero-bg);
+  --color-hero-text: var(--hero-text);
+  --color-hero-muted: var(--hero-muted);
+  --color-hero-chip: var(--hero-chip);
+  --color-pill-active-bg: var(--pill-active-bg);
+  --color-pill-active-text: var(--pill-active-text);
+  --color-nav-bg: var(--nav-bg);
+  --color-nav-icon: var(--nav-icon);
+  --color-nav-active-bg: var(--nav-active-bg);
+  --color-nav-active-text: var(--nav-active-text);
+  --color-overlay: var(--overlay);
+  --color-scrim: var(--scrim);
+  --color-shadow: var(--shadow);
+}
+
+/* Money and other figures: tabular digits with the design's tight tracking */
+@utility num {
+  font-feature-settings: 'tnum';
+  letter-spacing: -0.03em;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-bg font-sans text-text antialiased;
+    transition:
+      background-color 0.2s,
+      color 0.2s;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      transition-duration: 0s !important;
+      animation-duration: 0s !important;
+    }
+  }
+}

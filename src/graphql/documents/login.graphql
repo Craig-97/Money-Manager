@@ -1,0 +1,13 @@
+# The API exposes login as a query; it is only ever run on demand with no-cache
+query Login($email: String!, $password: String!) {
+  login(email: $email, password: $password) {
+    token
+    tokenExpiration
+    user {
+      id
+      email
+      firstName
+      surname
+    }
+  }
+}
