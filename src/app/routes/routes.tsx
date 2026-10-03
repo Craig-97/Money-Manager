@@ -64,6 +64,11 @@ export const routes: RouteObject[] = [
           }
         ]
       },
+      // Development only: the UI kit, for reviewing components against the design. The condition
+      // is false in production builds, so the page isn't bundled.
+      ...(import.meta.env.DEV
+        ? [{ path: '/kit', lazy: async () => ({ Component: (await import('~/pages/Kit')).Kit }) }]
+        : []),
       { path: '*', element: <Navigate to={ROUTES.home} replace /> }
     ]
   }
