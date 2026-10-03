@@ -1,4 +1,7 @@
+// Error codes the API puts in a GraphQL error's `extensions.code`
 export const ERRORS = {
+  UNAUTHENTICATED: 'UNAUTHENTICATED',
+  FORBIDDEN: 'FORBIDDEN',
   USER_EXISTS: 'USER_EXISTS',
   ACCOUNT_NOT_LINKED: 'ACCOUNT_NOT_LINKED',
   USER_EMAIL_NOT_FOUND: 'USER_EMAIL_NOT_FOUND',
@@ -6,3 +9,5 @@ export const ERRORS = {
   USER_NOT_FOUND: 'USER_NOT_FOUND',
   TOO_MANY_REQUESTS: 'TOO_MANY_REQUESTS'
 } as const;
+
+export type ErrorCode = (typeof ERRORS)[keyof typeof ERRORS];

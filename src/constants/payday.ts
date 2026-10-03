@@ -1,4 +1,4 @@
-import { PayFrequency, PaydayType, Weekday } from '~/types';
+import { PayFrequency, PaydayType, Weekday } from '~/graphql/generated';
 
 // `satisfies` keeps these in step with the API's enums, so a value the API rejects won't compile
 export const PAY_FREQUENCY = {

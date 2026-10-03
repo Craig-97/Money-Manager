@@ -1,57 +1,56 @@
-import { MemoryRouter } from 'react-router-dom';
+import { createMemoryRouter, RouterProvider } from 'react-router';
 import { afterEach } from 'vitest';
-import { ApolloClient } from '@apollo/client';
 import { ApolloProvider } from '@apollo/client/react';
-import { ThemeProvider } from '@mui/material/styles';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { createFakeApi, FakeApi } from './fakeApi';
-import { createCache } from '~/graphql';
-import { AppRoutes } from '~/routes';
-import { SnackbarProvider, UserProvider, useAccountStore, useSidebarStore } from '~/state';
-import { theme } from '~/styles';
+import { routes } from '~/app/routes';
+import { TooltipProvider } from '~/components/ui/Tooltip';
+import { createApolloClient } from '~/graphql/client';
+import { Session, useAuthStore } from '~/state/auth';
+import { usePrefsStore } from '~/state/prefs';
+import { useSidebarStore } from '~/state/sidebar';
+import { createFakeApi, DEFAULT_USER, FakeApi } from './fakeApi';
 
 // Zustand stores are module level state, so reset them between tests
 afterEach(() => {
-  useAccountStore.setState(useAccountStore.getInitialState(), true);
+  useAuthStore.setState(useAuthStore.getInitialState(), true);
+  usePrefsStore.setState(usePrefsStore.getInitialState(), true);
   useSidebarStore.setState(useSidebarStore.getInitialState(), true);
+});
+
+export const testSession = (overrides: Partial<Session> = {}): Session => ({
+  token: 'test-token',
+  userId: DEFAULT_USER.id,
+  expiresAt: Date.now() + 60 * 60 * 1000,
+  ...overrides
 });
 
 interface RenderAppOptions {
   route?: string;
   api?: FakeApi;
-  // Pass null to render as a logged out user
-  token?: string | null;
+  // Pass null to render signed out
+  session?: Session | null;
 }
 
-// Mounts the real app (providers, routes, hooks, stores) against an in-memory fake API
+// Mounts the real app (routes, guards, hooks, stores) against an in-memory fake API
 export const renderApp = ({
   route = '/',
   api = createFakeApi(),
-  token = 'test-token'
+  session = testSession()
 }: RenderAppOptions = {}) => {
-  if (token === null) {
-    localStorage.removeItem('token');
-  } else {
-    localStorage.setItem('token', token);
-  }
+  useAuthStore.setState({ session });
 
-  const client = new ApolloClient({ link: api.link, cache: createCache() });
+  const client = createApolloClient({ terminatingLink: api.link });
+  const router = createMemoryRouter(routes, { initialEntries: [route] });
   const user = userEvent.setup();
 
   const utils = render(
     <ApolloProvider client={client}>
-      <ThemeProvider theme={theme}>
-        <UserProvider>
-          <SnackbarProvider>
-            <MemoryRouter initialEntries={[route]}>
-              <AppRoutes />
-            </MemoryRouter>
-          </SnackbarProvider>
-        </UserProvider>
-      </ThemeProvider>
+      <TooltipProvider delayDuration={0}>
+        <RouterProvider router={router} />
+      </TooltipProvider>
     </ApolloProvider>
   );
 
-  return { ...utils, api, user, client };
+  return { ...utils, api, user, client, router };
 };
