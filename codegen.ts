@@ -1,19 +1,23 @@
 import { CodegenConfig } from '@graphql-codegen/cli';
 
 const config: CodegenConfig = {
+  overwrite: true,
   hooks: { afterAllFileWrite: ['prettier --write'] },
   schema: 'src/graphql/schema.graphql',
-  documents: ['src/graphql/queries/*.ts', 'src/graphql/mutations/*.ts'],
+  // Operations live in .graphql files next to the code that uses them
+  documents: ['src/**/*.graphql', '!src/graphql/schema.graphql'],
   generates: {
-    'src/graphql/generated.ts': {
-      plugins: ['typescript-operations'],
+    'src/graphql/generated/graphql.ts': {
+      plugins: ['typescript', 'typescript-operations', 'typed-document-node'],
       config: {
         // String unions instead of TypeScript enums
         enumsAsTypes: true,
         useTypeImports: true,
-        skipTypename: true,
-        avoidOptionals: false,
-        maybeValue: 'T | null'
+        // Nullable fields are `T | null`, nullable inputs can be left out
+        avoidOptionals: { field: true, inputValue: false },
+        defaultScalarType: 'unknown',
+        nonOptionalTypename: true,
+        skipTypeNameForRoot: true
       }
     }
   }

@@ -1,13 +1,16 @@
 import { defineConfig } from 'vite';
-import svgrPlugin from 'vite-plugin-svgr';
-import reactRefresh, { reactCompilerPreset } from '@vitejs/plugin-react';
 import babel from '@rolldown/plugin-babel';
+import tailwindcss from '@tailwindcss/vite';
+import react, { reactCompilerPreset } from '@vitejs/plugin-react';
+
+// The dev server proxies /graphql to the API, the local one by default
+const apiTarget = process.env.API_PROXY_TARGET ?? 'http://localhost:4000';
 
 export default defineConfig({
   resolve: {
     tsconfigPaths: true
   },
-    optimizeDeps: {
+  optimizeDeps: {
     include: ['@apollo/client']
   },
   build: {
@@ -16,24 +19,10 @@ export default defineConfig({
   server: {
     proxy: {
       '/graphql': {
-        target: 'https://craig-money-manager-api-pr-4.onrender.com',
-        changeOrigin: true,
-        secure: true
+        target: apiTarget,
+        changeOrigin: true
       }
     }
   },
-  plugins: [
-    reactRefresh(),
-    babel({ presets: [reactCompilerPreset()] }),
-    svgrPlugin({
-      svgrOptions: {
-        icon: true
-      }
-    })
-  ],
-  css: {
-    preprocessorOptions: {
-      scss: {}
-    }
-  }
+  plugins: [react(), babel({ presets: [reactCompilerPreset()] }), tailwindcss()]
 });

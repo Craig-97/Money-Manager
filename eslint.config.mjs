@@ -8,6 +8,9 @@ import unusedImports from 'eslint-plugin-unused-imports';
 
 export default [
   {
+    ignores: ['src/graphql/generated/**']
+  },
+  {
     files: ['**/*.{ts,tsx,js,jsx}'],
     languageOptions: {
       parser: typescriptParser,
@@ -68,27 +71,22 @@ export default [
               position: 'after'
             },
             {
-              pattern: '{recoil,zustand,redux,~/context/**,~/providers/**}',
+              pattern: '{zustand,zustand/**}',
               group: 'external',
               position: 'after'
             },
             {
-              pattern: '{~/components/**,~/layouts/**,~/pages/**}',
+              pattern: '~/{app,components,pages}{,/**}',
               group: 'internal',
               position: 'before'
             },
             {
-              pattern: '{~/hooks/**,~/utils/**}',
+              pattern: '~/{hooks,state,graphql,lib,constants}{,/**}',
               group: 'internal',
               position: 'before'
             },
             {
-              pattern: '{~/types/**,~/interfaces/**}',
-              group: 'internal',
-              position: 'after'
-            },
-            {
-              pattern: '**.scss',
+              pattern: '**.css',
               group: 'unknown',
               position: 'after'
             }
