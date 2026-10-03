@@ -4,7 +4,7 @@ import { useAuthStore } from '~/state/auth';
 
 /* Only for signed-in people; everyone else goes to sign in */
 export const RequireAuth = () => {
-  const hasSession = useAuthStore(state => state.session !== null);
+  const hasSession = useAuthStore(s => s.session !== null);
   const location = useLocation();
 
   if (!hasSession) {

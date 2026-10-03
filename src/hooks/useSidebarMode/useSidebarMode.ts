@@ -10,11 +10,11 @@ import { useMediaQuery } from '../useMediaQuery';
 export const useSidebarMode = () => {
   const isWide = useMediaQuery(MEDIA.wide);
   const { collapsed, overlayOpen, setCollapsed, setOverlayOpen } = useSidebarStore(
-    useShallow(state => ({
-      collapsed: state.collapsed,
-      overlayOpen: state.overlayOpen,
-      setCollapsed: state.setCollapsed,
-      setOverlayOpen: state.setOverlayOpen
+    useShallow(s => ({
+      collapsed: s.collapsed,
+      overlayOpen: s.overlayOpen,
+      setCollapsed: s.setCollapsed,
+      setOverlayOpen: s.setOverlayOpen
     }))
   );
 

@@ -23,7 +23,7 @@ export const usePrefsStore = create<PrefsState>()(
       theme: 'dark',
       accent: DEFAULT_ACCENT,
       setTheme: theme => set({ theme }),
-      toggleTheme: () => set(state => ({ theme: state.theme === 'dark' ? 'light' : 'dark' })),
+      toggleTheme: () => set(s => ({ theme: s.theme === 'dark' ? 'light' : 'dark' })),
       setAccent: accent => set({ accent })
     }),
     {

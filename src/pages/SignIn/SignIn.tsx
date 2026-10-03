@@ -19,7 +19,7 @@ const schema = z.object({
 // TODO(phase 3): replaced by the designed sign in screen. This one only gets you into the app.
 export const SignIn = () => {
   const signIn = useSignIn();
-  const sessionExpired = useAuthStore(state => state.endReason === 'expired');
+  const sessionExpired = useAuthStore(s => s.endReason === 'expired');
 
   const {
     register,

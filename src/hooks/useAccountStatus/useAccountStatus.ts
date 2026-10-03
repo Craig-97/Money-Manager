@@ -8,7 +8,7 @@ export type AccountStatus = 'loading' | 'ready' | 'missing' | 'error';
 
 /* Whether the signed-in user has an account yet, i.e. has finished setup */
 export const useAccountStatus = () => {
-  const userId = useAuthStore(state => state.session?.userId);
+  const userId = useAuthStore(s => s.session?.userId);
   const { data, error, refetch } = useQuery(
     AccountStatusDocument,
     userId ? { variables: { userId } } : skipToken

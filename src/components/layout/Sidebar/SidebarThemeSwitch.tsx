@@ -16,10 +16,10 @@ const ThemeIcon = ({ theme, size }: { theme: Theme; size: number }) =>
 /* A Light / Dark switch, or a single toggle button in the icon rail */
 export const SidebarThemeSwitch = ({ expanded }: { expanded: boolean }) => {
   const { theme, setTheme, toggleTheme } = usePrefsStore(
-    useShallow(state => ({
-      theme: state.theme,
-      setTheme: state.setTheme,
-      toggleTheme: state.toggleTheme
+    useShallow(s => ({
+      theme: s.theme,
+      setTheme: s.setTheme,
+      toggleTheme: s.toggleTheme
     }))
   );
 

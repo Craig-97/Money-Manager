@@ -4,7 +4,7 @@ import { useAuthStore } from '~/state/auth';
 
 /* Only for signed-out people; signing in returns you to where you were heading */
 export const PublicOnly = () => {
-  const hasSession = useAuthStore(state => state.session !== null);
+  const hasSession = useAuthStore(s => s.session !== null);
   const location = useLocation();
 
   if (hasSession) {

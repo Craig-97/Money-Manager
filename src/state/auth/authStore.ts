@@ -33,10 +33,10 @@ export const useAuthStore = create<AuthState>()(
     {
       name: 'mm-auth',
       version: 1,
-      partialize: state => ({ session: state.session }),
+      partialize: s => ({ session: s.session }),
       // A token that expired while the app was closed ends the session straight away
-      onRehydrateStorage: () => state => {
-        if (state && isExpired(state.session)) state.endSession('expired');
+      onRehydrateStorage: () => s => {
+        if (s && isExpired(s.session)) s.endSession('expired');
       }
     }
   )

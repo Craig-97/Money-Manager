@@ -13,7 +13,7 @@ export interface SignInValues {
 export const useSignIn = () => {
   const client = useApolloClient();
   const [login] = useLazyQuery(LoginDocument, { fetchPolicy: 'no-cache' });
-  const startSession = useAuthStore(state => state.startSession);
+  const startSession = useAuthStore(s => s.startSession);
 
   return async ({ email, password }: SignInValues) => {
     const { data } = await login({ variables: { email: email.trim(), password } });
