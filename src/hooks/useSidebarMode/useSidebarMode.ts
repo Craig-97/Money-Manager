@@ -1,3 +1,4 @@
+import { useShallow } from 'zustand/react/shallow';
 import { MEDIA } from '~/constants';
 import { useSidebarStore } from '~/state/sidebar';
 import { useMediaQuery } from '../useMediaQuery';
@@ -8,10 +9,14 @@ import { useMediaQuery } from '../useMediaQuery';
  */
 export const useSidebarMode = () => {
   const isWide = useMediaQuery(MEDIA.wide);
-  const collapsed = useSidebarStore(state => state.collapsed);
-  const overlayOpen = useSidebarStore(state => state.overlayOpen);
-  const setCollapsed = useSidebarStore(state => state.setCollapsed);
-  const setOverlayOpen = useSidebarStore(state => state.setOverlayOpen);
+  const { collapsed, overlayOpen, setCollapsed, setOverlayOpen } = useSidebarStore(
+    useShallow(state => ({
+      collapsed: state.collapsed,
+      overlayOpen: state.overlayOpen,
+      setCollapsed: state.setCollapsed,
+      setOverlayOpen: state.setOverlayOpen
+    }))
+  );
 
   const isOverlay = !isWide && overlayOpen;
   const expanded = isWide ? !collapsed : overlayOpen;
