@@ -1,0 +1,24 @@
+import { ComponentType } from 'react';
+import { PageName } from '~/app/routes/pageModules';
+import { DashboardIcon, ForecastIcon, IconProps, NotesIcon, ProfileIcon } from '~/components/icons';
+import { ROUTES } from '~/constants';
+
+export interface NavItem {
+  to: string;
+  label: string;
+  page: PageName;
+  Icon: ComponentType<IconProps>;
+}
+
+export const MAIN_NAV: NavItem[] = [
+  { to: ROUTES.dashboard, label: 'Dashboard', page: 'dashboard', Icon: DashboardIcon },
+  { to: ROUTES.forecast, label: 'Forecast', page: 'forecast', Icon: ForecastIcon },
+  { to: ROUTES.notes, label: 'Notes', page: 'notes', Icon: NotesIcon }
+];
+
+export const PROFILE_NAV: NavItem = {
+  to: ROUTES.profile,
+  label: 'Profile',
+  page: 'profile',
+  Icon: ProfileIcon
+};
