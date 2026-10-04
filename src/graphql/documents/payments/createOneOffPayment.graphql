@@ -1,0 +1,7 @@
+mutation CreateOneOffPayment($oneOffPayment: OneOffPaymentInput!) {
+  createOneOffPayment(oneOffPayment: $oneOffPayment) {
+    oneOffPayment {
+      ...OneOffPaymentFields
+    }
+  }
+}

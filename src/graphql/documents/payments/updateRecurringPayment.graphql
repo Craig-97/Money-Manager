@@ -1,0 +1,7 @@
+mutation UpdateRecurringPayment($id: ID!, $input: UpdateRecurringPaymentInput!) {
+  updateRecurringPayment(id: $id, input: $input) {
+    recurringPayment {
+      ...RecurringPaymentFields
+    }
+  }
+}

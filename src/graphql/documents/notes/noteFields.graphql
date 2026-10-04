@@ -1,0 +1,7 @@
+fragment NoteFields on Note {
+  id
+  body
+  color
+  createdAt
+  updatedAt
+}

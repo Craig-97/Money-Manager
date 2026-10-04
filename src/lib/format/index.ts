@@ -1,3 +1,3 @@
 export * from './formatLabel';
 export * from './initials';
-export * from './numbers';
+export * from './money';

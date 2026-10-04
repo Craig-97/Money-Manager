@@ -1,0 +1,5 @@
+mutation BatchDeleteRecurringPayments($ids: [ID!]!) {
+  batchDeleteRecurringPayments(ids: $ids) {
+    success
+  }
+}

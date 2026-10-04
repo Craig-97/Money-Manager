@@ -1,0 +1,7 @@
+mutation BatchUpdateOneOffPayments($ids: [ID!]!, $paid: Boolean!) {
+  batchUpdateOneOffPayments(ids: $ids, paid: $paid) {
+    oneOffPayments {
+      ...OneOffPaymentFields
+    }
+  }
+}

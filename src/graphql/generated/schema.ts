@@ -13,6 +13,7 @@ export type Account = {
   __typename: 'Account';
   bankBalance: Scalars['Float']['output'];
   bills: Maybe<Array<Maybe<Bill>>>;
+  cycleStartedOn: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   monthlyIncome: Scalars['Float']['output'];
   notes: Maybe<Array<Maybe<Note>>>;
@@ -68,6 +69,13 @@ export type BatchRecurringPaymentResponse = {
   success: Scalars['Boolean']['output'];
 };
 
+export type BatchUpdateOneOffPaymentResponse = {
+  __typename: 'BatchUpdateOneOffPaymentResponse';
+  oneOffPayments: Array<OneOffPayment>;
+  success: Scalars['Boolean']['output'];
+  updatedCount: Scalars['Int']['output'];
+};
+
 export type BatchUpdateRecurringPaymentInput = {
   amount?: InputMaybe<Scalars['Float']['input']>;
   category?: InputMaybe<RecurringPaymentCategory>;
@@ -76,6 +84,7 @@ export type BatchUpdateRecurringPaymentInput = {
   id: Scalars['ID']['input'];
   lastPaymentDate?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<PaymentStatus>;
   type?: InputMaybe<PaymentType>;
 };
 
@@ -133,7 +142,9 @@ export type Mutation = {
   batchDeleteOneOffPayments: BatchOneOffPaymentResponse;
   batchDeleteRecurringPayments: BatchDeleteResponse;
   batchUpdateBills: BatchBillResponse;
+  batchUpdateOneOffPayments: BatchUpdateOneOffPaymentResponse;
   batchUpdateRecurringPayments: BatchRecurringPaymentResponse;
+  changePassword: UserResponse;
   createAccount: AccountResponse;
   createBill: BillResponse;
   createNote: NoteResponse;
@@ -143,6 +154,7 @@ export type Mutation = {
   createUser: UserResponse;
   deleteAccount: AccountResponse;
   deleteBill: BillResponse;
+  deleteCurrentUser: UserResponse;
   deleteNote: NoteResponse;
   deleteOneOffPayment: OneOffPaymentResponse;
   deletePayday: PaydayResponse;
@@ -157,6 +169,8 @@ export type Mutation = {
   registerAndLogin: AuthData;
   requestPasswordReset: PasswordResetResponse;
   resetPassword: AuthData;
+  startPaydayCycle: AccountResponse;
+  updateCurrentUser: UserResponse;
   updateRecurringPayment: RecurringPaymentResponse;
 };
 
@@ -176,8 +190,18 @@ export type MutationBatchUpdateBillsArgs = {
   input: BatchBillUpdateInput;
 };
 
+export type MutationBatchUpdateOneOffPaymentsArgs = {
+  ids: Array<Scalars['ID']['input']>;
+  paid: Scalars['Boolean']['input'];
+};
+
 export type MutationBatchUpdateRecurringPaymentsArgs = {
   input: Array<BatchUpdateRecurringPaymentInput>;
+};
+
+export type MutationChangePasswordArgs = {
+  currentPassword: Scalars['String']['input'];
+  newPassword: Scalars['String']['input'];
 };
 
 export type MutationCreateAccountArgs = {
@@ -279,6 +303,14 @@ export type MutationResetPasswordArgs = {
   token: Scalars['String']['input'];
 };
 
+export type MutationStartPaydayCycleArgs = {
+  input: StartPaydayCycleInput;
+};
+
+export type MutationUpdateCurrentUserArgs = {
+  input: UserDetailsInput;
+};
+
 export type MutationUpdateRecurringPaymentArgs = {
   id: Scalars['ID']['input'];
   input: UpdateRecurringPaymentInput;
@@ -288,14 +320,18 @@ export type Note = {
   __typename: 'Note';
   account: Scalars['ID']['output'];
   body: Scalars['String']['output'];
+  color: NoteColor;
   createdAt: Scalars['String']['output'];
   id: Scalars['ID']['output'];
   updatedAt: Scalars['String']['output'];
 };
 
+export type NoteColor = 'AMBER' | 'BLUE' | 'GREEN' | 'ROSE' | 'VIOLET';
+
 export type NoteInput = {
   account?: InputMaybe<Scalars['ID']['input']>;
   body?: InputMaybe<Scalars['String']['input']>;
+  color?: InputMaybe<NoteColor>;
 };
 
 export type NoteResponse = {
@@ -312,6 +348,7 @@ export type OneOffPayment = {
   dueDate: Scalars['String']['output'];
   id: Scalars['ID']['output'];
   name: Scalars['String']['output'];
+  paid: Scalars['Boolean']['output'];
   type: PaymentType;
 };
 
@@ -343,6 +380,7 @@ export type OneOffPaymentInput = {
   category?: InputMaybe<OneOffPaymentCategory>;
   dueDate?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
+  paid?: InputMaybe<Scalars['Boolean']['input']>;
   type?: InputMaybe<PaymentType>;
 };
 
@@ -391,6 +429,8 @@ export type PaydayResponse = {
 export type PaydayType = 'LAST_DAY' | 'LAST_FRIDAY' | 'SET_DAY' | 'SET_WEEKDAY';
 
 export type PaymentFrequency = 'ANNUALLY' | 'BIWEEKLY' | 'MONTHLY' | 'QUARTERLY' | 'WEEKLY';
+
+export type PaymentStatus = 'PAID' | 'SKIPPED' | 'UNPAID';
 
 export type PaymentType = 'EXPENSE' | 'INCOME';
 
@@ -478,6 +518,8 @@ export type RecurringPayment = {
   id: Scalars['ID']['output'];
   lastPaymentDate: Maybe<Scalars['String']['output']>;
   name: Scalars['String']['output'];
+  nextDueDate: Maybe<Scalars['String']['output']>;
+  status: PaymentStatus;
   type: PaymentType;
 };
 
@@ -520,6 +562,13 @@ export type RecurringPaymentResponse = {
   success: Scalars['Boolean']['output'];
 };
 
+export type StartPaydayCycleInput = {
+  accountId: Scalars['ID']['input'];
+  bankBalance: Scalars['Float']['input'];
+  payday: Scalars['String']['input'];
+  recurringPaymentIds: Array<Scalars['ID']['input']>;
+};
+
 export type UpdateRecurringPaymentInput = {
   amount?: InputMaybe<Scalars['Float']['input']>;
   category?: InputMaybe<RecurringPaymentCategory>;
@@ -527,6 +576,7 @@ export type UpdateRecurringPaymentInput = {
   frequency?: InputMaybe<PaymentFrequency>;
   lastPaymentDate?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<PaymentStatus>;
   type?: InputMaybe<PaymentType>;
 };
 
@@ -537,6 +587,12 @@ export type User = {
   firstName: Scalars['String']['output'];
   id: Scalars['ID']['output'];
   surname: Scalars['String']['output'];
+};
+
+export type UserDetailsInput = {
+  email: Scalars['String']['input'];
+  firstName: Scalars['String']['input'];
+  surname: Scalars['String']['input'];
 };
 
 export type UserInput = {

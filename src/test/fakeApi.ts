@@ -1,7 +1,11 @@
 import { Observable } from 'rxjs';
 import { ApolloLink } from '@apollo/client';
 import { buildSchema, execute, ExecutionResult, GraphQLError } from 'graphql';
+import { addDays, fromApiDate, startOfToday, toIsoDate } from '~/lib/dates';
+import { nextOccurrence } from '~/lib/payments';
 import { typeDefs } from './schema';
+
+// Shapes as the API returns them: dates are epoch milliseconds in a string
 
 export interface FakeRecurringPayment {
   id: string;
@@ -12,25 +16,30 @@ export interface FakeRecurringPayment {
   type: 'INCOME' | 'EXPENSE';
   firstPaymentDate: string;
   lastPaymentDate: string | null;
+  nextDueDate: string | null;
+  status: 'UNPAID' | 'PAID' | 'SKIPPED';
 }
 
-export interface FakePayment {
+export interface FakeOneOffPayment {
   id: string;
   name: string;
   amount: number;
   dueDate: string;
   type: 'INCOME' | 'EXPENSE';
   category: string;
+  paid: boolean;
 }
 
 export interface FakeNote {
   id: string;
   body: string;
+  color: string;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface FakePayday {
+  id: string;
   frequency: string;
   type: string;
   dayOfMonth?: number | null;
@@ -43,8 +52,9 @@ export interface FakeAccount {
   id: string;
   bankBalance: number;
   monthlyIncome: number;
+  cycleStartedOn: string | null;
   recurringPayments: FakeRecurringPayment[];
-  oneOffPayments: FakePayment[];
+  oneOffPayments: FakeOneOffPayment[];
   notes: FakeNote[];
   payday: FakePayday | null;
 }
@@ -82,13 +92,35 @@ export const DEFAULT_PASSWORD = 'password1';
 // The token in a reset link that the fake API accepts, once
 export const VALID_RESET_TOKEN = 'valid-reset-token';
 
-// The real API returns Date fields through a GraphQL String, i.e. epoch milliseconds
-export const toApiDate = (iso: string) => String(new Date(iso).getTime());
+/* 'YYYY-MM-DD' -> the API's date: midnight UTC as epoch milliseconds */
+export const apiDate = (iso: string) => String(Date.parse(`${iso}T00:00:00Z`));
+
+/* A date some days from today, in the API's format, for data that has to be current */
+export const apiDateFromToday = (days: number) => apiDate(toIsoDate(addDays(startOfToday(), days)));
+
+// The API stores whatever a YYYY-MM-DD input says as that day
+const fromInput = (value: string) => apiDate(value.slice(0, 10));
+
+// Works out a recurring payment's due date the way the API's model does
+const dueDateFor = (
+  payment: Pick<FakeRecurringPayment, 'firstPaymentDate' | 'frequency' | 'lastPaymentDate'>
+) => {
+  const due = nextOccurrence(
+    {
+      firstPaymentDate: fromApiDate(payment.firstPaymentDate)!,
+      frequency: payment.frequency as never,
+      lastPaymentDate: fromApiDate(payment.lastPaymentDate)
+    },
+    startOfToday()
+  );
+  return due ? apiDate(toIsoDate(due)) : null;
+};
 
 export const DEFAULT_ACCOUNT: FakeAccount = {
   id: 'account-1',
   bankBalance: 1000,
   monthlyIncome: 2500,
+  cycleStartedOn: null,
   recurringPayments: [
     {
       id: 'recurring-1',
@@ -97,8 +129,11 @@ export const DEFAULT_ACCOUNT: FakeAccount = {
       category: 'MORTGAGE',
       frequency: 'MONTHLY',
       type: 'EXPENSE',
-      firstPaymentDate: toApiDate('2026-01-28'),
-      lastPaymentDate: null
+      firstPaymentDate: apiDate('2026-01-28'),
+      lastPaymentDate: null,
+      // Worked out by the client, as for payments saved before the API tracked due dates
+      nextDueDate: null,
+      status: 'UNPAID'
     }
   ],
   oneOffPayments: [
@@ -106,20 +141,23 @@ export const DEFAULT_ACCOUNT: FakeAccount = {
       id: 'payment-1',
       name: 'Holiday',
       amount: 200,
-      dueDate: toApiDate('2099-06-15'),
+      dueDate: apiDate('2099-06-15'),
       type: 'EXPENSE',
-      category: 'TRAVEL'
+      category: 'TRAVEL',
+      paid: false
     }
   ],
   notes: [
     {
       id: 'note-1',
       body: 'Buy milk',
-      createdAt: toApiDate('2024-01-01T10:00:00Z'),
-      updatedAt: toApiDate('2024-01-01T10:00:00Z')
+      color: 'BLUE',
+      createdAt: String(Date.parse('2024-01-01T10:00:00Z')),
+      updatedAt: String(Date.parse('2024-01-01T10:00:00Z'))
     }
   ],
   payday: {
+    id: 'payday-1',
     frequency: 'MONTHLY',
     type: 'LAST_DAY',
     dayOfMonth: null,
@@ -167,7 +205,13 @@ export const createFakeApi = ({
 }: Options = {}): FakeApi => {
   const db: FakeDb = { user: clone(user), password, account: account ? clone(account) : null };
   const resetTokens = new Set([VALID_RESET_TOKEN]);
+  const calls: Call[] = [];
+  const failures = new Map<string, GraphQLError>();
+  let nextId = 1;
+  const newId = (prefix: string) => `${prefix}-new-${nextId++}`;
+
   const authData = () => ({ user: db.user, token: 'test-token', tokenExpiration: 1 });
+
   const checkPassword = (newPassword: string) => {
     if (newPassword.length < 8 || !/[0-9]/.test(newPassword)) {
       throw apiError(
@@ -176,13 +220,75 @@ export const createFakeApi = ({
       );
     }
   };
-  const calls: Call[] = [];
-  const failures = new Map<string, GraphQLError>();
 
   const requireAccount = () => {
     if (!db.account) throw apiError('ACCOUNT_NOT_LINKED', 'Account not linked');
     return db.account;
   };
+
+  // Names are unique across an account's payments, as the API enforces
+  const checkUniqueName = (name: string, exceptId?: string) => {
+    const { recurringPayments, oneOffPayments } = requireAccount();
+    const taken = [...recurringPayments, ...oneOffPayments].some(
+      payment => payment.name === name && payment.id !== exceptId
+    );
+    if (taken) throw apiError('PAYMENT_EXISTS', `A payment called '${name}' already exists`);
+  };
+
+  const findRecurring = (id: string) => {
+    const payment = requireAccount().recurringPayments.find(p => p.id === id);
+    if (!payment) throw apiError('RECURRING_PAYMENT_NOT_FOUND', `No recurring payment '${id}'`);
+    return payment;
+  };
+
+  const findOneOff = (id: string) => {
+    const payment = requireAccount().oneOffPayments.find(p => p.id === id);
+    if (!payment) throw apiError('PAYMENT_NOT_FOUND', `No payment '${id}'`);
+    return payment;
+  };
+
+  const newRecurring = (input: Args): FakeRecurringPayment => {
+    const payment = {
+      id: newId('recurring'),
+      name: input.name,
+      amount: input.amount,
+      category: input.category,
+      frequency: input.frequency,
+      type: input.type,
+      firstPaymentDate: fromInput(input.firstPaymentDate),
+      lastPaymentDate: input.lastPaymentDate ? fromInput(input.lastPaymentDate) : null,
+      nextDueDate: null,
+      status: 'UNPAID' as const
+    };
+    return { ...payment, nextDueDate: dueDateFor(payment) };
+  };
+
+  const updateRecurring = (payment: FakeRecurringPayment, input: Args) => {
+    if (input.name && input.name !== payment.name) checkUniqueName(input.name, payment.id);
+    const scheduleChanged = ['firstPaymentDate', 'frequency', 'lastPaymentDate'].some(
+      key => key in input
+    );
+    for (const [key, value] of Object.entries(input)) {
+      if (key === 'id' || value === undefined) continue;
+      const isDate = key === 'firstPaymentDate' || key === 'lastPaymentDate';
+      Object.assign(payment, { [key]: isDate && value ? fromInput(value) : value });
+    }
+    if (scheduleChanged) {
+      payment.nextDueDate = dueDateFor(payment);
+      if (!('status' in input)) payment.status = 'UNPAID';
+    }
+    return payment;
+  };
+
+  const newOneOff = (input: Args): FakeOneOffPayment => ({
+    id: newId('payment'),
+    name: input.name,
+    amount: input.amount,
+    dueDate: fromInput(input.dueDate),
+    type: input.type,
+    category: input.category,
+    paid: input.paid ?? false
+  });
 
   const rootValue = {
     tokenFindUser: () => db.user,
@@ -224,6 +330,165 @@ export const createFakeApi = ({
       resetTokens.delete(token);
       db.password = newPassword;
       return authData();
+    },
+    updateCurrentUser: ({ input }: Args) => {
+      db.user = {
+        ...db.user,
+        firstName: input.firstName.trim(),
+        surname: input.surname.trim(),
+        email: input.email.trim()
+      };
+      return { user: db.user, success: true };
+    },
+    changePassword: ({ currentPassword, newPassword }: Args) => {
+      if (currentPassword !== db.password) {
+        throw apiError('INVALID_CREDENTIALS', 'Password is incorrect');
+      }
+      checkPassword(newPassword);
+      db.password = newPassword;
+      return { user: db.user, success: true };
+    },
+    deleteCurrentUser: () => {
+      db.account = null;
+      return { success: true };
+    },
+
+    createAccount: ({ account: input }: Args) => {
+      if (db.account) throw apiError('ACCOUNT_EXISTS', 'Account already exists');
+      db.account = {
+        id: 'account-new',
+        bankBalance: input.bankBalance,
+        monthlyIncome: input.monthlyIncome,
+        cycleStartedOn: null,
+        recurringPayments: [],
+        oneOffPayments: [],
+        notes: [],
+        payday: input.payday
+          ? {
+              id: 'payday-new',
+              ...input.payday,
+              firstPayDate: input.payday.firstPayDate ? fromInput(input.payday.firstPayDate) : null
+            }
+          : null
+      };
+      db.account.recurringPayments = (input.recurringPayments ?? []).map(newRecurring);
+      db.account.oneOffPayments = (input.oneOffPayments ?? []).map(newOneOff);
+      return { account: db.account, success: true };
+    },
+    editAccount: ({ account: input }: Args) => {
+      const current = requireAccount();
+      if (input.bankBalance !== undefined) current.bankBalance = input.bankBalance;
+      if (input.monthlyIncome !== undefined) current.monthlyIncome = input.monthlyIncome;
+      return { account: current, success: true };
+    },
+    startPaydayCycle: ({ input }: Args) => {
+      const current = requireAccount();
+      const today = startOfToday();
+      for (const id of input.recurringPaymentIds) {
+        const payment = findRecurring(id);
+        const due = fromApiDate(payment.nextDueDate);
+        const after = due ? addDays(due, 1) : today;
+        const next = nextOccurrence(
+          {
+            firstPaymentDate: fromApiDate(payment.firstPaymentDate)!,
+            frequency: payment.frequency as never,
+            lastPaymentDate: fromApiDate(payment.lastPaymentDate)
+          },
+          after > today ? after : today
+        );
+        payment.nextDueDate = next ? apiDate(toIsoDate(next)) : null;
+        payment.status = 'UNPAID';
+      }
+      current.bankBalance = input.bankBalance;
+      current.cycleStartedOn = fromInput(input.payday);
+      return { account: current, success: true };
+    },
+    editPayday: ({ payday: input }: Args) => {
+      const current = requireAccount();
+      current.payday = {
+        id: current.payday?.id ?? 'payday-new',
+        ...input,
+        firstPayDate: input.firstPayDate ? fromInput(input.firstPayDate) : null
+      };
+      return { payday: current.payday, success: true };
+    },
+
+    createRecurringPayment: ({ input }: Args) => {
+      checkUniqueName(input.name);
+      const payment = newRecurring(input);
+      requireAccount().recurringPayments.push(payment);
+      return { recurringPayment: payment, success: true };
+    },
+    updateRecurringPayment: ({ id, input }: Args) => ({
+      recurringPayment: updateRecurring(findRecurring(id), input),
+      success: true
+    }),
+    batchUpdateRecurringPayments: ({ input }: Args) => ({
+      recurringPayments: input.map((update: Args) =>
+        updateRecurring(findRecurring(update.id), update)
+      ),
+      success: true
+    }),
+    batchDeleteRecurringPayments: ({ ids }: Args) => {
+      const current = requireAccount();
+      ids.forEach(findRecurring);
+      current.recurringPayments = current.recurringPayments.filter(p => !ids.includes(p.id));
+      return { success: true, deletedCount: ids.length };
+    },
+
+    createOneOffPayment: ({ oneOffPayment: input }: Args) => {
+      checkUniqueName(input.name);
+      const payment = newOneOff(input);
+      requireAccount().oneOffPayments.push(payment);
+      return { oneOffPayment: payment, success: true };
+    },
+    editOneOffPayment: ({ id, oneOffPayment: input }: Args) => {
+      const payment = findOneOff(id);
+      if (input.name && input.name !== payment.name) checkUniqueName(input.name, id);
+      Object.assign(payment, {
+        ...input,
+        ...(input.dueDate ? { dueDate: fromInput(input.dueDate) } : {})
+      });
+      return { oneOffPayment: payment, success: true };
+    },
+    batchUpdateOneOffPayments: ({ ids, paid }: Args) => {
+      const payments = ids.map(findOneOff);
+      payments.forEach((payment: FakeOneOffPayment) => (payment.paid = paid));
+      return { oneOffPayments: payments, success: true, updatedCount: payments.length };
+    },
+    batchDeleteOneOffPayments: ({ ids }: Args) => {
+      const current = requireAccount();
+      ids.forEach(findOneOff);
+      current.oneOffPayments = current.oneOffPayments.filter(p => !ids.includes(p.id));
+      return { oneOffPayments: [], success: true, deletedCount: ids.length };
+    },
+
+    createNote: ({ note: input }: Args) => {
+      const current = requireAccount();
+      if (current.notes.some(note => note.body === input.body)) {
+        throw apiError('NOTE_EXISTS', 'A note with that text already exists');
+      }
+      const now = String(Date.now());
+      const note = {
+        id: newId('note'),
+        body: input.body,
+        color: input.color ?? 'BLUE',
+        createdAt: now,
+        updatedAt: now
+      };
+      current.notes.push(note);
+      return { note, success: true };
+    },
+    editNote: ({ id, note: input }: Args) => {
+      const note = requireAccount().notes.find(n => n.id === id);
+      if (!note) throw apiError('NOTE_NOT_FOUND', `No note '${id}'`);
+      Object.assign(note, input, { updatedAt: String(Date.now()) });
+      return { note, success: true };
+    },
+    deleteNote: ({ id }: Args) => {
+      const current = requireAccount();
+      current.notes = current.notes.filter(note => note.id !== id);
+      return { success: true };
     }
   };
 

@@ -1,0 +1,7 @@
+# The signed-in user's account. The API looks it up by user id and fails with ACCOUNT_NOT_LINKED
+# until setup is finished, which is how the route guards tell whether to show setup.
+query Account($userId: ID!) {
+  account(id: $userId) {
+    ...AccountFields
+  }
+}

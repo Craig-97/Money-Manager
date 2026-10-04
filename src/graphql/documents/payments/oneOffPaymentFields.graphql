@@ -1,0 +1,9 @@
+fragment OneOffPaymentFields on OneOffPayment {
+  id
+  name
+  amount
+  dueDate
+  type
+  category
+  paid
+}

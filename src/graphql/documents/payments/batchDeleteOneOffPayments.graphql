@@ -1,0 +1,5 @@
+mutation BatchDeleteOneOffPayments($ids: [ID!]!) {
+  batchDeleteOneOffPayments(ids: $ids) {
+    success
+  }
+}

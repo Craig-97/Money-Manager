@@ -1,0 +1,12 @@
+fragment RecurringPaymentFields on RecurringPayment {
+  id
+  name
+  amount
+  category
+  frequency
+  type
+  firstPaymentDate
+  lastPaymentDate
+  nextDueDate
+  status
+}

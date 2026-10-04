@@ -1,0 +1,6 @@
+# Deletes the signed-in user and everything on their account
+mutation DeleteCurrentUser {
+  deleteCurrentUser {
+    success
+  }
+}

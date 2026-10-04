@@ -1,7 +1,0 @@
-# Whether the user has finished setup. The API looks the account up by user id and
-# returns ACCOUNT_NOT_LINKED when there isn't one yet.
-query AccountStatus($userId: ID!) {
-  account(id: $userId) {
-    id
-  }
-}

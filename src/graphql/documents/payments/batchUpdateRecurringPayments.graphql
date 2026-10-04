@@ -1,0 +1,7 @@
+mutation BatchUpdateRecurringPayments($input: [BatchUpdateRecurringPaymentInput!]!) {
+  batchUpdateRecurringPayments(input: $input) {
+    recurringPayments {
+      ...RecurringPaymentFields
+    }
+  }
+}

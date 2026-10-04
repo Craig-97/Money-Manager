@@ -34,6 +34,12 @@ input UserInput {
   surname: String!
 }
 
+input UserDetailsInput {
+  firstName: String!
+  surname: String!
+  email: String!
+}
+
 type UserResponse {
   user: User
   account: ID
@@ -57,9 +63,13 @@ type Mutation {
   createUser(user: UserInput!): UserResponse!
   editUser(id: ID!, user: UserInput!): UserResponse!
   deleteUser(id: ID!): UserResponse!
+  updateCurrentUser(input: UserDetailsInput!): UserResponse!
+  changePassword(currentPassword: String!, newPassword: String!): UserResponse!
+  deleteCurrentUser: UserResponse!
   createAccount(account: CreateAccountInput!): AccountResponse!
   editAccount(id: ID!, account: EditAccountInput!): AccountResponse!
   deleteAccount(id: ID!): AccountResponse!
+  startPaydayCycle(input: StartPaydayCycleInput!): AccountResponse!
   createBill(bill: BillInput!): BillResponse!
   editBill(id: ID!, bill: BillInput!): BillResponse!
   deleteBill(id: ID!): BillResponse!
@@ -69,6 +79,7 @@ type Mutation {
   editOneOffPayment(id: ID!, oneOffPayment: OneOffPaymentInput!): OneOffPaymentResponse!
   deleteOneOffPayment(id: ID!): OneOffPaymentResponse!
   batchDeleteOneOffPayments(ids: [ID!]!): BatchOneOffPaymentResponse!
+  batchUpdateOneOffPayments(ids: [ID!]!, paid: Boolean!): BatchUpdateOneOffPaymentResponse!
   createRecurringPayment(input: CreateRecurringPaymentInput!): RecurringPaymentResponse!
   updateRecurringPayment(id: ID!, input: UpdateRecurringPaymentInput!): RecurringPaymentResponse!
   deleteRecurringPayment(id: ID!): RecurringPaymentResponse!
@@ -92,6 +103,7 @@ type Account {
   recurringPayments: [RecurringPayment]
   notes: [Note]
   payday: Payday
+  cycleStartedOn: String
 }
 
 input CreateAccountInput {
@@ -107,6 +119,13 @@ input CreateAccountInput {
 input EditAccountInput {
   bankBalance: Float
   monthlyIncome: Float
+}
+
+input StartPaydayCycleInput {
+  accountId: ID!
+  payday: String!
+  bankBalance: Float!
+  recurringPaymentIds: [ID!]!
 }
 
 type AccountResponse {
@@ -186,6 +205,7 @@ type OneOffPayment {
   dueDate: String!
   type: PaymentType!
   category: OneOffPaymentCategory!
+  paid: Boolean!
 }
 
 input OneOffPaymentInput {
@@ -195,6 +215,7 @@ input OneOffPaymentInput {
   dueDate: String
   type: PaymentType
   category: OneOffPaymentCategory
+  paid: Boolean
 }
 
 type OneOffPaymentResponse {
@@ -206,6 +227,12 @@ type BatchOneOffPaymentResponse {
   oneOffPayments: [OneOffPayment]!
   success: Boolean!
   deletedCount: Int!
+}
+
+type BatchUpdateOneOffPaymentResponse {
+  oneOffPayments: [OneOffPayment!]!
+  success: Boolean!
+  updatedCount: Int!
 }
 
 enum RecurringPaymentCategory {
@@ -240,6 +267,12 @@ enum PaymentFrequency {
   ANNUALLY
 }
 
+enum PaymentStatus {
+  UNPAID
+  PAID
+  SKIPPED
+}
+
 type RecurringPayment {
   id: ID!
   name: String!
@@ -250,6 +283,8 @@ type RecurringPayment {
   type: PaymentType!
   firstPaymentDate: String!
   lastPaymentDate: String
+  nextDueDate: String
+  status: PaymentStatus!
 }
 
 input CreateRecurringPaymentInput {
@@ -281,6 +316,7 @@ input UpdateRecurringPaymentInput {
   type: PaymentType
   firstPaymentDate: String
   lastPaymentDate: String
+  status: PaymentStatus
 }
 
 input BatchUpdateRecurringPaymentInput {
@@ -292,6 +328,7 @@ input BatchUpdateRecurringPaymentInput {
   type: PaymentType
   firstPaymentDate: String
   lastPaymentDate: String
+  status: PaymentStatus
 }
 
 type BatchRecurringPaymentResponse {
@@ -304,10 +341,19 @@ type RecurringPaymentResponse {
   success: Boolean!
 }
 
+enum NoteColor {
+  BLUE
+  GREEN
+  AMBER
+  ROSE
+  VIOLET
+}
+
 type Note {
   id: ID!
   account: ID!
   body: String!
+  color: NoteColor!
   createdAt: String!
   updatedAt: String!
 }
@@ -315,6 +361,7 @@ type Note {
 input NoteInput {
   account: ID
   body: String
+  color: NoteColor
 }
 
 type NoteResponse {

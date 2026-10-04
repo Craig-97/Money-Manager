@@ -1,0 +1,13 @@
+# Payday: sets the confirmed balance and moves the chosen recurring payments on to their next date
+mutation StartPaydayCycle($input: StartPaydayCycleInput!) {
+  startPaydayCycle(input: $input) {
+    account {
+      id
+      bankBalance
+      cycleStartedOn
+      recurringPayments {
+        ...RecurringPaymentFields
+      }
+    }
+  }
+}

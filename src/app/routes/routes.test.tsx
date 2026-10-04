@@ -59,13 +59,13 @@ describe('routing', () => {
         .map(call => call.operationName)
         .slice(0, 2)
         .sort()
-    ).toEqual(['AccountStatus', 'CurrentUser']);
-    expect(api.callsTo('AccountStatus')).toEqual([{ userId: DEFAULT_USER.id }]);
+    ).toEqual(['Account', 'CurrentUser']);
+    expect(api.callsTo('Account')).toEqual([{ userId: DEFAULT_USER.id }]);
   });
 
   it('offers a retry when the account fails to load', async () => {
     const api = createFakeApi();
-    api.failNext('AccountStatus', 'INTERNAL_SERVER_ERROR');
+    api.failNext('Account', 'INTERNAL_SERVER_ERROR');
     const { user } = renderApp({ route: '/dashboard', api });
 
     await user.click(await screen.findByRole('button', { name: 'Try again' }));
@@ -88,7 +88,7 @@ describe('sessions', () => {
 
   it('ends the session and explains why when the API says the token expired', async () => {
     const api = createFakeApi();
-    api.failNext('AccountStatus', 'UNAUTHENTICATED', { extensions: { expired: true } });
+    api.failNext('Account', 'UNAUTHENTICATED', { extensions: { expired: true } });
     renderApp({ route: '/dashboard', api });
 
     expect(await findPageHeading('Welcome back')).toBeInTheDocument();
