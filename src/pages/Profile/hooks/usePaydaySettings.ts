@@ -21,6 +21,8 @@ export const usePaydaySettings = (account: Account) => {
   const [editPayday, { loading: saving }] = useMutation(EditPaydayDocument);
   const [values, setValues] = useState(() => toPaydayValues(account.payday));
   const [submitted, setSubmitted] = useState(false);
+  // What was last saved, so the form knows when it has changed
+  const [saved, setSaved] = useState(values);
   const holidays = useBankHolidays(values.region);
 
   const errors = paydayErrors(values);
@@ -35,6 +37,7 @@ export const usePaydaySettings = (account: Account) => {
     try {
       await editPayday({ variables: { id: account.payday.id, payday: toPaydayInput(values) } });
       setSubmitted(false);
+      setSaved(values);
       showToast({ message: 'Payday settings saved' });
     } catch (error) {
       showToast({ message: getApiErrorMessage(error, "Couldn't save your payday. Try again.") });
@@ -51,6 +54,7 @@ export const usePaydaySettings = (account: Account) => {
     errors: submitted ? errors : {},
     preview,
     saving,
+    isDirty: (Object.keys(values) as (keyof PaydayValues)[]).some(key => values[key] !== saved[key]),
     save: () => void save()
   };
 };

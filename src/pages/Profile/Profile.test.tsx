@@ -32,7 +32,8 @@ describe('profile', () => {
   it('checks the current password before changing it', async () => {
     const { user, api } = renderProfile();
     const password = await section('Password');
-    const update = within(password).getByRole('button', { name: 'Update password' });
+    const update = within(password).getByRole('button', { name: 'Save changes' });
+    expect(update).toBeDisabled();
 
     await user.type(within(password).getByLabelText('Current password'), 'wrong-one1');
     await user.type(within(password).getByLabelText('New password'), 'better-pass2');
@@ -64,13 +65,16 @@ describe('profile', () => {
     const { user, api } = renderProfile();
     const payday = await section('Payday');
 
+    const save = within(payday).getByRole('button', { name: 'Save changes' });
+    expect(save).toBeDisabled();
+
     await user.click(within(payday).getByRole('radio', { name: /Set day/ }));
     const day = within(payday).getByLabelText('Day of month');
-    await user.click(within(payday).getByRole('button', { name: 'Save payday settings' }));
+    await user.click(save);
     expect(within(payday).getByText('Choose a day between 1 and 31')).toBeInTheDocument();
 
     await user.type(day, '15');
-    await user.click(within(payday).getByRole('button', { name: 'Save payday settings' }));
+    await user.click(save);
 
     expect(await screen.findByText('Payday settings saved')).toBeInTheDocument();
     expect(api.callsTo('EditPayday')).toEqual([
@@ -87,12 +91,15 @@ describe('profile', () => {
     const free = () => within(balances).getByText('Free to spend').nextElementSibling;
     const before = free()?.textContent;
 
+    const save = within(balances).getByRole('button', { name: 'Save changes' });
+    expect(save).toBeDisabled();
+
     const bank = within(balances).getByLabelText('Bank balance');
     await user.clear(bank);
     await user.type(bank, '2000');
     expect(free()?.textContent).not.toBe(before);
 
-    await user.click(within(balances).getByRole('button', { name: 'Save balances' }));
+    await user.click(save);
 
     expect(await screen.findByText('Balances saved')).toBeInTheDocument();
     expect(api.callsTo('EditAccount')).toEqual([

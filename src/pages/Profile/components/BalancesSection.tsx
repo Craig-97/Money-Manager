@@ -31,11 +31,12 @@ export const BalancesSection = ({ account }: { account: Account }) => {
           <span className={helpClasses}>Your forecast updates as soon as you save.</span>
           <Button
             type="submit"
-            variant="solid"
+            variant="accent"
+            disabled={!balances.isDirty}
             loading={balances.saving}
             loadingText="Saving…"
             className="font-bold">
-            Save balances
+            Save changes
           </Button>
         </>
       }>

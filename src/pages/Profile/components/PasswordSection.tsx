@@ -24,7 +24,7 @@ const describedBy = (...ids: (string | false | undefined)[]) =>
 
 /* Changing the password, with a strength meter */
 export const PasswordSection = () => {
-  const { register, errors, isSubmitting, onSubmit, visible, toggleVisible, strength } =
+  const { register, errors, isSubmitting, canSubmit, onSubmit, visible, toggleVisible, strength } =
     usePasswordForm();
   const type = visible ? 'text' : 'password';
 
@@ -49,11 +49,12 @@ export const PasswordSection = () => {
           </span>
           <Button
             type="submit"
-            variant="solid"
+            variant="accent"
+            disabled={!canSubmit}
             loading={isSubmitting}
-            loadingText="Updating…"
+            loadingText="Saving…"
             className="font-bold">
-            Update password
+            Save changes
           </Button>
         </>
       }>

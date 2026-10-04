@@ -14,7 +14,7 @@ export const AppShell = () => {
 
   return (
     <div
-      className="flex h-dvh overflow-hidden"
+      className="relative flex h-dvh overflow-hidden"
       style={{ '--sidebar-w': `${sidebarWidth}px` } as CSSProperties}>
       <a
         href="#main"

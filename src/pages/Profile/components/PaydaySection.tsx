@@ -50,10 +50,11 @@ export const PaydaySection = ({ account }: { account: Account }) => {
           <Button
             type="submit"
             variant="accent"
+            disabled={!payday.isDirty}
             loading={payday.saving}
             loadingText="Saving…"
             className="font-bold">
-            Save payday settings
+            Save changes
           </Button>
         </>
       }>

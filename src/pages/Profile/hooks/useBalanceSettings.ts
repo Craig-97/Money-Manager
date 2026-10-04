@@ -17,6 +17,8 @@ export const useBalanceSettings = (account: Account) => {
   const [balance, setBalance] = useState(() => formatMoneyInput(account.bankBalance));
   const [income, setIncome] = useState(() => formatMoneyInput(account.monthlyIncome));
   const [submitted, setSubmitted] = useState(false);
+  // What was last saved, so the form knows when it has changed
+  const [saved, setSaved] = useState({ balance, income });
 
   const bankBalance = parseMoney(balance);
   const monthlyIncome = parseMoney(income);
@@ -34,6 +36,7 @@ export const useBalanceSettings = (account: Account) => {
     try {
       await editAccount({ variables: { id: account.id, account: { bankBalance, monthlyIncome } } });
       setSubmitted(false);
+      setSaved({ balance, income });
       showToast({ message: 'Balances saved' });
     } catch (error) {
       showToast({ message: getApiErrorMessage(error, "Couldn't save your balances. Try again.") });
@@ -51,6 +54,7 @@ export const useBalanceSettings = (account: Account) => {
     },
     summary,
     saving,
+    isDirty: balance !== saved.balance || income !== saved.income,
     save: () => void save()
   };
 };

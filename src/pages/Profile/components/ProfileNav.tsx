@@ -59,7 +59,7 @@ export const ProfileNav = ({ current, onJump, onLogout }: ProfileNavProps) => (
 export const ProfileJumpChips = ({ current, onJump }: Omit<ProfileNavProps, 'onLogout'>) => (
   <nav
     aria-label="Profile sections"
-    className="-mx-4 flex [scrollbar-width:none] gap-2 overflow-x-auto px-4 py-0.5">
+    className="-mx-4 flex [scrollbar-width:none] gap-2 overflow-x-auto overflow-y-hidden px-4 py-1">
     {SECTIONS.map(section => (
       <a
         key={section.id}

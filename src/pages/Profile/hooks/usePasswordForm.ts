@@ -36,7 +36,10 @@ export const usePasswordForm = () => {
   const [visible, setVisible] = useState(false);
   const form = useForm<PasswordValues>({ resolver: zodResolver(schema), defaultValues: EMPTY });
   const { setError, reset } = form;
-  const newPassword = useWatch({ control: form.control, name: 'newPassword' });
+  const [currentValue, newPassword, confirmValue] = useWatch({
+    control: form.control,
+    name: ['currentPassword', 'newPassword', 'confirmPassword']
+  });
 
   const onSubmit = form.handleSubmit(async ({ currentPassword, newPassword: next }) => {
     try {
@@ -68,6 +71,8 @@ export const usePasswordForm = () => {
     register: form.register,
     errors,
     isSubmitting,
+    // Nothing to submit until all three fields are filled in
+    canSubmit: !!currentValue && !!newPassword && !!confirmValue,
     onSubmit,
     visible,
     toggleVisible: () => setVisible(v => !v),
