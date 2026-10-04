@@ -59,6 +59,8 @@ const Step = ({ number, title, titleFor, children }: StepProps) => {
   );
 };
 
+const lateText = (days: number) => (days === 1 ? 'yesterday' : `${days} days ago`);
+
 /* The payday prompt: confirm the balance and start the next cycle */
 export const PaydayPrompt = ({ prompt }: { prompt: Prompt }) => {
   const isDesktop = useMediaQuery(MEDIA.desktop);
@@ -126,10 +128,12 @@ export const PaydayPrompt = ({ prompt }: { prompt: Prompt }) => {
                 </span>
                 <div className="grow md:pt-0.5">
                   <Dialog.Title className="text-2xl leading-[1.15] font-extrabold tracking-[-0.035em] md:text-[28px] md:leading-[1.1]">
-                    It’s payday
+                    {prompt.daysLate ? 'Start your new pay cycle' : 'It’s payday'}
                   </Dialog.Title>
                   <p className="mt-1 flex flex-wrap items-center gap-2 text-[13px] font-semibold text-muted md:mt-1.5 md:text-sm">
-                    {formatLongDate(prompt.payday, { withYear: false })}
+                    {prompt.daysLate
+                      ? `Payday was ${formatLongDate(prompt.payday, { withYear: false })} · ${lateText(prompt.daysLate)}`
+                      : formatLongDate(prompt.payday, { withYear: false })}
                     <span
                       aria-hidden="true"
                       className="hidden size-1 rounded-full bg-border-strong md:inline-block"

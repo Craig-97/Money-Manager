@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useMutation } from '@apollo/client/react';
 import { StartPaydayCycleDocument } from '~/graphql/generated';
 import { Account } from '~/hooks/useAccount';
-import { addDays, fromApiDate, toApiDate } from '~/lib/dates';
+import { addDays, daysBetween, fromApiDate, toApiDate } from '~/lib/dates';
 import { getApiErrorMessage } from '~/lib/errors';
 import { formatMoneyInput, parseMoney } from '~/lib/format';
 import { PayCycle } from '~/lib/payday';
@@ -106,6 +106,8 @@ export const usePaydayPrompt = ({
     close: () => setView('closed'),
     skip,
     payday: cycle.start,
+    // Days since payday, when the prompt is catching up on one that's been and gone
+    daysLate: Math.max(0, daysBetween(cycle.start, today)),
     income: account.monthlyIncome,
     projectedBase: summary.freeToSpend,
     balance,

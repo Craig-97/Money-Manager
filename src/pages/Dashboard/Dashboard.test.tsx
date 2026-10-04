@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { screen, waitFor, within } from '@testing-library/react';
 import { apiDateFromToday, createFakeApi, DEFAULT_ACCOUNT, FakeAccount } from '~/test/fakeApi';
 import { renderApp } from '~/test/renderApp';
@@ -165,6 +165,15 @@ describe('dashboard', () => {
 });
 
 describe('payday prompt', () => {
+  // Wednesday 30 September 2026 is the last day of the month, the accounts' payday. Only Date is
+  // faked, so timers and user events run as normal.
+  const setToday = (iso: string) => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date(`${iso}T09:00:00`));
+  };
+  beforeEach(() => setToday('2026-09-30'));
+  afterEach(() => vi.useRealTimers());
+
   // A paid recurring payment from the cycle that's ending, with this cycle not started yet
   const paydayAccount = () =>
     account({
@@ -227,6 +236,14 @@ describe('payday prompt', () => {
     await user.click(screen.getByRole('button', { name: 'Show again' }));
 
     expect(await screen.findByRole('dialog', { name: 'It’s payday' })).toBeInTheDocument();
+  });
+
+  it('says when it is catching up on a payday that has been', async () => {
+    setToday('2026-10-04');
+    renderDashboard(paydayAccount());
+
+    const dialog = await screen.findByRole('dialog', { name: 'Start your new pay cycle' });
+    expect(dialog).toHaveTextContent('Payday was Wednesday 30 September · 4 days ago');
   });
 
   it("doesn't show once this cycle has started", async () => {
