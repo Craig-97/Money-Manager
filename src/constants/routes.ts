@@ -5,5 +5,9 @@ export const ROUTES = {
   notes: '/notes',
   profile: '/profile',
   setup: '/setup',
-  signIn: '/sign-in'
+  signIn: '/sign-in',
+  register: '/register',
+  forgotPassword: '/forgot-password',
+  // The API's reset email links here with ?token=
+  resetPassword: '/reset-password'
 } as const;

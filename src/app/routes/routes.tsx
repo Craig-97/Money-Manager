@@ -18,15 +18,33 @@ export const routes: RouteObject[] = [
         Component: PublicOnly,
         children: [
           {
+            path: ROUTES.home,
+            lazy: async () => ({ Component: (await pageModules.landing()).Landing })
+          },
+          {
             path: ROUTES.signIn,
             lazy: async () => ({ Component: (await pageModules.signIn()).SignIn })
+          },
+          {
+            path: ROUTES.register,
+            lazy: async () => ({ Component: (await pageModules.register()).Register })
+          },
+          {
+            path: ROUTES.forgotPassword,
+            lazy: async () => ({
+              Component: (await pageModules.forgotPassword()).ForgotPassword
+            })
           }
         ]
+      },
+      // Open whether signed in or not: the link comes from an email, and resetting signs you in
+      {
+        path: ROUTES.resetPassword,
+        lazy: async () => ({ Component: (await pageModules.resetPassword()).ResetPassword })
       },
       {
         Component: RequireAuth,
         children: [
-          { path: ROUTES.home, element: <Navigate to={ROUTES.dashboard} replace /> },
           {
             Component: RequireNoAccount,
             children: [

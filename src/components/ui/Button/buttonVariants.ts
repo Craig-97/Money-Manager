@@ -8,7 +8,10 @@ const VARIANTS = {
   danger: 'border-transparent bg-expense-bg text-expense hover:border-expense',
   // The red "Delete" in dialog footers
   dangerGhost: 'border-transparent bg-transparent text-expense hover:bg-expense-bg',
-  ghost: 'border-transparent bg-transparent text-muted hover:bg-hover hover:text-text'
+  ghost: 'border-transparent bg-transparent text-muted hover:bg-hover hover:text-text',
+  // On the accent hero panels
+  inverse: 'border-transparent bg-hero-text text-hero-bg hover:brightness-95',
+  onHero: 'border-white/40 bg-transparent text-hero-text hover:bg-hero-chip'
 } as const;
 
 const SIZES = {

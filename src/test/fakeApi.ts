@@ -79,6 +79,9 @@ export const DEFAULT_USER: FakeUser = {
 
 export const DEFAULT_PASSWORD = 'password1';
 
+// The token in a reset link that the fake API accepts, once
+export const VALID_RESET_TOKEN = 'valid-reset-token';
+
 // The real API returns Date fields through a GraphQL String, i.e. epoch milliseconds
 export const toApiDate = (iso: string) => String(new Date(iso).getTime());
 
@@ -163,6 +166,16 @@ export const createFakeApi = ({
   account = clone(DEFAULT_ACCOUNT)
 }: Options = {}): FakeApi => {
   const db: FakeDb = { user: clone(user), password, account: account ? clone(account) : null };
+  const resetTokens = new Set([VALID_RESET_TOKEN]);
+  const authData = () => ({ user: db.user, token: 'test-token', tokenExpiration: 1 });
+  const checkPassword = (newPassword: string) => {
+    if (newPassword.length < 8 || !/[0-9]/.test(newPassword)) {
+      throw apiError(
+        'INVALID_PASSWORD',
+        'Password must be at least 8 characters and contain a number'
+      );
+    }
+  };
   const calls: Call[] = [];
   const failures = new Map<string, GraphQLError>();
 
@@ -174,11 +187,43 @@ export const createFakeApi = ({
   const rootValue = {
     tokenFindUser: () => db.user,
     account: () => requireAccount(),
+    // Messages and codes as the real API sends them
     login: ({ email, password: attempt }: Args) => {
-      if (email !== db.user.email || attempt !== db.password) {
-        throw apiError('INVALID_CREDENTIALS', 'Incorrect email or password');
+      if (email !== db.user.email) {
+        throw apiError('USER_EMAIL_NOT_FOUND', "We couldn't find a user with that email address");
       }
-      return { user: db.user, token: 'test-token', tokenExpiration: 1 };
+      if (attempt !== db.password) throw apiError('INVALID_CREDENTIALS', 'Password is incorrect');
+      return authData();
+    },
+    // Replaces the fake's one user with the new one, who has no account until setup
+    registerAndLogin: ({ user: input }: Args) => {
+      if (input.email === db.user.email) {
+        throw apiError('USER_EXISTS', 'Account with that email address already exists');
+      }
+      checkPassword(input.password);
+      db.user = {
+        id: 'user-new',
+        email: input.email,
+        firstName: input.firstName,
+        surname: input.surname
+      };
+      db.password = input.password;
+      db.account = null;
+      return authData();
+    },
+    requestPasswordReset: () => ({ success: true }),
+    passwordResetTokenValid: ({ token }: Args) => resetTokens.has(token),
+    resetPassword: ({ token, password: newPassword }: Args) => {
+      if (!resetTokens.has(token)) {
+        throw apiError(
+          'PASSWORD_RESET_TOKEN_INVALID',
+          'This password reset link is invalid or has expired'
+        );
+      }
+      checkPassword(newPassword);
+      resetTokens.delete(token);
+      db.password = newPassword;
+      return authData();
     }
   };
 

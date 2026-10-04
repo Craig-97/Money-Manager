@@ -15,6 +15,15 @@ export const isSessionError = (error: unknown) => {
   return error.errors.some(e => e.extensions?.code === 'UNAUTHENTICATED');
 };
 
+/*
+ * The API's message for a GraphQL error. Anything else, such as no connection, gets the fallback
+ * rather than the browser's technical message.
+ */
+export const getApiErrorMessage = (
+  error: unknown,
+  fallback = "Couldn't reach Money Manager. Check your connection and try again."
+) => (CombinedGraphQLErrors.is(error) ? (error.errors[0]?.message ?? fallback) : fallback);
+
 /* The message to show for an error, without Apollo's prefixes */
 export const getErrorMessage = (error: unknown, fallback = 'Something went wrong') => {
   if (CombinedGraphQLErrors.is(error)) return error.errors[0]?.message ?? fallback;

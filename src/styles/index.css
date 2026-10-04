@@ -12,8 +12,10 @@
 
   /* Breakpoints are in rem so they follow the browser's text size; px values at the default 16px.
      md (Tailwind's 48rem = 768px): the mobile layout hands over to the desktop one.
+     split (61.25rem = 980px): the sign in and register screens show the brand panel beside the form.
      wide (68.8125rem = 1101px): the sidebar expands from the icon rail by default.
      Keep in step with src/constants/media.ts. */
+  --breakpoint-split: 61.25rem;
   --breakpoint-wide: 68.8125rem;
 
   --animate-fade-in: fade-in 0.12s ease-out;

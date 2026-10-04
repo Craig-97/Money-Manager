@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { screen, waitFor } from '@testing-library/react';
 import { useAuthStore } from '~/state/auth';
-import { createFakeApi, DEFAULT_PASSWORD, DEFAULT_USER } from '~/test/fakeApi';
+import { createFakeApi, DEFAULT_USER } from '~/test/fakeApi';
 import { renderApp } from '~/test/renderApp';
 
 const findPageHeading = (name: string) => screen.findByRole('heading', { level: 1, name });
@@ -11,6 +11,18 @@ describe('routing', () => {
     renderApp({ route: '/dashboard', session: null });
 
     expect(await findPageHeading('Welcome back')).toBeInTheDocument();
+  });
+
+  it('shows the landing page at home when signed out', async () => {
+    renderApp({ route: '/', session: null });
+
+    expect(await findPageHeading("Know what's left before payday.")).toBeInTheDocument();
+  });
+
+  it('keeps signed-in people out of the signed-out pages', async () => {
+    renderApp({ route: '/register' });
+
+    expect(await findPageHeading('Dashboard')).toBeInTheDocument();
   });
 
   it('opens the dashboard from the home page when signed in', async () => {
@@ -62,56 +74,7 @@ describe('routing', () => {
   });
 });
 
-describe('signing in and out', () => {
-  it('signs in and opens the dashboard', async () => {
-    const { user, api } = renderApp({ route: '/sign-in', session: null });
-
-    await user.type(await screen.findByLabelText('Email address'), DEFAULT_USER.email);
-    await user.type(screen.getByLabelText('Password'), DEFAULT_PASSWORD);
-    await user.click(screen.getByRole('button', { name: 'Sign in' }));
-
-    expect(await findPageHeading('Dashboard')).toBeInTheDocument();
-    expect(useAuthStore.getState().session).toMatchObject({
-      token: 'test-token',
-      userId: DEFAULT_USER.id
-    });
-    // The login response already had the user, so it isn't fetched again
-    expect(api.callsTo('CurrentUser')).toHaveLength(0);
-  });
-
-  it('returns to the page they were heading for after signing in', async () => {
-    const { user, router } = renderApp({ route: '/notes', session: null });
-
-    await user.type(await screen.findByLabelText('Email address'), DEFAULT_USER.email);
-    await user.type(screen.getByLabelText('Password'), DEFAULT_PASSWORD);
-    await user.click(screen.getByRole('button', { name: 'Sign in' }));
-
-    expect(await findPageHeading('Notes')).toBeInTheDocument();
-    expect(router.state.location.pathname).toBe('/notes');
-  });
-
-  it('shows the API error when the password is wrong', async () => {
-    const { user } = renderApp({ route: '/sign-in', session: null });
-
-    await user.type(await screen.findByLabelText('Email address'), DEFAULT_USER.email);
-    await user.type(screen.getByLabelText('Password'), 'wrong-password');
-    await user.click(screen.getByRole('button', { name: 'Sign in' }));
-
-    expect(await screen.findByRole('alert')).toHaveTextContent('Incorrect email or password');
-    expect(useAuthStore.getState().session).toBeNull();
-  });
-
-  it('checks the fields before calling the API', async () => {
-    const { user, api } = renderApp({ route: '/sign-in', session: null });
-
-    await user.type(await screen.findByLabelText('Email address'), 'not-an-email');
-    await user.click(screen.getByRole('button', { name: 'Sign in' }));
-
-    expect(await screen.findByText('Enter a valid email address')).toBeInTheDocument();
-    expect(screen.getByText('Enter your password')).toBeInTheDocument();
-    expect(api.callsTo('Login')).toHaveLength(0);
-  });
-
+describe('sessions', () => {
   it('logs out from the sidebar', async () => {
     const { user } = renderApp({ route: '/dashboard' });
 

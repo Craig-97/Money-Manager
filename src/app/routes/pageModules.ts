@@ -6,7 +6,11 @@ export const pageModules = {
   notes: () => import('~/pages/Notes'),
   profile: () => import('~/pages/Profile'),
   setup: () => import('~/pages/Setup'),
-  signIn: () => import('~/pages/SignIn')
+  landing: () => import('~/pages/Landing'),
+  signIn: () => import('~/pages/SignIn'),
+  register: () => import('~/pages/Register'),
+  forgotPassword: () => import('~/pages/ForgotPassword'),
+  resetPassword: () => import('~/pages/ResetPassword')
 } as const;
 
 export type PageName = keyof typeof pageModules;

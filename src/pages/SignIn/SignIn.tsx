@@ -1,108 +1,143 @@
-import { CircleAlert } from 'lucide-react';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { BrandMark } from '~/components/ui/BrandMark';
+import { Plus } from 'lucide-react';
+import { AuthAlternative } from '~/components/auth/AuthAlternative';
+import { authErrorLinkClasses, authInputBoxClasses } from '~/components/auth/authClasses';
+import { AuthField, authErrorId } from '~/components/auth/AuthField';
+import { AuthHeading } from '~/components/auth/AuthHeading';
+import { AuthLayout } from '~/components/auth/AuthLayout';
+import { HeroCard } from '~/components/auth/HeroCard';
+import { FieldError } from '~/components/form/FieldError';
+import { PasswordInput } from '~/components/form/PasswordInput';
+import { TextInput } from '~/components/form/TextInput';
+import { ArrowRightIcon } from '~/components/icons';
 import { Button } from '~/components/ui/Button';
-import { getErrorMessage } from '~/lib/errors';
+import { PageLink } from '~/components/ui/PageLink';
+import { ROUTES } from '~/constants';
 import { useAuthStore } from '~/state/auth';
-import { SignInField } from './components';
-import { SignInValues, useSignIn } from './hooks';
+import { SignInPanel } from './components';
+import { useSignInForm } from './hooks';
 
-const schema = z.object({
-  email: z.email('Enter a valid email address'),
-  password: z.string().min(1, 'Enter your password')
-});
-
-// TODO(phase 3): replaced by the designed sign in screen. This one only gets you into the app.
 export const SignIn = () => {
-  const signIn = useSignIn();
+  const { register, onSubmit, errors, isSubmitting } = useSignInForm();
   const sessionExpired = useAuthStore(s => s.endReason === 'expired');
 
-  const {
-    register,
-    handleSubmit,
-    setError,
-    formState: { errors, isSubmitting }
-  } = useForm<SignInValues>({
-    resolver: zodResolver(schema),
-    defaultValues: { email: '', password: '' }
-  });
-
-  const onSubmit = async (values: SignInValues) => {
-    try {
-      await signIn(values);
-    } catch (error) {
-      setError('root', { message: getErrorMessage(error, 'Sign in failed. Please try again.') });
-    }
-  };
-
   return (
-    <main className="flex min-h-dvh items-center justify-center px-4 py-10">
-      <div className="flex w-full max-w-[420px] flex-col gap-7">
-        <div className="flex items-center gap-2.5">
-          <BrandMark />
-          <span className="text-base font-extrabold tracking-[-0.02em]">Money Manager</span>
+    <AuthLayout panel={<SignInPanel />} back={{ page: 'landing', to: ROUTES.home, label: 'Home' }}>
+      <HeroCard className="items-end justify-between">
+        <div>
+          <p className="text-xs font-semibold text-hero-muted">Free to spend</p>
+          <p className="mt-1 num text-[28px] font-extrabold tracking-[-0.05em]">£9,185.00</p>
         </div>
-
-        <div className="flex flex-col gap-2">
-          <h1 className="text-[32px] leading-[1.05] font-extrabold tracking-[-0.045em]">
-            Welcome back
-          </h1>
-          <p className="text-[15px] leading-normal font-medium text-muted">
-            Sign in to pick up where you left off.
-          </p>
+        <div className="text-right">
+          <p className="text-xs font-semibold text-hero-muted">Next payday</p>
+          <p className="mt-1 num text-base font-extrabold">28 days</p>
         </div>
+      </HeroCard>
 
-        {sessionExpired ? (
-          <p
-            role="status"
-            className="rounded-2xl border border-border bg-surface px-4 py-3 text-sm font-medium">
-            Your session has expired. Sign in again to carry on.
-          </p>
-        ) : null}
+      <AuthHeading title="Welcome back">Sign in to pick up where you left off.</AuthHeading>
 
-        <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-[18px]">
-          <SignInField
+      {sessionExpired ? (
+        <p
+          role="status"
+          className="rounded-[20px] border border-border bg-surface px-4 py-3.5 text-sm font-semibold md:mt-7">
+          Your session has expired. Sign in again to carry on.
+        </p>
+      ) : null}
+
+      <form noValidate onSubmit={onSubmit} className="flex flex-col gap-[18px] md:mt-9 md:gap-5">
+        <AuthField
+          id="email"
+          label="Email address"
+          error={
+            errors.email ? (
+              <>
+                {errors.email.message}{' '}
+                {errors.email.type === 'notFound' ? (
+                  <PageLink page="register" to={ROUTES.register} className={authErrorLinkClasses}>
+                    Create an account
+                  </PageLink>
+                ) : null}
+              </>
+            ) : null
+          }>
+          <TextInput
             id="email"
-            label="Email address"
             type="email"
+            size="lg"
             autoComplete="username"
             inputMode="email"
             placeholder="you@example.com"
-            error={errors.email?.message}
+            boxClassName={authInputBoxClasses}
+            invalid={!!errors.email}
+            aria-describedby={errors.email ? authErrorId('email') : undefined}
             {...register('email')}
           />
-          <SignInField
+        </AuthField>
+
+        <AuthField
+          id="password"
+          label="Password"
+          labelEnd={
+            <PageLink
+              page="forgotPassword"
+              to={ROUTES.forgotPassword}
+              className="-mr-3 inline-flex h-11 items-center rounded-full px-3 text-[13px] font-bold text-accent-text transition-colors hover:bg-hover hover:text-text md:-mr-4 md:px-4">
+              Forgot password?
+            </PageLink>
+          }
+          error={
+            errors.password ? (
+              <>
+                {errors.password.message}{' '}
+                {errors.password.type === 'wrong' ? (
+                  <PageLink
+                    page="forgotPassword"
+                    to={ROUTES.forgotPassword}
+                    className={authErrorLinkClasses}>
+                    Reset your password
+                  </PageLink>
+                ) : null}
+              </>
+            ) : null
+          }>
+          <PasswordInput
             id="password"
-            label="Password"
-            type="password"
+            size="lg"
             autoComplete="current-password"
             placeholder="Your password"
-            error={errors.password?.message}
+            boxClassName={authInputBoxClasses}
+            invalid={!!errors.password}
+            aria-describedby={errors.password ? authErrorId('password') : undefined}
             {...register('password')}
           />
+        </AuthField>
 
-          {errors.root ? (
-            <p
-              role="alert"
-              className="flex items-start gap-2 text-[13px] leading-[1.4] font-semibold text-expense">
-              <CircleAlert size={16} className="mt-px shrink-0" aria-hidden="true" />
-              {errors.root.message}
-            </p>
-          ) : null}
+        {errors.root ? (
+          <FieldError id="sign-in-error" size="md" alert className="mt-0">
+            {errors.root.message}
+          </FieldError>
+        ) : null}
 
-          <Button
-            type="submit"
-            variant="accent"
-            size="xl"
-            loading={isSubmitting}
-            loadingText="Signing in…"
-            className="mt-1.5 w-full">
-            Sign in
-          </Button>
-        </form>
-      </div>
-    </main>
+        <Button
+          type="submit"
+          variant="accent"
+          size="xl"
+          loading={isSubmitting}
+          loadingText="Signing in…"
+          className="mt-1.5 w-full md:mt-2">
+          Sign in
+          <ArrowRightIcon size={18} className="hidden md:block" />
+        </Button>
+      </form>
+
+      <AuthAlternative
+        icon={Plus}
+        title="New to Money Manager?"
+        description="Set up your first payday cycle in a few minutes."
+        page="register"
+        to={ROUTES.register}
+        label="Create account"
+        mobileLabel="Create an account"
+      />
+    </AuthLayout>
   );
 };
