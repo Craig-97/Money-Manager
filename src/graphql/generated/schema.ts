@@ -432,7 +432,7 @@ export type PaydayResponse = {
   success: Maybe<Scalars['Boolean']['output']>;
 };
 
-export type PaydayType = 'LAST_DAY' | 'LAST_FRIDAY' | 'SET_DAY' | 'SET_WEEKDAY';
+export type PaydayType = 'LAST_DAY' | 'LAST_WEEKDAY' | 'SET_DAY' | 'SET_WEEKDAY';
 
 export type PaymentFrequency = 'ANNUALLY' | 'BIWEEKLY' | 'MONTHLY' | 'QUARTERLY' | 'WEEKLY';
 

@@ -13,7 +13,7 @@ export const PAY_FREQUENCY = {
 
 export const PAYDAY_TYPE = {
   LAST_DAY: 'LAST_DAY',
-  LAST_FRIDAY: 'LAST_FRIDAY',
+  LAST_WEEKDAY: 'LAST_WEEKDAY',
   SET_DAY: 'SET_DAY',
   SET_WEEKDAY: 'SET_WEEKDAY'
 } as const satisfies { [K in PaydayType]: K };
@@ -30,12 +30,12 @@ export const PAYDAY_TYPE_OPTIONS = {
   WEEKLY: [{ value: PAYDAY_TYPE.SET_WEEKDAY }],
   RECURRING: [
     { value: PAYDAY_TYPE.LAST_DAY },
-    { value: PAYDAY_TYPE.LAST_FRIDAY },
+    { value: PAYDAY_TYPE.LAST_WEEKDAY },
     { value: PAYDAY_TYPE.SET_WEEKDAY }
   ],
   DEFAULT: [
     { value: PAYDAY_TYPE.LAST_DAY },
-    { value: PAYDAY_TYPE.LAST_FRIDAY },
+    { value: PAYDAY_TYPE.LAST_WEEKDAY },
     { value: PAYDAY_TYPE.SET_DAY }
   ]
 } as const;

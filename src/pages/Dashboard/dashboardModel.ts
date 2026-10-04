@@ -1,5 +1,5 @@
 import { daysBetween, PaydayConfig } from '~/lib/dates';
-import { PayCycle } from '~/lib/payday';
+import { PayCycle, WEEKDAYS } from '~/lib/payday';
 import { formatShortDate, isInCycle, Payment } from '~/lib/payments';
 
 export type PaymentTab = 'upcoming' | 'recurring' | 'oneOff';
@@ -68,11 +68,18 @@ const PAY_FREQUENCY: Record<PaydayConfig['frequency'], string> = {
   ANNUAL: 'Yearly'
 };
 
-const PAYDAY_RULE: Record<PaydayConfig['type'], string> = {
-  LAST_DAY: 'last working day',
-  LAST_FRIDAY: 'last Friday',
-  SET_DAY: 'set day',
-  SET_WEEKDAY: 'set weekday'
+const paydayRule = ({ type, weekday }: PaydayConfig) => {
+  const day = WEEKDAYS.find(item => item.value === weekday)?.long;
+  switch (type) {
+    case 'LAST_DAY':
+      return 'last working day';
+    case 'LAST_WEEKDAY':
+      return `last ${day ?? 'Friday'}`;
+    case 'SET_DAY':
+      return 'set day';
+    case 'SET_WEEKDAY':
+      return 'set weekday';
+  }
 };
 
 const REGION: Record<string, string> = {
@@ -84,7 +91,7 @@ const REGION: Record<string, string> = {
 /* "Monthly · last Friday · Scotland bank holidays" */
 export const paydayText = (payday: PaydayConfig | null | undefined) => {
   if (!payday) return 'Monthly · last working day';
-  const parts = [PAY_FREQUENCY[payday.frequency], PAYDAY_RULE[payday.type]];
+  const parts = [PAY_FREQUENCY[payday.frequency], paydayRule(payday)];
   if (payday.bankHolidayRegion) parts.push(`${REGION[payday.bankHolidayRegion]} bank holidays`);
   return parts.join(' · ');
 };
@@ -92,7 +99,7 @@ export const paydayText = (payday: PaydayConfig | null | undefined) => {
 /* "Paid monthly · last Friday" */
 export const paidText = (payday: PaydayConfig | null | undefined) =>
   payday
-    ? `Paid ${PAY_FREQUENCY[payday.frequency].toLowerCase()} · ${PAYDAY_RULE[payday.type]}`
+    ? `Paid ${PAY_FREQUENCY[payday.frequency].toLowerCase()} · ${paydayRule(payday)}`
     : 'Paid monthly · last working day';
 
 /* What the cycle bar's tooltip says about a day */

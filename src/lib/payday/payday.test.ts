@@ -16,11 +16,39 @@ const cycle = (config: PaydayConfig, today: string, holidays = NO_HOLIDAYS) => {
 
 describe('getPayCycle', () => {
   it('runs from the last payday to the next for last-Friday pay', () => {
-    expect(cycle({ frequency: 'MONTHLY', type: 'LAST_FRIDAY' }, '2026-10-02')).toEqual({
+    expect(
+      cycle({ frequency: 'MONTHLY', type: 'LAST_WEEKDAY', weekday: 'FRIDAY' }, '2026-10-02')
+    ).toEqual({
       start: '2026-09-25',
       end: '2026-10-30',
       isPayday: false
     });
+  });
+
+  it('finds the last Thursday of the month', () => {
+    // Last Thursdays: 24 Sep, 29 Oct (the 31st is a Saturday), 26 Nov 2026
+    const config: PaydayConfig = {
+      frequency: 'MONTHLY',
+      type: 'LAST_WEEKDAY',
+      weekday: 'THURSDAY'
+    };
+    expect(cycle(config, '2026-10-02')).toEqual({
+      start: '2026-09-24',
+      end: '2026-10-29',
+      isPayday: false
+    });
+    expect(cycle(config, '2026-10-29')).toMatchObject({ start: '2026-10-29', isPayday: true });
+    expect(cycle(config, '2026-10-30').end).toBe('2026-11-26');
+  });
+
+  it('uses the last day itself when it is the chosen weekday', () => {
+    // 30 Apr 2026 is a Thursday
+    const config: PaydayConfig = {
+      frequency: 'MONTHLY',
+      type: 'LAST_WEEKDAY',
+      weekday: 'THURSDAY'
+    };
+    expect(cycle(config, '2026-04-10').end).toBe('2026-04-30');
   });
 
   it('moves a last working day off the weekend', () => {
@@ -33,9 +61,13 @@ describe('getPayCycle', () => {
 
   it('moves payday off a bank holiday to the working day before', () => {
     const holidays = new Set(['2026-12-25']);
-    expect(cycle({ frequency: 'MONTHLY', type: 'LAST_FRIDAY' }, '2026-12-01', holidays).end).toBe(
-      '2026-12-24'
-    );
+    expect(
+      cycle(
+        { frequency: 'MONTHLY', type: 'LAST_WEEKDAY', weekday: 'FRIDAY' },
+        '2026-12-01',
+        holidays
+      ).end
+    ).toBe('2026-12-24');
   });
 
   it('uses the end of shorter months for a set day', () => {
@@ -46,7 +78,9 @@ describe('getPayCycle', () => {
   });
 
   it('knows when today is payday, with the cycle running to the next one', () => {
-    expect(cycle({ frequency: 'MONTHLY', type: 'LAST_FRIDAY' }, '2026-10-30')).toEqual({
+    expect(
+      cycle({ frequency: 'MONTHLY', type: 'LAST_WEEKDAY', weekday: 'FRIDAY' }, '2026-10-30')
+    ).toEqual({
       start: '2026-10-30',
       end: '2026-11-27',
       isPayday: true

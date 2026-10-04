@@ -59,7 +59,9 @@ describe('payday form', () => {
 
   it('describes the plan', () => {
     expect(paydayPlan(payday)).toBe('Paid monthly · the 15th');
-    expect(paydayPlan({ ...payday, type: 'LAST_FRIDAY' })).toBe('Paid monthly · last Friday');
+    expect(paydayPlan({ ...payday, type: 'LAST_WEEKDAY', weekday: 'FRIDAY' })).toBe(
+      'Paid monthly · last Friday'
+    );
     expect(
       paydayPlan({ ...payday, frequency: 'WEEKLY', type: 'SET_WEEKDAY', weekday: 'THURSDAY' })
     ).toBe('Paid weekly · Thursdays');
@@ -69,7 +71,7 @@ describe('payday form', () => {
 describe('paydayPreview', () => {
   it('shows the next three paydays and which a bank holiday moved', () => {
     const preview = paydayPreview(
-      { frequency: 'MONTHLY', type: 'LAST_FRIDAY' },
+      { frequency: 'MONTHLY', type: 'LAST_WEEKDAY', weekday: 'FRIDAY' },
       new Set(['2026-12-25']),
       new Date(2026, 9, 4)
     );

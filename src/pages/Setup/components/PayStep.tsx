@@ -21,6 +21,7 @@ import {
   REGIONS,
   ruleDescription,
   RULES,
+  usesWeekday,
   WEEKDAYS
 } from '../setupModel';
 import {
@@ -157,7 +158,7 @@ export const PayStep = ({ setup, errors, nextPaydays }: PayStepProps) => {
           </div>
         ) : null}
 
-        {values.rule === 'SET_WEEKDAY' ? (
+        {usesWeekday(values.rule) ? (
           <div role="group" aria-label="Weekday" className="mt-4 flex flex-wrap gap-2">
             {WEEKDAYS.map(weekday => (
               <button

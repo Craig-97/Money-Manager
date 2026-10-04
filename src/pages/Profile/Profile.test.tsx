@@ -85,6 +85,23 @@ describe('profile', () => {
     ]);
   });
 
+  it('saves pay on the last Thursday of the month', async () => {
+    const { user, api } = renderProfile();
+    const payday = await section('Payday');
+
+    await user.click(within(payday).getByRole('radio', { name: /Last weekday/ }));
+    await user.click(within(payday).getByRole('button', { name: 'Thursday' }));
+    await user.click(within(payday).getByRole('button', { name: 'Save changes' }));
+
+    expect(await screen.findByText('Payday settings saved')).toBeInTheDocument();
+    expect(api.callsTo('EditPayday')).toEqual([
+      {
+        id: 'payday-1',
+        payday: expect.objectContaining({ type: 'LAST_WEEKDAY', weekday: 'THURSDAY' })
+      }
+    ]);
+  });
+
   it('shows what a new balance means before saving it', async () => {
     const { user, api } = renderProfile();
     const balances = await section('Balances');

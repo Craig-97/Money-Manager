@@ -18,7 +18,10 @@ export const MORE_FREQUENCIES: PayFrequency[] = ['QUARTERLY', 'BIANNUAL', 'ANNUA
 
 export const RULES: Record<PaydayType, { title: string; description: string }> = {
   LAST_DAY: { title: 'Last working day', description: 'The final weekday of the month' },
-  LAST_FRIDAY: { title: 'Last Friday', description: 'The last Friday of the month' },
+  LAST_WEEKDAY: {
+    title: 'Last weekday',
+    description: 'The last Monday–Friday of your choice each month'
+  },
   SET_DAY: { title: 'Set day', description: 'The same date every month' },
   SET_WEEKDAY: { title: 'Set weekday', description: 'The same day of the week' }
 };
@@ -27,12 +30,16 @@ export const RULES: Record<PaydayType, { title: string; description: string }> =
 export const allowedRules = (frequency: PayFrequency): PaydayType[] => {
   if (frequency === 'WEEKLY') return ['SET_WEEKDAY'];
   if (frequency === 'FORTNIGHTLY' || frequency === 'FOUR_WEEKLY') {
-    return ['LAST_DAY', 'LAST_FRIDAY', 'SET_WEEKDAY'];
+    return ['LAST_DAY', 'LAST_WEEKDAY', 'SET_WEEKDAY'];
   }
-  return ['LAST_DAY', 'LAST_FRIDAY', 'SET_DAY'];
+  return ['LAST_DAY', 'LAST_WEEKDAY', 'SET_DAY'];
 };
 
+/* Rules where a weekday is chosen */
+export const usesWeekday = (rule: PaydayType) => rule === 'SET_WEEKDAY' || rule === 'LAST_WEEKDAY';
+
 export const ruleDescription = (rule: PaydayType, frequency: PayFrequency) => {
+  if (rule === 'LAST_WEEKDAY') return 'Pick the weekday below';
   if (rule !== 'SET_WEEKDAY') return RULES[rule].description;
   return frequency === 'WEEKLY' ? 'The same day each week' : 'Pick the weekday below';
 };

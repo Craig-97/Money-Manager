@@ -72,7 +72,7 @@ describe('monthRows', () => {
     net: 2600,
     income: 3600,
     afterPayday: false,
-    payday: { frequency: 'MONTHLY', type: 'LAST_FRIDAY' },
+    payday: { frequency: 'MONTHLY', type: 'LAST_WEEKDAY', weekday: 'FRIDAY' },
     holidays: new Set(['2026-12-25'])
   });
 

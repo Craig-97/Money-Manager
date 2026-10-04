@@ -84,7 +84,9 @@ type Mutation {
   createRecurringPayment(input: CreateRecurringPaymentInput!): RecurringPaymentResponse!
   updateRecurringPayment(id: ID!, input: UpdateRecurringPaymentInput!): RecurringPaymentResponse!
   deleteRecurringPayment(id: ID!): RecurringPaymentResponse!
-  batchUpdateRecurringPayments(input: [BatchUpdateRecurringPaymentInput!]!): BatchRecurringPaymentResponse!
+  batchUpdateRecurringPayments(
+    input: [BatchUpdateRecurringPaymentInput!]!
+  ): BatchRecurringPaymentResponse!
   batchDeleteRecurringPayments(ids: [ID!]!): BatchDeleteResponse!
   createNote(note: NoteInput!): NoteResponse!
   editNote(id: ID!, note: NoteInput!): NoteResponse!
@@ -385,7 +387,7 @@ enum PayFrequency {
 
 enum PaydayType {
   LAST_DAY
-  LAST_FRIDAY
+  LAST_WEEKDAY
   SET_DAY
   SET_WEEKDAY
 }

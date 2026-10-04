@@ -45,13 +45,17 @@ const toWorkingDay = (date: Date, holidays: BankHolidays) => {
   return day;
 };
 
+/* The last given weekday (0 = Sunday) on or before the last day of a month */
+const lastWeekdayOf = (lastDay: Date, weekday: number) =>
+  addDays(lastDay, -((lastDay.getDay() - weekday + 7) % 7));
+
 /* The payday rule applied to one month, before moving off weekends and bank holidays */
 const paydayInMonth = (year: number, month: number, config: PaydayConfig) => {
   const lastDay = new Date(year, month + 1, 0);
 
   switch (config.type) {
-    case PAYDAY_TYPE.LAST_FRIDAY:
-      return addDays(lastDay, -((lastDay.getDay() + 2) % 7));
+    case PAYDAY_TYPE.LAST_WEEKDAY:
+      return lastWeekdayOf(lastDay, WEEKDAY_NUMBER[config.weekday ?? 'FRIDAY']);
     case PAYDAY_TYPE.SET_DAY:
       return new Date(year, month, Math.min(config.dayOfMonth ?? 1, lastDay.getDate()));
     default:

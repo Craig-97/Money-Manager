@@ -17,6 +17,7 @@ import {
   REGIONS,
   ruleDescription,
   RULES,
+  usesWeekday,
   WEEKDAYS
 } from '~/lib/payday';
 import { usePaydaySettings } from '../hooks';
@@ -128,7 +129,7 @@ export const PaydaySection = ({ account }: { account: Account }) => {
         </div>
       ) : null}
 
-      {values.rule === 'SET_WEEKDAY' ? (
+      {usesWeekday(values.rule) ? (
         <div role="group" aria-label="Weekday" className="flex flex-wrap gap-2">
           {WEEKDAYS.map(weekday => (
             <button

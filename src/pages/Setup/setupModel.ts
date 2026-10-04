@@ -11,7 +11,7 @@ import {
 } from '~/graphql/generated';
 import { addDays, parseIsoDate, PaydayConfig } from '~/lib/dates';
 import { parseMoney } from '~/lib/format';
-import { BankHolidays, getPayCycle } from '~/lib/payday';
+import { BankHolidays, getPayCycle, usesWeekday } from '~/lib/payday';
 import { occurrencesBetween, PER_MONTH } from '~/lib/payments';
 
 // Setup's answers. Amounts and dates are kept as typed until they're saved.
@@ -106,6 +106,7 @@ export {
   REGIONS,
   ruleDescription,
   RULES,
+  usesWeekday,
   WEEKDAYS
 } from '~/lib/payday';
 
@@ -133,7 +134,7 @@ export const paydayConfig = (values: SetupValues): PaydayConfig => ({
   frequency: values.frequency,
   type: values.rule,
   dayOfMonth: values.rule === 'SET_DAY' ? Number(values.dayOfMonth) : null,
-  weekday: values.rule === 'SET_WEEKDAY' ? values.weekday : null,
+  weekday: usesWeekday(values.rule) ? values.weekday : null,
   firstPayDate: values.frequency === 'MONTHLY' ? null : values.firstPayDate || null,
   bankHolidayRegion: values.region
 });

@@ -21,7 +21,7 @@ const demoAccount = (scenario: string | null): FakeAccount => {
   const payday =
     scenario === 'payday'
       ? { type: 'SET_DAY', dayOfMonth: today.getDate() }
-      : { type: 'LAST_FRIDAY', dayOfMonth: null };
+      : { type: 'LAST_WEEKDAY', weekday: 'FRIDAY', dayOfMonth: null };
 
   const account: FakeAccount = {
     id: 'account-1',

@@ -12,6 +12,7 @@ import {
   BankHolidays,
   getNextPaydays,
   PAY_FREQUENCY_LABELS,
+  usesWeekday,
   WEEKDAYS
 } from '~/lib/payday';
 
@@ -81,7 +82,7 @@ export const toPaydayConfig = (values: PaydayValues): PaydayConfig => ({
   frequency: values.frequency,
   type: values.rule,
   dayOfMonth: values.rule === 'SET_DAY' ? Number(values.dayOfMonth) : null,
-  weekday: values.rule === 'SET_WEEKDAY' ? values.weekday : null,
+  weekday: usesWeekday(values.rule) ? values.weekday : null,
   firstPayDate: values.frequency === 'MONTHLY' ? null : values.firstPayDate || null,
   bankHolidayRegion: values.region
 });
@@ -154,7 +155,7 @@ export const paydayPlan = (payday: PaydayFieldsFragment | null | undefined) => {
   const weekday = WEEKDAYS.find(day => day.value === values.weekday)?.long ?? 'Friday';
   const day: Record<PaydayType, string> = {
     LAST_DAY: 'last working day',
-    LAST_FRIDAY: 'last Friday',
+    LAST_WEEKDAY: `last ${weekday}`,
     SET_DAY: `the ${ordinal(Number(values.dayOfMonth) || 1)}`,
     SET_WEEKDAY: `${weekday}s`
   };

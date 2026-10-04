@@ -54,7 +54,9 @@ export const usePaydaySettings = (account: Account) => {
     errors: submitted ? errors : {},
     preview,
     saving,
-    isDirty: (Object.keys(values) as (keyof PaydayValues)[]).some(key => values[key] !== saved[key]),
+    isDirty: (Object.keys(values) as (keyof PaydayValues)[]).some(
+      key => values[key] !== saved[key]
+    ),
     save: () => void save()
   };
 };
