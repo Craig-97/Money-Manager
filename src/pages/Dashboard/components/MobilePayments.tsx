@@ -84,8 +84,7 @@ const MobileRow = ({ payment, dashboard }: { payment: Payment; dashboard: Dashbo
           <span
             className={cn(
               'block num text-[15px] font-extrabold',
-              payment.signedAmount < 0 ? 'text-expense' : 'text-income',
-              paid && 'line-through opacity-55'
+              payment.signedAmount < 0 ? 'text-expense' : 'text-income'
             )}>
             {formatPayment(payment.signedAmount)}
           </span>

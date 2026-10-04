@@ -153,8 +153,7 @@ const PaymentRow = ({ payment, dashboard }: RowProps) => {
         role="cell"
         className={cn(
           'text-right num text-[15px] font-extrabold',
-          payment.signedAmount < 0 ? 'text-expense' : 'text-income',
-          paid && 'line-through opacity-55'
+          payment.signedAmount < 0 ? 'text-expense' : 'text-income'
         )}>
         {formatPayment(payment.signedAmount)}
       </span>

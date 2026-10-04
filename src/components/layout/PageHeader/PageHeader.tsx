@@ -8,12 +8,14 @@ import { getInitials } from '~/lib/format';
 
 interface PageHeaderProps {
   title: string;
+  // A line under the title, shown on the desktop layout
+  description?: string;
   // Page actions, shown on the desktop layout
   actions?: ReactNode;
 }
 
 /* Today's date and the page title. On mobile the profile avatar sits on the right. */
-export const PageHeader = ({ title, actions }: PageHeaderProps) => {
+export const PageHeader = ({ title, description, actions }: PageHeaderProps) => {
   const { user } = useCurrentUser();
   const today = new Date();
   const name = user ? `${user.firstName} ${user.surname}` : '';
@@ -28,6 +30,9 @@ export const PageHeader = ({ title, actions }: PageHeaderProps) => {
         <h1 className="mt-0.5 text-[26px] font-extrabold tracking-[-0.035em] md:mt-1.5 md:text-4xl md:leading-[1.1]">
           {title}
         </h1>
+        {description ? (
+          <p className="mt-1.5 hidden text-[15px] text-muted md:block">{description}</p>
+        ) : null}
       </div>
       {actions ? <div className="hidden flex-wrap gap-2 md:flex">{actions}</div> : null}
       <Link
