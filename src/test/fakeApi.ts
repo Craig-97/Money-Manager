@@ -120,7 +120,8 @@ export const DEFAULT_ACCOUNT: FakeAccount = {
   id: 'account-1',
   bankBalance: 1000,
   monthlyIncome: 2500,
-  cycleStartedOn: null,
+  // Started today, so the payday prompt doesn't show unless a test asks for it
+  cycleStartedOn: apiDateFromToday(0),
   recurringPayments: [
     {
       id: 'recurring-1',
@@ -359,7 +360,7 @@ export const createFakeApi = ({
         id: 'account-new',
         bankBalance: input.bankBalance,
         monthlyIncome: input.monthlyIncome,
-        cycleStartedOn: null,
+        cycleStartedOn: apiDateFromToday(0),
         recurringPayments: [],
         oneOffPayments: [],
         notes: [],

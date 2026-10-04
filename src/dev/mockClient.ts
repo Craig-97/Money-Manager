@@ -27,7 +27,8 @@ const demoAccount = (scenario: string | null): FakeAccount => {
     id: 'account-1',
     bankBalance: scenario === 'overdrawn' ? 420 : 10000,
     monthlyIncome: 3600,
-    cycleStartedOn: null,
+    // The payday scenario hasn't started this cycle yet, so the prompt shows
+    cycleStartedOn: scenario === 'payday' ? null : fromToday(0),
     payday: {
       id: 'payday-1',
       frequency: 'MONTHLY',
@@ -58,7 +59,7 @@ const demoAccount = (scenario: string | null): FakeAccount => {
         type: 'EXPENSE',
         firstPaymentDate: fromToday(-247),
         lastPaymentDate: null,
-        nextDueDate: fromToday(scenario === 'payday' ? -2 : 26),
+        nextDueDate: fromToday(scenario === 'payday' ? -2 : 24),
         status: scenario === 'payday' ? 'PAID' : 'UNPAID'
       },
       {

@@ -56,3 +56,11 @@ export const MenuItem = ({
     {children}
   </DropdownMenu.Item>
 );
+
+/* A line between groups of items, e.g. before Delete */
+export const MenuSeparator = ({
+  className,
+  ...props
+}: ComponentProps<typeof DropdownMenu.Separator>) => (
+  <DropdownMenu.Separator className={cn('mx-2 my-1 h-px bg-border', className)} {...props} />
+);

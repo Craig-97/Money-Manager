@@ -1,29 +1,19 @@
 import { Navigate, Outlet } from 'react-router';
-import { FullPageLoader } from '~/components/feedback/FullPageLoader';
 import { ROUTES } from '~/constants';
 import { useAccountStatus } from '~/hooks/useAccountStatus';
 import { useCurrentUser } from '~/hooks/useCurrentUser';
-import { AccountLoadError } from './AccountLoadError';
 
 /*
  * Only for people who have finished setup; everyone else goes to setup. The user and account
- * requests are started together here so the app shell has both before it shows.
+ * requests start together here. While the account loads, or if it fails, the pages show their own
+ * skeleton or error inside the app shell.
  */
 export const RequireAccount = () => {
-  const account = useAccountStatus();
-  const user = useCurrentUser();
+  const { status } = useAccountStatus();
+  // Started alongside the account so the shell's user chip doesn't wait for it
+  useCurrentUser();
 
-  if (account.status === 'missing') return <Navigate to={ROUTES.setup} replace />;
-
-  if (account.status === 'error' || user.error) {
-    const retry = () => {
-      void account.refetch();
-      void user.refetch();
-    };
-    return <AccountLoadError onRetry={retry} />;
-  }
-
-  if (account.status === 'loading' || user.loading) return <FullPageLoader />;
+  if (status === 'missing') return <Navigate to={ROUTES.setup} replace />;
 
   return <Outlet />;
 };

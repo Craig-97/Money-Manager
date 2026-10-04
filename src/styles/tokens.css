@@ -28,6 +28,8 @@
   --on-accent: #ffffff;
   --hero-bg: var(--accent);
   --hero-text: #ffffff;
+  /* Text on the white chips inside the accent card */
+  --hero-ink: var(--accent);
   --hero-muted: rgb(255 255 255 / 0.78);
   --hero-chip: rgb(255 255 255 / 0.16);
   --pill-active-bg: #f2f4f7;
@@ -61,6 +63,7 @@
   --accent-text: color-mix(in srgb, var(--accent) 75%, #000000);
   --accent-soft: color-mix(in srgb, var(--accent) 14%, #ffffff);
   --hero-bg: #111318;
+  --hero-ink: #111318;
   --hero-muted: #b4b9c6;
   --hero-chip: #23262e;
   --pill-active-bg: #111318;

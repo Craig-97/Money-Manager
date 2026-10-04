@@ -3,6 +3,7 @@ import {
   PaymentFrequency,
   RecurringPaymentCategory
 } from '~/graphql/generated';
+import { formatDayMonth, formatShortDay } from '~/lib/dates';
 
 /* "HOME_MAINTENANCE" -> "Home maintenance" */
 export const categoryLabel = (category: string) => {
@@ -69,7 +70,6 @@ export const ONE_OFF_CATEGORIES: OneOffPaymentCategory[] = [
 ];
 
 const weekdayName = new Intl.DateTimeFormat('en-GB', { weekday: 'long' });
-const dayMonth = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short' });
 
 /* 1 -> "1st", 22 -> "22nd" */
 export const ordinal = (n: number) => {
@@ -91,27 +91,12 @@ export const scheduleText = (first: Date, frequency: PaymentFrequency, { lower =
     MONTHLY: `${lower ? 'monthly' : 'Monthly'} on the ${day}`,
     QUARTERLY: `${lower ? 'every' : 'Every'} 3 months on the ${day}`,
     ANNUALLY: lower
-      ? `every year on ${dayMonth.format(first)}`
-      : `Annually on ${dayMonth.format(first)}`
+      ? `every year on ${formatDayMonth(first)}`
+      : `Annually on ${formatDayMonth(first)}`
   };
   return text[frequency];
 };
 
-const shortDate = new Intl.DateTimeFormat('en-GB', {
-  weekday: 'short',
-  day: 'numeric',
-  month: 'short'
-});
-
-const shortDateWithYear = new Intl.DateTimeFormat('en-GB', {
-  weekday: 'short',
-  day: 'numeric',
-  month: 'short',
-  year: 'numeric'
-});
-
 /* "Fri 9 Oct", with the year when it isn't this year: "Thu 1 Jul 2027" */
 export const formatShortDate = (date: Date, today = new Date()) =>
-  (date.getFullYear() === today.getFullYear() ? shortDate : shortDateWithYear)
-    .format(date)
-    .replace(/,/g, '');
+  formatShortDay(date, { withYear: date.getFullYear() !== today.getFullYear() });

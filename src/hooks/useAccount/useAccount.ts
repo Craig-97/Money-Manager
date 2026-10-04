@@ -3,13 +3,19 @@ import { AccountDocument } from '~/graphql/generated';
 import { useAuthStore } from '~/state/auth';
 
 /*
- * The signed-in user's account. Only for pages behind RequireAccount, which has already loaded
- * it, so this reads from the cache and the account is always there.
+ * The signed-in user's account, for pages behind RequireAccount. It shares the guard's request,
+ * so this doesn't fetch again. `account` is null while it loads or if loading failed.
  */
 export const useAccount = () => {
   const userId = useAuthStore(s => s.session?.userId ?? '');
-  const { data } = useQuery(AccountDocument, { variables: { userId }, fetchPolicy: 'cache-only' });
+  const { data, error, refetch } = useQuery(AccountDocument, { variables: { userId } });
 
-  if (!data?.account) throw new Error('useAccount is only for pages behind RequireAccount');
-  return data.account;
+  return {
+    account: data?.account ?? null,
+    loading: !data && !error,
+    error,
+    retry: () => void refetch()
+  };
 };
+
+export type Account = NonNullable<ReturnType<typeof useAccount>['account']>;

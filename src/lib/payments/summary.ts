@@ -1,7 +1,7 @@
 import { addDays, daysBetween, isSameDay, toIsoDate } from '~/lib/dates';
 import { PayCycle } from '~/lib/payday';
 import { Payment } from './payments';
-import { occurrencesBetween, PER_MONTH } from './recurrence';
+import { PER_MONTH } from './recurrence';
 
 /*
  * Whether a payment belongs to this pay cycle: due before the next payday and not skipped.
@@ -100,52 +100,5 @@ export const cycleDays = (cycle: PayCycle, today: Date, payments: Payment[]): Cy
     if (index === total) kind = 'payday';
 
     return { date, kind, payments: dayPayments, isLastPayday: index === 0 };
-  });
-};
-
-export interface CalendarDay {
-  date: Date;
-  inCycle: boolean;
-  isToday: boolean;
-  isPayday: boolean;
-  // Every payment falling on the day, paid or not
-  payments: Payment[];
-}
-
-/*
- * The calendar to payday: whole Monday-to-Sunday weeks from this week to payday's week, with each
- * recurring payment shown on every date it falls on.
- */
-export const calendarDays = (cycle: PayCycle, today: Date, payments: Payment[]): CalendarDay[] => {
-  const from = addDays(today, -((today.getDay() + 6) % 7));
-  const to = addDays(cycle.end, (7 - cycle.end.getDay()) % 7);
-
-  const onDay = new Map<string, Payment[]>();
-  const add = (date: Date, payment: Payment) => {
-    const key = toIsoDate(date);
-    onDay.set(key, [...(onDay.get(key) ?? []), payment]);
-  };
-  for (const payment of payments) {
-    if (payment.kind === 'recurring') {
-      const schedule = {
-        firstPaymentDate: payment.firstPaymentDate,
-        frequency: payment.frequency,
-        lastPaymentDate: payment.lastPaymentDate
-      };
-      occurrencesBetween(schedule, from, to).forEach(date => add(date, payment));
-    } else if (payment.dueDate && payment.dueDate >= from && payment.dueDate <= to) {
-      add(payment.dueDate, payment);
-    }
-  }
-
-  return Array.from({ length: daysBetween(from, to) + 1 }, (_, index) => {
-    const date = addDays(from, index);
-    return {
-      date,
-      inCycle: date >= today && date <= cycle.end,
-      isToday: isSameDay(date, today),
-      isPayday: isSameDay(date, cycle.end),
-      payments: onDay.get(toIsoDate(date)) ?? []
-    };
   });
 };

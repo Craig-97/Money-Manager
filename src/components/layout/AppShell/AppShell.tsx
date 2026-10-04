@@ -1,5 +1,6 @@
 import { CSSProperties } from 'react';
 import { Outlet } from 'react-router';
+import { PaymentDialog } from '~/components/payments/PaymentDialog';
 import { Toaster } from '~/components/ui/Toaster';
 import { useSidebarMode } from '~/hooks/useSidebarMode';
 import { BottomNav } from '../BottomNav';
@@ -29,6 +30,8 @@ export const AppShell = () => {
         </div>
       </main>
       <BottomNav className="md:hidden" />
+      {/* Opened from any page, e.g. the mobile nav's add button */}
+      <PaymentDialog />
       {/* Above the mobile nav; on desktop, centred in the space beside the sidebar */}
       <Toaster className="bottom-[calc(104px+env(safe-area-inset-bottom))] md:bottom-[calc(24px+env(safe-area-inset-bottom))] md:left-[calc(var(--sidebar-w)+(100%-var(--sidebar-w))/2)]" />
     </div>

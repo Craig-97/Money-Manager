@@ -1,3 +1,5 @@
+import { formatShortDay } from './format';
+
 // Calendar dates in forms are 'YYYY-MM-DD' strings, read and written in local time so a picked day
 // never shifts across midnight.
 
@@ -21,12 +23,5 @@ export const toIsoDate = (date: Date) =>
     String(date.getDate()).padStart(2, '0')
   ].join('-');
 
-const shortDate = new Intl.DateTimeFormat('en-GB', {
-  weekday: 'short',
-  day: 'numeric',
-  month: 'short',
-  year: 'numeric'
-});
-
 /* "Fri 2 Oct 2026", as the design's date fields show it */
-export const formatPickerDate = (date: Date) => shortDate.format(date).replace(',', '');
+export const formatPickerDate = (date: Date) => formatShortDay(date, { withYear: true });

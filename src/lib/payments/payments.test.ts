@@ -4,7 +4,7 @@ import { toIsoDate } from '~/lib/dates';
 import { scheduleText } from './labels';
 import { toPayments } from './payments';
 import { nextOccurrence, occurrence } from './recurrence';
-import { calendarDays, cycleDays, summarise } from './summary';
+import { cycleDays, summarise } from './summary';
 
 const day = (iso: string) => {
   const [year, month, date] = iso.split('-').map(Number);
@@ -154,20 +154,6 @@ describe('cycleDays', () => {
     expect(days[14].kind).toBe('income'); // Shopping, Fri 9 Oct
     expect(days[25].kind).toBe('expense'); // Birthday, Tue 20 Oct
     expect(days[35].kind).toBe('payday');
-  });
-});
-
-describe('calendarDays', () => {
-  it("covers whole weeks from this week to payday's week", () => {
-    const days = calendarDays(cycle, today, designPayments);
-
-    expect(toIsoDate(days[0].date)).toBe('2026-09-28');
-    expect(toIsoDate(days.at(-1)!.date)).toBe('2026-11-01');
-    const nov2 = calendarDays({ ...cycle, end: day('2026-11-02') }, today, designPayments).find(
-      d => toIsoDate(d.date) === '2026-11-02'
-    );
-    // Recurring payments show on every date they fall on, not just the next
-    expect(nov2?.payments.map(p => p.name)).toEqual(['Netflix']);
   });
 });
 

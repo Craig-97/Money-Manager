@@ -91,6 +91,7 @@
   --color-on-accent: var(--on-accent);
   --color-hero-bg: var(--hero-bg);
   --color-hero-text: var(--hero-text);
+  --color-hero-ink: var(--hero-ink);
   --color-hero-muted: var(--hero-muted);
   --color-hero-chip: var(--hero-chip);
   --color-pill-active-bg: var(--pill-active-bg);
