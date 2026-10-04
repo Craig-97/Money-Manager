@@ -1,0 +1,11 @@
+# What login, register and reset password return: everything needed to start a session
+fragment AuthSession on AuthData {
+  token
+  tokenExpiration
+  user {
+    id
+    email
+    firstName
+    surname
+  }
+}

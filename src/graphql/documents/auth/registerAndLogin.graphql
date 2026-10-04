@@ -1,0 +1,6 @@
+# Creates the user and signs them in. Fails with USER_EXISTS if the email is taken.
+mutation RegisterAndLogin($user: UserInput!) {
+  registerAndLogin(user: $user) {
+    ...AuthSession
+  }
+}

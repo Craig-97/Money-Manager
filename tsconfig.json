@@ -30,6 +30,7 @@
   "include": [
     "src",
     "scripts",
-    "codegen.ts"
+    "codegen.ts",
+    "graphql.config.ts"
   ]
 }
