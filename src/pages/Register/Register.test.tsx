@@ -40,7 +40,7 @@ describe('register', () => {
 
     await user.click(screen.getByRole('button', { name: 'Set up your account' }));
 
-    expect(await findPageHeading('First-time setup')).toBeInTheDocument();
+    expect(await findPageHeading('When do you get paid?')).toBeInTheDocument();
     expect(useAuthStore.getState().session).toMatchObject({ userId: 'user-new' });
   });
 

@@ -35,7 +35,7 @@ describe('routing', () => {
   it('sends people without an account to setup', async () => {
     renderApp({ route: '/dashboard', api: createFakeApi({ account: null }) });
 
-    expect(await findPageHeading('First-time setup')).toBeInTheDocument();
+    expect(await findPageHeading('When do you get paid?')).toBeInTheDocument();
   });
 
   it('keeps people who finished setup out of setup', async () => {

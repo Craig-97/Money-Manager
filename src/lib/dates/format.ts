@@ -1,18 +1,15 @@
-const UK_TIMEZONE = 'Europe/London';
-
+// Dates in the app are local, so they're formatted in the browser's own time zone
 const longDate = new Intl.DateTimeFormat('en-GB', {
   weekday: 'long',
   day: 'numeric',
   month: 'long',
-  year: 'numeric',
-  timeZone: UK_TIMEZONE
+  year: 'numeric'
 });
 
 const longDateNoYear = new Intl.DateTimeFormat('en-GB', {
   weekday: 'long',
   day: 'numeric',
-  month: 'long',
-  timeZone: UK_TIMEZONE
+  month: 'long'
 });
 
 /* "Friday 2 October 2026", or "Friday 2 October" without the year */
