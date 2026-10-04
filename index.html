@@ -17,7 +17,14 @@
         try {
           var saved = JSON.parse(localStorage.getItem('mm-prefs') || 'null');
           var prefs = (saved && saved.state) || {};
-          var theme = prefs.theme === 'light' ? 'light' : 'dark';
+          var theme =
+            prefs.theme === 'system'
+              ? matchMedia('(prefers-color-scheme: light)').matches
+                ? 'light'
+                : 'dark'
+              : prefs.theme === 'light'
+                ? 'light'
+                : 'dark';
           var accent = /^#[0-9a-f]{6}$/i.test(prefs.accent || '') ? prefs.accent : '#7C3AED';
           var root = document.documentElement;
           root.dataset.theme = theme;

@@ -1,11 +1,12 @@
 import { useEffect } from 'react';
-import { useShallow } from 'zustand/react/shallow';
 import { applyPrefs } from '~/lib/theme';
 import { usePrefsStore } from '~/state/prefs';
+import { useTheme } from '../useTheme';
 
-/* Keeps the document's theme and accent in step with the saved preferences */
+/* Keeps the document's theme and accent in step with the saved preferences and the device */
 export const usePrefsSync = () => {
-  const { theme, accent } = usePrefsStore(useShallow(s => ({ theme: s.theme, accent: s.accent })));
+  const { theme } = useTheme();
+  const accent = usePrefsStore(s => s.accent);
 
   useEffect(() => {
     applyPrefs({ theme, accent });

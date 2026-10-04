@@ -9,8 +9,7 @@ export const fieldLabelClasses = 'mb-1.5 block text-xs font-bold text-muted';
 export const helpClasses = 'mt-2 text-[13px] leading-normal font-medium text-muted';
 
 // A pill that stays pressed when picked, e.g. a pay frequency
-export const choiceClasses =
-  'inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-full border-[1.5px] border-border-strong bg-surface px-[18px] text-sm font-bold text-muted transition-colors hover:bg-hover hover:text-text aria-pressed:border-transparent aria-pressed:bg-pill-active-bg aria-pressed:text-pill-active-text';
+export { choiceClasses } from '~/components/form/fieldClasses';
 
 // The rounded card each step sits in
 export const stepCardClasses = 'rounded-[28px] border border-border bg-surface';

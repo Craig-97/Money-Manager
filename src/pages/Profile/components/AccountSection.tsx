@@ -1,0 +1,99 @@
+import { LogOut, Trash2, TriangleAlert } from 'lucide-react';
+import { Button } from '~/components/ui/Button';
+import { Modal } from '~/components/ui/Modal';
+import { useDeleteAccount } from '../hooks';
+import { SECTION_ICONS } from './ProfileNav';
+import { helpClasses, SettingsTile } from './SettingsTile';
+
+const dangerButton =
+  'border-expense bg-transparent font-bold text-expense hover:bg-expense-bg max-md:w-full';
+
+const DeleteAccountDialog = ({ remove }: { remove: ReturnType<typeof useDeleteAccount> }) => (
+  <Modal
+    open={remove.open}
+    onOpenChange={remove.setOpen}
+    title="Delete your account?"
+    footer={
+      <div className="flex flex-col-reverse gap-2 md:flex-row md:justify-end">
+        <Button size="lg" onClick={() => remove.setOpen(false)}>
+          Keep my account
+        </Button>
+        <Button
+          variant="danger"
+          size="lg"
+          onClick={remove.confirm}
+          loading={remove.deleting}
+          loadingText="Deleting…"
+          className="font-bold">
+          <Trash2 size={16} aria-hidden="true" />
+          Delete everything
+        </Button>
+      </div>
+    }>
+    <div className="flex flex-col gap-3 px-5 pb-2 md:px-7">
+      <p className="text-sm leading-relaxed text-muted">
+        This permanently deletes your account, payments and notes. You won’t be able to get them
+        back.
+      </p>
+      {remove.error ? (
+        <p role="alert" className="text-sm font-bold text-expense">
+          {remove.error}
+        </p>
+      ) : null}
+    </div>
+  </Modal>
+);
+
+/* Log out, and deleting the account */
+export const AccountSection = ({ email, onLogout }: { email: string; onLogout: () => void }) => {
+  const remove = useDeleteAccount();
+
+  return (
+    <SettingsTile
+      id="account"
+      icon={SECTION_ICONS.account}
+      title="Account"
+      description="Your session on this device."
+      mobileDescription={`Signed in as ${email}`}>
+      <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 pt-1">
+        <div className="hidden min-w-0 flex-col gap-1 md:flex">
+          <span className="text-[13px] font-bold">Log out</span>
+          <p className={helpClasses}>
+            Signed in as <span className="font-bold text-text">{email}</span> on this device.
+          </p>
+        </div>
+        <Button
+          onClick={onLogout}
+          className="border-border-strong bg-transparent font-bold max-md:h-12 max-md:w-full">
+          <LogOut size={16} aria-hidden="true" />
+          Log out
+        </Button>
+      </div>
+      <section
+        aria-labelledby="danger-title"
+        className="overflow-hidden rounded-[20px] border border-expense/35 max-md:bg-expense-bg">
+        <div className="flex items-center gap-2.5 px-[18px] py-3 text-expense md:bg-expense-bg md:px-6">
+          <TriangleAlert size={16} aria-hidden="true" />
+          <h3
+            id="danger-title"
+            className="text-[15px] font-extrabold md:text-xs md:tracking-[0.08em] md:uppercase">
+            Danger zone
+          </h3>
+        </div>
+        <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3.5 px-[18px] pb-[18px] md:px-6 md:py-[22px]">
+          <div className="flex max-w-[560px] min-w-0 flex-col gap-1">
+            <span className="hidden text-[13px] font-bold md:block">Delete account</span>
+            <p className={`${helpClasses} max-md:text-text`}>
+              Permanently deletes your account, payments and notes. This can’t be undone.
+            </p>
+          </div>
+          <Button onClick={() => remove.setOpen(true)} className={dangerButton}>
+            <Trash2 size={16} aria-hidden="true" />
+            Delete account
+          </Button>
+        </div>
+      </section>
+      <DeleteAccountDialog remove={remove} />
+    </SettingsTile>
+  );
+};

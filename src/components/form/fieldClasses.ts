@@ -29,3 +29,7 @@ export const fieldClasses = ({
 /* The input inside a field box: no border or background of its own */
 export const bareInputClasses =
   'h-full w-full min-w-0 flex-1 border-0 bg-transparent p-0 text-text outline-none placeholder:text-faint';
+
+/* A pill that stays pressed when picked, e.g. a pay frequency or weekday */
+export const choiceClasses =
+  'inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-full border-[1.5px] border-border-strong bg-surface px-[18px] text-sm font-bold text-muted transition-colors hover:bg-hover hover:text-text aria-pressed:border-transparent aria-pressed:bg-pill-active-bg aria-pressed:text-pill-active-text';

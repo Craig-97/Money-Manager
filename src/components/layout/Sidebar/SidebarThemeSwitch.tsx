@@ -1,9 +1,9 @@
 import { Sun } from 'lucide-react';
-import { useShallow } from 'zustand/react/shallow';
 import { MoonIcon } from '~/components/icons';
 import { Tooltip } from '~/components/ui/Tooltip';
+import { useTheme } from '~/hooks/useTheme';
 import { cn } from '~/lib/cn';
-import { Theme, usePrefsStore } from '~/state/prefs';
+import { Theme } from '~/state/prefs';
 
 const THEMES: { value: Theme; label: string }[] = [
   { value: 'light', label: 'Light' },
@@ -15,13 +15,8 @@ const ThemeIcon = ({ theme, size }: { theme: Theme; size: number }) =>
 
 /* A Light / Dark switch, or a single toggle button in the icon rail */
 export const SidebarThemeSwitch = ({ expanded }: { expanded: boolean }) => {
-  const { theme, setTheme, toggleTheme } = usePrefsStore(
-    useShallow(s => ({
-      theme: s.theme,
-      setTheme: s.setTheme,
-      toggleTheme: s.toggleTheme
-    }))
-  );
+  // With System chosen, the theme showing is the one marked
+  const { theme, setTheme, toggleTheme } = useTheme();
 
   if (!expanded) {
     const next: Theme = theme === 'dark' ? 'light' : 'dark';

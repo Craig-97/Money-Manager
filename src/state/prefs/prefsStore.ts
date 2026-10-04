@@ -2,16 +2,17 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 export type Theme = 'dark' | 'light';
+// What the person chose; system follows the device's light or dark setting
+export type ThemePreference = Theme | 'system';
 
 // The accents offered by the design; the first is the default
 export const ACCENTS = ['#7C3AED', '#3D6BF5', '#0F9F8F', '#E5484D'] as const;
 export const DEFAULT_ACCENT = ACCENTS[0];
 
 interface PrefsState {
-  theme: Theme;
+  theme: ThemePreference;
   accent: string;
-  setTheme: (theme: Theme) => void;
-  toggleTheme: () => void;
+  setTheme: (theme: ThemePreference) => void;
   setAccent: (accent: string) => void;
 }
 
@@ -23,7 +24,6 @@ export const usePrefsStore = create<PrefsState>()(
       theme: 'dark',
       accent: DEFAULT_ACCENT,
       setTheme: theme => set({ theme }),
-      toggleTheme: () => set(s => ({ theme: s.theme === 'dark' ? 'light' : 'dark' })),
       setAccent: accent => set({ accent })
     }),
     {
