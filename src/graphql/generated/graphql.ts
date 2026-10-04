@@ -48,7 +48,6 @@ export type AccountQuery = {
       dueDate: string;
       type: Types.PaymentType;
       category: Types.OneOffPaymentCategory;
-      paid: boolean;
     } | null> | null;
     notes: Array<{
       __typename: 'Note';
@@ -98,7 +97,6 @@ export type AccountFieldsFragment = {
     dueDate: string;
     type: Types.PaymentType;
     category: Types.OneOffPaymentCategory;
-    paid: boolean;
   } | null> | null;
   notes: Array<{
     __typename: 'Note';
@@ -154,7 +152,6 @@ export type CreateAccountMutation = {
         dueDate: string;
         type: Types.PaymentType;
         category: Types.OneOffPaymentCategory;
-        paid: boolean;
       } | null> | null;
       notes: Array<{
         __typename: 'Note';
@@ -181,6 +178,71 @@ export type EditAccountMutation = {
       id: string;
       bankBalance: number;
       monthlyIncome: number;
+    } | null;
+  };
+};
+
+export type MarkPaymentsPaidMutationVariables = Exact<{
+  input: Types.MarkPaymentsPaidInput;
+}>;
+
+export type MarkPaymentsPaidMutation = {
+  markPaymentsPaid: {
+    __typename: 'AccountResponse';
+    account: {
+      __typename: 'Account';
+      id: string;
+      bankBalance: number;
+      recurringPayments: Array<{
+        __typename: 'RecurringPayment';
+        id: string;
+        name: string;
+        amount: number;
+        category: Types.RecurringPaymentCategory;
+        frequency: Types.PaymentFrequency;
+        type: Types.PaymentType;
+        firstPaymentDate: string;
+        lastPaymentDate: string | null;
+        nextDueDate: string | null;
+        status: Types.PaymentStatus;
+      } | null> | null;
+      oneOffPayments: Array<{
+        __typename: 'OneOffPayment';
+        id: string;
+        name: string;
+        amount: number;
+        dueDate: string;
+        type: Types.PaymentType;
+        category: Types.OneOffPaymentCategory;
+      } | null> | null;
+    } | null;
+  };
+};
+
+export type MarkPaymentsUnpaidMutationVariables = Exact<{
+  input: Types.MarkPaymentsUnpaidInput;
+}>;
+
+export type MarkPaymentsUnpaidMutation = {
+  markPaymentsUnpaid: {
+    __typename: 'AccountResponse';
+    account: {
+      __typename: 'Account';
+      id: string;
+      bankBalance: number;
+      recurringPayments: Array<{
+        __typename: 'RecurringPayment';
+        id: string;
+        name: string;
+        amount: number;
+        category: Types.RecurringPaymentCategory;
+        frequency: Types.PaymentFrequency;
+        type: Types.PaymentType;
+        firstPaymentDate: string;
+        lastPaymentDate: string | null;
+        nextDueDate: string | null;
+        status: Types.PaymentStatus;
+      } | null> | null;
     } | null;
   };
 };
@@ -378,27 +440,6 @@ export type BatchDeleteRecurringPaymentsMutation = {
   batchDeleteRecurringPayments: { __typename: 'BatchDeleteResponse'; success: boolean };
 };
 
-export type BatchUpdateOneOffPaymentsMutationVariables = Exact<{
-  ids: Array<string | number> | string | number;
-  paid: boolean;
-}>;
-
-export type BatchUpdateOneOffPaymentsMutation = {
-  batchUpdateOneOffPayments: {
-    __typename: 'BatchUpdateOneOffPaymentResponse';
-    oneOffPayments: Array<{
-      __typename: 'OneOffPayment';
-      id: string;
-      name: string;
-      amount: number;
-      dueDate: string;
-      type: Types.PaymentType;
-      category: Types.OneOffPaymentCategory;
-      paid: boolean;
-    }>;
-  };
-};
-
 export type BatchUpdateRecurringPaymentsMutationVariables = Exact<{
   input: Array<Types.BatchUpdateRecurringPaymentInput> | Types.BatchUpdateRecurringPaymentInput;
 }>;
@@ -437,7 +478,6 @@ export type CreateOneOffPaymentMutation = {
       dueDate: string;
       type: Types.PaymentType;
       category: Types.OneOffPaymentCategory;
-      paid: boolean;
     } | null;
   };
 };
@@ -481,7 +521,6 @@ export type EditOneOffPaymentMutation = {
       dueDate: string;
       type: Types.PaymentType;
       category: Types.OneOffPaymentCategory;
-      paid: boolean;
     } | null;
   };
 };
@@ -494,7 +533,6 @@ export type OneOffPaymentFieldsFragment = {
   dueDate: string;
   type: Types.PaymentType;
   category: Types.OneOffPaymentCategory;
-  paid: boolean;
 };
 
 export type RecurringPaymentFieldsFragment = {
@@ -641,8 +679,7 @@ export const OneOffPaymentFieldsFragmentDoc = {
           { kind: 'Field', name: { kind: 'Name', value: 'amount' } },
           { kind: 'Field', name: { kind: 'Name', value: 'dueDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'type' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'category' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'paid' } }
+          { kind: 'Field', name: { kind: 'Name', value: 'category' } }
         ]
       }
     }
@@ -772,8 +809,7 @@ export const AccountFieldsFragmentDoc = {
           { kind: 'Field', name: { kind: 'Name', value: 'amount' } },
           { kind: 'Field', name: { kind: 'Name', value: 'dueDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'type' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'category' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'paid' } }
+          { kind: 'Field', name: { kind: 'Name', value: 'category' } }
         ]
       }
     },
@@ -913,8 +949,7 @@ export const AccountDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'amount' } },
           { kind: 'Field', name: { kind: 'Name', value: 'dueDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'type' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'category' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'paid' } }
+          { kind: 'Field', name: { kind: 'Name', value: 'category' } }
         ]
       }
     },
@@ -1085,8 +1120,7 @@ export const CreateAccountDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'amount' } },
           { kind: 'Field', name: { kind: 'Name', value: 'dueDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'type' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'category' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'paid' } }
+          { kind: 'Field', name: { kind: 'Name', value: 'category' } }
         ]
       }
     },
@@ -1225,6 +1259,205 @@ export const EditAccountDocument = {
     }
   ]
 } as unknown as DocumentNode<EditAccountMutation, EditAccountMutationVariables>;
+export const MarkPaymentsPaidDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'MarkPaymentsPaid' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'MarkPaymentsPaidInput' } }
+          }
+        }
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'markPaymentsPaid' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } }
+              }
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'account' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'bankBalance' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'recurringPayments' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'FragmentSpread',
+                              name: { kind: 'Name', value: 'RecurringPaymentFields' }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'oneOffPayments' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'FragmentSpread',
+                              name: { kind: 'Name', value: 'OneOffPaymentFields' }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'RecurringPaymentFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'RecurringPayment' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'amount' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'category' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'frequency' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'type' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'firstPaymentDate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'lastPaymentDate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'nextDueDate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'status' } }
+        ]
+      }
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'OneOffPaymentFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'OneOffPayment' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'amount' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'dueDate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'type' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'category' } }
+        ]
+      }
+    }
+  ]
+} as unknown as DocumentNode<MarkPaymentsPaidMutation, MarkPaymentsPaidMutationVariables>;
+export const MarkPaymentsUnpaidDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'MarkPaymentsUnpaid' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'MarkPaymentsUnpaidInput' } }
+          }
+        }
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'markPaymentsUnpaid' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } }
+              }
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'account' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'bankBalance' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'recurringPayments' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'FragmentSpread',
+                              name: { kind: 'Name', value: 'RecurringPaymentFields' }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'RecurringPaymentFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'RecurringPayment' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'amount' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'category' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'frequency' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'type' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'firstPaymentDate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'lastPaymentDate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'nextDueDate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'status' } }
+        ]
+      }
+    }
+  ]
+} as unknown as DocumentNode<MarkPaymentsUnpaidMutation, MarkPaymentsUnpaidMutationVariables>;
 export const StartPaydayCycleDocument = {
   kind: 'Document',
   definitions: [
@@ -1972,99 +2205,6 @@ export const BatchDeleteRecurringPaymentsDocument = {
   BatchDeleteRecurringPaymentsMutation,
   BatchDeleteRecurringPaymentsMutationVariables
 >;
-export const BatchUpdateOneOffPaymentsDocument = {
-  kind: 'Document',
-  definitions: [
-    {
-      kind: 'OperationDefinition',
-      operation: 'mutation',
-      name: { kind: 'Name', value: 'BatchUpdateOneOffPayments' },
-      variableDefinitions: [
-        {
-          kind: 'VariableDefinition',
-          variable: { kind: 'Variable', name: { kind: 'Name', value: 'ids' } },
-          type: {
-            kind: 'NonNullType',
-            type: {
-              kind: 'ListType',
-              type: {
-                kind: 'NonNullType',
-                type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } }
-              }
-            }
-          }
-        },
-        {
-          kind: 'VariableDefinition',
-          variable: { kind: 'Variable', name: { kind: 'Name', value: 'paid' } },
-          type: {
-            kind: 'NonNullType',
-            type: { kind: 'NamedType', name: { kind: 'Name', value: 'Boolean' } }
-          }
-        }
-      ],
-      selectionSet: {
-        kind: 'SelectionSet',
-        selections: [
-          {
-            kind: 'Field',
-            name: { kind: 'Name', value: 'batchUpdateOneOffPayments' },
-            arguments: [
-              {
-                kind: 'Argument',
-                name: { kind: 'Name', value: 'ids' },
-                value: { kind: 'Variable', name: { kind: 'Name', value: 'ids' } }
-              },
-              {
-                kind: 'Argument',
-                name: { kind: 'Name', value: 'paid' },
-                value: { kind: 'Variable', name: { kind: 'Name', value: 'paid' } }
-              }
-            ],
-            selectionSet: {
-              kind: 'SelectionSet',
-              selections: [
-                {
-                  kind: 'Field',
-                  name: { kind: 'Name', value: 'oneOffPayments' },
-                  selectionSet: {
-                    kind: 'SelectionSet',
-                    selections: [
-                      {
-                        kind: 'FragmentSpread',
-                        name: { kind: 'Name', value: 'OneOffPaymentFields' }
-                      }
-                    ]
-                  }
-                }
-              ]
-            }
-          }
-        ]
-      }
-    },
-    {
-      kind: 'FragmentDefinition',
-      name: { kind: 'Name', value: 'OneOffPaymentFields' },
-      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'OneOffPayment' } },
-      selectionSet: {
-        kind: 'SelectionSet',
-        selections: [
-          { kind: 'Field', name: { kind: 'Name', value: 'id' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'name' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'amount' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'dueDate' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'type' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'category' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'paid' } }
-        ]
-      }
-    }
-  ]
-} as unknown as DocumentNode<
-  BatchUpdateOneOffPaymentsMutation,
-  BatchUpdateOneOffPaymentsMutationVariables
->;
 export const BatchUpdateRecurringPaymentsDocument = {
   kind: 'Document',
   definitions: [
@@ -2215,8 +2355,7 @@ export const CreateOneOffPaymentDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'amount' } },
           { kind: 'Field', name: { kind: 'Name', value: 'dueDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'type' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'category' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'paid' } }
+          { kind: 'Field', name: { kind: 'Name', value: 'category' } }
         ]
       }
     }
@@ -2379,8 +2518,7 @@ export const EditOneOffPaymentDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'amount' } },
           { kind: 'Field', name: { kind: 'Name', value: 'dueDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'type' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'category' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'paid' } }
+          { kind: 'Field', name: { kind: 'Name', value: 'category' } }
         ]
       }
     }

@@ -37,7 +37,6 @@ const oneOff = (
   dueDate: apiDate('2026-10-09'),
   type: 'EXPENSE',
   category: 'OTHER',
-  paid: false,
   ...overrides
 });
 
@@ -123,23 +122,20 @@ describe('summarise', () => {
     expect(summary.dueToday?.name).toBe('Netflix');
   });
 
-  it('leaves out paid and skipped payments, and paid ones from earlier cycles', () => {
+  it('leaves out paid and skipped payments but keeps overdue ones', () => {
     const payments = toPayments(
       {
         recurringPayments: [
           recurring({ name: 'Paid', status: 'PAID', nextDueDate: apiDate('2026-10-10') }),
           recurring({ name: 'Skipped', status: 'SKIPPED', nextDueDate: apiDate('2026-10-10') })
         ],
-        oneOffPayments: [
-          oneOff({ name: 'Old', paid: true, dueDate: apiDate('2026-09-01') }),
-          oneOff({ name: 'Overdue', dueDate: apiDate('2026-09-01') })
-        ]
+        oneOffPayments: [oneOff({ name: 'Overdue', dueDate: apiDate('2026-09-01') })]
       },
       today
     );
     const result = summarise({ payments, bankBalance: 100, monthlyIncome: 0, cycle, today });
 
-    expect(result.inCycle.map(p => p.name)).toEqual(['Paid', 'Overdue']);
+    expect(result.inCycle.map(p => p.name)).toEqual(['Overdue']);
     expect(result.upcomingNet).toBe(-10);
   });
 });

@@ -82,7 +82,8 @@ export const toOneOffPayment = (payment: OneOffPaymentFieldsFragment): OneOffPay
   type: payment.type,
   category: payment.category,
   dueDate: fromApiDate(payment.dueDate),
-  state: payment.paid ? 'paid' : 'unpaid'
+  // Paying a one-off deletes it, so the ones left are always still to pay
+  state: 'unpaid'
 });
 
 interface AccountPayments {

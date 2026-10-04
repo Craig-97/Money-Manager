@@ -2,12 +2,13 @@ import { useMutation } from '@apollo/client/react';
 import {
   BatchDeleteOneOffPaymentsDocument,
   BatchDeleteRecurringPaymentsDocument,
-  BatchUpdateOneOffPaymentsDocument,
-  BatchUpdateRecurringPaymentsDocument,
+  MarkPaymentsPaidDocument,
+  MarkPaymentsUnpaidDocument,
   UpdateRecurringPaymentDocument
 } from '~/graphql/generated';
 import { removeFromAccount } from '~/lib/apollo';
 import { getApiErrorMessage } from '~/lib/errors';
+import { formatMoney } from '~/lib/format';
 import { Payment } from '~/lib/payments';
 import { showToast } from '~/state/toast';
 
@@ -18,34 +19,58 @@ const idsOf = (payments: readonly Payment[], kind: Payment['kind']) =>
 const describe = (payments: readonly Payment[]) =>
   payments.length === 1 ? payments[0].name : `${payments.length} payments`;
 
+/* "· £20.00 off your balance" for a single payment, so it's clear where the money went */
+const balanceNote = (payments: readonly Payment[], paid: boolean) => {
+  if (payments.length !== 1) return '';
+  const [payment] = payments;
+  const off = paid === (payment.type === 'EXPENSE');
+  return ` · ${formatMoney(payment.amount)} ${off ? 'off' : 'added to'} your balance`;
+};
+
 const showError = (error: unknown) =>
   showToast({ message: getApiErrorMessage(error, "Couldn't save that. Try again.") });
 
-/* Marking payments paid, skipping and deleting them, with a toast to say it's done */
+/* Paying, skipping and deleting payments, with a toast to say it's done */
 export const usePaymentActions = (accountId: string) => {
-  const [updateRecurring] = useMutation(BatchUpdateRecurringPaymentsDocument);
-  const [updateOneOffs] = useMutation(BatchUpdateOneOffPaymentsDocument);
-  const [updateOneRecurring] = useMutation(UpdateRecurringPaymentDocument);
+  const [markPaid] = useMutation(MarkPaymentsPaidDocument);
+  const [markUnpaid] = useMutation(MarkPaymentsUnpaidDocument);
+  const [updateRecurring] = useMutation(UpdateRecurringPaymentDocument);
   const [deleteRecurring] = useMutation(BatchDeleteRecurringPaymentsDocument);
   const [deleteOneOffs] = useMutation(BatchDeleteOneOffPaymentsDocument);
 
-  /* Marks payments paid, or unpaid again. Paid recurring payments stay paid until the next cycle. */
+  /*
+   * Marks payments paid, taking them off the bank balance as v1 did: recurring payments stay
+   * paid until the next cycle, one-offs are done with and deleted. Marking a recurring payment
+   * unpaid again puts its amount back.
+   */
   const setPaid = async (payments: readonly Payment[], paid: boolean) => {
     if (!payments.length) return;
-    const recurring = idsOf(payments, 'recurring');
-    const oneOffs = idsOf(payments, 'oneOff');
     try {
-      await Promise.all([
-        recurring.length
-          ? updateRecurring({
-              variables: {
-                input: recurring.map(id => ({ id, status: paid ? 'PAID' : 'UNPAID' }))
-              }
-            })
-          : null,
-        oneOffs.length ? updateOneOffs({ variables: { ids: oneOffs, paid } }) : null
-      ]);
-      showToast({ message: `${describe(payments)} marked as ${paid ? 'paid' : 'unpaid'}` });
+      if (paid) {
+        const oneOffIds = idsOf(payments, 'oneOff');
+        await markPaid({
+          variables: {
+            input: {
+              accountId,
+              recurringPaymentIds: idsOf(payments, 'recurring'),
+              oneOffPaymentIds: oneOffIds
+            }
+          },
+          // The returned account lists them without the deleted one-offs; drop the entities too
+          update: cache => {
+            for (const id of oneOffIds)
+              cache.evict({ id: cache.identify({ __typename: 'OneOffPayment', id }) });
+            cache.gc();
+          }
+        });
+      } else {
+        await markUnpaid({
+          variables: { input: { accountId, recurringPaymentIds: idsOf(payments, 'recurring') } }
+        });
+      }
+      showToast({
+        message: `${describe(payments)} marked as ${paid ? 'paid' : 'unpaid'}${balanceNote(payments, paid)}`
+      });
     } catch (error) {
       showError(error);
     }
@@ -54,7 +79,7 @@ export const usePaymentActions = (accountId: string) => {
   /* Leaves a recurring payment out of this cycle; it comes back on its next date */
   const skip = async (payment: Payment) => {
     try {
-      await updateOneRecurring({ variables: { id: payment.id, input: { status: 'SKIPPED' } } });
+      await updateRecurring({ variables: { id: payment.id, input: { status: 'SKIPPED' } } });
       showToast({ message: `${payment.name} skipped this cycle` });
     } catch (error) {
       showError(error);

@@ -69,13 +69,6 @@ export type BatchRecurringPaymentResponse = {
   success: Scalars['Boolean']['output'];
 };
 
-export type BatchUpdateOneOffPaymentResponse = {
-  __typename: 'BatchUpdateOneOffPaymentResponse';
-  oneOffPayments: Array<OneOffPayment>;
-  success: Scalars['Boolean']['output'];
-  updatedCount: Scalars['Int']['output'];
-};
-
 export type BatchUpdateRecurringPaymentInput = {
   amount?: InputMaybe<Scalars['Float']['input']>;
   category?: InputMaybe<RecurringPaymentCategory>;
@@ -136,13 +129,23 @@ export type EditAccountInput = {
   monthlyIncome?: InputMaybe<Scalars['Float']['input']>;
 };
 
+export type MarkPaymentsPaidInput = {
+  accountId: Scalars['ID']['input'];
+  oneOffPaymentIds: Array<Scalars['ID']['input']>;
+  recurringPaymentIds: Array<Scalars['ID']['input']>;
+};
+
+export type MarkPaymentsUnpaidInput = {
+  accountId: Scalars['ID']['input'];
+  recurringPaymentIds: Array<Scalars['ID']['input']>;
+};
+
 export type Mutation = {
   __typename: 'Mutation';
   batchDeleteBills: BatchDeleteResponse;
   batchDeleteOneOffPayments: BatchOneOffPaymentResponse;
   batchDeleteRecurringPayments: BatchDeleteResponse;
   batchUpdateBills: BatchBillResponse;
-  batchUpdateOneOffPayments: BatchUpdateOneOffPaymentResponse;
   batchUpdateRecurringPayments: BatchRecurringPaymentResponse;
   changePassword: UserResponse;
   createAccount: AccountResponse;
@@ -166,6 +169,8 @@ export type Mutation = {
   editOneOffPayment: OneOffPaymentResponse;
   editPayday: PaydayResponse;
   editUser: UserResponse;
+  markPaymentsPaid: AccountResponse;
+  markPaymentsUnpaid: AccountResponse;
   registerAndLogin: AuthData;
   requestPasswordReset: PasswordResetResponse;
   resetPassword: AuthData;
@@ -188,11 +193,6 @@ export type MutationBatchDeleteRecurringPaymentsArgs = {
 
 export type MutationBatchUpdateBillsArgs = {
   input: BatchBillUpdateInput;
-};
-
-export type MutationBatchUpdateOneOffPaymentsArgs = {
-  ids: Array<Scalars['ID']['input']>;
-  paid: Scalars['Boolean']['input'];
 };
 
 export type MutationBatchUpdateRecurringPaymentsArgs = {
@@ -290,6 +290,14 @@ export type MutationEditUserArgs = {
   user: UserInput;
 };
 
+export type MutationMarkPaymentsPaidArgs = {
+  input: MarkPaymentsPaidInput;
+};
+
+export type MutationMarkPaymentsUnpaidArgs = {
+  input: MarkPaymentsUnpaidInput;
+};
+
 export type MutationRegisterAndLoginArgs = {
   user?: InputMaybe<UserInput>;
 };
@@ -348,7 +356,6 @@ export type OneOffPayment = {
   dueDate: Scalars['String']['output'];
   id: Scalars['ID']['output'];
   name: Scalars['String']['output'];
-  paid: Scalars['Boolean']['output'];
   type: PaymentType;
 };
 
@@ -380,7 +387,6 @@ export type OneOffPaymentInput = {
   category?: InputMaybe<OneOffPaymentCategory>;
   dueDate?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
-  paid?: InputMaybe<Scalars['Boolean']['input']>;
   type?: InputMaybe<PaymentType>;
 };
 

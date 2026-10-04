@@ -94,15 +94,15 @@ const Chooser = () => {
 };
 
 /* Where an existing payment stands, with shortcuts to mark it paid or skip it */
-const StatusStrip = ({
-  payment,
-  today,
-  accountId
-}: {
+interface StatusStripProps {
   payment: Payment;
   today: Date;
   accountId: string;
-}) => {
+  // Paying a one-off deletes it, which ends the edit
+  onDone: () => void;
+}
+
+const StatusStrip = ({ payment, today, accountId, onDone }: StatusStripProps) => {
   const { setPaid, skip } = usePaymentActions(accountId);
   const days = payment.dueDate ? daysBetween(today, payment.dueDate) : null;
   const dueText =
@@ -142,7 +142,10 @@ const StatusStrip = ({
         ) : null}
         <Button
           variant="solid"
-          onClick={() => void setPaid([payment], !paid)}
+          onClick={() => {
+            void setPaid([payment], !paid);
+            if (payment.kind === 'oneOff') onDone();
+          }}
           className="flex-1 text-[13px] md:flex-none md:px-3.5">
           <Check size={15} strokeWidth={2.5} aria-hidden="true" />
           {paid ? 'Mark as unpaid' : 'Mark as paid'}
@@ -390,7 +393,9 @@ export const PaymentDialog = () => {
       }>
       {target ? (
         <>
-          {payment ? <StatusStrip payment={payment} today={today} accountId={account.id} /> : null}
+          {payment ? (
+            <StatusStrip payment={payment} today={today} accountId={account.id} onDone={close} />
+          ) : null}
           <FormBody form={form} kind={kind} />
         </>
       ) : (

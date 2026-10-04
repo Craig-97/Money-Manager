@@ -82,8 +82,7 @@ const demoAccount = (scenario: string | null): FakeAccount => {
         amount: 10,
         dueDate: fromToday(7),
         type: 'INCOME',
-        category: 'OTHER',
-        paid: false
+        category: 'OTHER'
       },
       {
         id: 'birthday',
@@ -91,8 +90,7 @@ const demoAccount = (scenario: string | null): FakeAccount => {
         amount: 75,
         dueDate: fromToday(scenario === 'payday' ? -10 : 18),
         type: 'EXPENSE',
-        category: 'GIFT',
-        paid: false
+        category: 'GIFT'
       }
     ],
     notes: [

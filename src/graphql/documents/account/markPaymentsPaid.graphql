@@ -1,0 +1,16 @@
+# Takes the payments off the bank balance: recurring ones are marked paid for the cycle and
+# one-offs are deleted. The account comes back with its new balance and lists.
+mutation MarkPaymentsPaid($input: MarkPaymentsPaidInput!) {
+  markPaymentsPaid(input: $input) {
+    account {
+      id
+      bankBalance
+      recurringPayments {
+        ...RecurringPaymentFields
+      }
+      oneOffPayments {
+        ...OneOffPaymentFields
+      }
+    }
+  }
+}

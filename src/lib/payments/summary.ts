@@ -4,14 +4,11 @@ import { Payment } from './payments';
 import { PER_MONTH } from './recurrence';
 
 /*
- * Whether a payment belongs to this pay cycle: due before the next payday and not skipped.
- * Payments already paid in an earlier cycle drop off, while overdue unpaid ones stay.
+ * Whether a payment is still to pay this cycle: due before the next payday, overdue ones
+ * included, and not already paid or skipped. Paying it takes it off the bank balance, as v1 did.
  */
 export const isInCycle = (payment: Payment, cycle: PayCycle) =>
-  payment.dueDate !== null &&
-  payment.dueDate < cycle.end &&
-  payment.state !== 'skipped' &&
-  !(payment.state === 'paid' && payment.dueDate < cycle.start);
+  payment.dueDate !== null && payment.dueDate < cycle.end && payment.state === 'unpaid';
 
 const roundPence = (amount: number) => Math.round(amount * 100) / 100;
 

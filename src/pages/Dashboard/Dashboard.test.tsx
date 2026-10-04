@@ -29,8 +29,7 @@ const account = (overrides: Partial<FakeAccount> = {}): FakeAccount => ({
       amount: 50,
       dueDate: apiDateFromToday(0),
       type: 'INCOME',
-      category: 'OTHER',
-      paid: false
+      category: 'OTHER'
     }
   ],
   ...overrides
@@ -61,14 +60,30 @@ describe('dashboard', () => {
 
     await user.click(within(banner).getByRole('button', { name: 'Mark as paid' }));
 
-    await waitFor(() =>
-      expect(api.callsTo('BatchUpdateRecurringPayments')).toEqual([
-        { input: [{ id: 'netflix', status: 'PAID' }] }
-      ])
-    );
-    expect(await screen.findByText('Netflix marked as paid')).toBeInTheDocument();
-    // Paid, so it no longer counts against what's free to spend
+    expect(
+      await screen.findByText('Netflix marked as paid · £20.00 off your balance')
+    ).toBeInTheDocument();
+    expect(api.callsTo('MarkPaymentsPaid')).toEqual([
+      { input: { accountId: 'account-1', recurringPaymentIds: ['netflix'], oneOffPaymentIds: [] } }
+    ]);
+    // It comes off the balance and out of what's still due, so free to spend stays the same
+    expect(within(freeToSpend()).getByText('£980.00')).toBeInTheDocument();
+    expect(within(freeToSpend()).getByText('£1,030.00')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Edit Netflix' })).not.toBeInTheDocument();
+  });
+
+  it('settles a one-off payment, updating the balance and removing it', async () => {
+    const { user, api } = renderDashboard();
+
+    await user.click(await screen.findByRole('button', { name: 'More actions for Refund' }));
+    await user.click(await screen.findByRole('menuitem', { name: 'Mark as paid' }));
+
+    expect(
+      await screen.findByText('Refund marked as paid · £50.00 added to your balance')
+    ).toBeInTheDocument();
+    expect(api.db.account?.oneOffPayments).toEqual([]);
     expect(within(freeToSpend()).getByText('£1,050.00')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Edit Refund' })).not.toBeInTheDocument();
   });
 
   it('adds a one-off payment', async () => {

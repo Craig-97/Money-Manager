@@ -1,0 +1,12 @@
+# Puts recurring payments back to unpaid, returning their amounts to the bank balance
+mutation MarkPaymentsUnpaid($input: MarkPaymentsUnpaidInput!) {
+  markPaymentsUnpaid(input: $input) {
+    account {
+      id
+      bankBalance
+      recurringPayments {
+        ...RecurringPaymentFields
+      }
+    }
+  }
+}

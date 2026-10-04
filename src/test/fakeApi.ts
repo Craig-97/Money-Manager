@@ -27,7 +27,6 @@ export interface FakeOneOffPayment {
   dueDate: string;
   type: 'INCOME' | 'EXPENSE';
   category: string;
-  paid: boolean;
 }
 
 export interface FakeNote {
@@ -144,8 +143,7 @@ export const DEFAULT_ACCOUNT: FakeAccount = {
       amount: 200,
       dueDate: apiDate('2099-06-15'),
       type: 'EXPENSE',
-      category: 'TRAVEL',
-      paid: false
+      category: 'TRAVEL'
     }
   ],
   notes: [
@@ -287,8 +285,7 @@ export const createFakeApi = ({
     amount: input.amount,
     dueDate: fromInput(input.dueDate),
     type: input.type,
-    category: input.category,
-    paid: input.paid ?? false
+    category: input.category
   });
 
   const rootValue = {
@@ -404,6 +401,35 @@ export const createFakeApi = ({
       current.cycleStartedOn = fromInput(input.payday);
       return { account: current, success: true };
     },
+    // As the API: paid payments come off the balance (income goes on); one-offs are deleted
+    markPaymentsPaid: ({ input }: Args) => {
+      const current = requireAccount();
+      const change = (p: { amount: number; type: string }) =>
+        p.type === 'INCOME' ? p.amount : -p.amount;
+      for (const id of input.recurringPaymentIds) {
+        const payment = findRecurring(id);
+        if (payment.status === 'PAID') continue;
+        current.bankBalance += change(payment);
+        payment.status = 'PAID';
+      }
+      for (const id of input.oneOffPaymentIds) current.bankBalance += change(findOneOff(id));
+      current.oneOffPayments = current.oneOffPayments.filter(
+        p => !input.oneOffPaymentIds.includes(p.id)
+      );
+      current.bankBalance = Math.round(current.bankBalance * 100) / 100;
+      return { account: current, success: true };
+    },
+    markPaymentsUnpaid: ({ input }: Args) => {
+      const current = requireAccount();
+      for (const id of input.recurringPaymentIds) {
+        const payment = findRecurring(id);
+        if (payment.status !== 'PAID') continue;
+        current.bankBalance += payment.type === 'INCOME' ? -payment.amount : payment.amount;
+        payment.status = 'UNPAID';
+      }
+      current.bankBalance = Math.round(current.bankBalance * 100) / 100;
+      return { account: current, success: true };
+    },
     editPayday: ({ payday: input }: Args) => {
       const current = requireAccount();
       current.payday = {
@@ -451,11 +477,6 @@ export const createFakeApi = ({
         ...(input.dueDate ? { dueDate: fromInput(input.dueDate) } : {})
       });
       return { oneOffPayment: payment, success: true };
-    },
-    batchUpdateOneOffPayments: ({ ids, paid }: Args) => {
-      const payments = ids.map(findOneOff);
-      payments.forEach((payment: FakeOneOffPayment) => (payment.paid = paid));
-      return { oneOffPayments: payments, success: true, updatedCount: payments.length };
     },
     batchDeleteOneOffPayments: ({ ids }: Args) => {
       const current = requireAccount();
