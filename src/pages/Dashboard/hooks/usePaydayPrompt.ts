@@ -47,12 +47,11 @@ export const usePaydayPrompt = ({
   const due = needsNewCycle(cycle, account.cycleStartedOn);
   const [view, setView] = useState<'open' | 'closed' | 'done'>(due ? 'open' : 'closed');
 
-  // Paid, skipped or past-due recurring payments belong to the cycle that just ended
+  // Recurring payments dated before payday belong to the cycle that just ended. Anything due
+  // from payday on is already in the new cycle, paid or not, so it stays where it is.
   const toReset = payments.filter(
     (payment): payment is RecurringPayment =>
-      payment.kind === 'recurring' &&
-      payment.dueDate !== null &&
-      (payment.state !== 'unpaid' || payment.dueDate < today)
+      payment.kind === 'recurring' && payment.dueDate !== null && payment.dueDate < cycle.start
   );
   const overdue = payments.filter(
     payment =>

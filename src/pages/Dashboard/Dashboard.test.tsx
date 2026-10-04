@@ -1,6 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { screen, waitFor, within } from '@testing-library/react';
-import { apiDateFromToday, createFakeApi, DEFAULT_ACCOUNT, FakeAccount } from '~/test/fakeApi';
+import {
+  apiDate,
+  apiDateFromToday,
+  createFakeApi,
+  DEFAULT_ACCOUNT,
+  FakeAccount
+} from '~/test/fakeApi';
 import { renderApp } from '~/test/renderApp';
 
 // Everything due today, so it's always before the next payday whatever day the tests run
@@ -244,6 +250,25 @@ describe('payday prompt', () => {
 
     const dialog = await screen.findByRole('dialog', { name: 'Start your new pay cycle' });
     expect(dialog).toHaveTextContent('Payday was Wednesday 30 September · 4 days ago');
+  });
+
+  it('leaves payments already in the new cycle where they are', async () => {
+    setToday('2026-10-04');
+    const data = paydayAccount();
+    data.recurringPayments[0].nextDueDate = apiDate('2026-09-29');
+    // Paid on its due date, which is after the payday being caught up on
+    data.recurringPayments.push({
+      ...data.recurringPayments[0],
+      id: 'gym',
+      name: 'Gym',
+      nextDueDate: apiDateFromToday(0),
+      status: 'PAID'
+    });
+    renderDashboard(data);
+
+    const dialog = await screen.findByRole('dialog', { name: 'Start your new pay cycle' });
+    expect(within(dialog).getByRole('checkbox', { name: /Netflix/ })).toBeChecked();
+    expect(within(dialog).queryByRole('checkbox', { name: /Gym/ })).not.toBeInTheDocument();
   });
 
   it("doesn't show once this cycle has started", async () => {
