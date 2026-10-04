@@ -103,6 +103,21 @@
   --color-overlay: var(--overlay);
   --color-scrim: var(--scrim);
   --color-shadow: var(--shadow);
+  --color-note-blue: var(--n-blue);
+  --color-note-blue-line: var(--n-blue-line);
+  --color-note-blue-dot: var(--n-blue-dot);
+  --color-note-green: var(--n-green);
+  --color-note-green-line: var(--n-green-line);
+  --color-note-green-dot: var(--n-green-dot);
+  --color-note-amber: var(--n-amber);
+  --color-note-amber-line: var(--n-amber-line);
+  --color-note-amber-dot: var(--n-amber-dot);
+  --color-note-rose: var(--n-rose);
+  --color-note-rose-line: var(--n-rose-line);
+  --color-note-rose-dot: var(--n-rose-dot);
+  --color-note-violet: var(--n-violet);
+  --color-note-violet-line: var(--n-violet-line);
+  --color-note-violet-dot: var(--n-violet-dot);
 }
 
 /* Money and other figures: tabular digits with the design's tight tracking */

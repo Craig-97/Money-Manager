@@ -41,6 +41,23 @@
   --overlay: rgb(5 6 8 / 0.72);
   --scrim: rgb(0 0 0 / 0.4);
   --shadow: rgb(0 0 0 / 0.7);
+
+  /* Note tints: the card, its border, and the dot and swatch */
+  --n-blue: #25345c;
+  --n-blue-line: #3a5391;
+  --n-blue-dot: #7aa2ff;
+  --n-green: #1e3c2d;
+  --n-green-line: #306248;
+  --n-green-dot: #4ade80;
+  --n-amber: #403419;
+  --n-amber-line: #6f5c29;
+  --n-amber-dot: #fbbf24;
+  --n-rose: #42253a;
+  --n-rose-line: #76405a;
+  --n-rose-dot: #fb7185;
+  --n-violet: #32295a;
+  --n-violet-line: #55458f;
+  --n-violet-dot: #a78bfa;
 }
 
 [data-theme='light'] {
@@ -74,6 +91,22 @@
   --nav-active-text: #111318;
   --overlay: rgb(17 19 24 / 0.45);
   --shadow: rgb(17 19 24 / 0.28);
+
+  --n-blue: #dae5fe;
+  --n-blue-line: #bbcef9;
+  --n-blue-dot: #2f5be0;
+  --n-green: #d3f1df;
+  --n-green-line: #abdcbe;
+  --n-green-dot: #15803d;
+  --n-amber: #fbeabd;
+  --n-amber-line: #efd58e;
+  --n-amber-dot: #b45309;
+  --n-rose: #fbdae2;
+  --n-rose-line: #f2b4c4;
+  --n-rose-dot: #be123c;
+  --n-violet: #e5ddfd;
+  --n-violet-line: #ccbcf6;
+  --n-violet-dot: #6d28d9;
 }
 
 /* The blue accent has hand-tuned text and soft colours in the design instead of the mixed ones */

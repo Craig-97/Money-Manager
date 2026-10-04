@@ -9,13 +9,15 @@ import { getInitials } from '~/lib/format';
 interface PageHeaderProps {
   title: string;
   // A line under the title, shown on the desktop layout
-  description?: string;
+  description?: ReactNode;
+  // Beside the title on the mobile layout, e.g. how many notes there are
+  titleNote?: ReactNode;
   // Page actions, shown on the desktop layout
   actions?: ReactNode;
 }
 
 /* Today's date and the page title. On mobile the profile avatar sits on the right. */
-export const PageHeader = ({ title, description, actions }: PageHeaderProps) => {
+export const PageHeader = ({ title, description, titleNote, actions }: PageHeaderProps) => {
   const { user } = useCurrentUser();
   const today = new Date();
   const name = user ? `${user.firstName} ${user.surname}` : '';
@@ -27,9 +29,16 @@ export const PageHeader = ({ title, description, actions }: PageHeaderProps) => 
           <span className="md:hidden">{formatLongDate(today, { withYear: false })}</span>
           <span className="hidden md:inline">{formatLongDate(today)}</span>
         </p>
-        <h1 className="mt-0.5 text-[26px] font-extrabold tracking-[-0.035em] md:mt-1.5 md:text-4xl md:leading-[1.1]">
-          {title}
-        </h1>
+        <div className="mt-0.5 flex items-baseline gap-2 md:mt-1.5">
+          <h1 className="text-[26px] font-extrabold tracking-[-0.035em] md:text-4xl md:leading-[1.1]">
+            {title}
+          </h1>
+          {titleNote ? (
+            <span className="num text-[15px] font-bold tracking-normal text-muted md:hidden">
+              {titleNote}
+            </span>
+          ) : null}
+        </div>
         {description ? (
           <p className="mt-1.5 hidden text-[15px] text-muted md:block">{description}</p>
         ) : null}
