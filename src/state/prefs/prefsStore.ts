@@ -6,7 +6,15 @@ export type Theme = 'dark' | 'light';
 export type ThemePreference = Theme | 'system';
 
 // The accents offered by the design; the first is the default
-export const ACCENTS = ['#7C3AED', '#3D6BF5', '#0F9F8F', '#E5484D'] as const;
+export const ACCENTS = [
+  '#7C3AED',
+  '#3D6BF5',
+  '#0F9F8F',
+  '#2F8F4E',
+  '#E5484D',
+  '#EA580C',
+  '#DB2777'
+] as const;
 export const DEFAULT_ACCENT = ACCENTS[0];
 
 interface PrefsState {

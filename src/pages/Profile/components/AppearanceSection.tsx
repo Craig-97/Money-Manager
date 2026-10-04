@@ -17,7 +17,10 @@ const ACCENT_NAMES: Record<(typeof ACCENTS)[number], string> = {
   '#7C3AED': 'Violet',
   '#3D6BF5': 'Blue',
   '#0F9F8F': 'Teal',
-  '#E5484D': 'Red'
+  '#2F8F4E': 'Green',
+  '#E5484D': 'Red',
+  '#EA580C': 'Orange',
+  '#DB2777': 'Pink'
 };
 
 const SettingRow = ({
