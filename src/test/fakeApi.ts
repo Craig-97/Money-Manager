@@ -330,6 +330,7 @@ export const createFakeApi = ({
       email: resetTokens.has(token) ? db.user.email : null
     }),
     logout: () => ({ success: true }),
+    logoutEverywhere: () => ({ success: true }),
     updatePreferences: ({ theme, accent }: Args) => {
       db.user = { ...db.user, theme: theme ?? db.user.theme, accent: accent ?? db.user.accent };
       return { user: db.user, success: true };

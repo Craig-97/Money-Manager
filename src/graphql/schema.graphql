@@ -72,6 +72,7 @@ type Mutation {
   login(email: String!, password: String!): AuthData!
   refreshSession: AuthData!
   logout: PasswordResetResponse!
+  logoutEverywhere: PasswordResetResponse!
   registerAndLogin(user: UserInput): AuthData!
   requestPasswordReset(email: String!): PasswordResetResponse!
   resetPassword(token: String!, password: String!): AuthData!

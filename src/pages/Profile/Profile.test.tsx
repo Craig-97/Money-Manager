@@ -180,6 +180,31 @@ describe('profile', () => {
     expect(usePrefsStore.getState().accent).toBe('#0F9F8F');
   });
 
+  it('signs out everywhere after confirming, and signs out here too', async () => {
+    const { user, api } = renderProfile();
+    const account = await section('Account');
+
+    await user.click(within(account).getByRole('button', { name: 'Sign out everywhere' }));
+    const dialog = screen.getByRole('dialog', { name: 'Sign out everywhere?' });
+    await user.click(within(dialog).getByRole('button', { name: 'Sign out everywhere' }));
+
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Welcome back' })
+    ).toBeInTheDocument();
+    expect(api.callsTo('LogoutEverywhere')).toHaveLength(1);
+  });
+
+  it('keeps the session when signing out everywhere is cancelled', async () => {
+    const { user, api } = renderProfile();
+    const account = await section('Account');
+
+    await user.click(within(account).getByRole('button', { name: 'Sign out everywhere' }));
+    const dialog = screen.getByRole('dialog', { name: 'Sign out everywhere?' });
+    await user.click(within(dialog).getByRole('button', { name: 'Stay signed in' }));
+
+    expect(api.callsTo('LogoutEverywhere')).toHaveLength(0);
+  });
+
   it('deletes the account after confirming, and signs out', async () => {
     const { user, api } = renderProfile();
     const account = await section('Account');

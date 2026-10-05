@@ -171,6 +171,7 @@ export type Mutation = {
   editUser: UserResponse;
   login: AuthData;
   logout: PasswordResetResponse;
+  logoutEverywhere: PasswordResetResponse;
   markPaymentsPaid: AccountResponse;
   markPaymentsUnpaid: AccountResponse;
   refreshSession: AuthData;

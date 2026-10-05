@@ -320,6 +320,12 @@ export type LogoutMutationVariables = Exact<{ [key: string]: never }>;
 
 export type LogoutMutation = { logout: { __typename: 'PasswordResetResponse'; success: boolean } };
 
+export type LogoutEverywhereMutationVariables = Exact<{ [key: string]: never }>;
+
+export type LogoutEverywhereMutation = {
+  logoutEverywhere: { __typename: 'PasswordResetResponse'; success: boolean };
+};
+
 export type PasswordResetTokenValidQueryVariables = Exact<{
   token: string;
 }>;
@@ -1801,6 +1807,29 @@ export const LogoutDocument = {
     }
   ]
 } as unknown as DocumentNode<LogoutMutation, LogoutMutationVariables>;
+export const LogoutEverywhereDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'LogoutEverywhere' },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'logoutEverywhere' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [{ kind: 'Field', name: { kind: 'Name', value: 'success' } }]
+            }
+          }
+        ]
+      }
+    }
+  ]
+} as unknown as DocumentNode<LogoutEverywhereMutation, LogoutEverywhereMutationVariables>;
 export const PasswordResetTokenValidDocument = {
   kind: 'Document',
   definitions: [
