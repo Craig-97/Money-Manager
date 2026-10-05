@@ -9,7 +9,8 @@ interface TileProps extends ComponentProps<'section'> {
 /*
  * The design's hover lift, for cards that aren't built from Tile itself. Only on devices that
  * hover. A menu or dropdown opened from inside the card renders outside it, so the pointer leaves
- * the card; the card stays lifted for as long as something in it is open.
+ * the card; the card stays lifted for as long as something in it is open. A control that expands
+ * a section inside the card, rather than a floating menu, marks itself data-inline to opt out.
  *
  * When one closes, the browser keeps the page unhoverable (Radix sets pointer-events on <body>)
  * until its exit animation ends, so the card would dip and rise again. While that style is on
@@ -19,7 +20,7 @@ export const tileLift = [
   'transition-[translate,box-shadow,border-color] duration-200 ease-out',
   "[body[style*='pointer-events']_&]:delay-200",
   'hover:-translate-y-0.5 hover:border-border-strong hover:shadow-[0_22px_44px_-28px_var(--shadow)]',
-  '[@media(hover:hover)]:has-aria-expanded:-translate-y-0.5 [@media(hover:hover)]:has-aria-expanded:border-border-strong [@media(hover:hover)]:has-aria-expanded:shadow-[0_22px_44px_-28px_var(--shadow)]'
+  '[@media(hover:hover)]:has-[[aria-expanded=true]:not([data-inline])]:-translate-y-0.5 [@media(hover:hover)]:has-[[aria-expanded=true]:not([data-inline])]:border-border-strong [@media(hover:hover)]:has-[[aria-expanded=true]:not([data-inline])]:shadow-[0_22px_44px_-28px_var(--shadow)]'
 ].join(' ');
 
 /* The design's rounded card. It lifts slightly on hover, on devices that can hover. */

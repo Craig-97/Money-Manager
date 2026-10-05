@@ -259,6 +259,7 @@ export const PaydaySection = ({ account }: { account: Account }) => {
                     type="button"
                     disabled={dates.locked || !account.payday}
                     aria-expanded={editing}
+                    data-inline=""
                     aria-label={`${label}, ${formatShortDay(item.date)}${item.moved ? ', moved by you' : ''}. Change`}
                     onClick={() => (editing ? dates.close() : dates.start(index))}
                     className={cn(

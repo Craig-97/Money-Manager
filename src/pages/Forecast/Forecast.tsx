@@ -1,5 +1,6 @@
 import { CalendarDays } from 'lucide-react';
 import { PageHeader } from '~/components/layout/PageHeader';
+import { tileLift } from '~/components/ui/Tile';
 import { MEDIA } from '~/constants';
 import { Account, useAccount } from '~/hooks/useAccount';
 import { useMediaQuery } from '~/hooks/useMediaQuery';
@@ -42,7 +43,9 @@ export const Forecast = () => {
         description="Where your balance is heading if you keep spending at this pace."
         actions={
           account ? (
-            <span className="flex h-11 items-center gap-2 rounded-full border border-border bg-surface px-4 text-[13px] font-semibold text-muted">
+            <span
+              className={`flex h-11 items-center gap-2 rounded-full border border-border bg-surface px-4 text-[13px] font-semibold text-muted ${tileLift}`}
+            >
               <CalendarDays size={16} aria-hidden="true" />
               {paidText(account.payday)} ·{' '}
               <span className="num font-bold text-text">
