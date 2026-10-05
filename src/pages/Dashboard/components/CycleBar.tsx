@@ -14,7 +14,9 @@ const SEGMENTS: Record<Tone, Record<CycleDayKind, string>> = {
     future: 'h-2.5 rounded-full bg-track',
     expense: 'h-2.5 rounded-full bg-expense',
     income: 'h-2.5 rounded-full bg-income',
-    payday: 'h-2.5 rounded-full bg-accent'
+    payday: 'h-2.5 rounded-full bg-accent',
+    ghost: 'h-2.5 rounded-full border-[1.5px] border-dashed border-border-strong',
+    ghostPayday: 'h-2.5 rounded-full border-[1.5px] border-dashed border-accent-text'
   },
   hero: {
     past: 'h-2 rounded-[3px] bg-white opacity-35',
@@ -22,14 +24,17 @@ const SEGMENTS: Record<Tone, Record<CycleDayKind, string>> = {
     future: 'h-2 rounded-[3px] bg-white/14',
     expense: 'h-2 rounded-[3px] bg-[#FF9C96]',
     income: 'h-2 rounded-[3px] bg-[#86EFAC]',
-    payday: 'h-2 rounded-[3px] bg-[#86EFAC]'
+    payday: 'h-2 rounded-[3px] bg-[#86EFAC]',
+    ghost: 'h-2 rounded-[3px] border border-dashed border-white/40',
+    ghostPayday: 'h-2 rounded-[3px] border border-dashed border-white/80'
   }
 };
 
 const tagsFor = (day: CycleDay) => [
   ...(day.isLastPayday ? ['Last payday'] : []),
   ...(day.kind === 'today' ? ['Today'] : []),
-  ...(day.kind === 'payday' ? ['Payday'] : [])
+  ...(day.kind === 'payday' ? ['Payday'] : []),
+  ...(day.kind === 'ghostPayday' ? ['Usual payday'] : [])
 ];
 
 interface CycleBarProps {
@@ -56,6 +61,7 @@ export const CycleBar = ({ days, tone = 'default', className }: CycleBarProps) =
         const lines = day.payments.map(p => `${p.name} ${formatPayment(p.signedAmount)}`);
         const label =
           title + (lines.length ? `: ${lines.join(', ')}` : tags.length ? '' : ': nothing due');
+        const ghost = day.kind === 'ghost' || day.kind === 'ghostPayday';
         const align =
           index < 5 ? 'left-0' : index > days.length - 6 ? 'right-0' : 'left-1/2 -translate-x-1/2';
         const show = () => setOpen(index);
@@ -100,7 +106,7 @@ export const CycleBar = ({ days, tone = 'default', className }: CycleBarProps) =
                     {payment.name} {formatPayment(payment.signedAmount)}
                   </span>
                 ))}
-                {!day.payments.length && !tags.length ? (
+                {!day.payments.length && !tags.length && !ghost ? (
                   <span className="text-muted">Nothing due</span>
                 ) : null}
               </div>

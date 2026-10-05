@@ -42,7 +42,12 @@ const oneOff = (
 
 // The design's example: today Fri 2 Oct 2026, paid on the last Friday of the month
 const today = day('2026-10-02');
-const cycle = { start: day('2026-09-25'), end: day('2026-10-30'), isPayday: false };
+const cycle = {
+  start: day('2026-09-25'),
+  end: day('2026-10-30'),
+  endUsual: day('2026-10-30'),
+  isPayday: false
+};
 
 const designPayments = toPayments(
   {
@@ -150,6 +155,17 @@ describe('cycleDays', () => {
     expect(days[14].kind).toBe('income'); // Shopping, Fri 9 Oct
     expect(days[25].kind).toBe('expense'); // Birthday, Tue 20 Oct
     expect(days[35].kind).toBe('payday');
+  });
+
+  it('runs ghost days on from a payday brought forward to its usual date', () => {
+    const early = { ...cycle, end: day('2026-10-23') };
+    const days = cycleDays(early, today, designPayments);
+
+    // The new payday is 23 Oct, a week before the usual 30 Oct: six ghost days, then the usual day
+    expect(days).toHaveLength(36);
+    expect(days[28].kind).toBe('payday');
+    expect(days.slice(29, 35).map(item => item.kind)).toEqual(Array(6).fill('ghost'));
+    expect(days[35].kind).toBe('ghostPayday');
   });
 });
 

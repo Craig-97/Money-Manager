@@ -6,4 +6,8 @@ fragment PaydayFields on Payday {
   weekday
   firstPayDate
   bankHolidayRegion
+  overrides {
+    for
+    date
+  }
 }

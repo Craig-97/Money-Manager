@@ -1,12 +1,11 @@
 import { useState } from 'react';
-import { CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react';
-import { DayPicker } from '@daypicker/react';
-import { enGB } from '@daypicker/react/locale';
+import { CalendarDays } from 'lucide-react';
 import * as Popover from '@radix-ui/react-popover';
 import { popoverClasses } from '~/components/ui/popoverClasses';
 import { cn } from '~/lib/cn';
 import { formatPickerDate, parseIsoDate, toIsoDate } from '~/lib/dates';
 import { fieldClasses } from '../fieldClasses';
+import { Calendar } from './Calendar';
 
 interface DatePickerProps {
   // 'YYYY-MM-DD', or '' for no date
@@ -21,26 +20,6 @@ interface DatePickerProps {
   'aria-describedby'?: string;
   className?: string;
 }
-
-const narrowWeekday = new Intl.DateTimeFormat('en-GB', { weekday: 'narrow' });
-
-// The design's calendar: round 40px days, the picked day in the accent, today ringed
-const dayStyles = {
-  selected: '[&>button]:bg-accent [&>button]:text-on-accent [&>button]:hover:bg-accent',
-  today: '[&>button]:shadow-[inset_0_0_0_1.5px_var(--border-strong)]',
-  outside: '[&>button]:text-faint',
-  disabled: '[&>button]:cursor-default [&>button]:opacity-35 [&>button]:hover:bg-transparent'
-};
-
-const navButtonClasses =
-  'inline-flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full text-muted hover:bg-hover hover:text-text disabled:cursor-default disabled:opacity-35';
-
-const CalendarChevron = ({ orientation }: { orientation?: 'left' | 'right' | 'up' | 'down' }) =>
-  orientation === 'left' ? (
-    <ChevronLeft size={18} aria-hidden="true" />
-  ) : (
-    <ChevronRight size={18} aria-hidden="true" />
-  );
 
 const footerButtonClasses =
   'h-10 cursor-pointer rounded-full px-3 text-[13px] font-semibold hover:bg-hover disabled:cursor-default disabled:opacity-35';
@@ -63,8 +42,7 @@ export const DatePicker = ({
   const today = new Date();
   const todayAllowed = !minDate || toIsoDate(today) >= toIsoDate(minDate);
 
-  const pick = (date: Date | undefined) => {
-    if (!date) return;
+  const pick = (date: Date) => {
     onChange(toIsoDate(date));
     setOpen(false);
   };
@@ -93,37 +71,12 @@ export const DatePicker = ({
           sideOffset={6}
           collisionPadding={8}
           className={cn(popoverClasses, 'w-[300px] max-w-[calc(100vw-32px)] rounded-[18px] p-3')}>
-          <DayPicker
-            mode="single"
-            required
+          <Calendar
             selected={selected}
             onSelect={pick}
             defaultMonth={selected ?? today}
             disabled={minDate ? { before: minDate } : undefined}
-            locale={enGB}
-            weekStartsOn={1}
-            showOutsideDays
-            fixedWeeks
             autoFocus
-            formatters={{ formatWeekdayName: date => narrowWeekday.format(date) }}
-            classNames={{
-              root: 'relative',
-              months: 'relative',
-              month_caption: 'flex h-10 items-center justify-center',
-              caption_label: 'text-sm font-bold',
-              nav: 'absolute inset-x-0 top-0 flex justify-between',
-              button_previous: navButtonClasses,
-              button_next: navButtonClasses,
-              month_grid: 'mt-1 w-full border-collapse',
-              weekdays: '',
-              weekday: 'py-1 text-center text-[11px] font-semibold text-muted',
-              week: '',
-              day: 'p-px',
-              day_button:
-                'num h-10 w-full cursor-pointer rounded-full text-[13px] font-semibold text-text hover:bg-hover',
-              ...dayStyles
-            }}
-            components={{ Chevron: CalendarChevron }}
           />
           <div className="mt-1.5 flex justify-between border-t border-border pt-1.5">
             <button

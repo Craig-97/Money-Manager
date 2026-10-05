@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import { Calendar, Check, PenLine, Plus, Repeat, TriangleAlert, X } from 'lucide-react';
 import { Button } from '~/components/ui/Button';
 import { IconButton } from '~/components/ui/IconButton';
+import { Modal } from '~/components/ui/Modal';
 import { cn } from '~/lib/cn';
 import { formatBalance, formatMoney, formatPayment } from '~/lib/format';
 import { formatShortDate } from '~/lib/payments';
@@ -12,13 +13,22 @@ import { splitPence } from './FreeToSpendTile';
 import { IncomeEditor } from './IncomeEditor';
 import { IncomeSplit } from './MonthlyStats';
 import { OverdrawnPill } from './NextPaydayTile';
+import { PaydayPickerActions, PaydayPickerBody } from './PaydayPicker';
 
 const heroEditClasses =
   '-my-3 -mr-3 inline-flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full text-hero-muted hover:bg-hero-chip hover:text-hero-text';
 
 /* Mobile: the accent card, with the sum behind free to spend and the cycle bar */
 export const MobileHero = ({ dashboard }: { dashboard: Dashboard }) => {
-  const { summary, cycle, days, isEmpty, bankBalance, balanceEditor: editor } = dashboard;
+  const {
+    summary,
+    cycle,
+    days,
+    isEmpty,
+    bankBalance,
+    balanceEditor: editor,
+    paydayOverride: override
+  } = dashboard;
   const openChooser = usePaymentDialogStore(s => s.openChooser);
   const [whole, pence] = splitPence(summary.freeToSpend);
 
@@ -28,10 +38,24 @@ export const MobileHero = ({ dashboard }: { dashboard: Dashboard }) => {
       className="flex flex-col gap-4 rounded-3xl bg-hero-bg p-[22px] text-hero-text">
       <div className="flex items-center justify-between gap-2">
         <h2 className="text-[13px] font-bold text-hero-muted">Free to spend</h2>
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-hero-chip px-[11px] py-[7px] text-xs font-bold">
-          <Calendar size={13} strokeWidth={2.25} aria-hidden="true" />
-          {summary.daysToPayday} days · {formatShortDate(cycle.end)}
-        </span>
+        {override.canChange ? (
+          <button
+            type="button"
+            aria-label={`${summary.daysToPayday} days, ${formatShortDate(cycle.end)}. Change this payday`}
+            onClick={() => override.setOpen(true)}
+            className={cn(
+              'inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-full px-3 text-xs font-bold',
+              override.moved ? 'bg-hero-text text-hero-ink' : 'bg-hero-chip'
+            )}>
+            {summary.daysToPayday} days · {formatShortDate(cycle.end)}
+            <PenLine size={13} strokeWidth={2.25} aria-hidden="true" />
+          </button>
+        ) : (
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-hero-chip px-[11px] py-[7px] text-xs font-bold">
+            <Calendar size={13} strokeWidth={2.25} aria-hidden="true" />
+            {summary.daysToPayday} days · {formatShortDate(cycle.end)}
+          </span>
+        )}
       </div>
       <div>
         <p className="num text-[56px] leading-none font-extrabold tracking-[-0.05em]">
@@ -140,9 +164,27 @@ export const MobileHero = ({ dashboard }: { dashboard: Dashboard }) => {
         <CycleBar days={days} tone="hero" className="-mt-2.5 -mb-2" />
         <div className="flex justify-between text-[11px] font-semibold text-hero-muted">
           <span>Paid {formatShortDate(cycle.start)}</span>
-          <span>Payday {formatShortDate(cycle.end)}</span>
+          <span>
+            Payday {formatShortDate(cycle.end)}
+            {override.moved ? ` · usual ${formatShortDate(override.usual)}` : ''}
+          </span>
         </div>
       </div>
+      {override.canChange ? (
+        <Modal
+          open={override.open}
+          onOpenChange={override.setOpen}
+          title="Change this payday"
+          description={`Just this payday. Usually ${formatShortDate(override.usual)}.`}
+          footer={
+            <PaydayPickerActions override={override} onCancel={() => override.setOpen(false)} />
+          }>
+          <p className="-mt-1 pl-1 text-[13px] font-medium text-muted">
+            Just this one. Usually {formatShortDate(override.usual)}.
+          </p>
+          <PaydayPickerBody override={override} />
+        </Modal>
+      ) : null}
     </article>
   );
 };

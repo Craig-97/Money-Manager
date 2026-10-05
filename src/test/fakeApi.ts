@@ -45,6 +45,7 @@ export interface FakePayday {
   weekday?: string | null;
   firstPayDate?: string | null;
   bankHolidayRegion?: string | null;
+  overrides?: { for: string; date: string }[];
 }
 
 export interface FakeAccount {
@@ -162,7 +163,8 @@ export const DEFAULT_ACCOUNT: FakeAccount = {
     dayOfMonth: null,
     weekday: null,
     firstPayDate: null,
-    bankHolidayRegion: 'ENGLAND_AND_WALES'
+    bankHolidayRegion: 'ENGLAND_AND_WALES',
+    overrides: []
   }
 };
 
@@ -365,6 +367,7 @@ export const createFakeApi = ({
           ? {
               id: 'payday-new',
               ...input.payday,
+              overrides: [],
               firstPayDate: input.payday.firstPayDate ? fromInput(input.payday.firstPayDate) : null
             }
           : null
@@ -435,7 +438,17 @@ export const createFakeApi = ({
       current.payday = {
         id: current.payday?.id ?? 'payday-new',
         ...input,
-        firstPayDate: input.firstPayDate ? fromInput(input.firstPayDate) : null
+        firstPayDate: input.firstPayDate ? fromInput(input.firstPayDate) : null,
+        overrides: current.payday?.overrides ?? []
+      };
+      return { payday: current.payday, success: true };
+    },
+    setPaydayOverride: ({ for: usual, date }: Args) => {
+      const current = requireAccount();
+      const rest = (current.payday?.overrides ?? []).filter(item => item.for !== usual);
+      current.payday = {
+        ...current.payday!,
+        overrides: date ? [...rest, { for: usual, date }] : rest
       };
       return { payday: current.payday, success: true };
     },

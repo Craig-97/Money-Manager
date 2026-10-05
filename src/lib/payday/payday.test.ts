@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { PaydayConfig, toIsoDate } from '~/lib/dates';
-import { getNextPaydays, getPayCycle } from './payday';
+import { getNextPaydayDates, getNextPaydays, getPayCycle } from './payday';
 
 const day = (iso: string) => {
   const [year, month, date] = iso.split('-').map(Number);
@@ -142,5 +142,57 @@ describe('getNextPaydays', () => {
       2
     );
     expect(next.map(toIsoDate)).toEqual(['2026-10-30', '2026-11-30']);
+  });
+});
+
+describe('moving a single payday', () => {
+  // The last Friday of December 2026 is Christmas Day, so pay arrives on Thursday the 24th
+  const christmas = new Set(['2026-12-25']);
+  const lastFriday: PaydayConfig = {
+    frequency: 'MONTHLY',
+    type: 'LAST_WEEKDAY',
+    weekday: 'FRIDAY',
+    overrides: [{ for: '2026-12-24', date: '2026-12-17' }]
+  };
+
+  it('brings the next payday forward, and remembers the usual date', () => {
+    const result = getPayCycle(lastFriday, christmas, day('2026-12-04'));
+    expect(toIsoDate(result.end)).toBe('2026-12-17');
+    expect(toIsoDate(result.endUsual)).toBe('2026-12-24');
+  });
+
+  it('leaves the usual date alone when nothing is moved', () => {
+    const result = getPayCycle({ ...lastFriday, overrides: [] }, christmas, day('2026-12-04'));
+    expect(toIsoDate(result.end)).toBe('2026-12-24');
+    expect(result.endUsual).toEqual(result.end);
+  });
+
+  it('only moves the payday it was set for', () => {
+    const next = getNextPaydays(lastFriday, christmas, day('2026-12-04'), 3);
+    expect(next.map(toIsoDate)).toEqual(['2026-12-17', '2027-01-29', '2027-02-26']);
+  });
+
+  it('marks which paydays were moved', () => {
+    const next = getNextPaydayDates(lastFriday, christmas, day('2026-12-04'), 2);
+    expect(next.map(item => item.usual && toIsoDate(item.usual))).toEqual(['2026-12-24', null]);
+  });
+
+  it('ignores a move set for a date the rule no longer gives', () => {
+    const stale = { ...lastFriday, overrides: [{ for: '2026-12-31', date: '2026-12-17' }] };
+    expect(toIsoDate(getPayCycle(stale, christmas, day('2026-12-04')).end)).toBe('2026-12-24');
+  });
+
+  it('starts a new cycle once the moved payday arrives', () => {
+    const result = getPayCycle(lastFriday, christmas, day('2026-12-17'));
+    expect(toIsoDate(result.start)).toBe('2026-12-17');
+    expect(result.isPayday).toBe(true);
+    expect(toIsoDate(result.end)).toBe('2027-01-29');
+  });
+
+  it('can move a payday later too', () => {
+    const later = { ...lastFriday, overrides: [{ for: '2026-12-24', date: '2026-12-28' }] };
+    const result = getPayCycle(later, christmas, day('2026-12-20'));
+    expect(toIsoDate(result.end)).toBe('2026-12-28');
+    expect(toIsoDate(result.endUsual)).toBe('2026-12-24');
   });
 });

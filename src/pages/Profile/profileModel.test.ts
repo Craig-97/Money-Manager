@@ -29,7 +29,8 @@ describe('payday form', () => {
     dayOfMonth: 15,
     weekday: null,
     firstPayDate: null,
-    bankHolidayRegion: 'SCOTLAND' as const
+    bankHolidayRegion: 'SCOTLAND' as const,
+    overrides: []
   };
 
   it('starts from the saved payday and saves only what the rule needs', () => {
@@ -82,5 +83,22 @@ describe('paydayPreview', () => {
     ]);
     expect(preview[0].movedFrom).toBeNull();
     expect(toIsoDate(preview[2].movedFrom!)).toBe('2026-12-25');
+  });
+
+  it('marks a payday the user moved, keeping the date the rule gave', () => {
+    const preview = paydayPreview(
+      {
+        frequency: 'MONTHLY',
+        type: 'LAST_WEEKDAY',
+        weekday: 'FRIDAY',
+        overrides: [{ for: '2026-12-24', date: '2026-12-17' }]
+      },
+      new Set(['2026-12-25']),
+      new Date(2026, 11, 4)
+    );
+    expect(preview[0]).toMatchObject({ moved: true, movedFrom: null });
+    expect(toIsoDate(preview[0].date)).toBe('2026-12-17');
+    expect(toIsoDate(preview[0].usual)).toBe('2026-12-24');
+    expect(preview[1]).toMatchObject({ moved: false });
   });
 });

@@ -27,7 +27,7 @@ const BankHolidayTag = ({ row, className }: { row: MonthRow; className?: string 
         'inline-flex items-center rounded-full bg-accent-soft font-bold whitespace-nowrap text-accent-text',
         className
       )}>
-      Bank holiday
+      {row.movedBy === 'you' ? 'Moved' : 'Bank holiday'}
     </span>
   ) : null;
 

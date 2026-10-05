@@ -26,6 +26,7 @@ export type AccountQuery = {
       weekday: Types.Weekday | null;
       firstPayDate: string | null;
       bankHolidayRegion: Types.BankHolidayRegion | null;
+      overrides: Array<{ __typename: 'PaydayOverride'; for: string; date: string }>;
     } | null;
     recurringPayments: Array<{
       __typename: 'RecurringPayment';
@@ -75,6 +76,7 @@ export type AccountFieldsFragment = {
     weekday: Types.Weekday | null;
     firstPayDate: string | null;
     bankHolidayRegion: Types.BankHolidayRegion | null;
+    overrides: Array<{ __typename: 'PaydayOverride'; for: string; date: string }>;
   } | null;
   recurringPayments: Array<{
     __typename: 'RecurringPayment';
@@ -130,6 +132,7 @@ export type CreateAccountMutation = {
         weekday: Types.Weekday | null;
         firstPayDate: string | null;
         bankHolidayRegion: Types.BankHolidayRegion | null;
+        overrides: Array<{ __typename: 'PaydayOverride'; for: string; date: string }>;
       } | null;
       recurringPayments: Array<{
         __typename: 'RecurringPayment';
@@ -409,6 +412,7 @@ export type EditPaydayMutation = {
       weekday: Types.Weekday | null;
       firstPayDate: string | null;
       bankHolidayRegion: Types.BankHolidayRegion | null;
+      overrides: Array<{ __typename: 'PaydayOverride'; for: string; date: string }>;
     } | null;
   };
 };
@@ -422,6 +426,30 @@ export type PaydayFieldsFragment = {
   weekday: Types.Weekday | null;
   firstPayDate: string | null;
   bankHolidayRegion: Types.BankHolidayRegion | null;
+  overrides: Array<{ __typename: 'PaydayOverride'; for: string; date: string }>;
+};
+
+export type SetPaydayOverrideMutationVariables = Exact<{
+  id: string | number;
+  for: string;
+  date?: string | null | undefined;
+}>;
+
+export type SetPaydayOverrideMutation = {
+  setPaydayOverride: {
+    __typename: 'PaydayResponse';
+    payday: {
+      __typename: 'Payday';
+      id: string;
+      frequency: Types.PayFrequency;
+      type: Types.PaydayType;
+      dayOfMonth: number | null;
+      weekday: Types.Weekday | null;
+      firstPayDate: string | null;
+      bankHolidayRegion: Types.BankHolidayRegion | null;
+      overrides: Array<{ __typename: 'PaydayOverride'; for: string; date: string }>;
+    } | null;
+  };
 };
 
 export type BatchDeleteOneOffPaymentsMutationVariables = Exact<{
@@ -633,7 +661,18 @@ export const PaydayFieldsFragmentDoc = {
           { kind: 'Field', name: { kind: 'Name', value: 'dayOfMonth' } },
           { kind: 'Field', name: { kind: 'Name', value: 'weekday' } },
           { kind: 'Field', name: { kind: 'Name', value: 'firstPayDate' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'bankHolidayRegion' } }
+          { kind: 'Field', name: { kind: 'Name', value: 'bankHolidayRegion' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'overrides' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'for' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'date' } }
+              ]
+            }
+          }
         ]
       }
     }
@@ -773,7 +812,18 @@ export const AccountFieldsFragmentDoc = {
           { kind: 'Field', name: { kind: 'Name', value: 'dayOfMonth' } },
           { kind: 'Field', name: { kind: 'Name', value: 'weekday' } },
           { kind: 'Field', name: { kind: 'Name', value: 'firstPayDate' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'bankHolidayRegion' } }
+          { kind: 'Field', name: { kind: 'Name', value: 'bankHolidayRegion' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'overrides' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'for' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'date' } }
+              ]
+            }
+          }
         ]
       }
     },
@@ -913,7 +963,18 @@ export const AccountDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'dayOfMonth' } },
           { kind: 'Field', name: { kind: 'Name', value: 'weekday' } },
           { kind: 'Field', name: { kind: 'Name', value: 'firstPayDate' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'bankHolidayRegion' } }
+          { kind: 'Field', name: { kind: 'Name', value: 'bankHolidayRegion' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'overrides' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'for' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'date' } }
+              ]
+            }
+          }
         ]
       }
     },
@@ -1084,7 +1145,18 @@ export const CreateAccountDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'dayOfMonth' } },
           { kind: 'Field', name: { kind: 'Name', value: 'weekday' } },
           { kind: 'Field', name: { kind: 'Name', value: 'firstPayDate' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'bankHolidayRegion' } }
+          { kind: 'Field', name: { kind: 'Name', value: 'bankHolidayRegion' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'overrides' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'for' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'date' } }
+              ]
+            }
+          }
         ]
       }
     },
@@ -2101,12 +2173,125 @@ export const EditPaydayDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'dayOfMonth' } },
           { kind: 'Field', name: { kind: 'Name', value: 'weekday' } },
           { kind: 'Field', name: { kind: 'Name', value: 'firstPayDate' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'bankHolidayRegion' } }
+          { kind: 'Field', name: { kind: 'Name', value: 'bankHolidayRegion' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'overrides' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'for' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'date' } }
+              ]
+            }
+          }
         ]
       }
     }
   ]
 } as unknown as DocumentNode<EditPaydayMutation, EditPaydayMutationVariables>;
+export const SetPaydayOverrideDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'SetPaydayOverride' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } }
+          }
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'for' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } }
+          }
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'date' } },
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } }
+        }
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'setPaydayOverride' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'id' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'id' } }
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'for' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'for' } }
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'date' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'date' } }
+              }
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'payday' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'FragmentSpread', name: { kind: 'Name', value: 'PaydayFields' } }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'PaydayFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'Payday' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'frequency' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'type' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'dayOfMonth' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'weekday' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'firstPayDate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'bankHolidayRegion' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'overrides' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'for' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'date' } }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+} as unknown as DocumentNode<SetPaydayOverrideMutation, SetPaydayOverrideMutationVariables>;
 export const BatchDeleteOneOffPaymentsDocument = {
   kind: 'Document',
   definitions: [

@@ -8,6 +8,7 @@ import {
   FakeAccount
 } from '~/test/fakeApi';
 import { renderApp } from '~/test/renderApp';
+import { resetViewport, setViewportWidth } from '~/test/viewport';
 
 // Everything due today, so it's always before the next payday whatever day the tests run
 const account = (overrides: Partial<FakeAccount> = {}): FakeAccount => ({
@@ -115,6 +116,21 @@ describe('dashboard', () => {
     ]);
     await user.click(screen.getByRole('radio', { name: /One-off/ }));
     expect(screen.getByRole('button', { name: 'Edit Concert' })).toBeInTheDocument();
+  });
+
+  it('closes an edit without sending anything when nothing changed', async () => {
+    const { user, api } = renderDashboard();
+
+    await user.click(await screen.findByRole('button', { name: 'Edit Netflix' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Edit recurring payment' });
+    await user.click(within(dialog).getByRole('button', { name: 'Save changes' }));
+
+    await waitFor(() =>
+      expect(
+        screen.queryByRole('dialog', { name: 'Edit recurring payment' })
+      ).not.toBeInTheDocument()
+    );
+    expect(api.callsTo('UpdateRecurringPayment')).toEqual([]);
   });
 
   it('checks a payment has a name and amount', async () => {
@@ -276,5 +292,79 @@ describe('payday prompt', () => {
 
     await screen.findByRole('heading', { name: 'Dashboard' });
     expect(screen.queryByRole('dialog', { name: 'It’s payday' })).not.toBeInTheDocument();
+  });
+});
+
+describe('moving a payday', () => {
+  // Friday 4 December 2026: pay is on the last working day, Thursday 31 December
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date('2026-12-04T09:00:00'));
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+    resetViewport();
+  });
+
+  // The cycle started on the last payday, so there's no payday prompt in the way
+  const movable = () => account({ cycleStartedOn: apiDate('2026-11-30') });
+
+  const openPicker = async (user: ReturnType<typeof renderDashboard>['user']) => {
+    await user.click(await screen.findByRole('button', { name: 'Change this payday' }));
+    return screen.findByRole('dialog', { name: 'Change this payday' });
+  };
+
+  it('moves the next payday and shows it moved', async () => {
+    const { user, api } = renderDashboard(movable());
+    let picker = await openPicker(user);
+
+    // Nothing changed yet: the button just closes, without a request
+    await user.click(within(picker).getByRole('button', { name: 'Keep Thu 31 Dec' }));
+    expect(screen.queryByRole('dialog', { name: 'Change this payday' })).not.toBeInTheDocument();
+    expect(api.callsTo('SetPaydayOverride')).toEqual([]);
+    picker = await openPicker(user);
+    await user.click(within(picker).getByRole('button', { name: /17 December 2026/ }));
+    // Paid 14 days sooner
+    expect(within(picker).getByText(/27 → 13/)).toBeInTheDocument();
+    await user.click(within(picker).getByRole('button', { name: 'Move to Thu 17 Dec' }));
+
+    expect(await screen.findByText('Payday moved to Thu 17 Dec')).toBeInTheDocument();
+    expect(api.callsTo('SetPaydayOverride')).toEqual([
+      { id: 'payday-1', for: '2026-12-31', date: '2026-12-17' }
+    ]);
+    const tile = screen.getByRole('region', { name: 'Next payday' });
+    expect(within(tile).getByText('Moved from Thu 31 Dec')).toBeInTheDocument();
+    expect(within(tile).getByText('Usual Thu 31 Dec')).toBeInTheDocument();
+  });
+
+  it('puts the payday back', async () => {
+    const data = movable();
+    data.payday!.overrides = [{ for: '2026-12-31', date: '2026-12-17' }];
+    const { user, api } = renderDashboard(data);
+    const tile = await screen.findByRole('region', { name: 'Next payday' });
+    expect(within(tile).getByText('Moved from Thu 31 Dec')).toBeInTheDocument();
+
+    const picker = await openPicker(user);
+    await user.click(within(picker).getByRole('button', { name: 'Reset to usual' }));
+
+    expect(await screen.findByText('Payday back to Thu 31 Dec')).toBeInTheDocument();
+    expect(api.callsTo('SetPaydayOverride')).toEqual([
+      { id: 'payday-1', for: '2026-12-31', date: null }
+    ]);
+    expect(within(tile).queryByText('Moved from Thu 31 Dec')).not.toBeInTheDocument();
+  });
+
+  it('moves it from the mobile sheet', async () => {
+    setViewportWidth(390);
+    const { user, api } = renderDashboard(movable());
+    await user.click(await screen.findByRole('button', { name: /Change this payday/ }));
+    const sheet = await screen.findByRole('dialog', { name: 'Change this payday' });
+
+    await user.click(within(sheet).getByRole('button', { name: /17 December 2026/ }));
+    await user.click(within(sheet).getByRole('button', { name: 'Move to Thu 17 Dec' }));
+
+    expect(api.callsTo('SetPaydayOverride')).toEqual([
+      { id: 'payday-1', for: '2026-12-31', date: '2026-12-17' }
+    ]);
   });
 });

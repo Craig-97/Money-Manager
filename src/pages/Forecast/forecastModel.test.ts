@@ -93,5 +93,27 @@ describe('monthRows', () => {
     expect(toIsoDate(december.payday!)).toBe('2026-12-24');
     expect(toIsoDate(december.movedFrom!)).toBe('2026-12-25');
     expect(rows[0].movedFrom).toBeNull();
+    expect(december.movedBy).toBe('bank holiday');
+  });
+
+  it('flags a payday the user moved, apart from bank holidays', () => {
+    const moved = monthRows({
+      today: new Date(2026, 9, 2),
+      start: 9165,
+      net: 2600,
+      income: 3600,
+      afterPayday: false,
+      payday: {
+        frequency: 'MONTHLY',
+        type: 'LAST_WEEKDAY',
+        weekday: 'FRIDAY',
+        overrides: [{ for: '2026-12-24', date: '2026-12-17' }]
+      },
+      holidays: new Set(['2026-12-25'])
+    });
+    expect(toIsoDate(moved[2].payday!)).toBe('2026-12-17');
+    expect(toIsoDate(moved[2].movedFrom!)).toBe('2026-12-24');
+    expect(moved[2].movedBy).toBe('you');
+    expect(moved[1].movedBy).toBeNull();
   });
 });

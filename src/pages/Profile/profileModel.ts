@@ -10,6 +10,7 @@ import { daysBetween, fromApiDate, PaydayConfig, toIsoDate } from '~/lib/dates';
 import {
   allowedRules,
   BankHolidays,
+  getNextPaydayDates,
   getNextPaydays,
   PAY_FREQUENCY_LABELS,
   usesWeekday,
@@ -78,13 +79,17 @@ export const withFrequency = (values: PaydayValues, frequency: PayFrequency): Pa
   return { ...values, frequency, rule: rules.includes(values.rule) ? values.rule : rules[0] };
 };
 
-export const toPaydayConfig = (values: PaydayValues): PaydayConfig => ({
+export const toPaydayConfig = (
+  values: PaydayValues,
+  overrides: PaydayConfig['overrides'] = []
+): PaydayConfig => ({
   frequency: values.frequency,
   type: values.rule,
   dayOfMonth: values.rule === 'SET_DAY' ? Number(values.dayOfMonth) : null,
   weekday: usesWeekday(values.rule) ? values.weekday : null,
   firstPayDate: values.frequency === 'MONTHLY' ? null : values.firstPayDate || null,
-  bankHolidayRegion: values.region
+  bankHolidayRegion: values.region,
+  overrides
 });
 
 export const toPaydayInput = (values: PaydayValues): PaydayInput => {
@@ -123,23 +128,30 @@ const NO_HOLIDAYS: BankHolidays = new Set();
 
 export interface PaydayPreview {
   date: Date;
+  // The date the rule gives (bank holidays allowed for), which a move by the user attaches to
+  usual: Date;
+  // Moved by the user from `usual`
+  moved: boolean;
   // The date it would have been, when a bank holiday moved it
   movedFrom: Date | null;
 }
 
-/* The next few paydays, marking any a bank holiday moved */
+/* The next few paydays, marking any a bank holiday or the user moved */
 export const paydayPreview = (
   config: PaydayConfig,
   holidays: BankHolidays,
   today: Date
 ): PaydayPreview[] => {
   // Weekends are allowed for in both lists, so any difference is a bank holiday
-  const before = getNextPaydays(config, NO_HOLIDAYS, today, PREVIEW_COUNT);
-  return getNextPaydays(config, holidays, today, PREVIEW_COUNT).map((date, index) => {
-    const original = before[index];
-    const moved = original && original > date && daysBetween(date, original) < 7;
-    return { date, movedFrom: moved ? original : null };
-  });
+  const before = getNextPaydays({ ...config, overrides: [] }, NO_HOLIDAYS, today, PREVIEW_COUNT);
+  return getNextPaydayDates(config, holidays, today, PREVIEW_COUNT).map(
+    ({ date, usual }, index) => {
+      const original = before[index];
+      const heldBack =
+        !usual && original && original > date && daysBetween(date, original) < 7 ? original : null;
+      return { date, usual: usual ?? date, moved: !!usual, movedFrom: heldBack };
+    }
+  );
 };
 
 const ordinal = (day: number) => {

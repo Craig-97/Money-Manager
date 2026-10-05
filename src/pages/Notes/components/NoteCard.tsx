@@ -17,7 +17,14 @@ const NoteEditor = ({ note, board }: { note: Note; board: NotesBoard }) => {
       label="Edit note"
       saveLabel="Save changes"
       cancelLabel="Cancel editing"
-      onSave={() => draft.save(changes => board.actions.edit(note.id, changes))}
+      onSave={() =>
+        draft.save(async changes =>
+          // Unchanged: nothing to send
+          changes.body === note.body && changes.color === note.color
+            ? true
+            : board.actions.edit(note.id, changes)
+        )
+      }
       onSaved={board.stopEditing}
       onCancel={board.stopEditing}
     />

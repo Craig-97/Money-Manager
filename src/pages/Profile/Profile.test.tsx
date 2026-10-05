@@ -102,6 +102,48 @@ describe('profile', () => {
     ]);
   });
 
+  it('moves a single payday and puts it back', async () => {
+    const { user, api } = renderProfile();
+    const payday = await section('Payday');
+
+    // The second payday is always ahead of today, so the day before is always allowed
+    await user.click(within(payday).getByRole('button', { name: /^Then,/ }));
+    const editor = within(payday).getByRole('group', { name: /^Change / });
+    await user.click(within(editor).getByRole('button', { name: 'Save date' }));
+
+    expect(await screen.findByText(/^Payday moved to /)).toBeInTheDocument();
+    const [call] = api.callsTo('SetPaydayOverride');
+    expect(call).toMatchObject({
+      id: 'payday-1',
+      for: expect.any(String),
+      date: expect.any(String)
+    });
+    expect(call.date).not.toBe(call.for);
+    const moved = await within(payday).findByRole('button', { name: /^Then,.*moved by you/ });
+
+    await user.click(moved);
+    await user.click(within(payday).getByRole('button', { name: 'Reset to usual' }));
+    expect(await screen.findByText(/^Payday back to /)).toBeInTheDocument();
+    expect(api.callsTo('SetPaydayOverride')[1]).toEqual({
+      id: 'payday-1',
+      for: call.for,
+      date: null
+    });
+  });
+
+  it('holds off moving a payday while the form has unsaved changes', async () => {
+    const { user } = renderProfile();
+    const payday = await section('Payday');
+
+    await user.click(within(payday).getByRole('radio', { name: /Set day/ }));
+    await user.type(within(payday).getByLabelText('Day of month'), '15');
+
+    expect(within(payday).getByRole('button', { name: /^Then,/ })).toBeDisabled();
+    expect(
+      within(payday).getByText('Save your changes to adjust a single payday')
+    ).toBeInTheDocument();
+  });
+
   it('shows what a new balance means before saving it', async () => {
     const { user, api } = renderProfile();
     const balances = await section('Balances');

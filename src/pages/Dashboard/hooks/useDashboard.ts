@@ -9,10 +9,11 @@ import { cycleDays, summarise, toPayments } from '~/lib/payments';
 import { showToast } from '~/state/toast';
 import { PaymentTab, paymentsForTab } from '../dashboardModel';
 import { useMoneyEditor } from './useMoneyEditor';
+import { usePaydayOverride } from './usePaydayOverride';
 
 /* Everything the dashboard shows and does, worked out from the account */
 export const useDashboard = (account: Account) => {
-  const { today, cycle } = usePayCycle(account.payday);
+  const { today, holidays, cycle } = usePayCycle(account.payday);
   const actions = usePaymentActions(account.id);
   const [editAccount] = useMutation(EditAccountDocument);
 
@@ -32,6 +33,7 @@ export const useDashboard = (account: Account) => {
     cycle,
     today
   });
+  const paydayOverride = usePaydayOverride({ account, cycle, today, holidays, payments });
   const listed = paymentsForTab(payments, tab, cycle, today, ascending);
   const selectedPayments = listed.filter(payment => selected.has(payment.id));
 
@@ -55,6 +57,7 @@ export const useDashboard = (account: Account) => {
     cycle,
     payments,
     summary,
+    paydayOverride,
     days: cycleDays(cycle, today, payments),
     isEmpty: payments.length === 0,
     actions,

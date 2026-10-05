@@ -66,7 +66,9 @@ export const summarise = ({ payments, bankBalance, monthlyIncome, cycle, today }
 
 export type Summary = ReturnType<typeof summarise>;
 
-export type CycleDayKind = 'past' | 'today' | 'income' | 'expense' | 'payday' | 'future';
+// 'ghost' days run on from a payday the user brought forward to the date it usually falls
+export type CycleDayKind =
+  'past' | 'today' | 'income' | 'expense' | 'payday' | 'future' | 'ghost' | 'ghostPayday';
 
 export interface CycleDay {
   date: Date;
@@ -76,7 +78,10 @@ export interface CycleDay {
   isLastPayday: boolean;
 }
 
-/* A day-by-day view of the cycle for the progress bar, from the last payday to the next */
+/*
+ * A day-by-day view of the cycle for the progress bar, from the last payday to the next. When the
+ * next payday has been brought forward, the days up to its usual date follow as ghosts.
+ */
 export const cycleDays = (cycle: PayCycle, today: Date, payments: Payment[]): CycleDay[] => {
   const due = new Map<string, Payment[]>();
   for (const payment of payments) {
@@ -87,8 +92,13 @@ export const cycleDays = (cycle: PayCycle, today: Date, payments: Payment[]): Cy
   }
 
   const total = daysBetween(cycle.start, cycle.end);
-  return Array.from({ length: total + 1 }, (_, index) => {
+  const usualTotal = Math.max(total, daysBetween(cycle.start, cycle.endUsual));
+  return Array.from({ length: usualTotal + 1 }, (_, index) => {
     const date = addDays(cycle.start, index);
+    if (index > total) {
+      const kind = index === usualTotal ? 'ghostPayday' : 'ghost';
+      return { date, kind, payments: [], isLastPayday: false };
+    }
     const dayPayments = due.get(toIsoDate(date)) ?? [];
     const net = dayPayments.reduce((sum, p) => sum + p.signedAmount, 0);
 

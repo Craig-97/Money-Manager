@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { screen, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import { createFakeApi, DEFAULT_ACCOUNT, FakeAccount } from '~/test/fakeApi';
 import { renderApp } from '~/test/renderApp';
 
@@ -94,6 +94,18 @@ describe('notes', () => {
     expect(api.callsTo('EditNote')).toEqual([
       { id: 'milk', note: { body: 'Buy oat milk', color: 'BLUE' } }
     ]);
+  });
+
+  it('closes an edit without sending anything when the note is unchanged', async () => {
+    const { user, api } = renderNotes();
+    await board();
+
+    await user.click(screen.getByRole('button', { name: 'Edit note: Buy milk' }));
+    const form = screen.getByRole('form', { name: 'Edit note' });
+    await user.click(within(form).getByRole('button', { name: 'Save changes' }));
+
+    await waitFor(() => expect(screen.queryByRole('form', { name: 'Edit note' })).toBeNull());
+    expect(api.callsTo('EditNote')).toEqual([]);
   });
 
   it('deletes a note, with undo', async () => {

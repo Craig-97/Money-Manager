@@ -35,6 +35,7 @@ const demoAccount = (scenario: string | null): FakeAccount => {
       weekday: null,
       firstPayDate: null,
       bankHolidayRegion: 'ENGLAND_AND_WALES',
+      overrides: [],
       ...payday
     },
     recurringPayments: [

@@ -174,6 +174,7 @@ export type Mutation = {
   registerAndLogin: AuthData;
   requestPasswordReset: PasswordResetResponse;
   resetPassword: AuthData;
+  setPaydayOverride: PaydayResponse;
   startPaydayCycle: AccountResponse;
   updateCurrentUser: UserResponse;
   updateRecurringPayment: RecurringPaymentResponse;
@@ -311,6 +312,12 @@ export type MutationResetPasswordArgs = {
   token: Scalars['String']['input'];
 };
 
+export type MutationSetPaydayOverrideArgs = {
+  date?: InputMaybe<Scalars['String']['input']>;
+  for: Scalars['String']['input'];
+  id: Scalars['ID']['input'];
+};
+
 export type MutationStartPaydayCycleArgs = {
   input: StartPaydayCycleInput;
 };
@@ -412,6 +419,7 @@ export type Payday = {
   firstPayDate: Maybe<Scalars['String']['output']>;
   frequency: PayFrequency;
   id: Scalars['ID']['output'];
+  overrides: Array<PaydayOverride>;
   type: PaydayType;
   weekday: Maybe<Weekday>;
 };
@@ -424,6 +432,12 @@ export type PaydayInput = {
   frequency: PayFrequency;
   type: PaydayType;
   weekday?: InputMaybe<Weekday>;
+};
+
+export type PaydayOverride = {
+  __typename: 'PaydayOverride';
+  date: Scalars['String']['output'];
+  for: Scalars['String']['output'];
 };
 
 export type PaydayResponse = {

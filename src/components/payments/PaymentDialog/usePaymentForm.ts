@@ -75,6 +75,18 @@ const initialValues = (
     : { ...common, date: iso(payment.dueDate) };
 };
 
+/* Whether the form still holds what the payment already has */
+const isUnchanged = (values: PaymentFormValues, before: PaymentFormValues) =>
+  values.name.trim() === before.name &&
+  parseMoney(values.amount) === parseMoney(before.amount) &&
+  values.type === before.type &&
+  values.category === before.category &&
+  values.date === before.date &&
+  values.frequency === before.frequency &&
+  values.first === before.first &&
+  values.hasEnd === before.hasEnd &&
+  (!values.hasEnd || values.end === before.end);
+
 /* "Repeats monthly on the 2nd · next due Mon 2 Nov · last Fri 1 Jan" */
 export const scheduleSummary = (values: PaymentFormValues, today: Date) => {
   const first = parseIsoDate(values.first);
@@ -163,6 +175,11 @@ export const usePaymentForm = ({ kind, accountId, payment, today, onSaved, formK
       return;
     }
     const name = values.name.trim();
+    // Editing without changing anything just closes
+    if (payment && isUnchanged(values, initialValues(kind, payment, today))) {
+      onSaved();
+      return;
+    }
     const common = { name, amount: amount!, type: values.type };
     setSaving(true);
     try {

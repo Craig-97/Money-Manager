@@ -6,6 +6,7 @@ import { useBankHolidays } from '~/hooks/useBankHolidays';
 import { startOfToday } from '~/lib/dates';
 import { getApiErrorMessage } from '~/lib/errors';
 import { showToast } from '~/state/toast';
+import { usePaydayDates } from './usePaydayDates';
 import {
   paydayErrors,
   paydayPreview,
@@ -29,7 +30,14 @@ export const usePaydaySettings = (account: Account) => {
   const valid = !errors.dayOfMonth && !errors.firstPayDate;
   const today = startOfToday();
 
-  const preview = valid ? paydayPreview(toPaydayConfig(values), holidays, today) : [];
+  const preview = valid
+    ? paydayPreview(toPaydayConfig(values, account.payday?.overrides), holidays, today)
+    : [];
+
+  const isDirty = (Object.keys(values) as (keyof PaydayValues)[]).some(
+    key => values[key] !== saved[key]
+  );
+  const dates = usePaydayDates(account.payday?.id, preview, isDirty);
 
   const save = async () => {
     setSubmitted(true);
@@ -54,9 +62,8 @@ export const usePaydaySettings = (account: Account) => {
     errors: submitted ? errors : {},
     preview,
     saving,
-    isDirty: (Object.keys(values) as (keyof PaydayValues)[]).some(
-      key => values[key] !== saved[key]
-    ),
+    isDirty,
+    dates,
     save: () => void save()
   };
 };

@@ -1,6 +1,6 @@
 import { formatShortDay, PaydayConfig, toIsoDate } from '~/lib/dates';
 import { formatMoney, MINUS } from '~/lib/format';
-import { BankHolidays, getPaydays } from '~/lib/payday';
+import { BankHolidays, getPaydayDates, getPaydays } from '~/lib/payday';
 
 const MONTHS = [
   'January',
@@ -110,8 +110,9 @@ export interface MonthRow {
   month: string;
   isNow: boolean;
   payday: Date | null;
-  // Moved earlier by a bank holiday (weekends alone don't count)
+  // Moved by a bank holiday (weekends alone don't count) or by the user, from this date
   movedFrom: Date | null;
+  movedBy: 'bank holiday' | 'you' | null;
   balance: number;
   // Percentage change on the month before; null for the first month
   change: number | null;
@@ -140,26 +141,34 @@ export const monthRows = ({
 }: RowsInput): MonthRow[] => {
   const first = new Date(today.getFullYear(), today.getMonth(), 1);
   const last = new Date(today.getFullYear(), today.getMonth() + TABLE_MONTHS, 0);
-  const paydays = getPaydays(payday, holidays, first, last);
-  const nominal = getPaydays(payday, new Set(), first, last);
+  const paydays = getPaydayDates(payday, holidays, first, last);
+  const nominal = getPaydays({ ...payday, overrides: [] }, new Set(), first, last);
   const monthKey = (date: Date) => `${date.getFullYear()}-${date.getMonth()}`;
-  const byMonth = new Map<string, { actual: Date; nominal: Date | undefined }>();
-  paydays.forEach((actual, index) => {
+  const byMonth = new Map<
+    string,
+    { actual: Date; usual: Date | null; nominal: Date | undefined }
+  >();
+  paydays.forEach(({ date: actual, usual }, index) => {
     if (!byMonth.has(monthKey(actual)))
-      byMonth.set(monthKey(actual), { actual, nominal: nominal[index] });
+      byMonth.set(monthKey(actual), { actual, usual, nominal: nominal[index] });
   });
 
   const value = (i: number) => start + net * i + (afterPayday ? income : 0);
   return Array.from({ length: TABLE_MONTHS }, (_, i) => {
     const month = new Date(first.getFullYear(), first.getMonth() + i, 1);
     const found = byMonth.get(monthKey(month));
-    const moved = found && found.nominal && toIsoDate(found.nominal) !== toIsoDate(found.actual);
+    const heldBack =
+      found && found.nominal && toIsoDate(found.nominal) !== toIsoDate(found.actual)
+        ? found.nominal
+        : null;
+    const movedFrom = found?.usual ?? heldBack;
     const previous = i ? value(i - 1) : 0;
     return {
       month: `${MONTHS[month.getMonth()]} ${month.getFullYear()}`,
       isNow: i === 0,
       payday: found?.actual ?? null,
-      movedFrom: moved ? found.nominal! : null,
+      movedFrom,
+      movedBy: found?.usual ? 'you' : movedFrom ? 'bank holiday' : null,
       balance: value(i),
       change: i && previous !== 0 ? (net / Math.abs(previous)) * 100 : null
     };
@@ -167,4 +176,6 @@ export const monthRows = ({
 };
 
 export const movedTitle = (row: MonthRow) =>
-  row.movedFrom ? `Moved from ${formatShortDay(row.movedFrom)} (bank holiday)` : '';
+  row.movedFrom
+    ? `Moved from ${formatShortDay(row.movedFrom)} ${row.movedBy === 'you' ? 'by you' : '(bank holiday)'}`
+    : '';

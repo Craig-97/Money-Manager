@@ -1,4 +1,4 @@
-import { CalendarClock } from 'lucide-react';
+import { CalendarClock, PenLine } from 'lucide-react';
 import { DatePicker } from '~/components/form/DatePicker';
 import { choiceClasses } from '~/components/form/fieldClasses';
 import { FieldError } from '~/components/form/FieldError';
@@ -7,10 +7,11 @@ import { Radio } from '~/components/form/Radio';
 import { Select } from '~/components/form/Select';
 import { TextInput } from '~/components/form/TextInput';
 import { Button } from '~/components/ui/Button';
+import { SegmentedControl, SegmentedOption } from '~/components/ui/SegmentedControl';
 import { PayFrequency } from '~/graphql/generated';
 import { Account } from '~/hooks/useAccount';
 import { cn } from '~/lib/cn';
-import { formatShortDay } from '~/lib/dates';
+import { formatShortDay, toIsoDate } from '~/lib/dates';
 import {
   allowedRules,
   PAY_FREQUENCY_LABELS,
@@ -20,7 +21,8 @@ import {
   usesWeekday,
   WEEKDAYS
 } from '~/lib/payday';
-import { usePaydaySettings } from '../hooks';
+import { PaydayDates, QuickPick, usePaydaySettings } from '../hooks';
+import { PaydayPreview } from '../profileModel';
 import { SECTION_ICONS } from './ProfileNav';
 import { helpClasses, SettingsTile } from './SettingsTile';
 
@@ -31,11 +33,84 @@ const FREQUENCIES = (Object.keys(PAY_FREQUENCY_LABELS) as PayFrequency[]).map(va
 
 const PREVIEW_LABELS = ['Next', 'Then', 'After that'];
 
+const QUICK_PICKS: SegmentedOption<QuickPick>[] = [
+  { value: 'before', label: 'Day before' },
+  { value: 'week', label: 'A week earlier' },
+  { value: 'pick', label: 'Pick a date' }
+];
+
+/* Change one upcoming payday: a quick pick or any date, and put it back */
+const PaydayDateEditor = ({
+  dates,
+  item,
+  following
+}: {
+  dates: PaydayDates;
+  item: PaydayPreview;
+  following: Date | undefined;
+}) => (
+  <div
+    role="group"
+    aria-label={`Change ${formatShortDay(item.date)}`}
+    className="flex flex-col gap-3.5 rounded-[18px] border border-border-strong bg-surface p-4">
+    <div className="flex flex-wrap items-center justify-between gap-3">
+      <h4 className="text-sm font-extrabold">Change {formatShortDay(item.date)} to</h4>
+      <SegmentedControl
+        aria-label="Quick picks"
+        size="md"
+        value={dates.quick}
+        onValueChange={dates.pickQuick}
+        options={QUICK_PICKS}
+      />
+    </div>
+    <div className="grid items-start gap-4 md:grid-cols-[minmax(0,320px)_1fr]">
+      <div>
+        <Label htmlFor="payday-override-date">New date</Label>
+        <DatePicker
+          id="payday-override-date"
+          value={dates.draft}
+          onChange={value => {
+            dates.pickQuick('pick');
+            dates.setDraft(value);
+          }}
+          min={toIsoDate(new Date())}
+          invalid={!!dates.error}
+          aria-describedby={dates.error ? 'payday-override-error' : undefined}
+        />
+        {dates.error ? <FieldError id="payday-override-error">{dates.error}</FieldError> : null}
+      </div>
+      <div className="flex flex-wrap items-center gap-2 md:mt-[30px] md:justify-end">
+        {item.moved ? (
+          <Button variant="ghost" onClick={() => dates.reset(dates.editing ?? 0)}>
+            Reset to usual
+          </Button>
+        ) : null}
+        <Button variant="ghost" onClick={dates.close}>
+          Cancel
+        </Button>
+        <Button
+          variant="accent"
+          disabled={!!dates.error}
+          loading={dates.saving}
+          loadingText="Saving…"
+          onClick={dates.save}
+          className="font-bold">
+          Save date
+        </Button>
+      </div>
+    </div>
+    <p className={cn('flex items-center gap-1.5', helpClasses)}>
+      <span aria-hidden="true" className="size-1.5 shrink-0 rounded-full bg-accent" />
+      This payday only.
+      {following ? ` ${formatShortDay(following)} is unchanged.` : ' Later paydays are unchanged.'}
+    </p>
+  </div>
+);
+
 /* How often and on which day pay arrives, with the next paydays that gives */
 export const PaydaySection = ({ account }: { account: Account }) => {
   const payday = usePaydaySettings(account);
-  const { values, update, errors, preview } = payday;
-  const moved = preview.find(item => item.movedFrom);
+  const { values, update, errors, preview, dates } = payday;
 
   return (
     <SettingsTile
@@ -47,7 +122,10 @@ export const PaydaySection = ({ account }: { account: Account }) => {
       onSubmit={payday.save}
       footer={
         <>
-          <span className={helpClasses}>Your current cycle moves to match straight away.</span>
+          <span className={helpClasses}>
+            Your current cycle moves to match straight away. A single moved payday clears itself
+            once it has passed.
+          </span>
           <Button
             type="submit"
             variant="accent"
@@ -165,39 +243,77 @@ export const PaydaySection = ({ account }: { account: Account }) => {
         <div className="flex flex-col gap-3 rounded-[20px] border border-border bg-surface-2 p-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h3 className="text-[13px] font-extrabold">Next paydays</h3>
-            <span className={helpClasses}>Weekends and bank holidays move to the day before</span>
+            <span className={helpClasses}>
+              {dates.locked
+                ? 'Save your changes to adjust a single payday'
+                : 'Weekends and bank holidays move to the day before. Tap a date to change it.'}
+            </span>
           </div>
           <ol className="grid gap-2.5 md:grid-cols-3">
-            {preview.map((item, index) => (
-              <li
-                key={item.date.getTime()}
-                className={cn(
-                  'flex min-w-0 flex-col gap-0.5 rounded-2xl border border-border bg-surface px-4 py-3',
-                  item.movedFrom && 'border-accent bg-accent-soft'
-                )}>
-                <span
-                  className={cn(
-                    'flex items-center gap-1.5 text-xs font-semibold text-muted',
-                    item.movedFrom && 'font-bold text-accent-text'
-                  )}>
-                  {item.movedFrom ? (
-                    <>
-                      <CalendarClock size={13} aria-hidden="true" />
-                      Moved
-                    </>
-                  ) : (
-                    PREVIEW_LABELS[index]
-                  )}
-                </span>
-                <span className="num text-[17px] font-extrabold">{formatShortDay(item.date)}</span>
-              </li>
-            ))}
+            {preview.map((item, index) => {
+              const editing = dates.editing === index;
+              const label = PREVIEW_LABELS[index];
+              return (
+                <li key={item.date.getTime()} className="flex">
+                  <button
+                    type="button"
+                    disabled={dates.locked || !account.payday}
+                    aria-expanded={editing}
+                    aria-label={`${label}, ${formatShortDay(item.date)}${item.moved ? ', moved by you' : ''}. Change`}
+                    onClick={() => (editing ? dates.close() : dates.start(index))}
+                    className={cn(
+                      'relative flex min-h-[84px] w-full min-w-0 cursor-pointer flex-col gap-0.5 rounded-2xl border border-border bg-surface px-4 py-3 pr-12 text-left transition-colors hover:border-border-strong disabled:cursor-default disabled:opacity-70 disabled:hover:border-border',
+                      (item.moved || item.movedFrom) && 'border-accent bg-accent-soft',
+                      editing && 'border-accent shadow-[0_0_0_4px_var(--accent-soft)]'
+                    )}>
+                    <span
+                      className={cn(
+                        'flex items-center gap-1.5 text-xs font-semibold text-muted',
+                        (item.moved || item.movedFrom) && 'font-bold text-accent-text'
+                      )}>
+                      {item.movedFrom ? (
+                        <>
+                          <CalendarClock size={13} aria-hidden="true" />
+                          Moved
+                        </>
+                      ) : item.moved ? (
+                        `${label} · moved by you`
+                      ) : (
+                        label
+                      )}
+                    </span>
+                    <span className="num text-[17px] font-extrabold">
+                      {formatShortDay(item.date)}
+                    </span>
+                    {item.moved ? (
+                      <span className="text-xs font-medium text-muted">
+                        Usually {formatShortDay(item.usual)}
+                      </span>
+                    ) : item.movedFrom ? (
+                      <span className="text-xs font-medium text-muted">
+                        Moved from {formatShortDay(item.movedFrom)} (bank holiday)
+                      </span>
+                    ) : null}
+                    <span
+                      aria-hidden="true"
+                      className={cn(
+                        'absolute top-2 right-2 inline-flex size-8 items-center justify-center rounded-full text-muted',
+                        item.moved && 'text-accent-text',
+                        editing && 'bg-accent text-on-accent'
+                      )}>
+                      <PenLine size={15} />
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
           </ol>
-          {moved?.movedFrom ? (
-            <p className={cn('flex items-center gap-1.5', helpClasses)}>
-              <span aria-hidden="true" className="size-1.5 shrink-0 rounded-full bg-accent" />
-              Moved from {formatShortDay(moved.movedFrom)} (bank holiday)
-            </p>
+          {dates.editing !== null && preview[dates.editing] ? (
+            <PaydayDateEditor
+              dates={dates}
+              item={preview[dates.editing]}
+              following={preview[dates.editing + 1]?.date}
+            />
           ) : null}
         </div>
       ) : null}

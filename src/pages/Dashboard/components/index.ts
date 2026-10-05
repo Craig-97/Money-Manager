@@ -5,5 +5,6 @@ export * from './MobileOverview';
 export * from './MobilePayments';
 export * from './MonthlyStats';
 export * from './NextPaydayTile';
+export * from './PaydayPicker';
 export * from './PaydayPrompt';
 export * from './PaymentsTable';
