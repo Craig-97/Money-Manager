@@ -1,4 +1,5 @@
 import { ReactNode } from 'react';
+import { tileLift } from '~/components/ui/Tile';
 import { SectionId } from '../profileModel';
 
 // The small grey text under fields and in tile footers
@@ -55,8 +56,7 @@ export const SettingsTile = ({
       ) : null}
     </>
   );
-  const classes =
-    'flex min-w-0 scroll-mt-6 flex-col gap-5 rounded-3xl border border-border bg-surface p-5 md:p-6';
+  const classes = `flex min-w-0 scroll-mt-6 flex-col gap-5 rounded-3xl border border-border bg-surface p-5 md:p-6 ${tileLift}`;
 
   return onSubmit ? (
     <section id={id} aria-labelledby={`${id}-title`} className="scroll-mt-6">

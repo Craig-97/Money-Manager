@@ -3,6 +3,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { Checkbox, CheckboxHitArea } from '~/components/form/Checkbox';
 import { Button } from '~/components/ui/Button';
 import { SegmentedControl } from '~/components/ui/SegmentedControl';
+import { tileLift } from '~/components/ui/Tile';
 import { cn } from '~/lib/cn';
 import { formatPayment } from '~/lib/format';
 import { categoryLabel, formatShortDate, isInCycle, Payment, scheduleText } from '~/lib/payments';
@@ -188,7 +189,10 @@ export const PaymentsTable = ({ dashboard }: { dashboard: Dashboard }) => {
   return (
     <article
       aria-labelledby="payments-title"
-      className="col-span-full flex flex-col gap-3.5 rounded-3xl border border-border bg-surface p-5">
+      className={cn(
+        tileLift,
+        'col-span-full flex flex-col gap-3.5 rounded-3xl border border-border bg-surface p-5'
+      )}>
       <div className="flex flex-wrap items-center justify-between gap-3 px-1">
         <div className="flex flex-wrap items-center gap-4">
           <h2 id="payments-title" className="text-[19px] font-extrabold tracking-[-0.02em]">
@@ -217,7 +221,7 @@ export const PaymentsTable = ({ dashboard }: { dashboard: Dashboard }) => {
         {selectedPayments.length ? (
           <div
             role="row"
-            className="flex min-h-14 flex-wrap items-center gap-2.5 rounded-2xl bg-accent-soft px-2">
+            className="flex min-h-[52px] flex-wrap items-center gap-2.5 rounded-2xl bg-accent-soft px-2">
             {selectAll}
             <p className="mr-1.5 num text-sm font-extrabold text-accent-text">
               {selectedPayments.length} selected

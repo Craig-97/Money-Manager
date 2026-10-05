@@ -1,4 +1,5 @@
 import { Info } from 'lucide-react';
+import { tileLift } from '~/components/ui/Tile';
 import { cn } from '~/lib/cn';
 import { formatMoney, MINUS } from '~/lib/format';
 import { signedMoney, spendHelper } from '../forecastModel';
@@ -35,7 +36,11 @@ export const SpendCard = ({
   );
 
   return (
-    <section className="flex flex-col gap-3.5 rounded-3xl border border-border bg-surface p-5 md:gap-[18px] md:p-6">
+    <section
+      className={cn(
+        tileLift,
+        'flex flex-col gap-3.5 rounded-3xl border border-border bg-surface p-5 md:gap-[18px] md:p-6'
+      )}>
       <div className="flex items-baseline justify-between gap-2">
         <div>
           <h2 className="text-[17px] font-extrabold tracking-[-0.02em] md:text-lg">

@@ -1,6 +1,7 @@
 import { PenLine, Plus } from 'lucide-react';
 import { Button } from '~/components/ui/Button';
 import { IconButton } from '~/components/ui/IconButton';
+import { tileLift } from '~/components/ui/Tile';
 import { cn } from '~/lib/cn';
 import { formatBalance, formatMoney } from '~/lib/format';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
@@ -49,7 +50,10 @@ export const MonthlyStats = ({ dashboard }: { dashboard: Dashboard }) => {
   return (
     <section
       aria-label="Monthly money"
-      className="col-span-full grid grid-cols-1 rounded-3xl border border-border bg-surface min-[56.25rem]:grid-cols-3 [&>*+*]:border-t [&>*+*]:border-border min-[56.25rem]:[&>*+*]:border-t-0 min-[56.25rem]:[&>*+*]:border-l">
+      className={cn(
+        tileLift,
+        'col-span-full grid grid-cols-1 rounded-3xl border border-border bg-surface min-[56.25rem]:grid-cols-3 [&>*+*]:border-t [&>*+*]:border-border min-[56.25rem]:[&>*+*]:border-t-0 min-[56.25rem]:[&>*+*]:border-l'
+      )}>
       <div className={statClasses}>
         <div className="flex min-h-5 items-center justify-between gap-2">
           <h2 className={labelClasses}>Monthly income</h2>

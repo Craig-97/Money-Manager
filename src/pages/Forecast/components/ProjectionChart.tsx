@@ -1,4 +1,5 @@
 import { ArrowUp } from 'lucide-react';
+import { tileLift } from '~/components/ui/Tile';
 import { cn } from '~/lib/cn';
 import { formatBalance, formatMoney } from '~/lib/format';
 import { axisLabel, chartScale, impactText, PROJECTION_MONTHS } from '../forecastModel';
@@ -58,7 +59,11 @@ export const ProjectionChart = ({
   const label = `Line chart: projected balance before payday goes from ${formatBalance(summary.freeToSpend, { whole: true })} today to ${formatBalance(inAYear, { whole: true })} in ${yearLabel} at ${formatMoney(spend, { whole: true })} monthly spend, versus ${formatBalance(recurringOnly[PROJECTION_MONTHS], { whole: true })} if you only paid recurring payments.`;
 
   return (
-    <section className="flex flex-col gap-3.5 rounded-3xl border border-border bg-surface p-5 md:gap-5 md:p-6 min-[68.8125rem]:col-span-2">
+    <section
+      className={cn(
+        tileLift,
+        'flex flex-col gap-3.5 rounded-3xl border border-border bg-surface p-5 md:gap-5 md:p-6 min-[68.8125rem]:col-span-2'
+      )}>
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h2 className="text-[17px] font-extrabold tracking-[-0.02em] md:text-lg">

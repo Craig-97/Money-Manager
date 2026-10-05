@@ -2,7 +2,6 @@ import { ReactNode } from 'react';
 import { Calendar, Check, PenLine, Plus, Repeat, TriangleAlert, X } from 'lucide-react';
 import { Button } from '~/components/ui/Button';
 import { IconButton } from '~/components/ui/IconButton';
-import { Modal } from '~/components/ui/Modal';
 import { cn } from '~/lib/cn';
 import { formatBalance, formatMoney, formatPayment } from '~/lib/format';
 import { formatShortDate } from '~/lib/payments';
@@ -13,7 +12,7 @@ import { splitPence } from './FreeToSpendTile';
 import { IncomeEditor } from './IncomeEditor';
 import { IncomeSplit } from './MonthlyStats';
 import { OverdrawnPill } from './NextPaydayTile';
-import { PaydayPickerActions, PaydayPickerBody } from './PaydayPicker';
+import { PaydayOverrideDialog } from './PaydayPicker';
 
 const heroEditClasses =
   '-my-3 -mr-3 inline-flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full text-hero-muted hover:bg-hero-chip hover:text-hero-text';
@@ -170,21 +169,7 @@ export const MobileHero = ({ dashboard }: { dashboard: Dashboard }) => {
           </span>
         </div>
       </div>
-      {override.canChange ? (
-        <Modal
-          open={override.open}
-          onOpenChange={override.setOpen}
-          title="Change this payday"
-          description={`Just this payday. Usually ${formatShortDate(override.usual)}.`}
-          footer={
-            <PaydayPickerActions override={override} onCancel={() => override.setOpen(false)} />
-          }>
-          <p className="-mt-1 pl-1 text-[13px] font-medium text-muted">
-            Just this one. Usually {formatShortDate(override.usual)}.
-          </p>
-          <PaydayPickerBody override={override} />
-        </Modal>
-      ) : null}
+      {override.canChange ? <PaydayOverrideDialog override={override} /> : null}
     </article>
   );
 };

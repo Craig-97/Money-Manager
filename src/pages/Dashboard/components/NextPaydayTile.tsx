@@ -1,9 +1,7 @@
 import { ReactNode } from 'react';
 import { ArrowRight, PenLine, Repeat } from 'lucide-react';
-import * as Popover from '@radix-ui/react-popover';
 import { Button } from '~/components/ui/Button';
 import { IconButton } from '~/components/ui/IconButton';
-import { popoverClasses } from '~/components/ui/popoverClasses';
 import { Tile } from '~/components/ui/Tile';
 import { cn } from '~/lib/cn';
 import { formatBalance, formatMoney, formatPayment, MINUS } from '~/lib/format';
@@ -12,7 +10,7 @@ import { usePaymentDialogStore } from '~/state/paymentDialog';
 import { paydayText } from '../dashboardModel';
 import { Dashboard } from '../hooks';
 import { CycleBar } from './CycleBar';
-import { PaydayPickerActions, PaydayPickerBody } from './PaydayPicker';
+import { PaydayOverrideDialog } from './PaydayPicker';
 
 export const OverdrawnPill = ({
   children = 'Overdrawn',
@@ -75,38 +73,9 @@ export const NextPaydayTile = ({ dashboard }: { dashboard: Dashboard }) => {
             {formatShortDate(cycle.end)}
           </span>
           {override.canChange ? (
-            <Popover.Root open={override.open} onOpenChange={override.setOpen}>
-              <Popover.Trigger asChild>
-                <IconButton aria-label="Change this payday">
-                  <PenLine size={17} aria-hidden="true" />
-                </IconButton>
-              </Popover.Trigger>
-              <Popover.Portal>
-                <Popover.Content
-                  align="end"
-                  sideOffset={6}
-                  collisionPadding={8}
-                  aria-label="Change this payday"
-                  className={cn(
-                    popoverClasses,
-                    'flex max-h-(--radix-popover-content-available-height) w-[348px] max-w-[calc(100vw-16px)] flex-col gap-3 overflow-y-auto p-4'
-                  )}>
-                  <div className="px-1">
-                    <h3 className="text-[15px] font-extrabold tracking-[-0.01em]">
-                      When are you paid this time?
-                    </h3>
-                    <p className="text-xs font-medium text-muted">
-                      Just this payday. Usually {formatShortDate(override.usual)}.
-                    </p>
-                  </div>
-                  <PaydayPickerBody override={override} />
-                  <PaydayPickerActions
-                    override={override}
-                    onCancel={() => override.setOpen(false)}
-                  />
-                </Popover.Content>
-              </Popover.Portal>
-            </Popover.Root>
+            <IconButton aria-label="Change this payday" onClick={() => override.setOpen(true)}>
+              <PenLine size={17} aria-hidden="true" />
+            </IconButton>
           ) : null}
         </div>
       </div>
@@ -190,6 +159,7 @@ export const NextPaydayTile = ({ dashboard }: { dashboard: Dashboard }) => {
           />
         </div>
       )}
+      {override.canChange ? <PaydayOverrideDialog override={override} /> : null}
     </Tile>
   );
 };

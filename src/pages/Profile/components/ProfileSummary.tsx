@@ -1,7 +1,9 @@
 import { CalendarDays } from 'lucide-react';
+import { tileLift } from '~/components/ui/Tile';
 import { CurrentUserQuery } from '~/graphql/generated';
 import { Account } from '~/hooks/useAccount';
 import { usePayCycle } from '~/hooks/usePayCycle';
+import { cn } from '~/lib/cn';
 import { formatShortDay } from '~/lib/dates';
 import { getInitials } from '~/lib/format';
 import { paydayPlan } from '../profileModel';
@@ -61,7 +63,10 @@ export const ProfileSummary = ({ user, account, compact }: ProfileSummaryProps) 
   return (
     <section
       aria-label="Account summary"
-      className="flex flex-wrap items-center gap-5 rounded-3xl border border-border bg-surface px-7 py-6">
+      className={cn(
+        tileLift,
+        'flex flex-wrap items-center gap-5 rounded-3xl border border-border bg-surface px-7 py-6'
+      )}>
       <span
         aria-hidden="true"
         className="flex size-16 shrink-0 items-center justify-center rounded-full bg-accent text-[22px] font-extrabold text-on-accent shadow-[0_0_0_4px_var(--accent-soft)]">

@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
 import { Calendar } from '~/components/form/DatePicker';
 import { Button } from '~/components/ui/Button';
+import { Modal } from '~/components/ui/Modal';
 import { cn } from '~/lib/cn';
 import { isSameDay, toIsoDate } from '~/lib/dates';
 import { formatBalance } from '~/lib/format';
@@ -145,3 +146,18 @@ export const PaydayPickerActions = ({
     </div>
   );
 };
+
+/* The whole picker as a dialog: centred on desktop, a bottom sheet on mobile */
+export const PaydayOverrideDialog = ({ override }: { override: PaydayOverride }) => (
+  <Modal
+    open={override.open}
+    onOpenChange={override.setOpen}
+    title="Change this payday"
+    description={`Just this payday. Usually ${formatShortDate(override.usual)}.`}
+    footer={<PaydayPickerActions override={override} onCancel={() => override.setOpen(false)} />}>
+    <p className="-mt-1 pl-1 text-[13px] font-medium text-muted md:pl-0">
+      Just this one. Usually {formatShortDate(override.usual)}.
+    </p>
+    <PaydayPickerBody override={override} />
+  </Modal>
+);

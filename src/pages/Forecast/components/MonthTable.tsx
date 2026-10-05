@@ -2,6 +2,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Select } from '~/components/form/Select';
 import { IconButton } from '~/components/ui/IconButton';
 import { SegmentedControl } from '~/components/ui/SegmentedControl';
+import { tileLift } from '~/components/ui/Tile';
 import { cn } from '~/lib/cn';
 import { formatShortDay } from '~/lib/dates';
 import { formatBalance, formatMoney } from '~/lib/format';
@@ -102,6 +103,7 @@ export const MonthTable = ({
   return (
     <section
       className={cn(
+        tileLift,
         'flex flex-col gap-3 rounded-3xl border border-border bg-surface',
         compact ? 'px-4 pt-5 pb-4' : 'px-5 pt-6 pb-5'
       )}>
