@@ -5,5 +5,7 @@ query CurrentUser {
     email
     firstName
     surname
+    theme
+    accent
   }
 }

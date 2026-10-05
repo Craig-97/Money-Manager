@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
 
 export interface Session {
   token: string;
@@ -14,33 +13,53 @@ export type SessionEndReason = 'expired' | 'signed-out';
 interface AuthState {
   session: Session | null;
   endReason: SessionEndReason | null;
+  // False until the app has tried to restore a session from the refresh cookie
+  restored: boolean;
   startSession: (session: Session) => void;
   endSession: (reason: SessionEndReason) => void;
+  // The refresh cookie was tried and nobody is signed in
+  finishRestore: () => void;
 }
 
-const isExpired = (session: Session | null) => !!session && session.expiresAt <= Date.now();
+/*
+ * The access token only ever lives in memory. A session lasts across reloads through the httpOnly
+ * refresh cookie, which scripts can't read, so the app can't tell whether it has one. This flag in
+ * localStorage records that this browser signed in, so visitors who never have don't wait on a
+ * refresh request. It is not a credential.
+ */
+const HINT_KEY = 'mm-session';
 
-// TODO(phase 4): the token moves to memory with an httpOnly refresh cookie; until the API
-// supports that, it is kept in localStorage like the previous app did.
-export const useAuthStore = create<AuthState>()(
-  persist(
-    set => ({
-      session: null,
-      endReason: null,
-      startSession: session => set({ session, endReason: null }),
-      endSession: reason => set({ session: null, endReason: reason })
-    }),
-    {
-      name: 'mm-auth',
-      version: 1,
-      partialize: s => ({ session: s.session }),
-      // A token that expired while the app was closed ends the session straight away
-      onRehydrateStorage: () => s => {
-        if (s && isExpired(s.session)) s.endSession('expired');
-      }
-    }
-  )
-);
+const hasSessionHint = () => {
+  try {
+    return localStorage.getItem(HINT_KEY) === '1';
+  } catch {
+    return false;
+  }
+};
+
+const setSessionHint = (signedIn: boolean) => {
+  try {
+    if (signedIn) localStorage.setItem(HINT_KEY, '1');
+    else localStorage.removeItem(HINT_KEY);
+  } catch {
+    // Storage is blocked; the person just signs in again after a reload
+  }
+};
+
+export const useAuthStore = create<AuthState>()(set => ({
+  session: null,
+  endReason: null,
+  restored: !hasSessionHint(),
+  startSession: session => {
+    setSessionHint(true);
+    set({ session, endReason: null, restored: true });
+  },
+  endSession: reason => {
+    setSessionHint(false);
+    set({ session: null, endReason: reason, restored: true });
+  },
+  finishRestore: () => set({ restored: true })
+}));
 
 /* The current token, for code outside React such as the Apollo auth link */
 export const getAuthToken = () => useAuthStore.getState().session?.token;

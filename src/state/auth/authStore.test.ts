@@ -1,36 +1,39 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { getAuthToken, useAuthStore } from './authStore';
 
-const session = (expiresAt: number) => ({ token: 'stored-token', userId: 'user-1', expiresAt });
-
-const restore = async (saved: object) => {
-  localStorage.setItem('mm-auth', JSON.stringify({ state: saved, version: 1 }));
-  await useAuthStore.persist.rehydrate();
-};
+const session = { token: 'token', userId: 'user-1', expiresAt: Date.now() + 60_000 };
 
 afterEach(() => {
+  localStorage.clear();
   useAuthStore.setState(useAuthStore.getInitialState(), true);
 });
 
 describe('auth store', () => {
-  it('restores a saved session that is still valid', async () => {
-    await restore({ session: session(Date.now() + 60_000) });
+  it('keeps the token in memory only', () => {
+    useAuthStore.getState().startSession(session);
 
-    expect(getAuthToken()).toBe('stored-token');
-    expect(useAuthStore.getState().endReason).toBeNull();
+    expect(getAuthToken()).toBe('token');
+    expect(JSON.stringify({ ...localStorage })).not.toContain('token');
   });
 
-  it('ends a saved session that expired while the app was closed', async () => {
-    await restore({ session: session(Date.now() - 1) });
+  it('remembers that this browser signed in, so a reload knows to restore the session', () => {
+    useAuthStore.getState().startSession(session);
+    expect(localStorage.getItem('mm-session')).toBe('1');
 
-    expect(getAuthToken()).toBeUndefined();
-    expect(useAuthStore.getState().endReason).toBe('expired');
-  });
-
-  it('only saves the session, not why the last one ended', () => {
-    useAuthStore.getState().startSession(session(Date.now() + 60_000));
     useAuthStore.getState().endSession('signed-out');
+    expect(localStorage.getItem('mm-session')).toBeNull();
+    expect(useAuthStore.getState()).toMatchObject({ session: null, endReason: 'signed-out' });
+  });
 
-    expect(JSON.parse(localStorage.getItem('mm-auth')!).state).toEqual({ session: null });
+  it('has nothing to restore in a browser that never signed in', () => {
+    expect(useAuthStore.getInitialState().restored).toBe(true);
+  });
+
+  it('waits for the refresh cookie in a browser that signed in before', async () => {
+    localStorage.setItem('mm-session', '1');
+    useAuthStore.setState({ restored: false });
+
+    useAuthStore.getState().finishRestore();
+    expect(useAuthStore.getState().restored).toBe(true);
   });
 });

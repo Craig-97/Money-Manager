@@ -44,8 +44,7 @@ export const Forecast = () => {
         actions={
           account ? (
             <span
-              className={`flex h-11 items-center gap-2 rounded-full border border-border bg-surface px-4 text-[13px] font-semibold text-muted ${tileLift}`}
-            >
+              className={`flex h-11 items-center gap-2 rounded-full border border-border bg-surface px-4 text-[13px] font-semibold text-muted ${tileLift}`}>
               <CalendarDays size={16} aria-hidden="true" />
               {paidText(account.payday)} ·{' '}
               <span className="num font-bold text-text">

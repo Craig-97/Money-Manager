@@ -21,10 +21,8 @@ import { ROUTES } from '~/constants';
 import { ResetPasswordPanel } from './components';
 import { useResetPasswordForm, useResetToken } from './hooks';
 
-// TODO(phase 4): show "for <email>" under the heading, as the design does. The API's token check
-// only says whether the link is valid, so it needs to return the account's email too.
 export const ResetPassword = () => {
-  const { token, status } = useResetToken();
+  const { token, status, email } = useResetToken();
   const { register, control, onSubmit, outcome, errors, isSubmitting } =
     useResetPasswordForm(token);
   const password = useWatch({ control, name: 'password' });
@@ -44,7 +42,13 @@ export const ResetPassword = () => {
 
       {view === 'valid' ? (
         <form noValidate onSubmit={onSubmit} className="flex flex-1 flex-col gap-5 md:flex-none">
-          <AuthHeading title="Choose a new password" icon={KeyIcon} iconOnMobile />
+          <AuthHeading title="Choose a new password" icon={KeyIcon} iconOnMobile>
+            {email ? (
+              <>
+                for <span className="font-bold text-text">{email}</span>
+              </>
+            ) : null}
+          </AuthHeading>
 
           <div className="flex flex-col gap-[18px] md:mt-3 md:gap-5">
             <AuthField id="password" label="New password" error={errors.password?.message}>

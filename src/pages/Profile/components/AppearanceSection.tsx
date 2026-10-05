@@ -56,9 +56,8 @@ export const AppearanceSection = () => {
       id="appearance"
       icon={SECTION_ICONS.appearance}
       title="Appearance"
-      // TODO(phase 4): save these on the user so they follow you to other devices
-      description="Saved on this device."
-      mobileDescription="Saved on this device.">
+      description="Saved to your account, so they follow you to other devices."
+      mobileDescription="Saved to your account.">
       <div>
         <SettingRow
           labelId="appearance-theme"

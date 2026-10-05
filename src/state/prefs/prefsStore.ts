@@ -24,8 +24,7 @@ interface PrefsState {
   setAccent: (accent: string) => void;
 }
 
-// TODO(phase 4): also save these on the user through the API so they follow you across devices.
-// The storage key and shape are read by the inline script in index.html to avoid a theme flash.
+// Also saved on the user while signed in (see useServerPrefs). The storage key and shape are read by the inline script in index.html to avoid a theme flash.
 export const usePrefsStore = create<PrefsState>()(
   persist(
     set => ({

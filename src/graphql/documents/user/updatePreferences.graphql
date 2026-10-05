@@ -1,0 +1,10 @@
+# Saves the theme and accent so they follow the user to other devices
+mutation UpdatePreferences($theme: ThemePreference, $accent: String) {
+  updatePreferences(theme: $theme, accent: $accent) {
+    user {
+      id
+      theme
+      accent
+    }
+  }
+}

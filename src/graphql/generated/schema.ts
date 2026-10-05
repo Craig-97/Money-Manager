@@ -169,14 +169,18 @@ export type Mutation = {
   editOneOffPayment: OneOffPaymentResponse;
   editPayday: PaydayResponse;
   editUser: UserResponse;
+  login: AuthData;
+  logout: PasswordResetResponse;
   markPaymentsPaid: AccountResponse;
   markPaymentsUnpaid: AccountResponse;
+  refreshSession: AuthData;
   registerAndLogin: AuthData;
   requestPasswordReset: PasswordResetResponse;
   resetPassword: AuthData;
   setPaydayOverride: PaydayResponse;
   startPaydayCycle: AccountResponse;
   updateCurrentUser: UserResponse;
+  updatePreferences: UserResponse;
   updateRecurringPayment: RecurringPaymentResponse;
 };
 
@@ -291,6 +295,11 @@ export type MutationEditUserArgs = {
   user: UserInput;
 };
 
+export type MutationLoginArgs = {
+  email: Scalars['String']['input'];
+  password: Scalars['String']['input'];
+};
+
 export type MutationMarkPaymentsPaidArgs = {
   input: MarkPaymentsPaidInput;
 };
@@ -324,6 +333,11 @@ export type MutationStartPaydayCycleArgs = {
 
 export type MutationUpdateCurrentUserArgs = {
   input: UserDetailsInput;
+};
+
+export type MutationUpdatePreferencesArgs = {
+  accent?: InputMaybe<Scalars['String']['input']>;
+  theme?: InputMaybe<ThemePreference>;
 };
 
 export type MutationUpdateRecurringPaymentArgs = {
@@ -408,6 +422,12 @@ export type PasswordResetResponse = {
   success: Scalars['Boolean']['output'];
 };
 
+export type PasswordResetTokenCheck = {
+  __typename: 'PasswordResetTokenCheck';
+  email: Maybe<Scalars['String']['output']>;
+  valid: Scalars['Boolean']['output'];
+};
+
 export type PayFrequency =
   'ANNUAL' | 'BIANNUAL' | 'FORTNIGHTLY' | 'FOUR_WEEKLY' | 'MONTHLY' | 'QUARTERLY' | 'WEEKLY';
 
@@ -460,12 +480,11 @@ export type Query = {
   accounts: Array<Account>;
   bill: Maybe<Bill>;
   bills: Array<Bill>;
-  login: AuthData;
   note: Maybe<Note>;
   notes: Array<Note>;
   oneOffPayment: Maybe<OneOffPayment>;
   oneOffPayments: Array<OneOffPayment>;
-  passwordResetTokenValid: Scalars['Boolean']['output'];
+  passwordResetTokenValid: PasswordResetTokenCheck;
   payday: Maybe<Payday>;
   paydays: Array<Payday>;
   recurringPayment: Maybe<RecurringPayment>;
@@ -485,11 +504,6 @@ export type QueryBillArgs = {
 
 export type QueryBillsArgs = {
   accountId: Scalars['ID']['input'];
-};
-
-export type QueryLoginArgs = {
-  email: Scalars['String']['input'];
-  password: Scalars['String']['input'];
 };
 
 export type QueryNoteArgs = {
@@ -589,6 +603,8 @@ export type StartPaydayCycleInput = {
   recurringPaymentIds: Array<Scalars['ID']['input']>;
 };
 
+export type ThemePreference = 'DARK' | 'LIGHT' | 'SYSTEM';
+
 export type UpdateRecurringPaymentInput = {
   amount?: InputMaybe<Scalars['Float']['input']>;
   category?: InputMaybe<RecurringPaymentCategory>;
@@ -602,11 +618,13 @@ export type UpdateRecurringPaymentInput = {
 
 export type User = {
   __typename: 'User';
+  accent: Maybe<Scalars['String']['output']>;
   account: Maybe<Scalars['ID']['output']>;
   email: Scalars['String']['output'];
   firstName: Scalars['String']['output'];
   id: Scalars['ID']['output'];
   surname: Scalars['String']['output'];
+  theme: Maybe<ThemePreference>;
 };
 
 export type UserDetailsInput = {

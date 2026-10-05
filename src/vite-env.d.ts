@@ -1,8 +1,8 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
-  readonly VITE_DEV_API_URL?: string;
-  readonly VITE_PROD_API_URL?: string;
+  // Where the API is; the site's own /graphql unless set
+  readonly VITE_API_URL?: string;
   // Development only: 'true' runs against the in-memory fake API
   readonly VITE_MOCK_API?: string;
 }

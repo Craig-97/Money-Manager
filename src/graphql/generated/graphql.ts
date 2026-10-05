@@ -283,28 +283,73 @@ export type AuthSessionFragment = {
   __typename: 'AuthData';
   token: string;
   tokenExpiration: number;
-  user: { __typename: 'User'; id: string; email: string; firstName: string; surname: string };
+  user: {
+    __typename: 'User';
+    id: string;
+    email: string;
+    firstName: string;
+    surname: string;
+    theme: Types.ThemePreference | null;
+    accent: string | null;
+  };
 };
 
-export type LoginQueryVariables = Exact<{
+export type LoginMutationVariables = Exact<{
   email: string;
   password: string;
 }>;
 
-export type LoginQuery = {
+export type LoginMutation = {
   login: {
     __typename: 'AuthData';
     token: string;
     tokenExpiration: number;
-    user: { __typename: 'User'; id: string; email: string; firstName: string; surname: string };
+    user: {
+      __typename: 'User';
+      id: string;
+      email: string;
+      firstName: string;
+      surname: string;
+      theme: Types.ThemePreference | null;
+      accent: string | null;
+    };
   };
 };
+
+export type LogoutMutationVariables = Exact<{ [key: string]: never }>;
+
+export type LogoutMutation = { logout: { __typename: 'PasswordResetResponse'; success: boolean } };
 
 export type PasswordResetTokenValidQueryVariables = Exact<{
   token: string;
 }>;
 
-export type PasswordResetTokenValidQuery = { passwordResetTokenValid: boolean };
+export type PasswordResetTokenValidQuery = {
+  passwordResetTokenValid: {
+    __typename: 'PasswordResetTokenCheck';
+    valid: boolean;
+    email: string | null;
+  };
+};
+
+export type RefreshSessionMutationVariables = Exact<{ [key: string]: never }>;
+
+export type RefreshSessionMutation = {
+  refreshSession: {
+    __typename: 'AuthData';
+    token: string;
+    tokenExpiration: number;
+    user: {
+      __typename: 'User';
+      id: string;
+      email: string;
+      firstName: string;
+      surname: string;
+      theme: Types.ThemePreference | null;
+      accent: string | null;
+    };
+  };
+};
 
 export type RegisterAndLoginMutationVariables = Exact<{
   user: Types.UserInput;
@@ -315,7 +360,15 @@ export type RegisterAndLoginMutation = {
     __typename: 'AuthData';
     token: string;
     tokenExpiration: number;
-    user: { __typename: 'User'; id: string; email: string; firstName: string; surname: string };
+    user: {
+      __typename: 'User';
+      id: string;
+      email: string;
+      firstName: string;
+      surname: string;
+      theme: Types.ThemePreference | null;
+      accent: string | null;
+    };
   };
 };
 
@@ -337,7 +390,15 @@ export type ResetPasswordMutation = {
     __typename: 'AuthData';
     token: string;
     tokenExpiration: number;
-    user: { __typename: 'User'; id: string; email: string; firstName: string; surname: string };
+    user: {
+      __typename: 'User';
+      id: string;
+      email: string;
+      firstName: string;
+      surname: string;
+      theme: Types.ThemePreference | null;
+      accent: string | null;
+    };
   };
 };
 
@@ -619,6 +680,8 @@ export type CurrentUserQuery = {
     email: string;
     firstName: string;
     surname: string;
+    theme: Types.ThemePreference | null;
+    accent: string | null;
   } | null;
 };
 
@@ -641,6 +704,23 @@ export type UpdateCurrentUserMutation = {
       email: string;
       firstName: string;
       surname: string;
+    } | null;
+  };
+};
+
+export type UpdatePreferencesMutationVariables = Exact<{
+  theme?: Types.ThemePreference | null | undefined;
+  accent?: string | null | undefined;
+}>;
+
+export type UpdatePreferencesMutation = {
+  updatePreferences: {
+    __typename: 'UserResponse';
+    user: {
+      __typename: 'User';
+      id: string;
+      theme: Types.ThemePreference | null;
+      accent: string | null;
     } | null;
   };
 };
@@ -901,7 +981,9 @@ export const AuthSessionFragmentDoc = {
                 { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'email' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'surname' } }
+                { kind: 'Field', name: { kind: 'Name', value: 'surname' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'theme' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'accent' } }
               ]
             }
           }
@@ -1621,7 +1703,7 @@ export const LoginDocument = {
   definitions: [
     {
       kind: 'OperationDefinition',
-      operation: 'query',
+      operation: 'mutation',
       name: { kind: 'Name', value: 'Login' },
       variableDefinitions: [
         {
@@ -1685,7 +1767,9 @@ export const LoginDocument = {
                 { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'email' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'surname' } }
+                { kind: 'Field', name: { kind: 'Name', value: 'surname' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'theme' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'accent' } }
               ]
             }
           }
@@ -1693,7 +1777,30 @@ export const LoginDocument = {
       }
     }
   ]
-} as unknown as DocumentNode<LoginQuery, LoginQueryVariables>;
+} as unknown as DocumentNode<LoginMutation, LoginMutationVariables>;
+export const LogoutDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'Logout' },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'logout' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [{ kind: 'Field', name: { kind: 'Name', value: 'success' } }]
+            }
+          }
+        ]
+      }
+    }
+  ]
+} as unknown as DocumentNode<LogoutMutation, LogoutMutationVariables>;
 export const PasswordResetTokenValidDocument = {
   kind: 'Document',
   definitions: [
@@ -1723,13 +1830,70 @@ export const PasswordResetTokenValidDocument = {
                 name: { kind: 'Name', value: 'token' },
                 value: { kind: 'Variable', name: { kind: 'Name', value: 'token' } }
               }
-            ]
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'valid' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'email' } }
+              ]
+            }
           }
         ]
       }
     }
   ]
 } as unknown as DocumentNode<PasswordResetTokenValidQuery, PasswordResetTokenValidQueryVariables>;
+export const RefreshSessionDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'RefreshSession' },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'refreshSession' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [{ kind: 'FragmentSpread', name: { kind: 'Name', value: 'AuthSession' } }]
+            }
+          }
+        ]
+      }
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'AuthSession' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'AuthData' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'token' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'tokenExpiration' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'user' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'email' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'surname' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'theme' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'accent' } }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+} as unknown as DocumentNode<RefreshSessionMutation, RefreshSessionMutationVariables>;
 export const RegisterAndLoginDocument = {
   kind: 'Document',
   definitions: [
@@ -1786,7 +1950,9 @@ export const RegisterAndLoginDocument = {
                 { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'email' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'surname' } }
+                { kind: 'Field', name: { kind: 'Name', value: 'surname' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'theme' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'accent' } }
               ]
             }
           }
@@ -1904,7 +2070,9 @@ export const ResetPasswordDocument = {
                 { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'email' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'surname' } }
+                { kind: 'Field', name: { kind: 'Name', value: 'surname' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'theme' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'accent' } }
               ]
             }
           }
@@ -2874,7 +3042,9 @@ export const CurrentUserDocument = {
                 { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'email' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'surname' } }
+                { kind: 'Field', name: { kind: 'Name', value: 'surname' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'theme' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'accent' } }
               ]
             }
           }
@@ -2960,3 +3130,63 @@ export const UpdateCurrentUserDocument = {
     }
   ]
 } as unknown as DocumentNode<UpdateCurrentUserMutation, UpdateCurrentUserMutationVariables>;
+export const UpdatePreferencesDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'UpdatePreferences' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'theme' } },
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'ThemePreference' } }
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'accent' } },
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } }
+        }
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'updatePreferences' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'theme' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'theme' } }
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'accent' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'accent' } }
+              }
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'user' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'theme' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'accent' } }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+} as unknown as DocumentNode<UpdatePreferencesMutation, UpdatePreferencesMutationVariables>;

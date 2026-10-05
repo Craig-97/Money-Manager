@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { screen, waitFor } from '@testing-library/react';
 import { useAuthStore } from '~/state/auth';
 import { createFakeApi, DEFAULT_USER } from '~/test/fakeApi';
@@ -94,5 +94,22 @@ describe('sessions', () => {
     expect(await findPageHeading('Welcome back')).toBeInTheDocument();
     expect(screen.getByText(/session has expired/)).toBeInTheDocument();
     await waitFor(() => expect(useAuthStore.getState().endReason).toBe('expired'));
+  });
+
+  it('swaps an expired token for a new one and carries on without signing out', async () => {
+    const api = createFakeApi();
+    api.failNext('Account', 'UNAUTHENTICATED', { extensions: { expired: true } });
+    const refresh = vi.fn(async () => ({
+      __typename: 'AuthData' as const,
+      token: 'fresh-token',
+      tokenExpiration: 1,
+      user: { ...DEFAULT_USER, __typename: 'User' as const }
+    }));
+    renderApp({ route: '/dashboard', api, refresh });
+
+    expect(await findPageHeading('Dashboard')).toBeInTheDocument();
+    expect(refresh).toHaveBeenCalledTimes(1);
+    expect(useAuthStore.getState().session?.token).toBe('fresh-token');
+    expect(screen.queryByText(/session has expired/)).not.toBeInTheDocument();
   });
 });

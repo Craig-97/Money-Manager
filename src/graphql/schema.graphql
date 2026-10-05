@@ -1,9 +1,14 @@
+enum ThemePreference {
+  DARK
+  LIGHT
+  SYSTEM
+}
+
 type Query {
   users: [User!]!
   user(id: ID): User
-  login(email: String!, password: String!): AuthData!
   tokenFindUser: User
-  passwordResetTokenValid(token: String!): Boolean!
+  passwordResetTokenValid(token: String!): PasswordResetTokenCheck!
   accounts: [Account!]!
   account(id: ID): Account
   bills(accountId: ID!): [Bill!]!
@@ -24,6 +29,8 @@ type User {
   email: String!
   firstName: String!
   surname: String!
+  theme: ThemePreference
+  accent: String
 }
 
 input UserInput {
@@ -52,11 +59,19 @@ type AuthData {
   tokenExpiration: Int!
 }
 
+type PasswordResetTokenCheck {
+  valid: Boolean!
+  email: String
+}
+
 type PasswordResetResponse {
   success: Boolean!
 }
 
 type Mutation {
+  login(email: String!, password: String!): AuthData!
+  refreshSession: AuthData!
+  logout: PasswordResetResponse!
   registerAndLogin(user: UserInput): AuthData!
   requestPasswordReset(email: String!): PasswordResetResponse!
   resetPassword(token: String!, password: String!): AuthData!
@@ -66,6 +81,7 @@ type Mutation {
   updateCurrentUser(input: UserDetailsInput!): UserResponse!
   changePassword(currentPassword: String!, newPassword: String!): UserResponse!
   deleteCurrentUser: UserResponse!
+  updatePreferences(theme: ThemePreference, accent: String): UserResponse!
   createAccount(account: CreateAccountInput!): AccountResponse!
   editAccount(id: ID!, account: EditAccountInput!): AccountResponse!
   deleteAccount(id: ID!): AccountResponse!
@@ -84,9 +100,7 @@ type Mutation {
   createRecurringPayment(input: CreateRecurringPaymentInput!): RecurringPaymentResponse!
   updateRecurringPayment(id: ID!, input: UpdateRecurringPaymentInput!): RecurringPaymentResponse!
   deleteRecurringPayment(id: ID!): RecurringPaymentResponse!
-  batchUpdateRecurringPayments(
-    input: [BatchUpdateRecurringPaymentInput!]!
-  ): BatchRecurringPaymentResponse!
+  batchUpdateRecurringPayments(input: [BatchUpdateRecurringPaymentInput!]!): BatchRecurringPaymentResponse!
   batchDeleteRecurringPayments(ids: [ID!]!): BatchDeleteResponse!
   createNote(note: NoteInput!): NoteResponse!
   editNote(id: ID!, note: NoteInput!): NoteResponse!

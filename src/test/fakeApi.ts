@@ -1,6 +1,7 @@
 import { Observable } from 'rxjs';
 import { ApolloLink } from '@apollo/client';
 import { buildSchema, execute, ExecutionResult, GraphQLError } from 'graphql';
+import { ThemePreference } from '~/graphql/generated';
 import { addDays, fromApiDate, startOfToday, toIsoDate } from '~/lib/dates';
 import { nextOccurrence } from '~/lib/payments';
 import { typeDefs } from './schema';
@@ -64,6 +65,8 @@ export interface FakeUser {
   email: string;
   firstName: string;
   surname: string;
+  theme: ThemePreference | null;
+  accent: string | null;
 }
 
 export interface FakeDb {
@@ -84,7 +87,9 @@ export const DEFAULT_USER: FakeUser = {
   id: 'user-1',
   email: 'test@example.com',
   firstName: 'Test',
-  surname: 'Account'
+  surname: 'Account',
+  theme: null,
+  accent: null
 };
 
 export const DEFAULT_PASSWORD = 'password1';
@@ -311,14 +316,24 @@ export const createFakeApi = ({
         id: 'user-new',
         email: input.email,
         firstName: input.firstName,
-        surname: input.surname
+        surname: input.surname,
+        theme: null,
+        accent: null
       };
       db.password = input.password;
       db.account = null;
       return authData();
     },
     requestPasswordReset: () => ({ success: true }),
-    passwordResetTokenValid: ({ token }: Args) => resetTokens.has(token),
+    passwordResetTokenValid: ({ token }: Args) => ({
+      valid: resetTokens.has(token),
+      email: resetTokens.has(token) ? db.user.email : null
+    }),
+    logout: () => ({ success: true }),
+    updatePreferences: ({ theme, accent }: Args) => {
+      db.user = { ...db.user, theme: theme ?? db.user.theme, accent: accent ?? db.user.accent };
+      return { user: db.user, success: true };
+    },
     resetPassword: ({ token, password: newPassword }: Args) => {
       if (!resetTokens.has(token)) {
         throw apiError(
