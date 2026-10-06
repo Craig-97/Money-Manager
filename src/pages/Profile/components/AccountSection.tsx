@@ -63,7 +63,7 @@ const LogoutEverywhereDialog = ({
           size="lg"
           onClick={everywhere.confirm}
           loading={everywhere.signingOut}
-          loadingText="Signing out�"
+          loadingText="Signing out…"
           className="font-bold">
           <MonitorOff size={16} aria-hidden="true" />
           Sign out everywhere
