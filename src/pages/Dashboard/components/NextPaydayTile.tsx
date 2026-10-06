@@ -149,8 +149,12 @@ export const NextPaydayTile = ({ dashboard }: { dashboard: Dashboard }) => {
             amount={summary.afterRecurring}
             note={
               <>
-                <span className="num font-bold text-expense">
-                  {MINUS}
+                <span
+                  className={cn(
+                    'num font-bold',
+                    summary.monthlyRecurring < 0 ? 'text-income' : 'text-expense'
+                  )}>
+                  {summary.monthlyRecurring < 0 ? '+' : MINUS}
                   {formatMoney(summary.monthlyRecurring)}
                 </span>{' '}
                 next cycle

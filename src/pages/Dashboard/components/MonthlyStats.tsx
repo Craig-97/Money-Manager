@@ -94,6 +94,7 @@ export const MonthlyStats = ({ dashboard }: { dashboard: Dashboard }) => {
       <div className={statClasses}>
         <h2 className={labelClasses}>Monthly recurring</h2>
         <p className="num text-[32px] leading-[1.1] font-extrabold">
+          {summary.monthlyRecurring < 0 ? '+' : ''}
           {formatMoney(summary.monthlyRecurring)}
           {perMonth}
         </p>

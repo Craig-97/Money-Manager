@@ -123,6 +123,35 @@ describe('summarise', () => {
     expect(summary.recurringShare).toBeCloseTo(21.39, 2);
   });
 
+  it('takes recurring income off the recurring total, as v1 did', () => {
+    const withIncome = summarise({
+      payments: [
+        ...designPayments,
+        ...toPayments(
+          {
+            recurringPayments: [
+              recurring({
+                name: 'Rent from lodger',
+                amount: 300,
+                type: 'INCOME',
+                nextDueDate: apiDate('2026-11-05')
+              })
+            ]
+          },
+          today
+        )
+      ],
+      bankBalance: 10000,
+      monthlyIncome: 3600,
+      cycle,
+      today
+    });
+    expect(withIncome.monthlyRecurring).toBe(470);
+    expect(withIncome.afterRecurring).toBe(12295);
+    expect(withIncome.discretionary).toBe(3130);
+    expect(withIncome.recurringCount).toBe(4);
+  });
+
   it('finds what is due today', () => {
     expect(summary.dueToday?.name).toBe('Netflix');
   });

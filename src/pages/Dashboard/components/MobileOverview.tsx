@@ -273,7 +273,7 @@ export const MobileFigures = ({ dashboard }: { dashboard: Dashboard }) => {
       <FigureRow
         last
         label="Monthly recurring"
-        value={formatMoney(summary.monthlyRecurring)}
+        value={(summary.monthlyRecurring < 0 ? '+' : '') + formatMoney(summary.monthlyRecurring)}
         aside={
           summary.annualRecurring > 0 ? (
             <>

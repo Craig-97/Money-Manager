@@ -25,17 +25,16 @@ export const summarise = ({ payments, bankBalance, monthlyIncome, cycle, today }
   const inCycle = payments.filter(payment => isInCycle(payment, cycle));
   const unpaid = inCycle.filter(payment => payment.state === 'unpaid');
   const upcomingNet = roundPence(unpaid.reduce((total, p) => total + p.signedAmount, 0));
-
   // Recurring money out that is still running, as a monthly figure; yearly ones are kept apart
-  const activeOutgoings = payments.filter(
-    payment => payment.kind === 'recurring' && payment.type === 'EXPENSE' && payment.dueDate
+  const activeRecurring = payments.filter(
+    payment => payment.kind === 'recurring' && payment.dueDate
   );
   let monthlyRecurring = 0;
   let annualRecurring = 0;
-  for (const payment of activeOutgoings) {
+  for (const payment of activeRecurring) {
     if (payment.kind !== 'recurring') continue;
-    if (payment.frequency === 'ANNUALLY') annualRecurring += payment.amount;
-    else monthlyRecurring += payment.amount * PER_MONTH[payment.frequency];
+    if (payment.frequency === 'ANNUALLY') annualRecurring -= payment.signedAmount;
+    else monthlyRecurring -= payment.signedAmount * PER_MONTH[payment.frequency];
   }
   monthlyRecurring = roundPence(monthlyRecurring);
   annualRecurring = roundPence(annualRecurring);
@@ -44,7 +43,7 @@ export const summarise = ({ payments, bankBalance, monthlyIncome, cycle, today }
   const onPayday = roundPence(freeToSpend + monthlyIncome);
   const daysToPayday = Math.max(1, daysBetween(today, cycle.end));
   const recurringShare =
-    monthlyIncome > 0 ? Math.min(100, (monthlyRecurring / monthlyIncome) * 100) : 100;
+    monthlyIncome > 0 ? Math.min(100, Math.max(0, (monthlyRecurring / monthlyIncome) * 100)) : 100;
 
   return {
     inCycle,
@@ -56,7 +55,7 @@ export const summarise = ({ payments, bankBalance, monthlyIncome, cycle, today }
     onPayday,
     monthlyRecurring,
     annualRecurring,
-    recurringCount: activeOutgoings.length,
+    recurringCount: activeRecurring.length,
     afterRecurring: roundPence(onPayday - monthlyRecurring),
     discretionary: roundPence(monthlyIncome - monthlyRecurring),
     recurringShare,
