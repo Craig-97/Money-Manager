@@ -1,4 +1,5 @@
 import { useMutation } from '@apollo/client/react';
+import { removeFromAccount } from '~/graphql/cache';
 import {
   BatchDeleteOneOffPaymentsDocument,
   BatchDeleteRecurringPaymentsDocument,
@@ -6,7 +7,6 @@ import {
   MarkPaymentsUnpaidDocument,
   SkipRecurringPaymentsDocument
 } from '~/graphql/generated';
-import { removeFromAccount } from '~/lib/apollo';
 import { getApiErrorMessage } from '~/lib/errors';
 import { formatMoney } from '~/lib/format';
 import { Payment } from '~/lib/payments';

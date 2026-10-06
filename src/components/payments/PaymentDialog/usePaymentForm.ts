@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useMutation } from '@apollo/client/react';
+import { addOneOffPayment, addRecurringPayment } from '~/graphql/cache';
 import {
   CreateOneOffPaymentDocument,
   CreateRecurringPaymentDocument,
@@ -10,7 +11,6 @@ import {
   UpdateOneOffPaymentDocument,
   UpdateRecurringPaymentDocument
 } from '~/graphql/generated';
-import { addOneOffPayment, addRecurringPayment } from '~/lib/apollo';
 import { addDays, parseIsoDate, toApiDate } from '~/lib/dates';
 import { getApiErrorMessage, getErrorCode } from '~/lib/errors';
 import { formatMoneyInput, parseMoney } from '~/lib/format';

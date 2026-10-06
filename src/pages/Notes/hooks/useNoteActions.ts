@@ -1,11 +1,11 @@
 import { useMutation } from '@apollo/client/react';
+import { addNote, removeFromAccount } from '~/graphql/cache';
 import {
   CreateNoteDocument,
   DeleteNoteDocument,
   NoteColor,
   UpdateNoteDocument
 } from '~/graphql/generated';
-import { addNote, removeFromAccount } from '~/lib/apollo';
 import { getApiErrorMessage } from '~/lib/errors';
 import { showToast } from '~/state/toast';
 import { Note } from '../notesModel';
