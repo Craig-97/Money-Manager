@@ -11,11 +11,9 @@ export type AccountStatus = 'loading' | 'ready' | 'missing' | 'error';
  * account, so the pages behind the guard have their data as soon as it's ready.
  */
 export const useAccountStatus = () => {
-  const userId = useAuthStore(s => s.session?.userId);
-  const { data, error, refetch } = useQuery(
-    AccountDocument,
-    userId ? { variables: { userId } } : skipToken
-  );
+  // The API finds the account from the token, so this only waits for a session
+  const signedIn = useAuthStore(s => Boolean(s.session));
+  const { data, error, refetch } = useQuery(AccountDocument, signedIn ? {} : skipToken);
 
   const getStatus = (): AccountStatus => {
     if (hasErrorCode(error, ERRORS.ACCOUNT_NOT_LINKED)) return 'missing';

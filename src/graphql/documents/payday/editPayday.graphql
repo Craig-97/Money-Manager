@@ -1,7 +1,0 @@
-mutation EditPayday($id: ID!, $payday: PaydayInput!) {
-  editPayday(id: $id, payday: $payday) {
-    payday {
-      ...PaydayFields
-    }
-  }
-}

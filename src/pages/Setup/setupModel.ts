@@ -268,10 +268,9 @@ export const summariseFirstCycle = (values: SetupValues, holidays: BankHolidays,
 };
 
 /* The answers as the API's createAccount input */
-export const toCreateAccountInput = (values: SetupValues, userId: string): CreateAccountInput => {
+export const toCreateAccountInput = (values: SetupValues): CreateAccountInput => {
   const payday = paydayConfig(values);
   return {
-    userId,
     bankBalance: parseMoney(values.balance) ?? 0,
     monthlyIncome: parseMoney(values.income) ?? 0,
     payday: {

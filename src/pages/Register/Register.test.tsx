@@ -27,7 +27,7 @@ describe('register', () => {
     expect(screen.getByText(/Nice to meet you, Sam/)).toBeInTheDocument();
     expect(api.callsTo('RegisterAndLogin')).toEqual([
       {
-        user: {
+        input: {
           firstName: 'Sam',
           surname: 'Jones',
           email: 'sam@example.com',

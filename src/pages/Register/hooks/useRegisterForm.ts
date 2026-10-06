@@ -34,9 +34,9 @@ export const useRegisterForm = () => {
   });
   const { setError } = form;
 
-  const onSubmit = form.handleSubmit(async user => {
+  const onSubmit = form.handleSubmit(async input => {
     try {
-      const { data } = await registerAndLogin({ variables: { user } });
+      const { data } = await registerAndLogin({ variables: { input } });
       if (data) setCreated(data.registerAndLogin);
     } catch (error) {
       switch (getErrorCode(error)) {

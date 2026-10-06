@@ -60,7 +60,7 @@ describe('routing', () => {
         .slice(0, 2)
         .sort()
     ).toEqual(['Account', 'CurrentUser']);
-    expect(api.callsTo('Account')).toEqual([{ userId: DEFAULT_USER.id }]);
+    expect(api.callsTo('Account')).toEqual([{}]);
   });
 
   it('offers a retry when the account fails to load', async () => {

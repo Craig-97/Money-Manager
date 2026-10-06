@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useMutation } from '@apollo/client/react';
-import { EditAccountDocument } from '~/graphql/generated';
+import { UpdateAccountDocument } from '~/graphql/generated';
 import { Account } from '~/hooks/useAccount';
 import { usePayCycle } from '~/hooks/usePayCycle';
 import { getApiErrorMessage } from '~/lib/errors';
@@ -13,7 +13,7 @@ const AMOUNT_ERROR = 'Enter an amount, like 1,250.00';
 /* Bank balance and income, with what they'd mean for free to spend shown as they're typed */
 export const useBalanceSettings = (account: Account) => {
   const { today, cycle } = usePayCycle(account.payday);
-  const [editAccount, { loading: saving }] = useMutation(EditAccountDocument);
+  const [updateAccount, { loading: saving }] = useMutation(UpdateAccountDocument);
   const [balance, setBalance] = useState(() => formatMoneyInput(account.bankBalance));
   const [income, setIncome] = useState(() => formatMoneyInput(account.monthlyIncome));
   const [submitted, setSubmitted] = useState(false);
@@ -34,7 +34,7 @@ export const useBalanceSettings = (account: Account) => {
     setSubmitted(true);
     if (bankBalance === null || monthlyIncome === null) return;
     try {
-      await editAccount({ variables: { id: account.id, account: { bankBalance, monthlyIncome } } });
+      await updateAccount({ variables: { id: account.id, input: { bankBalance, monthlyIncome } } });
       setSubmitted(false);
       setSaved({ balance, income });
       showToast({ message: 'Balances saved' });

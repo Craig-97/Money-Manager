@@ -4,7 +4,7 @@ import {
   BatchDeleteRecurringPaymentsDocument,
   MarkPaymentsPaidDocument,
   MarkPaymentsUnpaidDocument,
-  UpdateRecurringPaymentDocument
+  SkipRecurringPaymentsDocument
 } from '~/graphql/generated';
 import { removeFromAccount } from '~/lib/apollo';
 import { getApiErrorMessage } from '~/lib/errors';
@@ -34,7 +34,7 @@ const showError = (error: unknown) =>
 export const usePaymentActions = (accountId: string) => {
   const [markPaid] = useMutation(MarkPaymentsPaidDocument);
   const [markUnpaid] = useMutation(MarkPaymentsUnpaidDocument);
-  const [updateRecurring] = useMutation(UpdateRecurringPaymentDocument);
+  const [skipRecurring] = useMutation(SkipRecurringPaymentsDocument);
   const [deleteRecurring] = useMutation(BatchDeleteRecurringPaymentsDocument);
   const [deleteOneOffs] = useMutation(BatchDeleteOneOffPaymentsDocument);
 
@@ -79,7 +79,9 @@ export const usePaymentActions = (accountId: string) => {
   /* Leaves a recurring payment out of this cycle; it comes back on its next date */
   const skip = async (payment: Payment) => {
     try {
-      await updateRecurring({ variables: { id: payment.id, input: { status: 'SKIPPED' } } });
+      await skipRecurring({
+        variables: { input: { accountId, recurringPaymentIds: [payment.id] } }
+      });
       showToast({ message: `${payment.name} skipped this cycle` });
     } catch (error) {
       showError(error);

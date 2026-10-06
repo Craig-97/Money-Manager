@@ -77,10 +77,10 @@ describe('profile', () => {
     await user.click(save);
 
     expect(await screen.findByText('Payday settings saved')).toBeInTheDocument();
-    expect(api.callsTo('EditPayday')).toEqual([
+    expect(api.callsTo('UpdatePayday')).toEqual([
       {
         id: 'payday-1',
-        payday: expect.objectContaining({ frequency: 'MONTHLY', type: 'SET_DAY', dayOfMonth: 15 })
+        input: expect.objectContaining({ frequency: 'MONTHLY', type: 'SET_DAY', dayOfMonth: 15 })
       }
     ]);
   });
@@ -94,10 +94,10 @@ describe('profile', () => {
     await user.click(within(payday).getByRole('button', { name: 'Save changes' }));
 
     expect(await screen.findByText('Payday settings saved')).toBeInTheDocument();
-    expect(api.callsTo('EditPayday')).toEqual([
+    expect(api.callsTo('UpdatePayday')).toEqual([
       {
         id: 'payday-1',
-        payday: expect.objectContaining({ type: 'LAST_WEEKDAY', weekday: 'THURSDAY' })
+        input: expect.objectContaining({ type: 'LAST_WEEKDAY', weekday: 'THURSDAY' })
       }
     ]);
   });
@@ -161,10 +161,10 @@ describe('profile', () => {
     await user.click(save);
 
     expect(await screen.findByText('Balances saved')).toBeInTheDocument();
-    expect(api.callsTo('EditAccount')).toEqual([
+    expect(api.callsTo('UpdateAccount')).toEqual([
       {
         id: 'account-1',
-        account: { bankBalance: 2000, monthlyIncome: DEFAULT_ACCOUNT.monthlyIncome }
+        input: { bankBalance: 2000, monthlyIncome: DEFAULT_ACCOUNT.monthlyIncome }
       }
     ]);
   });

@@ -1,0 +1,11 @@
+# Leaves recurring payments out of this cycle, with no change to the bank balance
+mutation SkipRecurringPayments($input: SkipRecurringPaymentsInput!) {
+  skipRecurringPayments(input: $input) {
+    account {
+      id
+      recurringPayments {
+        ...RecurringPaymentFields
+      }
+    }
+  }
+}

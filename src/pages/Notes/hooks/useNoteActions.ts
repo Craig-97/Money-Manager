@@ -2,8 +2,8 @@ import { useMutation } from '@apollo/client/react';
 import {
   CreateNoteDocument,
   DeleteNoteDocument,
-  EditNoteDocument,
-  NoteColor
+  NoteColor,
+  UpdateNoteDocument
 } from '~/graphql/generated';
 import { addNote, removeFromAccount } from '~/lib/apollo';
 import { getApiErrorMessage } from '~/lib/errors';
@@ -21,13 +21,13 @@ const showError = (error: unknown) =>
 /* Adding, changing and deleting notes. Each returns whether it worked. */
 export const useNoteActions = (accountId: string) => {
   const [createNote] = useMutation(CreateNoteDocument);
-  const [editNote] = useMutation(EditNoteDocument);
+  const [updateNote] = useMutation(UpdateNoteDocument);
   const [deleteNote] = useMutation(DeleteNoteDocument);
 
   const create = async (draft: NoteDraft) => {
     try {
       await createNote({
-        variables: { note: { account: accountId, ...draft } },
+        variables: { input: { accountId, ...draft } },
         update: (cache, { data }) => {
           const note = data?.createNote.note;
           if (note) addNote(cache, accountId, note);
@@ -42,7 +42,7 @@ export const useNoteActions = (accountId: string) => {
 
   const edit = async (id: string, draft: NoteDraft) => {
     try {
-      await editNote({ variables: { id, note: draft } });
+      await updateNote({ variables: { id, input: draft } });
       return true;
     } catch (error) {
       showError(error);

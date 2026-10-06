@@ -275,13 +275,14 @@ export const createFakeApi = ({
       key => key in input
     );
     for (const [key, value] of Object.entries(input)) {
-      if (key === 'id' || value === undefined) continue;
+      if (value === undefined) continue;
       const isDate = key === 'firstPaymentDate' || key === 'lastPaymentDate';
       Object.assign(payment, { [key]: isDate && value ? fromInput(value) : value });
     }
+    // A new schedule starts the payment unpaid again
     if (scheduleChanged) {
       payment.nextDueDate = dueDateFor(payment);
-      if (!('status' in input)) payment.status = 'UNPAID';
+      payment.status = 'UNPAID';
     }
     return payment;
   };
@@ -297,7 +298,12 @@ export const createFakeApi = ({
 
   const rootValue = {
     tokenFindUser: () => db.user,
-    account: () => requireAccount(),
+    // With no id, the signed-in user's account
+    account: ({ id }: Args) => {
+      const current = requireAccount();
+      if (id && id !== current.id) throw apiError('ACCOUNT_NOT_FOUND', `No account '${id}'`);
+      return current;
+    },
     // Messages and codes as the real API sends them
     login: ({ email, password: attempt }: Args) => {
       if (email !== db.user.email) {
@@ -307,7 +313,7 @@ export const createFakeApi = ({
       return authData();
     },
     // Replaces the fake's one user with the new one, who has no account until setup
-    registerAndLogin: ({ user: input }: Args) => {
+    registerAndLogin: ({ input }: Args) => {
       if (input.email === db.user.email) {
         throw apiError('USER_EXISTS', 'Account with that email address already exists');
       }
@@ -369,7 +375,7 @@ export const createFakeApi = ({
       return { success: true };
     },
 
-    createAccount: ({ account: input }: Args) => {
+    createAccount: ({ input }: Args) => {
       if (db.account) throw apiError('ACCOUNT_EXISTS', 'Account already exists');
       db.account = {
         id: 'account-new',
@@ -392,7 +398,7 @@ export const createFakeApi = ({
       db.account.oneOffPayments = (input.oneOffPayments ?? []).map(newOneOff);
       return { account: db.account, success: true };
     },
-    editAccount: ({ account: input }: Args) => {
+    updateAccount: ({ input }: Args) => {
       const current = requireAccount();
       if (input.bankBalance !== undefined) current.bankBalance = input.bankBalance;
       if (input.monthlyIncome !== undefined) current.monthlyIncome = input.monthlyIncome;
@@ -438,18 +444,29 @@ export const createFakeApi = ({
       current.bankBalance = Math.round(current.bankBalance * 100) / 100;
       return { account: current, success: true };
     },
+    // Paid payments go back on the balance; skipped ones just become unpaid again
     markPaymentsUnpaid: ({ input }: Args) => {
       const current = requireAccount();
       for (const id of input.recurringPaymentIds) {
         const payment = findRecurring(id);
-        if (payment.status !== 'PAID') continue;
-        current.bankBalance += payment.type === 'INCOME' ? -payment.amount : payment.amount;
+        if (payment.status === 'PAID') {
+          current.bankBalance += payment.type === 'INCOME' ? -payment.amount : payment.amount;
+        }
         payment.status = 'UNPAID';
       }
       current.bankBalance = Math.round(current.bankBalance * 100) / 100;
       return { account: current, success: true };
     },
-    editPayday: ({ payday: input }: Args) => {
+    // Leaves the payments out of this cycle without touching the balance. Paid ones stay paid.
+    skipRecurringPayments: ({ input }: Args) => {
+      const current = requireAccount();
+      for (const id of input.recurringPaymentIds) {
+        const payment = findRecurring(id);
+        if (payment.status !== 'PAID') payment.status = 'SKIPPED';
+      }
+      return { account: current, success: true };
+    },
+    updatePayday: ({ input }: Args) => {
       const current = requireAccount();
       current.payday = {
         id: current.payday?.id ?? 'payday-new',
@@ -479,26 +496,20 @@ export const createFakeApi = ({
       recurringPayment: updateRecurring(findRecurring(id), input),
       success: true
     }),
-    batchUpdateRecurringPayments: ({ input }: Args) => ({
-      recurringPayments: input.map((update: Args) =>
-        updateRecurring(findRecurring(update.id), update)
-      ),
-      success: true
-    }),
     batchDeleteRecurringPayments: ({ ids }: Args) => {
       const current = requireAccount();
       ids.forEach(findRecurring);
       current.recurringPayments = current.recurringPayments.filter(p => !ids.includes(p.id));
-      return { success: true, deletedCount: ids.length };
+      return { success: true, deletedCount: ids.length, ids };
     },
 
-    createOneOffPayment: ({ oneOffPayment: input }: Args) => {
+    createOneOffPayment: ({ input }: Args) => {
       checkUniqueName(input.name);
       const payment = newOneOff(input);
       requireAccount().oneOffPayments.push(payment);
       return { oneOffPayment: payment, success: true };
     },
-    editOneOffPayment: ({ id, oneOffPayment: input }: Args) => {
+    updateOneOffPayment: ({ id, input }: Args) => {
       const payment = findOneOff(id);
       if (input.name && input.name !== payment.name) checkUniqueName(input.name, id);
       Object.assign(payment, {
@@ -511,10 +522,10 @@ export const createFakeApi = ({
       const current = requireAccount();
       ids.forEach(findOneOff);
       current.oneOffPayments = current.oneOffPayments.filter(p => !ids.includes(p.id));
-      return { oneOffPayments: [], success: true, deletedCount: ids.length };
+      return { success: true, deletedCount: ids.length, ids };
     },
 
-    createNote: ({ note: input }: Args) => {
+    createNote: ({ input }: Args) => {
       const current = requireAccount();
       if (current.notes.some(note => note.body === input.body)) {
         throw apiError('NOTE_EXISTS', 'A note with that text already exists');
@@ -530,7 +541,7 @@ export const createFakeApi = ({
       current.notes.push(note);
       return { note, success: true };
     },
-    editNote: ({ id, note: input }: Args) => {
+    updateNote: ({ id, input }: Args) => {
       const note = requireAccount().notes.find(n => n.id === id);
       if (!note) throw apiError('NOTE_NOT_FOUND', `No note '${id}'`);
       Object.assign(note, input, { updatedAt: String(Date.now()) });
@@ -538,8 +549,9 @@ export const createFakeApi = ({
     },
     deleteNote: ({ id }: Args) => {
       const current = requireAccount();
+      const deleted = current.notes.some(note => note.id === id);
       current.notes = current.notes.filter(note => note.id !== id);
-      return { success: true };
+      return { success: true, deletedCount: deleted ? 1 : 0, ids: deleted ? [id] : [] };
     }
   };
 

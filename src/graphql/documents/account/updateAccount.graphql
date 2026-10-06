@@ -1,0 +1,9 @@
+mutation UpdateAccount($id: ID!, $input: UpdateAccountInput!) {
+  updateAccount(id: $id, input: $input) {
+    account {
+      id
+      bankBalance
+      monthlyIncome
+    }
+  }
+}

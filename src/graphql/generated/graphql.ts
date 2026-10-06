@@ -6,9 +6,7 @@ export type Incremental<T> =
 import type * as Types from './schema';
 
 import type { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
-export type AccountQueryVariables = Exact<{
-  userId: string | number;
-}>;
+export type AccountQueryVariables = Exact<{ [key: string]: never }>;
 
 export type AccountQuery = {
   account: {
@@ -111,7 +109,7 @@ export type AccountFieldsFragment = {
 };
 
 export type CreateAccountMutationVariables = Exact<{
-  account: Types.CreateAccountInput;
+  input: Types.CreateAccountInput;
 }>;
 
 export type CreateAccountMutation = {
@@ -164,23 +162,6 @@ export type CreateAccountMutation = {
         createdAt: string;
         updatedAt: string;
       } | null> | null;
-    } | null;
-  };
-};
-
-export type EditAccountMutationVariables = Exact<{
-  id: string | number;
-  account: Types.EditAccountInput;
-}>;
-
-export type EditAccountMutation = {
-  editAccount: {
-    __typename: 'AccountResponse';
-    account: {
-      __typename: 'Account';
-      id: string;
-      bankBalance: number;
-      monthlyIncome: number;
     } | null;
   };
 };
@@ -250,6 +231,33 @@ export type MarkPaymentsUnpaidMutation = {
   };
 };
 
+export type SkipRecurringPaymentsMutationVariables = Exact<{
+  input: Types.SkipRecurringPaymentsInput;
+}>;
+
+export type SkipRecurringPaymentsMutation = {
+  skipRecurringPayments: {
+    __typename: 'AccountResponse';
+    account: {
+      __typename: 'Account';
+      id: string;
+      recurringPayments: Array<{
+        __typename: 'RecurringPayment';
+        id: string;
+        name: string;
+        amount: number;
+        category: Types.RecurringPaymentCategory;
+        frequency: Types.PaymentFrequency;
+        type: Types.PaymentType;
+        firstPaymentDate: string;
+        lastPaymentDate: string | null;
+        nextDueDate: string | null;
+        status: Types.PaymentStatus;
+      } | null> | null;
+    } | null;
+  };
+};
+
 export type StartPaydayCycleMutationVariables = Exact<{
   input: Types.StartPaydayCycleInput;
 }>;
@@ -275,6 +283,23 @@ export type StartPaydayCycleMutation = {
         nextDueDate: string | null;
         status: Types.PaymentStatus;
       } | null> | null;
+    } | null;
+  };
+};
+
+export type UpdateAccountMutationVariables = Exact<{
+  id: string | number;
+  input: Types.UpdateAccountInput;
+}>;
+
+export type UpdateAccountMutation = {
+  updateAccount: {
+    __typename: 'AccountResponse';
+    account: {
+      __typename: 'Account';
+      id: string;
+      bankBalance: number;
+      monthlyIncome: number;
     } | null;
   };
 };
@@ -318,12 +343,12 @@ export type LoginMutation = {
 
 export type LogoutMutationVariables = Exact<{ [key: string]: never }>;
 
-export type LogoutMutation = { logout: { __typename: 'PasswordResetResponse'; success: boolean } };
+export type LogoutMutation = { logout: { __typename: 'SuccessResponse'; success: boolean } };
 
 export type LogoutEverywhereMutationVariables = Exact<{ [key: string]: never }>;
 
 export type LogoutEverywhereMutation = {
-  logoutEverywhere: { __typename: 'PasswordResetResponse'; success: boolean };
+  logoutEverywhere: { __typename: 'SuccessResponse'; success: boolean };
 };
 
 export type PasswordResetTokenValidQueryVariables = Exact<{
@@ -358,7 +383,7 @@ export type RefreshSessionMutation = {
 };
 
 export type RegisterAndLoginMutationVariables = Exact<{
-  user: Types.UserInput;
+  input: Types.RegisterInput;
 }>;
 
 export type RegisterAndLoginMutation = {
@@ -383,7 +408,7 @@ export type RequestPasswordResetMutationVariables = Exact<{
 }>;
 
 export type RequestPasswordResetMutation = {
-  requestPasswordReset: { __typename: 'PasswordResetResponse'; success: boolean };
+  requestPasswordReset: { __typename: 'SuccessResponse'; success: boolean };
 };
 
 export type ResetPasswordMutationVariables = Exact<{
@@ -409,7 +434,7 @@ export type ResetPasswordMutation = {
 };
 
 export type CreateNoteMutationVariables = Exact<{
-  note: Types.NoteInput;
+  input: Types.CreateNoteInput;
 }>;
 
 export type CreateNoteMutation = {
@@ -430,28 +455,7 @@ export type DeleteNoteMutationVariables = Exact<{
   id: string | number;
 }>;
 
-export type DeleteNoteMutation = {
-  deleteNote: { __typename: 'NoteResponse'; success: boolean | null };
-};
-
-export type EditNoteMutationVariables = Exact<{
-  id: string | number;
-  note: Types.NoteInput;
-}>;
-
-export type EditNoteMutation = {
-  editNote: {
-    __typename: 'NoteResponse';
-    note: {
-      __typename: 'Note';
-      id: string;
-      body: string;
-      color: Types.NoteColor;
-      createdAt: string;
-      updatedAt: string;
-    } | null;
-  };
-};
+export type DeleteNoteMutation = { deleteNote: { __typename: 'DeleteResponse'; success: boolean } };
 
 export type NoteFieldsFragment = {
   __typename: 'Note';
@@ -462,24 +466,21 @@ export type NoteFieldsFragment = {
   updatedAt: string;
 };
 
-export type EditPaydayMutationVariables = Exact<{
+export type UpdateNoteMutationVariables = Exact<{
   id: string | number;
-  payday: Types.PaydayInput;
+  input: Types.UpdateNoteInput;
 }>;
 
-export type EditPaydayMutation = {
-  editPayday: {
-    __typename: 'PaydayResponse';
-    payday: {
-      __typename: 'Payday';
+export type UpdateNoteMutation = {
+  updateNote: {
+    __typename: 'NoteResponse';
+    note: {
+      __typename: 'Note';
       id: string;
-      frequency: Types.PayFrequency;
-      type: Types.PaydayType;
-      dayOfMonth: number | null;
-      weekday: Types.Weekday | null;
-      firstPayDate: string | null;
-      bankHolidayRegion: Types.BankHolidayRegion | null;
-      overrides: Array<{ __typename: 'PaydayOverride'; for: string; date: string }>;
+      body: string;
+      color: Types.NoteColor;
+      createdAt: string;
+      updatedAt: string;
     } | null;
   };
 };
@@ -519,12 +520,34 @@ export type SetPaydayOverrideMutation = {
   };
 };
 
+export type UpdatePaydayMutationVariables = Exact<{
+  id: string | number;
+  input: Types.PaydayInput;
+}>;
+
+export type UpdatePaydayMutation = {
+  updatePayday: {
+    __typename: 'PaydayResponse';
+    payday: {
+      __typename: 'Payday';
+      id: string;
+      frequency: Types.PayFrequency;
+      type: Types.PaydayType;
+      dayOfMonth: number | null;
+      weekday: Types.Weekday | null;
+      firstPayDate: string | null;
+      bankHolidayRegion: Types.BankHolidayRegion | null;
+      overrides: Array<{ __typename: 'PaydayOverride'; for: string; date: string }>;
+    } | null;
+  };
+};
+
 export type BatchDeleteOneOffPaymentsMutationVariables = Exact<{
   ids: Array<string | number> | string | number;
 }>;
 
 export type BatchDeleteOneOffPaymentsMutation = {
-  batchDeleteOneOffPayments: { __typename: 'BatchOneOffPaymentResponse'; success: boolean };
+  batchDeleteOneOffPayments: { __typename: 'DeleteResponse'; success: boolean };
 };
 
 export type BatchDeleteRecurringPaymentsMutationVariables = Exact<{
@@ -532,34 +555,11 @@ export type BatchDeleteRecurringPaymentsMutationVariables = Exact<{
 }>;
 
 export type BatchDeleteRecurringPaymentsMutation = {
-  batchDeleteRecurringPayments: { __typename: 'BatchDeleteResponse'; success: boolean };
-};
-
-export type BatchUpdateRecurringPaymentsMutationVariables = Exact<{
-  input: Array<Types.BatchUpdateRecurringPaymentInput> | Types.BatchUpdateRecurringPaymentInput;
-}>;
-
-export type BatchUpdateRecurringPaymentsMutation = {
-  batchUpdateRecurringPayments: {
-    __typename: 'BatchRecurringPaymentResponse';
-    recurringPayments: Array<{
-      __typename: 'RecurringPayment';
-      id: string;
-      name: string;
-      amount: number;
-      category: Types.RecurringPaymentCategory;
-      frequency: Types.PaymentFrequency;
-      type: Types.PaymentType;
-      firstPaymentDate: string;
-      lastPaymentDate: string | null;
-      nextDueDate: string | null;
-      status: Types.PaymentStatus;
-    }>;
-  };
+  batchDeleteRecurringPayments: { __typename: 'DeleteResponse'; success: boolean };
 };
 
 export type CreateOneOffPaymentMutationVariables = Exact<{
-  oneOffPayment: Types.OneOffPaymentInput;
+  input: Types.CreateOneOffPaymentInput;
 }>;
 
 export type CreateOneOffPaymentMutation = {
@@ -600,26 +600,6 @@ export type CreateRecurringPaymentMutation = {
   };
 };
 
-export type EditOneOffPaymentMutationVariables = Exact<{
-  id: string | number;
-  oneOffPayment: Types.OneOffPaymentInput;
-}>;
-
-export type EditOneOffPaymentMutation = {
-  editOneOffPayment: {
-    __typename: 'OneOffPaymentResponse';
-    oneOffPayment: {
-      __typename: 'OneOffPayment';
-      id: string;
-      name: string;
-      amount: number;
-      dueDate: string;
-      type: Types.PaymentType;
-      category: Types.OneOffPaymentCategory;
-    } | null;
-  };
-};
-
 export type OneOffPaymentFieldsFragment = {
   __typename: 'OneOffPayment';
   id: string;
@@ -642,6 +622,26 @@ export type RecurringPaymentFieldsFragment = {
   lastPaymentDate: string | null;
   nextDueDate: string | null;
   status: Types.PaymentStatus;
+};
+
+export type UpdateOneOffPaymentMutationVariables = Exact<{
+  id: string | number;
+  input: Types.UpdateOneOffPaymentInput;
+}>;
+
+export type UpdateOneOffPaymentMutation = {
+  updateOneOffPayment: {
+    __typename: 'OneOffPaymentResponse';
+    oneOffPayment: {
+      __typename: 'OneOffPayment';
+      id: string;
+      name: string;
+      amount: number;
+      dueDate: string;
+      type: Types.PaymentType;
+      category: Types.OneOffPaymentCategory;
+    } | null;
+  };
 };
 
 export type UpdateRecurringPaymentMutationVariables = Exact<{
@@ -674,7 +674,7 @@ export type ChangePasswordMutationVariables = Exact<{
 }>;
 
 export type ChangePasswordMutation = {
-  changePassword: { __typename: 'UserResponse'; success: boolean | null };
+  changePassword: { __typename: 'UserResponse'; success: boolean };
 };
 
 export type CurrentUserQueryVariables = Exact<{ [key: string]: never }>;
@@ -694,7 +694,7 @@ export type CurrentUserQuery = {
 export type DeleteCurrentUserMutationVariables = Exact<{ [key: string]: never }>;
 
 export type DeleteCurrentUserMutation = {
-  deleteCurrentUser: { __typename: 'UserResponse'; success: boolean | null };
+  deleteCurrentUser: { __typename: 'UserResponse'; success: boolean };
 };
 
 export type UpdateCurrentUserMutationVariables = Exact<{
@@ -1005,29 +1005,12 @@ export const AccountDocument = {
       kind: 'OperationDefinition',
       operation: 'query',
       name: { kind: 'Name', value: 'Account' },
-      variableDefinitions: [
-        {
-          kind: 'VariableDefinition',
-          variable: { kind: 'Variable', name: { kind: 'Name', value: 'userId' } },
-          type: {
-            kind: 'NonNullType',
-            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } }
-          }
-        }
-      ],
       selectionSet: {
         kind: 'SelectionSet',
         selections: [
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'account' },
-            arguments: [
-              {
-                kind: 'Argument',
-                name: { kind: 'Name', value: 'id' },
-                value: { kind: 'Variable', name: { kind: 'Name', value: 'userId' } }
-              }
-            ],
             selectionSet: {
               kind: 'SelectionSet',
               selections: [
@@ -1181,7 +1164,7 @@ export const CreateAccountDocument = {
       variableDefinitions: [
         {
           kind: 'VariableDefinition',
-          variable: { kind: 'Variable', name: { kind: 'Name', value: 'account' } },
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
           type: {
             kind: 'NonNullType',
             type: { kind: 'NamedType', name: { kind: 'Name', value: 'CreateAccountInput' } }
@@ -1197,8 +1180,8 @@ export const CreateAccountDocument = {
             arguments: [
               {
                 kind: 'Argument',
-                name: { kind: 'Name', value: 'account' },
-                value: { kind: 'Variable', name: { kind: 'Name', value: 'account' } }
+                name: { kind: 'Name', value: 'input' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } }
               }
             ],
             selectionSet: {
@@ -1353,72 +1336,6 @@ export const CreateAccountDocument = {
     }
   ]
 } as unknown as DocumentNode<CreateAccountMutation, CreateAccountMutationVariables>;
-export const EditAccountDocument = {
-  kind: 'Document',
-  definitions: [
-    {
-      kind: 'OperationDefinition',
-      operation: 'mutation',
-      name: { kind: 'Name', value: 'EditAccount' },
-      variableDefinitions: [
-        {
-          kind: 'VariableDefinition',
-          variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
-          type: {
-            kind: 'NonNullType',
-            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } }
-          }
-        },
-        {
-          kind: 'VariableDefinition',
-          variable: { kind: 'Variable', name: { kind: 'Name', value: 'account' } },
-          type: {
-            kind: 'NonNullType',
-            type: { kind: 'NamedType', name: { kind: 'Name', value: 'EditAccountInput' } }
-          }
-        }
-      ],
-      selectionSet: {
-        kind: 'SelectionSet',
-        selections: [
-          {
-            kind: 'Field',
-            name: { kind: 'Name', value: 'editAccount' },
-            arguments: [
-              {
-                kind: 'Argument',
-                name: { kind: 'Name', value: 'id' },
-                value: { kind: 'Variable', name: { kind: 'Name', value: 'id' } }
-              },
-              {
-                kind: 'Argument',
-                name: { kind: 'Name', value: 'account' },
-                value: { kind: 'Variable', name: { kind: 'Name', value: 'account' } }
-              }
-            ],
-            selectionSet: {
-              kind: 'SelectionSet',
-              selections: [
-                {
-                  kind: 'Field',
-                  name: { kind: 'Name', value: 'account' },
-                  selectionSet: {
-                    kind: 'SelectionSet',
-                    selections: [
-                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
-                      { kind: 'Field', name: { kind: 'Name', value: 'bankBalance' } },
-                      { kind: 'Field', name: { kind: 'Name', value: 'monthlyIncome' } }
-                    ]
-                  }
-                }
-              ]
-            }
-          }
-        ]
-      }
-    }
-  ]
-} as unknown as DocumentNode<EditAccountMutation, EditAccountMutationVariables>;
 export const MarkPaymentsPaidDocument = {
   kind: 'Document',
   definitions: [
@@ -1618,6 +1535,90 @@ export const MarkPaymentsUnpaidDocument = {
     }
   ]
 } as unknown as DocumentNode<MarkPaymentsUnpaidMutation, MarkPaymentsUnpaidMutationVariables>;
+export const SkipRecurringPaymentsDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'SkipRecurringPayments' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'SkipRecurringPaymentsInput' } }
+          }
+        }
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'skipRecurringPayments' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } }
+              }
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'account' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'recurringPayments' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'FragmentSpread',
+                              name: { kind: 'Name', value: 'RecurringPaymentFields' }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'RecurringPaymentFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'RecurringPayment' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'amount' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'category' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'frequency' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'type' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'firstPaymentDate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'lastPaymentDate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'nextDueDate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'status' } }
+        ]
+      }
+    }
+  ]
+} as unknown as DocumentNode<SkipRecurringPaymentsMutation, SkipRecurringPaymentsMutationVariables>;
 export const StartPaydayCycleDocument = {
   kind: 'Document',
   definitions: [
@@ -1704,6 +1705,72 @@ export const StartPaydayCycleDocument = {
     }
   ]
 } as unknown as DocumentNode<StartPaydayCycleMutation, StartPaydayCycleMutationVariables>;
+export const UpdateAccountDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'UpdateAccount' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } }
+          }
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'UpdateAccountInput' } }
+          }
+        }
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'updateAccount' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'id' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'id' } }
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } }
+              }
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'account' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'bankBalance' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'monthlyIncome' } }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+} as unknown as DocumentNode<UpdateAccountMutation, UpdateAccountMutationVariables>;
 export const LoginDocument = {
   kind: 'Document',
   definitions: [
@@ -1933,10 +2000,10 @@ export const RegisterAndLoginDocument = {
       variableDefinitions: [
         {
           kind: 'VariableDefinition',
-          variable: { kind: 'Variable', name: { kind: 'Name', value: 'user' } },
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
           type: {
             kind: 'NonNullType',
-            type: { kind: 'NamedType', name: { kind: 'Name', value: 'UserInput' } }
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'RegisterInput' } }
           }
         }
       ],
@@ -1949,8 +2016,8 @@ export const RegisterAndLoginDocument = {
             arguments: [
               {
                 kind: 'Argument',
-                name: { kind: 'Name', value: 'user' },
-                value: { kind: 'Variable', name: { kind: 'Name', value: 'user' } }
+                name: { kind: 'Name', value: 'input' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } }
               }
             ],
             selectionSet: {
@@ -2120,10 +2187,10 @@ export const CreateNoteDocument = {
       variableDefinitions: [
         {
           kind: 'VariableDefinition',
-          variable: { kind: 'Variable', name: { kind: 'Name', value: 'note' } },
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
           type: {
             kind: 'NonNullType',
-            type: { kind: 'NamedType', name: { kind: 'Name', value: 'NoteInput' } }
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'CreateNoteInput' } }
           }
         }
       ],
@@ -2136,8 +2203,8 @@ export const CreateNoteDocument = {
             arguments: [
               {
                 kind: 'Argument',
-                name: { kind: 'Name', value: 'note' },
-                value: { kind: 'Variable', name: { kind: 'Name', value: 'note' } }
+                name: { kind: 'Name', value: 'input' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } }
               }
             ],
             selectionSet: {
@@ -2216,13 +2283,13 @@ export const DeleteNoteDocument = {
     }
   ]
 } as unknown as DocumentNode<DeleteNoteMutation, DeleteNoteMutationVariables>;
-export const EditNoteDocument = {
+export const UpdateNoteDocument = {
   kind: 'Document',
   definitions: [
     {
       kind: 'OperationDefinition',
       operation: 'mutation',
-      name: { kind: 'Name', value: 'EditNote' },
+      name: { kind: 'Name', value: 'UpdateNote' },
       variableDefinitions: [
         {
           kind: 'VariableDefinition',
@@ -2234,10 +2301,10 @@ export const EditNoteDocument = {
         },
         {
           kind: 'VariableDefinition',
-          variable: { kind: 'Variable', name: { kind: 'Name', value: 'note' } },
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
           type: {
             kind: 'NonNullType',
-            type: { kind: 'NamedType', name: { kind: 'Name', value: 'NoteInput' } }
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'UpdateNoteInput' } }
           }
         }
       ],
@@ -2246,7 +2313,7 @@ export const EditNoteDocument = {
         selections: [
           {
             kind: 'Field',
-            name: { kind: 'Name', value: 'editNote' },
+            name: { kind: 'Name', value: 'updateNote' },
             arguments: [
               {
                 kind: 'Argument',
@@ -2255,8 +2322,8 @@ export const EditNoteDocument = {
               },
               {
                 kind: 'Argument',
-                name: { kind: 'Name', value: 'note' },
-                value: { kind: 'Variable', name: { kind: 'Name', value: 'note' } }
+                name: { kind: 'Name', value: 'input' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } }
               }
             ],
             selectionSet: {
@@ -2294,99 +2361,7 @@ export const EditNoteDocument = {
       }
     }
   ]
-} as unknown as DocumentNode<EditNoteMutation, EditNoteMutationVariables>;
-export const EditPaydayDocument = {
-  kind: 'Document',
-  definitions: [
-    {
-      kind: 'OperationDefinition',
-      operation: 'mutation',
-      name: { kind: 'Name', value: 'EditPayday' },
-      variableDefinitions: [
-        {
-          kind: 'VariableDefinition',
-          variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
-          type: {
-            kind: 'NonNullType',
-            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } }
-          }
-        },
-        {
-          kind: 'VariableDefinition',
-          variable: { kind: 'Variable', name: { kind: 'Name', value: 'payday' } },
-          type: {
-            kind: 'NonNullType',
-            type: { kind: 'NamedType', name: { kind: 'Name', value: 'PaydayInput' } }
-          }
-        }
-      ],
-      selectionSet: {
-        kind: 'SelectionSet',
-        selections: [
-          {
-            kind: 'Field',
-            name: { kind: 'Name', value: 'editPayday' },
-            arguments: [
-              {
-                kind: 'Argument',
-                name: { kind: 'Name', value: 'id' },
-                value: { kind: 'Variable', name: { kind: 'Name', value: 'id' } }
-              },
-              {
-                kind: 'Argument',
-                name: { kind: 'Name', value: 'payday' },
-                value: { kind: 'Variable', name: { kind: 'Name', value: 'payday' } }
-              }
-            ],
-            selectionSet: {
-              kind: 'SelectionSet',
-              selections: [
-                {
-                  kind: 'Field',
-                  name: { kind: 'Name', value: 'payday' },
-                  selectionSet: {
-                    kind: 'SelectionSet',
-                    selections: [
-                      { kind: 'FragmentSpread', name: { kind: 'Name', value: 'PaydayFields' } }
-                    ]
-                  }
-                }
-              ]
-            }
-          }
-        ]
-      }
-    },
-    {
-      kind: 'FragmentDefinition',
-      name: { kind: 'Name', value: 'PaydayFields' },
-      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'Payday' } },
-      selectionSet: {
-        kind: 'SelectionSet',
-        selections: [
-          { kind: 'Field', name: { kind: 'Name', value: 'id' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'frequency' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'type' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'dayOfMonth' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'weekday' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'firstPayDate' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'bankHolidayRegion' } },
-          {
-            kind: 'Field',
-            name: { kind: 'Name', value: 'overrides' },
-            selectionSet: {
-              kind: 'SelectionSet',
-              selections: [
-                { kind: 'Field', name: { kind: 'Name', value: 'for' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'date' } }
-              ]
-            }
-          }
-        ]
-      }
-    }
-  ]
-} as unknown as DocumentNode<EditPaydayMutation, EditPaydayMutationVariables>;
+} as unknown as DocumentNode<UpdateNoteMutation, UpdateNoteMutationVariables>;
 export const SetPaydayOverrideDocument = {
   kind: 'Document',
   definitions: [
@@ -2489,6 +2464,98 @@ export const SetPaydayOverrideDocument = {
     }
   ]
 } as unknown as DocumentNode<SetPaydayOverrideMutation, SetPaydayOverrideMutationVariables>;
+export const UpdatePaydayDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'UpdatePayday' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } }
+          }
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'PaydayInput' } }
+          }
+        }
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'updatePayday' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'id' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'id' } }
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } }
+              }
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'payday' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'FragmentSpread', name: { kind: 'Name', value: 'PaydayFields' } }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'PaydayFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'Payday' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'frequency' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'type' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'dayOfMonth' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'weekday' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'firstPayDate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'bankHolidayRegion' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'overrides' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'for' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'date' } }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+} as unknown as DocumentNode<UpdatePaydayMutation, UpdatePaydayMutationVariables>;
 export const BatchDeleteOneOffPaymentsDocument = {
   kind: 'Document',
   definitions: [
@@ -2587,92 +2654,6 @@ export const BatchDeleteRecurringPaymentsDocument = {
   BatchDeleteRecurringPaymentsMutation,
   BatchDeleteRecurringPaymentsMutationVariables
 >;
-export const BatchUpdateRecurringPaymentsDocument = {
-  kind: 'Document',
-  definitions: [
-    {
-      kind: 'OperationDefinition',
-      operation: 'mutation',
-      name: { kind: 'Name', value: 'BatchUpdateRecurringPayments' },
-      variableDefinitions: [
-        {
-          kind: 'VariableDefinition',
-          variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
-          type: {
-            kind: 'NonNullType',
-            type: {
-              kind: 'ListType',
-              type: {
-                kind: 'NonNullType',
-                type: {
-                  kind: 'NamedType',
-                  name: { kind: 'Name', value: 'BatchUpdateRecurringPaymentInput' }
-                }
-              }
-            }
-          }
-        }
-      ],
-      selectionSet: {
-        kind: 'SelectionSet',
-        selections: [
-          {
-            kind: 'Field',
-            name: { kind: 'Name', value: 'batchUpdateRecurringPayments' },
-            arguments: [
-              {
-                kind: 'Argument',
-                name: { kind: 'Name', value: 'input' },
-                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } }
-              }
-            ],
-            selectionSet: {
-              kind: 'SelectionSet',
-              selections: [
-                {
-                  kind: 'Field',
-                  name: { kind: 'Name', value: 'recurringPayments' },
-                  selectionSet: {
-                    kind: 'SelectionSet',
-                    selections: [
-                      {
-                        kind: 'FragmentSpread',
-                        name: { kind: 'Name', value: 'RecurringPaymentFields' }
-                      }
-                    ]
-                  }
-                }
-              ]
-            }
-          }
-        ]
-      }
-    },
-    {
-      kind: 'FragmentDefinition',
-      name: { kind: 'Name', value: 'RecurringPaymentFields' },
-      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'RecurringPayment' } },
-      selectionSet: {
-        kind: 'SelectionSet',
-        selections: [
-          { kind: 'Field', name: { kind: 'Name', value: 'id' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'name' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'amount' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'category' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'frequency' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'type' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'firstPaymentDate' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'lastPaymentDate' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'nextDueDate' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'status' } }
-        ]
-      }
-    }
-  ]
-} as unknown as DocumentNode<
-  BatchUpdateRecurringPaymentsMutation,
-  BatchUpdateRecurringPaymentsMutationVariables
->;
 export const CreateOneOffPaymentDocument = {
   kind: 'Document',
   definitions: [
@@ -2683,10 +2664,10 @@ export const CreateOneOffPaymentDocument = {
       variableDefinitions: [
         {
           kind: 'VariableDefinition',
-          variable: { kind: 'Variable', name: { kind: 'Name', value: 'oneOffPayment' } },
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
           type: {
             kind: 'NonNullType',
-            type: { kind: 'NamedType', name: { kind: 'Name', value: 'OneOffPaymentInput' } }
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'CreateOneOffPaymentInput' } }
           }
         }
       ],
@@ -2699,8 +2680,8 @@ export const CreateOneOffPaymentDocument = {
             arguments: [
               {
                 kind: 'Argument',
-                name: { kind: 'Name', value: 'oneOffPayment' },
-                value: { kind: 'Variable', name: { kind: 'Name', value: 'oneOffPayment' } }
+                name: { kind: 'Name', value: 'input' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } }
               }
             ],
             selectionSet: {
@@ -2823,13 +2804,13 @@ export const CreateRecurringPaymentDocument = {
   CreateRecurringPaymentMutation,
   CreateRecurringPaymentMutationVariables
 >;
-export const EditOneOffPaymentDocument = {
+export const UpdateOneOffPaymentDocument = {
   kind: 'Document',
   definitions: [
     {
       kind: 'OperationDefinition',
       operation: 'mutation',
-      name: { kind: 'Name', value: 'EditOneOffPayment' },
+      name: { kind: 'Name', value: 'UpdateOneOffPayment' },
       variableDefinitions: [
         {
           kind: 'VariableDefinition',
@@ -2841,10 +2822,10 @@ export const EditOneOffPaymentDocument = {
         },
         {
           kind: 'VariableDefinition',
-          variable: { kind: 'Variable', name: { kind: 'Name', value: 'oneOffPayment' } },
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
           type: {
             kind: 'NonNullType',
-            type: { kind: 'NamedType', name: { kind: 'Name', value: 'OneOffPaymentInput' } }
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'UpdateOneOffPaymentInput' } }
           }
         }
       ],
@@ -2853,7 +2834,7 @@ export const EditOneOffPaymentDocument = {
         selections: [
           {
             kind: 'Field',
-            name: { kind: 'Name', value: 'editOneOffPayment' },
+            name: { kind: 'Name', value: 'updateOneOffPayment' },
             arguments: [
               {
                 kind: 'Argument',
@@ -2862,8 +2843,8 @@ export const EditOneOffPaymentDocument = {
               },
               {
                 kind: 'Argument',
-                name: { kind: 'Name', value: 'oneOffPayment' },
-                value: { kind: 'Variable', name: { kind: 'Name', value: 'oneOffPayment' } }
+                name: { kind: 'Name', value: 'input' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } }
               }
             ],
             selectionSet: {
@@ -2905,7 +2886,7 @@ export const EditOneOffPaymentDocument = {
       }
     }
   ]
-} as unknown as DocumentNode<EditOneOffPaymentMutation, EditOneOffPaymentMutationVariables>;
+} as unknown as DocumentNode<UpdateOneOffPaymentMutation, UpdateOneOffPaymentMutationVariables>;
 export const UpdateRecurringPaymentDocument = {
   kind: 'Document',
   definitions: [

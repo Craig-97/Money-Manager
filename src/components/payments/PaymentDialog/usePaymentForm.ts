@@ -3,11 +3,11 @@ import { useMutation } from '@apollo/client/react';
 import {
   CreateOneOffPaymentDocument,
   CreateRecurringPaymentDocument,
-  EditOneOffPaymentDocument,
   OneOffPaymentCategory,
   PaymentFrequency,
   PaymentType,
   RecurringPaymentCategory,
+  UpdateOneOffPaymentDocument,
   UpdateRecurringPaymentDocument
 } from '~/graphql/generated';
 import { addOneOffPayment, addRecurringPayment } from '~/lib/apollo';
@@ -136,7 +136,7 @@ export const usePaymentForm = ({ kind, accountId, payment, today, onSaved, formK
   const [createRecurring] = useMutation(CreateRecurringPaymentDocument);
   const [updateRecurring] = useMutation(UpdateRecurringPaymentDocument);
   const [createOneOff] = useMutation(CreateOneOffPaymentDocument);
-  const [editOneOff] = useMutation(EditOneOffPaymentDocument);
+  const [updateOneOff] = useMutation(UpdateOneOffPaymentDocument);
 
   const set = <K extends keyof PaymentFormValues>(key: K, value: PaymentFormValues[K]) => {
     if (key === 'name') setNameTaken(undefined);
@@ -224,10 +224,10 @@ export const usePaymentForm = ({ kind, accountId, payment, today, onSaved, formK
           category: values.category as OneOffPaymentCategory
         };
         if (payment) {
-          await editOneOff({ variables: { id: payment.id, oneOffPayment: fields } });
+          await updateOneOff({ variables: { id: payment.id, input: fields } });
         } else {
           await createOneOff({
-            variables: { oneOffPayment: { ...fields, account: accountId } },
+            variables: { input: { ...fields, accountId } },
             update: (cache, { data }) => {
               if (data) addOneOffPayment(cache, accountId, data.createOneOffPayment.oneOffPayment!);
             }

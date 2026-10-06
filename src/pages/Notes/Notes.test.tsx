@@ -72,7 +72,7 @@ describe('notes', () => {
 
     expect(await screen.findByText('Renew the car insurance')).toBeInTheDocument();
     expect(api.callsTo('CreateNote')).toEqual([
-      { note: { account: 'account-1', body: 'Renew the car insurance', color: 'GREEN' } }
+      { input: { accountId: 'account-1', body: 'Renew the car insurance', color: 'GREEN' } }
     ]);
     // Ready for another
     expect(text).toHaveValue('');
@@ -91,8 +91,8 @@ describe('notes', () => {
 
     expect(await screen.findByText('Buy oat milk')).toBeInTheDocument();
     expect(screen.queryByRole('form', { name: 'Edit note' })).not.toBeInTheDocument();
-    expect(api.callsTo('EditNote')).toEqual([
-      { id: 'milk', note: { body: 'Buy oat milk', color: 'BLUE' } }
+    expect(api.callsTo('UpdateNote')).toEqual([
+      { id: 'milk', input: { body: 'Buy oat milk', color: 'BLUE' } }
     ]);
   });
 
@@ -105,7 +105,7 @@ describe('notes', () => {
     await user.click(within(form).getByRole('button', { name: 'Save changes' }));
 
     await waitFor(() => expect(screen.queryByRole('form', { name: 'Edit note' })).toBeNull());
-    expect(api.callsTo('EditNote')).toEqual([]);
+    expect(api.callsTo('UpdateNote')).toEqual([]);
   });
 
   it('deletes a note, with undo', async () => {
@@ -122,7 +122,7 @@ describe('notes', () => {
 
     expect(await screen.findByText('Buy milk')).toBeInTheDocument();
     expect(api.callsTo('CreateNote')).toEqual([
-      { note: { account: 'account-1', body: 'Buy milk', color: 'BLUE' } }
+      { input: { accountId: 'account-1', body: 'Buy milk', color: 'BLUE' } }
     ]);
   });
 

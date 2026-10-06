@@ -1,6 +1,6 @@
 # Finishes setup: the account with its payday, balance and first payments
-mutation CreateAccount($account: CreateAccountInput!) {
-  createAccount(account: $account) {
+mutation CreateAccount($input: CreateAccountInput!) {
+  createAccount(input: $input) {
     account {
       ...AccountFields
     }

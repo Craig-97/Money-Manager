@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { screen, within } from '@testing-library/react';
-import { createFakeApi, DEFAULT_USER } from '~/test/fakeApi';
+import { createFakeApi } from '~/test/fakeApi';
 import { renderApp } from '~/test/renderApp';
 
 const findPageHeading = (name: string) => screen.findByRole('heading', { level: 1, name });
@@ -93,9 +93,8 @@ describe('setup', () => {
     expect(
       await screen.findByRole('heading', { name: "You're all set, Test" })
     ).toBeInTheDocument();
-    const [{ account }] = api.callsTo('CreateAccount') as [{ account: Record<string, unknown> }];
-    expect(account).toMatchObject({
-      userId: DEFAULT_USER.id,
+    const [{ input }] = api.callsTo('CreateAccount') as [{ input: Record<string, unknown> }];
+    expect(input).toMatchObject({
       bankBalance: 9165,
       monthlyIncome: 3600,
       payday: { frequency: 'MONTHLY', type: 'LAST_DAY', bankHolidayRegion: 'ENGLAND_AND_WALES' },

@@ -1,7 +1,0 @@
-mutation EditNote($id: ID!, $note: NoteInput!) {
-  editNote(id: $id, note: $note) {
-    note {
-      ...NoteFields
-    }
-  }
-}

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useMutation } from '@apollo/client/react';
-import { EditPaydayDocument } from '~/graphql/generated';
+import { UpdatePaydayDocument } from '~/graphql/generated';
 import { Account } from '~/hooks/useAccount';
 import { useBankHolidays } from '~/hooks/useBankHolidays';
 import { startOfToday } from '~/lib/dates';
@@ -19,7 +19,7 @@ import {
 
 /* The payday form, with the next few paydays it gives updating as it changes */
 export const usePaydaySettings = (account: Account) => {
-  const [editPayday, { loading: saving }] = useMutation(EditPaydayDocument);
+  const [updatePayday, { loading: saving }] = useMutation(UpdatePaydayDocument);
   const [values, setValues] = useState(() => toPaydayValues(account.payday));
   const [submitted, setSubmitted] = useState(false);
   // What was last saved, so the form knows when it has changed
@@ -43,7 +43,7 @@ export const usePaydaySettings = (account: Account) => {
     setSubmitted(true);
     if (!valid || !account.payday) return;
     try {
-      await editPayday({ variables: { id: account.payday.id, payday: toPaydayInput(values) } });
+      await updatePayday({ variables: { id: account.payday.id, input: toPaydayInput(values) } });
       setSubmitted(false);
       setSaved(values);
       showToast({ message: 'Payday settings saved' });

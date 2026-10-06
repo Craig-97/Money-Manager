@@ -1,9 +1,0 @@
-mutation EditAccount($id: ID!, $account: EditAccountInput!) {
-  editAccount(id: $id, account: $account) {
-    account {
-      id
-      bankBalance
-      monthlyIncome
-    }
-  }
-}

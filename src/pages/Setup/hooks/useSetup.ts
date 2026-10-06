@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useApolloClient, useMutation } from '@apollo/client/react';
 import { AccountDocument, CreateAccountDocument, PayFrequency } from '~/graphql/generated';
-import { useAuthStore } from '~/state/auth';
 import {
   allowedRules,
   COMING_UP_STEP,
@@ -22,7 +21,6 @@ const draftId = (prefix: string) => `${prefix}-${nextDraftId++}`;
 /* Setup's answers, which step is showing, and saving it all as the account at the end */
 export const useSetup = () => {
   const client = useApolloClient();
-  const userId = useAuthStore(s => s.session?.userId ?? '');
   const [createAccount, { loading: saving, error: saveError, reset: clearSaveError }] =
     useMutation(CreateAccountDocument);
 
@@ -126,7 +124,7 @@ export const useSetup = () => {
     }
     clearSaveError();
     try {
-      await createAccount({ variables: { account: toCreateAccountInput(values, userId) } });
+      await createAccount({ variables: { input: toCreateAccountInput(values) } });
       setCreated(true);
       setFinished(true);
     } catch {

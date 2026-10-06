@@ -105,8 +105,8 @@ describe('dashboard', () => {
     expect(await screen.findByText('Added Concert')).toBeInTheDocument();
     expect(api.callsTo('CreateOneOffPayment')).toEqual([
       {
-        oneOffPayment: expect.objectContaining({
-          account: 'account-1',
+        input: expect.objectContaining({
+          accountId: 'account-1',
           name: 'Concert',
           amount: 45,
           type: 'EXPENSE',
@@ -133,6 +133,23 @@ describe('dashboard', () => {
     expect(api.callsTo('UpdateRecurringPayment')).toEqual([]);
   });
 
+  it('skips a recurring payment for this cycle without touching the balance', async () => {
+    const { user, api } = renderDashboard();
+
+    await user.click(await screen.findByRole('button', { name: 'Edit Netflix' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Edit recurring payment' });
+    await user.click(within(dialog).getByRole('button', { name: 'Skip this cycle' }));
+
+    expect(await screen.findByText('Netflix skipped this cycle')).toBeInTheDocument();
+    expect(api.callsTo('SkipRecurringPayments')).toEqual([
+      { input: { accountId: 'account-1', recurringPaymentIds: ['netflix'] } }
+    ]);
+    expect(api.callsTo('UpdateRecurringPayment')).toEqual([]);
+    expect(api.db.account?.recurringPayments[0].status).toBe('SKIPPED');
+    expect(api.db.account?.bankBalance).toBe(1000);
+    expect(await within(dialog).findByText(/^Skipped this cycle/)).toBeInTheDocument();
+  });
+
   it('checks a payment has a name and amount', async () => {
     const { user } = renderDashboard();
 
@@ -156,8 +173,8 @@ describe('dashboard', () => {
     await user.type(field, '1,500{Enter}');
 
     await waitFor(() =>
-      expect(api.callsTo('EditAccount')).toEqual([
-        { id: 'account-1', account: { bankBalance: 1500 } }
+      expect(api.callsTo('UpdateAccount')).toEqual([
+        { id: 'account-1', input: { bankBalance: 1500 } }
       ])
     );
     expect(await within(freeToSpend()).findByText('£1,530.00')).toBeInTheDocument();

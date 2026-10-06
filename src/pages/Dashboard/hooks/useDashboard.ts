@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useMutation } from '@apollo/client/react';
-import { EditAccountDocument } from '~/graphql/generated';
+import { UpdateAccountDocument } from '~/graphql/generated';
 import { Account } from '~/hooks/useAccount';
 import { usePayCycle } from '~/hooks/usePayCycle';
 import { usePaymentActions } from '~/hooks/usePaymentActions';
@@ -15,7 +15,7 @@ import { usePaydayOverride } from './usePaydayOverride';
 export const useDashboard = (account: Account) => {
   const { today, holidays, cycle } = usePayCycle(account.payday);
   const actions = usePaymentActions(account.id);
-  const [editAccount] = useMutation(EditAccountDocument);
+  const [updateAccount] = useMutation(UpdateAccountDocument);
 
   const [tab, setTab] = useState<PaymentTab>('upcoming');
   const [ascending, setAscending] = useState(true);
@@ -38,7 +38,7 @@ export const useDashboard = (account: Account) => {
   const selectedPayments = listed.filter(payment => selected.has(payment.id));
 
   const saveAccount = (fields: { bankBalance?: number; monthlyIncome?: number }) =>
-    editAccount({ variables: { id: account.id, account: fields } }).catch(error =>
+    updateAccount({ variables: { id: account.id, input: fields } }).catch(error =>
       showToast({ message: getApiErrorMessage(error, "Couldn't save that. Try again.") })
     );
 

@@ -1,3 +1,13 @@
+type SuccessResponse {
+  success: Boolean!
+}
+
+type DeleteResponse {
+  success: Boolean!
+  deletedCount: Int!
+  ids: [ID!]!
+}
+
 enum ThemePreference {
   DARK
   LIGHT
@@ -5,22 +15,9 @@ enum ThemePreference {
 }
 
 type Query {
-  users: [User!]!
-  user(id: ID): User
   tokenFindUser: User
   passwordResetTokenValid(token: String!): PasswordResetTokenCheck!
-  accounts: [Account!]!
   account(id: ID): Account
-  bills(accountId: ID!): [Bill!]!
-  bill(id: ID): Bill
-  oneOffPayments(accountId: ID!): [OneOffPayment!]!
-  oneOffPayment(id: ID): OneOffPayment
-  recurringPayments(accountId: ID!): [RecurringPayment!]!
-  recurringPayment(id: ID!): RecurringPayment
-  notes(accountId: ID!): [Note!]!
-  note(id: ID): Note
-  paydays: [Payday!]!
-  payday(id: ID): Payday
 }
 
 type User {
@@ -33,10 +30,9 @@ type User {
   accent: String
 }
 
-input UserInput {
+input RegisterInput {
   email: String!
   password: String!
-  account: ID
   firstName: String!
   surname: String!
 }
@@ -50,7 +46,7 @@ input UserDetailsInput {
 type UserResponse {
   user: User
   account: ID
-  success: Boolean
+  success: Boolean!
 }
 
 type AuthData {
@@ -64,52 +60,35 @@ type PasswordResetTokenCheck {
   email: String
 }
 
-type PasswordResetResponse {
-  success: Boolean!
-}
-
 type Mutation {
   login(email: String!, password: String!): AuthData!
   refreshSession: AuthData!
-  logout: PasswordResetResponse!
-  logoutEverywhere: PasswordResetResponse!
-  registerAndLogin(user: UserInput): AuthData!
-  requestPasswordReset(email: String!): PasswordResetResponse!
+  logout: SuccessResponse!
+  logoutEverywhere: SuccessResponse!
+  registerAndLogin(input: RegisterInput!): AuthData!
+  requestPasswordReset(email: String!): SuccessResponse!
   resetPassword(token: String!, password: String!): AuthData!
-  createUser(user: UserInput!): UserResponse!
-  editUser(id: ID!, user: UserInput!): UserResponse!
-  deleteUser(id: ID!): UserResponse!
   updateCurrentUser(input: UserDetailsInput!): UserResponse!
   changePassword(currentPassword: String!, newPassword: String!): UserResponse!
   deleteCurrentUser: UserResponse!
   updatePreferences(theme: ThemePreference, accent: String): UserResponse!
-  createAccount(account: CreateAccountInput!): AccountResponse!
-  editAccount(id: ID!, account: EditAccountInput!): AccountResponse!
-  deleteAccount(id: ID!): AccountResponse!
+  createAccount(input: CreateAccountInput!): AccountResponse!
+  updateAccount(id: ID!, input: UpdateAccountInput!): AccountResponse!
   startPaydayCycle(input: StartPaydayCycleInput!): AccountResponse!
   markPaymentsPaid(input: MarkPaymentsPaidInput!): AccountResponse!
   markPaymentsUnpaid(input: MarkPaymentsUnpaidInput!): AccountResponse!
-  createBill(bill: BillInput!): BillResponse!
-  editBill(id: ID!, bill: BillInput!): BillResponse!
-  deleteBill(id: ID!): BillResponse!
-  batchUpdateBills(input: BatchBillUpdateInput!): BatchBillResponse!
-  batchDeleteBills(ids: [ID!]!): BatchDeleteResponse!
-  createOneOffPayment(oneOffPayment: OneOffPaymentInput!): OneOffPaymentResponse!
-  editOneOffPayment(id: ID!, oneOffPayment: OneOffPaymentInput!): OneOffPaymentResponse!
-  deleteOneOffPayment(id: ID!): OneOffPaymentResponse!
-  batchDeleteOneOffPayments(ids: [ID!]!): BatchOneOffPaymentResponse!
+  skipRecurringPayments(input: SkipRecurringPaymentsInput!): AccountResponse!
+  createOneOffPayment(input: CreateOneOffPaymentInput!): OneOffPaymentResponse!
+  updateOneOffPayment(id: ID!, input: UpdateOneOffPaymentInput!): OneOffPaymentResponse!
+  batchDeleteOneOffPayments(ids: [ID!]!): DeleteResponse!
   createRecurringPayment(input: CreateRecurringPaymentInput!): RecurringPaymentResponse!
   updateRecurringPayment(id: ID!, input: UpdateRecurringPaymentInput!): RecurringPaymentResponse!
-  deleteRecurringPayment(id: ID!): RecurringPaymentResponse!
-  batchUpdateRecurringPayments(input: [BatchUpdateRecurringPaymentInput!]!): BatchRecurringPaymentResponse!
-  batchDeleteRecurringPayments(ids: [ID!]!): BatchDeleteResponse!
-  createNote(note: NoteInput!): NoteResponse!
-  editNote(id: ID!, note: NoteInput!): NoteResponse!
-  deleteNote(id: ID!): NoteResponse!
-  createPayday(payday: PaydayInput!): PaydayResponse!
-  editPayday(id: ID!, payday: PaydayInput!): PaydayResponse!
+  batchDeleteRecurringPayments(ids: [ID!]!): DeleteResponse!
+  createNote(input: CreateNoteInput!): NoteResponse!
+  updateNote(id: ID!, input: UpdateNoteInput!): NoteResponse!
+  deleteNote(id: ID!): DeleteResponse!
+  updatePayday(id: ID!, input: PaydayInput!): PaydayResponse!
   setPaydayOverride(id: ID!, for: String!, date: String): PaydayResponse!
-  deletePayday(id: ID!): PaydayResponse!
 }
 
 type Account {
@@ -117,7 +96,6 @@ type Account {
   user: User
   bankBalance: Float!
   monthlyIncome: Float!
-  bills: [Bill]
   oneOffPayments: [OneOffPayment]
   recurringPayments: [RecurringPayment]
   notes: [Note]
@@ -128,14 +106,12 @@ type Account {
 input CreateAccountInput {
   bankBalance: Float!
   monthlyIncome: Float!
-  bills: [BillInput]
-  oneOffPayments: [OneOffPaymentInput]
-  recurringPayments: [RecurringPaymentInput]
+  oneOffPayments: [OneOffPaymentInput!]
+  recurringPayments: [RecurringPaymentInput!]
   payday: PaydayInput
-  userId: ID!
 }
 
-input EditAccountInput {
+input UpdateAccountInput {
   bankBalance: Float
   monthlyIncome: Float
 }
@@ -151,6 +127,11 @@ input MarkPaymentsUnpaidInput {
   recurringPaymentIds: [ID!]!
 }
 
+input SkipRecurringPaymentsInput {
+  accountId: ID!
+  recurringPaymentIds: [ID!]!
+}
+
 input StartPaydayCycleInput {
   accountId: ID!
   payday: String!
@@ -160,43 +141,7 @@ input StartPaydayCycleInput {
 
 type AccountResponse {
   account: Account
-  success: Boolean
-}
-
-type Bill {
-  id: ID!
-  account: ID!
-  name: String!
-  amount: Float!
-  paid: Boolean!
-}
-
-input BillInput {
-  account: ID
-  name: String
-  amount: Float
-  paid: Boolean
-}
-
-input BatchBillUpdateInput {
-  ids: [ID!]!
-  paid: Boolean!
-}
-
-type BillResponse {
-  bill: Bill
-  success: Boolean
-}
-
-type BatchBillResponse {
-  bills: [Bill]!
   success: Boolean!
-  updatedCount: Int!
-}
-
-type BatchDeleteResponse {
-  success: Boolean!
-  deletedCount: Int!
 }
 
 enum PaymentType {
@@ -237,8 +182,24 @@ type OneOffPayment {
   category: OneOffPaymentCategory!
 }
 
+input CreateOneOffPaymentInput {
+  accountId: ID!
+  name: String!
+  amount: Float!
+  dueDate: String!
+  type: PaymentType!
+  category: OneOffPaymentCategory!
+}
+
 input OneOffPaymentInput {
-  account: ID
+  name: String!
+  amount: Float!
+  dueDate: String!
+  type: PaymentType!
+  category: OneOffPaymentCategory!
+}
+
+input UpdateOneOffPaymentInput {
   name: String
   amount: Float
   dueDate: String
@@ -248,13 +209,7 @@ input OneOffPaymentInput {
 
 type OneOffPaymentResponse {
   oneOffPayment: OneOffPayment
-  success: Boolean
-}
-
-type BatchOneOffPaymentResponse {
-  oneOffPayments: [OneOffPayment]!
   success: Boolean!
-  deletedCount: Int!
 }
 
 enum RecurringPaymentCategory {
@@ -297,9 +252,9 @@ enum PaymentStatus {
 
 type RecurringPayment {
   id: ID!
+  account: ID!
   name: String!
   amount: Float!
-  account: Account!
   category: RecurringPaymentCategory!
   frequency: PaymentFrequency!
   type: PaymentType!
@@ -310,9 +265,9 @@ type RecurringPayment {
 }
 
 input CreateRecurringPaymentInput {
+  accountId: ID!
   name: String!
   amount: Float!
-  accountId: ID!
   category: RecurringPaymentCategory!
   frequency: PaymentFrequency!
   type: PaymentType!
@@ -338,24 +293,6 @@ input UpdateRecurringPaymentInput {
   type: PaymentType
   firstPaymentDate: String
   lastPaymentDate: String
-  status: PaymentStatus
-}
-
-input BatchUpdateRecurringPaymentInput {
-  id: ID!
-  name: String
-  amount: Float
-  category: RecurringPaymentCategory
-  frequency: PaymentFrequency
-  type: PaymentType
-  firstPaymentDate: String
-  lastPaymentDate: String
-  status: PaymentStatus
-}
-
-type BatchRecurringPaymentResponse {
-  recurringPayments: [RecurringPayment!]!
-  success: Boolean!
 }
 
 type RecurringPaymentResponse {
@@ -380,15 +317,20 @@ type Note {
   updatedAt: String!
 }
 
-input NoteInput {
-  account: ID
+input CreateNoteInput {
+  accountId: ID!
+  body: String!
+  color: NoteColor
+}
+
+input UpdateNoteInput {
   body: String
   color: NoteColor
 }
 
 type NoteResponse {
   note: Note
-  success: Boolean
+  success: Boolean!
 }
 
 enum PayFrequency {
@@ -440,7 +382,6 @@ type Payday {
 }
 
 input PaydayInput {
-  account: ID
   frequency: PayFrequency!
   type: PaydayType!
   dayOfMonth: Int
@@ -451,5 +392,5 @@ input PaydayInput {
 
 type PaydayResponse {
   payday: Payday
-  success: Boolean
+  success: Boolean!
 }
