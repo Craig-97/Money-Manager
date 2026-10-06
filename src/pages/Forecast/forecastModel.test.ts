@@ -7,7 +7,8 @@ import {
   impactText,
   monthRows,
   project,
-  spendHelper
+  spendHelper,
+  spendLimit
 } from './forecastModel';
 
 describe('project', () => {
@@ -59,9 +60,15 @@ describe('spend text', () => {
   });
 
   it('starts the slider at the next £500 above recurring payments', () => {
-    expect(defaultSpend(770, 3600)).toBe(1000);
-    expect(defaultSpend(0, 3600)).toBe(500);
-    expect(defaultSpend(2900, 3000)).toBe(3000);
+    expect(defaultSpend(770)).toBe(1000);
+    expect(defaultSpend(0)).toBe(500);
+    expect(defaultSpend(3200)).toBe(3500);
+  });
+
+  it('lets the slider go past the income', () => {
+    expect(spendLimit(3600, 770, 1000)).toBe(7500);
+    expect(spendLimit(0, 0, 0)).toBe(1000);
+    expect(spendLimit(3600, 770, 9200)).toBe(9500);
   });
 });
 

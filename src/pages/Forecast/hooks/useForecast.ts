@@ -3,7 +3,7 @@ import { Account } from '~/hooks/useAccount';
 import { usePayCycle } from '~/hooks/usePayCycle';
 import { daysBetween } from '~/lib/dates';
 import { summarise, toPayments } from '~/lib/payments';
-import { defaultSpend, monthRows, project } from '../forecastModel';
+import { defaultSpend, monthRows, project, spendLimit } from '../forecastModel';
 
 export const ROWS_PER_PAGE = [6, 12, 24] as const;
 export type RowsPerPage = (typeof ROWS_PER_PAGE)[number];
@@ -26,7 +26,8 @@ export const useForecast = (account: Account) => {
   const [page, setPage] = useState(0);
   const [perPage, setPerPage] = useState<RowsPerPage>(6);
 
-  const spend = Math.min(income, Math.max(0, spendChoice ?? defaultSpend(recurring, income)));
+  // Spending more than comes in is allowed, to see how quickly the balance runs down
+  const spend = Math.max(0, spendChoice ?? defaultSpend(recurring));
   const projection = project({ start: summary.freeToSpend, income, spend, recurring });
   const rows = account.payday
     ? monthRows({
@@ -56,6 +57,7 @@ export const useForecast = (account: Account) => {
     income,
     recurring,
     spend,
+    spendMax: spendLimit(income, recurring, spend),
     // A new spend goes back to the first page of the table
     setSpend: (amount: number) => {
       setSpendChoice(amount);

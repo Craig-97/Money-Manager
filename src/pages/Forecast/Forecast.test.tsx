@@ -35,6 +35,19 @@ describe('forecast', () => {
     ).toBeInTheDocument();
   });
 
+  it('allows a spend above the income, running the balance down', async () => {
+    const { user } = renderForecast();
+
+    const spend = await screen.findByLabelText('Spend per month');
+    await user.clear(spend);
+    await user.type(spend, '3000');
+
+    expect(spend).toHaveValue('3,000');
+    const figures = screen.getByRole('region', { name: 'Key figures' });
+    // £1,000 + 12 × (£2,500 − £3,000)
+    expect(within(figures).getByText('−£5,000')).toBeInTheDocument();
+  });
+
   it('pages through two years month by month', async () => {
     const { user } = renderForecast();
 

@@ -28,9 +28,17 @@ export const signedMoney = (amount: number, options?: { whole?: boolean }) =>
 export const signedPercent = (value: number, digits = 1) =>
   (value < 0 ? MINUS : '+') + Math.abs(value).toFixed(digits) + '%';
 
+const roundUp500 = (amount: number) => Math.ceil(amount / 500) * 500;
+
 /* A starting spend for the slider: the recurring total rounded up to the next £500 */
-export const defaultSpend = (recurring: number, income: number) =>
-  Math.min(income, Math.max(500, Math.ceil(recurring / 500) * 500));
+export const defaultSpend = (recurring: number) => Math.max(500, roundUp500(recurring));
+
+/*
+ * The top of the spend slider: twice the income, so spending more than comes in can be tried
+ * too, and never short of the recurring total or what's been typed
+ */
+export const spendLimit = (income: number, recurring: number, spend: number) =>
+  Math.max(1000, roundUp500(income * 2), roundUp500(recurring), roundUp500(spend));
 
 interface ProjectionInput {
   // What's free to spend now: the projection's starting point

@@ -15,7 +15,7 @@ export const SpendCard = ({
   forecast: Forecast;
   compact?: boolean;
 }) => {
-  const { spend, setSpend, income, recurring, projection } = forecast;
+  const { spend, spendMax, setSpend, income, recurring, projection } = forecast;
   const chips = [
     {
       label: `Recurring (${formatMoney(recurring, { whole: true })})`,
@@ -23,7 +23,7 @@ export const SpendCard = ({
     },
     { label: '£1,000', value: 1000 },
     { label: '£1,500', value: 1500 }
-  ].filter(chip => chip.value <= income);
+  ];
 
   const net = (
     <span
@@ -85,18 +85,24 @@ export const SpendCard = ({
           type="range"
           aria-label="Monthly spend slider"
           min={0}
-          max={income}
+          max={spendMax}
           step={10}
           value={spend}
           onChange={event => setSpend(Number(event.target.value))}
           className="h-11 w-full cursor-pointer accent-accent"
         />
-        <div className="flex justify-between num text-xs font-semibold text-faint">
+        <div className="relative flex justify-between num text-xs font-semibold text-faint">
           <span>£0</span>
-          <span>
-            {formatMoney(income, { whole: true })}
-            {compact ? '' : ' income'}
-          </span>
+          {income > 0 ? (
+            // Where the income sits, so spending past it is easy to see
+            <span
+              className="absolute -translate-x-1/2"
+              style={{ left: `${(income / spendMax) * 100}%` }}>
+              {formatMoney(income, { whole: true })}
+              {compact ? '' : ' income'}
+            </span>
+          ) : null}
+          <span>{formatMoney(spendMax, { whole: true })}</span>
         </div>
       </div>
 
