@@ -1,0 +1,10 @@
+# The signed-in user. `account` is their default account's id, null until setup is finished.
+fragment UserFields on User {
+  id
+  account
+  email
+  firstName
+  surname
+  theme
+  accent
+}

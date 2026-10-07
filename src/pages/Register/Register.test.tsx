@@ -42,6 +42,8 @@ describe('register', () => {
 
     expect(await findPageHeading('When do you get paid?')).toBeInTheDocument();
     expect(useAuthStore.getState().session).toMatchObject({ userId: 'user-new' });
+    // Straight to setup: the dashboard never opened to find there's no account
+    expect(api.callsTo('Account')).toHaveLength(0);
   });
 
   it('ticks off the password rules as you type', async () => {

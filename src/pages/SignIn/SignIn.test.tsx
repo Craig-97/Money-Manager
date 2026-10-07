@@ -27,6 +27,19 @@ describe('sign in', () => {
     expect(api.callsTo('CurrentUser')).toHaveLength(0);
   });
 
+  it('goes straight to setup when it is not finished yet', async () => {
+    const { api } = await signIn(
+      '/sign-in',
+      DEFAULT_USER.email,
+      DEFAULT_PASSWORD,
+      createFakeApi({ account: null })
+    );
+
+    expect(await findPageHeading('When do you get paid?')).toBeInTheDocument();
+    // The dashboard never opened to find there's no account
+    expect(api.callsTo('Account')).toHaveLength(0);
+  });
+
   it('returns to the page they were heading for after signing in', async () => {
     const { router } = await signIn('/notes', DEFAULT_USER.email, DEFAULT_PASSWORD);
 

@@ -311,6 +311,7 @@ export type AuthSessionFragment = {
   user: {
     __typename: 'User';
     id: string;
+    account: string | null;
     email: string;
     firstName: string;
     surname: string;
@@ -332,6 +333,7 @@ export type LoginMutation = {
     user: {
       __typename: 'User';
       id: string;
+      account: string | null;
       email: string;
       firstName: string;
       surname: string;
@@ -373,6 +375,7 @@ export type RefreshSessionMutation = {
     user: {
       __typename: 'User';
       id: string;
+      account: string | null;
       email: string;
       firstName: string;
       surname: string;
@@ -394,6 +397,7 @@ export type RegisterAndLoginMutation = {
     user: {
       __typename: 'User';
       id: string;
+      account: string | null;
       email: string;
       firstName: string;
       surname: string;
@@ -424,6 +428,7 @@ export type ResetPasswordMutation = {
     user: {
       __typename: 'User';
       id: string;
+      account: string | null;
       email: string;
       firstName: string;
       surname: string;
@@ -683,6 +688,7 @@ export type CurrentUserQuery = {
   tokenFindUser: {
     __typename: 'User';
     id: string;
+    account: string | null;
     email: string;
     firstName: string;
     surname: string;
@@ -729,6 +735,17 @@ export type UpdatePreferencesMutation = {
       accent: string | null;
     } | null;
   };
+};
+
+export type UserFieldsFragment = {
+  __typename: 'User';
+  id: string;
+  account: string | null;
+  email: string;
+  firstName: string;
+  surname: string;
+  theme: Types.ThemePreference | null;
+  accent: string | null;
 };
 
 export const PaydayFieldsFragmentDoc = {
@@ -966,6 +983,28 @@ export const AccountFieldsFragmentDoc = {
     }
   ]
 } as unknown as DocumentNode<AccountFieldsFragment, unknown>;
+export const UserFieldsFragmentDoc = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'UserFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'User' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'account' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'email' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'surname' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'theme' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'accent' } }
+        ]
+      }
+    }
+  ]
+} as unknown as DocumentNode<UserFieldsFragment, unknown>;
 export const AuthSessionFragmentDoc = {
   kind: 'Document',
   definitions: [
@@ -983,16 +1022,26 @@ export const AuthSessionFragmentDoc = {
             name: { kind: 'Name', value: 'user' },
             selectionSet: {
               kind: 'SelectionSet',
-              selections: [
-                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'email' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'surname' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'theme' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'accent' } }
-              ]
+              selections: [{ kind: 'FragmentSpread', name: { kind: 'Name', value: 'UserFields' } }]
             }
           }
+        ]
+      }
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'UserFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'User' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'account' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'email' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'surname' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'theme' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'accent' } }
         ]
       }
     }
@@ -1824,6 +1873,23 @@ export const LoginDocument = {
     },
     {
       kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'UserFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'User' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'account' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'email' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'surname' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'theme' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'accent' } }
+        ]
+      }
+    },
+    {
+      kind: 'FragmentDefinition',
       name: { kind: 'Name', value: 'AuthSession' },
       typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'AuthData' } },
       selectionSet: {
@@ -1836,14 +1902,7 @@ export const LoginDocument = {
             name: { kind: 'Name', value: 'user' },
             selectionSet: {
               kind: 'SelectionSet',
-              selections: [
-                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'email' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'surname' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'theme' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'accent' } }
-              ]
+              selections: [{ kind: 'FragmentSpread', name: { kind: 'Name', value: 'UserFields' } }]
             }
           }
         ]
@@ -1963,6 +2022,23 @@ export const RefreshSessionDocument = {
     },
     {
       kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'UserFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'User' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'account' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'email' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'surname' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'theme' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'accent' } }
+        ]
+      }
+    },
+    {
+      kind: 'FragmentDefinition',
       name: { kind: 'Name', value: 'AuthSession' },
       typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'AuthData' } },
       selectionSet: {
@@ -1975,14 +2051,7 @@ export const RefreshSessionDocument = {
             name: { kind: 'Name', value: 'user' },
             selectionSet: {
               kind: 'SelectionSet',
-              selections: [
-                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'email' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'surname' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'theme' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'accent' } }
-              ]
+              selections: [{ kind: 'FragmentSpread', name: { kind: 'Name', value: 'UserFields' } }]
             }
           }
         ]
@@ -2030,6 +2099,23 @@ export const RegisterAndLoginDocument = {
     },
     {
       kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'UserFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'User' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'account' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'email' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'surname' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'theme' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'accent' } }
+        ]
+      }
+    },
+    {
+      kind: 'FragmentDefinition',
       name: { kind: 'Name', value: 'AuthSession' },
       typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'AuthData' } },
       selectionSet: {
@@ -2042,14 +2128,7 @@ export const RegisterAndLoginDocument = {
             name: { kind: 'Name', value: 'user' },
             selectionSet: {
               kind: 'SelectionSet',
-              selections: [
-                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'email' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'surname' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'theme' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'accent' } }
-              ]
+              selections: [{ kind: 'FragmentSpread', name: { kind: 'Name', value: 'UserFields' } }]
             }
           }
         ]
@@ -2150,6 +2229,23 @@ export const ResetPasswordDocument = {
     },
     {
       kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'UserFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'User' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'account' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'email' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'surname' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'theme' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'accent' } }
+        ]
+      }
+    },
+    {
+      kind: 'FragmentDefinition',
       name: { kind: 'Name', value: 'AuthSession' },
       typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'AuthData' } },
       selectionSet: {
@@ -2162,14 +2258,7 @@ export const ResetPasswordDocument = {
             name: { kind: 'Name', value: 'user' },
             selectionSet: {
               kind: 'SelectionSet',
-              selections: [
-                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'email' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'surname' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'theme' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'accent' } }
-              ]
+              selections: [{ kind: 'FragmentSpread', name: { kind: 'Name', value: 'UserFields' } }]
             }
           }
         ]
@@ -3048,16 +3137,26 @@ export const CurrentUserDocument = {
             name: { kind: 'Name', value: 'tokenFindUser' },
             selectionSet: {
               kind: 'SelectionSet',
-              selections: [
-                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'email' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'surname' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'theme' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'accent' } }
-              ]
+              selections: [{ kind: 'FragmentSpread', name: { kind: 'Name', value: 'UserFields' } }]
             }
           }
+        ]
+      }
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'UserFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'User' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'account' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'email' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'surname' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'theme' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'accent' } }
         ]
       }
     }

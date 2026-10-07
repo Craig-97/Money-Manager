@@ -1,11 +1,6 @@
 # The signed-in user, resolved from the token
 query CurrentUser {
   tokenFindUser {
-    id
-    email
-    firstName
-    surname
-    theme
-    accent
+    ...UserFields
   }
 }

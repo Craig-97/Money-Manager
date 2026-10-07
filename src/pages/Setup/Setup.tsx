@@ -59,7 +59,7 @@ export const Setup = () => {
             cycleEnd={firstCycle.cycleEnd}
             freeToSpend={firstCycle.freeToSpend}
             onReview={setup.reopen}
-            onContinue={() => void setup.goToDashboard()}
+            onContinue={setup.goToDashboard}
           />
         ) : (
           <div className="grid grid-cols-[minmax(0,1fr)] items-start justify-center gap-10 min-[73.75rem]:grid-cols-[minmax(0,660px)_340px]">

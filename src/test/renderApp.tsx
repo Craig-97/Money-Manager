@@ -6,6 +6,7 @@ import userEvent from '@testing-library/user-event';
 import { routes } from '~/app/routes';
 import { TooltipProvider } from '~/components/ui/Tooltip';
 import { createApolloClient, RefreshFn } from '~/graphql/client';
+import { CurrentUserDocument } from '~/graphql/generated';
 import { Session, useAuthStore } from '~/state/auth';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
 import { usePrefsStore } from '~/state/prefs';
@@ -34,6 +35,8 @@ interface RenderAppOptions {
   session?: Session | null;
   // What the refresh cookie gives back when the API rejects the token; nothing by default
   refresh?: RefreshFn;
+  // Pass false to have the app fetch the user, which a session normally starts with
+  cacheUser?: boolean;
 }
 
 // Mounts the real app (routes, guards, hooks, stores) against an in-memory fake API
@@ -41,11 +44,19 @@ export const renderApp = ({
   route = '/',
   api = createFakeApi(),
   session = testSession(),
-  refresh = async () => null
+  refresh = async () => null,
+  cacheUser = true
 }: RenderAppOptions = {}) => {
   useAuthStore.setState({ session, restored: true });
 
   const client = createApolloClient({ terminatingLink: api.link, refresh });
+  // A session always starts with the user in the cache, as useStartSession leaves it
+  if (session && cacheUser) {
+    client.writeQuery({
+      query: CurrentUserDocument,
+      data: { tokenFindUser: { __typename: 'User', ...api.currentUser() } }
+    });
+  }
   const router = createMemoryRouter(routes, { initialEntries: [route] });
   const user = userEvent.setup();
 

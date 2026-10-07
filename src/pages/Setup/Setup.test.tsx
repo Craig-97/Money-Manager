@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { screen, within } from '@testing-library/react';
-import { createFakeApi } from '~/test/fakeApi';
+import { createFakeApi, DEFAULT_ACCOUNT } from '~/test/fakeApi';
 import { renderApp } from '~/test/renderApp';
 
 const findPageHeading = (name: string) => screen.findByRole('heading', { level: 1, name });
@@ -111,6 +111,25 @@ describe('setup', () => {
     });
 
     await user.click(screen.getByRole('button', { name: 'Go to dashboard' }));
+
+    expect(await findPageHeading('Dashboard')).toBeInTheDocument();
+    // It opens with the account setup saved, rather than loading it again
+    expect(api.callsTo('Account')).toHaveLength(0);
+  });
+
+  it('opens the dashboard when setup was finished on another device', async () => {
+    const api = createFakeApi({ account: null });
+    const { user } = renderApp({ route: '/setup', api });
+
+    await user.type(await screen.findByLabelText('Take-home pay per month'), '3600');
+    await cont(user);
+    await user.type(await screen.findByLabelText('Current bank balance'), '500');
+    await cont(user);
+    await cont(user);
+    await user.click(await screen.findByRole('button', { name: 'Skip for now' }));
+    // Finished elsewhere while this page was open
+    api.db.account = structuredClone(DEFAULT_ACCOUNT);
+    await user.click(await screen.findByRole('button', { name: 'Finish setup' }));
 
     expect(await findPageHeading('Dashboard')).toBeInTheDocument();
   });

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { screen, waitFor } from '@testing-library/react';
 import { useAuthStore } from '~/state/auth';
-import { createFakeApi, DEFAULT_USER } from '~/test/fakeApi';
+import { createFakeApi, DEFAULT_ACCOUNT, DEFAULT_USER } from '~/test/fakeApi';
 import { renderApp } from '~/test/renderApp';
 
 const findPageHeading = (name: string) => screen.findByRole('heading', { level: 1, name });
@@ -50,17 +50,22 @@ describe('routing', () => {
     expect(await findPageHeading('Dashboard')).toBeInTheDocument();
   });
 
-  it('loads the user and account together, not one after the other', async () => {
+  it('knows whether setup is finished from the session, without waiting on the account', async () => {
     const { api } = renderApp({ route: '/dashboard' });
 
     await findPageHeading('Dashboard');
-    expect(
-      api.calls
-        .map(call => call.operationName)
-        .slice(0, 2)
-        .sort()
-    ).toEqual(['Account', 'CurrentUser']);
-    expect(api.callsTo('Account')).toEqual([{}]);
+    expect(api.calls.map(call => call.operationName)).toEqual(['Account']);
+  });
+
+  it('offers a retry when the user fails to load', async () => {
+    const api = createFakeApi();
+    api.failNext('CurrentUser', 'INTERNAL_SERVER_ERROR');
+    const { user } = renderApp({ route: '/dashboard', api, cacheUser: false });
+
+    expect(await screen.findByRole('alert')).toHaveTextContent("Couldn't load your account");
+    await user.click(screen.getByRole('button', { name: 'Try again' }));
+
+    expect(await findPageHeading('Dashboard')).toBeInTheDocument();
   });
 
   it('offers a retry when the account fails to load', async () => {
@@ -103,7 +108,7 @@ describe('sessions', () => {
       __typename: 'AuthData' as const,
       token: 'fresh-token',
       tokenExpiration: 1,
-      user: { ...DEFAULT_USER, __typename: 'User' as const }
+      user: { ...DEFAULT_USER, account: DEFAULT_ACCOUNT.id, __typename: 'User' as const }
     }));
     renderApp({ route: '/dashboard', api, refresh });
 

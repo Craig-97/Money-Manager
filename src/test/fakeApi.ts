@@ -182,6 +182,8 @@ export interface FakeApi {
   link: ApolloLink;
   db: FakeDb;
   calls: Call[];
+  // The signed-in user as the API returns them, with their account's id once setup is finished
+  currentUser: () => FakeUser & { account: string | null };
   // Returns the variables of every call to an operation
   callsTo: (operationName: string) => Record<string, unknown>[];
   // Makes the next call to an operation return a GraphQL error with this code
@@ -216,7 +218,9 @@ export const createFakeApi = ({
   let nextId = 1;
   const newId = (prefix: string) => `${prefix}-new-${nextId++}`;
 
-  const authData = () => ({ user: db.user, token: 'test-token', tokenExpiration: 1 });
+  const currentUser = () => ({ ...db.user, account: db.account?.id ?? null });
+
+  const authData = () => ({ user: currentUser(), token: 'test-token', tokenExpiration: 1 });
 
   const checkPassword = (newPassword: string) => {
     if (newPassword.length < 8 || !/[0-9]/.test(newPassword)) {
@@ -297,7 +301,7 @@ export const createFakeApi = ({
   });
 
   const rootValue = {
-    tokenFindUser: () => db.user,
+    tokenFindUser: currentUser,
     // With no id, the signed-in user's account
     account: ({ id }: Args) => {
       const current = requireAccount();
@@ -339,7 +343,7 @@ export const createFakeApi = ({
     logoutEverywhere: () => ({ success: true }),
     updatePreferences: ({ theme, accent }: Args) => {
       db.user = { ...db.user, theme: theme ?? db.user.theme, accent: accent ?? db.user.accent };
-      return { user: db.user, success: true };
+      return { user: currentUser(), success: true };
     },
     resetPassword: ({ token, password: newPassword }: Args) => {
       if (!resetTokens.has(token)) {
@@ -360,7 +364,7 @@ export const createFakeApi = ({
         surname: input.surname.trim(),
         email: input.email.trim()
       };
-      return { user: db.user, success: true };
+      return { user: currentUser(), success: true };
     },
     changePassword: ({ currentPassword, newPassword }: Args) => {
       if (currentPassword !== db.password) {
@@ -368,7 +372,7 @@ export const createFakeApi = ({
       }
       checkPassword(newPassword);
       db.password = newPassword;
-      return { user: db.user, success: true };
+      return { user: currentUser(), success: true };
     },
     deleteCurrentUser: () => {
       db.account = null;
@@ -592,6 +596,7 @@ export const createFakeApi = ({
     link,
     db,
     calls,
+    currentUser,
     callsTo: name => calls.filter(c => c.operationName === name).map(c => c.variables),
     failNext: (operationName, code, { message, extensions } = {}) => {
       failures.set(operationName, apiError(code, message, extensions));

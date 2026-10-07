@@ -1,16 +1,10 @@
-import { ErrorState } from '~/components/feedback/ErrorState';
-import { Button } from '~/components/ui/Button';
+import { AccountError } from '~/components/feedback/AccountError';
 
+/* The guards' error, on its own page: they show before the app shell */
 export const AccountLoadError = ({ onRetry }: { onRetry: () => void }) => (
   <div className="flex min-h-dvh items-center justify-center p-4">
-    <ErrorState
-      title="Couldn't load your account"
-      message="Check your connection and try again."
-      action={
-        <Button variant="solid" onClick={onRetry}>
-          Try again
-        </Button>
-      }
-    />
+    <div className="w-full max-w-[520px]">
+      <AccountError onRetry={onRetry} />
+    </div>
   </div>
 );

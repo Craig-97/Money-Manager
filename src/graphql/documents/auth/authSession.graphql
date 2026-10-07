@@ -3,11 +3,6 @@ fragment AuthSession on AuthData {
   token
   tokenExpiration
   user {
-    id
-    email
-    firstName
-    surname
-    theme
-    accent
+    ...UserFields
   }
 }
