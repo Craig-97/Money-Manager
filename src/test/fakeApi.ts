@@ -1,6 +1,6 @@
 import { Observable } from 'rxjs';
 import { ApolloLink } from '@apollo/client';
-import { buildSchema, execute, ExecutionResult, GraphQLError } from 'graphql';
+import { buildSchema, execute, ExecutionResult, GraphQLError, parse } from 'graphql';
 import { ThemePreference } from '~/graphql/generated';
 import { addDays, fromApiDate, startOfToday, toIsoDate } from '~/lib/dates';
 import { nextOccurrence } from '~/lib/payments';
@@ -180,6 +180,8 @@ const apiError = (code: string, message = code, extensions: Record<string, unkno
 
 export interface FakeApi {
   link: ApolloLink;
+  // Stands in for the browser's fetch, for the session refresh sent outside Apollo
+  fetch: typeof fetch;
   db: FakeDb;
   calls: Call[];
   // The signed-in user as the API returns them, with their account's id once setup is finished
@@ -309,6 +311,8 @@ export const createFakeApi = ({
       return current;
     },
     // Messages and codes as the real API sends them
+    // The refresh cookie is always good here
+    refreshSession: authData,
     login: ({ email, password: attempt }: Args) => {
       if (email !== db.user.email) {
         throw apiError('USER_EMAIL_NOT_FOUND', "We couldn't find a user with that email address");
@@ -592,8 +596,18 @@ export const createFakeApi = ({
     });
   });
 
+  const fakeFetch = async (_url: RequestInfo | URL, init?: RequestInit) => {
+    const { query, variables } = JSON.parse(String(init?.body));
+    const document = parse(query);
+    const result = await execute({ schema, document, rootValue, variableValues: variables });
+    return new Response(JSON.stringify(result), {
+      headers: { 'Content-Type': 'application/json' }
+    });
+  };
+
   return {
     link,
+    fetch: fakeFetch,
     db,
     calls,
     currentUser,

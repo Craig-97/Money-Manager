@@ -57,6 +57,13 @@ describe('routing', () => {
     expect(api.calls.map(call => call.operationName)).toEqual(['Account']);
   });
 
+  it('brings the user back on a page load, keeping setup closed once it is finished', async () => {
+    renderApp({ route: '/setup', reload: true });
+
+    expect(await findPageHeading('Dashboard')).toBeInTheDocument();
+    expect((await screen.findAllByText('Test Account')).length).toBeGreaterThan(0);
+  });
+
   it('offers a retry when the user fails to load', async () => {
     const api = createFakeApi();
     api.failNext('CurrentUser', 'INTERNAL_SERVER_ERROR');

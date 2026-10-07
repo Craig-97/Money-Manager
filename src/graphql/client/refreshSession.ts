@@ -1,6 +1,11 @@
+import { addTypenameToDocument } from '@apollo/client/utilities';
 import { print } from 'graphql';
 import { AuthSessionFragment, RefreshSessionDocument } from '~/graphql/generated';
 import { apiUrl } from './apiUrl';
+
+// Asks for __typename as Apollo's own requests do. The user is written to the cache through the
+// UserFields fragment, which only matches an object that says it's a User.
+const REFRESH_QUERY = print(addTypenameToDocument(RefreshSessionDocument));
 
 // null when the API says there is no session to refresh (no cookie, or it was used or expired)
 export type RefreshResult = AuthSessionFragment | null;
@@ -14,7 +19,7 @@ const request = async (): Promise<RefreshResult> => {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'same-origin',
-    body: JSON.stringify({ query: print(RefreshSessionDocument) })
+    body: JSON.stringify({ query: REFRESH_QUERY })
   });
   const body = (await response.json()) as {
     data?: { refreshSession: AuthSessionFragment } | null;

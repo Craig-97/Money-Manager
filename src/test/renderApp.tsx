@@ -1,5 +1,5 @@
 import { createMemoryRouter, RouterProvider } from 'react-router';
-import { afterEach } from 'vitest';
+import { afterEach, vi } from 'vitest';
 import { ApolloProvider } from '@apollo/client/react';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -19,6 +19,7 @@ afterEach(() => {
   usePrefsStore.setState(usePrefsStore.getInitialState(), true);
   useSidebarStore.setState(useSidebarStore.getInitialState(), true);
   usePaymentDialogStore.setState(usePaymentDialogStore.getInitialState(), true);
+  vi.unstubAllGlobals();
 });
 
 export const testSession = (overrides: Partial<Session> = {}): Session => ({
@@ -37,6 +38,8 @@ interface RenderAppOptions {
   refresh?: RefreshFn;
   // Pass false to have the app fetch the user, which a session normally starts with
   cacheUser?: boolean;
+  // Starts as a page load does: signed out until the refresh cookie brings the session back
+  reload?: boolean;
 }
 
 // Mounts the real app (routes, guards, hooks, stores) against an in-memory fake API
@@ -45,13 +48,16 @@ export const renderApp = ({
   api = createFakeApi(),
   session = testSession(),
   refresh = async () => null,
-  cacheUser = true
+  cacheUser = true,
+  reload = false
 }: RenderAppOptions = {}) => {
-  useAuthStore.setState({ session, restored: true });
+  useAuthStore.setState(reload ? { session: null, restored: false } : { session, restored: true });
+  // The refresh is a plain fetch, so it goes to the fake API this way
+  if (reload) vi.stubGlobal('fetch', api.fetch);
 
   const client = createApolloClient({ terminatingLink: api.link, refresh });
   // A session always starts with the user in the cache, as useStartSession leaves it
-  if (session && cacheUser) {
+  if (session && cacheUser && !reload) {
     client.writeQuery({
       query: CurrentUserDocument,
       data: { tokenFindUser: { __typename: 'User', ...api.currentUser() } }
