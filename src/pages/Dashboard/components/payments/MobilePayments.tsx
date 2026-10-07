@@ -3,24 +3,24 @@ import { Checkbox, CheckboxHitArea } from '~/components/form/Checkbox';
 import { SegmentedControl } from '~/components/ui/SegmentedControl';
 import { cn } from '~/lib/cn';
 import { formatPayment } from '~/lib/format';
-import { categoryLabel, FREQUENCY_LABELS, formatShortDate, Payment } from '~/lib/payments';
+import { PayCycle } from '~/lib/payday';
+import {
+  categoryLabel,
+  cycleStatus,
+  FREQUENCY_LABELS,
+  formatShortDate,
+  Payment
+} from '~/lib/payments';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
-import { EmptyPayments, footLabel, PaymentLetter } from './paymentParts';
+import { EmptyPayments, footLabel, ListTotal, PaymentLetter, TimesDue } from './paymentParts';
 import { tabOptions, useAddForTab } from './PaymentsTable';
 import { dueInfo, PaymentTab } from '../../dashboardModel';
 import { Dashboard } from '../../hooks';
 
-const metaFor = (payment: Payment, tab: PaymentTab) => {
+const metaFor = (payment: Payment, tab: PaymentTab, cycle: PayCycle) => {
   const category = categoryLabel(payment.category);
   if (tab === 'recurring' && payment.kind === 'recurring') {
-    const status = !payment.dueDate
-      ? 'Ended'
-      : payment.state === 'paid'
-        ? 'Paid'
-        : payment.state === 'skipped'
-          ? 'Skipped'
-          : 'Unpaid';
-    return `${FREQUENCY_LABELS[payment.frequency]} · ${status}`;
+    return `${FREQUENCY_LABELS[payment.frequency]} · ${cycleStatus(payment, cycle).label}`;
   }
   if (tab === 'oneOff') return `${payment.type === 'INCOME' ? 'Income' : 'Expense'} · ${category}`;
   return `${payment.kind === 'recurring' ? 'Recurring' : 'One-off'} · ${category}`;
@@ -31,7 +31,6 @@ const MobileRow = ({ payment, dashboard }: { payment: Payment; dashboard: Dashbo
   const openEdit = usePaymentDialogStore(s => s.openEdit);
   const due = dueInfo(payment, today, cycle);
   const isSelected = selecting && selected.has(payment.id);
-  const paid = payment.state === 'paid';
   const urgent = due.state === 'today' || due.state === 'overdue';
 
   return (
@@ -67,17 +66,15 @@ const MobileRow = ({ payment, dashboard }: { payment: Payment; dashboard: Dashbo
         <span className="min-w-0 grow">
           <span className="flex items-center gap-1.5 text-[15px] font-bold">
             <span className="truncate">{payment.name}</span>
-            {paid ? (
-              <span className="rounded-full bg-income-bg px-[7px] py-[3px] text-[10px] font-bold text-income">
-                Paid
-              </span>
+            {tab === 'upcoming' ? (
+              <TimesDue payment={payment} cycle={cycle} today={today} hint={false} />
             ) : null}
           </span>
           <span className="mt-[3px] flex items-center gap-[5px] truncate text-xs font-medium text-muted">
             {payment.kind === 'recurring' ? (
               <Repeat size={12} strokeWidth={2.25} className="shrink-0" aria-hidden="true" />
             ) : null}
-            {metaFor(payment, tab)}
+            {metaFor(payment, tab, cycle)}
           </span>
         </span>
         <span className="shrink-0 text-right">
@@ -105,7 +102,6 @@ const MobileRow = ({ payment, dashboard }: { payment: Payment; dashboard: Dashbo
 export const MobilePayments = ({ dashboard }: { dashboard: Dashboard }) => {
   const { tab, setTab, listed, ascending, toggleSort, cycle, selecting } = dashboard;
   const add = useAddForTab(tab);
-  const net = listed.reduce((total, payment) => total + payment.signedAmount, 0);
 
   return (
     <article
@@ -152,13 +148,7 @@ export const MobilePayments = ({ dashboard }: { dashboard: Dashboard }) => {
             <span className="text-[13px] font-semibold text-muted">
               {footLabel(listed.length, tab, formatShortDate(cycle.end))}
             </span>
-            <span
-              className={cn(
-                'num text-lg font-extrabold',
-                net >= 0 ? 'text-income' : 'text-expense'
-              )}>
-              {formatPayment(net)}
-            </span>
+            <ListTotal dashboard={dashboard} compact />
           </div>
         </>
       ) : (
@@ -185,7 +175,7 @@ export const MobileBulkBar = ({ dashboard }: { dashboard: Dashboard }) => {
           type="button"
           disabled={none}
           onClick={() => {
-            void actions.setPaid(selectedPayments, true);
+            void dashboard.paySelected();
             stopSelecting();
           }}
           className="inline-flex h-11 cursor-pointer items-center rounded-full bg-nav-active-bg px-4 text-[13px] font-bold text-nav-active-text disabled:cursor-default disabled:opacity-45">

@@ -199,6 +199,7 @@ const FigureRow = ({ label, value, aside, last }: FigureRowProps) => (
 export const MobileFigures = ({ dashboard }: { dashboard: Dashboard }) => {
   const { summary, cycle, isEmpty, monthlyIncome, incomeEditor: editor } = dashboard;
   const openAdd = usePaymentDialogStore(s => s.openAdd);
+  const averaged = summary.averagedRecurring.length > 0;
 
   return (
     <article className="flex flex-col rounded-3xl border border-border bg-surface px-5 py-2">
@@ -273,7 +274,17 @@ export const MobileFigures = ({ dashboard }: { dashboard: Dashboard }) => {
       <FigureRow
         last
         label="Monthly recurring"
-        value={(summary.monthlyRecurring < 0 ? '+' : '') + formatMoney(summary.monthlyRecurring)}
+        value={
+          <>
+            {averaged ? (
+              <span className="text-muted">
+                <span aria-hidden="true">≈</span>
+                <span className="sr-only">About</span>{' '}
+              </span>
+            ) : null}
+            {(summary.monthlyRecurring < 0 ? '+' : '') + formatMoney(summary.monthlyRecurring)}
+          </>
+        }
         aside={
           summary.annualRecurring > 0 ? (
             <>

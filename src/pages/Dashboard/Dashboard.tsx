@@ -32,7 +32,7 @@ const DashboardContent = ({ account }: { account: Account }) => {
     today: dashboard.today,
     payments: dashboard.payments,
     summary: dashboard.summary,
-    markPaid: payments => dashboard.actions.setPaid(payments, true)
+    markPaid: dashboard.actions.pay
   });
 
   return (

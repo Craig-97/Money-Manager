@@ -14,11 +14,12 @@ import {
   footLabel,
   greenTagClasses,
   KindTag,
-  PaidTag,
+  ListTotal,
   PaymentLetter,
   PaymentMenu,
   redTagClasses,
-  StatusTag
+  StatusTag,
+  TimesDue
 } from './paymentParts';
 import { dueInfo, PaymentTab, TABS } from '../../dashboardModel';
 import { Dashboard } from '../../hooks';
@@ -70,7 +71,6 @@ const PaymentRow = ({ payment, dashboard }: RowProps) => {
   const openEdit = usePaymentDialogStore(s => s.openEdit);
   const due = dueInfo(payment, today, cycle);
   const isSelected = selected.has(payment.id);
-  const paid = payment.state === 'paid';
   const checkboxId = `payment-${tab}-${payment.id}`;
   const category = categoryLabel(payment.category);
 
@@ -97,7 +97,7 @@ const PaymentRow = ({ payment, dashboard }: RowProps) => {
               className="-my-[11px] min-w-0 cursor-pointer truncate rounded-lg py-[11px] text-left leading-[22px] hover:text-accent-text hover:underline hover:underline-offset-3">
               {payment.name}
             </button>
-            {paid && tab !== 'recurring' ? <PaidTag /> : null}
+            {tab === 'upcoming' ? <TimesDue payment={payment} cycle={cycle} today={today} /> : null}
           </div>
           <p className="mt-0.5 text-xs font-medium text-muted">
             {tab === 'oneOff' ? 'One-off' : category}
@@ -129,7 +129,7 @@ const PaymentRow = ({ payment, dashboard }: RowProps) => {
             <DueCell due={due} />
           </span>
           <span role="cell">
-            <StatusTag payment={payment} />
+            <StatusTag payment={payment} cycle={cycle} />
           </span>
         </>
       ) : null}
@@ -171,7 +171,6 @@ export const PaymentsTable = ({ dashboard }: { dashboard: Dashboard }) => {
     dashboard;
   const add = useAddForTab(tab);
   const allSelected = listed.length > 0 && selectedPayments.length === listed.length;
-  const net = listed.reduce((total, payment) => total + payment.signedAmount, 0);
   const [typeHeading, middleHeading, lastHeading] = HEADINGS[tab];
 
   const selectAll = (
@@ -231,7 +230,7 @@ export const PaymentsTable = ({ dashboard }: { dashboard: Dashboard }) => {
               variant="solid"
               className="text-[13px]"
               onClick={() => {
-                void actions.setPaid(selectedPayments, true);
+                void dashboard.paySelected();
                 dashboard.clearSelection();
               }}>
               <Check size={16} strokeWidth={2.5} aria-hidden="true" />
@@ -286,16 +285,7 @@ export const PaymentsTable = ({ dashboard }: { dashboard: Dashboard }) => {
               <p className="text-[13px] font-semibold text-muted">
                 {footLabel(listed.length, tab, formatShortDate(cycle.end))}
               </p>
-              <p className="flex items-baseline gap-2.5">
-                <span className="text-[13px] font-semibold text-muted">Net total</span>
-                <span
-                  className={cn(
-                    'num text-xl font-extrabold',
-                    net >= 0 ? 'text-income' : 'text-expense'
-                  )}>
-                  {formatPayment(net)}
-                </span>
-              </p>
+              <ListTotal dashboard={dashboard} />
             </div>
           </>
         ) : (

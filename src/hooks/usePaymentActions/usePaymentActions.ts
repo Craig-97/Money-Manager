@@ -7,9 +7,10 @@ import {
   MarkPaymentsUnpaidDocument,
   SkipRecurringPaymentsDocument
 } from '~/graphql/generated';
+import { toApiDate } from '~/lib/dates';
 import { getApiErrorMessage } from '~/lib/errors';
 import { formatMoney } from '~/lib/format';
-import { Payment } from '~/lib/payments';
+import { formatShortDate, Payment, RecurringPayment, repeatsInCycle } from '~/lib/payments';
 import { showToast } from '~/state/toast';
 
 const idsOf = (payments: readonly Payment[], kind: Payment['kind']) =>
@@ -39,50 +40,72 @@ export const usePaymentActions = (accountId: string) => {
   const [deleteOneOffs] = useMutation(BatchDeleteOneOffPaymentsDocument);
 
   /*
-   * Marks payments paid, taking them off the bank balance as v1 did: recurring payments stay
-   * paid until the next cycle, one-offs are done with and deleted. Marking a recurring payment
-   * unpaid again puts its amount back.
+   * Marks payments paid, taking them off the bank balance as v1 did: a recurring payment has its
+   * next date paid and moves on to the one after, and one-offs are done with and deleted.
    */
-  const setPaid = async (payments: readonly Payment[], paid: boolean) => {
+  const pay = async (payments: readonly Payment[]) => {
     if (!payments.length) return;
+    const oneOffIds = idsOf(payments, 'oneOff');
     try {
-      if (paid) {
-        const oneOffIds = idsOf(payments, 'oneOff');
-        await markPaid({
-          variables: {
-            input: {
-              accountId,
-              recurringPaymentIds: idsOf(payments, 'recurring'),
-              oneOffPaymentIds: oneOffIds
-            }
-          },
-          // The returned account lists them without the deleted one-offs; drop the entities too
-          update: cache => {
-            for (const id of oneOffIds)
-              cache.evict({ id: cache.identify({ __typename: 'OneOffPayment', id }) });
-            cache.gc();
+      await markPaid({
+        variables: {
+          input: {
+            accountId,
+            recurringPaymentIds: idsOf(payments, 'recurring'),
+            oneOffPaymentIds: oneOffIds
           }
-        });
-      } else {
-        await markUnpaid({
-          variables: { input: { accountId, recurringPaymentIds: idsOf(payments, 'recurring') } }
-        });
-      }
+        },
+        // The returned account lists them without the deleted one-offs; drop the entities too
+        update: cache => {
+          for (const id of oneOffIds)
+            cache.evict({ id: cache.identify({ __typename: 'OneOffPayment', id }) });
+          cache.gc();
+        }
+      });
+      showToast({ message: `${describe(payments)} marked as paid${balanceNote(payments, true)}` });
+    } catch (error) {
+      showError(error);
+    }
+  };
+
+  /* Undoes the latest pay or skip, bringing those dates back. A paid amount goes back on. */
+  const undo = async (payment: RecurringPayment) => {
+    const latest = payment.handled.at(-1);
+    if (!latest) return;
+    try {
+      await markUnpaid({ variables: { input: { accountId, recurringPaymentIds: [payment.id] } } });
       showToast({
-        message: `${describe(payments)} marked as ${paid ? 'paid' : 'unpaid'}${balanceNote(payments, paid)}`
+        message:
+          latest.outcome === 'paid'
+            ? `${payment.name} marked as unpaid${balanceNote([payment], false)}`
+            : `${payment.name} is no longer skipped`
       });
     } catch (error) {
       showError(error);
     }
   };
 
-  /* Leaves a recurring payment out of this cycle; it comes back on its next date */
-  const skip = async (payment: Payment) => {
+  /*
+   * Skips a recurring payment's next date, or every date before `until` (the next payday) to skip
+   * the rest of the cycle. The balance doesn't change.
+   */
+  const skip = async (payment: RecurringPayment, until?: Date) => {
     try {
       await skipRecurring({
-        variables: { input: { accountId, recurringPaymentIds: [payment.id] } }
+        variables: {
+          input: {
+            accountId,
+            recurringPaymentIds: [payment.id],
+            until: until ? toApiDate(until) : undefined
+          }
+        }
       });
-      showToast({ message: `${payment.name} skipped this cycle` });
+      const skipped = until
+        ? 'for the rest of this cycle'
+        : repeatsInCycle(payment) && payment.dueDate
+          ? `for ${formatShortDate(payment.dueDate)}`
+          : 'this cycle';
+      showToast({ message: `${payment.name} skipped ${skipped}` });
     } catch (error) {
       showError(error);
     }
@@ -113,7 +136,7 @@ export const usePaymentActions = (accountId: string) => {
     }
   };
 
-  return { setPaid, skip, remove };
+  return { pay, undo, skip, remove };
 };
 
 export type PaymentActions = ReturnType<typeof usePaymentActions>;

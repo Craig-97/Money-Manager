@@ -23,10 +23,11 @@ const account = (overrides: Partial<FakeAccount> = {}): FakeAccount => ({
       category: 'SUBSCRIPTION',
       frequency: 'MONTHLY',
       type: 'EXPENSE',
-      firstPaymentDate: apiDateFromToday(-31),
+      // Starting today, so today is one of its dates whatever day the tests run
+      firstPaymentDate: apiDateFromToday(0),
       lastPaymentDate: null,
       nextDueDate: apiDateFromToday(0),
-      status: 'UNPAID'
+      handled: []
     }
   ],
   oneOffPayments: [
@@ -48,6 +49,12 @@ const renderDashboard = (data = account()) => {
 };
 
 const freeToSpend = () => screen.getByRole('group', { name: 'How free to spend is worked out' });
+
+// A tooltip saying this; one that's closing can still be fading out
+const findTooltip = (text: string) =>
+  waitFor(() =>
+    expect(screen.getAllByRole('tooltip').map(tooltip => tooltip.textContent)).toContain(text)
+  );
 
 describe('dashboard', () => {
   it('works out what is free to spend before payday', async () => {
@@ -145,9 +152,11 @@ describe('dashboard', () => {
       { input: { accountId: 'account-1', recurringPaymentIds: ['netflix'] } }
     ]);
     expect(api.callsTo('UpdateRecurringPayment')).toEqual([]);
-    expect(api.db.account?.recurringPayments[0].status).toBe('SKIPPED');
+    expect(api.db.account?.recurringPayments[0].handled).toEqual([
+      { outcome: 'SKIPPED', dates: [apiDateFromToday(0)] }
+    ]);
     expect(api.db.account?.bankBalance).toBe(1000);
-    expect(await within(dialog).findByText(/^Skipped this cycle/)).toBeInTheDocument();
+    expect(await within(dialog).findByText(/^Skipped · next due/)).toBeInTheDocument();
   });
 
   it('checks a payment has a name and amount', async () => {
@@ -203,6 +212,108 @@ describe('dashboard', () => {
   });
 });
 
+describe('a payment due more than once before payday', () => {
+  // Wednesday 7 October 2026; payday is the last working day, Friday 30 October. Only Date is faked.
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date('2026-10-07T09:00:00'));
+  });
+  afterEach(() => vi.useRealTimers());
+
+  // A £50 cleaner every Wednesday: 7, 14, 21 and 28 October fall before payday
+  const cleanerAccount = () =>
+    account({
+      bankBalance: 1000,
+      cycleStartedOn: apiDate('2026-09-30'),
+      recurringPayments: [
+        {
+          id: 'cleaner',
+          name: 'Cleaner',
+          amount: 50,
+          category: 'OTHER',
+          frequency: 'WEEKLY',
+          type: 'EXPENSE',
+          firstPaymentDate: apiDate('2026-10-07'),
+          lastPaymentDate: null,
+          nextDueDate: apiDate('2026-10-07'),
+          handled: []
+        }
+      ],
+      oneOffPayments: []
+    });
+
+  const chooseFromMenu = async (user: ReturnType<typeof renderApp>['user'], name: string) => {
+    await user.click(await screen.findByRole('button', { name: 'More actions for Cleaner' }));
+    await user.click(await screen.findByRole('menuitem', { name }));
+  };
+
+  it('counts every date before payday, then pays them one at a time', async () => {
+    const { user, api } = renderDashboard(cleanerAccount());
+
+    // One row, marked as due four times
+    expect(await screen.findByText('×4')).toBeInTheDocument();
+    expect(screen.getByText(/due 4 times before payday/)).toBeInTheDocument();
+    await user.hover(screen.getByText('×4'));
+    await findTooltip(
+      'Due 4 times before payday' +
+        ['7', '14', '21', '28'].map(day => `Wed ${day} Oct £50.00`).join('')
+    );
+    // It closes as the pointer leaves, like the cycle bar's days
+    await user.unhover(screen.getByText('×4'));
+    await waitFor(() => expect(screen.queryByRole('tooltip')).not.toBeInTheDocument());
+    // All four come out of what's free to spend
+    expect(within(freeToSpend()).getByText('£800.00')).toBeInTheDocument();
+    // The monthly total uses its average; hovering the ≈ says so
+    const monthly = screen.getByRole('region', { name: 'Monthly money' });
+    expect(monthly).toHaveTextContent('About £216.67 /mo');
+    await user.hover(within(monthly).getByText('≈'));
+    await findTooltip('Includes monthly averagesCleaner £216.67/mo');
+    // Money out, in red as on the cycle bar
+    expect(screen.getAllByText('Cleaner £216.67/mo')[0]).toHaveClass('text-expense');
+
+    await chooseFromMenu(user, 'Mark Wed 7 Oct as paid');
+
+    expect(
+      await screen.findByText('Cleaner marked as paid · £50.00 off your balance')
+    ).toBeInTheDocument();
+    // Still in the upcoming list, now due next week
+    expect(await screen.findByText('×3')).toBeInTheDocument();
+    expect(api.db.account?.recurringPayments[0].nextDueDate).toBe(apiDate('2026-10-14'));
+    expect(within(freeToSpend()).getByText('£800.00')).toBeInTheDocument();
+  });
+
+  it('skips the rest of the cycle at once', async () => {
+    const { user, api } = renderDashboard(cleanerAccount());
+
+    await chooseFromMenu(user, 'Skip the rest of this cycle (4)');
+
+    expect(
+      await screen.findByText('Cleaner skipped for the rest of this cycle')
+    ).toBeInTheDocument();
+    expect(api.callsTo('SkipRecurringPayments')).toEqual([
+      { input: { accountId: 'account-1', recurringPaymentIds: ['cleaner'], until: '2026-10-30' } }
+    ]);
+    await waitFor(() =>
+      expect(screen.queryByRole('button', { name: 'Edit Cleaner' })).not.toBeInTheDocument()
+    );
+    expect(api.db.account?.bankBalance).toBe(1000);
+  });
+
+  it('shows how far through the cycle it is on the recurring tab', async () => {
+    const data = cleanerAccount();
+    data.recurringPayments[0].nextDueDate = apiDate('2026-10-14');
+    data.recurringPayments[0].handled = [{ outcome: 'PAID', dates: [apiDate('2026-10-07')] }];
+    const { user } = renderDashboard(data);
+
+    await user.click(await screen.findByRole('radio', { name: /Recurring/ }));
+
+    expect(await screen.findByText('1 of 4 paid')).toBeInTheDocument();
+    // The list's total is a monthly figure, at the cleaner's weekly average
+    const footer = screen.getByText('1 payment · recurring').parentElement!;
+    expect(footer).toHaveTextContent(/≈ .?£216\.67 \/mo/);
+  });
+});
+
 describe('payday prompt', () => {
   // Wednesday 30 September 2026 is the last day of the month, the accounts' payday. Only Date is
   // faked, so timers and user events run as normal.
@@ -213,7 +324,8 @@ describe('payday prompt', () => {
   beforeEach(() => setToday('2026-09-30'));
   afterEach(() => vi.useRealTimers());
 
-  // A paid recurring payment from the cycle that's ending, with this cycle not started yet
+  // A monthly payment whose 30 August date was left unpaid in the cycle that's ending, with this
+  // cycle not started yet. It falls again today, 30 September.
   const paydayAccount = () =>
     account({
       cycleStartedOn: null,
@@ -227,8 +339,8 @@ describe('payday prompt', () => {
           type: 'EXPENSE',
           firstPaymentDate: apiDateFromToday(-31),
           lastPaymentDate: null,
-          nextDueDate: apiDateFromToday(-1),
-          status: 'PAID'
+          nextDueDate: apiDateFromToday(-31),
+          handled: []
         }
       ],
       oneOffPayments: []
@@ -239,24 +351,25 @@ describe('payday prompt', () => {
 
     const dialog = await screen.findByRole('dialog', { name: 'It’s payday' });
     const balance = within(dialog).getByLabelText(/Confirm your bank balance/);
-    expect(balance).toHaveValue('3,500.00');
+    // £1,000 plus £2,500 income, less Netflix's £20 left over from August and £20 due today
+    expect(balance).toHaveValue('3,460.00');
     expect(within(dialog).getByText('Projected')).toBeInTheDocument();
 
     await user.clear(balance);
-    await user.type(balance, '3,480');
+    await user.type(balance, '3,450');
     expect(within(dialog).getByText('Edited')).toBeInTheDocument();
     expect(within(dialog).getByRole('checkbox', { name: /Netflix/ })).toBeChecked();
     await user.click(within(dialog).getByRole('button', { name: 'Start new cycle' }));
 
     expect(await within(dialog).findByText('New cycle started')).toBeInTheDocument();
     expect(dialog).toHaveTextContent(
-      'Bank balance set to £3,480.00. 1 recurring payment was reset to unpaid and moved to the next date.'
+      'Bank balance set to £3,450.00. 1 recurring payment was moved on to the new cycle.'
     );
     expect(api.callsTo('StartPaydayCycle')).toEqual([
       {
         input: expect.objectContaining({
           accountId: 'account-1',
-          bankBalance: 3480,
+          bankBalance: 3450,
           recurringPaymentIds: ['netflix']
         })
       }
@@ -289,19 +402,32 @@ describe('payday prompt', () => {
     setToday('2026-10-04');
     const data = paydayAccount();
     data.recurringPayments[0].nextDueDate = apiDate('2026-09-29');
-    // Paid on its due date, which is after the payday being caught up on
+    // Due after the payday being caught up on
     data.recurringPayments.push({
       ...data.recurringPayments[0],
       id: 'gym',
       name: 'Gym',
-      nextDueDate: apiDateFromToday(0),
-      status: 'PAID'
+      nextDueDate: apiDateFromToday(0)
     });
     renderDashboard(data);
 
     const dialog = await screen.findByRole('dialog', { name: 'Start your new pay cycle' });
     expect(within(dialog).getByRole('checkbox', { name: /Netflix/ })).toBeChecked();
     expect(within(dialog).queryByRole('checkbox', { name: /Gym/ })).not.toBeInTheDocument();
+  });
+
+  it('says when everything from the last cycle was paid or skipped', async () => {
+    const data = paydayAccount();
+    // Paid for 30 August, so it has already moved on to today, in the new cycle
+    data.recurringPayments[0].nextDueDate = apiDateFromToday(0);
+    data.recurringPayments[0].handled = [{ outcome: 'PAID', dates: [apiDateFromToday(-31)] }];
+    renderDashboard(data);
+
+    const dialog = await screen.findByRole('dialog', { name: 'It’s payday' });
+    expect(dialog).toHaveTextContent(
+      "Everything from the last cycle was paid or skipped, so there's nothing to move on."
+    );
+    expect(within(dialog).queryByRole('checkbox', { name: /Netflix/ })).not.toBeInTheDocument();
   });
 
   it("doesn't show once this cycle has started", async () => {

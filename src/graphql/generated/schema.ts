@@ -78,6 +78,12 @@ export type DeleteResponse = {
   success: Scalars['Boolean']['output'];
 };
 
+export type HandledDates = {
+  __typename: 'HandledDates';
+  dates: Array<Scalars['String']['output']>;
+  outcome: PaymentOutcome;
+};
+
 export type MarkPaymentsPaidInput = {
   accountId: Scalars['ID']['input'];
   oneOffPaymentIds: Array<Scalars['ID']['input']>;
@@ -340,7 +346,7 @@ export type PaydayType = 'LAST_DAY' | 'LAST_WEEKDAY' | 'SET_DAY' | 'SET_WEEKDAY'
 
 export type PaymentFrequency = 'ANNUALLY' | 'BIWEEKLY' | 'MONTHLY' | 'QUARTERLY' | 'WEEKLY';
 
-export type PaymentStatus = 'PAID' | 'SKIPPED' | 'UNPAID';
+export type PaymentOutcome = 'PAID' | 'SKIPPED';
 
 export type PaymentType = 'EXPENSE' | 'INCOME';
 
@@ -366,11 +372,11 @@ export type RecurringPayment = {
   category: RecurringPaymentCategory;
   firstPaymentDate: Scalars['String']['output'];
   frequency: PaymentFrequency;
+  handled: Array<HandledDates>;
   id: Scalars['ID']['output'];
   lastPaymentDate: Maybe<Scalars['String']['output']>;
   name: Scalars['String']['output'];
   nextDueDate: Maybe<Scalars['String']['output']>;
-  status: PaymentStatus;
   type: PaymentType;
 };
 
@@ -423,6 +429,7 @@ export type RegisterInput = {
 export type SkipRecurringPaymentsInput = {
   accountId: Scalars['ID']['input'];
   recurringPaymentIds: Array<Scalars['ID']['input']>;
+  until?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type StartPaydayCycleInput = {

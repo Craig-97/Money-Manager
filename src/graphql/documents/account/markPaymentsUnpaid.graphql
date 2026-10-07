@@ -1,4 +1,4 @@
-# Puts recurring payments back to unpaid, returning their amounts to the bank balance
+# Undoes the latest pay or skip on recurring payments, returning paid amounts to the balance
 mutation MarkPaymentsUnpaid($input: MarkPaymentsUnpaidInput!) {
   markPaymentsUnpaid(input: $input) {
     account {

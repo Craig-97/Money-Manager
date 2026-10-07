@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useMutation } from '@apollo/client/react';
 import { StartPaydayCycleDocument } from '~/graphql/generated';
 import { Account } from '~/hooks/useAccount';
-import { addDays, daysBetween, fromApiDate, toApiDate } from '~/lib/dates';
+import { daysBetween, fromApiDate, toApiDate } from '~/lib/dates';
 import { getApiErrorMessage } from '~/lib/errors';
 import { formatMoneyInput, parseMoney } from '~/lib/format';
 import { PayCycle } from '~/lib/payday';
@@ -28,11 +28,10 @@ export const needsNewCycle = (cycle: PayCycle, cycleStartedOn: string | null | u
   return !started || started < cycle.start;
 };
 
-/* The date a recurring payment moves on to when the cycle restarts */
-const movesTo = (payment: RecurringPayment, today: Date) => {
-  const after = payment.dueDate ? addDays(payment.dueDate, 1) : today;
-  return nextOccurrence(payment, after > today ? after : today);
-};
+/* Where a recurring payment with dates left over from the last cycle moves on to: its first date
+   from payday on, as the API works it out */
+const movesTo = (payment: RecurringPayment, cycle: PayCycle) =>
+  nextOccurrence(payment, cycle.start);
 
 /* The payday prompt: confirm the balance, start the next cycle, and catch up on anything overdue */
 export const usePaydayPrompt = ({
@@ -47,18 +46,14 @@ export const usePaydayPrompt = ({
   const due = needsNewCycle(cycle, account.cycleStartedOn);
   const [view, setView] = useState<'open' | 'closed' | 'done'>(due ? 'open' : 'closed');
 
-  // Recurring payments dated before payday belong to the cycle that just ended. Anything due
-  // from payday on is already in the new cycle, paid or not, so it stays where it is.
+  // Recurring payments whose next date is before payday weren't paid or skipped in the cycle that
+  // just ended. Anything due from payday on is already in the new cycle, so it stays where it is.
   const toReset = payments.filter(
     (payment): payment is RecurringPayment =>
       payment.kind === 'recurring' && payment.dueDate !== null && payment.dueDate < cycle.start
   );
   const overdue = payments.filter(
-    payment =>
-      payment.kind === 'oneOff' &&
-      payment.state === 'unpaid' &&
-      payment.dueDate &&
-      payment.dueDate < today
+    payment => payment.kind === 'oneOff' && payment.dueDate && payment.dueDate < today
   );
 
   const projected = summary.freeToSpend + account.monthlyIncome;
@@ -112,7 +107,7 @@ export const usePaydayPrompt = ({
     balance,
     setBalance,
     edited,
-    toReset: toReset.map(payment => ({ payment, next: movesTo(payment, today) })),
+    toReset: toReset.map(payment => ({ payment, next: movesTo(payment, cycle) })),
     chosen,
     toggle: (id: string) =>
       setChosen(current => {
@@ -132,8 +127,8 @@ export const usePaydayPrompt = ({
     resultBalance: result.balance,
     resetText:
       result.reset === 0
-        ? 'No recurring payments were reset.'
-        : `${result.reset} recurring ${result.reset === 1 ? 'payment was' : 'payments were'} reset to unpaid and moved to the next date.`
+        ? 'No recurring payments needed moving on.'
+        : `${result.reset} recurring ${result.reset === 1 ? 'payment was' : 'payments were'} moved on to the new cycle.`
   };
 };
 

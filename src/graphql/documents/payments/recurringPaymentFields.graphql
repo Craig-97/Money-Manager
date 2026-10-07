@@ -8,5 +8,8 @@ fragment RecurringPaymentFields on RecurringPayment {
   firstPaymentDate
   lastPaymentDate
   nextDueDate
-  status
+  handled {
+    outcome
+    dates
+  }
 }

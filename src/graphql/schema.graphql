@@ -130,6 +130,7 @@ input MarkPaymentsUnpaidInput {
 input SkipRecurringPaymentsInput {
   accountId: ID!
   recurringPaymentIds: [ID!]!
+  until: String
 }
 
 input StartPaydayCycleInput {
@@ -244,8 +245,7 @@ enum PaymentFrequency {
   ANNUALLY
 }
 
-enum PaymentStatus {
-  UNPAID
+enum PaymentOutcome {
   PAID
   SKIPPED
 }
@@ -261,7 +261,12 @@ type RecurringPayment {
   firstPaymentDate: String!
   lastPaymentDate: String
   nextDueDate: String
-  status: PaymentStatus!
+  handled: [HandledDates!]!
+}
+
+type HandledDates {
+  outcome: PaymentOutcome!
+  dates: [String!]!
 }
 
 input CreateRecurringPaymentInput {

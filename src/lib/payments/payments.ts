@@ -11,8 +11,13 @@ import { nextOccurrence } from './recurrence';
 
 export type PaymentKind = 'recurring' | 'oneOff';
 
-// Where the payment stands this cycle
-export type PaymentState = 'unpaid' | 'paid' | 'skipped';
+export type Outcome = 'paid' | 'skipped';
+
+// One time a recurring payment was paid or skipped: one date, or the rest of a cycle at once
+export interface Handled {
+  outcome: Outcome;
+  dates: Date[];
+}
 
 interface BasePayment {
   id: string;
@@ -22,9 +27,9 @@ interface BasePayment {
   // Negative for money out, so totals can just be summed
   signedAmount: number;
   type: PaymentType;
-  // When it's due this cycle; null for a recurring payment that has ended
+  // The next date to pay: a one-off's date, or the first of a recurring payment's dates not yet
+  // paid or skipped. Null for a recurring payment that has ended.
   dueDate: Date | null;
-  state: PaymentState;
 }
 
 export interface RecurringPayment extends BasePayment {
@@ -33,6 +38,8 @@ export interface RecurringPayment extends BasePayment {
   frequency: PaymentFrequency;
   firstPaymentDate: Date;
   lastPaymentDate: Date | null;
+  // What's been paid or skipped since the cycle started, oldest first
+  handled: Handled[];
 }
 
 export interface OneOffPayment extends BasePayment {
@@ -44,7 +51,7 @@ export type Payment = RecurringPayment | OneOffPayment;
 
 const signed = (amount: number, type: PaymentType) => (type === 'INCOME' ? amount : -amount);
 
-const RECURRING_STATE = { UNPAID: 'unpaid', PAID: 'paid', SKIPPED: 'skipped' } as const;
+const OUTCOMES = { PAID: 'paid', SKIPPED: 'skipped' } as const;
 
 export const toRecurringPayment = (
   payment: RecurringPaymentFieldsFragment,
@@ -69,7 +76,10 @@ export const toRecurringPayment = (
     firstPaymentDate,
     lastPaymentDate,
     dueDate,
-    state: RECURRING_STATE[payment.status]
+    handled: payment.handled.map(entry => ({
+      outcome: OUTCOMES[entry.outcome],
+      dates: entry.dates.map(date => fromApiDate(date)!)
+    }))
   };
 };
 
@@ -81,9 +91,8 @@ export const toOneOffPayment = (payment: OneOffPaymentFieldsFragment): OneOffPay
   signedAmount: signed(payment.amount, payment.type),
   type: payment.type,
   category: payment.category,
-  dueDate: fromApiDate(payment.dueDate),
   // Paying a one-off deletes it, so the ones left are always still to pay
-  state: 'unpaid'
+  dueDate: fromApiDate(payment.dueDate)
 });
 
 interface AccountPayments {

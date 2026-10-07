@@ -5,7 +5,7 @@ import { Account } from '~/hooks/useAccount';
 import { usePayCycle } from '~/hooks/usePayCycle';
 import { usePaymentActions } from '~/hooks/usePaymentActions';
 import { getApiErrorMessage } from '~/lib/errors';
-import { cycleDays, summarise, toPayments } from '~/lib/payments';
+import { canPay, cycleDays, summarise, toPayments } from '~/lib/payments';
 import { showToast } from '~/state/toast';
 import { PaymentTab, paymentsForTab } from '../dashboardModel';
 import { useMoneyEditor } from './useMoneyEditor';
@@ -73,8 +73,18 @@ export const useDashboard = (account: Account) => {
     ascending,
     toggleSort: () => setAscending(current => !current),
     listed,
+    // Upcoming counts every date before payday, though it lists each payment once. Recurring is a
+    // monthly figure, with quarterly and yearly payments kept apart as the summary has them.
+    listedNet:
+      tab === 'upcoming'
+        ? summary.upcomingNet
+        : tab === 'recurring'
+          ? -summary.monthlyRecurring
+          : listed.reduce((total, payment) => total + payment.signedAmount, 0),
     selected,
     selectedPayments,
+    // Recurring payments with nothing left this cycle are left out, so they aren't paid ahead
+    paySelected: () => actions.pay(selectedPayments.filter(payment => canPay(payment, cycle))),
     toggleSelected: (id: string) =>
       setSelected(current => {
         const next = new Set(current);

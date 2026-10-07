@@ -1,14 +1,8 @@
 import { addDays, daysBetween, isSameDay, toIsoDate } from '~/lib/dates';
 import { PayCycle } from '~/lib/payday';
+import { datesDue, isInCycle } from './cycle';
 import { Payment } from './payments';
 import { PER_MONTH } from './recurrence';
-
-/*
- * Whether a payment is still to pay this cycle: due before the next payday, overdue ones
- * included, and not already paid or skipped. Paying it takes it off the bank balance, as v1 did.
- */
-export const isInCycle = (payment: Payment, cycle: PayCycle) =>
-  payment.dueDate !== null && payment.dueDate < cycle.end && payment.state === 'unpaid';
 
 const roundPence = (amount: number) => Math.round(amount * 100) / 100;
 
@@ -23,18 +17,34 @@ interface SummaryInput {
 /* The dashboard's figures, worked out the way the design does */
 export const summarise = ({ payments, bankBalance, monthlyIncome, cycle, today }: SummaryInput) => {
   const inCycle = payments.filter(payment => isInCycle(payment, cycle));
-  const unpaid = inCycle.filter(payment => payment.state === 'unpaid');
-  const upcomingNet = roundPence(unpaid.reduce((total, p) => total + p.signedAmount, 0));
-  // Recurring money out that is still running, as a monthly figure; yearly ones are kept apart
+  // Every date still to pay counts, so a weekly payment counts each week before payday
+  const dueCount = (payment: Payment) => datesDue(payment, cycle).length;
+  const upcomingNet = roundPence(
+    inCycle.reduce((total, p) => total + p.signedAmount * dueCount(p), 0)
+  );
+  // Recurring money out that is still running. Weekly, fortnightly and monthly payments make the
+  // monthly total; quarterly and yearly ones are kept apart as a yearly total.
   const activeRecurring = payments.filter(
     payment => payment.kind === 'recurring' && payment.dueDate
   );
   let monthlyRecurring = 0;
   let annualRecurring = 0;
+  // Weekly and fortnightly payments don't fall the same number of times each month, so they
+  // count at their average a month. Negative for money out, like signedAmount.
+  const averaged: { name: string; perMonth: number }[] = [];
   for (const payment of activeRecurring) {
     if (payment.kind !== 'recurring') continue;
-    if (payment.frequency === 'ANNUALLY') annualRecurring -= payment.signedAmount;
-    else monthlyRecurring -= payment.signedAmount * PER_MONTH[payment.frequency];
+    if (payment.frequency === 'ANNUALLY' || payment.frequency === 'QUARTERLY') {
+      annualRecurring -= payment.signedAmount * PER_MONTH[payment.frequency] * 12;
+      continue;
+    }
+    monthlyRecurring -= payment.signedAmount * PER_MONTH[payment.frequency];
+    if (payment.frequency !== 'MONTHLY') {
+      averaged.push({
+        name: payment.name,
+        perMonth: roundPence(payment.signedAmount * PER_MONTH[payment.frequency])
+      });
+    }
   }
   monthlyRecurring = roundPence(monthlyRecurring);
   annualRecurring = roundPence(annualRecurring);
@@ -47,7 +57,7 @@ export const summarise = ({ payments, bankBalance, monthlyIncome, cycle, today }
 
   return {
     inCycle,
-    unpaidCount: unpaid.length,
+    unpaidCount: inCycle.reduce((count, p) => count + dueCount(p), 0),
     upcomingNet,
     freeToSpend,
     perDay: Math.max(0, freeToSpend) / daysToPayday,
@@ -55,11 +65,12 @@ export const summarise = ({ payments, bankBalance, monthlyIncome, cycle, today }
     onPayday,
     monthlyRecurring,
     annualRecurring,
+    averagedRecurring: averaged,
     recurringCount: activeRecurring.length,
     afterRecurring: roundPence(onPayday - monthlyRecurring),
     discretionary: roundPence(monthlyIncome - monthlyRecurring),
     recurringShare,
-    dueToday: unpaid.find(payment => payment.dueDate && isSameDay(payment.dueDate, today))
+    dueToday: inCycle.find(payment => payment.dueDate && isSameDay(payment.dueDate, today))
   };
 };
 
@@ -72,7 +83,7 @@ export type CycleDayKind =
 export interface CycleDay {
   date: Date;
   kind: CycleDayKind;
-  // Unpaid payments due that day
+  // Payments still to pay that day
   payments: Payment[];
   isLastPayday: boolean;
 }
@@ -84,10 +95,11 @@ export interface CycleDay {
 export const cycleDays = (cycle: PayCycle, today: Date, payments: Payment[]): CycleDay[] => {
   const due = new Map<string, Payment[]>();
   for (const payment of payments) {
-    if (!payment.dueDate || payment.state !== 'unpaid' || !isInCycle(payment, cycle)) continue;
-    // Anything overdue counts against today
-    const key = toIsoDate(payment.dueDate < today ? today : payment.dueDate);
-    due.set(key, [...(due.get(key) ?? []), payment]);
+    for (const date of datesDue(payment, cycle)) {
+      // Anything overdue counts against today
+      const key = toIsoDate(date < today ? today : date);
+      due.set(key, [...(due.get(key) ?? []), payment]);
+    }
   }
 
   const total = daysBetween(cycle.start, cycle.end);

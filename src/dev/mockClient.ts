@@ -49,7 +49,7 @@ const demoAccount = (scenario: string | null): FakeAccount => {
         firstPaymentDate: fromToday(-273),
         lastPaymentDate: null,
         nextDueDate: fromToday(0),
-        status: scenario === 'payday' ? 'PAID' : 'UNPAID'
+        handled: []
       },
       {
         id: 'mortgage',
@@ -60,8 +60,9 @@ const demoAccount = (scenario: string | null): FakeAccount => {
         type: 'EXPENSE',
         firstPaymentDate: fromToday(-247),
         lastPaymentDate: null,
+        // On payday it's left over from the last cycle, so the prompt offers to move it on
         nextDueDate: fromToday(scenario === 'payday' ? -2 : 24),
-        status: scenario === 'payday' ? 'PAID' : 'UNPAID'
+        handled: []
       },
       {
         id: 'prime',
@@ -73,7 +74,7 @@ const demoAccount = (scenario: string | null): FakeAccount => {
         firstPaymentDate: fromToday(-93),
         lastPaymentDate: null,
         nextDueDate: fromToday(272),
-        status: 'UNPAID'
+        handled: []
       }
     ],
     oneOffPayments: [

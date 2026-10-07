@@ -3,7 +3,7 @@ import { ApolloLink } from '@apollo/client';
 import { buildSchema, execute, ExecutionResult, GraphQLError, parse } from 'graphql';
 import { ThemePreference } from '~/graphql/generated';
 import { addDays, fromApiDate, startOfToday, toIsoDate } from '~/lib/dates';
-import { nextOccurrence } from '~/lib/payments';
+import { nextOccurrence, occurrencesBetween, Schedule } from '~/lib/payments';
 import { typeDefs } from './schema';
 
 // Shapes as the API returns them: dates are epoch milliseconds in a string
@@ -18,7 +18,7 @@ export interface FakeRecurringPayment {
   firstPaymentDate: string;
   lastPaymentDate: string | null;
   nextDueDate: string | null;
-  status: 'UNPAID' | 'PAID' | 'SKIPPED';
+  handled: { outcome: 'PAID' | 'SKIPPED'; dates: string[] }[];
 }
 
 export interface FakeOneOffPayment {
@@ -106,19 +106,26 @@ export const apiDateFromToday = (days: number) => apiDate(toIsoDate(addDays(star
 // The API stores whatever a YYYY-MM-DD input says as that day
 const fromInput = (value: string) => apiDate(value.slice(0, 10));
 
+const toApi = (date: Date | null) => (date ? apiDate(toIsoDate(date)) : null);
+
+const scheduleOf = (
+  payment: Pick<FakeRecurringPayment, 'firstPaymentDate' | 'frequency' | 'lastPaymentDate'>
+): Schedule => ({
+  firstPaymentDate: fromApiDate(payment.firstPaymentDate)!,
+  frequency: payment.frequency as never,
+  lastPaymentDate: fromApiDate(payment.lastPaymentDate)
+});
+
 // Works out a recurring payment's due date the way the API's model does
 const dueDateFor = (
   payment: Pick<FakeRecurringPayment, 'firstPaymentDate' | 'frequency' | 'lastPaymentDate'>
-) => {
-  const due = nextOccurrence(
-    {
-      firstPaymentDate: fromApiDate(payment.firstPaymentDate)!,
-      frequency: payment.frequency as never,
-      lastPaymentDate: fromApiDate(payment.lastPaymentDate)
-    },
-    startOfToday()
-  );
-  return due ? apiDate(toIsoDate(due)) : null;
+) => toApi(nextOccurrence(scheduleOf(payment), startOfToday()));
+
+// As the API: records dates as paid or skipped and moves the payment on to the date after the last
+const handle = (payment: FakeRecurringPayment, outcome: 'PAID' | 'SKIPPED', dates: Date[]) => {
+  if (!dates.length) return;
+  payment.handled.push({ outcome, dates: dates.map(date => toApi(date)!) });
+  payment.nextDueDate = toApi(nextOccurrence(scheduleOf(payment), addDays(dates.at(-1)!, 1)));
 };
 
 export const DEFAULT_ACCOUNT: FakeAccount = {
@@ -139,7 +146,7 @@ export const DEFAULT_ACCOUNT: FakeAccount = {
       lastPaymentDate: null,
       // Worked out by the client, as for payments saved before the API tracked due dates
       nextDueDate: null,
-      status: 'UNPAID'
+      handled: []
     }
   ],
   oneOffPayments: [
@@ -270,7 +277,7 @@ export const createFakeApi = ({
       firstPaymentDate: fromInput(input.firstPaymentDate),
       lastPaymentDate: input.lastPaymentDate ? fromInput(input.lastPaymentDate) : null,
       nextDueDate: null,
-      status: 'UNPAID' as const
+      handled: []
     };
     return { ...payment, nextDueDate: dueDateFor(payment) };
   };
@@ -285,10 +292,10 @@ export const createFakeApi = ({
       const isDate = key === 'firstPaymentDate' || key === 'lastPaymentDate';
       Object.assign(payment, { [key]: isDate && value ? fromInput(value) : value });
     }
-    // A new schedule starts the payment unpaid again
+    // A new schedule starts again from its next date, with nothing paid or skipped
     if (scheduleChanged) {
       payment.nextDueDate = dueDateFor(payment);
-      payment.status = 'UNPAID';
+      payment.handled = [];
     }
     return payment;
   };
@@ -412,23 +419,20 @@ export const createFakeApi = ({
       if (input.monthlyIncome !== undefined) current.monthlyIncome = input.monthlyIncome;
       return { account: current, success: true };
     },
+    // As the API: clears what was dealt with before payday, and moves the chosen payments on
+    // from dates left over to their first date from payday
     startPaydayCycle: ({ input }: Args) => {
       const current = requireAccount();
-      const today = startOfToday();
-      for (const id of input.recurringPaymentIds) {
-        const payment = findRecurring(id);
-        const due = fromApiDate(payment.nextDueDate);
-        const after = due ? addDays(due, 1) : today;
-        const next = nextOccurrence(
-          {
-            firstPaymentDate: fromApiDate(payment.firstPaymentDate)!,
-            frequency: payment.frequency as never,
-            lastPaymentDate: fromApiDate(payment.lastPaymentDate)
-          },
-          after > today ? after : today
+      const cycleStart = fromApiDate(fromInput(input.payday))!;
+      input.recurringPaymentIds.forEach(findRecurring);
+      for (const payment of current.recurringPayments) {
+        payment.handled = payment.handled.filter(entry =>
+          entry.dates.some(date => fromApiDate(date)! >= cycleStart)
         );
-        payment.nextDueDate = next ? apiDate(toIsoDate(next)) : null;
-        payment.status = 'UNPAID';
+        const due = fromApiDate(payment.nextDueDate);
+        if (input.recurringPaymentIds.includes(payment.id) && due && due < cycleStart) {
+          payment.nextDueDate = toApi(nextOccurrence(scheduleOf(payment), cycleStart));
+        }
       }
       current.bankBalance = input.bankBalance;
       current.cycleStartedOn = fromInput(input.payday);
@@ -441,9 +445,9 @@ export const createFakeApi = ({
         p.type === 'INCOME' ? p.amount : -p.amount;
       for (const id of input.recurringPaymentIds) {
         const payment = findRecurring(id);
-        if (payment.status === 'PAID') continue;
+        if (!payment.nextDueDate) continue;
         current.bankBalance += change(payment);
-        payment.status = 'PAID';
+        handle(payment, 'PAID', [fromApiDate(payment.nextDueDate)!]);
       }
       for (const id of input.oneOffPaymentIds) current.bankBalance += change(findOneOff(id));
       current.oneOffPayments = current.oneOffPayments.filter(
@@ -452,25 +456,36 @@ export const createFakeApi = ({
       current.bankBalance = Math.round(current.bankBalance * 100) / 100;
       return { account: current, success: true };
     },
-    // Paid payments go back on the balance; skipped ones just become unpaid again
+    // Undoes the latest pay or skip, bringing its dates back; paid amounts go back on
     markPaymentsUnpaid: ({ input }: Args) => {
       const current = requireAccount();
       for (const id of input.recurringPaymentIds) {
         const payment = findRecurring(id);
-        if (payment.status === 'PAID') {
+        const latest = payment.handled.pop();
+        if (!latest) continue;
+        payment.nextDueDate = latest.dates[0];
+        if (latest.outcome === 'PAID') {
           current.bankBalance += payment.type === 'INCOME' ? -payment.amount : payment.amount;
         }
-        payment.status = 'UNPAID';
       }
       current.bankBalance = Math.round(current.bankBalance * 100) / 100;
       return { account: current, success: true };
     },
-    // Leaves the payments out of this cycle without touching the balance. Paid ones stay paid.
+    // Skips the next date, or every date before `until`, without touching the balance
     skipRecurringPayments: ({ input }: Args) => {
       const current = requireAccount();
       for (const id of input.recurringPaymentIds) {
         const payment = findRecurring(id);
-        if (payment.status !== 'PAID') payment.status = 'SKIPPED';
+        const next = fromApiDate(payment.nextDueDate);
+        if (!next) continue;
+        const dates = input.until
+          ? occurrencesBetween(
+              scheduleOf(payment),
+              next,
+              addDays(fromApiDate(fromInput(input.until))!, -1)
+            )
+          : [next];
+        handle(payment, 'SKIPPED', dates);
       }
       return { account: current, success: true };
     },

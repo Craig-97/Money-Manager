@@ -2,8 +2,9 @@ import { PenLine, Plus } from 'lucide-react';
 import { Button } from '~/components/ui/Button';
 import { IconButton } from '~/components/ui/IconButton';
 import { tileLift } from '~/components/ui/Tile';
+import { Tooltip } from '~/components/ui/Tooltip';
 import { cn } from '~/lib/cn';
-import { formatBalance, formatMoney } from '~/lib/format';
+import { formatBalance, formatMoney, formatPayment } from '~/lib/format';
 import { paidText } from '~/lib/payday';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
 import { IncomeEditor } from './IncomeEditor';
@@ -46,6 +47,7 @@ export const MonthlyStats = ({ dashboard }: { dashboard: Dashboard }) => {
   const { summary, isEmpty, incomeEditor: editor, monthlyIncome, payday } = dashboard;
   const openAdd = usePaymentDialogStore(s => s.openAdd);
   const overspent = summary.discretionary < 0;
+  const averaged = summary.averagedRecurring;
 
   return (
     <section
@@ -94,6 +96,32 @@ export const MonthlyStats = ({ dashboard }: { dashboard: Dashboard }) => {
       <div className={statClasses}>
         <h2 className={labelClasses}>Monthly recurring</h2>
         <p className="num text-[32px] leading-[1.1] font-extrabold">
+          {averaged.length ? (
+            // Which payments are averaged, on hover or focus
+            <Tooltip
+              side="top"
+              tone="card"
+              label={
+                <>
+                  <span className="font-bold">Includes monthly averages</span>
+                  {averaged.map(payment => (
+                    <span
+                      key={payment.name}
+                      className={cn(
+                        'num font-bold',
+                        payment.perMonth < 0 ? 'text-expense' : 'text-income'
+                      )}>
+                      {payment.name} {formatPayment(payment.perMonth)}/mo
+                    </span>
+                  ))}
+                </>
+              }>
+              <span tabIndex={0} className="cursor-help rounded-md text-muted">
+                <span aria-hidden="true">≈</span>
+                <span className="sr-only">About</span>{' '}
+              </span>
+            </Tooltip>
+          ) : null}
           {summary.monthlyRecurring < 0 ? '+' : ''}
           {formatMoney(summary.monthlyRecurring)}
           {perMonth}
@@ -111,15 +139,6 @@ export const MonthlyStats = ({ dashboard }: { dashboard: Dashboard }) => {
           </>
         ) : (
           <p className="text-[13px] font-medium text-muted">
-            {summary.annualRecurring > 0 ? (
-              <>
-                +{' '}
-                <span className="num font-bold text-text">
-                  {formatMoney(summary.annualRecurring)}
-                </span>
-                /yr annual ·{' '}
-              </>
-            ) : null}
             {summary.recurringCount}{' '}
             {summary.recurringCount === 1 ? 'recurring payment' : 'recurring payments'}
           </p>

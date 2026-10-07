@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { hintCardClasses } from '~/components/ui/popoverClasses';
 import { cn } from '~/lib/cn';
 import { formatPayment } from '~/lib/format';
 import { CycleDay, CycleDayKind } from '~/lib/payments';
@@ -92,7 +93,8 @@ export const CycleBar = ({ days, tone = 'default', className }: CycleBarProps) =
               <div
                 role="tooltip"
                 className={cn(
-                  'pointer-events-none absolute bottom-[calc(100%+4px)] z-15 flex flex-col gap-[3px] rounded-[14px] border border-border-strong bg-surface px-3 py-[9px] text-xs font-medium whitespace-nowrap text-text shadow-[0_12px_28px_-10px_rgb(0_0_0/0.5)]',
+                  'pointer-events-none absolute bottom-[calc(100%+4px)] z-15',
+                  hintCardClasses,
                   align
                 )}>
                 <span className="font-bold">{title}</span>

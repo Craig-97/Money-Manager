@@ -41,7 +41,7 @@ export const DueTodayBanner = ({ dashboard }: { dashboard: Dashboard }) => {
           className="border-border bg-surface-2 md:border-transparent md:bg-transparent md:text-muted">
           Later
         </Button>
-        <Button variant="solid" onClick={() => void dashboard.actions.setPaid([payment], true)}>
+        <Button variant="solid" onClick={() => void dashboard.actions.pay([payment])}>
           <Check size={16} strokeWidth={2.5} aria-hidden="true" />
           Mark as paid
         </Button>

@@ -37,7 +37,11 @@ export type AccountQuery = {
       firstPaymentDate: string;
       lastPaymentDate: string | null;
       nextDueDate: string | null;
-      status: Types.PaymentStatus;
+      handled: Array<{
+        __typename: 'HandledDates';
+        outcome: Types.PaymentOutcome;
+        dates: Array<string>;
+      }>;
     } | null> | null;
     oneOffPayments: Array<{
       __typename: 'OneOffPayment';
@@ -87,7 +91,11 @@ export type AccountFieldsFragment = {
     firstPaymentDate: string;
     lastPaymentDate: string | null;
     nextDueDate: string | null;
-    status: Types.PaymentStatus;
+    handled: Array<{
+      __typename: 'HandledDates';
+      outcome: Types.PaymentOutcome;
+      dates: Array<string>;
+    }>;
   } | null> | null;
   oneOffPayments: Array<{
     __typename: 'OneOffPayment';
@@ -143,7 +151,11 @@ export type CreateAccountMutation = {
         firstPaymentDate: string;
         lastPaymentDate: string | null;
         nextDueDate: string | null;
-        status: Types.PaymentStatus;
+        handled: Array<{
+          __typename: 'HandledDates';
+          outcome: Types.PaymentOutcome;
+          dates: Array<string>;
+        }>;
       } | null> | null;
       oneOffPayments: Array<{
         __typename: 'OneOffPayment';
@@ -188,7 +200,11 @@ export type MarkPaymentsPaidMutation = {
         firstPaymentDate: string;
         lastPaymentDate: string | null;
         nextDueDate: string | null;
-        status: Types.PaymentStatus;
+        handled: Array<{
+          __typename: 'HandledDates';
+          outcome: Types.PaymentOutcome;
+          dates: Array<string>;
+        }>;
       } | null> | null;
       oneOffPayments: Array<{
         __typename: 'OneOffPayment';
@@ -225,7 +241,11 @@ export type MarkPaymentsUnpaidMutation = {
         firstPaymentDate: string;
         lastPaymentDate: string | null;
         nextDueDate: string | null;
-        status: Types.PaymentStatus;
+        handled: Array<{
+          __typename: 'HandledDates';
+          outcome: Types.PaymentOutcome;
+          dates: Array<string>;
+        }>;
       } | null> | null;
     } | null;
   };
@@ -252,7 +272,11 @@ export type SkipRecurringPaymentsMutation = {
         firstPaymentDate: string;
         lastPaymentDate: string | null;
         nextDueDate: string | null;
-        status: Types.PaymentStatus;
+        handled: Array<{
+          __typename: 'HandledDates';
+          outcome: Types.PaymentOutcome;
+          dates: Array<string>;
+        }>;
       } | null> | null;
     } | null;
   };
@@ -281,7 +305,11 @@ export type StartPaydayCycleMutation = {
         firstPaymentDate: string;
         lastPaymentDate: string | null;
         nextDueDate: string | null;
-        status: Types.PaymentStatus;
+        handled: Array<{
+          __typename: 'HandledDates';
+          outcome: Types.PaymentOutcome;
+          dates: Array<string>;
+        }>;
       } | null> | null;
     } | null;
   };
@@ -600,7 +628,11 @@ export type CreateRecurringPaymentMutation = {
       firstPaymentDate: string;
       lastPaymentDate: string | null;
       nextDueDate: string | null;
-      status: Types.PaymentStatus;
+      handled: Array<{
+        __typename: 'HandledDates';
+        outcome: Types.PaymentOutcome;
+        dates: Array<string>;
+      }>;
     } | null;
   };
 };
@@ -626,7 +658,11 @@ export type RecurringPaymentFieldsFragment = {
   firstPaymentDate: string;
   lastPaymentDate: string | null;
   nextDueDate: string | null;
-  status: Types.PaymentStatus;
+  handled: Array<{
+    __typename: 'HandledDates';
+    outcome: Types.PaymentOutcome;
+    dates: Array<string>;
+  }>;
 };
 
 export type UpdateOneOffPaymentMutationVariables = Exact<{
@@ -668,7 +704,11 @@ export type UpdateRecurringPaymentMutation = {
       firstPaymentDate: string;
       lastPaymentDate: string | null;
       nextDueDate: string | null;
-      status: Types.PaymentStatus;
+      handled: Array<{
+        __typename: 'HandledDates';
+        outcome: Types.PaymentOutcome;
+        dates: Array<string>;
+      }>;
     } | null;
   };
 };
@@ -800,7 +840,17 @@ export const RecurringPaymentFieldsFragmentDoc = {
           { kind: 'Field', name: { kind: 'Name', value: 'firstPaymentDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'lastPaymentDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'nextDueDate' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'status' } }
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'handled' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'outcome' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'dates' } }
+              ]
+            }
+          }
         ]
       }
     }
@@ -946,7 +996,17 @@ export const AccountFieldsFragmentDoc = {
           { kind: 'Field', name: { kind: 'Name', value: 'firstPaymentDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'lastPaymentDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'nextDueDate' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'status' } }
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'handled' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'outcome' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'dates' } }
+              ]
+            }
+          }
         ]
       }
     },
@@ -1114,7 +1174,17 @@ export const AccountDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'firstPaymentDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'lastPaymentDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'nextDueDate' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'status' } }
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'handled' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'outcome' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'dates' } }
+              ]
+            }
+          }
         ]
       }
     },
@@ -1296,7 +1366,17 @@ export const CreateAccountDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'firstPaymentDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'lastPaymentDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'nextDueDate' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'status' } }
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'handled' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'outcome' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'dates' } }
+              ]
+            }
+          }
         ]
       }
     },
@@ -1477,7 +1557,17 @@ export const MarkPaymentsPaidDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'firstPaymentDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'lastPaymentDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'nextDueDate' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'status' } }
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'handled' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'outcome' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'dates' } }
+              ]
+            }
+          }
         ]
       }
     },
@@ -1578,7 +1668,17 @@ export const MarkPaymentsUnpaidDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'firstPaymentDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'lastPaymentDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'nextDueDate' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'status' } }
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'handled' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'outcome' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'dates' } }
+              ]
+            }
+          }
         ]
       }
     }
@@ -1662,7 +1762,17 @@ export const SkipRecurringPaymentsDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'firstPaymentDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'lastPaymentDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'nextDueDate' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'status' } }
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'handled' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'outcome' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'dates' } }
+              ]
+            }
+          }
         ]
       }
     }
@@ -1748,7 +1858,17 @@ export const StartPaydayCycleDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'firstPaymentDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'lastPaymentDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'nextDueDate' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'status' } }
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'handled' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'outcome' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'dates' } }
+              ]
+            }
+          }
         ]
       }
     }
@@ -2884,7 +3004,17 @@ export const CreateRecurringPaymentDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'firstPaymentDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'lastPaymentDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'nextDueDate' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'status' } }
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'handled' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'outcome' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'dates' } }
+              ]
+            }
+          }
         ]
       }
     }
@@ -3060,7 +3190,17 @@ export const UpdateRecurringPaymentDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'firstPaymentDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'lastPaymentDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'nextDueDate' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'status' } }
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'handled' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'outcome' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'dates' } }
+              ]
+            }
+          }
         ]
       }
     }

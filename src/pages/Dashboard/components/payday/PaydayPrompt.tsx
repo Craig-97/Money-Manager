@@ -188,66 +188,78 @@ export const PaydayPrompt = ({ prompt }: { prompt: Prompt }) => {
               </Step>
 
               <Step number={2} title="Start a new cycle for recurring payments">
-                <div className="mt-3 overflow-hidden rounded-[20px] border border-border bg-surface-2">
-                  <div className="flex min-h-[52px] items-center gap-1 pr-3.5 pl-0.5 md:gap-1.5 md:pl-1">
-                    <CheckboxHitArea htmlFor="payday-all">
-                      <Checkbox
-                        id="payday-all"
-                        size="md"
-                        checked={allChosen}
-                        indeterminate={chosenCount > 0 && !allChosen}
-                        disabled={toReset.length === 0}
-                        onChange={() => prompt.setAll(!allChosen)}
-                      />
-                    </CheckboxHitArea>
-                    <label htmlFor="payday-all" className="grow cursor-pointer text-sm font-bold">
-                      Select all
-                    </label>
-                    <span className="rounded-full bg-accent-soft px-2.5 py-[5px] num text-xs font-bold text-accent-text">
-                      {chosenCount} of {toReset.length} selected
-                    </span>
-                  </div>
-                  {toReset.map(({ payment, next }) => (
-                    <div
-                      key={payment.id}
-                      className="flex min-h-[60px] items-center gap-2.5 border-t border-border pr-3.5 pl-1">
-                      <CheckboxHitArea htmlFor={`payday-${payment.id}`}>
-                        <Checkbox
-                          id={`payday-${payment.id}`}
-                          size="md"
-                          checked={chosen.has(payment.id)}
-                          onChange={() => prompt.toggle(payment.id)}
-                        />
-                      </CheckboxHitArea>
-                      <span
-                        aria-hidden="true"
-                        className="inline-flex size-9 shrink-0 items-center justify-center rounded-xl border border-border bg-surface text-sm font-extrabold">
-                        {payment.name.charAt(0).toUpperCase()}
-                      </span>
-                      <label
-                        htmlFor={`payday-${payment.id}`}
-                        className="min-w-0 grow cursor-pointer md:pl-0">
-                        <span className="block text-[15px] font-bold">{payment.name}</span>
-                        <span className="mt-0.5 flex items-center gap-[5px] text-xs font-medium text-muted">
-                          <Repeat
-                            size={12}
-                            strokeWidth={2.25}
-                            className="hidden md:block"
-                            aria-hidden="true"
+                {toReset.length === 0 ? (
+                  <p className="mt-1 text-xs leading-normal font-medium text-muted md:text-[13px]">
+                    Everything from the last cycle was paid or skipped, so there's nothing to move
+                    on.
+                  </p>
+                ) : (
+                  <>
+                    <div className="mt-3 overflow-hidden rounded-[20px] border border-border bg-surface-2">
+                      <div className="flex min-h-[52px] items-center gap-1 pr-3.5 pl-0.5 md:gap-1.5 md:pl-1">
+                        <CheckboxHitArea htmlFor="payday-all">
+                          <Checkbox
+                            id="payday-all"
+                            size="md"
+                            checked={allChosen}
+                            indeterminate={chosenCount > 0 && !allChosen}
+                            disabled={toReset.length === 0}
+                            onChange={() => prompt.setAll(!allChosen)}
                           />
-                          {FREQUENCY_LABELS[payment.frequency]}
-                          {next ? ` · next ${formatShortDate(next)}` : ' · no more payments'}
+                        </CheckboxHitArea>
+                        <label
+                          htmlFor="payday-all"
+                          className="grow cursor-pointer text-sm font-bold">
+                          Select all
+                        </label>
+                        <span className="rounded-full bg-accent-soft px-2.5 py-[5px] num text-xs font-bold text-accent-text">
+                          {chosenCount} of {toReset.length} selected
                         </span>
-                      </label>
-                      <span className="num text-[15px] font-extrabold text-expense">
-                        {formatMoney(payment.amount)}
-                      </span>
+                      </div>
+                      {toReset.map(({ payment, next }) => (
+                        <div
+                          key={payment.id}
+                          className="flex min-h-[60px] items-center gap-2.5 border-t border-border pr-3.5 pl-1">
+                          <CheckboxHitArea htmlFor={`payday-${payment.id}`}>
+                            <Checkbox
+                              id={`payday-${payment.id}`}
+                              size="md"
+                              checked={chosen.has(payment.id)}
+                              onChange={() => prompt.toggle(payment.id)}
+                            />
+                          </CheckboxHitArea>
+                          <span
+                            aria-hidden="true"
+                            className="inline-flex size-9 shrink-0 items-center justify-center rounded-xl border border-border bg-surface text-sm font-extrabold">
+                            {payment.name.charAt(0).toUpperCase()}
+                          </span>
+                          <label
+                            htmlFor={`payday-${payment.id}`}
+                            className="min-w-0 grow cursor-pointer md:pl-0">
+                            <span className="block text-[15px] font-bold">{payment.name}</span>
+                            <span className="mt-0.5 flex items-center gap-[5px] text-xs font-medium text-muted">
+                              <Repeat
+                                size={12}
+                                strokeWidth={2.25}
+                                className="hidden md:block"
+                                aria-hidden="true"
+                              />
+                              {FREQUENCY_LABELS[payment.frequency]}
+                              {next ? ` · next ${formatShortDate(next)}` : ' · no more payments'}
+                            </span>
+                          </label>
+                          <span className="num text-[15px] font-extrabold text-expense">
+                            {formatMoney(payment.amount)}
+                          </span>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-                <p className="mt-2 text-xs leading-normal font-medium text-muted md:mt-2.5 md:text-[13px]">
-                  Selected payments are reset to unpaid and moved to their next date.
-                </p>
+                    <p className="mt-2 text-xs leading-normal font-medium text-muted md:mt-2.5 md:text-[13px]">
+                      These weren't paid or skipped last cycle. Selected ones move on to their next
+                      date; any left unticked stay due.
+                    </p>
+                  </>
+                )}
               </Step>
 
               {firstOverdue && firstOverdue.dueDate ? (

@@ -1,4 +1,4 @@
-# Leaves recurring payments out of this cycle, with no change to the bank balance
+# Skips recurring payments' next date, or every date before `until`, with no change to the balance
 mutation SkipRecurringPayments($input: SkipRecurringPaymentsInput!) {
   skipRecurringPayments(input: $input) {
     account {

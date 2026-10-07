@@ -1,4 +1,4 @@
-import { Calendar, Check, ChevronRight, Repeat, SkipForward, Trash } from 'lucide-react';
+import { Calendar, Check, ChevronRight, Repeat, SkipForward, Trash, Undo2 } from 'lucide-react';
 import { useShallow } from 'zustand/react/shallow';
 import { AmountInput } from '~/components/form/AmountInput';
 import { Checkbox } from '~/components/form/Checkbox';
@@ -17,13 +17,16 @@ import { usePayCycle } from '~/hooks/usePayCycle';
 import { usePaymentActions } from '~/hooks/usePaymentActions';
 import { cn } from '~/lib/cn';
 import { daysBetween } from '~/lib/dates';
+import { PayCycle } from '~/lib/payday';
 import {
   categoryLabel,
+  cycleStatus,
   FREQUENCIES,
   FREQUENCY_LABELS,
   formatShortDate,
   ONE_OFF_CATEGORIES,
   Payment,
+  paymentChoices,
   RECURRING_CATEGORIES,
   toPayments
 } from '~/lib/payments';
@@ -93,30 +96,32 @@ const Chooser = () => {
   );
 };
 
-/* Where an existing payment stands, with shortcuts to mark it paid or skip it */
+/* Where an existing payment stands, with shortcuts to pay, skip or undo */
 interface StatusStripProps {
   payment: Payment;
   today: Date;
+  cycle: PayCycle;
   accountId: string;
   // Paying a one-off deletes it, which ends the edit
   onDone: () => void;
 }
 
-const StatusStrip = ({ payment, today, accountId, onDone }: StatusStripProps) => {
-  const { setPaid, skip } = usePaymentActions(accountId);
+const StatusStrip = ({ payment, today, cycle, accountId, onDone }: StatusStripProps) => {
+  const { pay, undo, skip } = usePaymentActions(accountId);
+  const recurring = payment.kind === 'recurring' ? payment : null;
+  const status = recurring
+    ? cycleStatus(recurring, cycle)
+    : { tone: 'unpaid' as const, label: 'Unpaid' };
+  const choices = paymentChoices(payment, cycle, today);
   const days = payment.dueDate ? daysBetween(today, payment.dueDate) : null;
   const dueText =
     days === null
       ? 'no upcoming date'
       : days === 0
         ? 'due today'
-        : `due ${formatShortDate(payment.dueDate!, today)}`;
+        : `${days < 0 ? 'overdue since' : 'next due'} ${formatShortDate(payment.dueDate!, today)}`;
   const text =
-    payment.state === 'unpaid' && days !== null && days < 0
-      ? `Overdue · ${formatShortDate(payment.dueDate!, today)}`
-      : `${payment.state === 'skipped' ? 'Skipped this cycle' : payment.state === 'paid' ? 'Paid' : 'Unpaid'} · ${dueText}`;
-  const canSkip = payment.kind === 'recurring' && payment.state === 'unpaid' && days !== null;
-  const paid = payment.state === 'paid';
+    status.tone === 'ended' ? 'Ended · no upcoming date' : `${status.label} · ${dueText}`;
 
   return (
     <div className="flex flex-col gap-2.5 rounded-[22px] border border-border bg-surface-2 p-3 md:flex-row md:items-center md:gap-2 md:rounded-[28px] md:py-1.5 md:pr-1.5 md:pl-[18px]">
@@ -125,31 +130,47 @@ const StatusStrip = ({ payment, today, accountId, onDone }: StatusStripProps) =>
           aria-hidden="true"
           className={cn(
             'size-2.5 shrink-0 rounded-full',
-            payment.state === 'skipped' ? 'bg-accent' : paid ? 'bg-income' : 'bg-expense'
+            status.tone === 'skipped'
+              ? 'bg-accent'
+              : status.tone === 'paid'
+                ? 'bg-income'
+                : status.tone === 'ended'
+                  ? 'bg-faint'
+                  : 'bg-expense'
           )}
         />
         <span className="text-sm leading-[1.3] font-bold">{text}</span>
       </div>
       <div className="flex gap-2">
-        {canSkip ? (
+        {recurring && choices.skipNext ? (
           <Button
             variant="ghost"
-            onClick={() => void skip(payment)}
+            onClick={() => void skip(recurring)}
             className="flex-1 bg-surface-2 text-[13px] text-text max-md:border-border md:flex-none md:bg-transparent md:px-3.5 md:text-muted">
             <SkipForward size={15} aria-hidden="true" />
-            Skip this cycle
+            {choices.skipNext}
           </Button>
         ) : null}
-        <Button
-          variant="solid"
-          onClick={() => {
-            void setPaid([payment], !paid);
-            if (payment.kind === 'oneOff') onDone();
-          }}
-          className="flex-1 text-[13px] md:flex-none md:px-3.5">
-          <Check size={15} strokeWidth={2.5} aria-hidden="true" />
-          {paid ? 'Mark as unpaid' : 'Mark as paid'}
-        </Button>
+        {choices.pay ? (
+          <Button
+            variant="solid"
+            onClick={() => {
+              void pay([payment]);
+              if (payment.kind === 'oneOff') onDone();
+            }}
+            className="flex-1 text-[13px] md:flex-none md:px-3.5">
+            <Check size={15} strokeWidth={2.5} aria-hidden="true" />
+            {choices.pay}
+          </Button>
+        ) : recurring && choices.undo ? (
+          <Button
+            variant="solid"
+            onClick={() => void undo(recurring)}
+            className="flex-1 text-[13px] md:flex-none md:px-3.5">
+            <Undo2 size={15} aria-hidden="true" />
+            {choices.undo}
+          </Button>
+        ) : null}
       </div>
     </div>
   );
@@ -321,7 +342,7 @@ export const PaymentDialog = () => {
   );
   const isDesktop = useMediaQuery(MEDIA.desktop);
   const { account } = useAccount();
-  const { today } = usePayCycle(account?.payday);
+  const { today, cycle } = usePayCycle(account?.payday);
   const { remove } = usePaymentActions(account?.id ?? '');
 
   const target = dialog.view === 'form' ? dialog : null;
@@ -394,7 +415,13 @@ export const PaymentDialog = () => {
       {target ? (
         <>
           {payment ? (
-            <StatusStrip payment={payment} today={today} accountId={account.id} onDone={close} />
+            <StatusStrip
+              payment={payment}
+              today={today}
+              cycle={cycle}
+              accountId={account.id}
+              onDone={close}
+            />
           ) : null}
           <FormBody form={form} kind={kind} />
         </>
