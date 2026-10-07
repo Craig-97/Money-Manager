@@ -1,3 +1,4 @@
+export * from './ForecastSkeleton';
 export * from './KeyFigures';
 export * from './MonthTable';
 export * from './ProjectionChart';

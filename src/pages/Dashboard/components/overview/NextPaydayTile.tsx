@@ -5,10 +5,10 @@ import { IconButton } from '~/components/ui/IconButton';
 import { Tile } from '~/components/ui/Tile';
 import { cn } from '~/lib/cn';
 import { formatBalance, formatMoney, formatPayment, MINUS } from '~/lib/format';
+import { paydayText } from '~/lib/payday';
 import { formatShortDate } from '~/lib/payments';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
 import { CycleBar } from './CycleBar';
-import { paydayText } from '../../dashboardModel';
 import { Dashboard } from '../../hooks';
 import { PaydayOverrideDialog } from '../payday/PaydayPicker';
 

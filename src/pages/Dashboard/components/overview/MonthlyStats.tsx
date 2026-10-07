@@ -4,10 +4,10 @@ import { IconButton } from '~/components/ui/IconButton';
 import { tileLift } from '~/components/ui/Tile';
 import { cn } from '~/lib/cn';
 import { formatBalance, formatMoney } from '~/lib/format';
+import { paidText } from '~/lib/payday';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
 import { IncomeEditor } from './IncomeEditor';
 import { OverdrawnPill } from './NextPaydayTile';
-import { paidText } from '../../dashboardModel';
 import { Dashboard } from '../../hooks';
 
 const statClasses = 'flex min-w-0 flex-col gap-2.5 px-7 py-[26px]';

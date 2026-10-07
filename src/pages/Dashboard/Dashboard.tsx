@@ -1,4 +1,5 @@
 import { Plus, Repeat } from 'lucide-react';
+import { AccountError } from '~/components/feedback/AccountError';
 import { PageHeader } from '~/components/layout/PageHeader';
 import { Button } from '~/components/ui/Button';
 import { MEDIA } from '~/constants';
@@ -6,8 +7,6 @@ import { Account, useAccount } from '~/hooks/useAccount';
 import { useMediaQuery } from '~/hooks/useMediaQuery';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
 import {
-  DashboardError,
-  DashboardSkeleton,
   DueTodayBanner,
   FreeToSpendTile,
   MobileBulkBar,
@@ -18,7 +17,8 @@ import {
   MonthlyStats,
   NextPaydayTile,
   PaydayPrompt,
-  PaymentsTable
+  PaymentsTable,
+  DashboardSkeleton
 } from './components';
 import { useDashboard, usePaydayPrompt } from './hooks';
 
@@ -93,7 +93,7 @@ export const Dashboard = () => {
       ) : loading ? (
         <DashboardSkeleton />
       ) : (
-        <DashboardError onRetry={retry} />
+        <AccountError onRetry={retry} />
       )}
     </>
   );

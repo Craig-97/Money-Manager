@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { AccountError } from '~/components/feedback/AccountError';
 import { PageHeader } from '~/components/layout/PageHeader';
 import { MEDIA } from '~/constants';
 import { CurrentUserQuery } from '~/graphql/generated';
@@ -15,10 +16,10 @@ import {
   PaydaySection,
   ProfileJumpChips,
   ProfileNav,
-  ProfileSummary
+  ProfileSummary,
+  ProfileSkeleton
 } from './components';
 import { SectionId } from './profileModel';
-import { DashboardError, DashboardSkeleton } from '../Dashboard/components';
 
 type User = NonNullable<CurrentUserQuery['tokenFindUser']>;
 
@@ -71,9 +72,9 @@ export const Profile = () => {
       {account && user ? (
         <ProfileContent user={user} account={account} />
       ) : loading || (!user && !userError) ? (
-        <DashboardSkeleton />
+        <ProfileSkeleton />
       ) : (
-        <DashboardError
+        <AccountError
           onRetry={() => {
             retry();
             void refetch();

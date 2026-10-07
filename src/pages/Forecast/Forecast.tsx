@@ -1,14 +1,21 @@
 import { CalendarDays } from 'lucide-react';
+import { AccountError } from '~/components/feedback/AccountError';
 import { PageHeader } from '~/components/layout/PageHeader';
 import { tileLift } from '~/components/ui/Tile';
 import { MEDIA } from '~/constants';
 import { Account, useAccount } from '~/hooks/useAccount';
 import { useMediaQuery } from '~/hooks/useMediaQuery';
 import { formatMoney } from '~/lib/format';
-import { KeyFigures, MobileKeyFigures, MonthTable, ProjectionChart, SpendCard } from './components';
+import { paidText } from '~/lib/payday';
+import {
+  KeyFigures,
+  MobileKeyFigures,
+  MonthTable,
+  ProjectionChart,
+  SpendCard,
+  ForecastSkeleton
+} from './components';
 import { useForecast } from './hooks';
-import { DashboardError, DashboardSkeleton } from '../Dashboard/components';
-import { paidText } from '../Dashboard/dashboardModel';
 
 const ForecastContent = ({ account }: { account: Account }) => {
   const forecast = useForecast(account);
@@ -57,9 +64,9 @@ export const Forecast = () => {
       {account ? (
         <ForecastContent account={account} />
       ) : loading ? (
-        <DashboardSkeleton />
+        <ForecastSkeleton />
       ) : (
-        <DashboardError onRetry={retry} />
+        <AccountError onRetry={retry} />
       )}
     </>
   );

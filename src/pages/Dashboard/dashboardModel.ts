@@ -1,5 +1,5 @@
-import { daysBetween, PaydayConfig } from '~/lib/dates';
-import { PayCycle, WEEKDAYS } from '~/lib/payday';
+import { daysBetween } from '~/lib/dates';
+import { PayCycle } from '~/lib/payday';
 import { formatShortDate, isInCycle, Payment, Summary, summarise } from '~/lib/payments';
 
 export type PaymentTab = 'upcoming' | 'recurring' | 'oneOff';
@@ -57,51 +57,6 @@ export const paymentsForTab = (
     return ascending ? x - y : y - x;
   });
 };
-
-const PAY_FREQUENCY: Record<PaydayConfig['frequency'], string> = {
-  WEEKLY: 'Weekly',
-  FORTNIGHTLY: 'Fortnightly',
-  FOUR_WEEKLY: 'Four-weekly',
-  MONTHLY: 'Monthly',
-  QUARTERLY: 'Quarterly',
-  BIANNUAL: 'Every 6 months',
-  ANNUAL: 'Yearly'
-};
-
-const paydayRule = ({ type, weekday }: PaydayConfig) => {
-  const day = WEEKDAYS.find(item => item.value === weekday)?.long;
-  switch (type) {
-    case 'LAST_DAY':
-      return 'last working day';
-    case 'LAST_WEEKDAY':
-      return `last ${day ?? 'Friday'}`;
-    case 'SET_DAY':
-      return 'set day';
-    case 'SET_WEEKDAY':
-      return 'set weekday';
-  }
-};
-
-const REGION: Record<string, string> = {
-  ENGLAND_AND_WALES: 'England & Wales',
-  SCOTLAND: 'Scotland',
-  NORTHERN_IRELAND: 'Northern Ireland'
-};
-
-/* "Monthly · last Friday · Scotland bank holidays" */
-export const paydayText = (payday: PaydayConfig | null | undefined) => {
-  if (!payday) return 'Monthly · last working day';
-  const parts = [PAY_FREQUENCY[payday.frequency], paydayRule(payday)];
-  if (payday.bankHolidayRegion) parts.push(`${REGION[payday.bankHolidayRegion]} bank holidays`);
-  return parts.join(' · ');
-};
-
-/* "Paid monthly · last Friday" */
-export const paidText = (payday: PaydayConfig | null | undefined) =>
-  payday
-    ? `Paid ${PAY_FREQUENCY[payday.frequency].toLowerCase()} · ${paydayRule(payday)}`
-    : 'Paid monthly · last working day';
-
 /* What the cycle bar's tooltip says about a day */
 export const dayTitle = (date: Date, tags: string[]) =>
   formatShortDate(date) + (tags.length ? ` · ${tags.join(' · ')}` : '');
