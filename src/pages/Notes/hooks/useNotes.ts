@@ -1,5 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { Account } from '~/hooks/useAccount';
+import { useNoteComposerStore } from '~/state/noteComposer';
 import { findNotes, NoteSort, toNotes } from '../notesModel';
 import { useNoteActions } from './useNoteActions';
 
@@ -7,7 +9,16 @@ import { useNoteActions } from './useNoteActions';
 export const useNotes = (account: Account) => {
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState<NoteSort>('newest');
-  const [composerOpen, setComposerOpen] = useState(false);
+  // The composer can be opened from the mobile nav too, so it lives in a store
+  const { composerOpen, openComposer, closeComposer } = useNoteComposerStore(
+    useShallow(s => ({
+      composerOpen: s.open,
+      openComposer: s.openComposer,
+      closeComposer: s.closeComposer
+    }))
+  );
+  // Leaving the page puts the composer away, so it isn't open again on coming back
+  useEffect(() => closeComposer, [closeComposer]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const actions = useNoteActions(account.id);
 
@@ -28,8 +39,8 @@ export const useNotes = (account: Account) => {
     sort,
     setSort,
     composerOpen,
-    openComposer: () => setComposerOpen(true),
-    closeComposer: () => setComposerOpen(false),
+    openComposer,
+    closeComposer,
     editingId,
     startEditing: (id: string) => setEditingId(id),
     stopEditing: () => setEditingId(null),

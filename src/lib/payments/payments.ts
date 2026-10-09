@@ -14,7 +14,7 @@ export type PaymentKind = 'recurring' | 'oneOff';
 export type Outcome = 'paid' | 'skipped';
 
 // One time a recurring payment was paid or skipped: one date, or the rest of a cycle at once
-export interface Handled {
+interface Handled {
   outcome: Outcome;
   dates: Date[];
 }
@@ -40,6 +40,11 @@ export interface RecurringPayment extends BasePayment {
   lastPaymentDate: Date | null;
   // What's been paid or skipped since the cycle started, oldest first
   handled: Handled[];
+  // When a policy or contract renews while the payments carry on. Never set on yearly payments,
+  // which renew with each payment.
+  renewalDate: Date | null;
+  // Days before renewing to show it as coming up, 0 for none (see renewal.ts)
+  renewalReminderDays: number;
 }
 
 export interface OneOffPayment extends BasePayment {
@@ -53,7 +58,7 @@ const signed = (amount: number, type: PaymentType) => (type === 'INCOME' ? amoun
 
 const OUTCOMES = { PAID: 'paid', SKIPPED: 'skipped' } as const;
 
-export const toRecurringPayment = (
+const toRecurringPayment = (
   payment: RecurringPaymentFieldsFragment,
   today: Date
 ): RecurringPayment => {
@@ -79,11 +84,13 @@ export const toRecurringPayment = (
     handled: payment.handled.map(entry => ({
       outcome: OUTCOMES[entry.outcome],
       dates: entry.dates.map(date => fromApiDate(date)!)
-    }))
+    })),
+    renewalDate: fromApiDate(payment.renewalDate),
+    renewalReminderDays: payment.renewalReminderDays
   };
 };
 
-export const toOneOffPayment = (payment: OneOffPaymentFieldsFragment): OneOffPayment => ({
+const toOneOffPayment = (payment: OneOffPaymentFieldsFragment): OneOffPayment => ({
   kind: 'oneOff',
   id: payment.id,
   name: payment.name,

@@ -262,6 +262,8 @@ type RecurringPayment {
   lastPaymentDate: String
   nextDueDate: String
   handled: [HandledDates!]!
+  renewalDate: String
+  renewalReminderDays: Int!
 }
 
 type HandledDates {
@@ -278,6 +280,8 @@ input CreateRecurringPaymentInput {
   type: PaymentType!
   firstPaymentDate: String!
   lastPaymentDate: String
+  renewalDate: String
+  renewalReminderDays: Int
 }
 
 input RecurringPaymentInput {
@@ -288,6 +292,8 @@ input RecurringPaymentInput {
   type: PaymentType!
   firstPaymentDate: String!
   lastPaymentDate: String
+  renewalDate: String
+  renewalReminderDays: Int
 }
 
 input UpdateRecurringPaymentInput {
@@ -298,6 +304,8 @@ input UpdateRecurringPaymentInput {
   type: PaymentType
   firstPaymentDate: String
   lastPaymentDate: String
+  renewalDate: String
+  renewalReminderDays: Int
 }
 
 type RecurringPaymentResponse {

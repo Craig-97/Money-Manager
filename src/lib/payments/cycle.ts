@@ -38,7 +38,7 @@ const datesBeforeAdded = (payment: RecurringPayment, cycle: PayCycle) => {
  * How many of a recurring payment's dates this cycle are paid, skipped, or still to pay. Dates
  * from before it was added count as paid, though there's nothing of them to undo.
  */
-export const cycleCounts = (payment: RecurringPayment, cycle: PayCycle) => {
+const cycleCounts = (payment: RecurringPayment, cycle: PayCycle) => {
   const count = (outcome: Outcome) =>
     payment.handled
       .filter(entry => entry.outcome === outcome)
@@ -51,7 +51,7 @@ export const cycleCounts = (payment: RecurringPayment, cycle: PayCycle) => {
   };
 };
 
-export type CycleTone = 'unpaid' | 'paid' | 'skipped' | 'ended';
+type CycleTone = 'unpaid' | 'paid' | 'skipped' | 'ended';
 
 /*
  * Where a recurring payment stands this cycle: "Unpaid", "1 of 4 paid", "Paid", "Skipped"... or
@@ -93,7 +93,7 @@ export const canPay = (payment: Payment, cycle: PayCycle) => {
 export const repeatsInCycle = (payment: RecurringPayment) =>
   payment.frequency === 'WEEKLY' || payment.frequency === 'BIWEEKLY';
 
-export interface PaymentChoices {
+interface PaymentChoices {
   // Each is the action's label, or null when it isn't offered
   pay: string | null;
   // Undoes the latest pay or skip

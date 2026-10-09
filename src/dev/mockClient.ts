@@ -49,7 +49,9 @@ const demoAccount = (scenario: string | null): FakeAccount => {
         firstPaymentDate: fromToday(-273),
         lastPaymentDate: null,
         nextDueDate: fromToday(0),
-        handled: []
+        handled: [],
+        renewalDate: null,
+        renewalReminderDays: 0
       },
       {
         id: 'mortgage',
@@ -62,7 +64,9 @@ const demoAccount = (scenario: string | null): FakeAccount => {
         lastPaymentDate: null,
         // On payday it's left over from the last cycle, so the prompt offers to move it on
         nextDueDate: fromToday(scenario === 'payday' ? -2 : 24),
-        handled: []
+        handled: [],
+        renewalDate: null,
+        renewalReminderDays: 0
       },
       {
         id: 'prime',
@@ -74,7 +78,9 @@ const demoAccount = (scenario: string | null): FakeAccount => {
         firstPaymentDate: fromToday(-93),
         lastPaymentDate: null,
         nextDueDate: fromToday(272),
-        handled: []
+        handled: [],
+        renewalDate: null,
+        renewalReminderDays: 0
       }
     ],
     oneOffPayments: [

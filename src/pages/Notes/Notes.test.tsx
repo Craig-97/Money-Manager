@@ -1,7 +1,8 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { screen, waitFor, within } from '@testing-library/react';
 import { createFakeApi, DEFAULT_ACCOUNT, FakeAccount } from '~/test/fakeApi';
 import { renderApp } from '~/test/renderApp';
+import { resetViewport, setViewportWidth } from '~/test/viewport';
 
 const NOTE_TIME = String(Date.parse('2024-12-09T10:00:00'));
 
@@ -59,7 +60,9 @@ describe('notes', () => {
     const { user, api } = renderNotes();
     await board();
 
-    await user.click(screen.getByRole('button', { name: 'Add note' }));
+    // The toolbar's button; the mobile nav has one too, hidden by CSS on desktop
+    const [toolbarAdd] = screen.getAllByRole('button', { name: 'Add note' });
+    await user.click(toolbarAdd);
     const form = screen.getByRole('form', { name: 'New note' });
     const text = within(form).getByLabelText('New note');
     expect(text).toHaveFocus();
@@ -135,5 +138,26 @@ describe('notes', () => {
 
     expect(screen.getByRole('form', { name: 'New note' })).toBeInTheDocument();
     expect(screen.queryByText('No notes yet')).not.toBeInTheDocument();
+  });
+});
+
+describe('notes on mobile', () => {
+  beforeEach(() => setViewportWidth(390));
+  afterEach(resetViewport);
+
+  it('starts a new note from the add button in the nav, ready to type', async () => {
+    const { user } = renderNotes();
+    await board();
+
+    // The sidebar is in the page too, hidden by CSS on mobile
+    const nav = screen
+      .getAllByRole('navigation', { name: 'Main' })
+      .find(element => within(element).queryByRole('button', { name: 'Add note' }))!;
+    await user.click(within(nav).getByRole('button', { name: 'Add note' }));
+
+    const text = within(screen.getByRole('form', { name: 'New note' })).getByLabelText('New note');
+    expect(text).toHaveFocus();
+    await user.type(text, 'Book the MOT');
+    expect(text).toHaveValue('Book the MOT');
   });
 });

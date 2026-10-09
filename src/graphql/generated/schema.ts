@@ -68,6 +68,8 @@ export type CreateRecurringPaymentInput = {
   frequency: PaymentFrequency;
   lastPaymentDate?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
+  renewalDate?: InputMaybe<Scalars['String']['input']>;
+  renewalReminderDays?: InputMaybe<Scalars['Int']['input']>;
   type: PaymentType;
 };
 
@@ -377,6 +379,8 @@ export type RecurringPayment = {
   lastPaymentDate: Maybe<Scalars['String']['output']>;
   name: Scalars['String']['output'];
   nextDueDate: Maybe<Scalars['String']['output']>;
+  renewalDate: Maybe<Scalars['String']['output']>;
+  renewalReminderDays: Scalars['Int']['output'];
   type: PaymentType;
 };
 
@@ -410,6 +414,8 @@ export type RecurringPaymentInput = {
   frequency: PaymentFrequency;
   lastPaymentDate?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
+  renewalDate?: InputMaybe<Scalars['String']['input']>;
+  renewalReminderDays?: InputMaybe<Scalars['Int']['input']>;
   type: PaymentType;
 };
 
@@ -471,6 +477,8 @@ export type UpdateRecurringPaymentInput = {
   frequency?: InputMaybe<PaymentFrequency>;
   lastPaymentDate?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
+  renewalDate?: InputMaybe<Scalars['String']['input']>;
+  renewalReminderDays?: InputMaybe<Scalars['Int']['input']>;
   type?: InputMaybe<PaymentType>;
 };
 

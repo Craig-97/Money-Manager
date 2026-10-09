@@ -17,16 +17,18 @@ const SIZES = {
   lg: 'h-11 gap-1.5 px-[18px] font-bold'
 } as const;
 
-interface SegmentedControlProps<T extends string> {
+// Named by a label of its own, or by a heading or label already on the page
+type Labelled = { 'aria-label': string } | { 'aria-labelledby': string };
+
+type SegmentedControlProps<T extends string> = Labelled & {
   value: T;
   onValueChange: (value: T) => void;
   options: SegmentedOption<T>[];
-  'aria-label': string;
   size?: keyof typeof SIZES;
   // Stretch to fill the width, with equal segments
   fullWidth?: boolean;
   className?: string;
-}
+};
 
 /* Pick one of a few options. Arrow keys move between them. */
 export const SegmentedControl = <T extends string>({

@@ -19,6 +19,8 @@ export interface FakeRecurringPayment {
   lastPaymentDate: string | null;
   nextDueDate: string | null;
   handled: { outcome: 'PAID' | 'SKIPPED'; dates: string[] }[];
+  renewalDate: string | null;
+  renewalReminderDays: number;
 }
 
 export interface FakeOneOffPayment {
@@ -146,7 +148,9 @@ export const DEFAULT_ACCOUNT: FakeAccount = {
       lastPaymentDate: null,
       // Worked out by the client, as for payments saved before the API tracked due dates
       nextDueDate: null,
-      handled: []
+      handled: [],
+      renewalDate: null,
+      renewalReminderDays: 0
     }
   ],
   oneOffPayments: [
@@ -277,25 +281,32 @@ export const createFakeApi = ({
       firstPaymentDate: fromInput(input.firstPaymentDate),
       lastPaymentDate: input.lastPaymentDate ? fromInput(input.lastPaymentDate) : null,
       nextDueDate: null,
-      handled: []
+      handled: [],
+      renewalDate: input.renewalDate ? fromInput(input.renewalDate) : null,
+      renewalReminderDays: input.renewalReminderDays ?? 0
     };
     return { ...payment, nextDueDate: dueDateFor(payment) };
   };
 
   const updateRecurring = (payment: FakeRecurringPayment, input: Args) => {
     if (input.name && input.name !== payment.name) checkUniqueName(input.name, payment.id);
-    const scheduleChanged = ['firstPaymentDate', 'frequency', 'lastPaymentDate'].some(
-      key => key in input
-    );
+    const scheduleChanged = ['firstPaymentDate', 'frequency'].some(key => key in input);
+    const endChanged = 'lastPaymentDate' in input;
     for (const [key, value] of Object.entries(input)) {
       if (value === undefined) continue;
-      const isDate = key === 'firstPaymentDate' || key === 'lastPaymentDate';
+      const isDate = ['firstPaymentDate', 'lastPaymentDate', 'renewalDate'].includes(key);
       Object.assign(payment, { [key]: isDate && value ? fromInput(value) : value });
     }
     // A new schedule starts again from its next date, with nothing paid or skipped
     if (scheduleChanged) {
       payment.nextDueDate = dueDateFor(payment);
       payment.handled = [];
+    } else if (endChanged) {
+      // Only the end moved: carry on from the date still due, or after the latest one dealt with
+      const latest = fromApiDate(payment.handled.at(-1)?.dates.at(-1));
+      const from =
+        fromApiDate(payment.nextDueDate) ?? (latest ? addDays(latest, 1) : startOfToday());
+      payment.nextDueDate = toApi(nextOccurrence(scheduleOf(payment), from));
     }
     return payment;
   };

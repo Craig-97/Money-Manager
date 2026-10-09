@@ -1,3 +1,3 @@
-export * from './DueTodayBanner';
+export * from './MobileBulkBar';
 export * from './MobilePayments';
 export * from './PaymentsTable';

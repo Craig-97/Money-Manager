@@ -10,7 +10,7 @@ import { getApiErrorMessage } from '~/lib/errors';
 import { showToast } from '~/state/toast';
 import { Note } from '../notesModel';
 
-export interface NoteDraft {
+interface NoteDraft {
   body: string;
   color: NoteColor;
 }

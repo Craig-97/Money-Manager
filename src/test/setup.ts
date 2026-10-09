@@ -3,7 +3,9 @@
 import '@testing-library/jest-dom/vitest';
 import { afterEach } from 'vitest';
 import { cleanup, configure } from '@testing-library/react';
+import { useNoteComposerStore } from '~/state/noteComposer';
 import { DEFAULT_ACCENT, usePrefsStore } from '~/state/prefs';
+import { useRenewalSnoozeStore } from '~/state/renewalSnooze';
 import { installMatchMedia, resetViewport } from './viewport';
 
 // Component tests render the whole app, so give async queries (findBy*, waitFor) more time
@@ -43,6 +45,8 @@ afterEach(() => {
   cleanup();
   localStorage.clear();
   usePrefsStore.setState({ theme: 'dark', accent: DEFAULT_ACCENT });
+  useRenewalSnoozeStore.setState({ until: {} });
+  useNoteComposerStore.setState({ open: false, requests: 0 });
   resetViewport();
   delete document.documentElement.dataset.theme;
   delete document.documentElement.dataset.accent;

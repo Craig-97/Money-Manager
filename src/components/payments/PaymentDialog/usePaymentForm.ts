@@ -11,19 +11,29 @@ import {
   UpdateOneOffPaymentDocument,
   UpdateRecurringPaymentDocument
 } from '~/graphql/generated';
-import { addDays, parseIsoDate, toApiDate } from '~/lib/dates';
+import { addDays, formatShortDay, parseIsoDate, toApiDate } from '~/lib/dates';
 import { getApiErrorMessage, getErrorCode } from '~/lib/errors';
 import { formatMoneyInput, parseMoney } from '~/lib/format';
 import {
+  addYear,
+  DEFAULT_REMINDER,
   formatShortDate,
   nextOccurrence,
+  occurrencesBetween,
   Payment,
   PaymentKind,
-  scheduleText
+  REMINDER_LABELS,
+  ReminderDays,
+  scheduleText,
+  toReminderDays
 } from '~/lib/payments';
 import { showToast } from '~/state/toast';
 
-export interface PaymentFormValues {
+// How a recurring payment ends: it carries on, renews on a date (the payments carry on), or stops
+// after a last payment. One choice, so a renewal and a last payment can't both be set.
+export type Ends = 'keep' | 'renew' | 'stop';
+
+interface PaymentFormValues {
   type: PaymentType;
   name: string;
   amount: string;
@@ -32,8 +42,11 @@ export interface PaymentFormValues {
   // Recurring payments
   frequency: PaymentFrequency;
   first: string;
-  hasEnd: boolean;
+  ends: Ends;
   end: string;
+  renewal: string;
+  // Null until chosen: a month for a renewal, off for a yearly payment
+  reminder: ReminderDays | null;
   category: RecurringPaymentCategory | OneOffPaymentCategory;
 }
 
@@ -51,8 +64,10 @@ const initialValues = (
     date: iso(addDays(today, 7)),
     frequency: 'MONTHLY',
     first: iso(today),
-    hasEnd: false,
+    ends: 'keep',
     end: '',
+    renewal: '',
+    reminder: null,
     category: kind === 'recurring' ? 'SUBSCRIPTION' : 'OTHER'
   };
   if (!payment) return blank;
@@ -69,10 +84,48 @@ const initialValues = (
         ...common,
         frequency: payment.frequency,
         first: iso(payment.firstPaymentDate),
-        hasEnd: payment.lastPaymentDate !== null,
-        end: iso(payment.lastPaymentDate)
+        ends: payment.lastPaymentDate ? 'stop' : payment.renewalDate ? 'renew' : 'keep',
+        end: iso(payment.lastPaymentDate),
+        renewal: iso(payment.renewalDate),
+        // A reminder only means something with a renewal, or on a yearly payment
+        reminder:
+          payment.renewalDate || payment.frequency === 'ANNUALLY'
+            ? toReminderDays(payment.renewalReminderDays)
+            : null
       }
     : { ...common, date: iso(payment.dueDate) };
+};
+
+/*
+ * The recurring fields once the rules apply: yearly payments renew with each payment, so for them
+ * Renews is Keeps going, and their reminder counts back from each payment.
+ */
+const recurringEnding = (values: PaymentFormValues) => {
+  const yearly = values.frequency === 'ANNUALLY';
+  const ends: Ends = yearly && values.ends === 'renew' ? 'keep' : values.ends;
+  const reminds = ends === 'renew' || (ends === 'keep' && yearly);
+  const reminder: ReminderDays = values.reminder ?? (yearly ? 0 : DEFAULT_REMINDER);
+  return { yearly, ends, reminds, reminder };
+};
+
+/* A recurring payment's ending as the API takes it */
+const endingFields = (values: PaymentFormValues) => {
+  const { ends, reminds, reminder } = recurringEnding(values);
+  return {
+    lastPaymentDate: ends === 'stop' ? values.end : null,
+    renewalDate: ends === 'renew' ? values.renewal : null,
+    renewalReminderDays: reminds ? reminder : 0
+  };
+};
+
+const sameEnding = (a: PaymentFormValues, b: PaymentFormValues) => {
+  const x = endingFields(a);
+  const y = endingFields(b);
+  return (
+    x.lastPaymentDate === y.lastPaymentDate &&
+    x.renewalDate === y.renewalDate &&
+    x.renewalReminderDays === y.renewalReminderDays
+  );
 };
 
 /* Whether the form still holds what the payment already has */
@@ -84,26 +137,81 @@ const isUnchanged = (values: PaymentFormValues, before: PaymentFormValues) =>
   values.date === before.date &&
   values.frequency === before.frequency &&
   values.first === before.first &&
-  values.hasEnd === before.hasEnd &&
-  (!values.hasEnd || values.end === before.end);
+  sameEnding(values, before);
 
-/* "Repeats monthly on the 2nd · next due Mon 2 Nov · last Fri 1 Jan" */
-export const scheduleSummary = (values: PaymentFormValues, today: Date) => {
+export interface SummaryRow {
+  label: string;
+  value: string;
+}
+
+/*
+ * A recurring payment's schedule as short rows: Repeats, Next due, then Renews or Last payment,
+ * and the reminder. A message instead while there's nothing to show yet.
+ */
+const scheduleSummary = (
+  values: PaymentFormValues,
+  today: Date,
+  { renewalPassed = false } = {}
+): { rows: SummaryRow[]; message?: string } => {
   const first = parseIsoDate(values.first);
-  const end = values.hasEnd ? parseIsoDate(values.end) : undefined;
-  if (!first) return 'Choose a first payment date to see the schedule';
-  const repeats = `Repeats ${scheduleText(first, values.frequency, { lower: true })}`;
-  if (values.hasEnd && !end) return `${repeats} · choose a last payment date`;
-  if (end && end < first) return 'The last payment must be on or after the first';
+  const { yearly, ends, reminds, reminder } = recurringEnding(values);
+  const end = ends === 'stop' ? parseIsoDate(values.end) : undefined;
+  if (!first) return { rows: [], message: 'Choose a first payment date to see the schedule' };
+  if (ends === 'stop' && !end) return { rows: [], message: 'Choose a last payment date' };
+  if (end && end < first) {
+    return { rows: [], message: 'The last payment must be on or after the first' };
+  }
 
-  const next = nextOccurrence(
-    { firstPaymentDate: first, frequency: values.frequency, lastPaymentDate: end },
-    today
-  );
-  const nextText = next
-    ? ` · next due ${next.getTime() === today.getTime() ? 'today' : formatShortDate(next, today)}`
-    : ' · no payments left';
-  return repeats + nextText + (end ? ` · last ${formatShortDate(end, today)}` : '');
+  const next = nextOccurrence({ firstPaymentDate: first, frequency: values.frequency }, today);
+  const noneLeft = !next || (!!end && end < next);
+  const rows: SummaryRow[] = [
+    { label: 'Repeats', value: scheduleText(first, values.frequency) },
+    {
+      label: 'Next due',
+      value: noneLeft
+        ? 'No payments left'
+        : next.getTime() === today.getTime()
+          ? 'Today'
+          : formatShortDate(next, today)
+    }
+  ];
+  const renewal = parseIsoDate(values.renewal);
+  if (ends === 'renew' && renewal && !renewalPassed) {
+    rows.push({ label: 'Renews', value: formatShortDay(renewal, { withYear: true }) });
+  }
+  if (end) {
+    rows.push({
+      label: 'Last payment',
+      value: formatShortDay(end, { withYear: true }) + (noneLeft ? '' : ' · then stops')
+    });
+  }
+  // A yearly payment renews with each payment, so its reminder counts back from the next one
+  const renewsOn = yearly ? next : ends === 'renew' ? renewal : undefined;
+  if (reminds && renewsOn && !renewalPassed) {
+    rows.push({
+      label: 'Reminder',
+      value:
+        reminder > 0
+          ? `${formatShortDate(addDays(renewsOn, -reminder), today)} · ${REMINDER_LABELS[reminder]} before`
+          : 'Off'
+    });
+  }
+  return { rows };
+};
+
+/* What the chosen ending means, under the Ends choice */
+export const endsHint = (values: PaymentFormValues, today: Date) => {
+  const { yearly, ends } = recurringEnding(values);
+  if (ends === 'renew') return 'A policy or contract renews on a date. The payments carry on.';
+  if (ends === 'stop') {
+    return 'For loans, finance or anything that finishes. Nothing is due after the last payment.';
+  }
+  const first = parseIsoDate(values.first);
+  const next =
+    first && nextOccurrence({ firstPaymentDate: first, frequency: values.frequency }, today);
+  return yearly && next
+    ? `Renews with each payment · next on ${formatShortDay(next, { withYear: true })}`
+    : 'Carries on until you change or delete it';
 };
 
 interface Options {
@@ -142,11 +250,16 @@ export const usePaymentForm = ({ kind, accountId, payment, today, onSaved, formK
     if (key === 'name') setNameTaken(undefined);
     setValues(current => {
       const next = { ...current, [key]: value };
-      // Turning on an end date suggests a year after the first payment
-      if (key === 'hasEnd' && value && !current.end) {
+      // Choosing an ending suggests a date: a last payment a year after the next payment, a
+      // renewal a year from today
+      if (key === 'ends' && value === 'stop' && !current.end) {
         const first = parseIsoDate(current.first);
-        if (first)
-          next.end = iso(new Date(first.getFullYear() + 1, first.getMonth(), first.getDate()));
+        const upcoming =
+          first && nextOccurrence({ firstPaymentDate: first, frequency: current.frequency }, today);
+        if (upcoming) next.end = iso(addYear(upcoming));
+      }
+      if (key === 'ends' && value === 'renew' && !current.renewal) {
+        next.renewal = iso(addYear(today));
       }
       return next;
     });
@@ -155,18 +268,55 @@ export const usePaymentForm = ({ kind, accountId, payment, today, onSaved, formK
   const amount = parseMoney(values.amount);
   const first = parseIsoDate(values.first);
   const end = parseIsoDate(values.end);
+  const renewal = parseIsoDate(values.renewal);
+  const ending = recurringEnding(values);
+  const { ends } = ending;
   const nameOk = values.name.trim().length > 0;
   const amountOk = amount !== null && amount > 0;
-  const endBad = values.hasEnd && !!first && !!end && end < first;
+  const endBad = ends === 'stop' && !!first && !!end && end < first;
+  const renewalBad = ends === 'renew' && !!first && !!renewal && renewal <= first;
   const datesOk =
     kind === 'oneOff'
       ? !!parseIsoDate(values.date)
-      : !!first && (!values.hasEnd || (!!end && !endBad));
+      : !!first &&
+        (ends !== 'stop' || (!!end && !endBad)) &&
+        (ends !== 'renew' || (!!renewal && !renewalBad));
+
+  // The saved renewal has gone by and hasn't been moved on yet, so the form asks about the next one
+  const savedRenewal = payment?.kind === 'recurring' ? payment.renewalDate : null;
+  const savedPassed = !!savedRenewal && savedRenewal < today;
+  const renewalPassed = ends === 'renew' && savedPassed && values.renewal === iso(savedRenewal);
 
   const errors = {
     name: nameTaken ?? (touched.name && !nameOk ? 'Enter a name' : undefined),
     amount: touched.amount && !amountOk ? 'Enter an amount above £0' : undefined,
-    end: endBad ? 'Choose a date on or after the first payment' : undefined
+    end: endBad ? 'Choose a date on or after the first payment' : undefined,
+    renewal: renewalBad ? 'Choose a date after the first payment' : undefined
+  };
+
+  // Set next renewal: the same day a year on, or as many years on as it takes to reach today
+  const setNextRenewal = () => {
+    if (!renewal) return;
+    let next = addYear(renewal);
+    while (next < today) next = addYear(next);
+    setValues(current => ({ ...current, renewal: iso(next) }));
+  };
+
+  // No longer renews: it stops instead, after the last payment on or before the renewal
+  const stopAtRenewal = () => {
+    const lastBefore =
+      first && renewal
+        ? occurrencesBetween(
+            { firstPaymentDate: first, frequency: values.frequency },
+            first,
+            renewal
+          ).at(-1)
+        : undefined;
+    setValues(current => ({
+      ...current,
+      ends: 'stop',
+      end: lastBefore ? iso(lastBefore) : current.end
+    }));
   };
 
   const save = async () => {
@@ -184,29 +334,30 @@ export const usePaymentForm = ({ kind, accountId, payment, today, onSaved, formK
     setSaving(true);
     try {
       if (kind === 'recurring') {
-        const schedule = {
-          frequency: values.frequency,
-          firstPaymentDate: values.first,
-          lastPaymentDate: values.hasEnd ? values.end : null
-        };
+        const schedule = { frequency: values.frequency, firstPaymentDate: values.first };
         const category = values.category as RecurringPaymentCategory;
         if (payment) {
           const before = initialValues(kind, payment, today);
-          // Only send the schedule if it changed: a new schedule starts the payment unpaid again
+          // Only send the schedule if it changed: a new schedule starts the payment unpaid again.
+          // The ending can always go, as a new last payment keeps what's been paid.
           const scheduleChanged =
-            before.frequency !== values.frequency ||
-            before.first !== values.first ||
-            before.hasEnd !== values.hasEnd ||
-            (values.hasEnd && before.end !== values.end);
+            before.frequency !== values.frequency || before.first !== values.first;
           await updateRecurring({
             variables: {
               id: payment.id,
-              input: { ...common, category, ...(scheduleChanged ? schedule : {}) }
+              input: {
+                ...common,
+                category,
+                ...endingFields(values),
+                ...(scheduleChanged ? schedule : {})
+              }
             }
           });
         } else {
           await createRecurring({
-            variables: { input: { ...common, ...schedule, category, accountId } },
+            variables: {
+              input: { ...common, ...schedule, ...endingFields(values), category, accountId }
+            },
             update: (cache, { data }) => {
               if (data)
                 addRecurringPayment(
@@ -256,7 +407,14 @@ export const usePaymentForm = ({ kind, accountId, payment, today, onSaved, formK
     canSave: nameOk && amountOk && datesOk && !nameTaken,
     saving,
     save: () => void save(),
-    summary: kind === 'recurring' ? scheduleSummary(values, today) : ''
+    summary: scheduleSummary(values, today, { renewalPassed }),
+    endsHint: endsHint(values, today),
+    ending,
+    renewalPassed,
+    // Moved on from a renewal that had gone by, so the price may have changed with it
+    renewalMoved: ends === 'renew' && savedPassed && values.renewal !== iso(savedRenewal),
+    setNextRenewal,
+    stopAtRenewal
   };
 };
 

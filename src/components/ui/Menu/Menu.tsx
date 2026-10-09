@@ -64,3 +64,22 @@ export const MenuSeparator = ({
 }: ComponentProps<typeof DropdownMenu.Separator>) => (
   <DropdownMenu.Separator className={cn('mx-2 my-1 h-px bg-border', className)} {...props} />
 );
+
+/* One choice of several, e.g. what to sort by. The picked one shows a tick, or what's passed in. */
+export const MenuRadioGroup = DropdownMenu.RadioGroup;
+
+interface MenuRadioItemProps extends ComponentProps<typeof DropdownMenu.RadioItem> {
+  // Shown at the end when picked, e.g. the sort direction
+  indicator?: ReactNode;
+}
+
+export const MenuRadioItem = ({ indicator, className, children, ...props }: MenuRadioItemProps) => (
+  <DropdownMenu.RadioItem
+    className={cn(optionClasses, 'h-11 justify-between gap-2.5 whitespace-nowrap', className)}
+    {...props}>
+    {children}
+    <DropdownMenu.ItemIndicator className="font-extrabold text-accent-text">
+      {indicator}
+    </DropdownMenu.ItemIndicator>
+  </DropdownMenu.RadioItem>
+);

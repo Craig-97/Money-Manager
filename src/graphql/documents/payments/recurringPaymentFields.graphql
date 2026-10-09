@@ -8,6 +8,8 @@ fragment RecurringPaymentFields on RecurringPayment {
   firstPaymentDate
   lastPaymentDate
   nextDueDate
+  renewalDate
+  renewalReminderDays
   handled {
     outcome
     dates

@@ -10,9 +10,11 @@ import {
 import { renderApp } from '~/test/renderApp';
 import { resetViewport, setViewportWidth } from '~/test/viewport';
 
-// Everything due today, so it's always before the next payday whatever day the tests run
+// Everything due today, so it falls once before payday. Tests pin today themselves, as a payday a
+// month or more before the next one would put a monthly payment in the cycle twice.
 const account = (overrides: Partial<FakeAccount> = {}): FakeAccount => ({
   ...structuredClone(DEFAULT_ACCOUNT),
+  cycleStartedOn: apiDateFromToday(0),
   bankBalance: 1000,
   monthlyIncome: 2500,
   recurringPayments: [
@@ -27,7 +29,9 @@ const account = (overrides: Partial<FakeAccount> = {}): FakeAccount => ({
       firstPaymentDate: apiDateFromToday(0),
       lastPaymentDate: null,
       nextDueDate: apiDateFromToday(0),
-      handled: []
+      handled: [],
+      renewalDate: null,
+      renewalReminderDays: 0
     }
   ],
   oneOffPayments: [
@@ -57,6 +61,13 @@ const findTooltip = (text: string) =>
   );
 
 describe('dashboard', () => {
+  // Thursday 8 October 2026, partway through a cycle that ends Friday 30 October
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date('2026-10-08T09:00:00'));
+  });
+  afterEach(() => vi.useRealTimers());
+
   it('works out what is free to spend before payday', async () => {
     renderDashboard();
 
@@ -236,7 +247,9 @@ describe('a payment due more than once before payday', () => {
           firstPaymentDate: apiDate('2026-10-07'),
           lastPaymentDate: null,
           nextDueDate: apiDate('2026-10-07'),
-          handled: []
+          handled: [],
+          renewalDate: null,
+          renewalReminderDays: 0
         }
       ],
       oneOffPayments: []
@@ -340,7 +353,9 @@ describe('payday prompt', () => {
           firstPaymentDate: apiDateFromToday(-31),
           lastPaymentDate: null,
           nextDueDate: apiDateFromToday(-31),
-          handled: []
+          handled: [],
+          renewalDate: null,
+          renewalReminderDays: 0
         }
       ],
       oneOffPayments: []
@@ -509,5 +524,134 @@ describe('moving a payday', () => {
     expect(api.callsTo('SetPaydayOverride')).toEqual([
       { id: 'payday-1', for: '2026-12-31', date: '2026-12-17' }
     ]);
+  });
+});
+
+describe('alerts', () => {
+  // Thursday 8 October 2026
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date('2026-10-08T09:00:00'));
+  });
+  afterEach(() => vi.useRealTimers());
+
+  // Netflix is due today, and breakdown cover renewed on 28 September without a new date set
+  const renewedAccount = () => {
+    const data = account();
+    data.recurringPayments.push({
+      ...data.recurringPayments[0],
+      id: 'breakdown',
+      name: 'Breakdown cover',
+      amount: 7.5,
+      category: 'VEHICLE',
+      firstPaymentDate: apiDate('2025-09-28'),
+      nextDueDate: apiDate('2026-10-28'),
+      renewalDate: apiDate('2026-09-28'),
+      renewalReminderDays: 30
+    });
+    return data;
+  };
+
+  it('shows one alert at a time, moving between them', async () => {
+    const { user } = renderDashboard(renewedAccount());
+
+    const alerts = await screen.findByRole('region', { name: 'Alerts' });
+    expect(within(alerts).getByRole('region', { name: 'Due today' })).toBeInTheDocument();
+    expect(within(alerts).getByText('1 of 2')).toBeInTheDocument();
+
+    await user.click(within(alerts).getByRole('button', { name: 'Next alert' }));
+
+    const renewal = within(alerts).getByRole('region', { name: 'Breakdown cover has renewed' });
+    expect(renewal).toHaveTextContent('Mon 28 Sep · £7.50 a month · check the price and next date');
+    await user.click(within(renewal).getByRole('button', { name: 'Update' }));
+    expect(
+      await screen.findByText('Renewed on Mon 28 Sep. Has the price or date changed for next year?')
+    ).toBeInTheDocument();
+  });
+
+  it('puts a renewal away for three days with Later', async () => {
+    const { user, unmount } = renderDashboard(renewedAccount());
+
+    const alerts = await screen.findByRole('region', { name: 'Alerts' });
+    await user.click(within(alerts).getByRole('button', { name: 'Next alert' }));
+    await user.click(within(alerts).getByRole('button', { name: 'Later' }));
+
+    // Only due today is left, so there's nothing to page through
+    expect(within(alerts).getByRole('region', { name: 'Due today' })).toBeInTheDocument();
+    expect(within(alerts).queryByText('1 of 2')).not.toBeInTheDocument();
+    expect(localStorage.getItem('mm-renewal-snooze')).toContain('breakdown:2026-9-28');
+
+    // Still away two days later; back on the third
+    unmount();
+    vi.setSystemTime(new Date('2026-10-10T09:00:00'));
+    renderDashboard(renewedAccount());
+    await screen.findByRole('region', { name: 'Alerts' });
+    expect(screen.queryByText('Breakdown cover has renewed')).not.toBeInTheDocument();
+    expect(screen.queryByText('1 of 2')).not.toBeInTheDocument();
+  });
+
+  it('flags a renewal coming up within its reminder, after one that has gone by', async () => {
+    // Car insurance is paid yearly on 24 October, 16 days away, with a reminder a month before
+    const data = renewedAccount();
+    data.recurringPayments.push({
+      ...data.recurringPayments[0],
+      id: 'car',
+      name: 'Car insurance',
+      amount: 612,
+      category: 'INSURANCE',
+      frequency: 'ANNUALLY',
+      firstPaymentDate: apiDate('2023-10-24'),
+      nextDueDate: apiDate('2026-10-24'),
+      renewalDate: null,
+      renewalReminderDays: 30
+    });
+    const { user } = renderDashboard(data);
+
+    const alerts = await screen.findByRole('region', { name: 'Alerts' });
+    expect(within(alerts).getByText('1 of 3')).toBeInTheDocument();
+    await user.click(within(alerts).getByRole('button', { name: 'Next alert' }));
+    expect(
+      within(alerts).getByRole('region', { name: 'Breakdown cover has renewed' })
+    ).toBeInTheDocument();
+    await user.click(within(alerts).getByRole('button', { name: 'Next alert' }));
+
+    const coming = within(alerts).getByRole('region', {
+      name: 'Car insurance renews in 16 days'
+    });
+    expect(coming).toHaveTextContent(
+      'Sat 24 Oct · £612.00 a year · check the price before it renews'
+    );
+  });
+
+  it('leaves a renewal alone with its reminder off until it has gone by', async () => {
+    const data = account();
+    data.recurringPayments.push({
+      ...data.recurringPayments[0],
+      id: 'car',
+      name: 'Car insurance',
+      amount: 612,
+      frequency: 'ANNUALLY',
+      firstPaymentDate: apiDate('2023-10-24'),
+      nextDueDate: apiDate('2026-10-24'),
+      renewalDate: null,
+      renewalReminderDays: 0
+    });
+    renderDashboard(data);
+
+    await screen.findByRole('region', { name: 'Alerts' });
+    expect(screen.queryByText(/Car insurance renews/)).not.toBeInTheDocument();
+  });
+
+  it('asks again once the snooze runs out', async () => {
+    const { user, unmount } = renderDashboard(renewedAccount());
+    const alerts = await screen.findByRole('region', { name: 'Alerts' });
+    await user.click(within(alerts).getByRole('button', { name: 'Next alert' }));
+    await user.click(within(alerts).getByRole('button', { name: 'Later' }));
+
+    unmount();
+    vi.setSystemTime(new Date('2026-10-11T09:30:00'));
+    renderDashboard(renewedAccount());
+
+    expect(await screen.findByText('1 of 2')).toBeInTheDocument();
   });
 });

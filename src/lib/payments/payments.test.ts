@@ -34,6 +34,8 @@ const recurring = (
   lastPaymentDate: null,
   nextDueDate: null,
   handled: [],
+  renewalDate: null,
+  renewalReminderDays: 0,
   ...overrides
 });
 

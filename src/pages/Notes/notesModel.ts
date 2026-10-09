@@ -3,9 +3,9 @@ import { Account } from '~/hooks/useAccount';
 
 export const NOTE_MAX_LENGTH = 200;
 // The counter turns red with this many characters left
-export const NOTE_LOW_LENGTH = 20;
+const NOTE_LOW_LENGTH = 20;
 
-export interface NoteColorStyle {
+interface NoteColorStyle {
   value: NoteColor;
   label: string;
   // The card's tint and border

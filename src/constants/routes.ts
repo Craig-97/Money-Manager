@@ -1,6 +1,7 @@
 export const ROUTES = {
   home: '/',
   dashboard: '/dashboard',
+  recurring: '/recurring',
   forecast: '/forecast',
   notes: '/notes',
   profile: '/profile',

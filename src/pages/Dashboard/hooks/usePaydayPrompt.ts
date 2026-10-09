@@ -23,7 +23,7 @@ interface Options {
  * Setup counts as a start, so a new account waits for its first payday. That also catches a
  * payday missed over a weekend.
  */
-export const needsNewCycle = (cycle: PayCycle, cycleStartedOn: string | null | undefined) => {
+const needsNewCycle = (cycle: PayCycle, cycleStartedOn: string | null | undefined) => {
   const started = fromApiDate(cycleStartedOn);
   return !started || started < cycle.start;
 };

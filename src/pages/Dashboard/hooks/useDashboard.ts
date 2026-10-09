@@ -4,10 +4,19 @@ import { UpdateAccountDocument } from '~/graphql/generated';
 import { Account } from '~/hooks/useAccount';
 import { usePayCycle } from '~/hooks/usePayCycle';
 import { usePaymentActions } from '~/hooks/usePaymentActions';
+import { usePaymentSelection } from '~/hooks/usePaymentSelection';
 import { getApiErrorMessage } from '~/lib/errors';
-import { canPay, cycleDays, summarise, toPayments } from '~/lib/payments';
+import {
+  canPay,
+  cycleDays,
+  DEFAULT_SORT,
+  PaymentSort,
+  summarise,
+  toPayments
+} from '~/lib/payments';
 import { showToast } from '~/state/toast';
 import { PaymentTab, paymentsForTab } from '../dashboardModel';
+import { useAlerts } from './useAlerts';
 import { useMoneyEditor } from './useMoneyEditor';
 import { usePaydayOverride } from './usePaydayOverride';
 
@@ -18,12 +27,7 @@ export const useDashboard = (account: Account) => {
   const [updateAccount] = useMutation(UpdateAccountDocument);
 
   const [tab, setTab] = useState<PaymentTab>('upcoming');
-  const [ascending, setAscending] = useState(true);
-  const [selected, setSelected] = useState<ReadonlySet<string>>(() => new Set());
-  // Mobile: rows tick on tap instead of opening, with bulk actions in place of the nav
-  const [selecting, setSelecting] = useState(false);
-  // "Later" on the due today banner hides it for this visit
-  const [dueDismissed, setDueDismissed] = useState(false);
+  const [sort, setSort] = useState<PaymentSort>(DEFAULT_SORT);
 
   const payments = toPayments(account, today);
   const summary = summarise({
@@ -34,8 +38,9 @@ export const useDashboard = (account: Account) => {
     today
   });
   const paydayOverride = usePaydayOverride({ account, cycle, today, holidays, payments });
-  const listed = paymentsForTab(payments, tab, cycle, today, ascending);
-  const selectedPayments = listed.filter(payment => selected.has(payment.id));
+  const alerts = useAlerts({ payments, today, dueToday: summary.dueToday });
+  const listed = paymentsForTab(payments, tab, cycle, sort);
+  const selection = usePaymentSelection(listed);
 
   const saveAccount = (fields: { bankBalance?: number; monthlyIncome?: number }) =>
     updateAccount({ variables: { id: account.id, input: fields } }).catch(error =>
@@ -63,15 +68,14 @@ export const useDashboard = (account: Account) => {
     actions,
     balanceEditor,
     incomeEditor,
-    dueToday: dueDismissed ? undefined : summary.dueToday,
-    dismissDue: () => setDueDismissed(true),
+    alerts,
     tab,
     setTab: (next: PaymentTab) => {
       setTab(next);
-      setSelected(new Set());
+      selection.clear();
     },
-    ascending,
-    toggleSort: () => setAscending(current => !current),
+    sort,
+    setSort,
     listed,
     // Upcoming counts every date before payday, though it lists each payment once. Recurring is a
     // monthly figure, with quarterly and yearly payments kept apart as the summary has them.
@@ -81,28 +85,10 @@ export const useDashboard = (account: Account) => {
         : tab === 'recurring'
           ? -summary.monthlyRecurring
           : listed.reduce((total, payment) => total + payment.signedAmount, 0),
-    selected,
-    selectedPayments,
+    selection,
     // Recurring payments with nothing left this cycle are left out, so they aren't paid ahead
-    paySelected: () => actions.pay(selectedPayments.filter(payment => canPay(payment, cycle))),
-    toggleSelected: (id: string) =>
-      setSelected(current => {
-        const next = new Set(current);
-        if (!next.delete(id)) next.add(id);
-        return next;
-      }),
-    selectAll: (all: boolean) =>
-      setSelected(all ? new Set(listed.map(payment => payment.id)) : new Set()),
-    clearSelection: () => setSelected(new Set()),
-    selecting,
-    toggleSelecting: () => {
-      setSelecting(current => !current);
-      setSelected(new Set());
-    },
-    stopSelecting: () => {
-      setSelecting(false);
-      setSelected(new Set());
-    }
+    paySelected: () =>
+      actions.pay(selection.selectedPayments.filter(payment => canPay(payment, cycle)))
   };
 };
 

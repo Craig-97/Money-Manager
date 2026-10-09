@@ -1,6 +1,12 @@
 import { ComponentType } from 'react';
 import { PageName } from '~/app/routes/pageModules';
-import { DashboardIcon, ForecastIcon, IconProps, NotesIcon, ProfileIcon } from '~/components/icons';
+import {
+  DashboardIcon,
+  ForecastIcon,
+  IconProps,
+  NotesIcon,
+  RecurringIcon
+} from '~/components/icons';
 import { ROUTES } from '~/constants';
 
 export interface NavItem {
@@ -12,13 +18,7 @@ export interface NavItem {
 
 export const MAIN_NAV: NavItem[] = [
   { to: ROUTES.dashboard, label: 'Dashboard', page: 'dashboard', Icon: DashboardIcon },
+  { to: ROUTES.recurring, label: 'Recurring', page: 'recurring', Icon: RecurringIcon },
   { to: ROUTES.forecast, label: 'Forecast', page: 'forecast', Icon: ForecastIcon },
   { to: ROUTES.notes, label: 'Notes', page: 'notes', Icon: NotesIcon }
 ];
-
-export const PROFILE_NAV: NavItem = {
-  to: ROUTES.profile,
-  label: 'Profile',
-  page: 'profile',
-  Icon: ProfileIcon
-};

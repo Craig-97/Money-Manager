@@ -37,6 +37,8 @@ export type AccountQuery = {
       firstPaymentDate: string;
       lastPaymentDate: string | null;
       nextDueDate: string | null;
+      renewalDate: string | null;
+      renewalReminderDays: number;
       handled: Array<{
         __typename: 'HandledDates';
         outcome: Types.PaymentOutcome;
@@ -91,6 +93,8 @@ export type AccountFieldsFragment = {
     firstPaymentDate: string;
     lastPaymentDate: string | null;
     nextDueDate: string | null;
+    renewalDate: string | null;
+    renewalReminderDays: number;
     handled: Array<{
       __typename: 'HandledDates';
       outcome: Types.PaymentOutcome;
@@ -151,6 +155,8 @@ export type CreateAccountMutation = {
         firstPaymentDate: string;
         lastPaymentDate: string | null;
         nextDueDate: string | null;
+        renewalDate: string | null;
+        renewalReminderDays: number;
         handled: Array<{
           __typename: 'HandledDates';
           outcome: Types.PaymentOutcome;
@@ -200,6 +206,8 @@ export type MarkPaymentsPaidMutation = {
         firstPaymentDate: string;
         lastPaymentDate: string | null;
         nextDueDate: string | null;
+        renewalDate: string | null;
+        renewalReminderDays: number;
         handled: Array<{
           __typename: 'HandledDates';
           outcome: Types.PaymentOutcome;
@@ -241,6 +249,8 @@ export type MarkPaymentsUnpaidMutation = {
         firstPaymentDate: string;
         lastPaymentDate: string | null;
         nextDueDate: string | null;
+        renewalDate: string | null;
+        renewalReminderDays: number;
         handled: Array<{
           __typename: 'HandledDates';
           outcome: Types.PaymentOutcome;
@@ -272,6 +282,8 @@ export type SkipRecurringPaymentsMutation = {
         firstPaymentDate: string;
         lastPaymentDate: string | null;
         nextDueDate: string | null;
+        renewalDate: string | null;
+        renewalReminderDays: number;
         handled: Array<{
           __typename: 'HandledDates';
           outcome: Types.PaymentOutcome;
@@ -305,6 +317,8 @@ export type StartPaydayCycleMutation = {
         firstPaymentDate: string;
         lastPaymentDate: string | null;
         nextDueDate: string | null;
+        renewalDate: string | null;
+        renewalReminderDays: number;
         handled: Array<{
           __typename: 'HandledDates';
           outcome: Types.PaymentOutcome;
@@ -628,6 +642,8 @@ export type CreateRecurringPaymentMutation = {
       firstPaymentDate: string;
       lastPaymentDate: string | null;
       nextDueDate: string | null;
+      renewalDate: string | null;
+      renewalReminderDays: number;
       handled: Array<{
         __typename: 'HandledDates';
         outcome: Types.PaymentOutcome;
@@ -658,6 +674,8 @@ export type RecurringPaymentFieldsFragment = {
   firstPaymentDate: string;
   lastPaymentDate: string | null;
   nextDueDate: string | null;
+  renewalDate: string | null;
+  renewalReminderDays: number;
   handled: Array<{
     __typename: 'HandledDates';
     outcome: Types.PaymentOutcome;
@@ -704,6 +722,8 @@ export type UpdateRecurringPaymentMutation = {
       firstPaymentDate: string;
       lastPaymentDate: string | null;
       nextDueDate: string | null;
+      renewalDate: string | null;
+      renewalReminderDays: number;
       handled: Array<{
         __typename: 'HandledDates';
         outcome: Types.PaymentOutcome;
@@ -840,6 +860,8 @@ export const RecurringPaymentFieldsFragmentDoc = {
           { kind: 'Field', name: { kind: 'Name', value: 'firstPaymentDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'lastPaymentDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'nextDueDate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'renewalDate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'renewalReminderDays' } },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'handled' },
@@ -996,6 +1018,8 @@ export const AccountFieldsFragmentDoc = {
           { kind: 'Field', name: { kind: 'Name', value: 'firstPaymentDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'lastPaymentDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'nextDueDate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'renewalDate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'renewalReminderDays' } },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'handled' },
@@ -1174,6 +1198,8 @@ export const AccountDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'firstPaymentDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'lastPaymentDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'nextDueDate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'renewalDate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'renewalReminderDays' } },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'handled' },
@@ -1366,6 +1392,8 @@ export const CreateAccountDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'firstPaymentDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'lastPaymentDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'nextDueDate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'renewalDate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'renewalReminderDays' } },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'handled' },
@@ -1557,6 +1585,8 @@ export const MarkPaymentsPaidDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'firstPaymentDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'lastPaymentDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'nextDueDate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'renewalDate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'renewalReminderDays' } },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'handled' },
@@ -1668,6 +1698,8 @@ export const MarkPaymentsUnpaidDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'firstPaymentDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'lastPaymentDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'nextDueDate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'renewalDate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'renewalReminderDays' } },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'handled' },
@@ -1762,6 +1794,8 @@ export const SkipRecurringPaymentsDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'firstPaymentDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'lastPaymentDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'nextDueDate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'renewalDate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'renewalReminderDays' } },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'handled' },
@@ -1858,6 +1892,8 @@ export const StartPaydayCycleDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'firstPaymentDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'lastPaymentDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'nextDueDate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'renewalDate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'renewalReminderDays' } },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'handled' },
@@ -3004,6 +3040,8 @@ export const CreateRecurringPaymentDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'firstPaymentDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'lastPaymentDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'nextDueDate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'renewalDate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'renewalReminderDays' } },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'handled' },
@@ -3190,6 +3228,8 @@ export const UpdateRecurringPaymentDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'firstPaymentDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'lastPaymentDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'nextDueDate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'renewalDate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'renewalReminderDays' } },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'handled' },

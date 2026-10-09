@@ -2,6 +2,7 @@
 // hover or focus so the chunk is usually ready by the time the link is clicked.
 export const pageModules = {
   dashboard: () => import('~/pages/Dashboard'),
+  recurring: () => import('~/pages/Recurring'),
   forecast: () => import('~/pages/Forecast'),
   notes: () => import('~/pages/Notes'),
   profile: () => import('~/pages/Profile'),

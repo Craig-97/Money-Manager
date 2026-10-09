@@ -1,12 +1,16 @@
 import { Plus } from 'lucide-react';
-import { NavLink } from 'react-router';
+import { NavLink, useMatch } from 'react-router';
+import { useShallow } from 'zustand/react/shallow';
 import { preloadPage } from '~/app/routes/pageModules';
 import { DashboardIcon, IconProps } from '~/components/icons';
+import { ROUTES } from '~/constants';
 import { cn } from '~/lib/cn';
+import { useNoteComposerStore } from '~/state/noteComposer';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
-import { MAIN_NAV, NavItem, PROFILE_NAV } from '../navItems';
+import { MAIN_NAV, NavItem } from '../navItems';
 
-const [dashboard, forecast, notes] = MAIN_NAV;
+// The add button sits in the middle, so the bar splits the pages either side of it
+const [dashboard, recurring, forecast, notes] = MAIN_NAV;
 
 // The mobile nav draws the dashboard tiles with rounder corners
 const RoundedDashboardIcon = (props: IconProps) => <DashboardIcon cornerRadius={2} {...props} />;
@@ -28,9 +32,24 @@ const BottomNavLink = ({ item }: { item: NavItem }) => {
   );
 };
 
-/* The floating mobile nav, with the add payment button in the middle */
+/*
+ * The floating mobile nav, with the add payment button in the middle. Profile isn't here: the
+ * avatar in every page header opens it.
+ */
 export const BottomNav = ({ className }: { className?: string }) => {
-  const openChooser = usePaymentDialogStore(s => s.openChooser);
+  const { openChooser, openAdd } = usePaymentDialogStore(
+    useShallow(s => ({ openChooser: s.openChooser, openAdd: s.openAdd }))
+  );
+  const openNote = useNoteComposerStore(s => s.openComposer);
+  // The add button adds what the page is about: a note on notes, a recurring payment on recurring,
+  // otherwise it asks which kind of payment
+  const onRecurring = useMatch(ROUTES.recurring) !== null;
+  const onNotes = useMatch(ROUTES.notes) !== null;
+  const add = onNotes
+    ? { label: 'Add note', open: openNote, dialog: false }
+    : onRecurring
+      ? { label: 'Add recurring payment', open: () => openAdd('recurring'), dialog: true }
+      : { label: 'Add payment', open: openChooser, dialog: true };
 
   return (
     <div
@@ -42,17 +61,17 @@ export const BottomNav = ({ className }: { className?: string }) => {
         aria-label="Main"
         className="pointer-events-auto flex items-center gap-1 rounded-full border border-border bg-nav-bg p-1.5 shadow-[0_18px_36px_-14px_var(--shadow)]">
         <BottomNavLink item={dashboard} />
-        <BottomNavLink item={forecast} />
+        <BottomNavLink item={recurring} />
         <button
           type="button"
-          aria-label="Add payment"
-          aria-haspopup="dialog"
-          onClick={openChooser}
+          aria-label={add.label}
+          aria-haspopup={add.dialog ? 'dialog' : undefined}
+          onClick={add.open}
           className="flex h-[52px] w-14 cursor-pointer items-center justify-center rounded-full border-0 bg-accent text-on-accent">
           <Plus size={22} strokeWidth={2.5} aria-hidden="true" />
         </button>
+        <BottomNavLink item={forecast} />
         <BottomNavLink item={notes} />
-        <BottomNavLink item={PROFILE_NAV} />
       </nav>
     </div>
   );
