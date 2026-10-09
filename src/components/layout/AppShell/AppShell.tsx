@@ -2,6 +2,7 @@ import { CSSProperties } from 'react';
 import { Outlet } from 'react-router';
 import { PaymentDialog } from '~/components/payments/PaymentDialog';
 import { Toaster } from '~/components/ui/Toaster';
+import { useScrollTopOnNavigate } from '~/hooks/useScrollTopOnNavigate';
 import { useSidebarMode } from '~/hooks/useSidebarMode';
 import { BottomNav } from '../BottomNav';
 import { Sidebar } from '../Sidebar';
@@ -11,6 +12,8 @@ export const AppShell = () => {
   const { expanded, isOverlay } = useSidebarMode();
   // How much room the sidebar takes, so toasts centre under the content rather than the window
   const sidebarWidth = expanded && !isOverlay ? 300 : 88;
+  // The pages scroll in here, so a new page starts at its top
+  const mainRef = useScrollTopOnNavigate<HTMLElement>();
 
   return (
     <div
@@ -23,6 +26,7 @@ export const AppShell = () => {
       </a>
       <Sidebar className="hidden md:block" />
       <main
+        ref={mainRef}
         id="main"
         className="min-w-0 flex-1 overflow-y-auto px-4 pt-5 pb-[120px] md:px-10 md:pt-8 md:pb-14">
         <div className="mx-auto flex max-w-[1480px] flex-col gap-3.5 md:gap-7">

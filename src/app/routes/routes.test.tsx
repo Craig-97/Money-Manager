@@ -32,6 +32,19 @@ describe('routing', () => {
     expect(router.state.location.pathname).toBe('/dashboard');
   });
 
+  it('starts each page at the top, however far down the last one was scrolled', async () => {
+    const { router } = renderApp({ route: '/dashboard' });
+    expect(await findPageHeading('Dashboard')).toBeInTheDocument();
+    // The pages scroll inside <main>, which stays from page to page
+    const main = document.getElementById('main')!;
+    main.scrollTop = 900;
+
+    await router.navigate('/notes');
+
+    expect(await findPageHeading('Notes')).toBeInTheDocument();
+    expect(main.scrollTop).toBe(0);
+  });
+
   it('sends people without an account to setup', async () => {
     renderApp({ route: '/dashboard', api: createFakeApi({ account: null }) });
 
