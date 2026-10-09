@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Checkbox } from './Checkbox';
@@ -96,6 +96,14 @@ describe('Select', () => {
 });
 
 describe('DatePicker', () => {
+  // A fixed today away from the months the tests open, as the calendar labels today's date
+  // differently ("Today, Friday, 9 October 2026"). Only Date is faked.
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date('2026-06-15T09:00:00'));
+  });
+  afterEach(() => vi.useRealTimers());
+
   const ControlledDatePicker = ({ initial = '', min }: { initial?: string; min?: string }) => {
     const [value, setValue] = useState(initial);
     return (
