@@ -7,7 +7,7 @@ import { getAuthToken, useAuthStore } from '~/state/auth';
 import { apiUrl } from './apiUrl';
 import { refreshSession, RefreshFn } from './refreshSession';
 
-export const createCache = () => new InMemoryCache();
+const createCache = () => new InMemoryCache();
 
 // Sends the session token as a Bearer header
 const authLink = new SetContextLink(prevContext => {

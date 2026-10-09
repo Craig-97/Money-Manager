@@ -2,7 +2,7 @@ import { useSearchParams } from 'react-router';
 import { skipToken, useQuery } from '@apollo/client/react';
 import { PasswordResetTokenValidDocument } from '~/graphql/generated';
 
-export type ResetTokenStatus = 'checking' | 'valid' | 'invalid';
+type ResetTokenStatus = 'checking' | 'valid' | 'invalid';
 
 /*
  * The token from the emailed link (?token=), whether it can still be used, and who it is for. If the check itself

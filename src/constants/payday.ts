@@ -1,4 +1,4 @@
-import { PayFrequency, PaydayType, Weekday } from '~/graphql/generated';
+import { PayFrequency, PaydayType } from '~/graphql/generated';
 
 // `satisfies` keeps these in step with the API's enums, so a value the API rejects won't compile
 export const PAY_FREQUENCY = {
@@ -17,42 +17,3 @@ export const PAYDAY_TYPE = {
   SET_DAY: 'SET_DAY',
   SET_WEEKDAY: 'SET_WEEKDAY'
 } as const satisfies { [K in PaydayType]: K };
-
-export const WEEKDAY = {
-  MONDAY: 'MONDAY',
-  TUESDAY: 'TUESDAY',
-  WEDNESDAY: 'WEDNESDAY',
-  THURSDAY: 'THURSDAY',
-  FRIDAY: 'FRIDAY'
-} as const satisfies { [K in Weekday]: K };
-
-export const PAYDAY_TYPE_OPTIONS = {
-  WEEKLY: [{ value: PAYDAY_TYPE.SET_WEEKDAY }],
-  RECURRING: [
-    { value: PAYDAY_TYPE.LAST_DAY },
-    { value: PAYDAY_TYPE.LAST_WEEKDAY },
-    { value: PAYDAY_TYPE.SET_WEEKDAY }
-  ],
-  DEFAULT: [
-    { value: PAYDAY_TYPE.LAST_DAY },
-    { value: PAYDAY_TYPE.LAST_WEEKDAY },
-    { value: PAYDAY_TYPE.SET_DAY }
-  ]
-} as const;
-
-export const PAYDAY_PERIOD_MAP: Record<PayFrequency, number> = {
-  [PAY_FREQUENCY.WEEKLY]: 1,
-  [PAY_FREQUENCY.FORTNIGHTLY]: 2,
-  [PAY_FREQUENCY.FOUR_WEEKLY]: 4,
-  [PAY_FREQUENCY.MONTHLY]: 1,
-  [PAY_FREQUENCY.QUARTERLY]: 3,
-  [PAY_FREQUENCY.BIANNUAL]: 6,
-  [PAY_FREQUENCY.ANNUAL]: 12
-};
-
-export const PAYDAY_MONTH_FREQUENCIES: PayFrequency[] = [
-  PAY_FREQUENCY.MONTHLY,
-  PAY_FREQUENCY.QUARTERLY,
-  PAY_FREQUENCY.BIANNUAL,
-  PAY_FREQUENCY.ANNUAL
-] as const;

@@ -19,7 +19,7 @@ const schema = z.object({
   })
 });
 
-export type RegisterValues = z.infer<typeof schema>;
+type RegisterValues = z.infer<typeof schema>;
 
 /*
  * The register form. Once the account exists the session is held back, so the "Account created"

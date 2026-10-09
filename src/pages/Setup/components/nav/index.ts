@@ -1,2 +1,3 @@
 export * from './SetupFooter';
-export * from './SetupNav';
+export * from './SetupMobileHeader';
+export * from './SetupSidebar';

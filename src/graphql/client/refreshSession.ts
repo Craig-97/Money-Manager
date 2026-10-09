@@ -8,7 +8,7 @@ import { apiUrl } from './apiUrl';
 const REFRESH_QUERY = print(addTypenameToDocument(RefreshSessionDocument));
 
 // null when the API says there is no session to refresh (no cookie, or it was used or expired)
-export type RefreshResult = AuthSessionFragment | null;
+type RefreshResult = AuthSessionFragment | null;
 export type RefreshFn = () => Promise<RefreshResult>;
 
 let inFlight: Promise<RefreshResult> | null = null;

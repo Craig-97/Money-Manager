@@ -179,7 +179,7 @@ const usedNames = (values: SetupValues) => {
   return counts;
 };
 
-export const DUPLICATE_NAME = "You've already used this name. Names need to be unique.";
+const DUPLICATE_NAME = "You've already used this name. Names need to be unique.";
 
 export const regularErrors = (regular: RegularDraft, values: SetupValues) => {
   const errors: { field: RegularField; message: string }[] = [];
@@ -266,6 +266,9 @@ export const summariseFirstCycle = (values: SetupValues, holidays: BankHolidays,
     spokenForPercent: balance > 0 ? Math.min(100, Math.round((goingOut / balance) * 100)) : 100
   };
 };
+
+/* How the first pay cycle looks from the answers, for the review step and its summary */
+export type FirstCycle = ReturnType<typeof summariseFirstCycle>;
 
 /* The answers as the API's createAccount input */
 export const toCreateAccountInput = (values: SetupValues): CreateAccountInput => {

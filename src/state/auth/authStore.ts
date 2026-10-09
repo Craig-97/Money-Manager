@@ -8,7 +8,7 @@ export interface Session {
 }
 
 // Why the last session ended, so the sign-in screen can explain it
-export type SessionEndReason = 'expired' | 'signed-out';
+type SessionEndReason = 'expired' | 'signed-out';
 
 interface AuthState {
   session: Session | null;

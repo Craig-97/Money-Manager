@@ -1,6 +1,6 @@
 import { useCurrentUser } from '../useCurrentUser';
 
-export type AccountStatus = 'loading' | 'ready' | 'missing' | 'error';
+type AccountStatus = 'loading' | 'ready' | 'missing' | 'error';
 
 /*
  * Whether the signed-in user has an account yet, i.e. has finished setup. Every session starts with

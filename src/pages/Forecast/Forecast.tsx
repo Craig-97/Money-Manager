@@ -2,43 +2,10 @@ import { CalendarDays } from 'lucide-react';
 import { AccountError } from '~/components/feedback/AccountError';
 import { PageHeader } from '~/components/layout/PageHeader';
 import { tileLift } from '~/components/ui/Tile';
-import { MEDIA } from '~/constants';
-import { Account, useAccount } from '~/hooks/useAccount';
-import { useMediaQuery } from '~/hooks/useMediaQuery';
+import { useAccount } from '~/hooks/useAccount';
 import { formatMoney } from '~/lib/format';
 import { paidText } from '~/lib/payday';
-import {
-  KeyFigures,
-  MobileKeyFigures,
-  MonthTable,
-  ProjectionChart,
-  SpendCard,
-  ForecastSkeleton
-} from './components';
-import { useForecast } from './hooks';
-
-const ForecastContent = ({ account }: { account: Account }) => {
-  const forecast = useForecast(account);
-  const isDesktop = useMediaQuery(MEDIA.desktop);
-
-  return isDesktop ? (
-    <>
-      <KeyFigures forecast={forecast} />
-      <section className="grid gap-4 min-[68.8125rem]:grid-cols-3">
-        <SpendCard forecast={forecast} />
-        <ProjectionChart forecast={forecast} />
-      </section>
-      <MonthTable forecast={forecast} />
-    </>
-  ) : (
-    <>
-      <MobileKeyFigures forecast={forecast} />
-      <SpendCard forecast={forecast} compact />
-      <ProjectionChart forecast={forecast} compact />
-      <MonthTable forecast={forecast} compact />
-    </>
-  );
-};
+import { ForecastContent, ForecastSkeleton } from './components';
 
 export const Forecast = () => {
   const { account, loading, retry } = useAccount();

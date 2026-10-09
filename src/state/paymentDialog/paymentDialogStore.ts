@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { PaymentKind } from '~/lib/payments';
 
-export type PaymentDialogView =
+type PaymentDialogView =
   | { view: 'closed' }
   // "What kind of payment is it?"
   | { view: 'chooser' }

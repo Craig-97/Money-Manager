@@ -58,5 +58,3 @@ export const useBalanceSettings = (account: Account) => {
     save: () => void save()
   };
 };
-
-export type BalanceSettings = ReturnType<typeof useBalanceSettings>;

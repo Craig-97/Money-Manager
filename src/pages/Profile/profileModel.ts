@@ -104,7 +104,7 @@ export const toPaydayInput = (values: PaydayValues): PaydayInput => {
   };
 };
 
-export interface PaydayErrors {
+interface PaydayErrors {
   dayOfMonth?: string;
   firstPayDate?: string;
 }

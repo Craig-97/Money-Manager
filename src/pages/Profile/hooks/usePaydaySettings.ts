@@ -67,5 +67,3 @@ export const usePaydaySettings = (account: Account) => {
     save: () => void save()
   };
 };
-
-export type PaydaySettings = ReturnType<typeof usePaydaySettings>;

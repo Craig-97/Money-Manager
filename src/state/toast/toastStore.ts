@@ -1,12 +1,12 @@
 import { ReactNode } from 'react';
 import { create } from 'zustand';
 
-export interface ToastAction {
+interface ToastAction {
   label: string;
   onClick: () => void;
 }
 
-export interface Toast {
+interface Toast {
   id: number;
   message: string;
   icon?: ReactNode;

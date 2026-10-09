@@ -4,7 +4,7 @@ import { optionClasses, popoverClasses } from '~/components/ui/popoverClasses';
 import { cn } from '~/lib/cn';
 import { fieldClasses } from '../fieldClasses';
 
-export interface SelectOption<T extends string = string> {
+interface SelectOption<T extends string = string> {
   value: T;
   label: string;
 }

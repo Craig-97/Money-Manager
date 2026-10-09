@@ -19,7 +19,7 @@ const schema = z.object({
 
 type ResetPasswordValues = z.infer<typeof schema>;
 
-export type ResetOutcome = 'updated' | 'expired';
+type ResetOutcome = 'updated' | 'expired';
 
 /* Sets the new password and signs the person in. The link can expire while they're typing. */
 export const useResetPasswordForm = (token: string) => {

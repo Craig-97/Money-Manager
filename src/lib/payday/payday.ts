@@ -102,7 +102,7 @@ const weeklyPaydays = (config: PaydayConfig, holidays: BankHolidays, from: Date,
 };
 
 // A payday, and the date the rule gave it when the user has moved it
-export interface PaydayDate {
+interface PaydayDate {
   date: Date;
   // The date the rule gave, for a payday the user moved; null otherwise
   usual: Date | null;

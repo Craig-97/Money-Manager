@@ -14,7 +14,7 @@ const schema = z.object({
   email: emailSchema
 });
 
-export type DetailsValues = z.infer<typeof schema>;
+type DetailsValues = z.infer<typeof schema>;
 
 type User = NonNullable<CurrentUserQuery['tokenFindUser']>;
 
