@@ -11,6 +11,7 @@ import { apiDate, createFakeApi, DEFAULT_USER, FakeAccount } from '~/test/fakeAp
  *   payday   - today is payday, so the payday prompt shows
  *   empty    - an account with no payments or notes
  *   overdrawn - more going out before payday than is in the bank
+ *   debts    - the design's three debts: a credit card, car finance and a loan from family
  */
 
 const fromToday = (days: number) => apiDate(toIsoDate(addDays(startOfToday(), days)));
@@ -49,7 +50,7 @@ const demoAccount = (scenario: string | null): FakeAccount => {
         firstPaymentDate: fromToday(-273),
         lastPaymentDate: null,
         nextDueDate: fromToday(0),
-        handled: [],
+        thisCycle: [],
         renewalDate: null,
         renewalReminderDays: 0
       },
@@ -64,7 +65,7 @@ const demoAccount = (scenario: string | null): FakeAccount => {
         lastPaymentDate: null,
         // On payday it's left over from the last cycle, so the prompt offers to move it on
         nextDueDate: fromToday(scenario === 'payday' ? -2 : 24),
-        handled: [],
+        thisCycle: [],
         renewalDate: null,
         renewalReminderDays: 0
       },
@@ -78,7 +79,7 @@ const demoAccount = (scenario: string | null): FakeAccount => {
         firstPaymentDate: fromToday(-93),
         lastPaymentDate: null,
         nextDueDate: fromToday(272),
-        handled: [],
+        thisCycle: [],
         renewalDate: null,
         renewalReminderDays: 0
       }
@@ -122,8 +123,54 @@ const demoAccount = (scenario: string | null): FakeAccount => {
   if (scenario === 'empty') {
     return { ...account, recurringPayments: [], oneOffPayments: [], notes: [] };
   }
+  if (scenario === 'debts') {
+    return { ...account, recurringPayments: [...account.recurringPayments, ...demoDebts()] };
+  }
   return account;
 };
+
+// Paid monthly, with a balance set from a statement a few weeks ago
+const demoDebt = (
+  id: string,
+  name: string,
+  category: string,
+  amount: number,
+  dueInDays: number,
+  debt: { balance: number; startingBalance: number; apr: number }
+) => ({
+  id,
+  name,
+  amount,
+  category,
+  frequency: 'MONTHLY',
+  type: 'EXPENSE' as const,
+  firstPaymentDate: fromToday(dueInDays - 365),
+  lastPaymentDate: null,
+  nextDueDate: fromToday(dueInDays),
+  thisCycle: [],
+  history: [],
+  renewalDate: null,
+  renewalReminderDays: 0,
+  debt: { ...debt, balanceUpdatedAt: fromToday(-21) }
+});
+
+const demoDebts = () => [
+  demoDebt('credit-card', 'Credit card', 'CREDIT_CARD', 150, 13, {
+    balance: 2340,
+    startingBalance: 3500,
+    apr: 24.9
+  }),
+  demoDebt('car-finance', 'Car finance', 'LOAN', 245, 24, {
+    balance: 6860,
+    startingBalance: 12000,
+    apr: 6.9
+  }),
+  demoDebt('family-loan', 'Family loan', 'LOAN', 100, 30, {
+    balance: 800,
+    startingBalance: 1500,
+    apr: 0
+  })
+];
 
 export const createMockClient = () => {
   const scenario = new URLSearchParams(window.location.search).get('mock');

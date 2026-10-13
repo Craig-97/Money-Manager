@@ -12,14 +12,17 @@ const day = (iso: string) => {
   return new Date(year, month - 1, date);
 };
 const apiDate = (iso: string) => String(Date.parse(`${iso}T00:00:00Z`));
-type HandledDates = RecurringPaymentFieldsFragment['handled'][number];
-const handled = (outcome: HandledDates['outcome'], dates: string[]): HandledDates => ({
-  __typename: 'HandledDates',
-  outcome,
-  dates: dates.map(apiDate)
+type CycleRecord = RecurringPaymentFieldsFragment['thisCycle'][number];
+let records = 0;
+const record = (kind: 'PAID' | 'SKIPPED', dates: string[]): CycleRecord => ({
+  __typename: 'PaymentRecord',
+  id: `record-${++records}`,
+  kind,
+  dates: dates.map(apiDate),
+  balanceChange: kind === 'PAID' ? -10 : 0
 });
-const paid = (...dates: string[]) => handled('PAID', dates);
-const skipped = (...dates: string[]) => handled('SKIPPED', dates);
+const paid = (...dates: string[]) => record('PAID', dates);
+const skipped = (...dates: string[]) => record('SKIPPED', dates);
 
 const recurring = (
   overrides: Partial<RecurringPaymentFieldsFragment> & { name: string }
@@ -33,9 +36,10 @@ const recurring = (
   firstPaymentDate: apiDate('2026-01-02'),
   lastPaymentDate: null,
   nextDueDate: null,
-  handled: [],
+  thisCycle: [],
   renewalDate: null,
   renewalReminderDays: 0,
+  debt: null,
   ...overrides
 });
 
@@ -48,6 +52,7 @@ const oneOff = (
   dueDate: apiDate('2026-10-09'),
   type: 'EXPENSE',
   category: 'OTHER',
+  paidAt: null,
   ...overrides
 });
 
@@ -206,14 +211,14 @@ describe('summarise', () => {
             frequency: 'WEEKLY',
             firstPaymentDate: apiDate('2026-09-28'),
             nextDueDate: apiDate('2026-10-05'),
-            handled: [paid('2026-09-28')]
+            thisCycle: [paid('2026-09-28')]
           }),
           // Paid for this cycle, so next due after payday
           recurring({
             name: 'Gym',
             firstPaymentDate: apiDate('2026-01-10'),
             nextDueDate: apiDate('2026-11-10'),
-            handled: [paid('2026-10-10')]
+            thisCycle: [paid('2026-10-10')]
           })
         ],
         oneOffPayments: [oneOff({ name: 'Overdue', dueDate: apiDate('2026-09-01') })]
@@ -265,7 +270,7 @@ describe('scheduleText', () => {
 
 describe('a weekly payment through the cycle', () => {
   // £50 every Monday from 28 Sep; the cycle runs 25 Sep to 30 Oct, so it falls five times
-  const cleaner = (nextDueDate: string, handled: HandledDates[] = []) =>
+  const cleaner = (nextDueDate: string, thisCycle: CycleRecord[] = []) =>
     toPayments(
       {
         recurringPayments: [
@@ -275,7 +280,7 @@ describe('a weekly payment through the cycle', () => {
             frequency: 'WEEKLY',
             firstPaymentDate: apiDate('2026-09-28'),
             nextDueDate: apiDate(nextDueDate),
-            handled
+            thisCycle
           })
         ]
       },
@@ -330,11 +335,11 @@ describe('a weekly payment through the cycle', () => {
 });
 
 describe('a monthly payment through the cycle', () => {
-  const netflix = (nextDueDate: string, handled: HandledDates[] = []) =>
+  const netflix = (nextDueDate: string, thisCycle: CycleRecord[] = []) =>
     toPayments(
       {
         recurringPayments: [
-          recurring({ name: 'Netflix', nextDueDate: apiDate(nextDueDate), handled })
+          recurring({ name: 'Netflix', nextDueDate: apiDate(nextDueDate), thisCycle })
         ]
       },
       today

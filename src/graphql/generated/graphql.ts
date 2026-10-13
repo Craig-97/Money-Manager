@@ -39,11 +39,20 @@ export type AccountQuery = {
       nextDueDate: string | null;
       renewalDate: string | null;
       renewalReminderDays: number;
-      handled: Array<{
-        __typename: 'HandledDates';
-        outcome: Types.PaymentOutcome;
+      thisCycle: Array<{
+        __typename: 'PaymentRecord';
+        id: string;
+        kind: Types.PaymentRecordKind;
         dates: Array<string>;
+        balanceChange: number;
       }>;
+      debt: {
+        __typename: 'Debt';
+        balance: number;
+        startingBalance: number | null;
+        apr: number;
+        balanceUpdatedAt: string | null;
+      } | null;
     } | null> | null;
     oneOffPayments: Array<{
       __typename: 'OneOffPayment';
@@ -53,6 +62,7 @@ export type AccountQuery = {
       dueDate: string;
       type: Types.PaymentType;
       category: Types.OneOffPaymentCategory;
+      paidAt: string | null;
     } | null> | null;
     notes: Array<{
       __typename: 'Note';
@@ -95,11 +105,20 @@ export type AccountFieldsFragment = {
     nextDueDate: string | null;
     renewalDate: string | null;
     renewalReminderDays: number;
-    handled: Array<{
-      __typename: 'HandledDates';
-      outcome: Types.PaymentOutcome;
+    thisCycle: Array<{
+      __typename: 'PaymentRecord';
+      id: string;
+      kind: Types.PaymentRecordKind;
       dates: Array<string>;
+      balanceChange: number;
     }>;
+    debt: {
+      __typename: 'Debt';
+      balance: number;
+      startingBalance: number | null;
+      apr: number;
+      balanceUpdatedAt: string | null;
+    } | null;
   } | null> | null;
   oneOffPayments: Array<{
     __typename: 'OneOffPayment';
@@ -109,6 +128,7 @@ export type AccountFieldsFragment = {
     dueDate: string;
     type: Types.PaymentType;
     category: Types.OneOffPaymentCategory;
+    paidAt: string | null;
   } | null> | null;
   notes: Array<{
     __typename: 'Note';
@@ -157,11 +177,20 @@ export type CreateAccountMutation = {
         nextDueDate: string | null;
         renewalDate: string | null;
         renewalReminderDays: number;
-        handled: Array<{
-          __typename: 'HandledDates';
-          outcome: Types.PaymentOutcome;
+        thisCycle: Array<{
+          __typename: 'PaymentRecord';
+          id: string;
+          kind: Types.PaymentRecordKind;
           dates: Array<string>;
+          balanceChange: number;
         }>;
+        debt: {
+          __typename: 'Debt';
+          balance: number;
+          startingBalance: number | null;
+          apr: number;
+          balanceUpdatedAt: string | null;
+        } | null;
       } | null> | null;
       oneOffPayments: Array<{
         __typename: 'OneOffPayment';
@@ -171,6 +200,7 @@ export type CreateAccountMutation = {
         dueDate: string;
         type: Types.PaymentType;
         category: Types.OneOffPaymentCategory;
+        paidAt: string | null;
       } | null> | null;
       notes: Array<{
         __typename: 'Note';
@@ -179,6 +209,49 @@ export type CreateAccountMutation = {
         color: Types.NoteColor;
         createdAt: string;
         updatedAt: string;
+      } | null> | null;
+    } | null;
+  };
+};
+
+export type LogDebtOverpaymentMutationVariables = Exact<{
+  input: Types.LogDebtOverpaymentInput;
+}>;
+
+export type LogDebtOverpaymentMutation = {
+  logDebtOverpayment: {
+    __typename: 'AccountResponse';
+    account: {
+      __typename: 'Account';
+      id: string;
+      bankBalance: number;
+      recurringPayments: Array<{
+        __typename: 'RecurringPayment';
+        id: string;
+        name: string;
+        amount: number;
+        category: Types.RecurringPaymentCategory;
+        frequency: Types.PaymentFrequency;
+        type: Types.PaymentType;
+        firstPaymentDate: string;
+        lastPaymentDate: string | null;
+        nextDueDate: string | null;
+        renewalDate: string | null;
+        renewalReminderDays: number;
+        thisCycle: Array<{
+          __typename: 'PaymentRecord';
+          id: string;
+          kind: Types.PaymentRecordKind;
+          dates: Array<string>;
+          balanceChange: number;
+        }>;
+        debt: {
+          __typename: 'Debt';
+          balance: number;
+          startingBalance: number | null;
+          apr: number;
+          balanceUpdatedAt: string | null;
+        } | null;
       } | null> | null;
     } | null;
   };
@@ -208,11 +281,20 @@ export type MarkPaymentsPaidMutation = {
         nextDueDate: string | null;
         renewalDate: string | null;
         renewalReminderDays: number;
-        handled: Array<{
-          __typename: 'HandledDates';
-          outcome: Types.PaymentOutcome;
+        thisCycle: Array<{
+          __typename: 'PaymentRecord';
+          id: string;
+          kind: Types.PaymentRecordKind;
           dates: Array<string>;
+          balanceChange: number;
         }>;
+        debt: {
+          __typename: 'Debt';
+          balance: number;
+          startingBalance: number | null;
+          apr: number;
+          balanceUpdatedAt: string | null;
+        } | null;
       } | null> | null;
       oneOffPayments: Array<{
         __typename: 'OneOffPayment';
@@ -222,6 +304,7 @@ export type MarkPaymentsPaidMutation = {
         dueDate: string;
         type: Types.PaymentType;
         category: Types.OneOffPaymentCategory;
+        paidAt: string | null;
       } | null> | null;
     } | null;
   };
@@ -251,11 +334,30 @@ export type MarkPaymentsUnpaidMutation = {
         nextDueDate: string | null;
         renewalDate: string | null;
         renewalReminderDays: number;
-        handled: Array<{
-          __typename: 'HandledDates';
-          outcome: Types.PaymentOutcome;
+        thisCycle: Array<{
+          __typename: 'PaymentRecord';
+          id: string;
+          kind: Types.PaymentRecordKind;
           dates: Array<string>;
+          balanceChange: number;
         }>;
+        debt: {
+          __typename: 'Debt';
+          balance: number;
+          startingBalance: number | null;
+          apr: number;
+          balanceUpdatedAt: string | null;
+        } | null;
+      } | null> | null;
+      oneOffPayments: Array<{
+        __typename: 'OneOffPayment';
+        id: string;
+        name: string;
+        amount: number;
+        dueDate: string;
+        type: Types.PaymentType;
+        category: Types.OneOffPaymentCategory;
+        paidAt: string | null;
       } | null> | null;
     } | null;
   };
@@ -284,11 +386,20 @@ export type SkipRecurringPaymentsMutation = {
         nextDueDate: string | null;
         renewalDate: string | null;
         renewalReminderDays: number;
-        handled: Array<{
-          __typename: 'HandledDates';
-          outcome: Types.PaymentOutcome;
+        thisCycle: Array<{
+          __typename: 'PaymentRecord';
+          id: string;
+          kind: Types.PaymentRecordKind;
           dates: Array<string>;
+          balanceChange: number;
         }>;
+        debt: {
+          __typename: 'Debt';
+          balance: number;
+          startingBalance: number | null;
+          apr: number;
+          balanceUpdatedAt: string | null;
+        } | null;
       } | null> | null;
     } | null;
   };
@@ -319,11 +430,73 @@ export type StartPaydayCycleMutation = {
         nextDueDate: string | null;
         renewalDate: string | null;
         renewalReminderDays: number;
-        handled: Array<{
-          __typename: 'HandledDates';
-          outcome: Types.PaymentOutcome;
+        thisCycle: Array<{
+          __typename: 'PaymentRecord';
+          id: string;
+          kind: Types.PaymentRecordKind;
           dates: Array<string>;
+          balanceChange: number;
         }>;
+        debt: {
+          __typename: 'Debt';
+          balance: number;
+          startingBalance: number | null;
+          apr: number;
+          balanceUpdatedAt: string | null;
+        } | null;
+      } | null> | null;
+      oneOffPayments: Array<{
+        __typename: 'OneOffPayment';
+        id: string;
+        name: string;
+        amount: number;
+        dueDate: string;
+        type: Types.PaymentType;
+        category: Types.OneOffPaymentCategory;
+        paidAt: string | null;
+      } | null> | null;
+    } | null;
+  };
+};
+
+export type UndoDebtOverpaymentMutationVariables = Exact<{
+  input: Types.UndoDebtOverpaymentInput;
+}>;
+
+export type UndoDebtOverpaymentMutation = {
+  undoDebtOverpayment: {
+    __typename: 'AccountResponse';
+    account: {
+      __typename: 'Account';
+      id: string;
+      bankBalance: number;
+      recurringPayments: Array<{
+        __typename: 'RecurringPayment';
+        id: string;
+        name: string;
+        amount: number;
+        category: Types.RecurringPaymentCategory;
+        frequency: Types.PaymentFrequency;
+        type: Types.PaymentType;
+        firstPaymentDate: string;
+        lastPaymentDate: string | null;
+        nextDueDate: string | null;
+        renewalDate: string | null;
+        renewalReminderDays: number;
+        thisCycle: Array<{
+          __typename: 'PaymentRecord';
+          id: string;
+          kind: Types.PaymentRecordKind;
+          dates: Array<string>;
+          balanceChange: number;
+        }>;
+        debt: {
+          __typename: 'Debt';
+          balance: number;
+          startingBalance: number | null;
+          apr: number;
+          balanceUpdatedAt: string | null;
+        } | null;
       } | null> | null;
     } | null;
   };
@@ -620,6 +793,7 @@ export type CreateOneOffPaymentMutation = {
       dueDate: string;
       type: Types.PaymentType;
       category: Types.OneOffPaymentCategory;
+      paidAt: string | null;
     } | null;
   };
 };
@@ -644,11 +818,20 @@ export type CreateRecurringPaymentMutation = {
       nextDueDate: string | null;
       renewalDate: string | null;
       renewalReminderDays: number;
-      handled: Array<{
-        __typename: 'HandledDates';
-        outcome: Types.PaymentOutcome;
+      thisCycle: Array<{
+        __typename: 'PaymentRecord';
+        id: string;
+        kind: Types.PaymentRecordKind;
         dates: Array<string>;
+        balanceChange: number;
       }>;
+      debt: {
+        __typename: 'Debt';
+        balance: number;
+        startingBalance: number | null;
+        apr: number;
+        balanceUpdatedAt: string | null;
+      } | null;
     } | null;
   };
 };
@@ -661,6 +844,7 @@ export type OneOffPaymentFieldsFragment = {
   dueDate: string;
   type: Types.PaymentType;
   category: Types.OneOffPaymentCategory;
+  paidAt: string | null;
 };
 
 export type RecurringPaymentFieldsFragment = {
@@ -676,11 +860,20 @@ export type RecurringPaymentFieldsFragment = {
   nextDueDate: string | null;
   renewalDate: string | null;
   renewalReminderDays: number;
-  handled: Array<{
-    __typename: 'HandledDates';
-    outcome: Types.PaymentOutcome;
+  thisCycle: Array<{
+    __typename: 'PaymentRecord';
+    id: string;
+    kind: Types.PaymentRecordKind;
     dates: Array<string>;
+    balanceChange: number;
   }>;
+  debt: {
+    __typename: 'Debt';
+    balance: number;
+    startingBalance: number | null;
+    apr: number;
+    balanceUpdatedAt: string | null;
+  } | null;
 };
 
 export type UpdateOneOffPaymentMutationVariables = Exact<{
@@ -699,6 +892,7 @@ export type UpdateOneOffPaymentMutation = {
       dueDate: string;
       type: Types.PaymentType;
       category: Types.OneOffPaymentCategory;
+      paidAt: string | null;
     } | null;
   };
 };
@@ -724,11 +918,20 @@ export type UpdateRecurringPaymentMutation = {
       nextDueDate: string | null;
       renewalDate: string | null;
       renewalReminderDays: number;
-      handled: Array<{
-        __typename: 'HandledDates';
-        outcome: Types.PaymentOutcome;
+      thisCycle: Array<{
+        __typename: 'PaymentRecord';
+        id: string;
+        kind: Types.PaymentRecordKind;
         dates: Array<string>;
+        balanceChange: number;
       }>;
+      debt: {
+        __typename: 'Debt';
+        balance: number;
+        startingBalance: number | null;
+        apr: number;
+        balanceUpdatedAt: string | null;
+      } | null;
     } | null;
   };
 };
@@ -864,12 +1067,27 @@ export const RecurringPaymentFieldsFragmentDoc = {
           { kind: 'Field', name: { kind: 'Name', value: 'renewalReminderDays' } },
           {
             kind: 'Field',
-            name: { kind: 'Name', value: 'handled' },
+            name: { kind: 'Name', value: 'thisCycle' },
             selectionSet: {
               kind: 'SelectionSet',
               selections: [
-                { kind: 'Field', name: { kind: 'Name', value: 'outcome' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'dates' } }
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'kind' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'dates' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'balanceChange' } }
+              ]
+            }
+          },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'debt' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'balance' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'startingBalance' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'apr' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } }
               ]
             }
           }
@@ -893,7 +1111,8 @@ export const OneOffPaymentFieldsFragmentDoc = {
           { kind: 'Field', name: { kind: 'Name', value: 'amount' } },
           { kind: 'Field', name: { kind: 'Name', value: 'dueDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'type' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'category' } }
+          { kind: 'Field', name: { kind: 'Name', value: 'category' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'paidAt' } }
         ]
       }
     }
@@ -1022,12 +1241,27 @@ export const AccountFieldsFragmentDoc = {
           { kind: 'Field', name: { kind: 'Name', value: 'renewalReminderDays' } },
           {
             kind: 'Field',
-            name: { kind: 'Name', value: 'handled' },
+            name: { kind: 'Name', value: 'thisCycle' },
             selectionSet: {
               kind: 'SelectionSet',
               selections: [
-                { kind: 'Field', name: { kind: 'Name', value: 'outcome' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'dates' } }
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'kind' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'dates' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'balanceChange' } }
+              ]
+            }
+          },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'debt' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'balance' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'startingBalance' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'apr' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } }
               ]
             }
           }
@@ -1046,7 +1280,8 @@ export const AccountFieldsFragmentDoc = {
           { kind: 'Field', name: { kind: 'Name', value: 'amount' } },
           { kind: 'Field', name: { kind: 'Name', value: 'dueDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'type' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'category' } }
+          { kind: 'Field', name: { kind: 'Name', value: 'category' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'paidAt' } }
         ]
       }
     },
@@ -1202,12 +1437,27 @@ export const AccountDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'renewalReminderDays' } },
           {
             kind: 'Field',
-            name: { kind: 'Name', value: 'handled' },
+            name: { kind: 'Name', value: 'thisCycle' },
             selectionSet: {
               kind: 'SelectionSet',
               selections: [
-                { kind: 'Field', name: { kind: 'Name', value: 'outcome' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'dates' } }
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'kind' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'dates' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'balanceChange' } }
+              ]
+            }
+          },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'debt' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'balance' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'startingBalance' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'apr' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } }
               ]
             }
           }
@@ -1226,7 +1476,8 @@ export const AccountDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'amount' } },
           { kind: 'Field', name: { kind: 'Name', value: 'dueDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'type' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'category' } }
+          { kind: 'Field', name: { kind: 'Name', value: 'category' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'paidAt' } }
         ]
       }
     },
@@ -1396,12 +1647,27 @@ export const CreateAccountDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'renewalReminderDays' } },
           {
             kind: 'Field',
-            name: { kind: 'Name', value: 'handled' },
+            name: { kind: 'Name', value: 'thisCycle' },
             selectionSet: {
               kind: 'SelectionSet',
               selections: [
-                { kind: 'Field', name: { kind: 'Name', value: 'outcome' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'dates' } }
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'kind' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'dates' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'balanceChange' } }
+              ]
+            }
+          },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'debt' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'balance' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'startingBalance' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'apr' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } }
               ]
             }
           }
@@ -1420,7 +1686,8 @@ export const CreateAccountDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'amount' } },
           { kind: 'Field', name: { kind: 'Name', value: 'dueDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'type' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'category' } }
+          { kind: 'Field', name: { kind: 'Name', value: 'category' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'paidAt' } }
         ]
       }
     },
@@ -1493,6 +1760,118 @@ export const CreateAccountDocument = {
     }
   ]
 } as unknown as DocumentNode<CreateAccountMutation, CreateAccountMutationVariables>;
+export const LogDebtOverpaymentDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'LogDebtOverpayment' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'LogDebtOverpaymentInput' } }
+          }
+        }
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'logDebtOverpayment' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } }
+              }
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'account' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'bankBalance' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'recurringPayments' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'FragmentSpread',
+                              name: { kind: 'Name', value: 'RecurringPaymentFields' }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'RecurringPaymentFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'RecurringPayment' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'amount' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'category' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'frequency' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'type' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'firstPaymentDate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'lastPaymentDate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'nextDueDate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'renewalDate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'renewalReminderDays' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'thisCycle' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'kind' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'dates' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'balanceChange' } }
+              ]
+            }
+          },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'debt' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'balance' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'startingBalance' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'apr' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+} as unknown as DocumentNode<LogDebtOverpaymentMutation, LogDebtOverpaymentMutationVariables>;
 export const MarkPaymentsPaidDocument = {
   kind: 'Document',
   definitions: [
@@ -1589,12 +1968,27 @@ export const MarkPaymentsPaidDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'renewalReminderDays' } },
           {
             kind: 'Field',
-            name: { kind: 'Name', value: 'handled' },
+            name: { kind: 'Name', value: 'thisCycle' },
             selectionSet: {
               kind: 'SelectionSet',
               selections: [
-                { kind: 'Field', name: { kind: 'Name', value: 'outcome' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'dates' } }
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'kind' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'dates' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'balanceChange' } }
+              ]
+            }
+          },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'debt' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'balance' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'startingBalance' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'apr' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } }
               ]
             }
           }
@@ -1613,7 +2007,8 @@ export const MarkPaymentsPaidDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'amount' } },
           { kind: 'Field', name: { kind: 'Name', value: 'dueDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'type' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'category' } }
+          { kind: 'Field', name: { kind: 'Name', value: 'category' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'paidAt' } }
         ]
       }
     }
@@ -1672,6 +2067,19 @@ export const MarkPaymentsUnpaidDocument = {
                             }
                           ]
                         }
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'oneOffPayments' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'FragmentSpread',
+                              name: { kind: 'Name', value: 'OneOffPaymentFields' }
+                            }
+                          ]
+                        }
                       }
                     ]
                   }
@@ -1702,15 +2110,47 @@ export const MarkPaymentsUnpaidDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'renewalReminderDays' } },
           {
             kind: 'Field',
-            name: { kind: 'Name', value: 'handled' },
+            name: { kind: 'Name', value: 'thisCycle' },
             selectionSet: {
               kind: 'SelectionSet',
               selections: [
-                { kind: 'Field', name: { kind: 'Name', value: 'outcome' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'dates' } }
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'kind' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'dates' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'balanceChange' } }
+              ]
+            }
+          },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'debt' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'balance' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'startingBalance' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'apr' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } }
               ]
             }
           }
+        ]
+      }
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'OneOffPaymentFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'OneOffPayment' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'amount' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'dueDate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'type' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'category' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'paidAt' } }
         ]
       }
     }
@@ -1798,12 +2238,27 @@ export const SkipRecurringPaymentsDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'renewalReminderDays' } },
           {
             kind: 'Field',
-            name: { kind: 'Name', value: 'handled' },
+            name: { kind: 'Name', value: 'thisCycle' },
             selectionSet: {
               kind: 'SelectionSet',
               selections: [
-                { kind: 'Field', name: { kind: 'Name', value: 'outcome' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'dates' } }
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'kind' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'dates' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'balanceChange' } }
+              ]
+            }
+          },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'debt' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'balance' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'startingBalance' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'apr' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } }
               ]
             }
           }
@@ -1866,6 +2321,19 @@ export const StartPaydayCycleDocument = {
                             }
                           ]
                         }
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'oneOffPayments' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'FragmentSpread',
+                              name: { kind: 'Name', value: 'OneOffPaymentFields' }
+                            }
+                          ]
+                        }
                       }
                     ]
                   }
@@ -1896,12 +2364,156 @@ export const StartPaydayCycleDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'renewalReminderDays' } },
           {
             kind: 'Field',
-            name: { kind: 'Name', value: 'handled' },
+            name: { kind: 'Name', value: 'thisCycle' },
             selectionSet: {
               kind: 'SelectionSet',
               selections: [
-                { kind: 'Field', name: { kind: 'Name', value: 'outcome' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'dates' } }
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'kind' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'dates' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'balanceChange' } }
+              ]
+            }
+          },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'debt' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'balance' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'startingBalance' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'apr' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'OneOffPaymentFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'OneOffPayment' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'amount' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'dueDate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'type' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'category' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'paidAt' } }
+        ]
+      }
+    }
+  ]
+} as unknown as DocumentNode<StartPaydayCycleMutation, StartPaydayCycleMutationVariables>;
+export const UndoDebtOverpaymentDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'UndoDebtOverpayment' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'UndoDebtOverpaymentInput' } }
+          }
+        }
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'undoDebtOverpayment' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } }
+              }
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'account' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'bankBalance' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'recurringPayments' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'FragmentSpread',
+                              name: { kind: 'Name', value: 'RecurringPaymentFields' }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'RecurringPaymentFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'RecurringPayment' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'amount' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'category' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'frequency' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'type' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'firstPaymentDate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'lastPaymentDate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'nextDueDate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'renewalDate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'renewalReminderDays' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'thisCycle' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'kind' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'dates' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'balanceChange' } }
+              ]
+            }
+          },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'debt' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'balance' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'startingBalance' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'apr' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } }
               ]
             }
           }
@@ -1909,7 +2521,7 @@ export const StartPaydayCycleDocument = {
       }
     }
   ]
-} as unknown as DocumentNode<StartPaydayCycleMutation, StartPaydayCycleMutationVariables>;
+} as unknown as DocumentNode<UndoDebtOverpaymentMutation, UndoDebtOverpaymentMutationVariables>;
 export const UpdateAccountDocument = {
   kind: 'Document',
   definitions: [
@@ -2963,7 +3575,8 @@ export const CreateOneOffPaymentDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'amount' } },
           { kind: 'Field', name: { kind: 'Name', value: 'dueDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'type' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'category' } }
+          { kind: 'Field', name: { kind: 'Name', value: 'category' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'paidAt' } }
         ]
       }
     }
@@ -3044,12 +3657,27 @@ export const CreateRecurringPaymentDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'renewalReminderDays' } },
           {
             kind: 'Field',
-            name: { kind: 'Name', value: 'handled' },
+            name: { kind: 'Name', value: 'thisCycle' },
             selectionSet: {
               kind: 'SelectionSet',
               selections: [
-                { kind: 'Field', name: { kind: 'Name', value: 'outcome' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'dates' } }
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'kind' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'dates' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'balanceChange' } }
+              ]
+            }
+          },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'debt' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'balance' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'startingBalance' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'apr' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } }
               ]
             }
           }
@@ -3138,7 +3766,8 @@ export const UpdateOneOffPaymentDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'amount' } },
           { kind: 'Field', name: { kind: 'Name', value: 'dueDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'type' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'category' } }
+          { kind: 'Field', name: { kind: 'Name', value: 'category' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'paidAt' } }
         ]
       }
     }
@@ -3232,12 +3861,27 @@ export const UpdateRecurringPaymentDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'renewalReminderDays' } },
           {
             kind: 'Field',
-            name: { kind: 'Name', value: 'handled' },
+            name: { kind: 'Name', value: 'thisCycle' },
             selectionSet: {
               kind: 'SelectionSet',
               selections: [
-                { kind: 'Field', name: { kind: 'Name', value: 'outcome' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'dates' } }
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'kind' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'dates' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'balanceChange' } }
+              ]
+            }
+          },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'debt' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'balance' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'startingBalance' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'apr' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } }
               ]
             }
           }

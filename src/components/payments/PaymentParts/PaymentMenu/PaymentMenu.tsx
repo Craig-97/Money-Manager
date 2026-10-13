@@ -38,8 +38,8 @@ export const PaymentMenu = ({ payment, cycle, today, actions }: PaymentMenuProps
             {choices.pay}
           </MenuItem>
         ) : null}
-        {recurring && choices.undo ? (
-          <MenuItem icon={<Undo2 size={16} />} onSelect={() => void undo(recurring)}>
+        {choices.undo ? (
+          <MenuItem icon={<Undo2 size={16} />} onSelect={() => void undo(payment)}>
             {choices.undo}
           </MenuItem>
         ) : null}

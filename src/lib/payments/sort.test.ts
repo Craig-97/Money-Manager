@@ -10,6 +10,7 @@ const payment = (name: string, amount: number, due: string | null): Payment => (
   signedAmount: -amount,
   type: 'EXPENSE',
   category: 'OTHER',
+  paidAt: null,
   dueDate: due ? new Date(`${due}T00:00:00`) : null
 });
 

@@ -1,4 +1,5 @@
-# Payday: sets the confirmed balance and moves the chosen recurring payments on to their next date
+# Payday: sets the confirmed balance, moves the chosen recurring payments on to their next date,
+# closes the last cycle's records and clears away paid one-offs
 mutation StartPaydayCycle($input: StartPaydayCycleInput!) {
   startPaydayCycle(input: $input) {
     account {
@@ -7,6 +8,9 @@ mutation StartPaydayCycle($input: StartPaydayCycleInput!) {
       cycleStartedOn
       recurringPayments {
         ...RecurringPaymentFields
+      }
+      oneOffPayments {
+        ...OneOffPaymentFields
       }
     }
   }

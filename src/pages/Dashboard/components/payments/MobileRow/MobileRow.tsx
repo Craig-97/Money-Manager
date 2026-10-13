@@ -87,9 +87,15 @@ export const MobileRow = ({ payment, dashboard }: { payment: Payment; dashboard:
           <span
             className={cn(
               'mt-[3px] block text-xs',
-              urgent ? 'font-bold text-expense' : 'font-medium text-muted'
+              urgent
+                ? 'font-bold text-expense'
+                : due.state === 'paid'
+                  ? 'font-bold text-income'
+                  : 'font-medium text-muted'
             )}>
-            {due.state === 'overdue' ? `Overdue · ${due.label}` : due.label}
+            {due.state === 'overdue' || due.state === 'paid'
+              ? `${due.detail} · ${due.label}`
+              : due.label}
           </span>
         </span>
       </button>

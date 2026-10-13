@@ -5,4 +5,5 @@ fragment OneOffPaymentFields on OneOffPayment {
   dueDate
   type
   category
+  paidAt
 }

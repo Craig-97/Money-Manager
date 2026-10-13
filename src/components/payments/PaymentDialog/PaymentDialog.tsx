@@ -95,13 +95,7 @@ export const PaymentDialog = () => {
       {target ? (
         <>
           {payment ? (
-            <StatusStrip
-              payment={payment}
-              today={today}
-              cycle={cycle}
-              accountId={account.id}
-              onDone={close}
-            />
+            <StatusStrip payment={payment} today={today} cycle={cycle} accountId={account.id} />
           ) : null}
           <FormBody form={form} kind={kind} />
         </>

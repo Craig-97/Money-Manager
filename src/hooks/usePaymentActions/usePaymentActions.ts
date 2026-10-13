@@ -40,26 +40,21 @@ export const usePaymentActions = (accountId: string) => {
   const [deleteOneOffs] = useMutation(BatchDeleteOneOffPaymentsDocument);
 
   /*
-   * Marks payments paid, taking them off the bank balance as v1 did: a recurring payment has its
-   * next date paid and moves on to the one after, and one-offs are done with and deleted.
+   * Marks payments paid, taking them off the bank balance: a recurring payment has its next date
+   * paid and moves on to the one after, and a one-off is marked paid until payday, so it can be
+   * undone. One-offs already paid are left out.
    */
-  const pay = async (payments: readonly Payment[]) => {
+  const pay = async (all: readonly Payment[]) => {
+    const payments = all.filter(payment => payment.kind === 'recurring' || !payment.paidAt);
     if (!payments.length) return;
-    const oneOffIds = idsOf(payments, 'oneOff');
     try {
       await markPaid({
         variables: {
           input: {
             accountId,
             recurringPaymentIds: idsOf(payments, 'recurring'),
-            oneOffPaymentIds: oneOffIds
+            oneOffPaymentIds: idsOf(payments, 'oneOff')
           }
-        },
-        // The returned account lists them without the deleted one-offs; drop the entities too
-        update: cache => {
-          for (const id of oneOffIds)
-            cache.evict({ id: cache.identify({ __typename: 'OneOffPayment', id }) });
-          cache.gc();
         }
       });
       showToast({ message: `${describe(payments)} marked as paid${balanceNote(payments, true)}` });
@@ -68,17 +63,30 @@ export const usePaymentActions = (accountId: string) => {
     }
   };
 
-  /* Undoes the latest pay or skip, bringing those dates back. A paid amount goes back on. */
-  const undo = async (payment: RecurringPayment) => {
-    const latest = payment.handled.at(-1);
-    if (!latest) return;
+  /*
+   * Undoes a recurring payment's latest pay or skip this cycle, bringing those dates back, or makes
+   * a paid one-off unpaid. Whatever paying took off the balance goes back on.
+   */
+  const undo = async (payment: Payment) => {
+    const wasPaid =
+      payment.kind === 'oneOff'
+        ? Boolean(payment.paidAt)
+        : payment.thisCycle.at(-1)?.kind === 'paid';
+    if (payment.kind === 'oneOff' ? !payment.paidAt : !payment.thisCycle.length) return;
     try {
-      await markUnpaid({ variables: { input: { accountId, recurringPaymentIds: [payment.id] } } });
+      await markUnpaid({
+        variables: {
+          input: {
+            accountId,
+            recurringPaymentIds: payment.kind === 'recurring' ? [payment.id] : [],
+            oneOffPaymentIds: payment.kind === 'oneOff' ? [payment.id] : []
+          }
+        }
+      });
       showToast({
-        message:
-          latest.outcome === 'paid'
-            ? `${payment.name} marked as unpaid${balanceNote([payment], false)}`
-            : `${payment.name} is no longer skipped`
+        message: wasPaid
+          ? `${payment.name} marked as unpaid${balanceNote([payment], false)}`
+          : `${payment.name} is no longer skipped`
       });
     } catch (error) {
       showError(error);
