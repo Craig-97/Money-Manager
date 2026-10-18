@@ -1,6 +1,7 @@
+import { AccountError } from '~/components/feedback/AccountError';
 import { PageHeader } from '~/components/layout/PageHeader';
 import { useAccount } from '~/hooks/useAccount';
-import { NotesContent, NotesError, NotesSkeleton } from './components';
+import { NotesContent, NotesSkeleton } from './components';
 import { countNotes, toNotes } from './notesModel';
 
 export const Notes = () => {
@@ -24,7 +25,7 @@ export const Notes = () => {
       ) : loading ? (
         <NotesSkeleton />
       ) : (
-        <NotesError onRetry={retry} />
+        <AccountError onRetry={retry} />
       )}
     </>
   );
