@@ -22,6 +22,10 @@ const TAP_SLOP = 6;
 /*
  * A reminder on mobile: swipe it left for Later and Clear, or tap it to see what it says and what
  * to do about it. The actions behind it can be reached with the keyboard too, which slides it open.
+ *
+ * A tap opens it on the click, not when the finger lifts. Opening it makes the bell's sheet taller,
+ * which moves the row under the finger, and a phone's click comes after the finger lifts: opened
+ * any earlier, that click would land on whatever had moved under it, like Mark as paid.
  */
 export const ReminderRow = ({ reminder, today, open, onLater, onClear }: ReminderRowProps) => {
   const clearable = canClear(reminder);
@@ -30,6 +34,8 @@ export const ReminderRow = ({ reminder, today, open, onLater, onClear }: Reminde
   const [expanded, setExpanded] = useState(false);
   const [dragging, setDragging] = useState(false);
   const drag = useRef<{ x: number; from: number; moved: boolean } | null>(null);
+  // The click a swipe ends with, which isn't a tap
+  const swiped = useRef(false);
 
   const onPointerDown = (event: PointerEvent<HTMLButtonElement>) => {
     drag.current = { x: event.clientX, from: offset, moved: false };
@@ -50,15 +56,23 @@ export const ReminderRow = ({ reminder, today, open, onLater, onClear }: Reminde
     const start = drag.current;
     drag.current = null;
     setDragging(false);
-    if (!start) return;
-    if (start.moved) {
-      // Snaps open past halfway, shut otherwise
-      setOffset(current => (current < -actionsWidth / 2 ? -actionsWidth : 0));
-    } else if (offset !== 0) {
-      setOffset(0);
-    } else {
-      setExpanded(current => !current);
+    if (!start?.moved) return;
+    swiped.current = true;
+    // Snaps open past halfway, shut otherwise
+    setOffset(current => (current < -actionsWidth / 2 ? -actionsWidth : 0));
+  };
+  // A tap (or Enter or Space) shuts it if it's swiped open, otherwise shows or hides the rest
+  const onClick = () => {
+    if (swiped.current) {
+      swiped.current = false;
+      return;
     }
+    if (offset !== 0) setOffset(0);
+    else setExpanded(current => !current);
+  };
+  // The actions behind it only work once it's swiped open, or reached with the keyboard
+  const whenOpen = (action: () => void) => () => {
+    if (offset !== 0) action();
   };
 
   const reveal = () => setOffset(-actionsWidth);
@@ -75,7 +89,7 @@ export const ReminderRow = ({ reminder, today, open, onLater, onClear }: Reminde
         style={{ width: actionsWidth }}>
         <button
           type="button"
-          onClick={onLater}
+          onClick={whenOpen(onLater)}
           onFocus={reveal}
           className="flex flex-1 cursor-pointer flex-col items-center justify-center gap-1 bg-accent text-xs font-bold text-on-accent">
           <Clock size={18} strokeWidth={2.25} aria-hidden="true" />
@@ -85,7 +99,7 @@ export const ReminderRow = ({ reminder, today, open, onLater, onClear }: Reminde
         {clearable ? (
           <button
             type="button"
-            onClick={onClear}
+            onClick={whenOpen(onClear)}
             onFocus={reveal}
             className="flex flex-1 cursor-pointer flex-col items-center justify-center gap-1 bg-expense text-xs font-bold text-white">
             <X size={18} strokeWidth={2.5} aria-hidden="true" />
@@ -108,12 +122,7 @@ export const ReminderRow = ({ reminder, today, open, onLater, onClear }: Reminde
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
           onPointerCancel={onPointerUp}
-          onKeyDown={event => {
-            if (event.key === 'Enter' || event.key === ' ') {
-              event.preventDefault();
-              setExpanded(current => !current);
-            }
-          }}
+          onClick={onClick}
           className={cn(
             'flex min-h-[72px] w-full cursor-pointer touch-pan-y items-center gap-3.5 px-3 py-3 text-left select-none',
             !reminder.read && 'bg-surface-2'
