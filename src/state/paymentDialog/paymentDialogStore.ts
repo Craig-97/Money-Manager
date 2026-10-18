@@ -12,13 +12,22 @@ type PaymentDialogView =
       paymentId?: string;
       // Opened from the chooser, so the form shows a back arrow to it
       fromChooser?: boolean;
+      // Opened from Debts: a recurring payment that's always a debt, with no switch to stop it
+      asDebt?: boolean;
     };
+
+interface FormOptions {
+  fromChooser?: boolean;
+  asDebt?: boolean;
+}
 
 interface PaymentDialogState {
   dialog: PaymentDialogView;
   openChooser: () => void;
-  openAdd: (kind: PaymentKind, fromChooser?: boolean) => void;
-  openEdit: (kind: PaymentKind, paymentId: string) => void;
+  openAdd: (kind: PaymentKind, options?: FormOptions) => void;
+  openEdit: (kind: PaymentKind, paymentId: string, options?: Pick<FormOptions, 'asDebt'>) => void;
+  // Adding a debt: a recurring payment that's paying one off
+  openAddDebt: () => void;
   close: () => void;
 }
 
@@ -29,7 +38,9 @@ interface PaymentDialogState {
 export const usePaymentDialogStore = create<PaymentDialogState>()(set => ({
   dialog: { view: 'closed' },
   openChooser: () => set({ dialog: { view: 'chooser' } }),
-  openAdd: (kind, fromChooser = false) => set({ dialog: { view: 'form', kind, fromChooser } }),
-  openEdit: (kind, paymentId) => set({ dialog: { view: 'form', kind, paymentId } }),
+  openAdd: (kind, options = {}) => set({ dialog: { view: 'form', kind, ...options } }),
+  openEdit: (kind, paymentId, options = {}) =>
+    set({ dialog: { view: 'form', kind, paymentId, ...options } }),
+  openAddDebt: () => set({ dialog: { view: 'form', kind: 'recurring', asDebt: true } }),
   close: () => set({ dialog: { view: 'closed' } })
 }));

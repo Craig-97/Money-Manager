@@ -47,8 +47,6 @@ describe('Debts', () => {
       })
     );
 
-    expect(
-      await screen.findByRole('dialog', { name: 'Add recurring payment' })
-    ).toBeInTheDocument();
+    expect(await screen.findByRole('dialog', { name: 'Add a debt' })).toBeInTheDocument();
   });
 });

@@ -11,6 +11,11 @@ export type DebtPayment = RecurringPayment & { debt: NonNullable<RecurringPaymen
 
 export const isDebt = (payment: RecurringPayment): payment is DebtPayment => payment.debt !== null;
 
+// What a payoff estimate needs from a debt, so a form can work one out before it's saved
+export type PayoffDebt = Pick<DebtPayment, 'id' | 'amount' | 'frequency'> & {
+  debt: Pick<DebtPayment['debt'], 'balance' | 'apr'>;
+};
+
 // What happens to a debt's payment once the debt is cleared
 export type PayoffStrategy =
   // It moves to the debt with the highest rate: the least interest overall
@@ -21,10 +26,10 @@ export type PayoffStrategy =
   | 'keep';
 
 // What one payment puts towards its debt in an average month
-export const monthlyPayment = (debt: DebtPayment) => debt.amount * PER_MONTH[debt.frequency];
+export const monthlyPayment = (debt: PayoffDebt) => debt.amount * PER_MONTH[debt.frequency];
 
 /* The order debts are paid off in, which is where freed-up payments and any extra go */
-export const payoffOrder = (debts: readonly DebtPayment[], strategy: PayoffStrategy) => {
+export const payoffOrder = (debts: readonly PayoffDebt[], strategy: PayoffStrategy) => {
   if (strategy === 'keep') return debts.map(debt => debt.id);
   return debts
     .toSorted((a, b) =>
@@ -57,7 +62,7 @@ const roundPence = (amount: number) => Math.round(amount * 100) / 100;
  * joins the extra.
  */
 export const simulatePayoff = (
-  debts: readonly DebtPayment[],
+  debts: readonly PayoffDebt[],
   { extra = 0, strategy = 'keep' }: { extra?: number; strategy?: PayoffStrategy } = {}
 ): Payoff => {
   const left = new Map(debts.map(debt => [debt.id, debt.debt.balance]));

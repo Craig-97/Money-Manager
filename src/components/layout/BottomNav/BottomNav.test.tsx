@@ -81,13 +81,11 @@ describe('BottomNav', () => {
     expect(within(nav).getByRole('button', { name: label })).toBeInTheDocument();
   });
 
-  it('adds a debt from the debts page with the recurring payment form', async () => {
+  it('adds a debt from the debts page', async () => {
     const { user, nav } = await renderPage('/debts', 'Debts');
 
     await user.click(within(nav).getByRole('button', { name: 'Add a debt' }));
 
-    expect(
-      await screen.findByRole('dialog', { name: 'Add recurring payment' })
-    ).toBeInTheDocument();
+    expect(await screen.findByRole('dialog', { name: 'Add a debt' })).toBeInTheDocument();
   });
 });

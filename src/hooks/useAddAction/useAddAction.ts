@@ -16,8 +16,12 @@ export interface AddAction {
  * otherwise it asks which kind of payment.
  */
 export const useAddAction = (): AddAction => {
-  const { openChooser, openAdd } = usePaymentDialogStore(
-    useShallow(s => ({ openChooser: s.openChooser, openAdd: s.openAdd }))
+  const { openChooser, openAdd, openAddDebt } = usePaymentDialogStore(
+    useShallow(s => ({
+      openChooser: s.openChooser,
+      openAdd: s.openAdd,
+      openAddDebt: s.openAddDebt
+    }))
   );
   const openNote = useNoteComposerStore(s => s.openComposer);
   const onRecurring = useMatch(ROUTES.recurring) !== null;
@@ -28,7 +32,6 @@ export const useAddAction = (): AddAction => {
   if (onRecurring) {
     return { label: 'Add recurring payment', open: () => openAdd('recurring'), dialog: true };
   }
-  // The recurring form, until it can start as a debt
-  if (onDebts) return { label: 'Add a debt', open: () => openAdd('recurring'), dialog: true };
+  if (onDebts) return { label: 'Add a debt', open: openAddDebt, dialog: true };
   return { label: 'Add payment', open: openChooser, dialog: true };
 };

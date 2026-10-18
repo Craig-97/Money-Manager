@@ -8,7 +8,7 @@ import { DebtsContent, DebtsSkeleton } from './components';
 
 export const Debts = () => {
   const { account, loading, retry } = useAccount();
-  const openAdd = usePaymentDialogStore(s => s.openAdd);
+  const openAddDebt = usePaymentDialogStore(s => s.openAddDebt);
 
   return (
     <>
@@ -17,11 +17,7 @@ export const Debts = () => {
         description="What you owe, and when it'll be paid off."
         actions={
           account ? (
-            <Button
-              variant="accent"
-              size="lg"
-              onClick={() => openAdd('recurring')}
-              className="px-5">
+            <Button variant="accent" size="lg" onClick={openAddDebt} className="px-5">
               <Plus size={16} strokeWidth={2.25} aria-hidden="true" />
               Add a debt
             </Button>

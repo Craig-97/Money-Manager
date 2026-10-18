@@ -5,7 +5,7 @@ import { usePaymentDialogStore } from '~/state/paymentDialog';
 
 /* No recurring payments are tracked as debts yet */
 export const NoDebts = () => {
-  const openAdd = usePaymentDialogStore(s => s.openAdd);
+  const openAddDebt = usePaymentDialogStore(s => s.openAddDebt);
 
   return (
     <div className="flex flex-col items-center gap-1.5 px-3 pt-7 pb-6 text-center md:px-4 md:pt-9 md:pb-8">
@@ -18,7 +18,7 @@ export const NoDebts = () => {
       <p className="mb-2.5 text-[13px] font-medium text-muted">
         Cards and loans you're paying off will show here
       </p>
-      <Button variant="accent" onClick={() => openAdd('recurring')}>
+      <Button variant="accent" onClick={openAddDebt}>
         <Plus size={16} strokeWidth={2.25} aria-hidden="true" />
         Add a debt
       </Button>

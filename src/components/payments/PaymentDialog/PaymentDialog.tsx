@@ -27,17 +27,19 @@ export const PaymentDialog = () => {
 
   const target = dialog.view === 'form' ? dialog : null;
   const kind = target?.kind ?? 'oneOff';
+  const asDebt = target?.asDebt ?? false;
   const payment =
     account && target?.paymentId
       ? toPayments(account, today).find(p => p.id === target.paymentId && p.kind === kind)
       : undefined;
   const form = usePaymentForm({
     kind,
+    asDebt,
     accountId: account?.id ?? '',
     payment,
     today,
     onSaved: close,
-    formKey: `${dialog.view}-${kind}-${target?.paymentId ?? 'new'}`
+    formKey: `${dialog.view}-${kind}-${target?.paymentId ?? 'new'}${asDebt ? '-debt' : ''}`
   });
 
   if (!account) return null;
@@ -48,12 +50,16 @@ export const PaymentDialog = () => {
       ? isDesktop
         ? 'Add a payment'
         : 'What are you adding?'
-      : `${editing ? 'Edit' : 'Add'} ${kind === 'recurring' ? 'recurring' : 'one-off'} payment`;
+      : asDebt && !editing
+        ? 'Add a debt'
+        : `${editing ? 'Edit' : 'Add'} ${kind === 'recurring' ? 'recurring' : 'one-off'} payment`;
   const submitLabel = editing
     ? 'Save changes'
-    : kind === 'recurring' && isDesktop
-      ? 'Add recurring payment'
-      : 'Add payment';
+    : kind === 'recurring' && form.values.tracked
+      ? 'Add debt'
+      : kind === 'recurring' && isDesktop
+        ? 'Add recurring payment'
+        : 'Add payment';
 
   return (
     <Modal
