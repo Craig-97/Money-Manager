@@ -136,7 +136,9 @@ const demoDebt = (
   category: string,
   amount: number,
   dueInDays: number,
-  debt: { balance: number; startingBalance: number; apr: number }
+  debt: { balance: number; startingBalance: number; apr: number },
+  // How many past payments it has, for its history
+  paid = 3
 ) => ({
   id,
   name,
@@ -148,23 +150,24 @@ const demoDebt = (
   lastPaymentDate: null,
   nextDueDate: fromToday(dueInDays),
   thisCycle: [],
-  history: pastPayments(amount, dueInDays, debt),
+  history: pastPayments(amount, dueInDays, debt, paid),
   renewalDate: null,
   renewalReminderDays: 0,
   debt: { ...debt, balanceUpdatedAt: fromToday(-21) }
 });
 
 /*
- * Its last three monthly payments, newest first, from before this cycle so they can't be undone,
+ * Its last few monthly payments, newest first, from before this cycle so they can't be undone,
  * with the interest each one paid as the API works it out
  */
 const pastPayments = (
   amount: number,
   dueInDays: number,
-  { balance, apr }: { balance: number; apr: number }
+  { balance, apr }: { balance: number; apr: number },
+  count: number
 ) => {
   let after = balance;
-  return [1, 2, 3].map(monthsAgo => {
+  return Array.from({ length: count }, (_, i) => i + 1).map(monthsAgo => {
     const before = (after + amount) / (1 + apr / 100 / 12);
     const interest = Math.round(before * (apr / 100 / 12) * 100) / 100;
     const record = {
@@ -181,11 +184,19 @@ const pastPayments = (
 };
 
 const demoDebts = () => [
-  demoDebt('credit-card', 'Credit card', 'CREDIT_CARD', 150, 13, {
-    balance: 2340,
-    startingBalance: 3500,
-    apr: 24.9
-  }),
+  demoDebt(
+    'credit-card',
+    'Credit card',
+    'CREDIT_CARD',
+    150,
+    13,
+    {
+      balance: 2340,
+      startingBalance: 3500,
+      apr: 24.9
+    },
+    18
+  ),
   demoDebt('car-finance', 'Car finance', 'LOAN', 245, 24, {
     balance: 6860,
     startingBalance: 12000,

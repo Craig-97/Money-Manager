@@ -848,6 +848,7 @@ export type CreateRecurringPaymentMutation = {
 
 export type DebtHistoryQueryVariables = Exact<{
   id: string | number;
+  limit: number;
 }>;
 
 export type DebtHistoryQuery = {
@@ -3753,6 +3754,14 @@ export const DebtHistoryDocument = {
             kind: 'NonNullType',
             type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } }
           }
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'limit' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } }
+          }
         }
       ],
       selectionSet: {
@@ -3779,7 +3788,7 @@ export const DebtHistoryDocument = {
                     {
                       kind: 'Argument',
                       name: { kind: 'Name', value: 'limit' },
-                      value: { kind: 'IntValue', value: '50' }
+                      value: { kind: 'Variable', name: { kind: 'Name', value: 'limit' } }
                     }
                   ],
                   selectionSet: {

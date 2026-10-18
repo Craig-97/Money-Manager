@@ -67,6 +67,20 @@ const recordEntry = (record: HistoryRecord): HistoryEntry => {
   };
 };
 
+const MONTH = new Intl.DateTimeFormat('en-GB', { month: 'long', year: 'numeric' });
+
+/* Entries under a heading for each month, newest first: "October 2026" */
+export const byMonth = (entries: readonly HistoryEntry[]) => {
+  const months: { label: string; entries: HistoryEntry[] }[] = [];
+  for (const entry of entries) {
+    const label = MONTH.format(entry.date);
+    const last = months.at(-1);
+    if (last?.label === label) last.entries.push(entry);
+    else months.push({ label, entries: [entry] });
+  }
+  return months;
+};
+
 /* "Due today", "Due tomorrow", "Due in 13 days" */
 export const dueInText = (date: Date, today: Date) => {
   const days = daysBetween(today, date);

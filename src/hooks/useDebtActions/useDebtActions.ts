@@ -52,7 +52,8 @@ export const useDebtActions = (accountId: string) => {
       // The overpayment's record, so the toast can take it back
       const history = await client.query({
         query: DebtHistoryDocument,
-        variables: { id: debt.id },
+        // The newest few are enough to find the one just made
+        variables: { id: debt.id, limit: 5 },
         fetchPolicy: 'network-only'
       });
       const record = history.data?.recurringPayment?.history.find(

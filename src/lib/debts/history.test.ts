@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { DebtHistoryQuery } from '~/graphql/generated';
 import { DebtPayment } from './debts';
-import { debtHistory, dueInText } from './history';
+import { byMonth, debtHistory, dueInText } from './history';
 
 type HistoryRecord = NonNullable<DebtHistoryQuery['recurringPayment']>['history'][number];
 
-const apiDate = (iso: string) => String(new Date(`${iso}T00:00:00`).getTime());
+const apiDate = (iso: string) => String(Date.parse(`${iso}T00:00:00Z`));
 const today = new Date(2026, 9, 2);
 
 const card: DebtPayment = {
@@ -104,5 +104,24 @@ describe('dueInText', () => {
     expect(dueInText(today, today)).toBe('Due today');
     expect(dueInText(new Date(2026, 9, 3), today)).toBe('Due tomorrow');
     expect(dueInText(new Date(2026, 8, 30), today)).toBe('Overdue');
+  });
+});
+
+describe('byMonth', () => {
+  it("puts each month's entries under it, newest first", () => {
+    const entries = debtHistory(
+      card,
+      [
+        record('PAID', '2026-09-15', -150, null),
+        record('PAID', '2026-09-01', -150, null),
+        record('PAID', '2026-08-15', -150, null)
+      ],
+      today
+    );
+    expect(byMonth(entries).map(month => [month.label, month.entries.length])).toEqual([
+      ['October 2026', 1],
+      ['September 2026', 2],
+      ['August 2026', 1]
+    ]);
   });
 });

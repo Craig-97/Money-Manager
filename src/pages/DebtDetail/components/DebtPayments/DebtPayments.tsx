@@ -1,4 +1,5 @@
 import { ArrowUp } from 'lucide-react';
+import { ShowOlderPayments } from '~/components/debts';
 import { Button } from '~/components/ui/Button';
 import { Skeleton } from '~/components/ui/Skeleton';
 import { useDebtHistory } from '~/hooks/useDebtHistory';
@@ -14,15 +15,15 @@ interface DebtPaymentsProps {
   onUndoOverpayment: (recordId: string, name: string) => void;
 }
 
-/* The debt's payments, newest first, led by the next one due */
+/* The debt's payments, newest first and by month, led by the next one due */
 export const DebtPayments = ({ debt, today, onUndoOverpayment }: DebtPaymentsProps) => {
   const openOverpayment = useDebtDialogStore(s => s.openOverpayment);
-  const { entries, loading, error, retry } = useDebtHistory(debt, today);
+  const history = useDebtHistory(debt, today);
 
   return (
     <section aria-label="Payments" className="flex flex-col gap-3.5">
       <div className="flex flex-col gap-0.5 rounded-3xl border border-border bg-surface p-2">
-        {loading ? (
+        {history.loading ? (
           [0, 1, 2].map(row => (
             <div key={row} className="flex min-h-[68px] items-center gap-3 px-2.5">
               <Skeleton className="size-12 rounded-[14px]" />
@@ -32,55 +33,69 @@ export const DebtPayments = ({ debt, today, onUndoOverpayment }: DebtPaymentsPro
               </div>
             </div>
           ))
-        ) : error ? (
+        ) : history.error ? (
           <div className="flex flex-col items-center gap-3 px-3 py-6 text-center">
             <p className="text-sm font-semibold">Couldn’t load the payments</p>
-            <Button onClick={retry}>Try again</Button>
+            <Button onClick={history.retry}>Try again</Button>
           </div>
         ) : (
-          <ul className="flex flex-col gap-0.5">
-            {entries.map(entry => (
-              <li key={entry.id} className="flex min-h-[68px] items-center gap-3 px-2.5 py-2">
-                <span
-                  className={cn(
-                    'flex size-12 shrink-0 flex-col items-center justify-center rounded-[14px] border leading-none',
-                    entry.kind === 'due'
-                      ? 'border-transparent bg-accent-soft text-accent-text'
-                      : 'border-border bg-surface-2'
-                  )}>
-                  <span className="text-[10px] font-bold uppercase">
-                    {formatShortMonth(entry.date)}
-                  </span>
-                  <span className="num text-lg font-extrabold">{entry.date.getDate()}</span>
-                </span>
-                <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                  <span className="truncate text-[15px] font-bold">
-                    {entry.kind === 'due' ? entry.detail : entry.label}
-                  </span>
-                  {entry.kind === 'due' ? null : (
-                    <span className="truncate text-xs font-medium text-muted">{entry.detail}</span>
-                  )}
-                </span>
-                <span className="flex shrink-0 flex-col items-end gap-0.5">
-                  <span
-                    className={cn(
-                      'num text-[15px] font-extrabold',
-                      entry.kind === 'overpayment' && 'text-income'
-                    )}>
-                    {entry.amount === null ? '—' : formatMoney(entry.amount)}
-                  </span>
-                  {entry.undoable ? (
-                    <button
-                      type="button"
-                      onClick={() => onUndoOverpayment(entry.id, debt.name)}
-                      className="-mr-2 cursor-pointer rounded-full px-2 py-1 text-xs font-bold text-accent-text hover:bg-hover">
-                      Undo
-                    </button>
-                  ) : null}
-                </span>
-              </li>
+          <>
+            {history.months.map(month => (
+              <section key={month.label} aria-label={month.label}>
+                <h3 className="px-2.5 pt-2.5 pb-1 text-xs font-bold tracking-[0.06em] text-muted uppercase">
+                  {month.label}
+                </h3>
+                <ul className="flex flex-col gap-0.5">
+                  {month.entries.map(entry => (
+                    <li key={entry.id} className="flex min-h-[68px] items-center gap-3 px-2.5 py-2">
+                      <span
+                        className={cn(
+                          'flex size-12 shrink-0 flex-col items-center justify-center rounded-[14px] border leading-none',
+                          entry.kind === 'due'
+                            ? 'border-transparent bg-accent-soft text-accent-text'
+                            : 'border-border bg-surface-2'
+                        )}>
+                        <span className="text-[10px] font-bold uppercase">
+                          {formatShortMonth(entry.date)}
+                        </span>
+                        <span className="num text-lg font-extrabold">{entry.date.getDate()}</span>
+                      </span>
+                      <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                        <span className="truncate text-[15px] font-bold">
+                          {entry.kind === 'due' ? entry.detail : entry.label}
+                        </span>
+                        {entry.kind === 'due' ? null : (
+                          <span className="truncate text-xs font-medium text-muted">
+                            {entry.detail}
+                          </span>
+                        )}
+                      </span>
+                      <span className="flex shrink-0 flex-col items-end gap-0.5">
+                        <span
+                          className={cn(
+                            'num text-[15px] font-extrabold',
+                            entry.kind === 'overpayment' && 'text-income'
+                          )}>
+                          {entry.amount === null ? '—' : formatMoney(entry.amount)}
+                        </span>
+                        {entry.undoable ? (
+                          <button
+                            type="button"
+                            onClick={() => onUndoOverpayment(entry.id, debt.name)}
+                            className="-mr-2 cursor-pointer rounded-full px-2 py-1 text-xs font-bold text-accent-text hover:bg-hover">
+                            Undo
+                          </button>
+                        ) : null}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
             ))}
-          </ul>
+            {history.hasMore ? (
+              <ShowOlderPayments onClick={history.showMore} loading={history.loadingMore} />
+            ) : null}
+          </>
         )}
       </div>
       <Button onClick={() => openOverpayment(debt.id)} className="h-[52px] w-full">

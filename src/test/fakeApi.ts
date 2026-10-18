@@ -475,7 +475,11 @@ export const createFakeApi = ({
     },
     recurringPayment: ({ id }: Args) => {
       const payment = findRecurring(id);
-      return { ...payment, history: payment.history ?? [] };
+      // As the API: the latest `limit` records, 50 when it isn't given
+      return {
+        ...payment,
+        history: ({ limit }: Args) => (payment.history ?? []).slice(0, limit ?? 50)
+      };
     },
     // Messages and codes as the real API sends them
     // The refresh cookie is always good here

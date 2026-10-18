@@ -78,6 +78,23 @@ const family = () =>
     apr: 0
   });
 
+// A card paid every month for the last `count` months, newest first, all before this cycle
+const longPaidCard = (count: number) => {
+  const history = Array.from({ length: count }, (_, i) => {
+    const date = new Date(2026, 8 - i, 15);
+    const iso = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-15`;
+    return {
+      ...fakeRecord('PAID', [apiDate(iso)], -150, {
+        interest: 40,
+        reduction: 110,
+        balanceAfter: 2340 + i * 110
+      }),
+      open: false
+    };
+  });
+  return { ...card(), history };
+};
+
 const account = (recurringPayments = [card(), car(), family()]): FakeAccount => ({
   ...structuredClone(DEFAULT_ACCOUNT),
   cycleStartedOn: apiDate('2026-09-30'),
@@ -167,6 +184,30 @@ describe('debts on desktop', () => {
     const rows = await within(dialog).findAllByRole('row');
     expect(rows[1]).toHaveTextContent('Thu 15 OctDue£150.00≈ £2,239');
     expect(rows[2]).toHaveTextContent('Tue 15 SepPaid£150.00£2,340');
+  });
+
+  it('shows the latest payments by month, and older ones when asked', async () => {
+    const { user } = renderDebts('/debts', [longPaidCard(30), car(), family()]);
+
+    await user.click(await screen.findByRole('button', { name: 'More actions for Credit card' }));
+    await user.click(screen.getByRole('menuitem', { name: 'See payments' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Credit card payments' });
+    const table = await within(dialog).findByRole('table', { name: 'Payments' });
+
+    // The next one due, then the latest 12, each month under its own heading
+    expect(
+      within(table)
+        .getAllByRole('rowgroup')
+        .map(group => group.getAttribute('aria-label'))
+    ).toEqual(expect.arrayContaining(['October 2026', 'September 2026', 'October 2025']));
+    expect(within(table).getAllByRole('row')).toHaveLength(1 + 1 + 12);
+
+    await user.click(within(dialog).getByRole('button', { name: 'Show older payments' }));
+    await waitFor(() => expect(within(table).getAllByRole('row')).toHaveLength(1 + 1 + 30));
+    // Everything's showing, so there's nothing older to ask for
+    expect(
+      within(dialog).queryByRole('button', { name: 'Show older payments' })
+    ).not.toBeInTheDocument();
   });
 
   it('logs an overpayment, which can be taken back', async () => {
@@ -318,6 +359,26 @@ describe('debts on mobile', () => {
     expect(details).toHaveTextContent('APR24.9%');
     expect(details).toHaveTextContent('Started at£3,500.00');
     expect(details).toHaveTextContent('Balance checked15 Sep');
+  });
+
+  it("shows a debt's latest payments by month, and older ones when asked", async () => {
+    const { user } = renderDebts('/debts/credit-card', [longPaidCard(14), car(), family()]);
+
+    await user.click(await screen.findByRole('radio', { name: 'Payments' }));
+    const payments = screen.getByRole('region', { name: 'Payments' });
+    expect(
+      await within(payments).findByRole('region', { name: 'September 2026' })
+    ).toBeInTheDocument();
+    expect(within(payments).getAllByRole('listitem')).toHaveLength(1 + 12);
+
+    await user.click(within(payments).getByRole('button', { name: 'Show older payments' }));
+
+    await waitFor(() => expect(within(payments).getAllByRole('listitem')).toHaveLength(1 + 14));
+    expect(within(payments).getByRole('region', { name: 'August 2025' })).toBeInTheDocument();
+    // Log an overpayment stays under the list
+    expect(
+      within(payments).getByRole('button', { name: 'Log an overpayment' })
+    ).toBeInTheDocument();
   });
 
   it("goes back to the list for a debt that isn't there", async () => {

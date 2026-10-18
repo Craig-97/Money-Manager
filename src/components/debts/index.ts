@@ -5,3 +5,4 @@ export * from './OverpaymentDialog';
 export * from './PaymentsDialog';
 export * from './PayoffChart';
 export * from './ProgressRing';
+export * from './ShowOlderPayments';
