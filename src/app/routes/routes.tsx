@@ -85,6 +85,10 @@ export const routes: RouteObject[] = [
                     lazy: async () => ({ Component: (await pageModules.notes()).Notes })
                   },
                   {
+                    path: ROUTES.reminders,
+                    lazy: async () => ({ Component: (await pageModules.reminders()).Reminders })
+                  },
+                  {
                     path: ROUTES.profile,
                     lazy: async () => ({ Component: (await pageModules.profile()).Profile })
                   }

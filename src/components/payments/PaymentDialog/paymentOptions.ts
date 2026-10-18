@@ -5,9 +5,7 @@ import {
   FREQUENCIES,
   FREQUENCY_LABELS,
   ONE_OFF_CATEGORIES,
-  RECURRING_CATEGORIES,
-  REMINDER_DAYS,
-  REMINDER_LABELS
+  RECURRING_CATEGORIES
 } from '~/lib/payments';
 import { Ends } from './usePaymentForm';
 
@@ -33,11 +31,6 @@ export const ENDS_OPTIONS: SegmentedOption<Ends>[] = [
   { value: 'renew', label: 'Renews' },
   { value: 'stop', label: 'Stops' }
 ];
-
-export const REMINDER_OPTIONS = REMINDER_DAYS.map(days => ({
-  value: String(days),
-  label: REMINDER_LABELS[days]
-}));
 
 export const TYPES: { value: PaymentType; label: string; dot: string }[] = [
   { value: 'EXPENSE', label: 'Expense', dot: 'bg-expense' },

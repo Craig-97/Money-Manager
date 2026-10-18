@@ -30,7 +30,6 @@ const carFinance: FakeRecurringPayment = {
   nextDueDate: null,
   thisCycle: [],
   renewalDate: null,
-  renewalReminderDays: 0,
   debt: { balance: 6860, startingBalance: 12000, apr: 6.9, balanceUpdatedAt: null }
 };
 
@@ -84,7 +83,6 @@ describe('adding a recurring payment as a debt', () => {
           category: 'LOAN',
           lastPaymentDate: null,
           renewalDate: null,
-          renewalReminderDays: 0,
           debt: { balance: 1200, apr: 0, startingBalance: null }
         })
       }

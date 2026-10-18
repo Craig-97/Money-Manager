@@ -7,6 +7,7 @@ export const pageModules = {
   debts: () => import('~/pages/Debts'),
   debt: () => import('~/pages/DebtDetail'),
   notes: () => import('~/pages/Notes'),
+  reminders: () => import('~/pages/Reminders'),
   profile: () => import('~/pages/Profile'),
   setup: () => import('~/pages/Setup'),
   landing: () => import('~/pages/Landing'),

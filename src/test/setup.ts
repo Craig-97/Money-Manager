@@ -7,7 +7,7 @@ import { useDebtDialogStore } from '~/state/debtDialog';
 import { useNoteDialogStore } from '~/state/noteDialog';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
 import { DEFAULT_ACCENT, usePrefsStore } from '~/state/prefs';
-import { useRenewalSnoozeStore } from '~/state/renewalSnooze';
+import { useReminderChooserStore } from '~/state/reminderChooser';
 import { installMatchMedia, resetViewport } from './viewport';
 
 // Component tests render the whole app, so give async queries (findBy*, waitFor) more time
@@ -49,10 +49,10 @@ afterEach(() => {
   vi.restoreAllMocks();
   localStorage.clear();
   usePrefsStore.setState({ theme: 'dark', accent: DEFAULT_ACCENT });
-  useRenewalSnoozeStore.setState({ until: {} });
   useNoteDialogStore.setState(useNoteDialogStore.getInitialState(), true);
   usePaymentDialogStore.setState(usePaymentDialogStore.getInitialState(), true);
   useDebtDialogStore.setState(useDebtDialogStore.getInitialState(), true);
+  useReminderChooserStore.setState(useReminderChooserStore.getInitialState(), true);
   resetViewport();
   delete document.documentElement.dataset.theme;
   delete document.documentElement.dataset.accent;

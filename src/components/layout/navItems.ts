@@ -6,7 +6,8 @@ import {
   ForecastIcon,
   IconProps,
   NotesIcon,
-  RecurringIcon
+  RecurringIcon,
+  RemindersIcon
 } from '~/components/icons';
 import { ROUTES } from '~/constants';
 
@@ -37,7 +38,14 @@ export const MAIN_NAV: NavItem[] = [
   },
   { to: ROUTES.forecast, label: 'Forecast', page: 'forecast', Icon: ForecastIcon, section: 'main' },
   { to: ROUTES.debts, label: 'Debts', page: 'debts', Icon: DebtsIcon, section: 'more' },
-  { to: ROUTES.notes, label: 'Notes', page: 'notes', Icon: NotesIcon, section: 'more' }
+  { to: ROUTES.notes, label: 'Notes', page: 'notes', Icon: NotesIcon, section: 'more' },
+  {
+    to: ROUTES.reminders,
+    label: 'Reminders',
+    page: 'reminders',
+    Icon: RemindersIcon,
+    section: 'more'
+  }
 ];
 
 export const navItem = (page: PageName) => MAIN_NAV.find(item => item.page === page)!;

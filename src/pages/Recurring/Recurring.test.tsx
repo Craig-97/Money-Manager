@@ -33,7 +33,6 @@ const recurring = (
   nextDueDate: null,
   thisCycle: [],
   renewalDate: null,
-  renewalReminderDays: 0,
   ...fields
 });
 
@@ -50,7 +49,7 @@ const account = (): FakeAccount => ({
       category: 'INSURANCE',
       firstPaymentDate: apiDate('2025-02-20'),
       renewalDate: apiDate('2027-02-02'),
-      renewalReminderDays: 30
+      renewalReminder: { off: false, days: 30 }
     }),
     recurring({
       id: 'car',
@@ -59,7 +58,7 @@ const account = (): FakeAccount => ({
       category: 'INSURANCE',
       frequency: 'ANNUALLY',
       firstPaymentDate: apiDate('2023-10-24'),
-      renewalReminderDays: 30
+      renewalReminder: { off: false, days: 30 }
     }),
     // Its renewal went by on Monday and hasn't been moved on
     recurring({
@@ -69,7 +68,7 @@ const account = (): FakeAccount => ({
       category: 'VEHICLE',
       firstPaymentDate: apiDate('2025-09-28'),
       renewalDate: apiDate('2026-09-28'),
-      renewalReminderDays: 30
+      renewalReminder: { off: false, days: 30 }
     }),
     // Every Wednesday: 7, 14, 21 and 28 October fall before payday
     recurring({
@@ -207,7 +206,8 @@ describe('recurring page', () => {
       'Sat 2 Oct 2027'
     );
     expect(within(dialog).getByText('Thu 2 Sep 2027 · 1 month before')).toBeInTheDocument();
-    await user.click(within(dialog).getByRole('radio', { name: '2 weeks' }));
+    await user.click(within(dialog).getByRole('combobox', { name: 'Remind me before it renews' }));
+    await user.click(await screen.findByRole('option', { name: '2 weeks before' }));
     await user.click(within(dialog).getByRole('button', { name: 'Save changes' }));
 
     expect(await screen.findByText('Saved Netflix')).toBeInTheDocument();
@@ -217,7 +217,7 @@ describe('recurring page', () => {
         input: expect.objectContaining({
           lastPaymentDate: null,
           renewalDate: '2027-10-02',
-          renewalReminderDays: 14
+          renewalReminder: { off: false, days: 14 }
         })
       }
     ]);
@@ -243,7 +243,7 @@ describe('recurring page', () => {
     expect(await screen.findByText('Saved Breakdown cover')).toBeInTheDocument();
     expect(api.callsTo('UpdateRecurringPayment')[0].input).toMatchObject({
       renewalDate: '2027-09-28',
-      renewalReminderDays: 30
+      renewalReminder: { off: false, days: 30 }
     });
   });
 
@@ -258,8 +258,7 @@ describe('recurring page', () => {
     expect(await screen.findByText('Saved Breakdown cover')).toBeInTheDocument();
     expect(api.callsTo('UpdateRecurringPayment')[0].input).toMatchObject({
       lastPaymentDate: '2026-09-28',
-      renewalDate: null,
-      renewalReminderDays: 0
+      renewalDate: null
     });
   });
 
@@ -273,7 +272,14 @@ describe('recurring page', () => {
     expect(
       within(dialog).getByText('Renews with each payment · next on Sat 24 Oct 2026')
     ).toBeInTheDocument();
-    expect(within(dialog).getByRole('radio', { name: '1 month' })).toBeChecked();
+    // Its own reminder, a month before
+    expect(
+      within(dialog).getByRole('combobox', { name: 'Remind me before it renews' })
+    ).toHaveTextContent('1 month before');
+    // Its payments follow the usual timing
+    expect(
+      within(dialog).getByRole('combobox', { name: 'Remind me before it’s due' })
+    ).toHaveTextContent('Usual · 1 day before');
   });
 });
 

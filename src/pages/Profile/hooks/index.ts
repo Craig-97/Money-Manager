@@ -1,3 +1,4 @@
+export * from './useCalendarFeed';
 export * from './useBalanceSettings';
 export * from './useDeleteAccount';
 export * from './useDetailsForm';

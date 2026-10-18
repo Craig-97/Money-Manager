@@ -8,23 +8,6 @@ import { Payment, RecurringPayment } from './payments';
  * checking the price. Yearly payments renew with each payment, so their renewal is the next one.
  */
 
-// How many days before a renewal it shows as coming up. 0 is no reminder.
-export const REMINDER_DAYS = [0, 7, 14, 30] as const;
-export type ReminderDays = (typeof REMINDER_DAYS)[number];
-
-export const REMINDER_LABELS: Record<ReminderDays, string> = {
-  0: 'Off',
-  7: '1 week',
-  14: '2 weeks',
-  30: '1 month'
-};
-
-// A new renewal reminds a month ahead; yearly payments have no reminder until one is chosen
-export const DEFAULT_REMINDER: ReminderDays = 30;
-
-export const toReminderDays = (days: number): ReminderDays =>
-  (REMINDER_DAYS as readonly number[]).includes(days) ? (days as ReminderDays) : DEFAULT_REMINDER;
-
 /* The same day a year on, moving 29 Feb to 28 Feb */
 export const addYear = (date: Date) => {
   const next = new Date(date.getFullYear() + 1, date.getMonth(), date.getDate());

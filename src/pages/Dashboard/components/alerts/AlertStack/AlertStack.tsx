@@ -6,13 +6,14 @@ import { Dashboard } from '../../../hooks';
 import { AlertDots } from '../AlertDots';
 import { AlertPager } from '../AlertPager';
 import { DueTodayAlert } from '../DueTodayAlert';
+import { OverdueAlert } from '../OverdueAlert';
 import { RenewalAlert } from '../RenewalAlert';
 
 // How far a swipe has to travel to move to the next alert
 const SWIPE_PX = 40;
 
 /*
- * The dashboard's alerts, one at a time: due today first, then renewals that have gone by. With
+ * The dashboard's alerts, one at a time: overdue payments first, then due today, then renewals. With
  * more than one, a card peeks out behind, and they page with the arrows, the dots or a swipe.
  */
 export const AlertStack = ({ dashboard }: { dashboard: Dashboard }) => {
@@ -36,9 +37,11 @@ export const AlertStack = ({ dashboard }: { dashboard: Dashboard }) => {
       ) : null}
       <section
         aria-label={
-          alert.kind === 'due'
-            ? 'Due today'
-            : renewalHeading(alert.payment, { renewal: alert.renewal, today: dashboard.today })
+          alert.kind === 'overdue'
+            ? `${alert.payment.name} is overdue`
+            : alert.kind === 'due'
+              ? 'Due today'
+              : renewalHeading(alert.payment, { renewal: alert.renewal, today: dashboard.today })
         }
         aria-roledescription="slide"
         onPointerDown={event => (swipeFrom.current = event.clientX)}
@@ -50,7 +53,15 @@ export const AlertStack = ({ dashboard }: { dashboard: Dashboard }) => {
           else if (moved > SWIPE_PX) go(index - 1);
         }}
         className="relative flex touch-pan-y flex-col gap-3 rounded-[22px] border border-border bg-surface p-3.5 transition-[translate,box-shadow,border-color] duration-200 md:flex-row md:flex-wrap md:items-center md:gap-4 md:rounded-3xl md:py-3 md:pr-3 md:pl-3.5 md:hover:-translate-y-0.5 md:hover:border-border-strong md:hover:shadow-[0_22px_44px_-28px_var(--shadow)]">
-        {alert.kind === 'due' ? (
+        {alert.kind === 'overdue' ? (
+          <OverdueAlert
+            payment={alert.payment}
+            due={alert.due}
+            today={dashboard.today}
+            onLater={() => later(alert)}
+            onPay={() => void dashboard.actions.pay([alert.payment])}
+          />
+        ) : alert.kind === 'due' ? (
           <DueTodayAlert
             payment={alert.payment}
             onLater={() => later(alert)}

@@ -1,102 +1,33 @@
-import { NoteColor } from '~/graphql/generated';
-import { Account } from '~/hooks/useAccount';
+import { daysBetween } from '~/lib/dates';
+import { Note, nextNoteDate, remindText } from '~/lib/notes';
+import { formatShortDate } from '~/lib/payments';
 
-export const NOTE_MAX_LENGTH = 200;
-// The counter turns red with this many characters left
-const NOTE_LOW_LENGTH = 20;
+export { NOTE_COLORS, noteColor, NOTE_MAX_LENGTH, charactersLeft } from '~/lib/notes';
 
-interface NoteColorStyle {
-  value: NoteColor;
-  label: string;
-  // The card's tint and border
-  card: string;
-  dot: string;
-  // The ring round the chosen swatch, on the note dialog's surface
-  surfaceRing: string;
-}
-
-// Written out in full so Tailwind can find every class
-export const NOTE_COLORS: readonly NoteColorStyle[] = [
-  {
-    value: 'BLUE',
-    label: 'Blue',
-    card: 'border-note-blue-line bg-note-blue',
-    dot: 'bg-note-blue-dot',
-    surfaceRing: 'shadow-[0_0_0_3px_var(--surface),0_0_0_5px_var(--n-blue-dot)]'
-  },
-  {
-    value: 'GREEN',
-    label: 'Green',
-    card: 'border-note-green-line bg-note-green',
-    dot: 'bg-note-green-dot',
-    surfaceRing: 'shadow-[0_0_0_3px_var(--surface),0_0_0_5px_var(--n-green-dot)]'
-  },
-  {
-    value: 'AMBER',
-    label: 'Amber',
-    card: 'border-note-amber-line bg-note-amber',
-    dot: 'bg-note-amber-dot',
-    surfaceRing: 'shadow-[0_0_0_3px_var(--surface),0_0_0_5px_var(--n-amber-dot)]'
-  },
-  {
-    value: 'ROSE',
-    label: 'Rose',
-    card: 'border-note-rose-line bg-note-rose',
-    dot: 'bg-note-rose-dot',
-    surfaceRing: 'shadow-[0_0_0_3px_var(--surface),0_0_0_5px_var(--n-rose-dot)]'
-  },
-  {
-    value: 'VIOLET',
-    label: 'Violet',
-    card: 'border-note-violet-line bg-note-violet',
-    dot: 'bg-note-violet-dot',
-    surfaceRing: 'shadow-[0_0_0_3px_var(--surface),0_0_0_5px_var(--n-violet-dot)]'
-  }
-];
-
-export const noteColor = (value: NoteColor) =>
-  NOTE_COLORS.find(color => color.value === value) ?? NOTE_COLORS[0];
-
-export type NoteSort = 'newest' | 'oldest' | 'updated' | 'updatedOldest';
+export type NoteSort = 'date' | 'newest' | 'oldest' | 'updated' | 'updatedOldest';
 
 export const NOTE_SORTS: { value: NoteSort; label: string }[] = [
+  { value: 'date', label: 'Soonest date first' },
   { value: 'newest', label: 'Newest' },
   { value: 'oldest', label: 'Oldest' },
   { value: 'updated', label: 'Last updated' },
   { value: 'updatedOldest', label: 'Last updated (oldest)' }
 ];
 
-export interface Note {
-  id: string;
-  body: string;
-  color: NoteColor;
-  // Milliseconds since 1970
-  created: number;
-  updated: number;
-}
+export type { Note } from '~/lib/notes';
+export { toNotes } from '~/lib/notes';
 
-// The API sends timestamps as epoch milliseconds in a string; ISO strings are read too
-const toTime = (value: string) => {
-  const ms = Number(value);
-  return Number.isNaN(ms) ? Date.parse(value) || 0 : ms;
+// Notes whose date is still to come, soonest first, then the rest newest first
+const bySoonest = (today: Date) => (a: Note, b: Note) => {
+  const x = nextNoteDate(a, today);
+  const y = nextNoteDate(b, today);
+  const ahead = (date: Date | null) => !!date && date >= today;
+  if (ahead(x) && ahead(y)) return x!.getTime() - y!.getTime();
+  if (ahead(x) !== ahead(y)) return ahead(x) ? -1 : 1;
+  return b.created - a.created;
 };
 
-export const toNotes = (notes: Account['notes']): Note[] =>
-  (notes ?? []).flatMap(note =>
-    note
-      ? [
-          {
-            id: note.id,
-            body: note.body,
-            color: note.color,
-            created: toTime(note.createdAt),
-            updated: toTime(note.updatedAt)
-          }
-        ]
-      : []
-  );
-
-const SORTERS: Record<NoteSort, (a: Note, b: Note) => number> = {
+const SORTERS: Record<Exclude<NoteSort, 'date'>, (a: Note, b: Note) => number> = {
   newest: (a, b) => b.created - a.created,
   oldest: (a, b) => a.created - b.created,
   updated: (a, b) => b.updated - a.updated,
@@ -106,12 +37,45 @@ const SORTERS: Record<NoteSort, (a: Note, b: Note) => number> = {
 /* The notes containing the search text, in the chosen order */
 export const findNotes = (
   notes: readonly Note[],
-  { query, sort }: { query: string; sort: NoteSort }
+  { query, sort, today }: { query: string; sort: NoteSort; today: Date }
 ) => {
   const search = query.trim().toLowerCase();
   return notes
     .filter(note => !search || note.body.toLowerCase().includes(search))
-    .toSorted(SORTERS[sort]);
+    .toSorted(sort === 'date' ? bySoonest(today) : SORTERS[sort]);
+};
+
+// A date this close shows how far off it is too
+const SOON_DAYS = 30;
+
+/* The date on a dated note: "Sat 7 Nov", or "Thu 22 Oct · in 20 days" when it's close */
+export const noteDateText = (note: Note, today: Date) => {
+  const date = nextNoteDate(note, today);
+  if (!date) return null;
+  const days = daysBetween(today, date);
+  const text = formatShortDate(date, today);
+  if (days < 0 || days > SOON_DAYS) return text;
+  if (days === 0) return `${text} · today`;
+  return `${text} · ${days === 1 ? 'tomorrow' : `in ${days} days`}`;
+};
+
+/*
+ * The line at the foot of a note: the payment it's about, when it reminds, or when it was written
+ * for one without a date. "Linked to Broadband · £32.00 a month", "Reminds you 1 month before",
+ * "No date · 9 Dec 2024".
+ */
+export const noteFoot = (
+  note: Note,
+  { today, paymentLabel }: { today: Date; paymentLabel: (id: string) => string | null }
+) => {
+  const linked = note.paymentId ? paymentLabel(note.paymentId) : null;
+  if (linked) return `Linked to ${linked}`;
+  const date = nextNoteDate(note, today);
+  if (!date) return `No date · ${noteMeta(note)}`;
+  if (date < today) return 'Its date has gone by';
+  return note.remind.length
+    ? `Reminds you ${remindText(note.remind).toLowerCase()}`
+    : 'No reminder';
 };
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -130,12 +94,3 @@ export const noteMeta = (note: Note) => {
 export const notePreview = (body: string) => body.split('\n')[0].slice(0, 30);
 
 export const countNotes = (count: number) => `${count} ${count === 1 ? 'note' : 'notes'}`;
-
-export const charactersLeft = (text: string) => {
-  const left = NOTE_MAX_LENGTH - text.length;
-  return {
-    left,
-    label: `${left} ${left === 1 ? 'character' : 'characters'} remaining`,
-    low: left <= NOTE_LOW_LENGTH
-  };
-};

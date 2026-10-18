@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router';
 import { MEDIA } from '~/constants';
 import { CurrentUserQuery } from '~/graphql/generated';
 import { Account } from '~/hooks/useAccount';
 import { useLogout } from '~/hooks/useLogout';
 import { useMediaQuery } from '~/hooks/useMediaQuery';
-import { SectionId } from '../../profileModel';
+import { SECTIONS, SectionId } from '../../profileModel';
 import { ProfileJumpChips, ProfileNav } from '../nav';
 import { ProfileSummary } from '../ProfileSummary';
 import {
@@ -13,7 +14,8 @@ import {
   BalancesSection,
   DetailsSection,
   PasswordSection,
-  PaydaySection
+  PaydaySection,
+  RemindersSection
 } from '../sections';
 
 type User = NonNullable<CurrentUserQuery['tokenFindUser']>;
@@ -28,12 +30,23 @@ export const ProfileContent = ({ user, account }: { user: User; account: Account
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
+  // Arriving at a section's link, e.g. /profile#reminders from Reminders, goes to that section
+  const { hash } = useLocation();
+  useEffect(() => {
+    const section = SECTIONS.find(item => `#${item.id}` === hash);
+    if (!section) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- follows the address once it changes
+    setCurrent(section.id);
+    document.getElementById(section.id)?.scrollIntoView({ block: 'start' });
+  }, [hash]);
+
   const sections = (
     <div className="flex min-w-0 flex-col gap-3.5 md:gap-4">
       <DetailsSection user={user} />
       <PasswordSection />
       <PaydaySection account={account} />
       <BalancesSection account={account} />
+      <RemindersSection account={account} />
       <AppearanceSection />
       <AccountSection email={user.email} onLogout={logout} />
     </div>

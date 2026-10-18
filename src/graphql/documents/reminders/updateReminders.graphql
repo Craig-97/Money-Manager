@@ -1,0 +1,7 @@
+mutation UpdateReminders($input: UpdateRemindersInput!) {
+  updateReminders(input: $input) {
+    states {
+      ...ReminderStateFields
+    }
+  }
+}

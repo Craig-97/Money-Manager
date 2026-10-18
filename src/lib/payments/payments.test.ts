@@ -38,7 +38,8 @@ const recurring = (
   nextDueDate: null,
   thisCycle: [],
   renewalDate: null,
-  renewalReminderDays: 0,
+  dueReminder: { __typename: 'ReminderTiming', off: false, days: null },
+  renewalReminder: { __typename: 'ReminderTiming', off: false, days: null },
   debt: null,
   ...overrides
 });

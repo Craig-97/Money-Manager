@@ -38,7 +38,8 @@ export type AccountQuery = {
       lastPaymentDate: string | null;
       nextDueDate: string | null;
       renewalDate: string | null;
-      renewalReminderDays: number;
+      dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
+      renewalReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
       thisCycle: Array<{
         __typename: 'PaymentRecord';
         id: string;
@@ -70,9 +71,36 @@ export type AccountQuery = {
       id: string;
       body: string;
       color: Types.NoteColor;
+      date: string | null;
+      remind: Array<number>;
+      repeat: Types.NoteRepeat;
+      payment: string | null;
       createdAt: string;
       updatedAt: string;
     } | null> | null;
+    reminderSettings: {
+      __typename: 'ReminderSettings';
+      paymentDays: number;
+      renewalDays: number;
+      payday: boolean;
+    };
+    reminderStates: Array<{
+      __typename: 'ReminderState';
+      key: string;
+      read: boolean;
+      cleared: boolean;
+      snoozedUntil: string | null;
+    }>;
+    calendarFeed: {
+      __typename: 'CalendarFeed';
+      token: string | null;
+      payments: boolean;
+      paydays: boolean;
+      renewals: boolean;
+      notes: boolean;
+      debtFree: boolean;
+      showAmounts: boolean;
+    };
   } | null;
 };
 
@@ -105,7 +133,8 @@ export type AccountFieldsFragment = {
     lastPaymentDate: string | null;
     nextDueDate: string | null;
     renewalDate: string | null;
-    renewalReminderDays: number;
+    dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
+    renewalReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
     thisCycle: Array<{
       __typename: 'PaymentRecord';
       id: string;
@@ -137,9 +166,36 @@ export type AccountFieldsFragment = {
     id: string;
     body: string;
     color: Types.NoteColor;
+    date: string | null;
+    remind: Array<number>;
+    repeat: Types.NoteRepeat;
+    payment: string | null;
     createdAt: string;
     updatedAt: string;
   } | null> | null;
+  reminderSettings: {
+    __typename: 'ReminderSettings';
+    paymentDays: number;
+    renewalDays: number;
+    payday: boolean;
+  };
+  reminderStates: Array<{
+    __typename: 'ReminderState';
+    key: string;
+    read: boolean;
+    cleared: boolean;
+    snoozedUntil: string | null;
+  }>;
+  calendarFeed: {
+    __typename: 'CalendarFeed';
+    token: string | null;
+    payments: boolean;
+    paydays: boolean;
+    renewals: boolean;
+    notes: boolean;
+    debtFree: boolean;
+    showAmounts: boolean;
+  };
 };
 
 export type CreateAccountMutationVariables = Exact<{
@@ -178,7 +234,8 @@ export type CreateAccountMutation = {
         lastPaymentDate: string | null;
         nextDueDate: string | null;
         renewalDate: string | null;
-        renewalReminderDays: number;
+        dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
+        renewalReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
         thisCycle: Array<{
           __typename: 'PaymentRecord';
           id: string;
@@ -210,9 +267,36 @@ export type CreateAccountMutation = {
         id: string;
         body: string;
         color: Types.NoteColor;
+        date: string | null;
+        remind: Array<number>;
+        repeat: Types.NoteRepeat;
+        payment: string | null;
         createdAt: string;
         updatedAt: string;
       } | null> | null;
+      reminderSettings: {
+        __typename: 'ReminderSettings';
+        paymentDays: number;
+        renewalDays: number;
+        payday: boolean;
+      };
+      reminderStates: Array<{
+        __typename: 'ReminderState';
+        key: string;
+        read: boolean;
+        cleared: boolean;
+        snoozedUntil: string | null;
+      }>;
+      calendarFeed: {
+        __typename: 'CalendarFeed';
+        token: string | null;
+        payments: boolean;
+        paydays: boolean;
+        renewals: boolean;
+        notes: boolean;
+        debtFree: boolean;
+        showAmounts: boolean;
+      };
     } | null;
   };
 };
@@ -240,7 +324,8 @@ export type LogDebtOverpaymentMutation = {
         lastPaymentDate: string | null;
         nextDueDate: string | null;
         renewalDate: string | null;
-        renewalReminderDays: number;
+        dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
+        renewalReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
         thisCycle: Array<{
           __typename: 'PaymentRecord';
           id: string;
@@ -284,7 +369,8 @@ export type MarkPaymentsPaidMutation = {
         lastPaymentDate: string | null;
         nextDueDate: string | null;
         renewalDate: string | null;
-        renewalReminderDays: number;
+        dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
+        renewalReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
         thisCycle: Array<{
           __typename: 'PaymentRecord';
           id: string;
@@ -338,7 +424,8 @@ export type MarkPaymentsUnpaidMutation = {
         lastPaymentDate: string | null;
         nextDueDate: string | null;
         renewalDate: string | null;
-        renewalReminderDays: number;
+        dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
+        renewalReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
         thisCycle: Array<{
           __typename: 'PaymentRecord';
           id: string;
@@ -391,7 +478,8 @@ export type SkipRecurringPaymentsMutation = {
         lastPaymentDate: string | null;
         nextDueDate: string | null;
         renewalDate: string | null;
-        renewalReminderDays: number;
+        dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
+        renewalReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
         thisCycle: Array<{
           __typename: 'PaymentRecord';
           id: string;
@@ -436,7 +524,8 @@ export type StartPaydayCycleMutation = {
         lastPaymentDate: string | null;
         nextDueDate: string | null;
         renewalDate: string | null;
-        renewalReminderDays: number;
+        dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
+        renewalReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
         thisCycle: Array<{
           __typename: 'PaymentRecord';
           id: string;
@@ -490,7 +579,8 @@ export type UndoDebtOverpaymentMutation = {
         lastPaymentDate: string | null;
         nextDueDate: string | null;
         renewalDate: string | null;
-        renewalReminderDays: number;
+        dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
+        renewalReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
         thisCycle: Array<{
           __typename: 'PaymentRecord';
           id: string;
@@ -674,6 +764,10 @@ export type CreateNoteMutation = {
       id: string;
       body: string;
       color: Types.NoteColor;
+      date: string | null;
+      remind: Array<number>;
+      repeat: Types.NoteRepeat;
+      payment: string | null;
       createdAt: string;
       updatedAt: string;
     } | null;
@@ -691,6 +785,10 @@ export type NoteFieldsFragment = {
   id: string;
   body: string;
   color: Types.NoteColor;
+  date: string | null;
+  remind: Array<number>;
+  repeat: Types.NoteRepeat;
+  payment: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -708,6 +806,10 @@ export type UpdateNoteMutation = {
       id: string;
       body: string;
       color: Types.NoteColor;
+      date: string | null;
+      remind: Array<number>;
+      repeat: Types.NoteRepeat;
+      payment: string | null;
       createdAt: string;
       updatedAt: string;
     } | null;
@@ -826,7 +928,8 @@ export type CreateRecurringPaymentMutation = {
       lastPaymentDate: string | null;
       nextDueDate: string | null;
       renewalDate: string | null;
-      renewalReminderDays: number;
+      dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
+      renewalReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
       thisCycle: Array<{
         __typename: 'PaymentRecord';
         id: string;
@@ -896,7 +999,8 @@ export type RecurringPaymentFieldsFragment = {
   lastPaymentDate: string | null;
   nextDueDate: string | null;
   renewalDate: string | null;
-  renewalReminderDays: number;
+  dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
+  renewalReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
   thisCycle: Array<{
     __typename: 'PaymentRecord';
     id: string;
@@ -955,7 +1059,8 @@ export type UpdateRecurringPaymentMutation = {
       lastPaymentDate: string | null;
       nextDueDate: string | null;
       renewalDate: string | null;
-      renewalReminderDays: number;
+      dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
+      renewalReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
       thisCycle: Array<{
         __typename: 'PaymentRecord';
         id: string;
@@ -972,6 +1077,117 @@ export type UpdateRecurringPaymentMutation = {
         paidOffThisCycle: number;
       } | null;
     } | null;
+  };
+};
+
+export type ReminderSettingsFieldsFragment = {
+  __typename: 'ReminderSettings';
+  paymentDays: number;
+  renewalDays: number;
+  payday: boolean;
+};
+
+export type ReminderStateFieldsFragment = {
+  __typename: 'ReminderState';
+  key: string;
+  read: boolean;
+  cleared: boolean;
+  snoozedUntil: string | null;
+};
+
+export type CalendarFeedFieldsFragment = {
+  __typename: 'CalendarFeed';
+  token: string | null;
+  payments: boolean;
+  paydays: boolean;
+  renewals: boolean;
+  notes: boolean;
+  debtFree: boolean;
+  showAmounts: boolean;
+};
+
+export type ResetCalendarFeedMutationVariables = Exact<{
+  accountId: string | number;
+}>;
+
+export type ResetCalendarFeedMutation = {
+  resetCalendarFeed: {
+    __typename: 'AccountResponse';
+    account: {
+      __typename: 'Account';
+      id: string;
+      calendarFeed: {
+        __typename: 'CalendarFeed';
+        token: string | null;
+        payments: boolean;
+        paydays: boolean;
+        renewals: boolean;
+        notes: boolean;
+        debtFree: boolean;
+        showAmounts: boolean;
+      };
+    } | null;
+  };
+};
+
+export type UpdateCalendarFeedMutationVariables = Exact<{
+  input: Types.UpdateCalendarFeedInput;
+}>;
+
+export type UpdateCalendarFeedMutation = {
+  updateCalendarFeed: {
+    __typename: 'AccountResponse';
+    account: {
+      __typename: 'Account';
+      id: string;
+      calendarFeed: {
+        __typename: 'CalendarFeed';
+        token: string | null;
+        payments: boolean;
+        paydays: boolean;
+        renewals: boolean;
+        notes: boolean;
+        debtFree: boolean;
+        showAmounts: boolean;
+      };
+    } | null;
+  };
+};
+
+export type UpdateReminderSettingsMutationVariables = Exact<{
+  input: Types.UpdateReminderSettingsInput;
+}>;
+
+export type UpdateReminderSettingsMutation = {
+  updateReminderSettings: {
+    __typename: 'AccountResponse';
+    account: {
+      __typename: 'Account';
+      id: string;
+      reminderSettings: {
+        __typename: 'ReminderSettings';
+        paymentDays: number;
+        renewalDays: number;
+        payday: boolean;
+      };
+    } | null;
+  };
+};
+
+export type UpdateRemindersMutationVariables = Exact<{
+  input: Types.UpdateRemindersInput;
+}>;
+
+export type UpdateRemindersMutation = {
+  updateReminders: {
+    __typename: 'ReminderStatesResponse';
+    states: Array<{
+      __typename: 'ReminderState';
+      key: string;
+      read: boolean;
+      cleared: boolean;
+      snoozedUntil: string | null;
+    }>;
   };
 };
 
@@ -1103,7 +1319,28 @@ export const RecurringPaymentFieldsFragmentDoc = {
           { kind: 'Field', name: { kind: 'Name', value: 'lastPaymentDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'nextDueDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'renewalDate' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'renewalReminderDays' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'dueReminder' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'off' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'days' } }
+              ]
+            }
+          },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'renewalReminder' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'off' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'days' } }
+              ]
+            }
+          },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'thisCycle' },
@@ -1171,6 +1408,10 @@ export const NoteFieldsFragmentDoc = {
           { kind: 'Field', name: { kind: 'Name', value: 'id' } },
           { kind: 'Field', name: { kind: 'Name', value: 'body' } },
           { kind: 'Field', name: { kind: 'Name', value: 'color' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'date' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'remind' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'repeat' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'payment' } },
           { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
           { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } }
         ]
@@ -1178,6 +1419,65 @@ export const NoteFieldsFragmentDoc = {
     }
   ]
 } as unknown as DocumentNode<NoteFieldsFragment, unknown>;
+export const ReminderSettingsFieldsFragmentDoc = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'ReminderSettingsFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'ReminderSettings' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'paymentDays' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'renewalDays' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'payday' } }
+        ]
+      }
+    }
+  ]
+} as unknown as DocumentNode<ReminderSettingsFieldsFragment, unknown>;
+export const ReminderStateFieldsFragmentDoc = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'ReminderStateFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'ReminderState' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'key' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'read' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'cleared' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'snoozedUntil' } }
+        ]
+      }
+    }
+  ]
+} as unknown as DocumentNode<ReminderStateFieldsFragment, unknown>;
+export const CalendarFeedFieldsFragmentDoc = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'CalendarFeedFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'CalendarFeed' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'token' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'payments' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'paydays' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'renewals' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'notes' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'debtFree' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'showAmounts' } }
+        ]
+      }
+    }
+  ]
+} as unknown as DocumentNode<CalendarFeedFieldsFragment, unknown>;
 export const AccountFieldsFragmentDoc = {
   kind: 'Document',
   definitions: [
@@ -1229,6 +1529,36 @@ export const AccountFieldsFragmentDoc = {
               kind: 'SelectionSet',
               selections: [{ kind: 'FragmentSpread', name: { kind: 'Name', value: 'NoteFields' } }]
             }
+          },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'reminderSettings' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'FragmentSpread', name: { kind: 'Name', value: 'ReminderSettingsFields' } }
+              ]
+            }
+          },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'reminderStates' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'FragmentSpread', name: { kind: 'Name', value: 'ReminderStateFields' } }
+              ]
+            }
+          },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'calendarFeed' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'FragmentSpread', name: { kind: 'Name', value: 'CalendarFeedFields' } }
+              ]
+            }
           }
         ]
       }
@@ -1278,7 +1608,28 @@ export const AccountFieldsFragmentDoc = {
           { kind: 'Field', name: { kind: 'Name', value: 'lastPaymentDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'nextDueDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'renewalDate' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'renewalReminderDays' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'dueReminder' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'off' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'days' } }
+              ]
+            }
+          },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'renewalReminder' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'off' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'days' } }
+              ]
+            }
+          },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'thisCycle' },
@@ -1336,8 +1687,56 @@ export const AccountFieldsFragmentDoc = {
           { kind: 'Field', name: { kind: 'Name', value: 'id' } },
           { kind: 'Field', name: { kind: 'Name', value: 'body' } },
           { kind: 'Field', name: { kind: 'Name', value: 'color' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'date' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'remind' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'repeat' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'payment' } },
           { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
           { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } }
+        ]
+      }
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'ReminderSettingsFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'ReminderSettings' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'paymentDays' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'renewalDays' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'payday' } }
+        ]
+      }
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'ReminderStateFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'ReminderState' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'key' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'read' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'cleared' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'snoozedUntil' } }
+        ]
+      }
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'CalendarFeedFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'CalendarFeed' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'token' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'payments' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'paydays' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'renewals' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'notes' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'debtFree' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'showAmounts' } }
         ]
       }
     }
@@ -1475,7 +1874,28 @@ export const AccountDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'lastPaymentDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'nextDueDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'renewalDate' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'renewalReminderDays' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'dueReminder' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'off' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'days' } }
+              ]
+            }
+          },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'renewalReminder' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'off' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'days' } }
+              ]
+            }
+          },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'thisCycle' },
@@ -1533,8 +1953,56 @@ export const AccountDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'id' } },
           { kind: 'Field', name: { kind: 'Name', value: 'body' } },
           { kind: 'Field', name: { kind: 'Name', value: 'color' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'date' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'remind' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'repeat' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'payment' } },
           { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
           { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } }
+        ]
+      }
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'ReminderSettingsFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'ReminderSettings' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'paymentDays' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'renewalDays' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'payday' } }
+        ]
+      }
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'ReminderStateFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'ReminderState' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'key' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'read' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'cleared' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'snoozedUntil' } }
+        ]
+      }
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'CalendarFeedFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'CalendarFeed' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'token' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'payments' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'paydays' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'renewals' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'notes' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'debtFree' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'showAmounts' } }
         ]
       }
     },
@@ -1585,6 +2053,36 @@ export const AccountDocument = {
             selectionSet: {
               kind: 'SelectionSet',
               selections: [{ kind: 'FragmentSpread', name: { kind: 'Name', value: 'NoteFields' } }]
+            }
+          },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'reminderSettings' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'FragmentSpread', name: { kind: 'Name', value: 'ReminderSettingsFields' } }
+              ]
+            }
+          },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'reminderStates' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'FragmentSpread', name: { kind: 'Name', value: 'ReminderStateFields' } }
+              ]
+            }
+          },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'calendarFeed' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'FragmentSpread', name: { kind: 'Name', value: 'CalendarFeedFields' } }
+              ]
             }
           }
         ]
@@ -1686,7 +2184,28 @@ export const CreateAccountDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'lastPaymentDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'nextDueDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'renewalDate' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'renewalReminderDays' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'dueReminder' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'off' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'days' } }
+              ]
+            }
+          },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'renewalReminder' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'off' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'days' } }
+              ]
+            }
+          },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'thisCycle' },
@@ -1744,8 +2263,56 @@ export const CreateAccountDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'id' } },
           { kind: 'Field', name: { kind: 'Name', value: 'body' } },
           { kind: 'Field', name: { kind: 'Name', value: 'color' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'date' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'remind' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'repeat' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'payment' } },
           { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
           { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } }
+        ]
+      }
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'ReminderSettingsFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'ReminderSettings' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'paymentDays' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'renewalDays' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'payday' } }
+        ]
+      }
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'ReminderStateFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'ReminderState' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'key' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'read' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'cleared' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'snoozedUntil' } }
+        ]
+      }
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'CalendarFeedFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'CalendarFeed' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'token' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'payments' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'paydays' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'renewals' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'notes' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'debtFree' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'showAmounts' } }
         ]
       }
     },
@@ -1796,6 +2363,36 @@ export const CreateAccountDocument = {
             selectionSet: {
               kind: 'SelectionSet',
               selections: [{ kind: 'FragmentSpread', name: { kind: 'Name', value: 'NoteFields' } }]
+            }
+          },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'reminderSettings' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'FragmentSpread', name: { kind: 'Name', value: 'ReminderSettingsFields' } }
+              ]
+            }
+          },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'reminderStates' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'FragmentSpread', name: { kind: 'Name', value: 'ReminderStateFields' } }
+              ]
+            }
+          },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'calendarFeed' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'FragmentSpread', name: { kind: 'Name', value: 'CalendarFeedFields' } }
+              ]
             }
           }
         ]
@@ -1883,7 +2480,28 @@ export const LogDebtOverpaymentDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'lastPaymentDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'nextDueDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'renewalDate' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'renewalReminderDays' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'dueReminder' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'off' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'days' } }
+              ]
+            }
+          },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'renewalReminder' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'off' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'days' } }
+              ]
+            }
+          },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'thisCycle' },
@@ -2009,7 +2627,28 @@ export const MarkPaymentsPaidDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'lastPaymentDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'nextDueDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'renewalDate' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'renewalReminderDays' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'dueReminder' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'off' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'days' } }
+              ]
+            }
+          },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'renewalReminder' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'off' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'days' } }
+              ]
+            }
+          },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'thisCycle' },
@@ -2152,7 +2791,28 @@ export const MarkPaymentsUnpaidDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'lastPaymentDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'nextDueDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'renewalDate' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'renewalReminderDays' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'dueReminder' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'off' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'days' } }
+              ]
+            }
+          },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'renewalReminder' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'off' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'days' } }
+              ]
+            }
+          },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'thisCycle' },
@@ -2281,7 +2941,28 @@ export const SkipRecurringPaymentsDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'lastPaymentDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'nextDueDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'renewalDate' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'renewalReminderDays' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'dueReminder' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'off' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'days' } }
+              ]
+            }
+          },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'renewalReminder' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'off' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'days' } }
+              ]
+            }
+          },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'thisCycle' },
@@ -2408,7 +3089,28 @@ export const StartPaydayCycleDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'lastPaymentDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'nextDueDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'renewalDate' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'renewalReminderDays' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'dueReminder' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'off' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'days' } }
+              ]
+            }
+          },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'renewalReminder' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'off' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'days' } }
+              ]
+            }
+          },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'thisCycle' },
@@ -2538,7 +3240,28 @@ export const UndoDebtOverpaymentDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'lastPaymentDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'nextDueDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'renewalDate' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'renewalReminderDays' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'dueReminder' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'off' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'days' } }
+              ]
+            }
+          },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'renewalReminder' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'off' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'days' } }
+              ]
+            }
+          },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'thisCycle' },
@@ -3142,6 +3865,10 @@ export const CreateNoteDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'id' } },
           { kind: 'Field', name: { kind: 'Name', value: 'body' } },
           { kind: 'Field', name: { kind: 'Name', value: 'color' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'date' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'remind' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'repeat' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'payment' } },
           { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
           { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } }
         ]
@@ -3261,6 +3988,10 @@ export const UpdateNoteDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'id' } },
           { kind: 'Field', name: { kind: 'Name', value: 'body' } },
           { kind: 'Field', name: { kind: 'Name', value: 'color' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'date' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'remind' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'repeat' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'payment' } },
           { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
           { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } }
         ]
@@ -3703,7 +4434,28 @@ export const CreateRecurringPaymentDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'lastPaymentDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'nextDueDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'renewalDate' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'renewalReminderDays' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'dueReminder' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'off' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'days' } }
+              ]
+            }
+          },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'renewalReminder' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'off' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'days' } }
+              ]
+            }
+          },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'thisCycle' },
@@ -3992,7 +4744,28 @@ export const UpdateRecurringPaymentDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'lastPaymentDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'nextDueDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'renewalDate' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'renewalReminderDays' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'dueReminder' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'off' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'days' } }
+              ]
+            }
+          },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'renewalReminder' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'off' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'days' } }
+              ]
+            }
+          },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'thisCycle' },
@@ -4028,6 +4801,319 @@ export const UpdateRecurringPaymentDocument = {
   UpdateRecurringPaymentMutation,
   UpdateRecurringPaymentMutationVariables
 >;
+export const ResetCalendarFeedDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'ResetCalendarFeed' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'accountId' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } }
+          }
+        }
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'resetCalendarFeed' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'accountId' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'accountId' } }
+              }
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'account' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'calendarFeed' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'FragmentSpread',
+                              name: { kind: 'Name', value: 'CalendarFeedFields' }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'CalendarFeedFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'CalendarFeed' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'token' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'payments' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'paydays' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'renewals' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'notes' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'debtFree' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'showAmounts' } }
+        ]
+      }
+    }
+  ]
+} as unknown as DocumentNode<ResetCalendarFeedMutation, ResetCalendarFeedMutationVariables>;
+export const UpdateCalendarFeedDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'UpdateCalendarFeed' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'UpdateCalendarFeedInput' } }
+          }
+        }
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'updateCalendarFeed' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } }
+              }
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'account' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'calendarFeed' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'FragmentSpread',
+                              name: { kind: 'Name', value: 'CalendarFeedFields' }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'CalendarFeedFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'CalendarFeed' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'token' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'payments' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'paydays' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'renewals' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'notes' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'debtFree' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'showAmounts' } }
+        ]
+      }
+    }
+  ]
+} as unknown as DocumentNode<UpdateCalendarFeedMutation, UpdateCalendarFeedMutationVariables>;
+export const UpdateReminderSettingsDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'UpdateReminderSettings' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'NamedType',
+              name: { kind: 'Name', value: 'UpdateReminderSettingsInput' }
+            }
+          }
+        }
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'updateReminderSettings' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } }
+              }
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'account' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'reminderSettings' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'FragmentSpread',
+                              name: { kind: 'Name', value: 'ReminderSettingsFields' }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'ReminderSettingsFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'ReminderSettings' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'paymentDays' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'renewalDays' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'payday' } }
+        ]
+      }
+    }
+  ]
+} as unknown as DocumentNode<
+  UpdateReminderSettingsMutation,
+  UpdateReminderSettingsMutationVariables
+>;
+export const UpdateRemindersDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'UpdateReminders' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'UpdateRemindersInput' } }
+          }
+        }
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'updateReminders' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } }
+              }
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'states' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      {
+                        kind: 'FragmentSpread',
+                        name: { kind: 'Name', value: 'ReminderStateFields' }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'ReminderStateFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'ReminderState' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'key' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'read' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'cleared' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'snoozedUntil' } }
+        ]
+      }
+    }
+  ]
+} as unknown as DocumentNode<UpdateRemindersMutation, UpdateRemindersMutationVariables>;
 export const ChangePasswordDocument = {
   kind: 'Document',
   definitions: [

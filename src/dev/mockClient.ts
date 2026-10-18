@@ -12,6 +12,7 @@ import { apiDate, createFakeApi, DEFAULT_USER, FakeAccount, fakeRecord } from '~
  *   empty    - an account with no payments or notes
  *   overdrawn - more going out before payday than is in the bank
  *   debts    - the design's three debts: a credit card, car finance and a loan from family
+ *   reminders - the design's reminders: Spotify overdue, renewals, dated notes
  */
 
 const fromToday = (days: number) => apiDate(toIsoDate(addDays(startOfToday(), days)));
@@ -51,8 +52,7 @@ const demoAccount = (scenario: string | null): FakeAccount => {
         lastPaymentDate: null,
         nextDueDate: fromToday(0),
         thisCycle: [],
-        renewalDate: null,
-        renewalReminderDays: 0
+        renewalDate: null
       },
       {
         id: 'mortgage',
@@ -66,8 +66,7 @@ const demoAccount = (scenario: string | null): FakeAccount => {
         // On payday it's left over from the last cycle, so the prompt offers to move it on
         nextDueDate: fromToday(scenario === 'payday' ? -2 : 24),
         thisCycle: [],
-        renewalDate: null,
-        renewalReminderDays: 0
+        renewalDate: null
       },
       {
         id: 'prime',
@@ -80,8 +79,7 @@ const demoAccount = (scenario: string | null): FakeAccount => {
         lastPaymentDate: null,
         nextDueDate: fromToday(272),
         thisCycle: [],
-        renewalDate: null,
-        renewalReminderDays: 0
+        renewalDate: null
       }
     ],
     oneOffPayments: [
@@ -126,8 +124,87 @@ const demoAccount = (scenario: string | null): FakeAccount => {
   if (scenario === 'debts') {
     return { ...account, recurringPayments: [...account.recurringPayments, ...demoDebts()] };
   }
+  if (scenario === 'reminders') {
+    return {
+      ...account,
+      recurringPayments: [...account.recurringPayments, ...demoReminderPayments()],
+      notes: [...demoDatedNotes(), ...account.notes]
+    };
+  }
   return account;
 };
+
+const demoPayment = (fields: {
+  id: string;
+  name: string;
+  amount: number;
+  category: string;
+  frequency?: string;
+  dueInDays: number;
+  renewInDays?: number;
+}) => ({
+  id: fields.id,
+  name: fields.name,
+  amount: fields.amount,
+  category: fields.category,
+  frequency: fields.frequency ?? 'MONTHLY',
+  type: 'EXPENSE' as const,
+  firstPaymentDate: fromToday(fields.dueInDays - 365),
+  lastPaymentDate: null,
+  nextDueDate: fromToday(fields.dueInDays),
+  thisCycle: [],
+  renewalDate: fields.renewInDays === undefined ? null : fromToday(fields.renewInDays)
+});
+
+// Spotify went by unpaid yesterday; car insurance renews in five weeks with a note about it
+const demoReminderPayments = () => [
+  demoPayment({
+    id: 'spotify',
+    name: 'Spotify',
+    amount: 20,
+    category: 'SUBSCRIPTION',
+    dueInDays: -1
+  }),
+  demoPayment({ id: 'energy', name: 'Energy', amount: 120, category: 'UTILITIES', dueInDays: 1 }),
+  demoPayment({
+    id: 'car-insurance',
+    name: 'Car insurance',
+    amount: 612,
+    category: 'INSURANCE',
+    frequency: 'ANNUALLY',
+    dueInDays: 36
+  }),
+  demoPayment({
+    id: 'phone',
+    name: 'Phone contract',
+    amount: 32,
+    category: 'UTILITIES',
+    dueInDays: 12,
+    renewInDays: 109
+  })
+];
+
+const demoDatedNotes = () =>
+  [
+    {
+      id: 'note-quotes',
+      body: 'Car insurance quotes. Get three quotes before renewing.',
+      color: 'AMBER',
+      date: fromToday(36),
+      remind: [30, 7],
+      repeat: 'YEARLY' as const,
+      payment: 'car-insurance'
+    },
+    {
+      id: 'note-mot',
+      body: 'Car MOT and service at the garage on the high street.',
+      color: 'BLUE',
+      date: fromToday(20),
+      remind: [14],
+      repeat: 'YEARLY' as const,
+      payment: null
+    }
+  ].map(note => ({ ...note, createdAt: String(Date.now()), updatedAt: String(Date.now()) }));
 
 // Paid monthly, with a balance set from a statement a few weeks ago
 interface DemoDebt {
@@ -154,7 +231,6 @@ const demoDebt = ({ id, name, category, amount, dueInDays, debt, paid = 3 }: Dem
   thisCycle: [],
   history: pastPayments({ amount, dueInDays, debt, count: paid }),
   renewalDate: null,
-  renewalReminderDays: 0,
   debt: { ...debt, balanceUpdatedAt: fromToday(-21) }
 });
 

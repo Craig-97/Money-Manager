@@ -23,6 +23,9 @@ const card: DebtPayment = {
   thisCycle: [],
   renewalDate: null,
   renewalReminderDays: 0,
+  dueReminder: { off: false, days: null },
+  renewalReminder: { off: false, days: null },
+  dueReminderDays: 1,
   debt: {
     balance: 2340,
     startingBalance: 3500,

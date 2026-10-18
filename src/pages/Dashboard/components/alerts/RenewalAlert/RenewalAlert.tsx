@@ -8,7 +8,7 @@ import {
   Renewal,
   renewalHeading
 } from '~/lib/payments';
-import { laterClasses } from '../alertClasses';
+import { alertSublineClasses, alertTitleClasses, laterClasses } from '../alertClasses';
 
 interface RenewalAlertProps {
   payment: RecurringPayment;
@@ -21,13 +21,13 @@ interface RenewalAlertProps {
 /* A renewal coming up, or gone by: check the price, and set the next date once it's renewed */
 export const RenewalAlert = ({ payment, renewal, today, onLater, onUpdate }: RenewalAlertProps) => (
   <>
-    <div className="flex min-w-[200px] grow items-center gap-3 md:gap-4">
+    <div className="flex min-w-0 grow items-center gap-3 md:min-w-[200px] md:gap-4">
       <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-accent-soft text-accent-text md:size-11">
         <RefreshCw size={20} className="size-[18px] md:size-5" aria-hidden="true" />
       </span>
       <div className="min-w-0">
-        <p className="text-[15px] font-bold">{renewalHeading(payment, { renewal, today })}</p>
-        <p className="mt-0.5 text-xs font-medium text-muted md:text-[13px]">
+        <p className={alertTitleClasses}>{renewalHeading(payment, { renewal, today })}</p>
+        <p className={alertSublineClasses}>
           {formatShortDate(renewal.date, today)} ·{' '}
           <span className="num">{formatMoney(payment.amount)}</span> {PER_PERIOD[payment.frequency]}{' '}
           · {renewal.passed ? 'check the price and next date' : 'check the price before it renews'}

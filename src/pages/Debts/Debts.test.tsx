@@ -48,7 +48,6 @@ const debt = ({
   thisCycle: [],
   history: [],
   renewalDate: null,
-  renewalReminderDays: 0,
   debt: { ...figures, balanceUpdatedAt: apiDate('2026-09-15') },
   ...fields
 });

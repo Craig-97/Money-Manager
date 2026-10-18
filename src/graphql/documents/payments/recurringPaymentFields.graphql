@@ -9,7 +9,15 @@ fragment RecurringPaymentFields on RecurringPayment {
   lastPaymentDate
   nextDueDate
   renewalDate
-  renewalReminderDays
+  # When its reminders go off; days left out follow the usual timing
+  dueReminder {
+    off
+    days
+  }
+  renewalReminder {
+    off
+    days
+  }
   # Its pays and skips this cycle, oldest first
   thisCycle {
     id

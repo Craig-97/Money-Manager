@@ -92,6 +92,10 @@ type Mutation {
   deleteNote(id: ID!): DeleteResponse!
   updatePayday(id: ID!, input: PaydayInput!): PaydayResponse!
   setPaydayOverride(id: ID!, for: String!, date: String): PaydayResponse!
+  updateReminderSettings(input: UpdateReminderSettingsInput!): AccountResponse!
+  updateReminders(input: UpdateRemindersInput!): ReminderStatesResponse!
+  updateCalendarFeed(input: UpdateCalendarFeedInput!): AccountResponse!
+  resetCalendarFeed(accountId: ID!): AccountResponse!
 }
 
 type Account {
@@ -104,6 +108,9 @@ type Account {
   notes: [Note]
   payday: Payday
   cycleStartedOn: String
+  reminderSettings: ReminderSettings!
+  reminderStates: [ReminderState!]!
+  calendarFeed: CalendarFeed!
 }
 
 input CreateAccountInput {
@@ -282,7 +289,8 @@ type RecurringPayment {
   thisCycle: [PaymentRecord!]!
   history(limit: Int): [PaymentRecord!]!
   renewalDate: String
-  renewalReminderDays: Int!
+  dueReminder: ReminderTiming!
+  renewalReminder: ReminderTiming!
   debt: Debt
 }
 
@@ -326,7 +334,8 @@ input CreateRecurringPaymentInput {
   firstPaymentDate: String!
   lastPaymentDate: String
   renewalDate: String
-  renewalReminderDays: Int
+  dueReminder: ReminderTimingInput
+  renewalReminder: ReminderTimingInput
   debt: DebtInput
 }
 
@@ -339,7 +348,8 @@ input RecurringPaymentInput {
   firstPaymentDate: String!
   lastPaymentDate: String
   renewalDate: String
-  renewalReminderDays: Int
+  dueReminder: ReminderTimingInput
+  renewalReminder: ReminderTimingInput
   debt: DebtInput
 }
 
@@ -352,7 +362,8 @@ input UpdateRecurringPaymentInput {
   firstPaymentDate: String
   lastPaymentDate: String
   renewalDate: String
-  renewalReminderDays: Int
+  dueReminder: ReminderTimingInput
+  renewalReminder: ReminderTimingInput
   debt: DebtInput
 }
 
@@ -369,11 +380,20 @@ enum NoteColor {
   VIOLET
 }
 
+enum NoteRepeat {
+  NONE
+  YEARLY
+}
+
 type Note {
   id: ID!
   account: ID!
   body: String!
   color: NoteColor!
+  date: String
+  remind: [Int!]!
+  repeat: NoteRepeat!
+  payment: ID
   createdAt: String!
   updatedAt: String!
 }
@@ -382,11 +402,19 @@ input CreateNoteInput {
   accountId: ID!
   body: String!
   color: NoteColor
+  date: String
+  remind: [Int!]
+  repeat: NoteRepeat
+  payment: ID
 }
 
 input UpdateNoteInput {
   body: String
   color: NoteColor
+  date: String
+  remind: [Int!]
+  repeat: NoteRepeat
+  payment: ID
 }
 
 type NoteResponse {
@@ -453,5 +481,75 @@ input PaydayInput {
 
 type PaydayResponse {
   payday: Payday
+  success: Boolean!
+}
+
+enum ReminderAction {
+  READ
+  CLEAR
+  LATER
+  RESTORE
+}
+
+type ReminderTiming {
+  off: Boolean!
+  days: Int
+}
+
+input ReminderTimingInput {
+  off: Boolean!
+  days: Int
+}
+
+type ReminderSettings {
+  paymentDays: Int!
+  renewalDays: Int!
+  payday: Boolean!
+}
+
+type ReminderState {
+  key: String!
+  read: Boolean!
+  cleared: Boolean!
+  snoozedUntil: String
+}
+
+type CalendarFeed {
+  token: String
+  payments: Boolean!
+  paydays: Boolean!
+  renewals: Boolean!
+  notes: Boolean!
+  debtFree: Boolean!
+  showAmounts: Boolean!
+}
+
+input UpdateReminderSettingsInput {
+  accountId: ID!
+  paymentDays: Int
+  renewalDays: Int
+  payday: Boolean
+}
+
+input UpdateRemindersInput {
+  accountId: ID!
+  keys: [String!]!
+  action: ReminderAction!
+  until: String
+}
+
+input UpdateCalendarFeedInput {
+  accountId: ID!
+  enabled: Boolean
+  payments: Boolean
+  paydays: Boolean
+  renewals: Boolean
+  notes: Boolean
+  debtFree: Boolean
+  showAmounts: Boolean
+}
+
+type ReminderStatesResponse {
+  states: [ReminderState!]!
   success: Boolean!
 }

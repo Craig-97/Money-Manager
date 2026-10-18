@@ -1,8 +1,10 @@
 import { ReactNode } from 'react';
 import { Link } from 'react-router';
+import { ReminderBell } from '~/components/reminders';
 import { Avatar } from '~/components/ui/Avatar';
-import { ROUTES } from '~/constants';
+import { MEDIA, ROUTES } from '~/constants';
 import { useCurrentUser } from '~/hooks/useCurrentUser';
+import { useMediaQuery } from '~/hooks/useMediaQuery';
 import { formatLongDate } from '~/lib/dates';
 import { getInitials } from '~/lib/format';
 
@@ -14,11 +16,24 @@ interface PageHeaderProps {
   titleNote?: ReactNode;
   // Page actions, shown on the desktop layout
   actions?: ReactNode;
+  // Beside the avatar on mobile, in place of the reminders bell
+  mobileActions?: ReactNode;
 }
 
-/* Today's date and the page title. On mobile the profile avatar sits on the right. */
-export const PageHeader = ({ title, description, titleNote, actions }: PageHeaderProps) => {
+/*
+ * Today's date and the page title, with the reminders bell on the right. On mobile the profile
+ * avatar sits beside it.
+ */
+export const PageHeader = ({
+  title,
+  description,
+  titleNote,
+  actions,
+  mobileActions
+}: PageHeaderProps) => {
   const { user } = useCurrentUser();
+  // One bell, where the layout shows it
+  const isDesktop = useMediaQuery(MEDIA.desktop);
   const today = new Date();
   const name = user ? `${user.firstName} ${user.surname}` : '';
 
@@ -43,13 +58,19 @@ export const PageHeader = ({ title, description, titleNote, actions }: PageHeade
           <p className="mt-1.5 hidden text-[15px] text-muted md:block">{description}</p>
         ) : null}
       </div>
-      {actions ? <div className="hidden flex-wrap gap-2 md:flex">{actions}</div> : null}
-      <Link
-        to={ROUTES.profile}
-        aria-label={`Profile, ${name}`}
-        className="rounded-full transition-shadow hover:shadow-[0_0_0_3px_var(--border-strong)] md:hidden">
-        <Avatar initials={getInitials(user?.firstName, user?.surname)} />
-      </Link>
+      <div className="hidden flex-wrap items-center justify-end gap-2 md:flex">
+        {actions}
+        {isDesktop ? <ReminderBell /> : null}
+      </div>
+      <div className="flex shrink-0 items-center gap-2 md:hidden">
+        {isDesktop ? null : (mobileActions ?? <ReminderBell />)}
+        <Link
+          to={ROUTES.profile}
+          aria-label={`Profile, ${name}`}
+          className="rounded-full transition-shadow hover:shadow-[0_0_0_3px_var(--border-strong)]">
+          <Avatar initials={getInitials(user?.firstName, user?.surname)} />
+        </Link>
+      </div>
     </header>
   );
 };

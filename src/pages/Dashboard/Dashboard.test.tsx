@@ -31,8 +31,7 @@ const account = (overrides: Partial<FakeAccount> = {}): FakeAccount => ({
       lastPaymentDate: null,
       nextDueDate: apiDateFromToday(0),
       thisCycle: [],
-      renewalDate: null,
-      renewalReminderDays: 0
+      renewalDate: null
     }
   ],
   oneOffPayments: [
@@ -270,8 +269,7 @@ describe('a payment due more than once before payday', () => {
           lastPaymentDate: null,
           nextDueDate: apiDate('2026-10-07'),
           thisCycle: [],
-          renewalDate: null,
-          renewalReminderDays: 0
+          renewalDate: null
         }
       ],
       oneOffPayments: []
@@ -378,8 +376,7 @@ describe('payday prompt', () => {
           lastPaymentDate: null,
           nextDueDate: apiDateFromToday(-31),
           thisCycle: [],
-          renewalDate: null,
-          renewalReminderDays: 0
+          renewalDate: null
         }
       ],
       oneOffPayments: []
@@ -571,7 +568,7 @@ describe('alerts', () => {
       firstPaymentDate: apiDate('2025-09-28'),
       nextDueDate: apiDate('2026-10-28'),
       renewalDate: apiDate('2026-09-28'),
-      renewalReminderDays: 30
+      renewalReminder: { off: false, days: 30 }
     });
     return data;
   };
@@ -593,8 +590,21 @@ describe('alerts', () => {
     ).toBeInTheDocument();
   });
 
-  it('puts a renewal away for three days with Later', async () => {
-    const { user, unmount } = renderDashboard(renewedAccount());
+  // Put away with Later until a day, as the API keeps it
+  const putAway = (data: ReturnType<typeof renewedAccount>, until: string) => ({
+    ...data,
+    reminderStates: [
+      {
+        key: 'renewed:breakdown:2026-09-28',
+        read: false,
+        cleared: false,
+        snoozedUntil: apiDate(until)
+      }
+    ]
+  });
+
+  it('puts a renewal away for three days with Later, on the account', async () => {
+    const { user, unmount, api } = renderDashboard(renewedAccount());
 
     const alerts = await screen.findByRole('region', { name: 'Alerts' });
     await user.click(within(alerts).getByRole('button', { name: 'Next alert' }));
@@ -603,12 +613,22 @@ describe('alerts', () => {
     // Only due today is left, so there's nothing to page through
     expect(within(alerts).getByRole('region', { name: 'Due today' })).toBeInTheDocument();
     expect(within(alerts).queryByText('1 of 2')).not.toBeInTheDocument();
-    expect(localStorage.getItem('mm-renewal-snooze')).toContain('breakdown:2026-9-28');
+    // The same as its reminder's Later, so it follows the user to other devices
+    expect(api.callsTo('UpdateReminders')).toEqual([
+      {
+        input: {
+          accountId: 'account-1',
+          keys: ['renewed:breakdown:2026-09-28'],
+          action: 'LATER',
+          until: '2026-10-11'
+        }
+      }
+    ]);
 
-    // Still away two days later; back on the third
+    // Still away two days later
     unmount();
     vi.setSystemTime(new Date('2026-10-10T09:00:00'));
-    renderDashboard(renewedAccount());
+    renderDashboard(putAway(renewedAccount(), '2026-10-11'));
     await screen.findByRole('region', { name: 'Alerts' });
     expect(screen.queryByText('Breakdown cover has renewed')).not.toBeInTheDocument();
     expect(screen.queryByText('1 of 2')).not.toBeInTheDocument();
@@ -627,7 +647,7 @@ describe('alerts', () => {
       firstPaymentDate: apiDate('2023-10-24'),
       nextDueDate: apiDate('2026-10-24'),
       renewalDate: null,
-      renewalReminderDays: 30
+      renewalReminder: { off: false, days: 30 }
     });
     const { user } = renderDashboard(data);
 
@@ -658,7 +678,7 @@ describe('alerts', () => {
       firstPaymentDate: apiDate('2023-10-24'),
       nextDueDate: apiDate('2026-10-24'),
       renewalDate: null,
-      renewalReminderDays: 0
+      renewalReminder: { off: true, days: null }
     });
     renderDashboard(data);
 
@@ -666,16 +686,35 @@ describe('alerts', () => {
     expect(screen.queryByText(/Car insurance renews/)).not.toBeInTheDocument();
   });
 
-  it('asks again once the snooze runs out', async () => {
-    const { user, unmount } = renderDashboard(renewedAccount());
-    const alerts = await screen.findByRole('region', { name: 'Alerts' });
-    await user.click(within(alerts).getByRole('button', { name: 'Next alert' }));
-    await user.click(within(alerts).getByRole('button', { name: 'Later' }));
-
-    unmount();
+  it('asks again once the day it was put away until comes', async () => {
     vi.setSystemTime(new Date('2026-10-11T09:30:00'));
-    renderDashboard(renewedAccount());
+    renderDashboard(putAway(renewedAccount(), '2026-10-11'));
 
     expect(await screen.findByText('1 of 2')).toBeInTheDocument();
+  });
+
+  it('puts a payment gone by unpaid first, to mark paid', async () => {
+    const data = renewedAccount();
+    data.recurringPayments.push({
+      ...data.recurringPayments[0],
+      id: 'spotify',
+      name: 'Spotify',
+      firstPaymentDate: apiDate('2026-01-07'),
+      nextDueDate: apiDate('2026-10-07')
+    });
+    const { user, api } = renderDashboard(data);
+
+    const alerts = await screen.findByRole('region', { name: 'Alerts' });
+    expect(within(alerts).getByText('1 of 3')).toBeInTheDocument();
+    const overdue = within(alerts).getByRole('region', { name: 'Spotify is overdue' });
+    expect(overdue).toHaveTextContent('Spotify · £20.00 was due Wed 7 Oct');
+
+    await user.click(within(overdue).getByRole('button', { name: 'Mark as paid' }));
+
+    await waitFor(() =>
+      expect(api.callsTo('MarkPaymentsPaid')[0]).toMatchObject({
+        input: { recurringPaymentIds: ['spotify'] }
+      })
+    );
   });
 });

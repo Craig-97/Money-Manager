@@ -16,16 +16,21 @@ import { getApiErrorMessage, getErrorCode } from '~/lib/errors';
 import { formatMoneyInput, parseMoney } from '~/lib/format';
 import {
   addYear,
-  DEFAULT_REMINDER,
+  daysBeforeText,
   formatShortDate,
+  fromTimingChoice,
   nextOccurrence,
   occurrencesBetween,
   Payment,
+  PAYMENT_REMINDER_DAYS,
   PaymentKind,
-  REMINDER_LABELS,
-  ReminderDays,
+  reminderDays,
+  ReminderSettings,
+  RENEWAL_REMINDER_DAYS,
   scheduleText,
-  toReminderDays
+  TimingChoice,
+  timingOptions,
+  toTimingChoice
 } from '~/lib/payments';
 import { showToast } from '~/state/toast';
 import { paidOffText, parseApr } from './debtFields';
@@ -46,8 +51,9 @@ interface PaymentFormValues {
   ends: Ends;
   end: string;
   renewal: string;
-  // Null until chosen: a month for a renewal, off for a yearly payment
-  reminder: ReminderDays | null;
+  // When the reminders before each payment and before it renews go off
+  dueReminder: TimingChoice;
+  reminder: TimingChoice;
   category: RecurringPaymentCategory | OneOffPaymentCategory;
   // Recurring payments tracked as a debt: what's owed now, its APR, and what was borrowed
   tracked: boolean;
@@ -88,7 +94,8 @@ const initialValues = ({
     ends: 'keep',
     end: '',
     renewal: '',
-    reminder: null,
+    dueReminder: 'usual',
+    reminder: 'usual',
     category: asDebt ? 'CREDIT_CARD' : kind === 'recurring' ? 'SUBSCRIPTION' : 'OTHER',
     tracked: asDebt,
     balance: '',
@@ -112,11 +119,8 @@ const initialValues = ({
         ends: payment.lastPaymentDate ? 'stop' : payment.renewalDate ? 'renew' : 'keep',
         end: iso(payment.lastPaymentDate),
         renewal: iso(payment.renewalDate),
-        // A reminder only means something with a renewal, or on a yearly payment
-        reminder:
-          payment.renewalDate || payment.frequency === 'ANNUALLY'
-            ? toReminderDays(payment.renewalReminderDays)
-            : null,
+        dueReminder: toTimingChoice(payment.dueReminder),
+        reminder: toTimingChoice(payment.renewalReminder),
         tracked: payment.debt !== null,
         balance: payment.debt ? formatMoneyInput(payment.debt.balance) : '',
         apr: payment.debt ? String(payment.debt.apr) : '',
@@ -130,39 +134,29 @@ const initialValues = ({
 
 /*
  * The recurring fields once the rules apply: yearly payments renew with each payment, so for them
- * Renews is Keeps going, and their reminder counts back from each payment. A debt ends when it's
- * paid off, so it keeps going with no renewal or reminder.
+ * Renews is Keeps going, and their renewal reminder counts back from each payment. A debt ends when
+ * it's paid off, so it keeps going with no renewal.
  */
 const recurringEnding = (values: PaymentFormValues) => {
   const yearly = values.frequency === 'ANNUALLY';
-  if (values.tracked) {
-    return { yearly, ends: 'keep' as Ends, reminds: false, reminder: 0 as ReminderDays };
-  }
+  if (values.tracked) return { yearly, ends: 'keep' as Ends, reminds: false };
   const ends: Ends = yearly && values.ends === 'renew' ? 'keep' : values.ends;
-  const reminds = ends === 'renew' || (ends === 'keep' && yearly);
-  const reminder: ReminderDays = values.reminder ?? (yearly ? 0 : DEFAULT_REMINDER);
-  return { yearly, ends, reminds, reminder };
+  return { yearly, ends, reminds: ends === 'renew' || (ends === 'keep' && yearly) };
 };
 
-/* A recurring payment's ending as the API takes it */
+/* A recurring payment's ending and reminders as the API takes them */
 const endingFields = (values: PaymentFormValues) => {
-  const { ends, reminds, reminder } = recurringEnding(values);
+  const { ends } = recurringEnding(values);
   return {
     lastPaymentDate: ends === 'stop' ? values.end : null,
     renewalDate: ends === 'renew' ? values.renewal : null,
-    renewalReminderDays: reminds ? reminder : 0
+    dueReminder: fromTimingChoice(values.dueReminder),
+    renewalReminder: fromTimingChoice(values.reminder)
   };
 };
 
-const sameEnding = (a: PaymentFormValues, b: PaymentFormValues) => {
-  const x = endingFields(a);
-  const y = endingFields(b);
-  return (
-    x.lastPaymentDate === y.lastPaymentDate &&
-    x.renewalDate === y.renewalDate &&
-    x.renewalReminderDays === y.renewalReminderDays
-  );
-};
+const sameEnding = (a: PaymentFormValues, b: PaymentFormValues) =>
+  JSON.stringify(endingFields(a)) === JSON.stringify(endingFields(b));
 
 // A debt's figures as the API takes them, or null when it isn't one or they aren't filled in yet
 const debtFields = (values: PaymentFormValues) => {
@@ -208,10 +202,15 @@ export interface SummaryRow {
  */
 const scheduleSummary = (
   values: PaymentFormValues,
-  { today, renewalPassed = false }: { today: Date; renewalPassed?: boolean }
+  {
+    today,
+    settings,
+    renewalPassed = false
+  }: { today: Date; settings: ReminderSettings; renewalPassed?: boolean }
 ): { rows: SummaryRow[]; message?: string } => {
   const first = parseIsoDate(values.first);
-  const { yearly, ends, reminds, reminder } = recurringEnding(values);
+  const { yearly, ends, reminds } = recurringEnding(values);
+  const reminder = reminderDays(fromTimingChoice(values.reminder), settings.renewalDays);
   const end = ends === 'stop' ? parseIsoDate(values.end) : undefined;
   if (!first) return { rows: [], message: 'Choose a first payment date to see the schedule' };
   if (ends === 'stop' && !end) return { rows: [], message: 'Choose a last payment date' };
@@ -248,9 +247,9 @@ const scheduleSummary = (
     rows.push({
       label: 'Reminder',
       value:
-        reminder > 0
-          ? `${formatShortDate(addDays(renewsOn, -reminder), today)} · ${REMINDER_LABELS[reminder]} before`
-          : 'Off'
+        reminder === null
+          ? 'Off'
+          : `${formatShortDate(addDays(renewsOn, -reminder), today)} · ${daysBeforeText(reminder).toLowerCase()}`
     });
   }
   return { rows };
@@ -303,6 +302,8 @@ interface Options {
   accountId: string;
   payment: Payment | undefined;
   today: Date;
+  // The account's usual reminder timing, for payments that follow it
+  settings: ReminderSettings;
   onSaved: () => void;
   // Changes when the dialog switches to another payment or kind, which starts the form afresh
   formKey: string;
@@ -315,6 +316,7 @@ export const usePaymentForm = ({
   accountId,
   payment,
   today,
+  settings,
   onSaved,
   formKey
 }: Options) => {
@@ -529,7 +531,15 @@ export const usePaymentForm = ({
     canSave: nameOk && amountOk && datesOk && debtOk && !nameTaken,
     saving,
     save: () => void save(),
-    summary: withPaidOff(scheduleSummary(values, { today, renewalPassed }), { values, today }),
+    summary: withPaidOff(scheduleSummary(values, { today, settings, renewalPassed }), {
+      values,
+      today
+    }),
+    // The choices for each reminder, saying what the usual timing is
+    reminderOptions: {
+      due: timingOptions({ days: PAYMENT_REMINDER_DAYS, usual: settings.paymentDays }),
+      renewal: timingOptions({ days: RENEWAL_REMINDER_DAYS, usual: settings.renewalDays })
+    },
     // Opened from Debts: always a debt, so there's no switch to stop tracking it
     asDebt,
     endsHint: endsHint(values, today),

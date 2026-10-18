@@ -7,7 +7,13 @@ import { getAuthToken, useAuthStore } from '~/state/auth';
 import { apiUrl } from './apiUrl';
 import { refreshSession, RefreshFn } from './refreshSession';
 
-const createCache = () => new InMemoryCache();
+const createCache = () =>
+  new InMemoryCache({
+    typePolicies: {
+      // A reminder's state has no id; its key names the reminder and the date it's for
+      ReminderState: { keyFields: ['key'] }
+    }
+  });
 
 // Sends the session token as a Bearer header
 const authLink = new SetContextLink(prevContext => {

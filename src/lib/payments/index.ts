@@ -3,6 +3,7 @@ export * from './due';
 export * from './labels';
 export * from './payments';
 export * from './recurrence';
+export * from './reminderTiming';
 export * from './renewal';
 export * from './sort';
 export * from './summary';

@@ -1,0 +1,10 @@
+mutation ResetCalendarFeed($accountId: ID!) {
+  resetCalendarFeed(accountId: $accountId) {
+    account {
+      id
+      calendarFeed {
+        ...CalendarFeedFields
+      }
+    }
+  }
+}

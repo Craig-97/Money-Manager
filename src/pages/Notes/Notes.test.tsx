@@ -42,7 +42,7 @@ describe('notes', () => {
       .getAllByRole('article')
       .map(note => note.querySelector('p')?.textContent);
     expect(bodies).toEqual(['Pay the plumber', 'Buy milk']);
-    expect(within(notes).getAllByText('9 Dec 2024')).toHaveLength(2);
+    expect(within(notes).getAllByText('No date · 9 Dec 2024')).toHaveLength(2);
 
     await user.type(screen.getByLabelText('Search notes'), 'MILK');
     expect(within(notes).getAllByRole('article')).toHaveLength(1);
@@ -82,7 +82,17 @@ describe('notes', () => {
 
     expect(await screen.findByText('Renew the car insurance')).toBeInTheDocument();
     expect(api.callsTo('CreateNote')).toEqual([
-      { input: { accountId: 'account-1', body: 'Renew the car insurance', color: 'GREEN' } }
+      {
+        input: {
+          accountId: 'account-1',
+          body: 'Renew the car insurance',
+          color: 'GREEN',
+          date: null,
+          remind: [],
+          repeat: 'NONE',
+          payment: null
+        }
+      }
     ]);
     await waitFor(() => expect(screen.queryByRole('dialog', { name: 'New note' })).toBeNull());
 
@@ -128,7 +138,17 @@ describe('notes', () => {
     expect(await screen.findByText('Pay the electrician')).toBeInTheDocument();
     await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Edit note' })).toBeNull());
     expect(api.callsTo('UpdateNote')).toEqual([
-      { id: 'plumber', input: { body: 'Pay the electrician', color: 'ROSE' } }
+      {
+        id: 'plumber',
+        input: {
+          body: 'Pay the electrician',
+          color: 'ROSE',
+          date: null,
+          remind: [],
+          repeat: 'NONE',
+          payment: null
+        }
+      }
     ]);
   });
 
@@ -188,7 +208,17 @@ describe('notes', () => {
 
     expect(await screen.findByText('Buy milk')).toBeInTheDocument();
     expect(api.callsTo('CreateNote')).toEqual([
-      { input: { accountId: 'account-1', body: 'Buy milk', color: 'BLUE' } }
+      {
+        input: {
+          accountId: 'account-1',
+          body: 'Buy milk',
+          color: 'BLUE',
+          date: null,
+          remind: [],
+          repeat: 'NONE',
+          payment: null
+        }
+      }
     ]);
   });
 
@@ -246,5 +276,30 @@ describe('notes on mobile', () => {
     await waitFor(() => expect(text).toHaveFocus());
     await user.type(text, 'Book the MOT');
     expect(text).toHaveValue('Book the MOT');
+  });
+});
+
+describe('a note with a date', () => {
+  it('adds a date, reminding a week before until other reminders are picked', async () => {
+    const { user, api } = renderNotes();
+    await user.click(await screen.findByRole('button', { name: 'Add note' }));
+    const dialog = await screen.findByRole('dialog', { name: 'New note' });
+
+    await user.type(within(dialog).getByLabelText('Note'), 'Car MOT');
+    // Without a date it's a single row; adding one opens the calendar
+    expect(within(dialog).queryByRole('group', { name: 'Remind me' })).not.toBeInTheDocument();
+    await user.click(within(dialog).getByRole('button', { name: 'Add a date' }));
+    await user.click(await screen.findByRole('button', { name: 'Today' }));
+    await user.click(within(dialog).getByRole('button', { name: '1 month before' }));
+    await user.click(within(dialog).getByRole('radio', { name: 'Every year' }));
+    await user.click(within(dialog).getByRole('button', { name: 'Save note' }));
+
+    await waitFor(() => expect(api.callsTo('CreateNote')).toHaveLength(1));
+    expect(api.callsTo('CreateNote')[0]).toMatchObject({
+      input: { body: 'Car MOT', remind: [30, 7], repeat: 'YEARLY', payment: null }
+    });
+    expect((api.callsTo('CreateNote')[0].input as { date: string }).date).toMatch(
+      /^\d{4}-\d{2}-\d{2}$/
+    );
   });
 });

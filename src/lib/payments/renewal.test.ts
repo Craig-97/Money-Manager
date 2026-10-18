@@ -33,6 +33,9 @@ const payment = (overrides: Partial<RecurringPayment> = {}): RecurringPayment =>
   thisCycle: [],
   renewalDate: day('2027-02-02'),
   renewalReminderDays: 30,
+  dueReminder: { off: false, days: null },
+  renewalReminder: { off: false, days: 30 },
+  dueReminderDays: 1,
   debt: null,
   ...overrides
 });

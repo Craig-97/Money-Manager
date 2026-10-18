@@ -40,6 +40,7 @@ describe('BottomNav', () => {
     expect(links.map(link => link.textContent)).toEqual([
       'DebtsLoans and cards you’re paying off',
       expect.stringMatching(/^Notes(\d+ notes?|Nothing written yet)$/),
+      expect.stringMatching(/^Reminders(\d+ new|What’s due, renewing and coming up)$/),
       'ProfileTest Account'
     ]);
 

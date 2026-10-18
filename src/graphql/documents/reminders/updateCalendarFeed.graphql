@@ -1,0 +1,10 @@
+mutation UpdateCalendarFeed($input: UpdateCalendarFeedInput!) {
+  updateCalendarFeed(input: $input) {
+    account {
+      id
+      calendarFeed {
+        ...CalendarFeedFields
+      }
+    }
+  }
+}

@@ -1,18 +1,21 @@
 import { DatePicker } from '~/components/form/DatePicker';
 import { FieldError } from '~/components/form/FieldError';
 import { Label } from '~/components/form/Label';
+import { Select } from '~/components/form/Select';
 import { SegmentedControl } from '~/components/ui/SegmentedControl';
 import { parseIsoDate } from '~/lib/dates';
-import { toReminderDays } from '~/lib/payments';
-import { ENDS_OPTIONS, REMINDER_OPTIONS } from '../../paymentOptions';
+import { ENDS_OPTIONS } from '../../paymentOptions';
 import { PaymentForm } from '../../usePaymentForm';
 import { RenewalPrompt } from '../RenewalPrompt';
 import { ScheduleSummary } from '../ScheduleSummary';
 
-/* Ends: keeps going, renews on a date, or stops after a last payment, plus the schedule summary */
+/*
+ * Ends: keeps going, renews on a date, or stops after a last payment. Then when to be reminded,
+ * and the schedule summary.
+ */
 export const RecurringEnding = ({ form }: { form: PaymentForm }) => {
   const { values, set, errors, ending, summary } = form;
-  const { ends, yearly, reminds, reminder } = ending;
+  const { ends, yearly, reminds } = ending;
   const renewal = parseIsoDate(values.renewal);
 
   return (
@@ -76,21 +79,32 @@ export const RecurringEnding = ({ form }: { form: PaymentForm }) => {
         </div>
       ) : null}
 
-      {reminds && !form.renewalPassed ? (
+      <div className={reminds && !form.renewalPassed ? 'grid gap-3.5 md:grid-cols-2' : undefined}>
         <div>
-          <p id="payment-reminder" className="mb-2 text-[13px] font-bold text-muted">
-            Remind me before it renews
-          </p>
-          <SegmentedControl
-            aria-labelledby="payment-reminder"
-            value={String(reminder)}
-            onValueChange={value => set('reminder', toReminderDays(Number(value)))}
-            options={REMINDER_OPTIONS}
-            size="lg"
-            fullWidth
+          <Label tone="muted" htmlFor="payment-due-reminder">
+            Remind me before it’s due
+          </Label>
+          <Select
+            id="payment-due-reminder"
+            value={values.dueReminder}
+            onValueChange={value => set('dueReminder', value)}
+            options={form.reminderOptions.due}
           />
         </div>
-      ) : null}
+        {reminds && !form.renewalPassed ? (
+          <div>
+            <Label tone="muted" htmlFor="payment-reminder">
+              Remind me before it renews
+            </Label>
+            <Select
+              id="payment-reminder"
+              value={values.reminder}
+              onValueChange={value => set('reminder', value)}
+              options={form.reminderOptions.renewal}
+            />
+          </div>
+        ) : null}
+      </div>
 
       <ScheduleSummary rows={summary.rows} message={summary.message} />
       {form.renewalMoved ? (

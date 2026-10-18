@@ -2,6 +2,7 @@ import { PageName } from '~/app/routes/pageModules';
 import { useAccount } from '~/hooks/useAccount';
 import { useCurrentUser } from '~/hooks/useCurrentUser';
 import { usePayCycle } from '~/hooks/usePayCycle';
+import { useReminders } from '~/hooks/useReminders';
 import { clearedText, debtTotals, isDebt, simulatePayoff } from '~/lib/debts';
 import { formatMoney } from '~/lib/format';
 import { RecurringPayment, toPayments } from '~/lib/payments';
@@ -19,6 +20,7 @@ export const useMoreSubtitles = (): Partial<Record<PageName, string>> => {
     : [];
   const { months } = simulatePayoff(debts);
   const notes = account?.notes?.length ?? 0;
+  const { unread } = useReminders();
 
   return {
     debts: debts.length
@@ -26,6 +28,7 @@ export const useMoreSubtitles = (): Partial<Record<PageName, string>> => {
         (months === null ? '' : ` · debt-free ${clearedText(months, today)}`)
       : 'Loans and cards you’re paying off',
     notes: notes ? `${notes} ${notes === 1 ? 'note' : 'notes'}` : 'Nothing written yet',
+    reminders: unread ? `${unread} new` : 'What’s due, renewing and coming up',
     profile: user ? `${user.firstName} ${user.surname}` : undefined
   };
 };

@@ -2,6 +2,10 @@ fragment NoteFields on Note {
   id
   body
   color
+  date
+  remind
+  repeat
+  payment
   createdAt
   updatedAt
 }

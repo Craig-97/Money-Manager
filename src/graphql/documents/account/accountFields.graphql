@@ -17,4 +17,13 @@ fragment AccountFields on Account {
   notes {
     ...NoteFields
   }
+  reminderSettings {
+    ...ReminderSettingsFields
+  }
+  reminderStates {
+    ...ReminderStateFields
+  }
+  calendarFeed {
+    ...CalendarFeedFields
+  }
 }

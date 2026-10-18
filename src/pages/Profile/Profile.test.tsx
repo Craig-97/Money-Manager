@@ -219,3 +219,31 @@ describe('profile', () => {
     expect(api.callsTo('DeleteCurrentUser')).toHaveLength(1);
   });
 });
+
+describe('the calendar feed', () => {
+  it('is off until turned on, then gives a private link and chooses what it carries', async () => {
+    const { user, api } = renderProfile();
+    const reminders = await section('Reminders');
+    expect(within(reminders).queryByRole('button', { name: 'Copy' })).not.toBeInTheDocument();
+
+    await user.click(within(reminders).getByRole('switch', { name: 'Calendar feed' }));
+
+    expect(await within(reminders).findByRole('button', { name: 'Copy' })).toBeInTheDocument();
+    // The secret in the link isn't shown
+    expect(within(reminders).getByLabelText('Feed link, hidden')).not.toHaveTextContent(
+      'feed-token'
+    );
+    expect(within(reminders).getByRole('link', { name: 'Add to Apple Calendar' })).toHaveAttribute(
+      'href',
+      expect.stringMatching(/^webcal:\/\/.+\/cal\/feed-token-\d+\.ics$/)
+    );
+
+    await user.click(within(reminders).getByRole('checkbox', { name: 'Debt-free dates' }));
+
+    expect(within(reminders).getByRole('checkbox', { name: 'Debt-free dates' })).toBeChecked();
+    expect(api.callsTo('UpdateCalendarFeed')).toEqual([
+      { input: { accountId: 'account-1', enabled: true } },
+      { input: { accountId: 'account-1', debtFree: true } }
+    ]);
+  });
+});

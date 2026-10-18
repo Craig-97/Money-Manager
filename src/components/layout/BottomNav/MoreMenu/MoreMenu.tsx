@@ -3,6 +3,7 @@ import { matchPath, useLocation } from 'react-router';
 import * as Dialog from '@radix-ui/react-dialog';
 import { preloadPage } from '~/app/routes/pageModules';
 import { MoreIcon } from '~/components/icons';
+import { useReminders } from '~/hooks/useReminders';
 import { cn } from '~/lib/cn';
 import { MoreSheet } from '../MoreSheet';
 import { MORE_LINKS } from './moreLinks';
@@ -17,6 +18,8 @@ export const MoreMenu = () => {
   const { pathname } = useLocation();
   // A debt's own page counts as Debts
   const current = MORE_LINKS.find(link => matchPath({ path: link.to, end: false }, pathname));
+  // Reminders sits under More, so a dot shows when some are new
+  const { unread } = useReminders();
 
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
@@ -25,15 +28,25 @@ export const MoreMenu = () => {
           ref={trigger}
           type="button"
           aria-label="More"
-          // Says which of its pages is showing, as the other nav links do
-          aria-description={current ? `On ${current.label}` : undefined}
+          // Says which of its pages is showing, as the other nav links do, and what the dot means
+          aria-description={
+            [current && `On ${current.label}`, unread && `${unread} new reminders`]
+              .filter(Boolean)
+              .join('. ') || undefined
+          }
           data-current={current ? '' : undefined}
           onFocus={() => MORE_LINKS.forEach(link => preloadPage(link.page))}
           className={cn(
-            'flex h-[52px] w-14 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-nav-icon hover:text-nav-active-bg',
+            'relative flex h-[52px] w-14 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-nav-icon hover:text-nav-active-bg',
             'aria-expanded:bg-nav-active-bg aria-expanded:text-nav-active-text data-current:bg-nav-active-bg data-current:text-nav-active-text'
           )}>
           <MoreIcon size={22} strokeWidth={1.9} />
+          {unread ? (
+            <span
+              aria-hidden="true"
+              className="absolute top-2.5 right-3 size-2.5 rounded-full border-2 border-nav-bg bg-expense"
+            />
+          ) : null}
         </button>
       </Dialog.Trigger>
       <Dialog.Portal>

@@ -6,7 +6,9 @@ import {
   OneOffPaymentFieldsFragment,
   OneOffPaymentFieldsFragmentDoc,
   RecurringPaymentFieldsFragment,
-  RecurringPaymentFieldsFragmentDoc
+  RecurringPaymentFieldsFragmentDoc,
+  ReminderStateFieldsFragment,
+  ReminderStateFieldsFragmentDoc
 } from '~/graphql/generated';
 
 // The account's lists in the cache. Mutations that return an updated payment or note update it
@@ -79,4 +81,27 @@ export const removeFromAccount = (
   });
   for (const id of ids) cache.evict({ id: cache.identify({ __typename: TYPENAMES[field], id }) });
   cache.gc();
+};
+
+/*
+ * Puts reminder states the API sent back on the account's list. A state already there is updated
+ * by its key on its own; a new one is added.
+ */
+export const addReminderStates = (
+  cache: ApolloCache,
+  { account, states }: { account: string; states: readonly ReminderStateFieldsFragment[] }
+) => {
+  const refs = states.flatMap(state => {
+    const ref = cache.writeFragment({ fragment: ReminderStateFieldsFragmentDoc, data: state });
+    return ref ? [ref] : [];
+  });
+  cache.modify({
+    id: accountId(cache, account),
+    fields: {
+      reminderStates: (existing: readonly Reference[] = []) => [
+        ...existing,
+        ...refs.filter(ref => !existing.some(item => item.__ref === ref.__ref))
+      ]
+    } as Modifiers
+  });
 };

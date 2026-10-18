@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { charactersLeft, findNotes, Note, noteMeta, notePreview, toNotes } from './notesModel';
 
 const at = (iso: string) => Date.parse(iso);
+const TODAY = new Date(2026, 9, 2);
 
 const notes: Note[] = [
   {
@@ -9,21 +10,33 @@ const notes: Note[] = [
     body: 'Pay the plumber',
     color: 'BLUE',
     created: at('2024-12-09T10:00:00'),
-    updated: at('2024-12-09T18:00:00')
+    updated: at('2024-12-09T18:00:00'),
+    date: null,
+    remind: [],
+    repeat: 'NONE',
+    paymentId: null
   },
   {
     id: 'b',
     body: 'Cancel the gym',
     color: 'GREEN',
     created: at('2024-12-09T12:00:00'),
-    updated: at('2024-12-09T12:00:00')
+    updated: at('2024-12-09T12:00:00'),
+    date: null,
+    remind: [],
+    repeat: 'NONE',
+    paymentId: null
   },
   {
     id: 'c',
     body: 'Plumber quote £120',
     color: 'ROSE',
     created: at('2024-12-09T08:00:00'),
-    updated: at('2024-12-09T09:00:00')
+    updated: at('2024-12-09T09:00:00'),
+    date: null,
+    remind: [],
+    repeat: 'NONE',
+    paymentId: null
   }
 ];
 
@@ -31,15 +44,34 @@ const ids = (list: Note[]) => list.map(note => note.id);
 
 describe('findNotes', () => {
   it('sorts by when notes were made or changed', () => {
-    expect(ids(findNotes(notes, { query: '', sort: 'newest' }))).toEqual(['b', 'a', 'c']);
-    expect(ids(findNotes(notes, { query: '', sort: 'oldest' }))).toEqual(['c', 'a', 'b']);
-    expect(ids(findNotes(notes, { query: '', sort: 'updated' }))).toEqual(['a', 'b', 'c']);
-    expect(ids(findNotes(notes, { query: '', sort: 'updatedOldest' }))).toEqual(['c', 'b', 'a']);
+    expect(ids(findNotes(notes, { query: '', sort: 'newest', today: TODAY }))).toEqual([
+      'b',
+      'a',
+      'c'
+    ]);
+    expect(ids(findNotes(notes, { query: '', sort: 'oldest', today: TODAY }))).toEqual([
+      'c',
+      'a',
+      'b'
+    ]);
+    expect(ids(findNotes(notes, { query: '', sort: 'updated', today: TODAY }))).toEqual([
+      'a',
+      'b',
+      'c'
+    ]);
+    expect(ids(findNotes(notes, { query: '', sort: 'updatedOldest', today: TODAY }))).toEqual([
+      'c',
+      'b',
+      'a'
+    ]);
   });
 
   it('matches the search text anywhere, ignoring case', () => {
-    expect(ids(findNotes(notes, { query: '  PLUMBER ', sort: 'newest' }))).toEqual(['a', 'c']);
-    expect(findNotes(notes, { query: 'rent', sort: 'newest' })).toEqual([]);
+    expect(ids(findNotes(notes, { query: '  PLUMBER ', sort: 'newest', today: TODAY }))).toEqual([
+      'a',
+      'c'
+    ]);
+    expect(findNotes(notes, { query: 'rent', sort: 'newest', today: TODAY })).toEqual([]);
   });
 });
 
@@ -77,7 +109,11 @@ describe('toNotes', () => {
         body: 'Hi',
         color: 'AMBER',
         createdAt: '1733738400000',
-        updatedAt: '2024-12-09T10:00:00.000Z'
+        updatedAt: '2024-12-09T10:00:00.000Z',
+        date: null,
+        remind: [],
+        repeat: 'NONE',
+        payment: null
       }
     ]);
     expect(note.created).toBe(1733738400000);

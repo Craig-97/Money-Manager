@@ -12,6 +12,7 @@ export type Scalars = {
 export type Account = {
   __typename: 'Account';
   bankBalance: Scalars['Float']['output'];
+  calendarFeed: CalendarFeed;
   cycleStartedOn: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   monthlyIncome: Scalars['Float']['output'];
@@ -19,6 +20,8 @@ export type Account = {
   oneOffPayments: Maybe<Array<Maybe<OneOffPayment>>>;
   payday: Maybe<Payday>;
   recurringPayments: Maybe<Array<Maybe<RecurringPayment>>>;
+  reminderSettings: ReminderSettings;
+  reminderStates: Array<ReminderState>;
   user: Maybe<User>;
 };
 
@@ -37,6 +40,17 @@ export type AuthData = {
 
 export type BankHolidayRegion = 'ENGLAND_AND_WALES' | 'NORTHERN_IRELAND' | 'SCOTLAND';
 
+export type CalendarFeed = {
+  __typename: 'CalendarFeed';
+  debtFree: Scalars['Boolean']['output'];
+  notes: Scalars['Boolean']['output'];
+  paydays: Scalars['Boolean']['output'];
+  payments: Scalars['Boolean']['output'];
+  renewals: Scalars['Boolean']['output'];
+  showAmounts: Scalars['Boolean']['output'];
+  token: Maybe<Scalars['String']['output']>;
+};
+
 export type CreateAccountInput = {
   bankBalance: Scalars['Float']['input'];
   monthlyIncome: Scalars['Float']['input'];
@@ -49,6 +63,10 @@ export type CreateNoteInput = {
   accountId: Scalars['ID']['input'];
   body: Scalars['String']['input'];
   color?: InputMaybe<NoteColor>;
+  date?: InputMaybe<Scalars['String']['input']>;
+  payment?: InputMaybe<Scalars['ID']['input']>;
+  remind?: InputMaybe<Array<Scalars['Int']['input']>>;
+  repeat?: InputMaybe<NoteRepeat>;
 };
 
 export type CreateOneOffPaymentInput = {
@@ -65,12 +83,13 @@ export type CreateRecurringPaymentInput = {
   amount: Scalars['Float']['input'];
   category: RecurringPaymentCategory;
   debt?: InputMaybe<DebtInput>;
+  dueReminder?: InputMaybe<ReminderTimingInput>;
   firstPaymentDate: Scalars['String']['input'];
   frequency: PaymentFrequency;
   lastPaymentDate?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
   renewalDate?: InputMaybe<Scalars['String']['input']>;
-  renewalReminderDays?: InputMaybe<Scalars['Int']['input']>;
+  renewalReminder?: InputMaybe<ReminderTimingInput>;
   type: PaymentType;
 };
 
@@ -134,18 +153,22 @@ export type Mutation = {
   refreshSession: AuthData;
   registerAndLogin: AuthData;
   requestPasswordReset: SuccessResponse;
+  resetCalendarFeed: AccountResponse;
   resetPassword: AuthData;
   setPaydayOverride: PaydayResponse;
   skipRecurringPayments: AccountResponse;
   startPaydayCycle: AccountResponse;
   undoDebtOverpayment: AccountResponse;
   updateAccount: AccountResponse;
+  updateCalendarFeed: AccountResponse;
   updateCurrentUser: UserResponse;
   updateNote: NoteResponse;
   updateOneOffPayment: OneOffPaymentResponse;
   updatePayday: PaydayResponse;
   updatePreferences: UserResponse;
   updateRecurringPayment: RecurringPaymentResponse;
+  updateReminderSettings: AccountResponse;
+  updateReminders: ReminderStatesResponse;
 };
 
 export type MutationBatchDeleteOneOffPaymentsArgs = {
@@ -206,6 +229,10 @@ export type MutationRequestPasswordResetArgs = {
   email: Scalars['String']['input'];
 };
 
+export type MutationResetCalendarFeedArgs = {
+  accountId: Scalars['ID']['input'];
+};
+
 export type MutationResetPasswordArgs = {
   password: Scalars['String']['input'];
   token: Scalars['String']['input'];
@@ -232,6 +259,10 @@ export type MutationUndoDebtOverpaymentArgs = {
 export type MutationUpdateAccountArgs = {
   id: Scalars['ID']['input'];
   input: UpdateAccountInput;
+};
+
+export type MutationUpdateCalendarFeedArgs = {
+  input: UpdateCalendarFeedInput;
 };
 
 export type MutationUpdateCurrentUserArgs = {
@@ -263,17 +294,31 @@ export type MutationUpdateRecurringPaymentArgs = {
   input: UpdateRecurringPaymentInput;
 };
 
+export type MutationUpdateReminderSettingsArgs = {
+  input: UpdateReminderSettingsInput;
+};
+
+export type MutationUpdateRemindersArgs = {
+  input: UpdateRemindersInput;
+};
+
 export type Note = {
   __typename: 'Note';
   account: Scalars['ID']['output'];
   body: Scalars['String']['output'];
   color: NoteColor;
   createdAt: Scalars['String']['output'];
+  date: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
+  payment: Maybe<Scalars['ID']['output']>;
+  remind: Array<Scalars['Int']['output']>;
+  repeat: NoteRepeat;
   updatedAt: Scalars['String']['output'];
 };
 
 export type NoteColor = 'AMBER' | 'BLUE' | 'GREEN' | 'ROSE' | 'VIOLET';
+
+export type NoteRepeat = 'NONE' | 'YEARLY';
 
 export type NoteResponse = {
   __typename: 'NoteResponse';
@@ -424,6 +469,7 @@ export type RecurringPayment = {
   amount: Scalars['Float']['output'];
   category: RecurringPaymentCategory;
   debt: Maybe<Debt>;
+  dueReminder: ReminderTiming;
   firstPaymentDate: Scalars['String']['output'];
   frequency: PaymentFrequency;
   history: Array<PaymentRecord>;
@@ -432,7 +478,7 @@ export type RecurringPayment = {
   name: Scalars['String']['output'];
   nextDueDate: Maybe<Scalars['String']['output']>;
   renewalDate: Maybe<Scalars['String']['output']>;
-  renewalReminderDays: Scalars['Int']['output'];
+  renewalReminder: ReminderTiming;
   thisCycle: Array<PaymentRecord>;
   type: PaymentType;
 };
@@ -468,12 +514,13 @@ export type RecurringPaymentInput = {
   amount: Scalars['Float']['input'];
   category: RecurringPaymentCategory;
   debt?: InputMaybe<DebtInput>;
+  dueReminder?: InputMaybe<ReminderTimingInput>;
   firstPaymentDate: Scalars['String']['input'];
   frequency: PaymentFrequency;
   lastPaymentDate?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
   renewalDate?: InputMaybe<Scalars['String']['input']>;
-  renewalReminderDays?: InputMaybe<Scalars['Int']['input']>;
+  renewalReminder?: InputMaybe<ReminderTimingInput>;
   type: PaymentType;
 };
 
@@ -488,6 +535,40 @@ export type RegisterInput = {
   firstName: Scalars['String']['input'];
   password: Scalars['String']['input'];
   surname: Scalars['String']['input'];
+};
+
+export type ReminderAction = 'CLEAR' | 'LATER' | 'READ' | 'RESTORE';
+
+export type ReminderSettings = {
+  __typename: 'ReminderSettings';
+  payday: Scalars['Boolean']['output'];
+  paymentDays: Scalars['Int']['output'];
+  renewalDays: Scalars['Int']['output'];
+};
+
+export type ReminderState = {
+  __typename: 'ReminderState';
+  cleared: Scalars['Boolean']['output'];
+  key: Scalars['String']['output'];
+  read: Scalars['Boolean']['output'];
+  snoozedUntil: Maybe<Scalars['String']['output']>;
+};
+
+export type ReminderStatesResponse = {
+  __typename: 'ReminderStatesResponse';
+  states: Array<ReminderState>;
+  success: Scalars['Boolean']['output'];
+};
+
+export type ReminderTiming = {
+  __typename: 'ReminderTiming';
+  days: Maybe<Scalars['Int']['output']>;
+  off: Scalars['Boolean']['output'];
+};
+
+export type ReminderTimingInput = {
+  days?: InputMaybe<Scalars['Int']['input']>;
+  off: Scalars['Boolean']['input'];
 };
 
 export type SkipRecurringPaymentsInput = {
@@ -520,9 +601,24 @@ export type UpdateAccountInput = {
   monthlyIncome?: InputMaybe<Scalars['Float']['input']>;
 };
 
+export type UpdateCalendarFeedInput = {
+  accountId: Scalars['ID']['input'];
+  debtFree?: InputMaybe<Scalars['Boolean']['input']>;
+  enabled?: InputMaybe<Scalars['Boolean']['input']>;
+  notes?: InputMaybe<Scalars['Boolean']['input']>;
+  paydays?: InputMaybe<Scalars['Boolean']['input']>;
+  payments?: InputMaybe<Scalars['Boolean']['input']>;
+  renewals?: InputMaybe<Scalars['Boolean']['input']>;
+  showAmounts?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
 export type UpdateNoteInput = {
   body?: InputMaybe<Scalars['String']['input']>;
   color?: InputMaybe<NoteColor>;
+  date?: InputMaybe<Scalars['String']['input']>;
+  payment?: InputMaybe<Scalars['ID']['input']>;
+  remind?: InputMaybe<Array<Scalars['Int']['input']>>;
+  repeat?: InputMaybe<NoteRepeat>;
 };
 
 export type UpdateOneOffPaymentInput = {
@@ -537,13 +633,28 @@ export type UpdateRecurringPaymentInput = {
   amount?: InputMaybe<Scalars['Float']['input']>;
   category?: InputMaybe<RecurringPaymentCategory>;
   debt?: InputMaybe<DebtInput>;
+  dueReminder?: InputMaybe<ReminderTimingInput>;
   firstPaymentDate?: InputMaybe<Scalars['String']['input']>;
   frequency?: InputMaybe<PaymentFrequency>;
   lastPaymentDate?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   renewalDate?: InputMaybe<Scalars['String']['input']>;
-  renewalReminderDays?: InputMaybe<Scalars['Int']['input']>;
+  renewalReminder?: InputMaybe<ReminderTimingInput>;
   type?: InputMaybe<PaymentType>;
+};
+
+export type UpdateReminderSettingsInput = {
+  accountId: Scalars['ID']['input'];
+  payday?: InputMaybe<Scalars['Boolean']['input']>;
+  paymentDays?: InputMaybe<Scalars['Int']['input']>;
+  renewalDays?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type UpdateRemindersInput = {
+  accountId: Scalars['ID']['input'];
+  action: ReminderAction;
+  keys: Array<Scalars['String']['input']>;
+  until?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type User = {

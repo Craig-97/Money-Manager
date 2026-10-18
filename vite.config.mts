@@ -3,7 +3,7 @@ import babel from '@rolldown/plugin-babel';
 import tailwindcss from '@tailwindcss/vite';
 import react, { reactCompilerPreset } from '@vitejs/plugin-react';
 
-// The dev server proxies /graphql to the API, the local one by default
+// The dev server proxies /graphql and the calendar feed (/cal) to the API, the local one by default
 const apiTarget = process.env.API_PROXY_TARGET ?? 'http://localhost:4000';
 
 export default defineConfig({
@@ -19,6 +19,10 @@ export default defineConfig({
   server: {
     proxy: {
       '/graphql': {
+        target: apiTarget,
+        changeOrigin: true
+      },
+      '/cal': {
         target: apiTarget,
         changeOrigin: true
       }

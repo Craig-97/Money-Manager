@@ -7,6 +7,8 @@ export const ROUTES = {
   // One debt on mobile: how to pay it sooner, its payments and details
   debt: '/debts/:id',
   notes: '/notes',
+  // What's gone off (New) and what's ahead (?tab=up)
+  reminders: '/reminders',
   profile: '/profile',
   setup: '/setup',
   signIn: '/sign-in',

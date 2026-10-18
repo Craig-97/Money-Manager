@@ -1,0 +1,10 @@
+mutation UpdateReminderSettings($input: UpdateReminderSettingsInput!) {
+  updateReminderSettings(input: $input) {
+    account {
+      id
+      reminderSettings {
+        ...ReminderSettingsFields
+      }
+    }
+  }
+}

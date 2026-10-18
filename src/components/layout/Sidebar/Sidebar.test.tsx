@@ -72,7 +72,15 @@ describe('Sidebar', () => {
       within(nav)
         .getAllByRole('link')
         .map(link => link.textContent)
-    ).toEqual(['Dashboard', 'Recurring', 'Forecast', 'Debts', 'Notes']);
+    ).toEqual([
+      'Dashboard',
+      'Recurring',
+      'Forecast',
+      'Debts',
+      'Notes',
+      // With how many are new beside it
+      expect.stringMatching(/^Reminders/)
+    ]);
     const divider = nav.querySelector('hr')!;
     expect(divider.previousElementSibling).toHaveTextContent('Forecast');
     expect(divider.nextElementSibling).toHaveTextContent('Debts');

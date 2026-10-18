@@ -14,6 +14,7 @@ import {
   summarise,
   toPayments
 } from '~/lib/payments';
+import { toReminderStates } from '~/lib/reminders';
 import { showToast } from '~/state/toast';
 import { PaymentTab, paymentsForTab } from '../dashboardModel';
 import { useAlerts } from './useAlerts';
@@ -38,7 +39,13 @@ export const useDashboard = (account: Account) => {
     today
   });
   const paydayOverride = usePaydayOverride({ account, cycle, today, holidays, payments });
-  const alerts = useAlerts({ payments, today, dueToday: summary.dueToday });
+  const alerts = useAlerts({
+    accountId: account.id,
+    payments,
+    today,
+    dueToday: summary.dueToday,
+    states: toReminderStates(account.reminderStates)
+  });
   const listed = paymentsForTab(payments, { tab, cycle, sort });
   const selection = usePaymentSelection(listed);
 

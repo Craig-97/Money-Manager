@@ -50,8 +50,15 @@ export interface FakeRecurringPayment {
   // Every record, newest first, as the API's history field
   history?: FakeRecord[];
   renewalDate: string | null;
-  renewalReminderDays: number;
+  // Left out, they follow the usual timing
+  dueReminder?: FakeTiming;
+  renewalReminder?: FakeTiming;
   debt?: FakeDebt | null;
+}
+
+export interface FakeTiming {
+  off: boolean;
+  days: number | null;
 }
 
 export interface FakeOneOffPayment {
@@ -70,6 +77,34 @@ export interface FakeNote {
   color: string;
   createdAt: string;
   updatedAt: string;
+  // Left out, a note has no date, reminders or payment
+  date?: string | null;
+  remind?: number[];
+  repeat?: 'NONE' | 'YEARLY';
+  payment?: string | null;
+}
+
+export interface FakeReminderState {
+  key: string;
+  read: boolean;
+  cleared: boolean;
+  snoozedUntil: string | null;
+}
+
+export interface FakeReminderSettings {
+  paymentDays: number;
+  renewalDays: number;
+  payday: boolean;
+}
+
+export interface FakeCalendarFeed {
+  token: string | null;
+  payments: boolean;
+  paydays: boolean;
+  renewals: boolean;
+  notes: boolean;
+  debtFree: boolean;
+  showAmounts: boolean;
 }
 
 export interface FakePayday {
@@ -92,6 +127,10 @@ export interface FakeAccount {
   oneOffPayments: FakeOneOffPayment[];
   notes: FakeNote[];
   payday: FakePayday | null;
+  // Left out, the API's defaults
+  reminderSettings?: FakeReminderSettings;
+  reminderStates?: FakeReminderState[];
+  calendarFeed?: FakeCalendarFeed;
 }
 
 export interface FakeUser {
@@ -130,6 +169,49 @@ debtField.resolve = (payment: FakeRecurringPayment) =>
         .reduce((sum, record) => sum + (record.debt?.reduction ?? 0), 0)
     )
   };
+
+// As the API, for data saved before reminders: the usual timing, nothing done, the feed off
+const USUAL_TIMING: FakeTiming = { off: false, days: null };
+
+export const DEFAULT_REMINDER_SETTINGS: FakeReminderSettings = {
+  paymentDays: 1,
+  renewalDays: 30,
+  payday: true
+};
+
+export const DEFAULT_CALENDAR_FEED: FakeCalendarFeed = {
+  token: null,
+  payments: true,
+  paydays: true,
+  renewals: true,
+  notes: true,
+  debtFree: false,
+  showAmounts: false
+};
+
+// Fields the fixtures can leave out, filled in as the API would
+type Loose = Record<string, unknown>;
+const FIELD_DEFAULTS: Record<string, Record<string, (value: Loose) => unknown>> = {
+  RecurringPayment: {
+    dueReminder: p => p.dueReminder ?? USUAL_TIMING,
+    renewalReminder: p => p.renewalReminder ?? USUAL_TIMING
+  },
+  Note: {
+    date: n => n.date ?? null,
+    remind: n => n.remind ?? [],
+    repeat: n => n.repeat ?? 'NONE',
+    payment: n => n.payment ?? null
+  },
+  Account: {
+    reminderSettings: a => a.reminderSettings ?? DEFAULT_REMINDER_SETTINGS,
+    reminderStates: a => a.reminderStates ?? [],
+    calendarFeed: a => a.calendarFeed ?? DEFAULT_CALENDAR_FEED
+  }
+};
+for (const [type, fields] of Object.entries(FIELD_DEFAULTS)) {
+  const schemaFields = (schema.getType(type) as GraphQLObjectType).getFields();
+  for (const [field, resolve] of Object.entries(fields)) schemaFields[field].resolve = resolve;
+}
 
 export const DEFAULT_USER: FakeUser = {
   id: 'user-1',
@@ -260,8 +342,7 @@ export const DEFAULT_ACCOUNT: FakeAccount = {
       // Worked out by the client, as for payments saved before the API tracked due dates
       nextDueDate: null,
       thisCycle: [],
-      renewalDate: null,
-      renewalReminderDays: 0
+      renewalDate: null
     }
   ],
   oneOffPayments: [
@@ -400,7 +481,8 @@ export const createFakeApi = ({
       thisCycle: [],
       history: [],
       renewalDate: input.renewalDate ? fromInput(input.renewalDate) : null,
-      renewalReminderDays: input.renewalReminderDays ?? 0,
+      dueReminder: input.dueReminder ?? USUAL_TIMING,
+      renewalReminder: input.renewalReminder ?? USUAL_TIMING,
       debt: input.debt ? debtFrom(input.debt) : null
     };
     const created = { ...payment, nextDueDate: dueDateFor(payment) };
@@ -787,6 +869,8 @@ export const createFakeApi = ({
       const current = requireAccount();
       ids.forEach(findRecurring);
       current.recurringPayments = current.recurringPayments.filter(p => !ids.includes(p.id));
+      for (const note of current.notes)
+        if (note.payment && ids.includes(note.payment)) note.payment = null;
       return { success: true, deletedCount: ids.length, ids };
     },
 
@@ -818,12 +902,16 @@ export const createFakeApi = ({
         throw apiError('NOTE_EXISTS', { message: 'A note with that text already exists' });
       }
       const now = String(Date.now());
-      const note = {
+      const note: FakeNote = {
         id: newId('note'),
         body: input.body,
         color: input.color ?? 'BLUE',
         createdAt: now,
-        updatedAt: now
+        updatedAt: now,
+        date: input.date ? fromInput(input.date) : null,
+        remind: input.remind ?? [],
+        repeat: input.repeat ?? 'NONE',
+        payment: input.payment ?? null
       };
       current.notes.push(note);
       return { note, success: true };
@@ -831,9 +919,59 @@ export const createFakeApi = ({
     updateNote: ({ id, input }: Args) => {
       const note = requireAccount().notes.find(n => n.id === id);
       if (!note) throw apiError('NOTE_NOT_FOUND', { message: `No note '${id}'` });
-      Object.assign(note, input, { updatedAt: String(Date.now()) });
+      Object.assign(note, input, {
+        ...('date' in input ? { date: input.date ? fromInput(input.date) : null } : {}),
+        updatedAt: String(Date.now())
+      });
       return { note, success: true };
     },
+    updateReminders: ({ input }: Args) => {
+      const current = requireAccount();
+      const states = (current.reminderStates ??= []);
+      const changed = (input.keys as string[]).map(key => {
+        let state = states.find(item => item.key === key);
+        if (!state) {
+          state = { key, read: false, cleared: false, snoozedUntil: null };
+          states.push(state);
+        }
+        if (input.action === 'READ') state.read = true;
+        if (input.action === 'CLEAR') state.cleared = true;
+        if (input.action === 'LATER') {
+          Object.assign(state, { read: false, snoozedUntil: fromInput(input.until) });
+        }
+        if (input.action === 'RESTORE')
+          Object.assign(state, { cleared: false, snoozedUntil: null });
+        return state;
+      });
+      return { states: changed, success: true };
+    },
+    updateReminderSettings: ({ input }: Args) => {
+      const current = requireAccount();
+      const { accountId: _, ...changes } = input;
+      current.reminderSettings = {
+        ...(current.reminderSettings ?? DEFAULT_REMINDER_SETTINGS),
+        ...Object.fromEntries(Object.entries(changes).filter(([, value]) => value != null))
+      };
+      return { account: current, success: true };
+    },
+    updateCalendarFeed: ({ input }: Args) => {
+      const current = requireAccount();
+      const { accountId: _, enabled, ...changes } = input;
+      const feed = { ...(current.calendarFeed ?? DEFAULT_CALENDAR_FEED), ...changes };
+      if (enabled === true && !feed.token) feed.token = `feed-token-${nextId++}`;
+      if (enabled === false) feed.token = null;
+      current.calendarFeed = feed;
+      return { account: current, success: true };
+    },
+    resetCalendarFeed: () => {
+      const current = requireAccount();
+      current.calendarFeed = {
+        ...(current.calendarFeed ?? DEFAULT_CALENDAR_FEED),
+        token: `feed-token-${nextId++}`
+      };
+      return { account: current, success: true };
+    },
+
     deleteNote: ({ id }: Args) => {
       const current = requireAccount();
       const deleted = current.notes.some(note => note.id === id);
