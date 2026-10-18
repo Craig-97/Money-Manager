@@ -66,6 +66,24 @@ export const DebtsIcon = (props: IconProps) => (
   </Svg>
 );
 
+/* Four rounded squares: the mobile nav's More */
+export const MoreIcon = (props: IconProps) => (
+  <Svg {...props}>
+    <rect x="3" y="3" width="7" height="7" rx="2" />
+    <rect x="14" y="3" width="7" height="7" rx="2" />
+    <rect x="3" y="14" width="7" height="7" rx="2" />
+    <rect x="14" y="14" width="7" height="7" rx="2" />
+  </Svg>
+);
+
+/* A head and shoulders, for the profile */
+export const ProfileIcon = (props: IconProps) => (
+  <Svg {...props}>
+    <circle cx="12" cy="8" r="4" />
+    <path d="M4 21a8 8 0 0 1 16 0" />
+  </Svg>
+);
+
 export const NotesIcon = (props: IconProps) => (
   <Svg {...props}>
     <path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" />

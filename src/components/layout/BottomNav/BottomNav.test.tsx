@@ -34,16 +34,19 @@ describe('BottomNav', () => {
     const { user, nav } = await renderPage('/dashboard', 'Dashboard');
 
     await user.click(within(nav).getByRole('button', { name: 'More' }));
-    const menu = await screen.findByRole('menu');
-    expect(
-      within(menu)
-        .getAllByRole('menuitem')
-        .map(item => item.textContent)
-    ).toEqual(['Debts', 'Notes', 'Profile']);
+    const sheet = await screen.findByRole('dialog', { name: 'More' });
+    const links = within(sheet).getAllByRole('link');
+    // Each with a line saying what's there
+    expect(links.map(link => link.textContent)).toEqual([
+      'DebtsLoans and cards you’re paying off',
+      expect.stringMatching(/^Notes(\d+ notes?|Nothing written yet)$/),
+      'ProfileTest Account'
+    ]);
 
-    await user.click(within(menu).getByRole('menuitem', { name: 'Debts' }));
+    await user.click(links[0]);
 
     expect(await screen.findByRole('heading', { level: 1, name: 'Debts' })).toBeInTheDocument();
+    expect(screen.queryByRole('dialog', { name: 'More' })).not.toBeInTheDocument();
   });
 
   it('marks More as current on the pages it opens', async () => {
@@ -56,10 +59,16 @@ describe('BottomNav', () => {
     );
 
     await user.click(more);
-    expect(await screen.findByRole('menuitem', { name: 'Notes' })).toHaveAttribute(
+    const sheet = await screen.findByRole('dialog', { name: 'More' });
+    expect(within(sheet).getByRole('link', { name: /^Notes/ })).toHaveAttribute(
       'aria-current',
       'page'
     );
+    expect(within(sheet).getByRole('link', { name: /^Debts/ })).not.toHaveAttribute('aria-current');
+
+    // Escape closes it, as any sheet
+    await user.keyboard('{Escape}');
+    expect(screen.queryByRole('dialog', { name: 'More' })).not.toBeInTheDocument();
   });
 
   it("doesn't mark More on the everyday pages", async () => {

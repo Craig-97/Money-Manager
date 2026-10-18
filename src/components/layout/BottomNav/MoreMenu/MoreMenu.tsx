@@ -1,46 +1,28 @@
-import { Fragment, ReactNode } from 'react';
-import { CircleUserRound, Ellipsis } from 'lucide-react';
-import { matchPath, useLocation, useNavigate } from 'react-router';
-import { PageName, preloadPage } from '~/app/routes/pageModules';
-import { Menu, MenuContent, MenuItem, MenuSeparator, MenuTrigger } from '~/components/ui/Menu';
-import { ROUTES } from '~/constants';
+import { useRef, useState } from 'react';
+import { matchPath, useLocation } from 'react-router';
+import * as Dialog from '@radix-ui/react-dialog';
+import { preloadPage } from '~/app/routes/pageModules';
+import { MoreIcon } from '~/components/icons';
 import { cn } from '~/lib/cn';
-import { navSection } from '../../navItems';
+import { MoreSheet } from '../MoreSheet';
+import { MORE_LINKS } from './moreLinks';
 
-interface MoreLink {
-  to: string;
-  label: string;
-  page: PageName;
-  icon: ReactNode;
-}
-
-// The pages that don't fit in the bar, then the profile, which the page header's avatar opens too
-const MORE_LINKS: MoreLink[] = [
-  ...navSection('more').map(({ to, label, page, Icon }) => ({
-    to,
-    label,
-    page,
-    icon: <Icon size={18} />
-  })),
-  {
-    to: ROUTES.profile,
-    label: 'Profile',
-    page: 'profile',
-    icon: <CircleUserRound size={18} aria-hidden="true" />
-  }
-];
-
-/* The mobile nav's last button. It's marked as the current page on any page it opens. */
+/*
+ * The mobile nav's last button. It opens a sheet above the nav with the pages that don't fit in
+ * the bar, over a dimmed page, and it's marked as current on any page it opens.
+ */
 export const MoreMenu = () => {
-  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+  const trigger = useRef<HTMLButtonElement>(null);
   const { pathname } = useLocation();
   // A debt's own page counts as Debts
   const current = MORE_LINKS.find(link => matchPath({ path: link.to, end: false }, pathname));
 
   return (
-    <Menu>
-      <MenuTrigger>
+    <Dialog.Root open={open} onOpenChange={setOpen}>
+      <Dialog.Trigger asChild>
         <button
+          ref={trigger}
           type="button"
           aria-label="More"
           // Says which of its pages is showing, as the other nav links do
@@ -49,25 +31,25 @@ export const MoreMenu = () => {
           onFocus={() => MORE_LINKS.forEach(link => preloadPage(link.page))}
           className={cn(
             'flex h-[52px] w-14 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-nav-icon hover:text-nav-active-bg',
-            'data-current:bg-nav-active-bg data-current:text-nav-active-text'
+            'aria-expanded:bg-nav-active-bg aria-expanded:text-nav-active-text data-current:bg-nav-active-bg data-current:text-nav-active-text'
           )}>
-          <Ellipsis size={22} strokeWidth={1.9} aria-hidden="true" />
+          <MoreIcon size={22} strokeWidth={1.9} />
         </button>
-      </MenuTrigger>
-      <MenuContent side="top" sideOffset={14}>
-        {MORE_LINKS.map(link => (
-          <Fragment key={link.to}>
-            {link.page === 'profile' ? <MenuSeparator /> : null}
-            <MenuItem
-              icon={link.icon}
-              aria-current={link === current ? 'page' : undefined}
-              onSelect={() => void navigate(link.to)}
-              className="aria-[current=page]:font-bold aria-[current=page]:[&_svg]:text-accent-text">
-              {link.label}
-            </MenuItem>
-          </Fragment>
-        ))}
-      </MenuContent>
-    </Menu>
+      </Dialog.Trigger>
+      <Dialog.Portal>
+        {/* Under the nav, so the nav stays clear while the page dims */}
+        <Dialog.Overlay className="fixed inset-0 z-35 bg-overlay data-[state=closed]:animate-fade-out data-[state=open]:animate-fade-in" />
+        <Dialog.Content
+          aria-describedby={undefined}
+          // The More button closes it; without this its press would close and reopen it
+          onPointerDownOutside={event => {
+            if (trigger.current?.contains(event.target as Node)) event.preventDefault();
+          }}
+          className="fixed inset-x-3 bottom-[calc(104px+env(safe-area-inset-bottom))] z-45 rounded-[28px] border border-border bg-surface px-[18px] py-2 shadow-[0_30px_60px_-20px_var(--shadow)] outline-none data-[state=closed]:animate-fade-out data-[state=open]:animate-fade-in">
+          <Dialog.Title className="sr-only">More</Dialog.Title>
+          <MoreSheet links={MORE_LINKS} current={current} onNavigate={() => setOpen(false)} />
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
   );
 };
