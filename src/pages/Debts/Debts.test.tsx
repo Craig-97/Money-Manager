@@ -256,6 +256,28 @@ describe('debts on mobile', () => {
     ).toBeInTheDocument();
   });
 
+  it('shows how much is paid off, overall and since payday', async () => {
+    const { user } = renderDebts();
+
+    const paidOff = await screen.findByRole('region', { name: 'Paid off' });
+    expect(within(paidOff).getByRole('img', { name: '41% paid off' })).toBeInTheDocument();
+    expect(paidOff).toHaveTextContent('£7,000 of £17,000 paid off');
+    expect(within(paidOff).queryByText(/since payday/)).not.toBeInTheDocument();
+
+    // An overpayment counts towards it
+    await user.click(
+      within(screen.getByRole('region', { name: 'Your debts · 3' })).getAllByRole('link')[0]
+    );
+    await user.click(await screen.findByRole('radio', { name: 'Payments' }));
+    await user.click(screen.getByRole('button', { name: 'Log an overpayment' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Log an overpayment' });
+    await user.type(within(dialog).getByLabelText('Amount'), '100');
+    await user.click(within(dialog).getByRole('button', { name: 'Log overpayment' }));
+    await user.click(await screen.findByRole('link', { name: 'Back to debts' }));
+
+    expect(await screen.findByText('£100 paid off since payday')).toBeInTheDocument();
+  });
+
   it('steps through the orders with the sort button', async () => {
     const { user } = renderDebts();
 

@@ -10,6 +10,7 @@ import { DebtsHero } from '../DebtsHero';
 import { DebtsTable } from '../DebtsTable';
 import { MobileDebtList } from '../MobileDebtList';
 import { MobileDebtsHero } from '../MobileDebtsHero';
+import { MobilePaidOff } from '../MobilePaidOff';
 import { MobilePayoffPlan } from '../MobilePayoffPlan';
 import { NoDebts } from '../NoDebts';
 import { PaidOffTile } from '../PaidOffTile';
@@ -85,6 +86,7 @@ export const DebtsContent = ({ account }: { account: Account }) => {
   ) : (
     <section aria-label="Debts" className="flex flex-col gap-3.5">
       <MobileDebtsHero debts={debts} />
+      <MobilePaidOff debts={debts} />
       {tabs}
       {view === 'debts' ? (
         <MobileDebtList debts={debts} />
