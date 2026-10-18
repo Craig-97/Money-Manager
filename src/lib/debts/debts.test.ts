@@ -2,11 +2,16 @@ import { describe, expect, it } from 'vitest';
 import {
   DebtPayment,
   debtTotals,
+  extraPerPayment,
   isDebt,
   monthFromNow,
+  monthlyInterest,
   monthlyPayment,
+  paidOffShare,
+  paidOffThisCycle,
   payoffOrder,
-  simulatePayoff
+  simulatePayoff,
+  startedAt
 } from './debts';
 
 const debt = (
@@ -159,5 +164,42 @@ describe('debtTotals', () => {
       paidOffShare: 0,
       monthly: 0
     });
+  });
+});
+
+describe('startedAt and paidOffShare', () => {
+  it("use the starting balance, or the balance now when it isn't known", () => {
+    expect(startedAt(card)).toBe(3500);
+    expect(paidOffShare(card)).toBeCloseTo(1160 / 3500);
+    const unknown = debt('x', { balance: 500, apr: 0, amount: 50 });
+    expect(startedAt(unknown)).toBe(500);
+    expect(paidOffShare(unknown)).toBe(0);
+  });
+});
+
+describe('monthlyInterest', () => {
+  it("adds up a month's interest on each balance", () => {
+    // £2,340 × 24.9% ÷ 12 + £6,860 × 6.9% ÷ 12
+    expect(monthlyInterest(all)).toBeCloseTo(48.56 + 39.45, 1);
+  });
+});
+
+describe('paidOffThisCycle', () => {
+  it('adds up what the payments marked paid since payday took off', () => {
+    const paidCard = {
+      ...card,
+      thisCycle: [
+        { id: 'r1', kind: 'paid' as const, dates: [], balanceChange: -150, debtReduction: 101.44 },
+        { id: 'r2', kind: 'skipped' as const, dates: [], balanceChange: 0, debtReduction: 0 }
+      ]
+    };
+    expect(paidOffThisCycle([paidCard, car])).toBe(101.44);
+  });
+});
+
+describe('extraPerPayment', () => {
+  it("spreads a month's extra over each payment", () => {
+    expect(extraPerPayment({ frequency: 'MONTHLY' }, 50)).toBe(50);
+    expect(extraPerPayment({ frequency: 'WEEKLY' }, 52)).toBe(12);
   });
 });

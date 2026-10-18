@@ -1,7 +1,7 @@
 import { createApolloClient } from '~/graphql/client/createApolloClient';
 import { addDays, startOfToday, toIsoDate } from '~/lib/dates';
 import { useAuthStore } from '~/state/auth';
-import { apiDate, createFakeApi, DEFAULT_USER, FakeAccount } from '~/test/fakeApi';
+import { apiDate, createFakeApi, DEFAULT_USER, FakeAccount, fakeRecord } from '~/test/fakeApi';
 
 /*
  * Development only (VITE_MOCK_API=true): the app runs against the in-memory fake API from the
@@ -148,11 +148,37 @@ const demoDebt = (
   lastPaymentDate: null,
   nextDueDate: fromToday(dueInDays),
   thisCycle: [],
-  history: [],
+  history: pastPayments(amount, dueInDays, debt),
   renewalDate: null,
   renewalReminderDays: 0,
   debt: { ...debt, balanceUpdatedAt: fromToday(-21) }
 });
+
+/*
+ * Its last three monthly payments, newest first, from before this cycle so they can't be undone,
+ * with the interest each one paid as the API works it out
+ */
+const pastPayments = (
+  amount: number,
+  dueInDays: number,
+  { balance, apr }: { balance: number; apr: number }
+) => {
+  let after = balance;
+  return [1, 2, 3].map(monthsAgo => {
+    const before = (after + amount) / (1 + apr / 100 / 12);
+    const interest = Math.round(before * (apr / 100 / 12) * 100) / 100;
+    const record = {
+      ...fakeRecord('PAID', [fromToday(dueInDays - monthsAgo * 30)], -amount, {
+        interest,
+        reduction: Math.round((amount - interest) * 100) / 100,
+        balanceAfter: Math.round(after * 100) / 100
+      }),
+      open: false
+    };
+    after = before;
+    return record;
+  });
+};
 
 const demoDebts = () => [
   demoDebt('credit-card', 'Credit card', 'CREDIT_CARD', 150, 13, {

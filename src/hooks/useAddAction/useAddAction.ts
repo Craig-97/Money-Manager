@@ -25,7 +25,8 @@ export const useAddAction = (): AddAction => {
   );
   const openNote = useNoteComposerStore(s => s.openComposer);
   const onRecurring = useMatch(ROUTES.recurring) !== null;
-  const onDebts = useMatch(ROUTES.debts) !== null;
+  // A debt's own page too
+  const onDebts = useMatch({ path: ROUTES.debts, end: false }) !== null;
   const onNotes = useMatch(ROUTES.notes) !== null;
 
   if (onNotes) return { label: 'Add note', open: openNote, dialog: false };

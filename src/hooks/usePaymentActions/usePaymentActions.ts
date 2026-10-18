@@ -48,7 +48,7 @@ export const usePaymentActions = (accountId: string) => {
     const payments = all.filter(payment => payment.kind === 'recurring' || !payment.paidAt);
     if (!payments.length) return;
     try {
-      await markPaid({
+      const { data } = await markPaid({
         variables: {
           input: {
             accountId,
@@ -57,7 +57,19 @@ export const usePaymentActions = (accountId: string) => {
           }
         }
       });
-      showToast({ message: `${describe(payments)} marked as paid${balanceNote(payments, true)}` });
+      // A debt that payment cleared offers to go, as there's nothing left to pay
+      const after = data?.markPaymentsPaid.account?.recurringPayments ?? [];
+      const cleared = payments.filter(
+        payment =>
+          payment.kind === 'recurring' &&
+          payment.debt &&
+          after.find(updated => updated?.id === payment.id)?.debt?.balance === 0
+      );
+      if (cleared.length === 1) showPaidOff(cleared[0]);
+      else
+        showToast({
+          message: `${describe(payments)} marked as paid${balanceNote(payments, true)}`
+        });
     } catch (error) {
       showError(error);
     }
@@ -144,7 +156,14 @@ export const usePaymentActions = (accountId: string) => {
     }
   };
 
-  return { pay, undo, skip, remove };
+  /* A debt's been paid off: say so, and offer to delete it as there's nothing left to pay */
+  const showPaidOff = (payment: Payment) =>
+    showToast({
+      message: `${payment.name} is paid off`,
+      action: { label: 'Delete', onClick: () => void remove([payment]) }
+    });
+
+  return { pay, undo, skip, remove, showPaidOff };
 };
 
 export type PaymentActions = ReturnType<typeof usePaymentActions>;

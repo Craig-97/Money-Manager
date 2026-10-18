@@ -401,6 +401,7 @@ export type Query = {
   __typename: 'Query';
   account: Maybe<Account>;
   passwordResetTokenValid: PasswordResetTokenCheck;
+  recurringPayment: Maybe<RecurringPayment>;
   tokenFindUser: Maybe<User>;
 };
 
@@ -410,6 +411,10 @@ export type QueryAccountArgs = {
 
 export type QueryPasswordResetTokenValidArgs = {
   token: Scalars['String']['input'];
+};
+
+export type QueryRecurringPaymentArgs = {
+  id: Scalars['ID']['input'];
 };
 
 export type RecurringPayment = {

@@ -68,6 +68,7 @@ export const PaymentDialog = () => {
       title={title}
       onBack={target?.fromChooser ? openChooser : undefined}
       backLabel="Back to payment types"
+      initialFocusId={target?.focusBalance ? 'payment-balance' : undefined}
       footer={
         target ? (
           <>

@@ -150,3 +150,37 @@ export const debtTotals = (debts: readonly DebtPayment[]): DebtTotals => {
     monthly: roundPence(monthly)
   };
 };
+
+/* What was borrowed: the starting balance, or the balance now when that isn't known or is lower */
+export const startedAt = (debt: DebtPayment) =>
+  Math.max(debt.debt.startingBalance ?? debt.debt.balance, debt.debt.balance);
+
+/* How much of what was borrowed is paid off, 0 to 1 */
+export const paidOffShare = (debt: DebtPayment) => {
+  const started = startedAt(debt);
+  return started > 0 ? (started - debt.debt.balance) / started : 0;
+};
+
+/* About how much of this month's payments goes on interest, from each debt's APR */
+export const monthlyInterest = (debts: readonly PayoffDebt[]) =>
+  roundPence(debts.reduce((sum, debt) => sum + (debt.debt.balance * debt.debt.apr) / 100 / 12, 0));
+
+/* How much the payments marked paid since payday took off the debts */
+export const paidOffThisCycle = (debts: readonly DebtPayment[]) =>
+  roundPence(
+    debts.reduce(
+      (sum, debt) =>
+        sum +
+        debt.thisCycle
+          .filter(record => record.kind === 'paid')
+          .reduce((total, record) => total + record.debtReduction, 0),
+      0
+    )
+  );
+
+/*
+ * Extra a month as an amount on each of a debt's payments, so a weekly debt gets a quarter or so of
+ * it each week. Rounded to the penny.
+ */
+export const extraPerPayment = (debt: Pick<DebtPayment, 'frequency'>, extraPerMonth: number) =>
+  roundPence(extraPerMonth / PER_MONTH[debt.frequency]);

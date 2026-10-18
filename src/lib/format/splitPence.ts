@@ -1,5 +1,6 @@
-import { formatBalance } from '~/lib/format';
+import { formatBalance } from './money';
 
+/* "£10,000" and ".00", for the big figures that show the pence smaller */
 export const splitPence = (amount: number) => {
   const text = formatBalance(amount);
   const dot = text.lastIndexOf('.');

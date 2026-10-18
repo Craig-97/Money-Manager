@@ -3,6 +3,7 @@ import { Account } from '~/hooks/useAccount';
 import { usePayCycle } from '~/hooks/usePayCycle';
 import { usePaymentActions } from '~/hooks/usePaymentActions';
 import { usePaymentSelection } from '~/hooks/usePaymentSelection';
+import { isDebt } from '~/lib/debts';
 import { canPay, DEFAULT_SORT, PaymentSort, toPayments } from '~/lib/payments';
 import {
   ALL_CATEGORIES,
@@ -46,6 +47,8 @@ export const useRecurring = (account: Account) => {
     cycle,
     actions,
     payments,
+    // The ones paying off a loan or card, for the Debts card
+    debts: payments.filter(isDebt),
     isEmpty: payments.length === 0,
     totals: listTotals(payments, cycle, today),
     renewals: upcomingRenewals(payments, today),

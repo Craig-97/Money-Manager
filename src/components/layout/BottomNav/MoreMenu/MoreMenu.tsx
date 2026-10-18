@@ -34,7 +34,8 @@ const MORE_LINKS: MoreLink[] = [
 export const MoreMenu = () => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const current = MORE_LINKS.find(link => matchPath(link.to, pathname));
+  // A debt's own page counts as Debts
+  const current = MORE_LINKS.find(link => matchPath({ path: link.to, end: false }, pathname));
 
   return (
     <Menu>

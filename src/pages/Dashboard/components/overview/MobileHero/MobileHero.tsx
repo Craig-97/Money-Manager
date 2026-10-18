@@ -1,13 +1,12 @@
 import { Calendar, Check, PenLine, Plus, TriangleAlert, X } from 'lucide-react';
 import { Button } from '~/components/ui/Button';
 import { cn } from '~/lib/cn';
-import { formatBalance, formatMoney, formatPayment } from '~/lib/format';
+import { formatBalance, formatMoney, formatPayment, splitPence } from '~/lib/format';
 import { formatShortDate } from '~/lib/payments';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
 import { Dashboard } from '../../../hooks';
 import { PaydayOverrideDialog } from '../../payday/PaydayOverrideDialog';
 import { CycleBar } from '../CycleBar';
-import { splitPence } from '../splitPence';
 
 const heroEditClasses =
   '-my-3 -mr-3 inline-flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full text-hero-muted hover:bg-hero-chip hover:text-hero-text';

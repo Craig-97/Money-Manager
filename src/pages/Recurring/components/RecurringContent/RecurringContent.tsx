@@ -1,3 +1,4 @@
+import { DebtsCard } from '~/components/debts';
 import { MEDIA } from '~/constants';
 import { Account } from '~/hooks/useAccount';
 import { useMediaQuery } from '~/hooks/useMediaQuery';
@@ -31,6 +32,9 @@ export const RecurringContent = ({ account }: { account: Account }) => {
   ) : (
     <section aria-label="Recurring payments" className="flex flex-col gap-3.5">
       <MobileSummary recurring={recurring} />
+      {recurring.debts.length ? (
+        <DebtsCard debts={recurring.debts} today={recurring.today} />
+      ) : null}
       <RenewalsTile recurring={recurring} compact />
       {recurring.isEmpty ? null : <MobileFilters recurring={recurring} />}
       <MobileRecurringList recurring={recurring} />

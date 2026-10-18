@@ -18,6 +18,10 @@ interface ModalProps {
   children: ReactNode;
   // Buttons pinned below the scrolling body
   footer?: ReactNode;
+  // Wider on desktop, for a table
+  wide?: boolean;
+  // The field to focus when it opens, in place of the first control
+  initialFocusId?: string;
 }
 
 /*
@@ -32,7 +36,9 @@ export const Modal = ({
   onBack,
   backLabel = 'Back',
   children,
-  footer
+  footer,
+  wide = false,
+  initialFocusId
 }: ModalProps) => {
   const isDesktop = useMediaQuery(MEDIA.desktop);
 
@@ -42,10 +48,18 @@ export const Modal = ({
         <Dialog.Overlay className="fixed inset-0 z-90 bg-overlay data-[state=closed]:animate-fade-out data-[state=open]:animate-fade-in" />
         <Dialog.Content
           {...(description ? {} : { 'aria-describedby': undefined })}
+          onOpenAutoFocus={event => {
+            const field = initialFocusId ? document.getElementById(initialFocusId) : null;
+            if (!field) return;
+            event.preventDefault();
+            field.focus();
+          }}
           className={cn(
             'fixed z-90 flex flex-col overflow-hidden border border-border bg-surface outline-none',
+            isDesktop &&
+              (wide ? 'w-[min(640px,calc(100%-32px))]' : 'w-[min(560px,calc(100%-32px))]'),
             isDesktop
-              ? 'top-1/2 left-1/2 max-h-[calc(100dvh-48px)] w-[min(560px,calc(100%-32px))] -translate-1/2 rounded-[32px] shadow-[0_40px_90px_-30px_var(--shadow)] data-[state=closed]:animate-dialog-out data-[state=open]:animate-dialog-in'
+              ? 'top-1/2 left-1/2 max-h-[calc(100dvh-48px)] -translate-1/2 rounded-[32px] shadow-[0_40px_90px_-30px_var(--shadow)] data-[state=closed]:animate-dialog-out data-[state=open]:animate-dialog-in'
               : 'inset-x-0 bottom-0 max-h-[min(760px,calc(100dvh-24px))] rounded-t-[28px] border-b-0 pt-2.5 shadow-[0_-20px_48px_-16px_var(--shadow)] data-[state=closed]:animate-sheet-out data-[state=open]:animate-sheet-in'
           )}>
           {isDesktop ? null : (

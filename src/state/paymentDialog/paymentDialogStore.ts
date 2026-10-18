@@ -14,18 +14,25 @@ type PaymentDialogView =
       fromChooser?: boolean;
       // Opened from Debts: a recurring payment that's always a debt, with no switch to stop it
       asDebt?: boolean;
+      // Opened to update a debt's balance, so that field has focus
+      focusBalance?: boolean;
     };
 
 interface FormOptions {
   fromChooser?: boolean;
   asDebt?: boolean;
+  focusBalance?: boolean;
 }
 
 interface PaymentDialogState {
   dialog: PaymentDialogView;
   openChooser: () => void;
   openAdd: (kind: PaymentKind, options?: FormOptions) => void;
-  openEdit: (kind: PaymentKind, paymentId: string, options?: Pick<FormOptions, 'asDebt'>) => void;
+  openEdit: (
+    kind: PaymentKind,
+    paymentId: string,
+    options?: Pick<FormOptions, 'asDebt' | 'focusBalance'>
+  ) => void;
   // Adding a debt: a recurring payment that's paying one off
   openAddDebt: () => void;
   close: () => void;

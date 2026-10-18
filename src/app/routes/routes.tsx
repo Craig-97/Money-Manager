@@ -77,6 +77,10 @@ export const routes: RouteObject[] = [
                     lazy: async () => ({ Component: (await pageModules.debts()).Debts })
                   },
                   {
+                    path: ROUTES.debt,
+                    lazy: async () => ({ Component: (await pageModules.debt()).DebtDetail })
+                  },
+                  {
                     path: ROUTES.notes,
                     lazy: async () => ({ Component: (await pageModules.notes()).Notes })
                   },

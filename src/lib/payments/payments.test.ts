@@ -19,7 +19,8 @@ const record = (kind: 'PAID' | 'SKIPPED', dates: string[]): CycleRecord => ({
   id: `record-${++records}`,
   kind,
   dates: dates.map(apiDate),
-  balanceChange: kind === 'PAID' ? -10 : 0
+  balanceChange: kind === 'PAID' ? -10 : 0,
+  debt: null
 });
 const paid = (...dates: string[]) => record('PAID', dates);
 const skipped = (...dates: string[]) => record('SKIPPED', dates);

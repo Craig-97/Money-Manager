@@ -1,4 +1,5 @@
 import { Repeat } from 'lucide-react';
+import { DebtLeft } from '~/components/debts';
 import { Checkbox, CheckboxHitArea } from '~/components/form/Checkbox';
 import {
   DueCell,
@@ -9,6 +10,7 @@ import {
   TimesDue
 } from '~/components/payments/PaymentParts';
 import { cn } from '~/lib/cn';
+import { isDebt } from '~/lib/debts';
 import { formatPayment } from '~/lib/format';
 import { categoryLabel, dueInfo, RecurringPayment, renewalOf, scheduleText } from '~/lib/payments';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
@@ -57,7 +59,11 @@ export const RecurringRow = ({
             {beforePayday ? <TimesDue payment={payment} cycle={cycle} today={today} /> : null}
           </div>
           <div className="mt-0.5 flex items-center gap-2 text-xs font-medium text-muted">
-            <span className="truncate">{categoryLabel(payment.category)}</span>
+            {isDebt(payment) ? (
+              <DebtLeft debt={payment} />
+            ) : (
+              <span className="truncate">{categoryLabel(payment.category)}</span>
+            )}
             {beforePayday ? (
               <StatusTag payment={payment} cycle={cycle} className="h-[22px] wide:hidden" />
             ) : renewal ? (

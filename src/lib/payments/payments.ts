@@ -21,6 +21,8 @@ export interface CycleRecord {
   dates: Date[];
   // What it did to the bank balance: negative for money out, 0 for a skip
   balanceChange: number;
+  // How much less a debt owes after it; 0 when the payment isn't a debt
+  debtReduction: number;
 }
 
 // A loan or card the payment is paying off
@@ -106,7 +108,8 @@ const toRecurringPayment = (
       // Only pays and skips count towards the cycle
       kind: CYCLE_KINDS[record.kind as keyof typeof CYCLE_KINDS],
       dates: record.dates.map(date => fromApiDate(date)!),
-      balanceChange: record.balanceChange
+      balanceChange: record.balanceChange,
+      debtReduction: record.debt?.reduction ?? 0
     })),
     renewalDate: fromApiDate(payment.renewalDate),
     renewalReminderDays: payment.renewalReminderDays,

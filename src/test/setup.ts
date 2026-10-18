@@ -3,7 +3,9 @@
 import '@testing-library/jest-dom/vitest';
 import { afterEach } from 'vitest';
 import { cleanup, configure } from '@testing-library/react';
+import { useDebtDialogStore } from '~/state/debtDialog';
 import { useNoteComposerStore } from '~/state/noteComposer';
+import { usePaymentDialogStore } from '~/state/paymentDialog';
 import { DEFAULT_ACCENT, usePrefsStore } from '~/state/prefs';
 import { useRenewalSnoozeStore } from '~/state/renewalSnooze';
 import { installMatchMedia, resetViewport } from './viewport';
@@ -47,6 +49,8 @@ afterEach(() => {
   usePrefsStore.setState({ theme: 'dark', accent: DEFAULT_ACCENT });
   useRenewalSnoozeStore.setState({ until: {} });
   useNoteComposerStore.setState({ open: false, requests: 0 });
+  usePaymentDialogStore.setState({ dialog: { view: 'closed' } });
+  useDebtDialogStore.setState({ dialog: { view: 'closed' } });
   resetViewport();
   delete document.documentElement.dataset.theme;
   delete document.documentElement.dataset.accent;

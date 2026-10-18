@@ -45,6 +45,7 @@ export type AccountQuery = {
         kind: Types.PaymentRecordKind;
         dates: Array<string>;
         balanceChange: number;
+        debt: { __typename: 'PaymentRecordDebt'; reduction: number } | null;
       }>;
       debt: {
         __typename: 'Debt';
@@ -111,6 +112,7 @@ export type AccountFieldsFragment = {
       kind: Types.PaymentRecordKind;
       dates: Array<string>;
       balanceChange: number;
+      debt: { __typename: 'PaymentRecordDebt'; reduction: number } | null;
     }>;
     debt: {
       __typename: 'Debt';
@@ -183,6 +185,7 @@ export type CreateAccountMutation = {
           kind: Types.PaymentRecordKind;
           dates: Array<string>;
           balanceChange: number;
+          debt: { __typename: 'PaymentRecordDebt'; reduction: number } | null;
         }>;
         debt: {
           __typename: 'Debt';
@@ -244,6 +247,7 @@ export type LogDebtOverpaymentMutation = {
           kind: Types.PaymentRecordKind;
           dates: Array<string>;
           balanceChange: number;
+          debt: { __typename: 'PaymentRecordDebt'; reduction: number } | null;
         }>;
         debt: {
           __typename: 'Debt';
@@ -287,6 +291,7 @@ export type MarkPaymentsPaidMutation = {
           kind: Types.PaymentRecordKind;
           dates: Array<string>;
           balanceChange: number;
+          debt: { __typename: 'PaymentRecordDebt'; reduction: number } | null;
         }>;
         debt: {
           __typename: 'Debt';
@@ -340,6 +345,7 @@ export type MarkPaymentsUnpaidMutation = {
           kind: Types.PaymentRecordKind;
           dates: Array<string>;
           balanceChange: number;
+          debt: { __typename: 'PaymentRecordDebt'; reduction: number } | null;
         }>;
         debt: {
           __typename: 'Debt';
@@ -392,6 +398,7 @@ export type SkipRecurringPaymentsMutation = {
           kind: Types.PaymentRecordKind;
           dates: Array<string>;
           balanceChange: number;
+          debt: { __typename: 'PaymentRecordDebt'; reduction: number } | null;
         }>;
         debt: {
           __typename: 'Debt';
@@ -436,6 +443,7 @@ export type StartPaydayCycleMutation = {
           kind: Types.PaymentRecordKind;
           dates: Array<string>;
           balanceChange: number;
+          debt: { __typename: 'PaymentRecordDebt'; reduction: number } | null;
         }>;
         debt: {
           __typename: 'Debt';
@@ -489,6 +497,7 @@ export type UndoDebtOverpaymentMutation = {
           kind: Types.PaymentRecordKind;
           dates: Array<string>;
           balanceChange: number;
+          debt: { __typename: 'PaymentRecordDebt'; reduction: number } | null;
         }>;
         debt: {
           __typename: 'Debt';
@@ -824,6 +833,7 @@ export type CreateRecurringPaymentMutation = {
         kind: Types.PaymentRecordKind;
         dates: Array<string>;
         balanceChange: number;
+        debt: { __typename: 'PaymentRecordDebt'; reduction: number } | null;
       }>;
       debt: {
         __typename: 'Debt';
@@ -834,6 +844,32 @@ export type CreateRecurringPaymentMutation = {
       } | null;
     } | null;
   };
+};
+
+export type DebtHistoryQueryVariables = Exact<{
+  id: string | number;
+}>;
+
+export type DebtHistoryQuery = {
+  recurringPayment: {
+    __typename: 'RecurringPayment';
+    id: string;
+    history: Array<{
+      __typename: 'PaymentRecord';
+      id: string;
+      kind: Types.PaymentRecordKind;
+      dates: Array<string>;
+      balanceChange: number;
+      open: boolean;
+      createdAt: string;
+      debt: {
+        __typename: 'PaymentRecordDebt';
+        interest: number;
+        reduction: number;
+        balanceAfter: number;
+      } | null;
+    }>;
+  } | null;
 };
 
 export type OneOffPaymentFieldsFragment = {
@@ -866,6 +902,7 @@ export type RecurringPaymentFieldsFragment = {
     kind: Types.PaymentRecordKind;
     dates: Array<string>;
     balanceChange: number;
+    debt: { __typename: 'PaymentRecordDebt'; reduction: number } | null;
   }>;
   debt: {
     __typename: 'Debt';
@@ -924,6 +961,7 @@ export type UpdateRecurringPaymentMutation = {
         kind: Types.PaymentRecordKind;
         dates: Array<string>;
         balanceChange: number;
+        debt: { __typename: 'PaymentRecordDebt'; reduction: number } | null;
       }>;
       debt: {
         __typename: 'Debt';
@@ -1074,7 +1112,15 @@ export const RecurringPaymentFieldsFragmentDoc = {
                 { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'kind' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'dates' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'balanceChange' } }
+                { kind: 'Field', name: { kind: 'Name', value: 'balanceChange' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'debt' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [{ kind: 'Field', name: { kind: 'Name', value: 'reduction' } }]
+                  }
+                }
               ]
             }
           },
@@ -1248,7 +1294,15 @@ export const AccountFieldsFragmentDoc = {
                 { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'kind' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'dates' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'balanceChange' } }
+                { kind: 'Field', name: { kind: 'Name', value: 'balanceChange' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'debt' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [{ kind: 'Field', name: { kind: 'Name', value: 'reduction' } }]
+                  }
+                }
               ]
             }
           },
@@ -1444,7 +1498,15 @@ export const AccountDocument = {
                 { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'kind' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'dates' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'balanceChange' } }
+                { kind: 'Field', name: { kind: 'Name', value: 'balanceChange' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'debt' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [{ kind: 'Field', name: { kind: 'Name', value: 'reduction' } }]
+                  }
+                }
               ]
             }
           },
@@ -1654,7 +1716,15 @@ export const CreateAccountDocument = {
                 { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'kind' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'dates' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'balanceChange' } }
+                { kind: 'Field', name: { kind: 'Name', value: 'balanceChange' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'debt' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [{ kind: 'Field', name: { kind: 'Name', value: 'reduction' } }]
+                  }
+                }
               ]
             }
           },
@@ -1850,7 +1920,15 @@ export const LogDebtOverpaymentDocument = {
                 { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'kind' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'dates' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'balanceChange' } }
+                { kind: 'Field', name: { kind: 'Name', value: 'balanceChange' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'debt' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [{ kind: 'Field', name: { kind: 'Name', value: 'reduction' } }]
+                  }
+                }
               ]
             }
           },
@@ -1975,7 +2053,15 @@ export const MarkPaymentsPaidDocument = {
                 { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'kind' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'dates' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'balanceChange' } }
+                { kind: 'Field', name: { kind: 'Name', value: 'balanceChange' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'debt' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [{ kind: 'Field', name: { kind: 'Name', value: 'reduction' } }]
+                  }
+                }
               ]
             }
           },
@@ -2117,7 +2203,15 @@ export const MarkPaymentsUnpaidDocument = {
                 { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'kind' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'dates' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'balanceChange' } }
+                { kind: 'Field', name: { kind: 'Name', value: 'balanceChange' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'debt' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [{ kind: 'Field', name: { kind: 'Name', value: 'reduction' } }]
+                  }
+                }
               ]
             }
           },
@@ -2245,7 +2339,15 @@ export const SkipRecurringPaymentsDocument = {
                 { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'kind' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'dates' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'balanceChange' } }
+                { kind: 'Field', name: { kind: 'Name', value: 'balanceChange' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'debt' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [{ kind: 'Field', name: { kind: 'Name', value: 'reduction' } }]
+                  }
+                }
               ]
             }
           },
@@ -2371,7 +2473,15 @@ export const StartPaydayCycleDocument = {
                 { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'kind' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'dates' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'balanceChange' } }
+                { kind: 'Field', name: { kind: 'Name', value: 'balanceChange' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'debt' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [{ kind: 'Field', name: { kind: 'Name', value: 'reduction' } }]
+                  }
+                }
               ]
             }
           },
@@ -2500,7 +2610,15 @@ export const UndoDebtOverpaymentDocument = {
                 { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'kind' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'dates' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'balanceChange' } }
+                { kind: 'Field', name: { kind: 'Name', value: 'balanceChange' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'debt' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [{ kind: 'Field', name: { kind: 'Name', value: 'reduction' } }]
+                  }
+                }
               ]
             }
           },
@@ -3664,7 +3782,15 @@ export const CreateRecurringPaymentDocument = {
                 { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'kind' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'dates' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'balanceChange' } }
+                { kind: 'Field', name: { kind: 'Name', value: 'balanceChange' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'debt' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [{ kind: 'Field', name: { kind: 'Name', value: 'reduction' } }]
+                  }
+                }
               ]
             }
           },
@@ -3689,6 +3815,82 @@ export const CreateRecurringPaymentDocument = {
   CreateRecurringPaymentMutation,
   CreateRecurringPaymentMutationVariables
 >;
+export const DebtHistoryDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'DebtHistory' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } }
+          }
+        }
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'recurringPayment' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'id' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'id' } }
+              }
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'history' },
+                  arguments: [
+                    {
+                      kind: 'Argument',
+                      name: { kind: 'Name', value: 'limit' },
+                      value: { kind: 'IntValue', value: '50' }
+                    }
+                  ],
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'kind' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'dates' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'balanceChange' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'open' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'debt' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'interest' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'reduction' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'balanceAfter' } }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+} as unknown as DocumentNode<DebtHistoryQuery, DebtHistoryQueryVariables>;
 export const UpdateOneOffPaymentDocument = {
   kind: 'Document',
   definitions: [
@@ -3868,7 +4070,15 @@ export const UpdateRecurringPaymentDocument = {
                 { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'kind' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'dates' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'balanceChange' } }
+                { kind: 'Field', name: { kind: 'Name', value: 'balanceChange' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'debt' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [{ kind: 'Field', name: { kind: 'Name', value: 'reduction' } }]
+                  }
+                }
               ]
             }
           },

@@ -158,7 +158,7 @@ describe('adding a debt from Debts', () => {
       debt: { balance: 600, apr: 29.9, startingBalance: 900 }
     });
     expect(
-      within(screen.getByRole('region', { name: 'Your debts' })).getByText('Store card')
+      within(await screen.findByRole('table', { name: 'Debts' })).getByText('Store card')
     ).toBeInTheDocument();
   });
 });

@@ -18,6 +18,7 @@ type Query {
   tokenFindUser: User
   passwordResetTokenValid(token: String!): PasswordResetTokenCheck!
   account(id: ID): Account
+  recurringPayment(id: ID!): RecurringPayment
 }
 
 type User {

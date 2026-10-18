@@ -454,6 +454,10 @@ export const createFakeApi = ({
       if (id && id !== current.id) throw apiError('ACCOUNT_NOT_FOUND', `No account '${id}'`);
       return current;
     },
+    recurringPayment: ({ id }: Args) => {
+      const payment = findRecurring(id);
+      return { ...payment, history: payment.history ?? [] };
+    },
     // Messages and codes as the real API sends them
     // The refresh cookie is always good here
     refreshSession: authData,
