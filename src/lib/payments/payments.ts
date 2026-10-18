@@ -21,8 +21,6 @@ export interface CycleRecord {
   dates: Date[];
   // What it did to the bank balance: negative for money out, 0 for a skip
   balanceChange: number;
-  // How much less a debt owes after it; 0 when the payment isn't a debt
-  debtReduction: number;
 }
 
 // A loan or card the payment is paying off
@@ -35,6 +33,8 @@ export interface Debt {
   apr: number;
   // When the balance was last set by hand, e.g. from a statement
   balanceUpdatedAt: Date | null;
+  // How much less it owes since payday, from payments and overpayments
+  paidOffThisCycle: number;
 }
 
 interface BasePayment {
@@ -108,8 +108,7 @@ const toRecurringPayment = (
       // Only pays and skips count towards the cycle
       kind: CYCLE_KINDS[record.kind as keyof typeof CYCLE_KINDS],
       dates: record.dates.map(date => fromApiDate(date)!),
-      balanceChange: record.balanceChange,
-      debtReduction: record.debt?.reduction ?? 0
+      balanceChange: record.balanceChange
     })),
     renewalDate: fromApiDate(payment.renewalDate),
     renewalReminderDays: payment.renewalReminderDays,
@@ -118,7 +117,8 @@ const toRecurringPayment = (
           balance: payment.debt.balance,
           startingBalance: payment.debt.startingBalance ?? null,
           apr: payment.debt.apr,
-          balanceUpdatedAt: fromApiDate(payment.debt.balanceUpdatedAt)
+          balanceUpdatedAt: fromApiDate(payment.debt.balanceUpdatedAt),
+          paidOffThisCycle: payment.debt.paidOffThisCycle
         }
       : null
   };

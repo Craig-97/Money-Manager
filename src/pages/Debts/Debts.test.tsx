@@ -191,12 +191,14 @@ describe('debts on desktop', () => {
       { input: { accountId: 'account-1', recurringPaymentId: 'credit-card', amount: 200 } }
     ]);
     expect(screen.getByRole('article', { name: 'Left to pay' })).toHaveTextContent('£9,800.00');
+    expect(screen.getByText('£200 paid off since payday')).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'Undo' }));
 
     expect(await screen.findByText('Took back the overpayment on Credit card')).toBeInTheDocument();
     expect(api.callsTo('UndoDebtOverpayment')).toHaveLength(1);
     expect(screen.getByRole('article', { name: 'Left to pay' })).toHaveTextContent('£10,000.00');
+    expect(screen.queryByText(/paid off since payday/)).not.toBeInTheDocument();
   });
 
   it('opens the edit form ready to type a new balance', async () => {

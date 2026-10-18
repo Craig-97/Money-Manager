@@ -17,7 +17,7 @@ export const PaidOffTile = ({ debts: model }: { debts: Debts }) => {
         </h2>
         {paidThisCycle > 0 ? (
           <span className="rounded-full bg-accent-soft px-3 py-1.5 text-[13px] font-bold text-accent-text">
-            Up {formatMoney(paidThisCycle, { whole: true })} since payday
+            {formatMoney(paidThisCycle, { whole: true })} paid off since payday
           </span>
         ) : null}
       </div>

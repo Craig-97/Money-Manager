@@ -23,7 +23,13 @@ const card: DebtPayment = {
   thisCycle: [],
   renewalDate: null,
   renewalReminderDays: 0,
-  debt: { balance: 2340, startingBalance: 3500, apr: 24.9, balanceUpdatedAt: null }
+  debt: {
+    balance: 2340,
+    startingBalance: 3500,
+    apr: 24.9,
+    balanceUpdatedAt: null,
+    paidOffThisCycle: 0
+  }
 };
 
 const record = (

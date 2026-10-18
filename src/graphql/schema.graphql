@@ -291,6 +291,7 @@ type Debt {
   startingBalance: Float
   apr: Float!
   balanceUpdatedAt: String
+  paidOffThisCycle: Float!
 }
 
 input DebtInput {

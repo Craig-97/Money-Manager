@@ -16,15 +16,12 @@ fragment RecurringPaymentFields on RecurringPayment {
     kind
     dates
     balanceChange
-    # What a payment took off a debt, for how much has been paid off since payday
-    debt {
-      reduction
-    }
   }
   debt {
     balance
     startingBalance
     apr
     balanceUpdatedAt
+    paidOffThisCycle
   }
 }

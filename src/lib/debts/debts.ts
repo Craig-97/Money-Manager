@@ -165,18 +165,9 @@ export const paidOffShare = (debt: DebtPayment) => {
 export const monthlyInterest = (debts: readonly PayoffDebt[]) =>
   roundPence(debts.reduce((sum, debt) => sum + (debt.debt.balance * debt.debt.apr) / 100 / 12, 0));
 
-/* How much the payments marked paid since payday took off the debts */
+/* How much less the debts owe since payday, from payments marked paid and overpayments */
 export const paidOffThisCycle = (debts: readonly DebtPayment[]) =>
-  roundPence(
-    debts.reduce(
-      (sum, debt) =>
-        sum +
-        debt.thisCycle
-          .filter(record => record.kind === 'paid')
-          .reduce((total, record) => total + record.debtReduction, 0),
-      0
-    )
-  );
+  roundPence(debts.reduce((sum, debt) => sum + debt.debt.paidOffThisCycle, 0));
 
 /*
  * Extra a month as an amount on each of a debt's payments, so a weekly debt gets a quarter or so of

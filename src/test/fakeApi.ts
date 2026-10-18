@@ -1,6 +1,13 @@
 import { Observable } from 'rxjs';
 import { ApolloLink } from '@apollo/client';
-import { buildSchema, execute, ExecutionResult, GraphQLError, parse } from 'graphql';
+import {
+  buildSchema,
+  execute,
+  ExecutionResult,
+  GraphQLError,
+  GraphQLObjectType,
+  parse
+} from 'graphql';
 import { ThemePreference } from '~/graphql/generated';
 import { addDays, fromApiDate, startOfToday, toIsoDate } from '~/lib/dates';
 import { nextOccurrence, occurrencesBetween, Schedule } from '~/lib/payments';
@@ -108,7 +115,21 @@ export interface Call {
   variables: Record<string, unknown>;
 }
 
+const roundPence = (amount: number) => Math.round(amount * 100) / 100;
+
 const schema = buildSchema(typeDefs);
+
+// As the API: a debt's paidOffThisCycle comes from its payment's open pays and overpayments
+const debtField = (schema.getType('RecurringPayment') as GraphQLObjectType).getFields().debt;
+debtField.resolve = (payment: FakeRecurringPayment) =>
+  payment.debt && {
+    ...payment.debt,
+    paidOffThisCycle: roundPence(
+      (payment.history ?? [])
+        .filter(record => record.open && (record.kind === 'PAID' || record.kind === 'OVERPAYMENT'))
+        .reduce((sum, record) => sum + (record.debt?.reduction ?? 0), 0)
+    )
+  };
 
 export const DEFAULT_USER: FakeUser = {
   id: 'user-1',
@@ -165,8 +186,6 @@ export const fakeRecord = (
   open: true,
   createdAt: String(Date.now())
 });
-
-const roundPence = (amount: number) => Math.round(amount * 100) / 100;
 
 const PAYMENTS_PER_YEAR: Record<string, number> = {
   WEEKLY: 52,

@@ -44,7 +44,7 @@ const debt = (
   thisCycle: [],
   renewalDate: null,
   renewalReminderDays: 0,
-  debt: { balance, startingBalance, apr, balanceUpdatedAt: null }
+  debt: { balance, startingBalance, apr, balanceUpdatedAt: null, paidOffThisCycle: 0 }
 });
 
 // The Debts design's three: a card, car finance and a loan from family
@@ -185,15 +185,10 @@ describe('monthlyInterest', () => {
 });
 
 describe('paidOffThisCycle', () => {
-  it('adds up what the payments marked paid since payday took off', () => {
-    const paidCard = {
-      ...card,
-      thisCycle: [
-        { id: 'r1', kind: 'paid' as const, dates: [], balanceChange: -150, debtReduction: 101.44 },
-        { id: 'r2', kind: 'skipped' as const, dates: [], balanceChange: 0, debtReduction: 0 }
-      ]
-    };
-    expect(paidOffThisCycle([paidCard, car])).toBe(101.44);
+  it('adds up how much less each debt owes since payday', () => {
+    const paidCard = { ...card, debt: { ...card.debt, paidOffThisCycle: 301.44 } };
+    const paidCar = { ...car, debt: { ...car.debt, paidOffThisCycle: 205.56 } };
+    expect(paidOffThisCycle([paidCard, paidCar, family])).toBe(507);
   });
 });
 
