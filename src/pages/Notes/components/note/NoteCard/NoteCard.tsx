@@ -2,15 +2,12 @@ import { Pencil, Trash2 } from 'lucide-react';
 import { cn } from '~/lib/cn';
 import { NotesBoard } from '../../../hooks';
 import { Note, noteColor, noteMeta, notePreview } from '../../../notesModel';
-import { NoteEditor } from '../NoteEditor';
 
 const noteButton =
   'inline-flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full text-muted transition-colors hover:bg-surface hover:text-text';
 
-/* A note on the board, or the form to change it while it's being edited */
+/* A note on the board. Its pencil opens it to change. */
 export const NoteCard = ({ note, board }: { note: Note; board: NotesBoard }) => {
-  if (board.editingId === note.id) return <NoteEditor note={note} board={board} />;
-
   const color = noteColor(note.color);
   const preview = notePreview(note.body);
 
@@ -32,7 +29,8 @@ export const NoteCard = ({ note, board }: { note: Note; board: NotesBoard }) => 
           <button
             type="button"
             aria-label={`Edit note: ${preview}`}
-            onClick={() => board.startEditing(note.id)}
+            aria-haspopup="dialog"
+            onClick={() => board.openEdit(note.id)}
             className={noteButton}>
             <Pencil size={18} aria-hidden="true" />
           </button>

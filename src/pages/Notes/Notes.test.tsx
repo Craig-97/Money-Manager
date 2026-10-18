@@ -56,46 +56,78 @@ describe('notes', () => {
     expect(within(notes).getAllByRole('article')).toHaveLength(2);
   });
 
-  it('adds a note in the chosen colour', async () => {
+  it('adds a note in the chosen colour, from a dialog', async () => {
     const { user, api } = renderNotes();
     await board();
 
     // The toolbar's button; the mobile nav has one too, hidden by CSS on desktop
     const [toolbarAdd] = screen.getAllByRole('button', { name: 'Add note' });
     await user.click(toolbarAdd);
-    const form = screen.getByRole('form', { name: 'New note' });
-    const text = within(form).getByLabelText('New note');
-    expect(text).toHaveFocus();
-    expect(within(form).getByRole('button', { name: 'Save note' })).toBeDisabled();
+    const dialog = await screen.findByRole('dialog', { name: 'New note' });
+    const text = within(dialog).getByLabelText('Note');
+    await waitFor(() => expect(text).toHaveFocus());
+    expect(within(dialog).getByRole('button', { name: 'Save note' })).toBeDisabled();
+    // Nothing to delete yet
+    expect(within(dialog).queryByRole('button', { name: 'Delete' })).not.toBeInTheDocument();
 
     await user.type(text, 'Renew the car insurance');
-    expect(within(form).getByLabelText('177 characters remaining')).toBeInTheDocument();
-    await user.click(within(form).getByRole('button', { name: 'Green tag' }));
-    await user.click(within(form).getByRole('button', { name: 'Save note' }));
+    expect(within(dialog).getByLabelText('177 characters remaining')).toBeInTheDocument();
+    await user.click(
+      within(within(dialog).getByRole('group', { name: 'Colour' })).getByRole('button', {
+        name: 'Green tag'
+      })
+    );
+    await user.click(within(dialog).getByRole('button', { name: 'Save note' }));
 
     expect(await screen.findByText('Renew the car insurance')).toBeInTheDocument();
     expect(api.callsTo('CreateNote')).toEqual([
       { input: { accountId: 'account-1', body: 'Renew the car insurance', color: 'GREEN' } }
     ]);
-    // Ready for another
-    expect(text).toHaveValue('');
+    await waitFor(() => expect(screen.queryByRole('dialog', { name: 'New note' })).toBeNull());
+
+    // Each new note starts blank
+    await user.click(toolbarAdd);
+    expect(
+      within(await screen.findByRole('dialog', { name: 'New note' })).getByLabelText('Note')
+    ).toHaveValue('');
   });
 
-  it('edits a note in place', async () => {
+  it('saves with Ctrl+Enter', async () => {
     const { user, api } = renderNotes();
     await board();
 
-    await user.click(screen.getByRole('button', { name: 'Edit note: Buy milk' }));
-    const form = screen.getByRole('form', { name: 'Edit note' });
-    const text = within(form).getByLabelText('Edit note');
-    await user.clear(text);
-    await user.type(text, 'Buy oat milk');
-    await user.click(within(form).getByRole('button', { name: 'Save changes' }));
+    const [toolbarAdd] = screen.getAllByRole('button', { name: 'Add note' });
+    await user.click(toolbarAdd);
+    const dialog = await screen.findByRole('dialog', { name: 'New note' });
+    await user.type(
+      within(dialog).getByLabelText('Note'),
+      'Ring the bank{Control>}{Enter}{/Control}'
+    );
 
-    expect(await screen.findByText('Buy oat milk')).toBeInTheDocument();
-    expect(screen.queryByRole('form', { name: 'Edit note' })).not.toBeInTheDocument();
+    await waitFor(() => expect(api.callsTo('CreateNote')).toHaveLength(1));
+  });
+
+  it('edits a note in a dialog, starting from its text and colour', async () => {
+    const { user, api } = renderNotes();
+    await board();
+
+    await user.click(screen.getByRole('button', { name: 'Edit note: Pay the plumber' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Edit note' });
+    const text = within(dialog).getByLabelText('Note');
+    expect(text).toHaveValue('Pay the plumber');
+    expect(within(dialog).getByRole('button', { name: 'Rose tag' })).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
+
+    await user.clear(text);
+    await user.type(text, 'Pay the electrician');
+    await user.click(within(dialog).getByRole('button', { name: 'Save note' }));
+
+    expect(await screen.findByText('Pay the electrician')).toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Edit note' })).toBeNull());
     expect(api.callsTo('UpdateNote')).toEqual([
-      { id: 'milk', input: { body: 'Buy oat milk', color: 'BLUE' } }
+      { id: 'plumber', input: { body: 'Pay the electrician', color: 'ROSE' } }
     ]);
   });
 
@@ -104,11 +136,41 @@ describe('notes', () => {
     await board();
 
     await user.click(screen.getByRole('button', { name: 'Edit note: Buy milk' }));
-    const form = screen.getByRole('form', { name: 'Edit note' });
-    await user.click(within(form).getByRole('button', { name: 'Save changes' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Edit note' });
+    await user.click(within(dialog).getByRole('button', { name: 'Save note' }));
 
-    await waitFor(() => expect(screen.queryByRole('form', { name: 'Edit note' })).toBeNull());
+    await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Edit note' })).toBeNull());
     expect(api.callsTo('UpdateNote')).toEqual([]);
+  });
+
+  it('throws away changes on Cancel', async () => {
+    const { user, api } = renderNotes();
+    await board();
+
+    await user.click(screen.getByRole('button', { name: 'Edit note: Buy milk' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Edit note' });
+    await user.type(within(dialog).getByLabelText('Note'), ' and bread');
+    await user.click(within(dialog).getByRole('button', { name: 'Cancel' }));
+
+    await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Edit note' })).toBeNull());
+    expect(api.callsTo('UpdateNote')).toEqual([]);
+    // Opening it again starts from the note, not what was typed
+    await user.click(screen.getByRole('button', { name: 'Edit note: Buy milk' }));
+    expect(
+      within(await screen.findByRole('dialog', { name: 'Edit note' })).getByLabelText('Note')
+    ).toHaveValue('Buy milk');
+  });
+
+  it('deletes a note from its dialog', async () => {
+    const { user, api } = renderNotes();
+    await board();
+
+    await user.click(screen.getByRole('button', { name: 'Edit note: Buy milk' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Edit note' });
+    await user.click(within(dialog).getByRole('button', { name: 'Delete' }));
+
+    expect(await screen.findByText('Note deleted')).toBeInTheDocument();
+    expect(api.callsTo('DeleteNote')).toEqual([{ id: 'milk' }]);
   });
 
   it('deletes a note, with undo', async () => {
@@ -136,8 +198,7 @@ describe('notes', () => {
     const add = screen.getAllByRole('button', { name: 'Add note' });
     await user.click(add[add.length - 1]);
 
-    expect(screen.getByRole('form', { name: 'New note' })).toBeInTheDocument();
-    expect(screen.queryByText('No notes yet')).not.toBeInTheDocument();
+    expect(await screen.findByRole('dialog', { name: 'New note' })).toBeInTheDocument();
   });
 });
 
@@ -155,8 +216,10 @@ describe('notes on mobile', () => {
       .find(element => within(element).queryByRole('button', { name: 'Add note' }))!;
     await user.click(within(nav).getByRole('button', { name: 'Add note' }));
 
-    const text = within(screen.getByRole('form', { name: 'New note' })).getByLabelText('New note');
-    expect(text).toHaveFocus();
+    // A bottom sheet on mobile
+    const sheet = await screen.findByRole('dialog', { name: 'New note' });
+    const text = within(sheet).getByLabelText('Note');
+    await waitFor(() => expect(text).toHaveFocus());
     await user.type(text, 'Book the MOT');
     expect(text).toHaveValue('Book the MOT');
   });

@@ -48,7 +48,7 @@ export const BottomNav = ({ className }: { className?: string }) => {
         <button
           type="button"
           aria-label={add.label}
-          aria-haspopup={add.dialog ? 'dialog' : undefined}
+          aria-haspopup="dialog"
           onClick={add.open}
           className="flex h-[52px] w-14 cursor-pointer items-center justify-center rounded-full border-0 bg-accent text-on-accent">
           <Plus size={22} strokeWidth={2.5} aria-hidden="true" />
