@@ -3,6 +3,7 @@ export const ROUTES = {
   dashboard: '/dashboard',
   recurring: '/recurring',
   forecast: '/forecast',
+  debts: '/debts',
   notes: '/notes',
   profile: '/profile',
   setup: '/setup',

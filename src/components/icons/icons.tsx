@@ -58,6 +58,14 @@ export const ForecastIcon = (props: IconProps) => (
   </Svg>
 );
 
+/* A line heading down, the way a debt should */
+export const DebtsIcon = (props: IconProps) => (
+  <Svg {...props}>
+    <path d="M3 7l6 6 4-4 8 8" />
+    <path d="M21 11v6h-6" />
+  </Svg>
+);
+
 export const NotesIcon = (props: IconProps) => (
   <Svg {...props}>
     <path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" />

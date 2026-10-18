@@ -64,6 +64,24 @@ describe('Sidebar', () => {
     expect(within(sidebar).getByText('View profile')).toBeInTheDocument();
   });
 
+  it('lists the everyday pages, then the others below a divider', async () => {
+    const { user, sidebar } = await renderDashboard(1440);
+    const nav = within(sidebar).getByRole('navigation', { name: 'Main' });
+
+    expect(
+      within(nav)
+        .getAllByRole('link')
+        .map(link => link.textContent)
+    ).toEqual(['Dashboard', 'Recurring', 'Forecast', 'Debts', 'Notes']);
+    const divider = nav.querySelector('hr')!;
+    expect(divider.previousElementSibling).toHaveTextContent('Forecast');
+    expect(divider.nextElementSibling).toHaveTextContent('Debts');
+
+    await user.click(within(nav).getByRole('link', { name: 'Debts' }));
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Debts' })).toBeInTheDocument();
+  });
+
   it('marks the current page', async () => {
     const { sidebar } = await renderDashboard(1440);
 
