@@ -8,7 +8,7 @@ import { cn } from '~/lib/cn';
 import { formatMoney } from '~/lib/format';
 import { NOTE_MAX_LENGTH, noteColor, toNotes } from '~/lib/notes';
 import { PER_PERIOD, toPayments } from '~/lib/payments';
-import { ColorSwatches, NoteDateFields, NotePaymentOption } from './components';
+import { ColorSwatches, NotePaymentAndReminder, NotePaymentOption } from './components';
 import { useNoteDialog } from './useNoteDialog';
 
 /*
@@ -115,7 +115,11 @@ export const NoteDialog = () => {
           <ColorSwatches draft={draft} labelledBy="note-colour" />
         </div>
       </div>
-      <NoteDateFields draft={draft} payments={paymentOptions(account, today)} today={today} />
+      <NotePaymentAndReminder
+        draft={draft}
+        payments={paymentOptions(account, today)}
+        today={today}
+      />
     </Modal>
   );
 };

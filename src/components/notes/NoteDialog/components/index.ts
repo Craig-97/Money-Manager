@@ -1,2 +1,2 @@
 export * from './ColorSwatches';
-export * from './NoteDateFields';
+export * from './NotePaymentAndReminder';

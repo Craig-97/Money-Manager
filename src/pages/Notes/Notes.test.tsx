@@ -279,16 +279,27 @@ describe('notes on mobile', () => {
   });
 });
 
-describe('a note with a date', () => {
-  it('adds a date, reminding a week before until other reminders are picked', async () => {
-    const { user, api } = renderNotes();
-    await user.click(await screen.findByRole('button', { name: 'Add note' }));
+describe('a note with a reminder', () => {
+  const openNew = async () => {
+    const api = renderNotes();
+    await api.user.click(await screen.findByRole('button', { name: 'Add note' }));
     const dialog = await screen.findByRole('dialog', { name: 'New note' });
+    return { ...api, dialog };
+  };
 
+  const linkMortgage = async (
+    user: ReturnType<typeof renderNotes>['user'],
+    dialog: HTMLElement
+  ) => {
+    await user.click(within(dialog).getByRole('combobox', { name: 'Payment' }));
+    await user.click(await screen.findByRole('option', { name: /^Mortgage/ }));
+  };
+
+  it('adds a reminder on a date, a week before until others are picked', async () => {
+    const { user, api, dialog } = await openNew();
     await user.type(within(dialog).getByLabelText('Note'), 'Car MOT');
-    // Without a date it's a single row; adding one opens the calendar
-    expect(within(dialog).queryByRole('group', { name: 'Remind me' })).not.toBeInTheDocument();
-    await user.click(within(dialog).getByRole('button', { name: 'Add a date' }));
+
+    await user.click(within(dialog).getByRole('button', { name: 'Add a reminder' }));
     // The calendar opens from the date field, not by itself
     expect(screen.queryByRole('button', { name: 'Today' })).not.toBeInTheDocument();
     await user.click(within(dialog).getByLabelText('Date'));
@@ -306,18 +317,30 @@ describe('a note with a date', () => {
     );
   });
 
-  it('follows a payment once linked to one, with no date of its own', async () => {
-    const { user, api } = renderNotes();
-    await user.click(await screen.findByRole('button', { name: 'Add note' }));
-    const dialog = await screen.findByRole('dialog', { name: 'New note' });
+  it('links a payment without setting a reminder', async () => {
+    const { user, api, dialog } = await openNew();
     await user.type(within(dialog).getByLabelText('Note'), 'Remortgage quotes');
-    await user.click(within(dialog).getByRole('button', { name: 'Add a date' }));
 
-    await user.click(within(dialog).getByRole('combobox', { name: 'Payment' }));
-    await user.click(await screen.findByRole('option', { name: /^Mortgage/ }));
+    await linkMortgage(user, dialog);
+    expect(within(dialog).queryByRole('region', { name: 'Reminder' })).not.toBeInTheDocument();
+    await user.click(within(dialog).getByRole('button', { name: 'Save note' }));
 
-    expect(within(dialog).getByRole('radio', { name: 'With the payment' })).toBeChecked();
-    expect(within(dialog).getByText(/^Each Mortgage payment · next/)).toBeInTheDocument();
+    await waitFor(() => expect(api.callsTo('CreateNote')).toHaveLength(1));
+    expect(api.callsTo('CreateNote')[0]).toMatchObject({
+      input: { date: null, remind: [], repeat: 'NONE', payment: 'recurring-1' }
+    });
+  });
+
+  it('reminds before each payment, showing its next date', async () => {
+    const { user, api, dialog } = await openNew();
+    await user.type(within(dialog).getByLabelText('Note'), 'Remortgage quotes');
+    await linkMortgage(user, dialog);
+
+    await user.click(within(dialog).getByRole('button', { name: 'Add a reminder' }));
+
+    const reminder = within(dialog).getByRole('region', { name: 'Reminder' });
+    expect(within(reminder).getByRole('radio', { name: 'Before each payment' })).toBeChecked();
+    expect(within(reminder).getByText(/· Mortgage’s next payment$/)).toBeInTheDocument();
     await user.click(within(dialog).getByRole('button', { name: 'Save note' }));
 
     await waitFor(() => expect(api.callsTo('CreateNote')).toHaveLength(1));
@@ -326,18 +349,14 @@ describe('a note with a date', () => {
     });
   });
 
-  it('stops following its payment with the ✕, keeping the payment linked', async () => {
-    const { user } = renderNotes();
-    await user.click(await screen.findByRole('button', { name: 'Add note' }));
-    const dialog = await screen.findByRole('dialog', { name: 'New note' });
-    await user.click(within(dialog).getByRole('button', { name: 'Add a date' }));
-    await user.click(within(dialog).getByRole('combobox', { name: 'Payment' }));
-    await user.click(await screen.findByRole('option', { name: /^Mortgage/ }));
+  it('takes the reminder off, keeping the payment linked', async () => {
+    const { user, dialog } = await openNew();
+    await linkMortgage(user, dialog);
+    await user.click(within(dialog).getByRole('button', { name: 'Add a reminder' }));
 
-    await user.click(within(dialog).getByRole('button', { name: 'Take the date off' }));
+    await user.click(within(dialog).getByRole('button', { name: 'Take the reminder off' }));
 
-    expect(within(dialog).queryByText(/^Each Mortgage payment/)).not.toBeInTheDocument();
-    expect(within(dialog).queryByText('Remind me')).not.toBeInTheDocument();
+    expect(within(dialog).queryByRole('region', { name: 'Reminder' })).not.toBeInTheDocument();
     expect(within(dialog).getByRole('combobox', { name: 'Payment' })).toHaveTextContent('Mortgage');
   });
 });
