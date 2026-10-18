@@ -5,7 +5,6 @@ import { PayCycle } from '~/lib/payday';
 import {
   formatShortDate,
   Payment,
-  RecurringPayment,
   Renewal,
   renewalHeading,
   renewalOf,
@@ -44,7 +43,7 @@ export interface Reminder {
   body: string;
   // Signed, as on the dashboard; null when there's no money in it
   amount: number | null;
-  payment: RecurringPayment | null;
+  payment: Payment | null;
   note: Note | null;
   // A note about the payment, for a renewal to open
   paymentNote: Note | null;
@@ -134,9 +133,13 @@ export const inTime = (days: number) => {
 const dueText = (payment: Payment, days: number) =>
   `${payment.type === 'INCOME' ? 'comes in' : 'is due'} ${inTime(days)}`;
 
+// Recurring payments' next dates, and one-offs not paid yet
+const isStillDue = (payment: Payment) =>
+  payment.kind === 'recurring' ? !!payment.dueDate : !!payment.dueDate && !payment.paidAt;
+
 const paymentEvents = ({ payments, notes, today }: ReminderSources) =>
   payments.flatMap((payment): Omit<Reminder, 'read'>[] => {
-    if (payment.kind !== 'recurring' || !payment.dueDate) return [];
+    if (!payment.dueDate || !isStillDue(payment)) return [];
     const due = payment.dueDate;
     const base = {
       date: due,
@@ -157,7 +160,10 @@ const paymentEvents = ({ payments, notes, today }: ReminderSources) =>
           timing: 'Overdue',
           title: `${payment.name} · ${money} was due ${formatShortDate(due, today)}`,
           name: `${payment.name} is overdue`,
-          body: 'Still unpaid. Mark it paid or skip it to clear it.'
+          body:
+            payment.kind === 'recurring'
+              ? 'Still unpaid. Mark it paid or skip it to clear it.'
+              : 'Still unpaid. Mark it paid or delete it to clear it.'
         }
       ];
     }
@@ -344,7 +350,9 @@ export const newReminders = (sources: ReminderSources) =>
 
 // A yearly payment renews with each payment, so ahead of time its renewal says it all
 const isYearlyDue = (reminder: Reminder) =>
-  reminder.kind === 'due' && reminder.payment?.frequency === 'ANNUALLY';
+  reminder.kind === 'due' &&
+  reminder.payment?.kind === 'recurring' &&
+  reminder.payment.frequency === 'ANNUALLY';
 
 /* Coming up: what's ahead, soonest first */
 export const upcomingReminders = (sources: ReminderSources) =>
@@ -386,7 +394,11 @@ export const kindText = (reminder: Reminder) => {
   switch (reminder.kind) {
     case 'due':
     case 'overdue':
-      return reminder.payment?.debt ? 'Payment · Debt' : 'Payment';
+      return reminder.payment?.kind === 'oneOff'
+        ? 'One-off payment'
+        : reminder.payment?.debt
+          ? 'Payment · Debt'
+          : 'Payment';
     case 'renewal':
     case 'renewed':
       return reminder.paymentNote ? 'Renewal · has a note' : 'Renewal';

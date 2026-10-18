@@ -12,16 +12,16 @@ interface ReminderCardProps {
   open: ReminderOpen | null;
   onLater: () => void;
   onClear: () => void;
-  // Stacked, for the bell's narrower list
+  // For the bell's narrower list
   compact?: boolean;
 }
 
 const smallButton = 'h-[38px] px-3.5 text-[13px]';
 
 /*
- * A reminder that has gone off: what it's about and when it went off, a line each, then the thing
- * to do about it and Later: beside the text on the page, under it in the bell. Unread ones sit on
- * a tint. An overdue payment has no ✕, as it only goes once it's paid or skipped.
+ * A reminder that has gone off, as the design draws it: what it's about with when it went off,
+ * a line saying more, then the thing to do about it and Later. Unread ones sit on a tint. An
+ * overdue payment has no ✕, as it only goes once it's paid.
  */
 export const ReminderCard = ({
   reminder,
@@ -37,7 +37,7 @@ export const ReminderCard = ({
     </span>
   );
   const actions = (
-    <div className={cn('flex shrink-0 items-center gap-1.5', compact && 'mt-2.5 -ml-1')}>
+    <div className="mt-2.5 -ml-1 flex flex-wrap items-center gap-1.5">
       {open ? (
         <Button onClick={open.run} className={cn(smallButton, 'font-bold')}>
           {open.label}
@@ -49,42 +49,50 @@ export const ReminderCard = ({
       </Button>
     </div>
   );
+  const title = (
+    <h3 title={reminder.title} className="min-w-0 truncate text-[15px] leading-[1.35] font-bold">
+      {reminder.title}
+      {reminder.read ? null : <span className="sr-only"> (new)</span>}
+    </h3>
+  );
 
   return (
     <article
       aria-label={reminder.title}
       className={cn(
         'flex gap-3.5 rounded-[22px] border',
-        compact ? 'p-3.5' : 'items-center px-4 py-3',
+        compact ? 'p-3.5' : 'p-4',
         reminder.read ? 'border-transparent' : 'border-border bg-surface-2'
       )}>
       <ReminderIcon reminder={reminder} />
       <div className="flex min-w-0 flex-1 flex-col">
-        {compact ? <p className="num text-xs font-semibold text-muted">{fired}</p> : null}
-        <h3 title={reminder.title} className="truncate text-[15px] leading-[1.35] font-bold">
-          {reminder.title}
-          {reminder.read ? null : <span className="sr-only"> (new)</span>}
-        </h3>
+        {compact ? (
+          // The bell's list is narrower, so when it went off goes above the title
+          <>
+            <p className="num text-xs font-semibold text-muted">{fired}</p>
+            {title}
+          </>
+        ) : (
+          <div className="flex items-start justify-between gap-3">
+            {title}
+            <span className="mt-0.5 shrink-0 num text-xs font-semibold text-muted">{fired}</span>
+          </div>
+        )}
         <p
           title={reminder.body}
           className="mt-0.5 truncate text-sm leading-[1.45] font-medium text-muted">
-          {compact ? null : <span className="num">{fired} · </span>}
           {reminder.body}
         </p>
-        {compact ? actions : null}
+        {actions}
       </div>
-      {compact ? null : actions}
       {canClear(reminder) ? (
         <IconButton
           aria-label={`Clear: ${reminder.title}`}
           onClick={onClear}
-          className={cn('size-10', compact && '-mt-1.5 -mr-1.5')}>
+          className="-mt-1.5 -mr-1.5 size-10">
           <X size={17} strokeWidth={2.25} aria-hidden="true" />
         </IconButton>
-      ) : compact ? null : (
-        // Keeps the actions lined up with the rows that have a ✕
-        <span aria-hidden="true" className="size-10 shrink-0" />
-      )}
+      ) : null}
     </article>
   );
 };

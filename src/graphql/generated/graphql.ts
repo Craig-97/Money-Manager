@@ -65,6 +65,7 @@ export type AccountQuery = {
       type: Types.PaymentType;
       category: Types.OneOffPaymentCategory;
       paidAt: string | null;
+      dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
     } | null> | null;
     notes: Array<{
       __typename: 'Note';
@@ -160,6 +161,7 @@ export type AccountFieldsFragment = {
     type: Types.PaymentType;
     category: Types.OneOffPaymentCategory;
     paidAt: string | null;
+    dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
   } | null> | null;
   notes: Array<{
     __typename: 'Note';
@@ -261,6 +263,7 @@ export type CreateAccountMutation = {
         type: Types.PaymentType;
         category: Types.OneOffPaymentCategory;
         paidAt: string | null;
+        dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
       } | null> | null;
       notes: Array<{
         __typename: 'Note';
@@ -396,6 +399,7 @@ export type MarkPaymentsPaidMutation = {
         type: Types.PaymentType;
         category: Types.OneOffPaymentCategory;
         paidAt: string | null;
+        dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
       } | null> | null;
     } | null;
   };
@@ -451,6 +455,7 @@ export type MarkPaymentsUnpaidMutation = {
         type: Types.PaymentType;
         category: Types.OneOffPaymentCategory;
         paidAt: string | null;
+        dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
       } | null> | null;
     } | null;
   };
@@ -551,6 +556,7 @@ export type StartPaydayCycleMutation = {
         type: Types.PaymentType;
         category: Types.OneOffPaymentCategory;
         paidAt: string | null;
+        dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
       } | null> | null;
     } | null;
   };
@@ -905,6 +911,7 @@ export type CreateOneOffPaymentMutation = {
       type: Types.PaymentType;
       category: Types.OneOffPaymentCategory;
       paidAt: string | null;
+      dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
     } | null;
   };
 };
@@ -985,6 +992,7 @@ export type OneOffPaymentFieldsFragment = {
   type: Types.PaymentType;
   category: Types.OneOffPaymentCategory;
   paidAt: string | null;
+  dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
 };
 
 export type RecurringPaymentFieldsFragment = {
@@ -1035,6 +1043,7 @@ export type UpdateOneOffPaymentMutation = {
       type: Types.PaymentType;
       category: Types.OneOffPaymentCategory;
       paidAt: string | null;
+      dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
     } | null;
   };
 };
@@ -1389,7 +1398,18 @@ export const OneOffPaymentFieldsFragmentDoc = {
           { kind: 'Field', name: { kind: 'Name', value: 'dueDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'type' } },
           { kind: 'Field', name: { kind: 'Name', value: 'category' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'paidAt' } }
+          { kind: 'Field', name: { kind: 'Name', value: 'paidAt' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'dueReminder' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'off' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'days' } }
+              ]
+            }
+          }
         ]
       }
     }
@@ -1673,7 +1693,18 @@ export const AccountFieldsFragmentDoc = {
           { kind: 'Field', name: { kind: 'Name', value: 'dueDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'type' } },
           { kind: 'Field', name: { kind: 'Name', value: 'category' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'paidAt' } }
+          { kind: 'Field', name: { kind: 'Name', value: 'paidAt' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'dueReminder' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'off' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'days' } }
+              ]
+            }
+          }
         ]
       }
     },
@@ -1939,7 +1970,18 @@ export const AccountDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'dueDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'type' } },
           { kind: 'Field', name: { kind: 'Name', value: 'category' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'paidAt' } }
+          { kind: 'Field', name: { kind: 'Name', value: 'paidAt' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'dueReminder' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'off' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'days' } }
+              ]
+            }
+          }
         ]
       }
     },
@@ -2249,7 +2291,18 @@ export const CreateAccountDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'dueDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'type' } },
           { kind: 'Field', name: { kind: 'Name', value: 'category' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'paidAt' } }
+          { kind: 'Field', name: { kind: 'Name', value: 'paidAt' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'dueReminder' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'off' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'days' } }
+              ]
+            }
+          }
         ]
       }
     },
@@ -2692,7 +2745,18 @@ export const MarkPaymentsPaidDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'dueDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'type' } },
           { kind: 'Field', name: { kind: 'Name', value: 'category' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'paidAt' } }
+          { kind: 'Field', name: { kind: 'Name', value: 'paidAt' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'dueReminder' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'off' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'days' } }
+              ]
+            }
+          }
         ]
       }
     }
@@ -2856,7 +2920,18 @@ export const MarkPaymentsUnpaidDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'dueDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'type' } },
           { kind: 'Field', name: { kind: 'Name', value: 'category' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'paidAt' } }
+          { kind: 'Field', name: { kind: 'Name', value: 'paidAt' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'dueReminder' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'off' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'days' } }
+              ]
+            }
+          }
         ]
       }
     }
@@ -3154,7 +3229,18 @@ export const StartPaydayCycleDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'dueDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'type' } },
           { kind: 'Field', name: { kind: 'Name', value: 'category' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'paidAt' } }
+          { kind: 'Field', name: { kind: 'Name', value: 'paidAt' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'dueReminder' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'off' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'days' } }
+              ]
+            }
+          }
         ]
       }
     }
@@ -4356,7 +4442,18 @@ export const CreateOneOffPaymentDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'dueDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'type' } },
           { kind: 'Field', name: { kind: 'Name', value: 'category' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'paidAt' } }
+          { kind: 'Field', name: { kind: 'Name', value: 'paidAt' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'dueReminder' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'off' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'days' } }
+              ]
+            }
+          }
         ]
       }
     }
@@ -4653,7 +4750,18 @@ export const UpdateOneOffPaymentDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'dueDate' } },
           { kind: 'Field', name: { kind: 'Name', value: 'type' } },
           { kind: 'Field', name: { kind: 'Name', value: 'category' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'paidAt' } }
+          { kind: 'Field', name: { kind: 'Name', value: 'paidAt' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'dueReminder' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'off' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'days' } }
+              ]
+            }
+          }
         ]
       }
     }

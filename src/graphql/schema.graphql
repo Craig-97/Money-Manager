@@ -204,6 +204,7 @@ type OneOffPayment {
   type: PaymentType!
   category: OneOffPaymentCategory!
   paidAt: String
+  dueReminder: ReminderTiming!
 }
 
 input CreateOneOffPaymentInput {
@@ -213,6 +214,7 @@ input CreateOneOffPaymentInput {
   dueDate: String!
   type: PaymentType!
   category: OneOffPaymentCategory!
+  dueReminder: ReminderTimingInput
 }
 
 input OneOffPaymentInput {
@@ -221,6 +223,7 @@ input OneOffPaymentInput {
   dueDate: String!
   type: PaymentType!
   category: OneOffPaymentCategory!
+  dueReminder: ReminderTimingInput
 }
 
 input UpdateOneOffPaymentInput {
@@ -229,6 +232,7 @@ input UpdateOneOffPaymentInput {
   dueDate: String
   type: PaymentType
   category: OneOffPaymentCategory
+  dueReminder: ReminderTimingInput
 }
 
 type OneOffPaymentResponse {

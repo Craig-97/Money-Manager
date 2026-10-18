@@ -30,7 +30,11 @@ export const TimingDialog = ({ page }: { page: RemindersPage }) => {
     const payment = changing.payment;
     if (payment) {
       setChoice(
-        toTimingChoice(changing.kind === 'due' ? payment.dueReminder : payment.renewalReminder)
+        toTimingChoice(
+          changing.kind === 'renewal' && payment.kind === 'recurring'
+            ? payment.renewalReminder
+            : payment.dueReminder
+        )
       );
     }
   }
@@ -45,7 +49,7 @@ export const TimingDialog = ({ page }: { page: RemindersPage }) => {
   const save = async () => {
     if (!payment) return;
     setSaving(true);
-    const saved = await page.actions.changeTiming(payment.id, {
+    const saved = await page.actions.changeTiming(payment, {
       which: due ? 'dueReminder' : 'renewalReminder',
       timing: fromTimingChoice(choice)
     });

@@ -2,13 +2,14 @@ import { useMutation } from '@apollo/client/react';
 import { addReminderStates } from '~/graphql/cache';
 import {
   ReminderAction,
+  UpdateOneOffPaymentDocument,
   UpdateRecurringPaymentDocument,
   UpdateReminderSettingsDocument,
   UpdateRemindersDocument
 } from '~/graphql/generated';
 import { addDays, formatShortDay, toApiDate } from '~/lib/dates';
 import { getApiErrorMessage } from '~/lib/errors';
-import { ReminderSettings, ReminderTiming } from '~/lib/payments';
+import { Payment, ReminderSettings, ReminderTiming } from '~/lib/payments';
 import { canClear, laterUntil, Reminder, ReminderStates } from '~/lib/reminders';
 import { showToast } from '~/state/toast';
 
@@ -31,7 +32,8 @@ interface Options {
 export const useReminderActions = ({ accountId, states, today }: Options) => {
   const [updateReminders] = useMutation(UpdateRemindersDocument);
   const [updateSettings] = useMutation(UpdateReminderSettingsDocument);
-  const [updatePayment] = useMutation(UpdateRecurringPaymentDocument);
+  const [updateRecurring] = useMutation(UpdateRecurringPaymentDocument);
+  const [updateOneOff] = useMutation(UpdateOneOffPaymentDocument);
 
   const update = async (
     keys: string[],
@@ -140,13 +142,17 @@ export const useReminderActions = ({ accountId, states, today }: Options) => {
       }
     },
 
-    /* One payment's own timing, for when it's due or when it renews */
+    /* One payment's own timing, for when it's due or, for a recurring one, when it renews */
     changeTiming: async (
-      paymentId: string,
+      payment: Pick<Payment, 'id' | 'kind'>,
       { which, timing }: { which: 'dueReminder' | 'renewalReminder'; timing: ReminderTiming }
     ) => {
       try {
-        await updatePayment({ variables: { id: paymentId, input: { [which]: timing } } });
+        if (payment.kind === 'oneOff') {
+          await updateOneOff({ variables: { id: payment.id, input: { dueReminder: timing } } });
+        } else {
+          await updateRecurring({ variables: { id: payment.id, input: { [which]: timing } } });
+        }
         return true;
       } catch (error) {
         showError(error);

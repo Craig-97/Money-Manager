@@ -74,6 +74,7 @@ export type CreateOneOffPaymentInput = {
   amount: Scalars['Float']['input'];
   category: OneOffPaymentCategory;
   dueDate: Scalars['String']['input'];
+  dueReminder?: InputMaybe<ReminderTimingInput>;
   name: Scalars['String']['input'];
   type: PaymentType;
 };
@@ -332,6 +333,7 @@ export type OneOffPayment = {
   amount: Scalars['Float']['output'];
   category: OneOffPaymentCategory;
   dueDate: Scalars['String']['output'];
+  dueReminder: ReminderTiming;
   id: Scalars['ID']['output'];
   name: Scalars['String']['output'];
   paidAt: Maybe<Scalars['String']['output']>;
@@ -364,6 +366,7 @@ export type OneOffPaymentInput = {
   amount: Scalars['Float']['input'];
   category: OneOffPaymentCategory;
   dueDate: Scalars['String']['input'];
+  dueReminder?: InputMaybe<ReminderTimingInput>;
   name: Scalars['String']['input'];
   type: PaymentType;
 };
@@ -625,6 +628,7 @@ export type UpdateOneOffPaymentInput = {
   amount?: InputMaybe<Scalars['Float']['input']>;
   category?: InputMaybe<OneOffPaymentCategory>;
   dueDate?: InputMaybe<Scalars['String']['input']>;
+  dueReminder?: InputMaybe<ReminderTimingInput>;
   name?: InputMaybe<Scalars['String']['input']>;
   type?: InputMaybe<PaymentType>;
 };

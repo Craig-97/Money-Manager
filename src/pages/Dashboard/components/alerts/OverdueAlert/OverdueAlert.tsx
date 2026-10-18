@@ -2,11 +2,11 @@ import { Check, CircleAlert } from 'lucide-react';
 import { Button } from '~/components/ui/Button';
 import { daysBetween } from '~/lib/dates';
 import { formatMoney } from '~/lib/format';
-import { formatShortDate, RecurringPayment } from '~/lib/payments';
+import { formatShortDate, Payment } from '~/lib/payments';
 import { alertSublineClasses, alertTitleClasses, laterClasses } from '../alertClasses';
 
 interface OverdueAlertProps {
-  payment: RecurringPayment;
+  payment: Payment;
   // Its date that's gone by unpaid
   due: Date;
   today: Date;
@@ -33,7 +33,8 @@ export const OverdueAlert = ({ payment, due, today, onLater, onPay }: OverdueAle
           </p>
           <p className={alertSublineClasses}>
             <span className="font-bold text-expense">Overdue</span> ·{' '}
-            {days === 1 ? '1 day' : `${days} days`} unpaid · mark it paid or skip it
+            {days === 1 ? '1 day' : `${days} days`} unpaid ·{' '}
+            {payment.kind === 'recurring' ? 'mark it paid or skip it' : 'mark it paid'}
           </p>
         </div>
       </div>

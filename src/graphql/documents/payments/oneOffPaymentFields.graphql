@@ -6,4 +6,9 @@ fragment OneOffPaymentFields on OneOffPayment {
   type
   category
   paidAt
+  # When its reminder goes off; days left out follow the usual timing
+  dueReminder {
+    off
+    days
+  }
 }

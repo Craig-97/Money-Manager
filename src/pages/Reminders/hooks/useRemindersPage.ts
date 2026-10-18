@@ -36,7 +36,7 @@ export const useRemindersPage = () => {
       const payment = reminder.payment;
       return {
         label: 'Open payment',
-        run: () => openPayment('recurring', { paymentId: payment.id })
+        run: () => openPayment(payment.kind, { paymentId: payment.id })
       };
     }
     return null;
@@ -53,11 +53,15 @@ export const useRemindersPage = () => {
     }
     if (!payment || (reminder.kind !== 'due' && reminder.kind !== 'renewal')) return null;
     const which = reminder.kind === 'due' ? 'dueReminder' : 'renewalReminder';
-    const on = !payment[which].off;
+    const timing =
+      which === 'renewalReminder' && payment.kind === 'recurring'
+        ? payment.renewalReminder
+        : payment.dueReminder;
+    const on = !timing.off;
     return {
       on,
       run: () =>
-        void actions.changeTiming(payment.id, {
+        void actions.changeTiming(payment, {
           which,
           timing: on ? { off: true, days: null } : { off: false, days: null }
         })

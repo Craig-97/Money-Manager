@@ -23,7 +23,7 @@ export const useReminderOpen = (accountId: string) => {
   return (reminder: Reminder): ReminderOpen | null => {
     const { payment } = reminder;
     const editPayment = (label: string) =>
-      payment ? { label, run: () => openPayment('recurring', { paymentId: payment.id }) } : null;
+      payment ? { label, run: () => openPayment(payment.kind, { paymentId: payment.id }) } : null;
     const note = reminder.note ?? reminder.paymentNote;
     const noteOpen = note ? { label: 'Open note', run: () => openNote(note.id) } : null;
 

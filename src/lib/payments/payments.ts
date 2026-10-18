@@ -54,6 +54,10 @@ interface BasePayment {
   // The next date to pay: a one-off's date, or the first of a recurring payment's dates not yet
   // paid or skipped. Null for a recurring payment that has ended.
   dueDate: Date | null;
+  // When the reminder before it's due goes off, as saved: its own timing or the usual one
+  dueReminder: ReminderTiming;
+  // Days before it's due it reminds, worked out with the usual timing; null when it's off
+  dueReminderDays: number | null;
 }
 
 export interface RecurringPayment extends BasePayment {
@@ -67,11 +71,8 @@ export interface RecurringPayment extends BasePayment {
   // When a policy or contract renews while the payments carry on. Never set on yearly payments,
   // which renew with each payment.
   renewalDate: Date | null;
-  // When its reminders go off, as saved: its own timing or the usual one
-  dueReminder: ReminderTiming;
+  // When the reminder before it renews goes off, as saved: its own timing or the usual one
   renewalReminder: ReminderTiming;
-  // Days before each due date it reminds, worked out with the usual timing; null when it's off
-  dueReminderDays: number | null;
   // Days before renewing to show it as coming up, worked out with the usual timing; 0 when it's
   // off (see renewal.ts)
   renewalReminderDays: number;
@@ -139,7 +140,10 @@ const toRecurringPayment = (
   };
 };
 
-const toOneOffPayment = (payment: OneOffPaymentFieldsFragment): OneOffPayment => ({
+const toOneOffPayment = (
+  payment: OneOffPaymentFieldsFragment,
+  settings: ReminderSettings
+): OneOffPayment => ({
   kind: 'oneOff',
   id: payment.id,
   name: payment.name,
@@ -148,7 +152,9 @@ const toOneOffPayment = (payment: OneOffPaymentFieldsFragment): OneOffPayment =>
   type: payment.type,
   category: payment.category,
   dueDate: fromApiDate(payment.dueDate),
-  paidAt: fromApiDate(payment.paidAt)
+  paidAt: fromApiDate(payment.paidAt),
+  dueReminder: payment.dueReminder,
+  dueReminderDays: reminderDays(payment.dueReminder, settings.paymentDays)
 });
 
 interface AccountPayments {
@@ -159,14 +165,14 @@ interface AccountPayments {
 }
 
 /* Both kinds of payment on the account as one list */
-export const toPayments = (account: AccountPayments, today: Date): Payment[] => [
-  ...(account.recurringPayments ?? [])
-    .filter(payment => payment !== null)
-    .map(payment =>
-      toRecurringPayment(payment, {
-        today,
-        settings: account.reminderSettings ?? DEFAULT_REMINDER_SETTINGS
-      })
-    ),
-  ...(account.oneOffPayments ?? []).filter(payment => payment !== null).map(toOneOffPayment)
-];
+export const toPayments = (account: AccountPayments, today: Date): Payment[] => {
+  const settings = account.reminderSettings ?? DEFAULT_REMINDER_SETTINGS;
+  return [
+    ...(account.recurringPayments ?? [])
+      .filter(payment => payment !== null)
+      .map(payment => toRecurringPayment(payment, { today, settings })),
+    ...(account.oneOffPayments ?? [])
+      .filter(payment => payment !== null)
+      .map(payment => toOneOffPayment(payment, settings))
+  ];
+};

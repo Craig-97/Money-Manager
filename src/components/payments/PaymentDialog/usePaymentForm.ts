@@ -109,7 +109,8 @@ const initialValues = ({
     type: payment.type,
     name: payment.name,
     amount: formatMoneyInput(payment.amount),
-    category: payment.category
+    category: payment.category,
+    dueReminder: toTimingChoice(payment.dueReminder)
   };
   return payment.kind === 'recurring'
     ? {
@@ -119,7 +120,6 @@ const initialValues = ({
         ends: payment.lastPaymentDate ? 'stop' : payment.renewalDate ? 'renew' : 'keep',
         end: iso(payment.lastPaymentDate),
         renewal: iso(payment.renewalDate),
-        dueReminder: toTimingChoice(payment.dueReminder),
         reminder: toTimingChoice(payment.renewalReminder),
         tracked: payment.debt !== null,
         balance: payment.debt ? formatMoneyInput(payment.debt.balance) : '',
@@ -185,6 +185,7 @@ const isUnchanged = (values: PaymentFormValues, before: PaymentFormValues) =>
   values.type === before.type &&
   values.category === before.category &&
   values.date === before.date &&
+  values.dueReminder === before.dueReminder &&
   values.frequency === before.frequency &&
   values.first === before.first &&
   sameEnding(values, before) &&
@@ -492,7 +493,8 @@ export const usePaymentForm = ({
         const fields = {
           ...common,
           dueDate: values.date,
-          category: values.category as OneOffPaymentCategory
+          category: values.category as OneOffPaymentCategory,
+          dueReminder: fromTimingChoice(values.dueReminder)
         };
         if (payment) {
           await updateOneOff({ variables: { id: payment.id, input: fields } });

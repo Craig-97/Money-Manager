@@ -14,7 +14,9 @@ const payment = (
   type: 'EXPENSE',
   category: 'OTHER',
   paidAt: null,
-  dueDate: due ? new Date(`${due}T00:00:00`) : null
+  dueDate: due ? new Date(`${due}T00:00:00`) : null,
+  dueReminder: { off: false, days: null },
+  dueReminderDays: 1
 });
 
 const list = [

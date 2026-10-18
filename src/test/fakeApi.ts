@@ -69,6 +69,8 @@ export interface FakeOneOffPayment {
   type: 'INCOME' | 'EXPENSE';
   category: string;
   paidAt?: string | null;
+  // Left out, it follows the usual timing
+  dueReminder?: FakeTiming;
 }
 
 export interface FakeNote {
@@ -192,6 +194,9 @@ export const DEFAULT_CALENDAR_FEED: FakeCalendarFeed = {
 // Fields the fixtures can leave out, filled in as the API would
 type Loose = Record<string, unknown>;
 const FIELD_DEFAULTS: Record<string, Record<string, (value: Loose) => unknown>> = {
+  OneOffPayment: {
+    dueReminder: p => p.dueReminder ?? USUAL_TIMING
+  },
   RecurringPayment: {
     dueReminder: p => p.dueReminder ?? USUAL_TIMING,
     renewalReminder: p => p.renewalReminder ?? USUAL_TIMING
@@ -533,7 +538,8 @@ export const createFakeApi = ({
     dueDate: fromInput(input.dueDate),
     type: input.type,
     category: input.category,
-    paidAt: null
+    paidAt: null,
+    dueReminder: input.dueReminder ?? USUAL_TIMING
   });
 
   const debtFrom = (input: Args): FakeDebt => ({

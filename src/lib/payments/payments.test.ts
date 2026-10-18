@@ -54,6 +54,7 @@ const oneOff = (
   type: 'EXPENSE',
   category: 'OTHER',
   paidAt: null,
+  dueReminder: { __typename: 'ReminderTiming', off: false, days: null },
   ...overrides
 });
 

@@ -98,6 +98,17 @@ export const FormBody = ({ form, kind }: { form: PaymentForm; kind: Payment['kin
             </div>
           </div>
           {categoryField}
+          <div>
+            <Label tone="muted" htmlFor="payment-due-reminder">
+              Remind me before it’s due
+            </Label>
+            <Select
+              id="payment-due-reminder"
+              value={values.dueReminder}
+              onValueChange={value => set('dueReminder', value)}
+              options={form.reminderOptions.due}
+            />
+          </div>
         </>
       ) : (
         <>

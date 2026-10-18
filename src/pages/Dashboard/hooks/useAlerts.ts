@@ -4,7 +4,7 @@ import { Payment, RecurringPayment, Renewal, renewalOf } from '~/lib/payments';
 import { overdueKey, renewalKey, ReminderStates } from '~/lib/reminders';
 
 type DashboardAlert =
-  | { kind: 'overdue'; payment: RecurringPayment; due: Date }
+  | { kind: 'overdue'; payment: Payment; due: Date }
   | { kind: 'due'; payment: Payment }
   | { kind: 'renewal'; payment: RecurringPayment; renewal: Renewal };
 
@@ -47,12 +47,13 @@ export const useAlerts = ({ accountId, payments, today, dueToday, states }: Aler
     })
     .sort((a, b) => a.renewal.date.getTime() - b.renewal.date.getTime());
 
-  // Recurring payments whose date has gone by without being paid or skipped, oldest first
+  // Payments whose date has gone by without being paid (or, for a recurring one, skipped),
+  // oldest first
   const overdue = payments
     .flatMap(payment =>
-      payment.kind === 'recurring' &&
       payment.dueDate &&
       payment.dueDate < today &&
+      (payment.kind === 'recurring' || !payment.paidAt) &&
       !isAway(overdueKey(payment, payment.dueDate))
         ? [{ kind: 'overdue' as const, payment, due: payment.dueDate }]
         : []

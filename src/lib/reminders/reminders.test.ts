@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { Note } from '~/lib/notes';
-import { DEFAULT_REMINDER_SETTINGS, RecurringPayment } from '~/lib/payments';
+import { DEFAULT_REMINDER_SETTINGS, OneOffPayment, RecurringPayment } from '~/lib/payments';
 import {
   canClear,
   filterReminders,
@@ -177,6 +177,41 @@ describe('new reminders', () => {
   it('puts payments away until tomorrow with Later, the rest for a few days', () => {
     expect(laterUntil({ kind: 'overdue' }, TODAY)).toEqual(day('2026-10-03'));
     expect(laterUntil({ kind: 'renewal' }, TODAY)).toEqual(day('2026-10-05'));
+  });
+});
+
+describe('one-off payments', () => {
+  const oneOff = (overrides: Partial<OneOffPayment> & { id: string }): OneOffPayment => ({
+    kind: 'oneOff',
+    name: overrides.id,
+    amount: 75,
+    signedAmount: -75,
+    type: 'EXPENSE',
+    category: 'GIFT',
+    dueDate: day('2026-10-03'),
+    paidAt: null,
+    dueReminder: { off: false, days: null },
+    dueReminderDays: 1,
+    ...overrides
+  });
+
+  it('reminds before one is due, and goes overdue until it is paid', () => {
+    const birthday = oneOff({ id: 'Birthday' });
+    const late = oneOff({ id: 'Parking', dueDate: day('2026-09-30') });
+    const paid = oneOff({ id: 'Paid', dueDate: day('2026-09-30'), paidAt: day('2026-09-30') });
+
+    const fresh = newReminders(sources({ payments: [birthday, late, paid] }));
+
+    expect(titles(fresh)).toEqual(
+      expect.arrayContaining(['Parking · £75.00 was due Wed 30 Sep', 'Birthday is due tomorrow'])
+    );
+    expect(titles(fresh).join()).not.toContain('Paid');
+    expect(fresh.find(r => r.kind === 'overdue')?.body).toBe(
+      'Still unpaid. Mark it paid or delete it to clear it.'
+    );
+    expect(kindText(upcomingReminders(sources({ payments: [birthday] }))[0])).toBe(
+      'One-off payment'
+    );
   });
 });
 
