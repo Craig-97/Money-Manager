@@ -1,14 +1,13 @@
 import { useMatch } from 'react-router';
 import { useShallow } from 'zustand/react/shallow';
 import { ROUTES } from '~/constants';
-import { useNoteComposerStore } from '~/state/noteComposer';
+import { useNoteDialogStore } from '~/state/noteDialog';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
 
 export interface AddAction {
   label: string;
+  // Opens a dialog: the note dialog, or the payment one
   open: () => void;
-  // Opens the payment dialog; the note composer is part of the notes page
-  dialog: boolean;
 }
 
 /*
@@ -23,16 +22,16 @@ export const useAddAction = (): AddAction => {
       openAddDebt: s.openAddDebt
     }))
   );
-  const openNote = useNoteComposerStore(s => s.openComposer);
+  const openNote = useNoteDialogStore(s => s.openNew);
   const onRecurring = useMatch(ROUTES.recurring) !== null;
   // A debt's own page too
   const onDebts = useMatch({ path: ROUTES.debts, end: false }) !== null;
   const onNotes = useMatch(ROUTES.notes) !== null;
 
-  if (onNotes) return { label: 'Add note', open: openNote, dialog: false };
+  if (onNotes) return { label: 'Add note', open: openNote };
   if (onRecurring) {
-    return { label: 'Add recurring payment', open: () => openAdd('recurring'), dialog: true };
+    return { label: 'Add recurring payment', open: () => openAdd('recurring') };
   }
-  if (onDebts) return { label: 'Add a debt', open: openAddDebt, dialog: true };
-  return { label: 'Add payment', open: openChooser, dialog: true };
+  if (onDebts) return { label: 'Add a debt', open: openAddDebt };
+  return { label: 'Add payment', open: openChooser };
 };

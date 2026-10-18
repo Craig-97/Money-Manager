@@ -1,10 +1,10 @@
 // jest-dom adds custom matchers for asserting on DOM nodes, e.g. toHaveTextContent
 // learn more: https://github.com/testing-library/jest-dom
 import '@testing-library/jest-dom/vitest';
-import { afterEach } from 'vitest';
+import { afterEach, vi } from 'vitest';
 import { cleanup, configure } from '@testing-library/react';
 import { useDebtDialogStore } from '~/state/debtDialog';
-import { useNoteComposerStore } from '~/state/noteComposer';
+import { useNoteDialogStore } from '~/state/noteDialog';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
 import { DEFAULT_ACCENT, usePrefsStore } from '~/state/prefs';
 import { useRenewalSnoozeStore } from '~/state/renewalSnooze';
@@ -45,12 +45,14 @@ Element.prototype.scrollIntoView ??= noop;
 // Keep tests independent: storage, the viewport and the document's theme are shared global state
 afterEach(() => {
   cleanup();
+  // e.g. holdExitAnimations' getComputedStyle
+  vi.restoreAllMocks();
   localStorage.clear();
   usePrefsStore.setState({ theme: 'dark', accent: DEFAULT_ACCENT });
   useRenewalSnoozeStore.setState({ until: {} });
-  useNoteComposerStore.setState({ open: false, requests: 0 });
-  usePaymentDialogStore.setState({ dialog: { view: 'closed' } });
-  useDebtDialogStore.setState({ dialog: { view: 'closed' } });
+  useNoteDialogStore.setState(useNoteDialogStore.getInitialState(), true);
+  usePaymentDialogStore.setState(usePaymentDialogStore.getInitialState(), true);
+  useDebtDialogStore.setState(useDebtDialogStore.getInitialState(), true);
   resetViewport();
   delete document.documentElement.dataset.theme;
   delete document.documentElement.dataset.accent;

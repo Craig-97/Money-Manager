@@ -33,11 +33,16 @@ const columns = 'grid grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)_100px_110px] item
  * headings stay at the top as the payments scroll, and older ones load on asking.
  */
 export const PaymentsDialog = ({ debts, today, onUndoOverpayment }: PaymentsDialogProps) => {
-  const { dialog, close, openOverpayment } = useDebtDialogStore(
-    useShallow(s => ({ dialog: s.dialog, close: s.close, openOverpayment: s.openOverpayment }))
+  const { open, debtId, close, openOverpayment } = useDebtDialogStore(
+    useShallow(s => ({
+      open: s.open === 'payments',
+      debtId: s.paymentsDebtId,
+      close: s.close,
+      openOverpayment: s.openOverpayment
+    }))
   );
-  const debt =
-    dialog.view === 'payments' ? debts.find(item => item.id === dialog.debtId) : undefined;
+  // Kept while closing, so it animates away showing what it showed
+  const debt = debts.find(item => item.id === debtId);
   const history = useDebtHistory(debt, today);
 
   if (!debt) return null;
@@ -45,7 +50,7 @@ export const PaymentsDialog = ({ debts, today, onUndoOverpayment }: PaymentsDial
 
   return (
     <Modal
-      open
+      open={open}
       wide
       onOpenChange={next => (next ? undefined : close())}
       title={`${debt.name} payments`}

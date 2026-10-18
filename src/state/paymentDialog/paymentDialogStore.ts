@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { PaymentKind } from '~/lib/payments';
 
 type PaymentDialogView =
+  // Nothing opened yet
   | { view: 'closed' }
   // "What kind of payment is it?"
   | { view: 'chooser' }
@@ -25,7 +26,12 @@ interface FormOptions {
 }
 
 interface PaymentDialogState {
+  // What it shows. Closing leaves this as it was, so the dialog keeps its contents while it
+  // animates away; the next opening replaces it.
   dialog: PaymentDialogView;
+  open: boolean;
+  // Goes up each time it opens, so each opening starts from a fresh form
+  opened: number;
   openChooser: () => void;
   openAdd: (kind: PaymentKind, options?: FormOptions) => void;
   openEdit: (
@@ -42,12 +48,18 @@ interface PaymentDialogState {
  * The add and edit payment dialog, which lives in the app shell so the mobile nav's add button
  * can open it from any page.
  */
-export const usePaymentDialogStore = create<PaymentDialogState>()(set => ({
-  dialog: { view: 'closed' },
-  openChooser: () => set({ dialog: { view: 'chooser' } }),
-  openAdd: (kind, options = {}) => set({ dialog: { view: 'form', kind, ...options } }),
-  openEdit: (kind, paymentId, options = {}) =>
-    set({ dialog: { view: 'form', kind, paymentId, ...options } }),
-  openAddDebt: () => set({ dialog: { view: 'form', kind: 'recurring', asDebt: true } }),
-  close: () => set({ dialog: { view: 'closed' } })
-}));
+export const usePaymentDialogStore = create<PaymentDialogState>()(set => {
+  const show = (dialog: PaymentDialogView) =>
+    set(s => ({ dialog, open: true, opened: s.opened + 1 }));
+  return {
+    dialog: { view: 'closed' },
+    open: false,
+    opened: 0,
+    openChooser: () => show({ view: 'chooser' }),
+    openAdd: (kind, options = {}) => show({ view: 'form', kind, ...options }),
+    openEdit: (kind, paymentId, options = {}) =>
+      show({ view: 'form', kind, paymentId, ...options }),
+    openAddDebt: () => show({ view: 'form', kind: 'recurring', asDebt: true }),
+    close: () => set({ open: false })
+  };
+});
