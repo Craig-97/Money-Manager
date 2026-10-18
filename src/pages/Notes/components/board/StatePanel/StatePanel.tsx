@@ -1,32 +1,18 @@
 import { ReactNode } from 'react';
-import { cn } from '~/lib/cn';
 
 interface StatePanelProps {
   icon: ReactNode;
   title: string;
   text?: string;
   action: ReactNode;
-  tone?: 'dashed' | 'error';
 }
 
-/* A message in place of the board: no notes, no matches, or an error */
-export const StatePanel = ({ icon, title, text, action, tone = 'dashed' }: StatePanelProps) => (
-  <div
-    role={tone === 'error' ? 'alert' : undefined}
-    className={cn(
-      'flex flex-col items-center gap-3 rounded-3xl px-6 py-12 text-center',
-      tone === 'error'
-        ? 'border border-border bg-surface'
-        : 'border border-dashed border-border-strong'
-    )}>
+/* A message in place of the board: no notes, or no matches */
+export const StatePanel = ({ icon, title, text, action }: StatePanelProps) => (
+  <div className="flex flex-col items-center gap-3 rounded-3xl border border-dashed border-border-strong px-6 py-12 text-center">
     <span
       aria-hidden="true"
-      className={cn(
-        'inline-flex size-12 items-center justify-center rounded-2xl',
-        tone === 'error'
-          ? 'bg-expense-bg text-expense'
-          : 'border border-border bg-surface text-muted'
-      )}>
+      className="inline-flex size-12 items-center justify-center rounded-2xl border border-border bg-surface text-muted">
       {icon}
     </span>
     <h2 className="text-base font-bold">{title}</h2>
