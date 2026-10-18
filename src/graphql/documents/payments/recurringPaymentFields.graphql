@@ -10,8 +10,18 @@ fragment RecurringPaymentFields on RecurringPayment {
   nextDueDate
   renewalDate
   renewalReminderDays
-  handled {
-    outcome
+  # Its pays and skips this cycle, oldest first
+  thisCycle {
+    id
+    kind
     dates
+    balanceChange
+  }
+  debt {
+    balance
+    startingBalance
+    apr
+    balanceUpdatedAt
+    paidOffThisCycle
   }
 }

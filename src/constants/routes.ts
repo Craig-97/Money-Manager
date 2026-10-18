@@ -3,6 +3,9 @@ export const ROUTES = {
   dashboard: '/dashboard',
   recurring: '/recurring',
   forecast: '/forecast',
+  debts: '/debts',
+  // One debt on mobile: how to pay it sooner, its payments and details
+  debt: '/debts/:id',
   notes: '/notes',
   profile: '/profile',
   setup: '/setup',
@@ -12,3 +15,6 @@ export const ROUTES = {
   // The API's reset email links here with ?token=
   resetPassword: '/reset-password'
 } as const;
+
+/* The page for one debt */
+export const debtPath = (id: string) => ROUTES.debt.replace(':id', encodeURIComponent(id));

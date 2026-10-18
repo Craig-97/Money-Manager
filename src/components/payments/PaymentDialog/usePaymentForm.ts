@@ -28,6 +28,7 @@ import {
   toReminderDays
 } from '~/lib/payments';
 import { showToast } from '~/state/toast';
+import { paidOffText, parseApr } from './debtFields';
 
 // How a recurring payment ends: it carries on, renews on a date (the payments carry on), or stops
 // after a last payment. One choice, so a renewal and a last payment can't both be set.
@@ -48,14 +49,29 @@ interface PaymentFormValues {
   // Null until chosen: a month for a renewal, off for a yearly payment
   reminder: ReminderDays | null;
   category: RecurringPaymentCategory | OneOffPaymentCategory;
+  // Recurring payments tracked as a debt: what's owed now, its APR, and what was borrowed
+  tracked: boolean;
+  balance: string;
+  apr: string;
+  started: string;
 }
+
+type TouchedField = 'name' | 'amount' | 'balance' | 'apr' | 'started';
+const UNTOUCHED: Record<TouchedField, boolean> = {
+  name: false,
+  amount: false,
+  balance: false,
+  apr: false,
+  started: false
+};
 
 const iso = (date: Date | null) => (date ? toApiDate(date) : '');
 
 const initialValues = (
   kind: PaymentKind,
   payment: Payment | undefined,
-  today: Date
+  today: Date,
+  asDebt = false
 ): PaymentFormValues => {
   const blank: PaymentFormValues = {
     type: 'EXPENSE',
@@ -68,7 +84,11 @@ const initialValues = (
     end: '',
     renewal: '',
     reminder: null,
-    category: kind === 'recurring' ? 'SUBSCRIPTION' : 'OTHER'
+    category: asDebt ? 'CREDIT_CARD' : kind === 'recurring' ? 'SUBSCRIPTION' : 'OTHER',
+    tracked: asDebt,
+    balance: '',
+    apr: '',
+    started: ''
   };
   if (!payment) return blank;
 
@@ -91,17 +111,28 @@ const initialValues = (
         reminder:
           payment.renewalDate || payment.frequency === 'ANNUALLY'
             ? toReminderDays(payment.renewalReminderDays)
-            : null
+            : null,
+        tracked: payment.debt !== null,
+        balance: payment.debt ? formatMoneyInput(payment.debt.balance) : '',
+        apr: payment.debt ? String(payment.debt.apr) : '',
+        started:
+          payment.debt?.startingBalance != null
+            ? formatMoneyInput(payment.debt.startingBalance)
+            : ''
       }
     : { ...common, date: iso(payment.dueDate) };
 };
 
 /*
  * The recurring fields once the rules apply: yearly payments renew with each payment, so for them
- * Renews is Keeps going, and their reminder counts back from each payment.
+ * Renews is Keeps going, and their reminder counts back from each payment. A debt ends when it's
+ * paid off, so it keeps going with no renewal or reminder.
  */
 const recurringEnding = (values: PaymentFormValues) => {
   const yearly = values.frequency === 'ANNUALLY';
+  if (values.tracked) {
+    return { yearly, ends: 'keep' as Ends, reminds: false, reminder: 0 as ReminderDays };
+  }
   const ends: Ends = yearly && values.ends === 'renew' ? 'keep' : values.ends;
   const reminds = ends === 'renew' || (ends === 'keep' && yearly);
   const reminder: ReminderDays = values.reminder ?? (yearly ? 0 : DEFAULT_REMINDER);
@@ -128,6 +159,26 @@ const sameEnding = (a: PaymentFormValues, b: PaymentFormValues) => {
   );
 };
 
+// A debt's figures as the API takes them, or null when it isn't one or they aren't filled in yet
+const debtFields = (values: PaymentFormValues) => {
+  const balance = parseMoney(values.balance);
+  const apr = parseApr(values.apr);
+  if (!values.tracked || balance === null || apr === null) return null;
+  return {
+    balance,
+    apr,
+    startingBalance: values.started.trim() ? parseMoney(values.started) : null
+  };
+};
+
+const sameDebt = (a: PaymentFormValues, b: PaymentFormValues) => {
+  const x = debtFields(a);
+  const y = debtFields(b);
+  return (
+    x?.balance === y?.balance && x?.apr === y?.apr && x?.startingBalance === y?.startingBalance
+  );
+};
+
 /* Whether the form still holds what the payment already has */
 const isUnchanged = (values: PaymentFormValues, before: PaymentFormValues) =>
   values.name.trim() === before.name &&
@@ -137,7 +188,9 @@ const isUnchanged = (values: PaymentFormValues, before: PaymentFormValues) =>
   values.date === before.date &&
   values.frequency === before.frequency &&
   values.first === before.first &&
-  sameEnding(values, before);
+  sameEnding(values, before) &&
+  values.tracked === before.tracked &&
+  sameDebt(values, before);
 
 export interface SummaryRow {
   label: string;
@@ -199,6 +252,32 @@ const scheduleSummary = (
   return { rows };
 };
 
+/* A debt's summary also says when it'd be paid off */
+const withPaidOff = (
+  summary: ReturnType<typeof scheduleSummary>,
+  values: PaymentFormValues,
+  today: Date
+) =>
+  values.tracked && !summary.message
+    ? {
+        rows: [
+          ...summary.rows,
+          {
+            label: 'Paid off',
+            value: paidOffText(
+              {
+                balance: parseMoney(values.balance),
+                apr: parseApr(values.apr),
+                amount: parseMoney(values.amount),
+                frequency: values.frequency
+              },
+              today
+            )
+          }
+        ]
+      }
+    : summary;
+
 /* What the chosen ending means, under the Ends choice */
 export const endsHint = (values: PaymentFormValues, today: Date) => {
   const { yearly, ends } = recurringEnding(values);
@@ -216,6 +295,8 @@ export const endsHint = (values: PaymentFormValues, today: Date) => {
 
 interface Options {
   kind: PaymentKind;
+  // Opened from Debts, so it's always a debt
+  asDebt?: boolean;
   accountId: string;
   payment: Payment | undefined;
   today: Date;
@@ -225,9 +306,17 @@ interface Options {
 }
 
 /* The add or edit payment form: its values, what's wrong with them, and saving */
-export const usePaymentForm = ({ kind, accountId, payment, today, onSaved, formKey }: Options) => {
-  const [values, setValues] = useState(() => initialValues(kind, payment, today));
-  const [touched, setTouched] = useState({ name: false, amount: false });
+export const usePaymentForm = ({
+  kind,
+  asDebt = false,
+  accountId,
+  payment,
+  today,
+  onSaved,
+  formKey
+}: Options) => {
+  const [values, setValues] = useState(() => initialValues(kind, payment, today, asDebt));
+  const [touched, setTouched] = useState(UNTOUCHED);
   const [nameTaken, setNameTaken] = useState<string>();
   const [saving, setSaving] = useState(false);
 
@@ -236,8 +325,8 @@ export const usePaymentForm = ({ kind, accountId, payment, today, onSaved, formK
   const [currentKey, setCurrentKey] = useState(formKey);
   if (formKey !== currentKey) {
     setCurrentKey(formKey);
-    setValues(initialValues(kind, payment, today));
-    setTouched({ name: false, amount: false });
+    setValues(initialValues(kind, payment, today, asDebt));
+    setTouched(UNTOUCHED);
     setNameTaken(undefined);
   }
 
@@ -261,6 +350,11 @@ export const usePaymentForm = ({ kind, accountId, payment, today, onSaved, formK
       if (key === 'ends' && value === 'renew' && !current.renewal) {
         next.renewal = iso(addYear(today));
       }
+      // A debt is always money out. A new one still on the default category is likely a loan.
+      if (key === 'tracked' && value) {
+        next.type = 'EXPENSE';
+        if (!payment && current.category === 'SUBSCRIPTION') next.category = 'LOAN';
+      }
       return next;
     });
   };
@@ -275,6 +369,13 @@ export const usePaymentForm = ({ kind, accountId, payment, today, onSaved, formK
   const amountOk = amount !== null && amount > 0;
   const endBad = ends === 'stop' && !!first && !!end && end < first;
   const renewalBad = ends === 'renew' && !!first && !!renewal && renewal <= first;
+  const balance = parseMoney(values.balance);
+  const apr = parseApr(values.apr);
+  // A new debt owes something; an existing one may have just been paid off
+  const balanceOk = balance !== null && (balance > 0 || !!payment);
+  const aprOk = apr !== null;
+  const startedOk = !values.started.trim() || parseMoney(values.started) !== null;
+  const debtOk = kind !== 'recurring' || !values.tracked || (balanceOk && aprOk && startedOk);
   const datesOk =
     kind === 'oneOff'
       ? !!parseIsoDate(values.date)
@@ -291,7 +392,10 @@ export const usePaymentForm = ({ kind, accountId, payment, today, onSaved, formK
     name: nameTaken ?? (touched.name && !nameOk ? 'Enter a name' : undefined),
     amount: touched.amount && !amountOk ? 'Enter an amount above £0' : undefined,
     end: endBad ? 'Choose a date on or after the first payment' : undefined,
-    renewal: renewalBad ? 'Choose a date after the first payment' : undefined
+    renewal: renewalBad ? 'Choose a date after the first payment' : undefined,
+    balance: touched.balance && !balanceOk ? 'Enter what you owe now' : undefined,
+    apr: touched.apr && !aprOk ? 'Enter a rate from 0 to 100%' : undefined,
+    started: touched.started && !startedOk ? 'Enter an amount, or leave it empty' : undefined
   };
 
   // Set next renewal: the same day a year on, or as many years on as it takes to reach today
@@ -320,13 +424,13 @@ export const usePaymentForm = ({ kind, accountId, payment, today, onSaved, formK
   };
 
   const save = async () => {
-    if (!nameOk || !amountOk || !datesOk) {
-      setTouched({ name: true, amount: true });
+    if (!nameOk || !amountOk || !datesOk || !debtOk) {
+      setTouched({ name: true, amount: true, balance: true, apr: true, started: true });
       return;
     }
     const name = values.name.trim();
     // Editing without changing anything just closes
-    if (payment && isUnchanged(values, initialValues(kind, payment, today))) {
+    if (payment && isUnchanged(values, initialValues(kind, payment, today, asDebt))) {
       onSaved();
       return;
     }
@@ -337,7 +441,7 @@ export const usePaymentForm = ({ kind, accountId, payment, today, onSaved, formK
         const schedule = { frequency: values.frequency, firstPaymentDate: values.first };
         const category = values.category as RecurringPaymentCategory;
         if (payment) {
-          const before = initialValues(kind, payment, today);
+          const before = initialValues(kind, payment, today, asDebt);
           // Only send the schedule if it changed: a new schedule starts the payment unpaid again.
           // The ending can always go, as a new last payment keeps what's been paid.
           const scheduleChanged =
@@ -349,14 +453,27 @@ export const usePaymentForm = ({ kind, accountId, payment, today, onSaved, formK
                 ...common,
                 category,
                 ...endingFields(values),
-                ...(scheduleChanged ? schedule : {})
+                ...(scheduleChanged ? schedule : {}),
+                // Sent when it's a debt, and as null to stop tracking one
+                ...(values.tracked
+                  ? { debt: debtFields(values) }
+                  : before.tracked
+                    ? { debt: null }
+                    : {})
               }
             }
           });
         } else {
           await createRecurring({
             variables: {
-              input: { ...common, ...schedule, ...endingFields(values), category, accountId }
+              input: {
+                ...common,
+                ...schedule,
+                ...endingFields(values),
+                category,
+                accountId,
+                ...(values.tracked ? { debt: debtFields(values) } : {})
+              }
             },
             update: (cache, { data }) => {
               if (data)
@@ -402,12 +519,14 @@ export const usePaymentForm = ({ kind, accountId, payment, today, onSaved, formK
   return {
     values,
     set,
-    touch: (field: 'name' | 'amount') => setTouched(current => ({ ...current, [field]: true })),
+    touch: (field: TouchedField) => setTouched(current => ({ ...current, [field]: true })),
     errors,
-    canSave: nameOk && amountOk && datesOk && !nameTaken,
+    canSave: nameOk && amountOk && datesOk && debtOk && !nameTaken,
     saving,
     save: () => void save(),
-    summary: scheduleSummary(values, today, { renewalPassed }),
+    summary: withPaidOff(scheduleSummary(values, today, { renewalPassed }), values, today),
+    // Opened from Debts: always a debt, so there's no switch to stop tracking it
+    asDebt,
     endsHint: endsHint(values, today),
     ending,
     renewalPassed,

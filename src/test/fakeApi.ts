@@ -1,12 +1,39 @@
 import { Observable } from 'rxjs';
 import { ApolloLink } from '@apollo/client';
-import { buildSchema, execute, ExecutionResult, GraphQLError, parse } from 'graphql';
+import {
+  buildSchema,
+  execute,
+  ExecutionResult,
+  GraphQLError,
+  GraphQLObjectType,
+  parse
+} from 'graphql';
 import { ThemePreference } from '~/graphql/generated';
 import { addDays, fromApiDate, startOfToday, toIsoDate } from '~/lib/dates';
 import { nextOccurrence, occurrencesBetween, Schedule } from '~/lib/payments';
 import { typeDefs } from './schema';
 
 // Shapes as the API returns them: dates are epoch milliseconds in a string
+
+export type FakeRecordKind = 'PAID' | 'SKIPPED' | 'OVERPAYMENT' | 'BALANCE_SET';
+
+// A payment record, as the API keeps them
+export interface FakeRecord {
+  id: string;
+  kind: FakeRecordKind;
+  dates: string[];
+  balanceChange: number;
+  debt: { interest: number; reduction: number; balanceAfter: number } | null;
+  open: boolean;
+  createdAt: string;
+}
+
+export interface FakeDebt {
+  balance: number;
+  startingBalance: number | null;
+  apr: number;
+  balanceUpdatedAt: string | null;
+}
 
 export interface FakeRecurringPayment {
   id: string;
@@ -18,9 +45,13 @@ export interface FakeRecurringPayment {
   firstPaymentDate: string;
   lastPaymentDate: string | null;
   nextDueDate: string | null;
-  handled: { outcome: 'PAID' | 'SKIPPED'; dates: string[] }[];
+  // Its open pays and skips, oldest first, as the API's thisCycle field
+  thisCycle: FakeRecord[];
+  // Every record, newest first, as the API's history field
+  history?: FakeRecord[];
   renewalDate: string | null;
   renewalReminderDays: number;
+  debt?: FakeDebt | null;
 }
 
 export interface FakeOneOffPayment {
@@ -30,6 +61,7 @@ export interface FakeOneOffPayment {
   dueDate: string;
   type: 'INCOME' | 'EXPENSE';
   category: string;
+  paidAt?: string | null;
 }
 
 export interface FakeNote {
@@ -83,7 +115,21 @@ export interface Call {
   variables: Record<string, unknown>;
 }
 
+const roundPence = (amount: number) => Math.round(amount * 100) / 100;
+
 const schema = buildSchema(typeDefs);
+
+// As the API: a debt's paidOffThisCycle comes from its payment's open pays and overpayments
+const debtField = (schema.getType('RecurringPayment') as GraphQLObjectType).getFields().debt;
+debtField.resolve = (payment: FakeRecurringPayment) =>
+  payment.debt && {
+    ...payment.debt,
+    paidOffThisCycle: roundPence(
+      (payment.history ?? [])
+        .filter(record => record.open && (record.kind === 'PAID' || record.kind === 'OVERPAYMENT'))
+        .reduce((sum, record) => sum + (record.debt?.reduction ?? 0), 0)
+    )
+  };
 
 export const DEFAULT_USER: FakeUser = {
   id: 'user-1',
@@ -123,11 +169,69 @@ const dueDateFor = (
   payment: Pick<FakeRecurringPayment, 'firstPaymentDate' | 'frequency' | 'lastPaymentDate'>
 ) => toApi(nextOccurrence(scheduleOf(payment), startOfToday()));
 
+let recordCount = 0;
+
+/* A payment record for tests to put on a payment's thisCycle: open, from this cycle */
+export const fakeRecord = (
+  kind: FakeRecordKind,
+  dates: string[],
+  balanceChange = 0,
+  debt: FakeRecord['debt'] = null
+): FakeRecord => ({
+  id: `record-${++recordCount}`,
+  kind,
+  dates,
+  balanceChange,
+  debt,
+  open: true,
+  createdAt: String(Date.now())
+});
+
+const PAYMENTS_PER_YEAR: Record<string, number> = {
+  WEEKLY: 52,
+  BIWEEKLY: 26,
+  MONTHLY: 12,
+  QUARTERLY: 4,
+  ANNUALLY: 1
+};
+
+// As the API: a record goes on the payment's history, and its pays and skips on thisCycle
+const addRecord = (payment: FakeRecurringPayment, record: FakeRecord) => {
+  payment.history = [record, ...(payment.history ?? [])];
+  if (record.kind === 'PAID' || record.kind === 'SKIPPED') payment.thisCycle.push(record);
+};
+
+const removeRecord = (payment: FakeRecurringPayment, record: FakeRecord) => {
+  payment.history = (payment.history ?? []).filter(item => item.id !== record.id);
+  payment.thisCycle = payment.thisCycle.filter(item => item.id !== record.id);
+};
+
 // As the API: records dates as paid or skipped and moves the payment on to the date after the last
-const handle = (payment: FakeRecurringPayment, outcome: 'PAID' | 'SKIPPED', dates: Date[]) => {
+const handle = (
+  payment: FakeRecurringPayment,
+  kind: 'PAID' | 'SKIPPED',
+  dates: Date[],
+  balanceChange = 0,
+  debt: FakeRecord['debt'] = null
+) => {
   if (!dates.length) return;
-  payment.handled.push({ outcome, dates: dates.map(date => toApi(date)!) });
+  addRecord(
+    payment,
+    fakeRecord(
+      kind,
+      dates.map(date => toApi(date)!),
+      balanceChange,
+      debt
+    )
+  );
   payment.nextDueDate = toApi(nextOccurrence(scheduleOf(payment), addDays(dates.at(-1)!, 1)));
+};
+
+// As the API: the period's interest goes on, then the payment comes off, never below nothing
+const payTowardsDebt = (debt: FakeDebt, amount: number, frequency: string) => {
+  const interest = roundPence((debt.balance * debt.apr) / 100 / PAYMENTS_PER_YEAR[frequency]);
+  const balance = Math.max(0, roundPence(debt.balance + interest - amount));
+  return { interest, reduction: roundPence(debt.balance - balance), balanceAfter: balance };
 };
 
 export const DEFAULT_ACCOUNT: FakeAccount = {
@@ -148,7 +252,7 @@ export const DEFAULT_ACCOUNT: FakeAccount = {
       lastPaymentDate: null,
       // Worked out by the client, as for payments saved before the API tracked due dates
       nextDueDate: null,
-      handled: [],
+      thisCycle: [],
       renewalDate: null,
       renewalReminderDays: 0
     }
@@ -281,29 +385,46 @@ export const createFakeApi = ({
       firstPaymentDate: fromInput(input.firstPaymentDate),
       lastPaymentDate: input.lastPaymentDate ? fromInput(input.lastPaymentDate) : null,
       nextDueDate: null,
-      handled: [],
+      thisCycle: [],
+      history: [],
       renewalDate: input.renewalDate ? fromInput(input.renewalDate) : null,
-      renewalReminderDays: input.renewalReminderDays ?? 0
+      renewalReminderDays: input.renewalReminderDays ?? 0,
+      debt: input.debt ? debtFrom(input.debt) : null
     };
-    return { ...payment, nextDueDate: dueDateFor(payment) };
+    const created = { ...payment, nextDueDate: dueDateFor(payment) };
+    if (created.debt) balanceSet(created, null);
+    return created;
   };
 
   const updateRecurring = (payment: FakeRecurringPayment, input: Args) => {
     if (input.name && input.name !== payment.name) checkUniqueName(input.name, payment.id);
     const scheduleChanged = ['firstPaymentDate', 'frequency'].some(key => key in input);
     const endChanged = 'lastPaymentDate' in input;
+    // A debt's balance gets a new date, and a record, only when it's set to something else
+    if (input.debt === null) {
+      payment.debt = null;
+    } else if (input.debt) {
+      const previous = payment.debt ? payment.debt.balance : null;
+      const moved = previous !== input.debt.balance;
+      payment.debt = moved
+        ? debtFrom(input.debt)
+        : { ...debtFrom(input.debt), balanceUpdatedAt: payment.debt?.balanceUpdatedAt ?? null };
+      if (moved) balanceSet(payment, previous);
+    }
     for (const [key, value] of Object.entries(input)) {
-      if (value === undefined) continue;
+      if (value === undefined || key === 'debt') continue;
       const isDate = ['firstPaymentDate', 'lastPaymentDate', 'renewalDate'].includes(key);
       Object.assign(payment, { [key]: isDate && value ? fromInput(value) : value });
     }
-    // A new schedule starts again from its next date, with nothing paid or skipped
+    // A new schedule starts again from its next date, with nothing paid or skipped: the old
+    // schedule's records are closed
     if (scheduleChanged) {
       payment.nextDueDate = dueDateFor(payment);
-      payment.handled = [];
+      for (const record of payment.history ?? []) record.open = false;
+      payment.thisCycle = [];
     } else if (endChanged) {
       // Only the end moved: carry on from the date still due, or after the latest one dealt with
-      const latest = fromApiDate(payment.handled.at(-1)?.dates.at(-1));
+      const latest = fromApiDate(payment.thisCycle.at(-1)?.dates.at(-1));
       const from =
         fromApiDate(payment.nextDueDate) ?? (latest ? addDays(latest, 1) : startOfToday());
       payment.nextDueDate = toApi(nextOccurrence(scheduleOf(payment), from));
@@ -317,8 +438,32 @@ export const createFakeApi = ({
     amount: input.amount,
     dueDate: fromInput(input.dueDate),
     type: input.type,
-    category: input.category
+    category: input.category,
+    paidAt: null
   });
+
+  const debtFrom = (input: Args): FakeDebt => ({
+    balance: input.balance,
+    startingBalance: input.startingBalance ?? null,
+    apr: input.apr,
+    balanceUpdatedAt: String(Date.now())
+  });
+
+  // As the API: notes a debt's balance being set by hand, and how far it moved
+  const balanceSet = (payment: FakeRecurringPayment, previous: number | null) => {
+    const balance = payment.debt?.balance ?? 0;
+    addRecord(payment, {
+      ...fakeRecord('BALANCE_SET', [apiDateFromToday(0)]),
+      debt: {
+        interest: 0,
+        reduction: roundPence((previous ?? balance) - balance),
+        balanceAfter: balance
+      }
+    });
+  };
+
+  // As the API's records for paid one-offs: what paying took off, to put back on undo
+  const oneOffPaid = new Map<string, number>();
 
   const rootValue = {
     tokenFindUser: currentUser,
@@ -327,6 +472,14 @@ export const createFakeApi = ({
       const current = requireAccount();
       if (id && id !== current.id) throw apiError('ACCOUNT_NOT_FOUND', `No account '${id}'`);
       return current;
+    },
+    recurringPayment: ({ id }: Args) => {
+      const payment = findRecurring(id);
+      // As the API: the latest `limit` records, 50 when it isn't given
+      return {
+        ...payment,
+        history: ({ limit }: Args) => (payment.history ?? []).slice(0, limit ?? 50)
+      };
     },
     // Messages and codes as the real API sends them
     // The refresh cookie is always good here
@@ -430,16 +583,20 @@ export const createFakeApi = ({
       if (input.monthlyIncome !== undefined) current.monthlyIncome = input.monthlyIncome;
       return { account: current, success: true };
     },
-    // As the API: clears what was dealt with before payday, and moves the chosen payments on
-    // from dates left over to their first date from payday
+    // As the API: closes the records of the cycle that ended, clears away paid one-offs due before
+    // payday, and moves the chosen payments on from dates left over to their first date from payday
     startPaydayCycle: ({ input }: Args) => {
       const current = requireAccount();
       const cycleStart = fromApiDate(fromInput(input.payday))!;
       input.recurringPaymentIds.forEach(findRecurring);
+      const inNewCycle = (record: FakeRecord) =>
+        record.dates.some(date => fromApiDate(date)! >= cycleStart);
+      current.oneOffPayments = current.oneOffPayments.filter(
+        payment => !payment.paidAt || fromApiDate(payment.dueDate)! >= cycleStart
+      );
       for (const payment of current.recurringPayments) {
-        payment.handled = payment.handled.filter(entry =>
-          entry.dates.some(date => fromApiDate(date)! >= cycleStart)
-        );
+        for (const record of payment.history ?? []) if (!inNewCycle(record)) record.open = false;
+        payment.thisCycle = payment.thisCycle.filter(inNewCycle);
         const due = fromApiDate(payment.nextDueDate);
         if (input.recurringPaymentIds.includes(payment.id) && due && due < cycleStart) {
           payment.nextDueDate = toApi(nextOccurrence(scheduleOf(payment), cycleStart));
@@ -449,7 +606,8 @@ export const createFakeApi = ({
       current.cycleStartedOn = fromInput(input.payday);
       return { account: current, success: true };
     },
-    // As the API: paid payments come off the balance (income goes on); one-offs are deleted
+    // As the API: paid payments come off the balance (income goes on), with a debt's interest
+    // added first. One-offs are marked paid until payday.
     markPaymentsPaid: ({ input }: Args) => {
       const current = requireAccount();
       const change = (p: { amount: number; type: string }) =>
@@ -457,30 +615,88 @@ export const createFakeApi = ({
       for (const id of input.recurringPaymentIds) {
         const payment = findRecurring(id);
         if (!payment.nextDueDate) continue;
+        let debt: FakeRecord['debt'] = null;
+        if (payment.debt) {
+          debt = payTowardsDebt(payment.debt, payment.amount, payment.frequency);
+          payment.debt.balance = debt.balanceAfter;
+        }
         current.bankBalance += change(payment);
-        handle(payment, 'PAID', [fromApiDate(payment.nextDueDate)!]);
+        handle(payment, 'PAID', [fromApiDate(payment.nextDueDate)!], change(payment), debt);
       }
-      for (const id of input.oneOffPaymentIds) current.bankBalance += change(findOneOff(id));
-      current.oneOffPayments = current.oneOffPayments.filter(
-        p => !input.oneOffPaymentIds.includes(p.id)
-      );
-      current.bankBalance = Math.round(current.bankBalance * 100) / 100;
+      for (const id of input.oneOffPaymentIds) {
+        const payment = findOneOff(id);
+        if (payment.paidAt) continue;
+        current.bankBalance += change(payment);
+        oneOffPaid.set(id, change(payment));
+        payment.paidAt = String(Date.now());
+      }
+      current.bankBalance = roundPence(current.bankBalance);
       return { account: current, success: true };
     },
-    // Undoes the latest pay or skip, bringing its dates back; paid amounts go back on
+    // As the API: undoes the latest pay or skip this cycle, bringing its dates back, and makes
+    // paid one-offs unpaid, putting back exactly what paying did
     markPaymentsUnpaid: ({ input }: Args) => {
       const current = requireAccount();
       for (const id of input.recurringPaymentIds) {
         const payment = findRecurring(id);
-        const latest = payment.handled.pop();
+        const latest = payment.thisCycle.at(-1);
         if (!latest) continue;
+        removeRecord(payment, latest);
         payment.nextDueDate = latest.dates[0];
-        if (latest.outcome === 'PAID') {
-          current.bankBalance += payment.type === 'INCOME' ? -payment.amount : payment.amount;
+        current.bankBalance -= latest.balanceChange;
+        if (payment.debt && latest.debt) {
+          payment.debt.balance = roundPence(payment.debt.balance + latest.debt.reduction);
         }
       }
-      current.bankBalance = Math.round(current.bankBalance * 100) / 100;
+      for (const id of input.oneOffPaymentIds ?? []) {
+        const payment = findOneOff(id);
+        if (!payment.paidAt) continue;
+        current.bankBalance -=
+          oneOffPaid.get(id) ?? (payment.type === 'INCOME' ? payment.amount : -payment.amount);
+        oneOffPaid.delete(id);
+        payment.paidAt = null;
+      }
+      current.bankBalance = roundPence(current.bankBalance);
       return { account: current, success: true };
+    },
+    // As the API: extra off a debt and off the bank balance
+    logDebtOverpayment: ({ input }: Args) => {
+      const current = requireAccount();
+      const payment = findRecurring(input.recurringPaymentId);
+      if (!payment.debt) throw apiError('DEBT_NOT_TRACKED', "That payment isn't tracked as a debt");
+      if (input.amount <= 0) {
+        throw apiError('BAD_USER_INPUT', 'Overpayments must be more than £0', { field: 'amount' });
+      }
+      if (input.amount > payment.debt.balance) {
+        throw apiError('BAD_USER_INPUT', "That's more than is left to pay", { field: 'amount' });
+      }
+      payment.debt.balance = roundPence(payment.debt.balance - input.amount);
+      current.bankBalance = roundPence(current.bankBalance - input.amount);
+      addRecord(
+        payment,
+        fakeRecord('OVERPAYMENT', [apiDateFromToday(0)], -input.amount, {
+          interest: 0,
+          reduction: input.amount,
+          balanceAfter: payment.debt.balance
+        })
+      );
+      return { account: current, success: true };
+    },
+    undoDebtOverpayment: ({ input }: Args) => {
+      const current = requireAccount();
+      for (const payment of current.recurringPayments) {
+        const record = (payment.history ?? []).find(item => item.id === input.recordId);
+        if (!record || record.kind !== 'OVERPAYMENT') continue;
+        if (!record.open)
+          throw apiError('PAYMENT_RECORD_CLOSED', "It's from before the last payday");
+        removeRecord(payment, record);
+        current.bankBalance = roundPence(current.bankBalance - record.balanceChange);
+        if (payment.debt && record.debt) {
+          payment.debt.balance = roundPence(payment.debt.balance + record.debt.reduction);
+        }
+        return { account: current, success: true };
+      }
+      throw apiError('PAYMENT_RECORD_NOT_FOUND', `No payment record '${input.recordId}'`);
     },
     // Skips the next date, or every date before `until`, without touching the balance
     skipRecurringPayments: ({ input }: Args) => {

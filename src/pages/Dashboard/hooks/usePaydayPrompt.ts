@@ -53,7 +53,8 @@ export const usePaydayPrompt = ({
       payment.kind === 'recurring' && payment.dueDate !== null && payment.dueDate < cycle.start
   );
   const overdue = payments.filter(
-    payment => payment.kind === 'oneOff' && payment.dueDate && payment.dueDate < today
+    payment =>
+      payment.kind === 'oneOff' && !payment.paidAt && payment.dueDate && payment.dueDate < today
   );
 
   const projected = summary.freeToSpend + account.monthlyIncome;

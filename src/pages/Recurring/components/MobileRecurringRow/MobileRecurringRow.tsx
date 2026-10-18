@@ -1,7 +1,9 @@
 import { Repeat } from 'lucide-react';
+import { DebtLeft } from '~/components/debts';
 import { Checkbox, CheckboxHitArea } from '~/components/form/Checkbox';
 import { PaymentLetter, TimesDue } from '~/components/payments/PaymentParts';
 import { cn } from '~/lib/cn';
+import { isDebt } from '~/lib/debts';
 import { formatPayment } from '~/lib/format';
 import { PayCycle } from '~/lib/payday';
 import {
@@ -82,10 +84,14 @@ export const MobileRecurringRow = ({
               <TimesDue payment={payment} cycle={cycle} today={today} hint={false} />
             ) : null}
           </span>
-          <span className="mt-[3px] flex min-w-0 items-center gap-[5px] text-xs font-medium text-muted">
-            <Repeat size={12} strokeWidth={2.25} className="shrink-0" aria-hidden="true" />
-            <span className="truncate">{subtitle(payment, tab, cycle, today)}</span>
-          </span>
+          {isDebt(payment) && tab !== 'cycle' ? (
+            <DebtLeft debt={payment} className="mt-[5px] text-xs font-medium text-muted" />
+          ) : (
+            <span className="mt-[3px] flex min-w-0 items-center gap-[5px] text-xs font-medium text-muted">
+              <Repeat size={12} strokeWidth={2.25} className="shrink-0" aria-hidden="true" />
+              <span className="truncate">{subtitle(payment, tab, cycle, today)}</span>
+            </span>
+          )}
         </span>
         <span className="shrink-0 text-right">
           <span

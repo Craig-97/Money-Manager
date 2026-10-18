@@ -1,0 +1,12 @@
+# Takes back an overpayment from this cycle, putting it back on the debt and the bank balance
+mutation UndoDebtOverpayment($input: UndoDebtOverpaymentInput!) {
+  undoDebtOverpayment(input: $input) {
+    account {
+      id
+      bankBalance
+      recurringPayments {
+        ...RecurringPaymentFields
+      }
+    }
+  }
+}

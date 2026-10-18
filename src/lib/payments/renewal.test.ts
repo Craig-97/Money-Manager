@@ -30,9 +30,10 @@ const payment = (overrides: Partial<RecurringPayment> = {}): RecurringPayment =>
   firstPaymentDate: day('2025-02-20'),
   lastPaymentDate: null,
   dueDate: day('2026-10-20'),
-  handled: [],
+  thisCycle: [],
   renewalDate: day('2027-02-02'),
   renewalReminderDays: 30,
+  debt: null,
   ...overrides
 });
 

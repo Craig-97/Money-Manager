@@ -31,7 +31,7 @@ const recurring = (
   lastPaymentDate: null,
   // Worked out by the app from the schedule
   nextDueDate: null,
-  handled: [],
+  thisCycle: [],
   renewalDate: null,
   renewalReminderDays: 0,
   ...fields

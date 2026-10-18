@@ -11,17 +11,17 @@ interface StatusStripProps {
   today: Date;
   cycle: PayCycle;
   accountId: string;
-  // Paying a one-off deletes it, which ends the edit
-  onDone: () => void;
 }
 
 /* Where an existing payment stands, with shortcuts to pay, skip or undo */
-export const StatusStrip = ({ payment, today, cycle, accountId, onDone }: StatusStripProps) => {
+export const StatusStrip = ({ payment, today, cycle, accountId }: StatusStripProps) => {
   const { pay, undo, skip } = usePaymentActions(accountId);
   const recurring = payment.kind === 'recurring' ? payment : null;
   const status = recurring
     ? cycleStatus(recurring, cycle)
-    : { tone: 'unpaid' as const, label: 'Unpaid' };
+    : payment.kind === 'oneOff' && payment.paidAt
+      ? { tone: 'paid' as const, label: 'Paid' }
+      : { tone: 'unpaid' as const, label: 'Unpaid' };
   const choices = paymentChoices(payment, cycle, today);
   const days = payment.dueDate ? daysBetween(today, payment.dueDate) : null;
   const dueText =
@@ -65,18 +65,15 @@ export const StatusStrip = ({ payment, today, cycle, accountId, onDone }: Status
         {choices.pay ? (
           <Button
             variant="solid"
-            onClick={() => {
-              void pay([payment]);
-              if (payment.kind === 'oneOff') onDone();
-            }}
+            onClick={() => void pay([payment])}
             className="flex-1 text-[13px] md:flex-none md:px-3.5">
             <Check size={15} strokeWidth={2.5} aria-hidden="true" />
             {choices.pay}
           </Button>
-        ) : recurring && choices.undo ? (
+        ) : choices.undo ? (
           <Button
             variant="solid"
-            onClick={() => void undo(recurring)}
+            onClick={() => void undo(payment)}
             className="flex-1 text-[13px] md:flex-none md:px-3.5">
             <Undo2 size={15} aria-hidden="true" />
             {choices.undo}

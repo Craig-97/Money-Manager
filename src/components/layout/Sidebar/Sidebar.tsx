@@ -6,7 +6,7 @@ import { ROUTES } from '~/constants';
 import { useEscapeKey } from '~/hooks/useEscapeKey';
 import { useSidebarMode } from '~/hooks/useSidebarMode';
 import { cn } from '~/lib/cn';
-import { MAIN_NAV } from '../navItems';
+import { navSection } from '../navItems';
 import { SidebarNavLink } from './SidebarNavLink';
 import { SidebarThemeSwitch } from './SidebarThemeSwitch';
 import { SidebarUserChip } from './SidebarUserChip';
@@ -76,7 +76,19 @@ export const Sidebar = ({ className }: { className?: string }) => {
           </div>
 
           <nav aria-label="Main" className="flex flex-col gap-1">
-            {MAIN_NAV.map(item => (
+            {navSection('main').map(item => (
+              <SidebarNavLink
+                key={item.to}
+                item={item}
+                expanded={expanded}
+                onNavigate={closeOverlay}
+              />
+            ))}
+            <hr
+              aria-hidden="true"
+              className={cn('my-2 border-border', expanded ? 'mx-4' : 'mx-3')}
+            />
+            {navSection('more').map(item => (
               <SidebarNavLink
                 key={item.to}
                 item={item}

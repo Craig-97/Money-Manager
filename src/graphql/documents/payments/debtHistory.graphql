@@ -1,0 +1,20 @@
+# What's happened to a debt, newest first: pays, skips, overpayments and balances set. The latest
+# `limit` of them; the API allows up to 200.
+query DebtHistory($id: ID!, $limit: Int!) {
+  recurringPayment(id: $id) {
+    id
+    history(limit: $limit) {
+      id
+      kind
+      dates
+      balanceChange
+      open
+      createdAt
+      debt {
+        interest
+        reduction
+        balanceAfter
+      }
+    }
+  }
+}

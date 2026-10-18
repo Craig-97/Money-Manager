@@ -7,14 +7,22 @@ import { TextInput } from '~/components/form/TextInput';
 import { Payment } from '~/lib/payments';
 import { FREQUENCY_OPTIONS, ONE_OFF_OPTIONS, RECURRING_OPTIONS } from '../../paymentOptions';
 import { PaymentForm } from '../../usePaymentForm';
+import { DebtFields } from '../DebtFields';
 import { PaymentTypeToggle } from '../PaymentTypeToggle';
 import { RecurringEnding } from '../RecurringEnding';
+import { TrackAsDebt } from '../TrackAsDebt';
 
 const pairClasses = 'grid gap-3.5 max-md:grid-cols-2 max-md:gap-2.5 min-[35rem]:grid-cols-2';
 
-/* The payment's fields: type, name, amount and category, then its date or schedule */
+/*
+ * The payment's fields: type, name, amount and category, then its date or schedule. A recurring
+ * expense can be tracked as a debt, which is always money out and ends when it's paid off.
+ */
 export const FormBody = ({ form, kind }: { form: PaymentForm; kind: Payment['kind'] }) => {
   const { values, set, touch, errors } = form;
+  const debt = kind === 'recurring' && values.tracked;
+  // From Debts it's always a debt; otherwise only an expense can be one
+  const canTrack = kind === 'recurring' && !form.asDebt && (values.type === 'EXPENSE' || debt);
   const amountField = (
     <div>
       <Label tone="muted" htmlFor="payment-amount">
@@ -49,7 +57,7 @@ export const FormBody = ({ form, kind }: { form: PaymentForm; kind: Payment['kin
 
   return (
     <>
-      <PaymentTypeToggle value={values.type} onChange={type => set('type', type)} />
+      {debt ? null : <PaymentTypeToggle value={values.type} onChange={type => set('type', type)} />}
 
       <div>
         <Label tone="muted" htmlFor="payment-name">
@@ -60,7 +68,13 @@ export const FormBody = ({ form, kind }: { form: PaymentForm; kind: Payment['kin
           value={values.name}
           onChange={event => set('name', event.target.value)}
           onBlur={() => touch('name')}
-          placeholder={kind === 'recurring' ? 'e.g. Spotify' : 'e.g. Concert tickets'}
+          placeholder={
+            debt
+              ? 'e.g. Credit card'
+              : kind === 'recurring'
+                ? 'e.g. Spotify'
+                : 'e.g. Concert tickets'
+          }
           autoComplete="off"
           invalid={!!errors.name}
           aria-describedby={errors.name ? 'payment-name-error' : undefined}
@@ -89,6 +103,9 @@ export const FormBody = ({ form, kind }: { form: PaymentForm; kind: Payment['kin
         <>
           {amountField}
           {categoryField}
+          {canTrack ? (
+            <TrackAsDebt checked={values.tracked} onCheckedChange={on => set('tracked', on)} />
+          ) : null}
           <div className={pairClasses}>
             <div>
               <Label tone="muted" htmlFor="payment-frequency">
@@ -112,7 +129,7 @@ export const FormBody = ({ form, kind }: { form: PaymentForm; kind: Payment['kin
               />
             </div>
           </div>
-          <RecurringEnding form={form} />
+          {debt ? <DebtFields form={form} /> : <RecurringEnding form={form} />}
         </>
       )}
     </>

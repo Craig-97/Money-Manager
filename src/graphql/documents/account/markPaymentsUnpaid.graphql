@@ -1,4 +1,5 @@
-# Undoes the latest pay or skip on recurring payments, returning paid amounts to the balance
+# Undoes the latest pay or skip this cycle on recurring payments, and makes paid one-offs unpaid,
+# putting back exactly what paying did to the balance and any debt
 mutation MarkPaymentsUnpaid($input: MarkPaymentsUnpaidInput!) {
   markPaymentsUnpaid(input: $input) {
     account {
@@ -6,6 +7,9 @@ mutation MarkPaymentsUnpaid($input: MarkPaymentsUnpaidInput!) {
       bankBalance
       recurringPayments {
         ...RecurringPaymentFields
+      }
+      oneOffPayments {
+        ...OneOffPaymentFields
       }
     }
   }

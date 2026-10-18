@@ -17,8 +17,14 @@ import { usePaymentForm } from './usePaymentForm';
  * shell and opens from the payment dialog store.
  */
 export const PaymentDialog = () => {
-  const { dialog, close, openChooser } = usePaymentDialogStore(
-    useShallow(s => ({ dialog: s.dialog, close: s.close, openChooser: s.openChooser }))
+  const { dialog, open, opened, close, openChooser } = usePaymentDialogStore(
+    useShallow(s => ({
+      dialog: s.dialog,
+      open: s.open,
+      opened: s.opened,
+      close: s.close,
+      openChooser: s.openChooser
+    }))
   );
   const isDesktop = useMediaQuery(MEDIA.desktop);
   const { account } = useAccount();
@@ -27,41 +33,51 @@ export const PaymentDialog = () => {
 
   const target = dialog.view === 'form' ? dialog : null;
   const kind = target?.kind ?? 'oneOff';
+  const asDebt = target?.asDebt ?? false;
   const payment =
     account && target?.paymentId
       ? toPayments(account, today).find(p => p.id === target.paymentId && p.kind === kind)
       : undefined;
   const form = usePaymentForm({
     kind,
+    asDebt,
     accountId: account?.id ?? '',
     payment,
     today,
     onSaved: close,
-    formKey: `${dialog.view}-${kind}-${target?.paymentId ?? 'new'}`
+    // Each opening starts afresh. Closing keeps the form as it was while the dialog animates away.
+    formKey: String(opened)
   });
 
   if (!account) return null;
 
-  const editing = !!payment;
+  // From what was opened, so it reads the same while closing, even once the payment is deleted
+  const editing = !!target?.paymentId;
   const title =
     dialog.view === 'chooser'
       ? isDesktop
         ? 'Add a payment'
         : 'What are you adding?'
-      : `${editing ? 'Edit' : 'Add'} ${kind === 'recurring' ? 'recurring' : 'one-off'} payment`;
+      : asDebt && !editing
+        ? 'Add a debt'
+        : `${editing ? 'Edit' : 'Add'} ${kind === 'recurring' ? 'recurring' : 'one-off'} payment`;
   const submitLabel = editing
     ? 'Save changes'
-    : kind === 'recurring' && isDesktop
-      ? 'Add recurring payment'
-      : 'Add payment';
+    : kind === 'recurring' && form.values.tracked
+      ? 'Add debt'
+      : kind === 'recurring' && isDesktop
+        ? 'Add recurring payment'
+        : 'Add payment';
 
   return (
     <Modal
-      open={dialog.view !== 'closed' && !(target?.paymentId && !payment)}
+      // A payment that's gone has nothing to edit
+      open={open && !(target?.paymentId && !payment)}
       onOpenChange={open => (open ? undefined : close())}
       title={title}
       onBack={target?.fromChooser ? openChooser : undefined}
       backLabel="Back to payment types"
+      initialFocusId={target?.focusBalance ? 'payment-balance' : undefined}
       footer={
         target ? (
           <>
@@ -69,7 +85,7 @@ export const PaymentDialog = () => {
               <Button
                 variant="dangerGhost"
                 onClick={() => {
-                  void remove([payment]);
+                  if (payment) void remove([payment]);
                   close();
                 }}
                 className="max-md:-ml-2">
@@ -95,13 +111,7 @@ export const PaymentDialog = () => {
       {target ? (
         <>
           {payment ? (
-            <StatusStrip
-              payment={payment}
-              today={today}
-              cycle={cycle}
-              accountId={account.id}
-              onDone={close}
-            />
+            <StatusStrip payment={payment} today={today} cycle={cycle} accountId={account.id} />
           ) : null}
           <FormBody form={form} kind={kind} />
         </>

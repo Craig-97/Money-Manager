@@ -18,6 +18,7 @@ type Query {
   tokenFindUser: User
   passwordResetTokenValid(token: String!): PasswordResetTokenCheck!
   account(id: ID): Account
+  recurringPayment(id: ID!): RecurringPayment
 }
 
 type User {
@@ -78,6 +79,8 @@ type Mutation {
   markPaymentsPaid(input: MarkPaymentsPaidInput!): AccountResponse!
   markPaymentsUnpaid(input: MarkPaymentsUnpaidInput!): AccountResponse!
   skipRecurringPayments(input: SkipRecurringPaymentsInput!): AccountResponse!
+  logDebtOverpayment(input: LogDebtOverpaymentInput!): AccountResponse!
+  undoDebtOverpayment(input: UndoDebtOverpaymentInput!): AccountResponse!
   createOneOffPayment(input: CreateOneOffPaymentInput!): OneOffPaymentResponse!
   updateOneOffPayment(id: ID!, input: UpdateOneOffPaymentInput!): OneOffPaymentResponse!
   batchDeleteOneOffPayments(ids: [ID!]!): DeleteResponse!
@@ -125,12 +128,24 @@ input MarkPaymentsPaidInput {
 input MarkPaymentsUnpaidInput {
   accountId: ID!
   recurringPaymentIds: [ID!]!
+  oneOffPaymentIds: [ID!]
+}
+
+input UndoDebtOverpaymentInput {
+  accountId: ID!
+  recordId: ID!
 }
 
 input SkipRecurringPaymentsInput {
   accountId: ID!
   recurringPaymentIds: [ID!]!
   until: String
+}
+
+input LogDebtOverpaymentInput {
+  accountId: ID!
+  recurringPaymentId: ID!
+  amount: Float!
 }
 
 input StartPaydayCycleInput {
@@ -181,6 +196,7 @@ type OneOffPayment {
   dueDate: String!
   type: PaymentType!
   category: OneOffPaymentCategory!
+  paidAt: String
 }
 
 input CreateOneOffPaymentInput {
@@ -245,9 +261,11 @@ enum PaymentFrequency {
   ANNUALLY
 }
 
-enum PaymentOutcome {
+enum PaymentRecordKind {
   PAID
   SKIPPED
+  OVERPAYMENT
+  BALANCE_SET
 }
 
 type RecurringPayment {
@@ -261,14 +279,41 @@ type RecurringPayment {
   firstPaymentDate: String!
   lastPaymentDate: String
   nextDueDate: String
-  handled: [HandledDates!]!
+  thisCycle: [PaymentRecord!]!
+  history(limit: Int): [PaymentRecord!]!
   renewalDate: String
   renewalReminderDays: Int!
+  debt: Debt
 }
 
-type HandledDates {
-  outcome: PaymentOutcome!
+type Debt {
+  balance: Float!
+  startingBalance: Float
+  apr: Float!
+  balanceUpdatedAt: String
+  paidOffThisCycle: Float!
+}
+
+input DebtInput {
+  balance: Float!
+  startingBalance: Float
+  apr: Float!
+}
+
+type PaymentRecord {
+  id: ID!
+  kind: PaymentRecordKind!
   dates: [String!]!
+  balanceChange: Float!
+  debt: PaymentRecordDebt
+  open: Boolean!
+  createdAt: String!
+}
+
+type PaymentRecordDebt {
+  interest: Float!
+  reduction: Float!
+  balanceAfter: Float!
 }
 
 input CreateRecurringPaymentInput {
@@ -282,6 +327,7 @@ input CreateRecurringPaymentInput {
   lastPaymentDate: String
   renewalDate: String
   renewalReminderDays: Int
+  debt: DebtInput
 }
 
 input RecurringPaymentInput {
@@ -294,6 +340,7 @@ input RecurringPaymentInput {
   lastPaymentDate: String
   renewalDate: String
   renewalReminderDays: Int
+  debt: DebtInput
 }
 
 input UpdateRecurringPaymentInput {
@@ -306,6 +353,7 @@ input UpdateRecurringPaymentInput {
   lastPaymentDate: String
   renewalDate: String
   renewalReminderDays: Int
+  debt: DebtInput
 }
 
 type RecurringPaymentResponse {

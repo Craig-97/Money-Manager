@@ -1,13 +1,15 @@
 import { DueInfo } from '~/lib/payments';
-import { redTagClasses } from '../tagClasses';
+import { greenTagClasses, redTagClasses } from '../tagClasses';
 
-/* When it's due: a tag for today or overdue, otherwise the date and how far off it is */
+/* When it's due: a tag for today, overdue or paid, otherwise the date and how far off it is */
 export const DueCell = ({ due }: { due: DueInfo }) => {
   if (due.state === 'today') return <span className={redTagClasses}>Today</span>;
-  if (due.state === 'overdue') {
+  if (due.state === 'overdue' || due.state === 'paid') {
     return (
       <div className="flex flex-col items-start gap-1">
-        <span className={redTagClasses}>Overdue</span>
+        <span className={due.state === 'paid' ? greenTagClasses : redTagClasses}>
+          {due.state === 'paid' ? 'Paid' : 'Overdue'}
+        </span>
         <span className="text-xs font-medium text-muted">{due.label}</span>
       </div>
     );

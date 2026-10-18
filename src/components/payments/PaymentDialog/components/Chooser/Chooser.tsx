@@ -32,7 +32,7 @@ export const Chooser = () => {
         <button
           key={kind}
           type="button"
-          onClick={() => openAdd(kind, true)}
+          onClick={() => openAdd(kind, { fromChooser: true })}
           className={choiceClasses}>
           <span className="inline-flex size-[52px] shrink-0 items-center justify-center rounded-[18px] bg-accent-soft text-accent-text max-md:size-12 max-md:rounded-2xl max-md:bg-accent max-md:text-on-accent">
             <Icon size={24} className="max-md:size-[22px]" aria-hidden="true" />

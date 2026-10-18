@@ -1,7 +1,7 @@
 import { addDays } from '~/lib/dates';
 import { PayCycle } from '~/lib/payday';
 import { formatShortDate } from './labels';
-import { Outcome, Payment, RecurringPayment } from './payments';
+import { CycleRecordKind, Payment, RecurringPayment } from './payments';
 import { occurrencesBetween } from './recurrence';
 
 /*
@@ -11,11 +11,11 @@ import { occurrencesBetween } from './recurrence';
 export const datesDue = (payment: Payment, cycle: PayCycle): Date[] => {
   const { dueDate } = payment;
   if (!dueDate || dueDate >= cycle.end) return [];
-  if (payment.kind === 'oneOff') return [dueDate];
+  if (payment.kind === 'oneOff') return payment.paidAt ? [] : [dueDate];
   return [dueDate, ...occurrencesBetween(payment, addDays(dueDate, 1), addDays(cycle.end, -1))];
 };
 
-/* Whether a payment still has something to pay before payday. Paid one-offs are deleted. */
+/* Whether a payment still has something to pay before payday. Paid one-offs don't. */
 export const isInCycle = (payment: Payment, cycle: PayCycle) => datesDue(payment, cycle).length > 0;
 
 /*
@@ -26,7 +26,7 @@ const datesBeforeAdded = (payment: RecurringPayment, cycle: PayCycle) => {
   const { dueDate } = payment;
   if (!dueDate) return 0;
   const recorded = new Set(
-    payment.handled.flatMap(entry => entry.dates).map(date => date.getTime())
+    payment.thisCycle.flatMap(record => record.dates).map(date => date.getTime())
   );
   const until = addDays(dueDate < cycle.end ? dueDate : cycle.end, -1);
   return occurrencesBetween(payment, cycle.start, until).filter(
@@ -39,10 +39,10 @@ const datesBeforeAdded = (payment: RecurringPayment, cycle: PayCycle) => {
  * from before it was added count as paid, though there's nothing of them to undo.
  */
 const cycleCounts = (payment: RecurringPayment, cycle: PayCycle) => {
-  const count = (outcome: Outcome) =>
-    payment.handled
-      .filter(entry => entry.outcome === outcome)
-      .flatMap(entry => entry.dates)
+  const count = (kind: CycleRecordKind) =>
+    payment.thisCycle
+      .filter(record => record.kind === kind)
+      .flatMap(record => record.dates)
       .filter(date => date >= cycle.start).length;
   return {
     paid: count('paid') + datesBeforeAdded(payment, cycle),
@@ -83,7 +83,7 @@ export const cycleStatus = (
  * all dealt with, the next one waits for the next cycle.
  */
 export const canPay = (payment: Payment, cycle: PayCycle) => {
-  if (payment.kind === 'oneOff') return true;
+  if (payment.kind === 'oneOff') return !payment.paidAt;
   if (!payment.dueDate) return false;
   const { paid, skipped, left } = cycleCounts(payment, cycle);
   return left > 0 || paid + skipped === 0;
@@ -107,13 +107,15 @@ interface PaymentChoices {
 export const paymentChoices = (payment: Payment, cycle: PayCycle, today: Date): PaymentChoices => {
   const day = (date: Date) => formatShortDate(date, today);
   if (payment.kind === 'oneOff') {
-    return { pay: 'Mark as paid', undo: null, skipNext: null, skipRest: null };
+    return payment.paidAt
+      ? { pay: null, undo: 'Mark as unpaid', skipNext: null, skipRest: null }
+      : { pay: 'Mark as paid', undo: null, skipNext: null, skipRest: null };
   }
 
   const repeats = repeatsInCycle(payment);
   const next = payment.dueDate;
   const { left } = cycleCounts(payment, cycle);
-  const latest = payment.handled.at(-1);
+  const latest = payment.thisCycle.at(-1);
 
   const pay = canPay(payment, cycle)
     ? repeats
@@ -121,7 +123,7 @@ export const paymentChoices = (payment: Payment, cycle: PayCycle, today: Date): 
       : 'Mark as paid'
     : null;
   let undo: string | null = null;
-  if (latest?.outcome === 'paid') {
+  if (latest?.kind === 'paid') {
     undo = repeats ? `Mark ${day(latest.dates[0])} as unpaid` : 'Mark as unpaid';
   } else if (latest) {
     undo =

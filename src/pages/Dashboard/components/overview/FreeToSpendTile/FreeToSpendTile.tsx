@@ -1,10 +1,9 @@
 import { Calendar, Check, PenLine, Plus, TriangleAlert, X } from 'lucide-react';
 import { Button } from '~/components/ui/Button';
-import { formatBalance, formatMoney } from '~/lib/format';
+import { formatBalance, formatMoney, splitPence } from '~/lib/format';
 import { formatShortDate } from '~/lib/payments';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
 import { Dashboard } from '../../../hooks';
-import { splitPence } from '../splitPence';
 
 const chipClasses = 'flex min-w-0 flex-col gap-1 rounded-[18px] bg-hero-chip px-3.5 py-3';
 

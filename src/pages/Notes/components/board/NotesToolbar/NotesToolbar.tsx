@@ -35,7 +35,8 @@ export const NotesToolbar = ({ board }: { board: NotesBoard }) => (
       </div>
       <Button
         variant="accent"
-        onClick={board.openComposer}
+        onClick={board.openNew}
+        aria-haspopup="dialog"
         className="h-12 flex-auto px-6 font-bold md:h-[52px] md:flex-none">
         <Plus size={16} strokeWidth={2.5} aria-hidden="true" />
         Add note

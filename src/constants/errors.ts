@@ -10,7 +10,9 @@ export const ERRORS = {
   USER_NOT_FOUND: 'USER_NOT_FOUND',
   TOO_MANY_REQUESTS: 'TOO_MANY_REQUESTS',
   INVALID_PASSWORD: 'INVALID_PASSWORD',
-  PASSWORD_RESET_TOKEN_INVALID: 'PASSWORD_RESET_TOKEN_INVALID'
+  PASSWORD_RESET_TOKEN_INVALID: 'PASSWORD_RESET_TOKEN_INVALID',
+  // An input the API turned down, e.g. an overpayment bigger than what's left
+  BAD_USER_INPUT: 'BAD_USER_INPUT'
 } as const;
 
 export type ErrorCode = (typeof ERRORS)[keyof typeof ERRORS];
