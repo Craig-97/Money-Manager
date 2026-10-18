@@ -269,6 +269,7 @@ enum PaymentFrequency {
   BIWEEKLY
   MONTHLY
   QUARTERLY
+  BIANNUALLY
   ANNUALLY
 }
 
@@ -386,7 +387,11 @@ enum NoteColor {
 
 enum NoteRepeat {
   NONE
+  MONTHLY
+  QUARTERLY
+  BIANNUALLY
   YEARLY
+  WITH_PAYMENT
 }
 
 type Note {

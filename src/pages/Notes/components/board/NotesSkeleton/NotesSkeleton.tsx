@@ -22,7 +22,7 @@ export const NotesSkeleton = () => (
       <div
         key={second}
         aria-hidden="true"
-        className="flex min-h-[200px] flex-col gap-4 rounded-[22px] border border-border bg-surface p-[18px] md:h-[190px] md:min-h-0 md:rounded-3xl md:p-[22px]">
+        className="flex min-h-[200px] flex-col gap-4 rounded-[22px] border border-border bg-surface p-[18px] md:h-[212px] md:min-h-0 md:rounded-3xl md:p-[22px]">
         <div className="flex grow flex-col gap-3 pt-[5px]">
           <Skeleton shape="pill" className="h-3.5 w-[88%]" />
           <Skeleton shape="pill" className={cn('h-3.5', second)} />

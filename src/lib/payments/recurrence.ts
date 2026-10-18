@@ -6,6 +6,7 @@ import { addDays } from '~/lib/dates';
 const MONTHS_BETWEEN: Partial<Record<PaymentFrequency, number>> = {
   MONTHLY: 1,
   QUARTERLY: 3,
+  BIANNUALLY: 6,
   ANNUALLY: 12
 };
 
@@ -72,5 +73,6 @@ export const PER_MONTH: Record<PaymentFrequency, number> = {
   BIWEEKLY: 26 / 12,
   MONTHLY: 1,
   QUARTERLY: 1 / 3,
+  BIANNUALLY: 1 / 6,
   ANNUALLY: 1 / 12
 };

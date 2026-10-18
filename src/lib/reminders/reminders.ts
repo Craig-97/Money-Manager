@@ -1,6 +1,6 @@
 import { addDays, daysBetween, fromApiDate, toIsoDate } from '~/lib/dates';
 import { formatMoney } from '~/lib/format';
-import { Note, noteDateFrom, noteHeading, remindText } from '~/lib/notes';
+import { Note, noteDateFrom, noteHeading, remindText, repeatText } from '~/lib/notes';
 import { PayCycle } from '~/lib/payday';
 import {
   formatShortDate,
@@ -228,7 +228,7 @@ const renewalEvents = ({ payments, notes, today }: ReminderSources) =>
     ];
   });
 
-const noteEvents = ({ notes, today }: ReminderSources) =>
+const noteEvents = ({ notes, payments, today }: ReminderSources) =>
   notes.flatMap((note): Omit<Reminder, 'read'>[] => {
     // Still the one just gone by for a few days, so its reminder can be seen
     const date = noteDateFrom(note, addDays(today, -NOTE_AFTER_DAYS));
@@ -251,7 +251,13 @@ const noteEvents = ({ notes, today }: ReminderSources) =>
             ? `${heading} was ${formatShortDate(date, today)}`
             : `${heading} · ${inTime(days)}`,
         name: heading,
-        body: `${formatShortDate(date, today)}${note.repeat === 'YEARLY' ? ' · every year' : ''} · from your note`,
+        body: [
+          formatShortDate(date, today),
+          repeatText(note.repeat, payments.find(payment => payment.id === note.paymentId)?.name),
+          'from your note'
+        ]
+          .filter(Boolean)
+          .join(' · '),
         amount: null,
         payment: null,
         note,

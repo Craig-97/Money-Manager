@@ -8,7 +8,7 @@ import {
   GraphQLObjectType,
   parse
 } from 'graphql';
-import { ThemePreference } from '~/graphql/generated';
+import { NoteRepeat, ThemePreference } from '~/graphql/generated';
 import { addDays, fromApiDate, startOfToday, toIsoDate } from '~/lib/dates';
 import { nextOccurrence, occurrencesBetween, Schedule } from '~/lib/payments';
 import { typeDefs } from './schema';
@@ -82,7 +82,7 @@ export interface FakeNote {
   // Left out, a note has no date, reminders or payment
   date?: string | null;
   remind?: number[];
-  repeat?: 'NONE' | 'YEARLY';
+  repeat?: NoteRepeat;
   payment?: string | null;
 }
 
@@ -281,6 +281,7 @@ const PAYMENTS_PER_YEAR: Record<string, number> = {
   BIWEEKLY: 26,
   MONTHLY: 12,
   QUARTERLY: 4,
+  BIANNUALLY: 2,
   ANNUALLY: 1
 };
 

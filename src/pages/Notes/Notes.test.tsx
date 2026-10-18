@@ -302,4 +302,25 @@ describe('a note with a date', () => {
       /^\d{4}-\d{2}-\d{2}$/
     );
   });
+
+  it('follows a payment once linked to one, with no date of its own', async () => {
+    const { user, api } = renderNotes();
+    await user.click(await screen.findByRole('button', { name: 'Add note' }));
+    const dialog = await screen.findByRole('dialog', { name: 'New note' });
+    await user.type(within(dialog).getByLabelText('Note'), 'Remortgage quotes');
+    await user.click(within(dialog).getByRole('button', { name: 'Add a date' }));
+    await user.keyboard('{Escape}');
+
+    await user.click(within(dialog).getByRole('combobox', { name: 'Payment' }));
+    await user.click(await screen.findByRole('option', { name: /^Mortgage/ }));
+
+    expect(within(dialog).getByRole('radio', { name: 'With the payment' })).toBeChecked();
+    expect(within(dialog).getByText(/^Each Mortgage payment · next/)).toBeInTheDocument();
+    await user.click(within(dialog).getByRole('button', { name: 'Save note' }));
+
+    await waitFor(() => expect(api.callsTo('CreateNote')).toHaveLength(1));
+    expect(api.callsTo('CreateNote')[0]).toMatchObject({
+      input: { date: null, repeat: 'WITH_PAYMENT', payment: 'recurring-1', remind: [7] }
+    });
+  });
 });

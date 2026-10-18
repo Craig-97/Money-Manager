@@ -7,18 +7,24 @@ import { usePayCycle } from '~/hooks/usePayCycle';
 import { cn } from '~/lib/cn';
 import { formatMoney } from '~/lib/format';
 import { NOTE_MAX_LENGTH, noteColor, toNotes } from '~/lib/notes';
-import { PER_PERIOD } from '~/lib/payments';
-import { ColorSwatches, NoteDateFields } from './components';
+import { PER_PERIOD, toPayments } from '~/lib/payments';
+import { ColorSwatches, NoteDateFields, NotePaymentOption } from './components';
 import { useNoteDialog } from './useNoteDialog';
 
-// "Car insurance · £612.00 a year", for picking the payment a note is about
-const paymentOptions = (account: Account) =>
-  (account.recurringPayments ?? [])
-    .flatMap(payment => (payment ? [payment] : []))
+/*
+ * The recurring payments a note can be about, by name: "Car insurance · £612.00 a year", with
+ * each one's next date and how often, for a note that follows it
+ */
+const paymentOptions = (account: Account, today: Date): NotePaymentOption[] =>
+  toPayments(account, today)
+    .flatMap(payment => (payment.kind === 'recurring' ? [payment] : []))
     .toSorted((a, b) => a.name.localeCompare(b.name))
     .map(payment => ({
       value: payment.id,
-      label: `${payment.name} · ${formatMoney(payment.amount)} ${PER_PERIOD[payment.frequency]}`
+      label: `${payment.name} · ${formatMoney(payment.amount)} ${PER_PERIOD[payment.frequency]}`,
+      name: payment.name,
+      due: payment.dueDate,
+      frequency: payment.frequency
     }));
 
 /*
@@ -109,7 +115,7 @@ export const NoteDialog = () => {
           <ColorSwatches draft={draft} labelledBy="note-colour" />
         </div>
       </div>
-      <NoteDateFields draft={draft} payments={paymentOptions(account)} today={today} />
+      <NoteDateFields draft={draft} payments={paymentOptions(account, today)} today={today} />
     </Modal>
   );
 };

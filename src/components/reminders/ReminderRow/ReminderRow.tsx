@@ -159,6 +159,11 @@ export const ReminderRow = ({ reminder, today, open, onLater, onClear }: Reminde
                   {open.label}
                 </Button>
               ) : null}
+              {open?.also ? (
+                <Button onClick={open.also.run} className="h-10 px-3.5 text-[13px] font-bold">
+                  {open.also.label}
+                </Button>
+              ) : null}
               <Button variant="ghost" onClick={onLater} className="h-10 px-3 text-[13px]">
                 Later
               </Button>

@@ -1,5 +1,6 @@
-import { NoteColor, NoteFieldsFragment, NoteRepeat } from '~/graphql/generated';
+import { NoteColor, NoteFieldsFragment, NoteRepeat, PaymentFrequency } from '~/graphql/generated';
 import { addDays, fromApiDate, parseIsoDate, toIsoDate } from '~/lib/dates';
+import { nextOccurrence, Payment } from '~/lib/payments';
 
 // The days before a note's date it can remind: on the day, the day before, a week, two weeks, a month
 export const NOTE_REMIND_DAYS = [0, 1, 7, 14, 30] as const;
@@ -18,7 +19,8 @@ export interface Note {
   date: Date | null;
   // Days before the date to remind, furthest first
   remind: number[];
-  // Whether the date comes round every year
+  // How often the date comes round. WITH_PAYMENT follows the linked payment's dates; the date
+  // is then that payment's next one, filled in by followPayments.
   repeat: NoteRepeat;
   // The recurring payment it's about
   paymentId: string | null;
@@ -45,26 +47,80 @@ export const toNote = (note: NoteFieldsFragment): Note => ({
 export const toNotes = (notes: readonly (NoteFieldsFragment | null)[] | null | undefined): Note[] =>
   (notes ?? []).flatMap(note => (note ? [toNote(note)] : []));
 
-/* The same day some years on, moving 29 Feb to 28 Feb */
-const yearsOn = (date: Date, years: number) => {
-  const next = new Date(date.getFullYear() + years, date.getMonth(), date.getDate());
-  return next.getMonth() === date.getMonth()
-    ? next
-    : new Date(date.getFullYear() + years, date.getMonth() + 1, 0);
+// How often each repeat comes round, as the payment frequency with the same steps
+const REPEAT_FREQUENCIES: Partial<Record<NoteRepeat, PaymentFrequency>> = {
+  MONTHLY: 'MONTHLY',
+  QUARTERLY: 'QUARTERLY',
+  BIANNUALLY: 'BIANNUALLY',
+  YEARLY: 'ANNUALLY'
+};
+
+export const REPEAT_LABELS: Record<NoteRepeat, string> = {
+  NONE: 'Just once',
+  MONTHLY: 'Every month',
+  QUARTERLY: 'Every 3 months',
+  BIANNUALLY: 'Every 6 months',
+  YEARLY: 'Every year',
+  WITH_PAYMENT: 'With the payment'
 };
 
 /*
- * The note's date that matters now: its date, or for one that repeats yearly, the first time it
- * comes round on or after `from`. Null for a note without a date.
+ * The note's date that matters now: its date, or for one that repeats, the first time it comes
+ * round on or after `from`. A note that follows its payment already has the payment's next date.
+ * Null for a note without a date.
  */
 export const noteDateFrom = (note: Pick<Note, 'date' | 'repeat'>, from: Date) => {
   if (!note.date) return null;
-  if (note.repeat !== 'YEARLY' || note.date >= from) return note.date;
-  let years = Math.max(1, from.getFullYear() - note.date.getFullYear());
-  while (yearsOn(note.date, years) < from) years += 1;
-  // A year earlier may still be on or after `from`, when the date is late in the year
-  while (years > 1 && yearsOn(note.date, years - 1) >= from) years -= 1;
-  return yearsOn(note.date, years);
+  const frequency = REPEAT_FREQUENCIES[note.repeat];
+  if (!frequency || note.date >= from) return note.date;
+  return nextOccurrence({ firstPaymentDate: note.date, frequency, lastPaymentDate: null }, from);
+};
+
+// Days between one time and the next, at the shortest: a month can be 28 days
+const GAP_DAYS: Record<PaymentFrequency, number> = {
+  WEEKLY: 7,
+  BIWEEKLY: 14,
+  MONTHLY: 28,
+  QUARTERLY: 89,
+  BIANNUALLY: 181,
+  ANNUALLY: 365
+};
+
+/*
+ * The reminders a note can have, which have to come after the time before: a note following a
+ * weekly payment can remind on the day or the day before, not a month before.
+ */
+export const remindChoices = ({
+  repeat,
+  paymentFrequency
+}: {
+  repeat: NoteRepeat;
+  paymentFrequency?: PaymentFrequency | null;
+}) => {
+  const frequency = repeat === 'WITH_PAYMENT' ? paymentFrequency : REPEAT_FREQUENCIES[repeat];
+  return frequency
+    ? NOTE_REMIND_DAYS.filter(days => days < GAP_DAYS[frequency])
+    : [...NOTE_REMIND_DAYS];
+};
+
+/* Whether linking this payment should make the note follow it: not one every week or two */
+export const followsByDefault = (frequency: PaymentFrequency) =>
+  GAP_DAYS[frequency] >= GAP_DAYS.MONTHLY;
+
+/* Notes that follow their payment take its next date; one whose payment has ended has none */
+export const followPayments = (notes: readonly Note[], payments: readonly Payment[]): Note[] =>
+  notes.map(note => {
+    if (note.repeat !== 'WITH_PAYMENT') return note;
+    const payment = payments.find(item => item.id === note.paymentId);
+    return { ...note, date: payment?.dueDate ?? null };
+  });
+
+/* "every 6 months", or "before each Car Tax payment"; nothing for a note that doesn't repeat */
+export const repeatText = (repeat: NoteRepeat, paymentName?: string) => {
+  if (repeat === 'NONE') return '';
+  if (repeat === 'WITH_PAYMENT')
+    return paymentName ? `each time ${paymentName} is due` : 'with its payment';
+  return REPEAT_LABELS[repeat].toLowerCase();
 };
 
 /* The note's next date, today included */
@@ -131,15 +187,30 @@ export const toDraft = (note: Note): NoteDraft => ({
   paymentId: note.paymentId ?? ''
 });
 
-/* A draft as the API takes it. Without a date there's nothing to remind about or repeat. */
-export const noteInput = (draft: NoteDraft) => ({
-  body: draft.body,
-  color: draft.color,
-  date: draft.date || null,
-  remind: draft.date ? [...draft.remind].sort((a, b) => b - a) : [],
-  repeat: draft.date ? draft.repeat : ('NONE' as const),
-  payment: draft.paymentId || null
-});
+// Following a payment's dates, which needs a payment
+const followsPayment = (draft: Pick<NoteDraft, 'repeat' | 'paymentId'>) =>
+  draft.repeat === 'WITH_PAYMENT' && !!draft.paymentId;
+
+/*
+ * A draft as the API takes it. Without a date (or a payment to follow) there's nothing to remind
+ * about or repeat; following a payment, the note's own date isn't used.
+ */
+export const noteInput = (draft: NoteDraft) => {
+  const follows = followsPayment(draft);
+  const dated = follows || !!draft.date;
+  return {
+    body: draft.body,
+    color: draft.color,
+    date: follows ? null : draft.date || null,
+    remind: dated ? [...draft.remind].sort((a, b) => b - a) : [],
+    repeat: follows
+      ? ('WITH_PAYMENT' as const)
+      : draft.date && draft.repeat !== 'WITH_PAYMENT'
+        ? draft.repeat
+        : ('NONE' as const),
+    payment: draft.paymentId || null
+  };
+};
 
 /* Whether two drafts save the same note */
 export const sameDraft = (a: NoteDraft, b: NoteDraft) =>
@@ -148,25 +219,42 @@ export const sameDraft = (a: NoteDraft, b: NoteDraft) =>
 const joinDates = (dates: string[]) =>
   dates.length <= 1 ? (dates[0] ?? '') : `${dates.slice(0, -1).join(', ')} and ${dates.at(-1)}`;
 
+// What comes after the first reminders, for each repeat
+const THEN: Record<NoteRepeat, string> = {
+  NONE: '',
+  MONTHLY: ', then on the same days each month',
+  QUARTERLY: ', then every 3 months',
+  BIANNUALLY: ', then every 6 months',
+  YEARLY: ', then on the same days each year',
+  WITH_PAYMENT: ', then before each payment after'
+};
+
 /*
  * Under the date: when the reminders will go off, e.g. "You'll get a reminder on Wed 7 Oct and
- * Sat 31 Oct, then on the same days each year."
+ * Sat 31 Oct, then on the same days each year." A note following its payment counts back from
+ * the payment's next date.
  */
 export const reminderHint = (
-  draft: Pick<NoteDraft, 'date' | 'remind' | 'repeat'>,
-  { today, format }: { today: Date; format: (date: Date) => string }
+  draft: Pick<NoteDraft, 'date' | 'remind' | 'repeat' | 'paymentId'>,
+  {
+    today,
+    format,
+    paymentDue = null
+  }: { today: Date; format: (date: Date) => string; paymentDue?: Date | null }
 ) => {
-  const date = parseIsoDate(draft.date);
+  const follows = followsPayment(draft);
+  const date = follows ? paymentDue : parseIsoDate(draft.date);
   if (!date) return '';
-  const yearly = draft.repeat === 'YEARLY';
-  const next = noteDateFrom({ date, repeat: draft.repeat }, today);
+  const repeat = follows ? 'WITH_PAYMENT' : draft.repeat;
+  const repeats = repeat !== 'NONE';
+  const next = noteDateFrom({ date, repeat }, today);
   if (!next) return '';
   if (!draft.remind.length) return 'No reminders. It still shows under Reminders, coming up.';
   const dates = [...draft.remind]
     .sort((a, b) => b - a)
     .map(days => addDays(next, -days))
     .filter(day => day >= today);
-  if (!dates.length) return yearly ? '' : 'Its reminders have gone by.';
+  if (!dates.length) return repeats ? '' : 'Its reminders have gone by.';
   const plural = dates.length === 1 ? 'a reminder' : 'reminders';
-  return `You’ll get ${plural} on ${joinDates(dates.map(format))}${yearly ? ', then on the same days each year' : ''}.`;
+  return `You’ll get ${plural} on ${joinDates(dates.map(format))}${THEN[repeat]}.`;
 };

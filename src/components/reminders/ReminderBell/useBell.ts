@@ -21,13 +21,15 @@ export const useBell = () => {
     /* Its one thing to do; doing it puts the bell away, as it may open a dialog or another page */
     openOf: (reminder: Reminder) => {
       const action = openOf(reminder);
+      const closing = (run: () => void) => () => {
+        setOpen(false);
+        run();
+      };
       return action
         ? {
             ...action,
-            run: () => {
-              setOpen(false);
-              action.run();
-            }
+            run: closing(action.run),
+            also: action.also ? { ...action.also, run: closing(action.also.run) } : null
           }
         : null;
     },

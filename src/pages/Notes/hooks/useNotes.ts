@@ -4,7 +4,8 @@ import { Account } from '~/hooks/useAccount';
 import { useNoteActions } from '~/hooks/useNoteActions';
 import { startOfToday } from '~/lib/dates';
 import { formatMoney } from '~/lib/format';
-import { PER_PERIOD } from '~/lib/payments';
+import { followPayments } from '~/lib/notes';
+import { PER_PERIOD, toPayments } from '~/lib/payments';
 import { useNoteDialogStore } from '~/state/noteDialog';
 import { findNotes, NoteSort, toNotes } from '../notesModel';
 
@@ -20,7 +21,8 @@ export const useNotes = (account: Account) => {
   const actions = useNoteActions(account.id);
   const today = startOfToday();
 
-  const all = toNotes(account.notes);
+  // Notes that follow a payment take its next date
+  const all = followPayments(toNotes(account.notes), toPayments(account, today));
   const notes = findNotes(all, { query, sort, today });
   const searching = query.trim().length > 0;
 

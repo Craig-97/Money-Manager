@@ -8,11 +8,14 @@ import { usePaymentDialogStore } from '~/state/paymentDialog';
 export interface ReminderOpen {
   label: string;
   run: () => void;
+  // A second thing to do, e.g. the note about a renewal beside updating it
+  also?: { label: string; run: () => void } | null;
 }
 
 /*
- * The one thing to do about a reminder, if there is one: pay a payment, open the note or payment
- * it's about, or start the new cycle on the dashboard.
+ * What to do about a reminder, if anything: pay a payment, update a renewal (as the dashboard's
+ * alert does), open the note it's about, or start the new cycle on the dashboard. A renewal with a
+ * note about it offers the note as well.
  */
 export const useReminderOpen = (accountId: string) => {
   const navigate = useNavigate();
@@ -31,10 +34,14 @@ export const useReminderOpen = (accountId: string) => {
       case 'due':
       case 'overdue':
         return payment ? { label: 'Mark as paid', run: () => void pay([payment]) } : null;
-      case 'renewal':
-        return noteOpen ?? editPayment('Open payment');
-      case 'renewed':
-        return editPayment('Set next renewal');
+      case 'renewal': {
+        const update = editPayment('Update');
+        return update ? { ...update, also: noteOpen } : noteOpen;
+      }
+      case 'renewed': {
+        const next = editPayment('Set next renewal');
+        return next ? { ...next, also: noteOpen } : noteOpen;
+      }
       case 'note':
         return noteOpen;
       case 'payday':

@@ -23,7 +23,7 @@ export const summarise = ({ payments, bankBalance, monthlyIncome, cycle, today }
     inCycle.reduce((total, p) => total + p.signedAmount * dueCount(p), 0)
   );
   // Recurring money out that is still running. Weekly, fortnightly and monthly payments make the
-  // monthly total; quarterly and yearly ones are kept apart as a yearly total.
+  // monthly total; quarterly, 6-monthly and yearly ones are kept apart as a yearly total.
   const activeRecurring = payments.filter(
     payment => payment.kind === 'recurring' && payment.dueDate
   );
@@ -34,7 +34,7 @@ export const summarise = ({ payments, bankBalance, monthlyIncome, cycle, today }
   const averaged: { name: string; perMonth: number }[] = [];
   for (const payment of activeRecurring) {
     if (payment.kind !== 'recurring') continue;
-    if (payment.frequency === 'ANNUALLY' || payment.frequency === 'QUARTERLY') {
+    if (['QUARTERLY', 'BIANNUALLY', 'ANNUALLY'].includes(payment.frequency)) {
       annualRecurring -= payment.signedAmount * PER_MONTH[payment.frequency] * 12;
       continue;
     }

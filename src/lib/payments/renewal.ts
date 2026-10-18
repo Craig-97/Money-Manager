@@ -22,6 +22,7 @@ export const PER_PERIOD: Record<PaymentFrequency, string> = {
   BIWEEKLY: 'a fortnight',
   MONTHLY: 'a month',
   QUARTERLY: 'a quarter',
+  BIANNUALLY: 'every 6 months',
   ANNUALLY: 'a year'
 };
 

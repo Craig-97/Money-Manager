@@ -16,6 +16,7 @@ export const FREQUENCY_LABELS: Record<PaymentFrequency, string> = {
   BIWEEKLY: 'Fortnightly',
   MONTHLY: 'Monthly',
   QUARTERLY: 'Quarterly',
+  BIANNUALLY: 'Every 6 months',
   ANNUALLY: 'Annually'
 };
 
@@ -93,6 +94,7 @@ export const scheduleText = (
     BIWEEKLY: `${lower ? 'every' : 'Every'} other ${weekday}`,
     MONTHLY: `${lower ? 'monthly' : 'Monthly'} on the ${day}`,
     QUARTERLY: `${lower ? 'every' : 'Every'} 3 months on the ${day}`,
+    BIANNUALLY: `${lower ? 'every' : 'Every'} 6 months on the ${day}`,
     ANNUALLY: lower
       ? `every year on ${formatDayMonth(first)}`
       : `Annually on ${formatDayMonth(first)}`

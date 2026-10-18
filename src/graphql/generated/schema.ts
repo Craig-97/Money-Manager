@@ -319,7 +319,8 @@ export type Note = {
 
 export type NoteColor = 'AMBER' | 'BLUE' | 'GREEN' | 'ROSE' | 'VIOLET';
 
-export type NoteRepeat = 'NONE' | 'YEARLY';
+export type NoteRepeat =
+  'BIANNUALLY' | 'MONTHLY' | 'NONE' | 'QUARTERLY' | 'WITH_PAYMENT' | 'YEARLY';
 
 export type NoteResponse = {
   __typename: 'NoteResponse';
@@ -422,7 +423,8 @@ export type PaydayResponse = {
 
 export type PaydayType = 'LAST_DAY' | 'LAST_WEEKDAY' | 'SET_DAY' | 'SET_WEEKDAY';
 
-export type PaymentFrequency = 'ANNUALLY' | 'BIWEEKLY' | 'MONTHLY' | 'QUARTERLY' | 'WEEKLY';
+export type PaymentFrequency =
+  'ANNUALLY' | 'BIANNUALLY' | 'BIWEEKLY' | 'MONTHLY' | 'QUARTERLY' | 'WEEKLY';
 
 export type PaymentRecord = {
   __typename: 'PaymentRecord';

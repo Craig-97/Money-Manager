@@ -175,6 +175,14 @@ const demoReminderPayments = () => [
     dueInDays: 36
   }),
   demoPayment({
+    id: 'prescription',
+    name: 'Prescription',
+    amount: 114.5,
+    category: 'HEALTHCARE',
+    frequency: 'BIANNUALLY',
+    dueInDays: 25
+  }),
+  demoPayment({
     id: 'phone',
     name: 'Phone contract',
     amount: 32,
@@ -196,8 +204,17 @@ const demoDatedNotes = () =>
       payment: 'car-insurance'
     },
     {
+      id: 'note-prescription',
+      body: 'Book the prescription review with the GP before the next prepayment certificate.',
+      color: 'GREEN',
+      date: null,
+      remind: [14],
+      repeat: 'WITH_PAYMENT' as const,
+      payment: 'prescription'
+    },
+    {
       id: 'note-mot',
-      body: 'Car MOT and service at the garage on the high street.',
+      body: 'Car MOT and service at the garage on the high street. Ask them to check the tyres and the brake pads while it’s in.',
       color: 'BLUE',
       date: fromToday(20),
       remind: [14],

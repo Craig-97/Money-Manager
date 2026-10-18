@@ -1,7 +1,7 @@
 import { useAccount } from '~/hooks/useAccount';
 import { usePayCycle } from '~/hooks/usePayCycle';
 import { fromApiDate } from '~/lib/dates';
-import { toNotes } from '~/lib/notes';
+import { followPayments, toNotes } from '~/lib/notes';
 import { DEFAULT_REMINDER_SETTINGS, toPayments } from '~/lib/payments';
 import {
   newReminders,
@@ -20,10 +20,12 @@ export const useReminders = () => {
   const settings = account?.reminderSettings ?? DEFAULT_REMINDER_SETTINGS;
   const states = toReminderStates(account?.reminderStates);
 
+  const payments = account ? toPayments(account, today) : [];
   const sources: ReminderSources | null = account
     ? {
-        payments: toPayments(account, today),
-        notes: toNotes(account.notes),
+        payments,
+        // Notes that follow a payment take its next date
+        notes: followPayments(toNotes(account.notes), payments),
         settings,
         cycle,
         cycleStartedOn: fromApiDate(account.cycleStartedOn),

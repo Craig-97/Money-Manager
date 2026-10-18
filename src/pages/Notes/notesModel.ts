@@ -1,5 +1,5 @@
 import { daysBetween } from '~/lib/dates';
-import { Note, nextNoteDate, remindText } from '~/lib/notes';
+import { Note, nextNoteDate, remindText, repeatText } from '~/lib/notes';
 import { formatShortDate } from '~/lib/payments';
 
 export { NOTE_COLORS, noteColor, NOTE_MAX_LENGTH, charactersLeft } from '~/lib/notes';
@@ -73,9 +73,11 @@ export const noteFoot = (
   const date = nextNoteDate(note, today);
   if (!date) return `No date · ${noteMeta(note)}`;
   if (date < today) return 'Its date has gone by';
+  const every =
+    note.repeat === 'NONE' || note.repeat === 'WITH_PAYMENT' ? '' : ` · ${repeatText(note.repeat)}`;
   return note.remind.length
-    ? `Reminds you ${remindText(note.remind).toLowerCase()}`
-    : 'No reminder';
+    ? `Reminds you ${remindText(note.remind).toLowerCase()}${every}`
+    : `No reminder${every}`;
 };
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];

@@ -18,7 +18,7 @@ export const NoteCard = ({ note, board }: { note: Note; board: NotesBoard }) => 
   return (
     <article
       className={cn(
-        'flex min-h-[200px] flex-col gap-3.5 rounded-[22px] border p-[18px] md:h-[190px] md:min-h-0 md:gap-4 md:rounded-3xl md:p-[22px] md:transition-[transform,box-shadow] md:duration-200 md:hover:-translate-y-0.5 md:hover:shadow-[0_22px_44px_-26px_var(--shadow)]',
+        'flex min-h-[200px] flex-col gap-3.5 rounded-[22px] border p-[18px] md:h-[212px] md:min-h-0 md:gap-4 md:rounded-3xl md:p-[22px] md:transition-[transform,box-shadow] md:duration-200 md:hover:-translate-y-0.5 md:hover:shadow-[0_22px_44px_-26px_var(--shadow)]',
         color.card
       )}>
       {date ? (

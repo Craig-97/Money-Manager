@@ -13,6 +13,7 @@ export const whenPaid = (debt: DebtPayment) =>
         WEEKLY: 'weekly',
         BIWEEKLY: 'fortnightly',
         QUARTERLY: 'quarterly',
+        BIANNUALLY: 'every 6 months',
         ANNUALLY: 'yearly'
       }[debt.frequency];
 

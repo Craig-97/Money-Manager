@@ -43,6 +43,11 @@ export const ReminderCard = ({
           {open.label}
         </Button>
       ) : null}
+      {open?.also ? (
+        <Button onClick={open.also.run} className={cn(smallButton, 'font-bold')}>
+          {open.also.label}
+        </Button>
+      ) : null}
       <Button variant="ghost" onClick={onLater} className={smallButton}>
         <Clock size={15} strokeWidth={2.25} aria-hidden="true" />
         Later

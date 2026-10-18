@@ -1,6 +1,30 @@
 import { describe, expect, it } from 'vitest';
 import { formatShortDay } from '~/lib/dates';
-import { BLANK_DRAFT, noteDateFrom, noteInput, reminderHint, remindText, sameDraft } from './notes';
+import { Payment } from '~/lib/payments';
+import {
+  BLANK_DRAFT,
+  followPayments,
+  followsByDefault,
+  Note,
+  noteDateFrom,
+  noteInput,
+  reminderHint,
+  remindChoices,
+  remindText,
+  sameDraft
+} from './notes';
+
+const BLANK_NOTE: Note = {
+  id: 'note',
+  body: 'Note',
+  color: 'BLUE',
+  created: 0,
+  updated: 0,
+  date: null,
+  remind: [],
+  repeat: 'NONE',
+  paymentId: null
+};
 
 const day = (iso: string) => {
   const [year, month, date] = iso.split('-').map(Number);
@@ -49,7 +73,7 @@ describe('reminderHint', () => {
   it('lists the days its reminders go off on', () => {
     expect(
       reminderHint(
-        { date: '2026-11-07', remind: [7, 30], repeat: 'YEARLY' },
+        { date: '2026-11-07', remind: [7, 30], repeat: 'YEARLY', paymentId: '' },
         { today: TODAY, format }
       )
     ).toBe('You’ll get reminders on Thu 8 Oct and Sat 31 Oct, then on the same days each year.');
@@ -57,10 +81,16 @@ describe('reminderHint', () => {
 
   it('says when there are none, or they have gone by', () => {
     expect(
-      reminderHint({ date: '2026-11-07', remind: [], repeat: 'NONE' }, { today: TODAY, format })
+      reminderHint(
+        { date: '2026-11-07', remind: [], repeat: 'NONE', paymentId: '' },
+        { today: TODAY, format }
+      )
     ).toMatch(/^No reminders/);
     expect(
-      reminderHint({ date: '2026-10-05', remind: [30], repeat: 'NONE' }, { today: TODAY, format })
+      reminderHint(
+        { date: '2026-10-05', remind: [30], repeat: 'NONE', paymentId: '' },
+        { today: TODAY, format }
+      )
     ).toBe('Its reminders have gone by.');
   });
 });
@@ -81,5 +111,70 @@ describe('noteInput', () => {
     const draft = { ...BLANK_DRAFT, body: 'Hi', date: '2026-11-07', remind: [7, 30] };
     expect(sameDraft(draft, { ...draft, remind: [30, 7] })).toBe(true);
     expect(sameDraft(draft, { ...draft, date: '' })).toBe(false);
+  });
+});
+
+describe('repeats', () => {
+  it('comes round every month, 3 months or 6 months, keeping to the end of shorter months', () => {
+    expect(noteDateFrom({ date: day('2026-03-31'), repeat: 'MONTHLY' }, TODAY)).toEqual(
+      day('2026-10-31')
+    );
+    expect(noteDateFrom({ date: day('2026-04-01'), repeat: 'BIANNUALLY' }, TODAY)).toEqual(
+      day('2027-04-01')
+    );
+    expect(noteDateFrom({ date: day('2026-01-15'), repeat: 'QUARTERLY' }, TODAY)).toEqual(
+      day('2026-10-15')
+    );
+  });
+
+  it("follows its payment's next date, and has none once the payment has ended", () => {
+    const follows = { ...BLANK_NOTE, id: 'n', repeat: 'WITH_PAYMENT' as const, paymentId: 'tax' };
+    const [withDate] = followPayments(
+      [follows],
+      [{ id: 'tax', dueDate: day('2026-11-01') } as Payment]
+    );
+    expect(withDate.date).toEqual(day('2026-11-01'));
+    const [ended] = followPayments([follows], [{ id: 'tax', dueDate: null } as Payment]);
+    expect(ended.date).toBeNull();
+  });
+
+  it('only offers reminders that come after the time before', () => {
+    expect(remindChoices({ repeat: 'WITH_PAYMENT', paymentFrequency: 'WEEKLY' })).toEqual([0, 1]);
+    expect(remindChoices({ repeat: 'WITH_PAYMENT', paymentFrequency: 'BIWEEKLY' })).toEqual([
+      0, 1, 7
+    ]);
+    expect(remindChoices({ repeat: 'MONTHLY' })).toEqual([0, 1, 7, 14]);
+    expect(remindChoices({ repeat: 'YEARLY' })).toEqual([0, 1, 7, 14, 30]);
+    expect(followsByDefault('BIWEEKLY')).toBe(false);
+    expect(followsByDefault('MONTHLY')).toBe(true);
+  });
+
+  it('sends a note that follows its payment without a date of its own', () => {
+    expect(
+      noteInput({
+        ...BLANK_DRAFT,
+        body: 'Hi',
+        date: '2026-11-01',
+        remind: [7],
+        repeat: 'WITH_PAYMENT',
+        paymentId: 'tax'
+      })
+    ).toMatchObject({ date: null, remind: [7], repeat: 'WITH_PAYMENT', payment: 'tax' });
+    // Without the payment there's nothing to follow
+    expect(
+      noteInput({ ...BLANK_DRAFT, body: 'Hi', date: '2026-11-01', repeat: 'WITH_PAYMENT' })
+    ).toMatchObject({
+      date: '2026-11-01',
+      repeat: 'NONE'
+    });
+  });
+
+  it('says when reminders come round for a note following its payment', () => {
+    expect(
+      reminderHint(
+        { date: '', remind: [14], repeat: 'WITH_PAYMENT', paymentId: 'tax' },
+        { today: TODAY, format: date => formatShortDay(date), paymentDue: day('2026-11-01') }
+      )
+    ).toBe('You’ll get a reminder on Sun 18 Oct, then before each payment after.');
   });
 });
