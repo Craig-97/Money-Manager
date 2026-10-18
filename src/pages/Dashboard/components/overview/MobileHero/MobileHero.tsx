@@ -28,8 +28,12 @@ export const MobileHero = ({ dashboard }: { dashboard: Dashboard }) => {
   return (
     <article
       aria-label="Free to spend"
-      className="flex flex-col gap-4 rounded-3xl bg-hero-bg p-[22px] text-hero-text">
-      <div className="flex items-center justify-between gap-2">
+      className="relative flex flex-col gap-4 overflow-hidden rounded-3xl bg-hero-bg p-[22px] text-hero-text">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -top-[110px] -right-[90px] size-[220px] rounded-full bg-hero-chip"
+      />
+      <div className="relative flex items-center justify-between gap-2">
         <h2 className="text-[13px] font-bold text-hero-muted">Free to spend</h2>
         {override.canChange ? (
           <button
@@ -50,7 +54,7 @@ export const MobileHero = ({ dashboard }: { dashboard: Dashboard }) => {
           </span>
         )}
       </div>
-      <div>
+      <div className="relative">
         <p className="num text-[56px] leading-none font-extrabold tracking-[-0.05em]">
           {whole}
           <span className="text-[0.42em] tracking-[-0.02em] text-hero-muted">{pence}</span>
@@ -85,7 +89,7 @@ export const MobileHero = ({ dashboard }: { dashboard: Dashboard }) => {
         )}
       </div>
 
-      <div className="rounded-[18px] bg-hero-chip px-3.5 py-1.5 text-[13px] font-semibold">
+      <div className="relative rounded-[18px] bg-hero-chip px-3.5 py-1.5 text-[13px] font-semibold">
         {editor.editing ? (
           <div className="pt-2 pb-1.5">
             <label htmlFor="balance-edit-mobile" className="text-hero-muted">
@@ -153,7 +157,7 @@ export const MobileHero = ({ dashboard }: { dashboard: Dashboard }) => {
         )}
       </div>
 
-      <div className="flex flex-col gap-1.5 rounded-[18px] bg-black/24 px-3.5 pt-3 pb-2.5">
+      <div className="relative flex flex-col gap-1.5 rounded-[18px] bg-black/24 px-3.5 pt-3 pb-2.5">
         <CycleBar days={days} tone="hero" className="-mt-2.5 -mb-2" />
         <div className="flex justify-between text-[11px] font-semibold text-hero-muted">
           <span>Paid {formatShortDate(cycle.start)}</span>

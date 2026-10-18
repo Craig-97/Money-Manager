@@ -66,13 +66,12 @@ export const DebtsIcon = (props: IconProps) => (
   </Svg>
 );
 
-/* Four rounded squares: the mobile nav's More */
+/* Three dots: the mobile nav's More, unlike the Dashboard's tiles beside it */
 export const MoreIcon = (props: IconProps) => (
   <Svg {...props}>
-    <rect x="3" y="3" width="7" height="7" rx="2" />
-    <rect x="14" y="3" width="7" height="7" rx="2" />
-    <rect x="3" y="14" width="7" height="7" rx="2" />
-    <rect x="14" y="14" width="7" height="7" rx="2" />
+    <circle cx="5" cy="12" r="1.6" fill="currentColor" />
+    <circle cx="12" cy="12" r="1.6" fill="currentColor" />
+    <circle cx="19" cy="12" r="1.6" fill="currentColor" />
   </Svg>
 );
 
