@@ -35,7 +35,14 @@ export const RenewalAlert = ({ payment, renewal, today, onLater, onUpdate }: Ren
         <p className={alertSublineClasses}>
           {formatShortDate(renewal.date, today)} ·{' '}
           <span className="num">{formatMoney(payment.amount)}</span> {PER_PERIOD[payment.frequency]}{' '}
-          · {renewal.passed ? 'check the price and next date' : 'check the price before it renews'}
+          ·{' '}
+          {renewal.passed ? (
+            'check the price and next date'
+          ) : (
+            <>
+              check the price<span className="hidden md:inline"> before it renews</span>
+            </>
+          )}
         </p>
       </div>
     </div>

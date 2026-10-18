@@ -23,6 +23,31 @@ export const AlertStack = ({ dashboard }: { dashboard: Dashboard }) => {
   if (!alert) return null;
   const several = alerts.length > 1;
 
+  const content = (item: (typeof alerts)[number]) =>
+    item.kind === 'overdue' ? (
+      <OverdueAlert
+        payment={item.payment}
+        due={item.due}
+        today={dashboard.today}
+        onLater={() => later(item)}
+        onPay={() => void dashboard.actions.pay([item.payment])}
+      />
+    ) : item.kind === 'due' ? (
+      <DueTodayAlert
+        payment={item.payment}
+        onLater={() => later(item)}
+        onPay={() => void dashboard.actions.pay([item.payment])}
+      />
+    ) : (
+      <RenewalAlert
+        payment={item.payment}
+        renewal={item.renewal}
+        today={dashboard.today}
+        onLater={() => later(item)}
+        onUpdate={() => openEdit('recurring', { paymentId: item.payment.id })}
+      />
+    );
+
   return (
     <div
       role="region"
@@ -53,29 +78,26 @@ export const AlertStack = ({ dashboard }: { dashboard: Dashboard }) => {
           else if (moved > SWIPE_PX) go(index - 1);
         }}
         className="relative flex touch-pan-y flex-col gap-3 rounded-[22px] border border-border bg-surface p-3.5 transition-[translate,box-shadow,border-color] duration-200 md:flex-row md:flex-wrap md:items-center md:gap-4 md:rounded-3xl md:py-3 md:pr-3 md:pl-3.5 md:hover:-translate-y-0.5 md:hover:border-border-strong md:hover:shadow-[0_22px_44px_-28px_var(--shadow)]">
-        {alert.kind === 'overdue' ? (
-          <OverdueAlert
-            payment={alert.payment}
-            due={alert.due}
-            today={dashboard.today}
-            onLater={() => later(alert)}
-            onPay={() => void dashboard.actions.pay([alert.payment])}
-          />
-        ) : alert.kind === 'due' ? (
-          <DueTodayAlert
-            payment={alert.payment}
-            onLater={() => later(alert)}
-            onPay={() => void dashboard.actions.pay([alert.payment])}
-          />
-        ) : (
-          <RenewalAlert
-            payment={alert.payment}
-            renewal={alert.renewal}
-            today={dashboard.today}
-            onLater={() => later(alert)}
-            onUpdate={() => openEdit('recurring', { paymentId: alert.payment.id })}
-          />
-        )}
+        {/* Every alert sits in the same place, the others hidden, so the stack is as tall as the
+            tallest at this width and paging between them doesn't move the page */}
+        <div className="grid min-w-0 md:flex-1">
+          {alerts.map((item, at) => (
+            <div
+              key={
+                item.kind === 'renewal'
+                  ? `renewal:${item.payment.id}`
+                  : `${item.kind}:${item.payment.id}`
+              }
+              aria-hidden={at === index ? undefined : true}
+              inert={at !== index}
+              className={cn(
+                'flex flex-col gap-3 [grid-area:1/1] md:flex-row md:flex-wrap md:items-center md:gap-4',
+                at !== index && 'invisible'
+              )}>
+              {content(item)}
+            </div>
+          ))}
+        </div>
         {several ? (
           <>
             <AlertPager index={index} count={alerts.length} onGo={go} />
