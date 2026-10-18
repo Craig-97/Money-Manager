@@ -31,13 +31,13 @@ export const usePaydaySettings = (account: Account) => {
   const today = startOfToday();
 
   const preview = valid
-    ? paydayPreview(toPaydayConfig(values, account.payday?.overrides), holidays, today)
+    ? paydayPreview(toPaydayConfig(values, account.payday?.overrides), { holidays, today })
     : [];
 
   const isDirty = (Object.keys(values) as (keyof PaydayValues)[]).some(
     key => values[key] !== saved[key]
   );
-  const dates = usePaydayDates(account.payday?.id, preview, isDirty);
+  const dates = usePaydayDates({ paydayId: account.payday?.id, preview, locked: isDirty });
 
   const save = async () => {
     setSubmitted(true);

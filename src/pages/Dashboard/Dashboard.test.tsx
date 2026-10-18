@@ -337,7 +337,9 @@ describe('a payment due more than once before payday', () => {
   it('shows how far through the cycle it is on the recurring tab', async () => {
     const data = cleanerAccount();
     data.recurringPayments[0].nextDueDate = apiDate('2026-10-14');
-    data.recurringPayments[0].thisCycle = [fakeRecord('PAID', [apiDate('2026-10-07')], -50)];
+    data.recurringPayments[0].thisCycle = [
+      fakeRecord('PAID', { dates: [apiDate('2026-10-07')], balanceChange: -50 })
+    ];
     const { user } = renderDashboard(data);
 
     await user.click(await screen.findByRole('radio', { name: /Recurring/ }));
@@ -457,7 +459,7 @@ describe('payday prompt', () => {
     const data = paydayAccount();
     // Paid for 30 August, so it has already moved on to today, in the new cycle
     data.recurringPayments[0].nextDueDate = apiDateFromToday(0);
-    data.recurringPayments[0].thisCycle = [fakeRecord('PAID', [apiDateFromToday(-31)])];
+    data.recurringPayments[0].thisCycle = [fakeRecord('PAID', { dates: [apiDateFromToday(-31)] })];
     renderDashboard(data);
 
     const dialog = await screen.findByRole('dialog', { name: 'It’s payday' });

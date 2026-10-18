@@ -18,7 +18,7 @@ export const useNotes = (account: Account) => {
   const actions = useNoteActions(account.id);
 
   const all = toNotes(account.notes);
-  const notes = findNotes(all, query, sort);
+  const notes = findNotes(all, { query, sort });
   const searching = query.trim().length > 0;
 
   return {

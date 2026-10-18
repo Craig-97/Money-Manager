@@ -73,8 +73,7 @@ describe('paydayPreview', () => {
   it('shows the next three paydays and which a bank holiday moved', () => {
     const preview = paydayPreview(
       { frequency: 'MONTHLY', type: 'LAST_WEEKDAY', weekday: 'FRIDAY' },
-      new Set(['2026-12-25']),
-      new Date(2026, 9, 4)
+      { holidays: new Set(['2026-12-25']), today: new Date(2026, 9, 4) }
     );
     expect(preview.map(item => toIsoDate(item.date))).toEqual([
       '2026-10-30',
@@ -93,8 +92,7 @@ describe('paydayPreview', () => {
         weekday: 'FRIDAY',
         overrides: [{ for: '2026-12-24', date: '2026-12-17' }]
       },
-      new Set(['2026-12-25']),
-      new Date(2026, 11, 4)
+      { holidays: new Set(['2026-12-25']), today: new Date(2026, 11, 4) }
     );
     expect(preview[0]).toMatchObject({ moved: true, movedFrom: null });
     expect(toIsoDate(preview[0].date)).toBe('2026-12-17');

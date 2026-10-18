@@ -11,5 +11,5 @@ export const usePayCycle = (payday: PaydayFieldsFragment | null | undefined) => 
   const holidays = useBankHolidays(payday?.bankHolidayRegion);
   const today = startOfToday();
 
-  return { today, holidays, cycle: getPayCycle(payday ?? DEFAULT_PAYDAY, holidays, today) };
+  return { today, holidays, cycle: getPayCycle(payday ?? DEFAULT_PAYDAY, { holidays, today }) };
 };

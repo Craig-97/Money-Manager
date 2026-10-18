@@ -85,7 +85,10 @@ export const renewalTag = (renewal: Renewal, today: Date) => {
 };
 
 /* An alert's heading: "Car insurance renews in 22 days", or "Breakdown cover has renewed" */
-export const renewalHeading = (payment: Payment, renewal: Renewal, today: Date) =>
+export const renewalHeading = (
+  payment: Payment,
+  { renewal, today }: { renewal: Renewal; today: Date }
+) =>
   renewal.passed
     ? `${payment.name} has renewed`
     : `${payment.name} ${renewalTag(renewal, today).toLowerCase()}`;
@@ -105,9 +108,7 @@ export const renewalWhen = (renewal: Renewal) => {
 /* "Fri 2 Oct · £612.00 a year", or "Renewed Mon 28 Sep · …" once it has gone by */
 export const renewalLine = (
   payment: RecurringPayment,
-  renewal: Renewal,
-  today: Date,
-  money: string
+  { renewal, today, money }: { renewal: Renewal; today: Date; money: string }
 ) =>
   `${renewal.passed ? 'Renewed ' : ''}${formatShortDate(renewal.date, today)} · ${money} ${PER_PERIOD[payment.frequency]}`;
 
@@ -138,8 +139,7 @@ const MONTH_YEAR = new Intl.DateTimeFormat('en-GB', { month: 'short', year: 'num
  */
 export const renewalWindow = <T extends { renewal: Renewal }>(
   items: T[],
-  today: Date,
-  size = 3
+  { size = 3 }: { size?: number } = {}
 ): RenewalWindow<T> => {
   const sorted = items.toSorted((a, b) => a.renewal.date.getTime() - b.renewal.date.getTime());
   const passed = sorted.filter(item => item.renewal.passed);

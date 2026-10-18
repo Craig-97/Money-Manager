@@ -29,7 +29,7 @@ export const DetailHeader = ({ debt }: { debt: DebtPayment }) => {
       <IconButton
         aria-label={`Edit ${debt.name}`}
         variant="outline"
-        onClick={() => openEdit('recurring', debt.id, { asDebt: true })}>
+        onClick={() => openEdit('recurring', { paymentId: debt.id, asDebt: true })}>
         <PenLine size={18} aria-hidden="true" />
       </IconButton>
     </header>

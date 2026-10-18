@@ -36,10 +36,14 @@ export const recurringOnly = (payments: { kind: string }[]) =>
 /* The payments a tab lists, narrowed by the search and category, in the chosen order */
 export const filterPayments = (
   payments: RecurringPayment[],
-  { tab, query, category }: RecurringFilters,
-  cycle: PayCycle,
-  today: Date,
-  sort: PaymentSort
+  {
+    tab,
+    query,
+    category,
+    cycle,
+    today,
+    sort
+  }: RecurringFilters & { cycle: PayCycle; today: Date; sort: PaymentSort }
 ) => {
   const search = query.trim().toLowerCase();
   return sortPayments(
@@ -59,8 +63,7 @@ export const filterPayments = (
 
 export const tabCounts = (
   payments: RecurringPayment[],
-  cycle: PayCycle,
-  today: Date
+  { cycle, today }: { cycle: PayCycle; today: Date }
 ): Record<RecurringTab, number> => ({
   all: payments.length,
   cycle: payments.filter(payment => isInCycle(payment, cycle)).length,
@@ -82,7 +85,10 @@ export const categoriesUsed = (payments: RecurringPayment[]) =>
  * payments, "≈" when some count at their average, quarterly and yearly payments as a yearly
  * figure, and what's still to pay before payday counting every date. Negative is money out.
  */
-export const listTotals = (payments: RecurringPayment[], cycle: PayCycle, today: Date) => {
+export const listTotals = (
+  payments: RecurringPayment[],
+  { cycle, today }: { cycle: PayCycle; today: Date }
+) => {
   const summary = summarise({ payments, bankBalance: 0, monthlyIncome: 0, cycle, today });
   return {
     monthly: -summary.monthlyRecurring,
@@ -150,7 +156,7 @@ const sliceColour = (index: number, count: number) => {
 };
 
 /* One page of a list: "1–8 of 11", with which way it can move */
-export const pageOf = <T>(items: T[], size: number, page: number) => {
+export const pageOf = <T>(items: T[], { size, page }: { size: number; page: number }) => {
   const pages = Math.max(1, Math.ceil(items.length / size));
   const current = Math.min(page, pages - 1);
   const from = current * size;
@@ -171,10 +177,13 @@ export interface RenewalItem {
 }
 
 /* The payments with a renewal, and the soonest few in a window that makes sense of them */
-export const upcomingRenewals = (payments: RecurringPayment[], today: Date, size = 3) => {
+export const upcomingRenewals = (
+  payments: RecurringPayment[],
+  { today, size = 3 }: { today: Date; size?: number }
+) => {
   const items = payments.flatMap(payment => {
     const renewal = renewalOf(payment, today);
     return renewal ? [{ payment, renewal }] : [];
   });
-  return { ...renewalWindow(items, today, size), total: items.length };
+  return { ...renewalWindow(items, { size }), total: items.length };
 };

@@ -13,7 +13,7 @@ export const usePayoffPlan = ({ debts, today, base, actions }: Debts) => {
   const [extra, setExtra] = useState(0);
   const [applying, setApplying] = useState(false);
 
-  const figures = planFigures(debts, strategy, extra, today, base);
+  const figures = planFigures(debts, { strategy, extra, today, base });
   const change = figures.target && extra > 0 ? applyChange(figures.target, extra) : null;
 
   const apply = async () => {

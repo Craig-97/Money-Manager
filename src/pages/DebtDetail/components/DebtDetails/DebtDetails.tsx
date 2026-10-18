@@ -14,7 +14,7 @@ export const DebtDetails = ({ debt, today }: { debt: DebtPayment; today: Date })
   const rows = [
     {
       label: 'Payment',
-      value: `${formatMoney(debt.amount)} · ${scheduleText(debt.firstPaymentDate, debt.frequency)}`
+      value: `${formatMoney(debt.amount)} · ${scheduleText(debt.firstPaymentDate, { frequency: debt.frequency })}`
     },
     { label: 'APR', value: aprText(debt.debt.apr) },
     {
@@ -42,13 +42,15 @@ export const DebtDetails = ({ debt, today }: { debt: DebtPayment; today: Date })
       </dl>
       <div className="grid grid-cols-2 gap-2.5">
         <Button
-          onClick={() => openEdit('recurring', debt.id, { asDebt: true, focusBalance: true })}
+          onClick={() =>
+            openEdit('recurring', { paymentId: debt.id, asDebt: true, focusBalance: true })
+          }
           className="h-[52px]">
           <RefreshCw size={16} aria-hidden="true" />
           Update balance
         </Button>
         <Button
-          onClick={() => openEdit('recurring', debt.id, { asDebt: true })}
+          onClick={() => openEdit('recurring', { paymentId: debt.id, asDebt: true })}
           className="h-[52px]">
           <PenLine size={16} aria-hidden="true" />
           Edit

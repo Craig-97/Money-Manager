@@ -12,7 +12,10 @@ export const datesDue = (payment: Payment, cycle: PayCycle): Date[] => {
   const { dueDate } = payment;
   if (!dueDate || dueDate >= cycle.end) return [];
   if (payment.kind === 'oneOff') return payment.paidAt ? [] : [dueDate];
-  return [dueDate, ...occurrencesBetween(payment, addDays(dueDate, 1), addDays(cycle.end, -1))];
+  return [
+    dueDate,
+    ...occurrencesBetween(payment, { from: addDays(dueDate, 1), to: addDays(cycle.end, -1) })
+  ];
 };
 
 /* Whether a payment still has something to pay before payday. Paid one-offs don't. */
@@ -29,7 +32,7 @@ const datesBeforeAdded = (payment: RecurringPayment, cycle: PayCycle) => {
     payment.thisCycle.flatMap(record => record.dates).map(date => date.getTime())
   );
   const until = addDays(dueDate < cycle.end ? dueDate : cycle.end, -1);
-  return occurrencesBetween(payment, cycle.start, until).filter(
+  return occurrencesBetween(payment, { from: cycle.start, to: until }).filter(
     date => !recorded.has(date.getTime())
   ).length;
 };
@@ -104,7 +107,10 @@ interface PaymentChoices {
 }
 
 /* What can be done with a payment now, labelled as the menu and payment dialog show it */
-export const paymentChoices = (payment: Payment, cycle: PayCycle, today: Date): PaymentChoices => {
+export const paymentChoices = (
+  payment: Payment,
+  { cycle, today }: { cycle: PayCycle; today: Date }
+): PaymentChoices => {
   const day = (date: Date) => formatShortDate(date, today);
   if (payment.kind === 'oneOff') {
     return payment.paidAt

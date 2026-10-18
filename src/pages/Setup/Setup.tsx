@@ -32,9 +32,13 @@ export const Setup = () => {
   const holidays = useBankHolidays(values.region);
   const today = startOfToday();
 
-  const firstCycle = summariseFirstCycle(values, holidays, today);
+  const firstCycle = summariseFirstCycle(values, { holidays, today });
   // Paydays after today, so on payday itself the first cycle runs to the next one
-  const nextPaydays = getNextPaydays(paydayConfig(values), holidays, addDays(today, 1), 2);
+  const nextPaydays = getNextPaydays(paydayConfig(values), {
+    holidays,
+    from: addDays(today, 1),
+    count: 2
+  });
   const shownPayErrors = showErrors ? payErrors(values) : {};
 
   const stepSummaries = [

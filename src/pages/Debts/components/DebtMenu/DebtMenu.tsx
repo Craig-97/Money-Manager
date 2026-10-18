@@ -28,12 +28,14 @@ export const DebtMenu = ({ debt, onDelete }: DebtMenuProps) => {
       <MenuContent aria-label={`Actions for ${debt.name}`}>
         <MenuItem
           icon={<PenLine size={16} />}
-          onSelect={() => openEdit('recurring', debt.id, { asDebt: true })}>
+          onSelect={() => openEdit('recurring', { paymentId: debt.id, asDebt: true })}>
           Edit
         </MenuItem>
         <MenuItem
           icon={<RefreshCw size={16} />}
-          onSelect={() => openEdit('recurring', debt.id, { asDebt: true, focusBalance: true })}>
+          onSelect={() =>
+            openEdit('recurring', { paymentId: debt.id, asDebt: true, focusBalance: true })
+          }>
           Update balance
         </MenuItem>
         <MenuItem icon={<ArrowUp size={16} />} onSelect={() => openOverpayment(debt.id)}>

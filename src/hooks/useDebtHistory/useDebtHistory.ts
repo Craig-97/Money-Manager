@@ -27,7 +27,8 @@ export const useDebtHistory = (debt: DebtPayment | null | undefined, today: Date
   );
   // While older ones load, the ones already showing stay
   const records = (data ?? previousData)?.recurringPayment?.history;
-  const entries = debt && records ? debtHistory(debt, records.slice(0, count), today) : [];
+  const entries =
+    debt && records ? debtHistory(debt, { records: records.slice(0, count), today }) : [];
 
   return {
     months: byMonth(entries),

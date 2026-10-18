@@ -140,13 +140,23 @@ export const usePaymentActions = (accountId: string) => {
         recurring.length
           ? deleteRecurring({
               variables: { ids: recurring },
-              update: cache => removeFromAccount(cache, accountId, 'recurringPayments', recurring)
+              update: cache =>
+                removeFromAccount(cache, {
+                  account: accountId,
+                  field: 'recurringPayments',
+                  ids: recurring
+                })
             })
           : null,
         oneOffs.length
           ? deleteOneOffs({
               variables: { ids: oneOffs },
-              update: cache => removeFromAccount(cache, accountId, 'oneOffPayments', oneOffs)
+              update: cache =>
+                removeFromAccount(cache, {
+                  account: accountId,
+                  field: 'oneOffPayments',
+                  ids: oneOffs
+                })
             })
           : null
       ]);

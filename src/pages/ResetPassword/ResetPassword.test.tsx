@@ -44,7 +44,7 @@ describe('reset password', () => {
 
   it('shows the link as expired if it runs out while typing', async () => {
     const api = createFakeApi();
-    api.failNext('ResetPassword', 'PASSWORD_RESET_TOKEN_INVALID');
+    api.failNext('ResetPassword', { code: 'PASSWORD_RESET_TOKEN_INVALID' });
     const { user } = renderApp({ route: resetRoute(), session: null, api });
 
     await findPageHeading('Choose a new password');

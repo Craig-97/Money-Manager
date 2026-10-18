@@ -2,7 +2,10 @@ import { describe, expect, it } from 'vitest';
 import { Payment } from './payments';
 import { nextSort, PaymentSort, pickSort, sortLabel, sortPayments } from './sort';
 
-const payment = (name: string, amount: number, due: string | null): Payment => ({
+const payment = (
+  name: string,
+  { amount, due }: { amount: number; due: string | null }
+): Payment => ({
   kind: 'oneOff',
   id: name,
   name,
@@ -15,10 +18,10 @@ const payment = (name: string, amount: number, due: string | null): Payment => (
 });
 
 const list = [
-  payment('gym', 34, '2026-10-12'),
-  payment('Energy', 120, '2026-10-14'),
-  payment('Car loan', 245, null),
-  payment('Netflix', 20, '2026-10-02')
+  payment('gym', { amount: 34, due: '2026-10-12' }),
+  payment('Energy', { amount: 120, due: '2026-10-14' }),
+  payment('Car loan', { amount: 245, due: null }),
+  payment('Netflix', { amount: 20, due: '2026-10-02' })
 ];
 const names = (payments: Payment[]) => payments.map(p => p.name);
 

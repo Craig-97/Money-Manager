@@ -38,7 +38,7 @@ export const AlertStack = ({ dashboard }: { dashboard: Dashboard }) => {
         aria-label={
           alert.kind === 'due'
             ? 'Due today'
-            : renewalHeading(alert.payment, alert.renewal, dashboard.today)
+            : renewalHeading(alert.payment, { renewal: alert.renewal, today: dashboard.today })
         }
         aria-roledescription="slide"
         onPointerDown={event => (swipeFrom.current = event.clientX)}
@@ -62,7 +62,7 @@ export const AlertStack = ({ dashboard }: { dashboard: Dashboard }) => {
             renewal={alert.renewal}
             today={dashboard.today}
             onLater={() => later(alert)}
-            onUpdate={() => openEdit('recurring', alert.payment.id)}
+            onUpdate={() => openEdit('recurring', { paymentId: alert.payment.id })}
           />
         )}
         {several ? (

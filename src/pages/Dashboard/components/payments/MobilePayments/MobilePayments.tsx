@@ -51,7 +51,7 @@ export const MobilePayments = ({ dashboard }: { dashboard: Dashboard }) => {
           </div>
           <div className="mt-1 flex items-center justify-between border-t border-border px-2.5 pt-3.5 pb-1.5">
             <span className="text-[13px] font-semibold text-muted">
-              {footLabel(listed.length, tab, formatShortDate(cycle.end))}
+              {footLabel(listed.length, { tab, payday: formatShortDate(cycle.end) })}
             </span>
             <TabTotal dashboard={dashboard} compact />
           </div>

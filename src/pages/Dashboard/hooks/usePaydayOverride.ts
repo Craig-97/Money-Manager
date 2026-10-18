@@ -30,7 +30,7 @@ export const usePaydayOverride = ({ account, cycle, today, holidays, payments }:
   const moved = cycle.end.getTime() !== cycle.endUsual.getTime();
   // It can't run into the payday after this one
   const following = payday
-    ? getNextPaydays(payday, holidays, addDays(cycle.endUsual, 1), 1)[0]
+    ? getNextPaydays(payday, { holidays, from: addDays(cycle.endUsual, 1), count: 1 })[0]
     : undefined;
   const latest = following ? addDays(following, -1) : addDays(cycle.endUsual, FALLBACK_DAYS);
   const changed = picked.getTime() !== cycle.end.getTime();

@@ -25,7 +25,7 @@ interface RowProps {
 export const PaymentRow = ({ payment, dashboard }: RowProps) => {
   const { tab, today, cycle, selection, actions } = dashboard;
   const openEdit = usePaymentDialogStore(s => s.openEdit);
-  const due = dueInfo(payment, today, cycle);
+  const due = dueInfo(payment, { today, cycle });
   const isSelected = selection.selected.has(payment.id);
   const checkboxId = `payment-${tab}-${payment.id}`;
   const category = categoryLabel(payment.category);
@@ -51,7 +51,7 @@ export const PaymentRow = ({ payment, dashboard }: RowProps) => {
             <button
               type="button"
               aria-label={`Edit ${payment.name}`}
-              onClick={() => openEdit(payment.kind, payment.id)}
+              onClick={() => openEdit(payment.kind, { paymentId: payment.id })}
               className="-my-[11px] min-w-0 cursor-pointer truncate rounded-lg py-[11px] text-left leading-[22px] hover:text-accent-text hover:underline hover:underline-offset-3">
               {payment.name}
             </button>
@@ -81,7 +81,7 @@ export const PaymentRow = ({ payment, dashboard }: RowProps) => {
         <>
           <span role="cell" className="flex items-center gap-2 text-sm font-semibold">
             <Repeat size={15} className="shrink-0 text-muted" aria-hidden="true" />
-            {scheduleText(payment.firstPaymentDate, payment.frequency)}
+            {scheduleText(payment.firstPaymentDate, { frequency: payment.frequency })}
           </span>
           <span role="cell" className="hidden wide:block">
             <DueCell due={due} />

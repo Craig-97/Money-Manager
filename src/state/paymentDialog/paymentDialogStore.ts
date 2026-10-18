@@ -25,6 +25,12 @@ interface FormOptions {
   focusBalance?: boolean;
 }
 
+interface EditOptions {
+  paymentId: string;
+  asDebt?: boolean;
+  focusBalance?: boolean;
+}
+
 interface PaymentDialogState {
   // What it shows. Closing leaves this as it was, so the dialog keeps its contents while it
   // animates away; the next opening replaces it.
@@ -34,11 +40,7 @@ interface PaymentDialogState {
   opened: number;
   openChooser: () => void;
   openAdd: (kind: PaymentKind, options?: FormOptions) => void;
-  openEdit: (
-    kind: PaymentKind,
-    paymentId: string,
-    options?: Pick<FormOptions, 'asDebt' | 'focusBalance'>
-  ) => void;
+  openEdit: (kind: PaymentKind, options: EditOptions) => void;
   // Adding a debt: a recurring payment that's paying one off
   openAddDebt: () => void;
   close: () => void;
@@ -57,8 +59,7 @@ export const usePaymentDialogStore = create<PaymentDialogState>()(set => {
     opened: 0,
     openChooser: () => show({ view: 'chooser' }),
     openAdd: (kind, options = {}) => show({ view: 'form', kind, ...options }),
-    openEdit: (kind, paymentId, options = {}) =>
-      show({ view: 'form', kind, paymentId, ...options }),
+    openEdit: (kind, options) => show({ view: 'form', kind, ...options }),
     openAddDebt: () => show({ view: 'form', kind: 'recurring', asDebt: true }),
     close: () => set({ open: false })
   };

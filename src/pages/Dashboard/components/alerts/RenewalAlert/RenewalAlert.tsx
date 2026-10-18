@@ -26,7 +26,7 @@ export const RenewalAlert = ({ payment, renewal, today, onLater, onUpdate }: Ren
         <RefreshCw size={20} className="size-[18px] md:size-5" aria-hidden="true" />
       </span>
       <div className="min-w-0">
-        <p className="text-[15px] font-bold">{renewalHeading(payment, renewal, today)}</p>
+        <p className="text-[15px] font-bold">{renewalHeading(payment, { renewal, today })}</p>
         <p className="mt-0.5 text-xs font-medium text-muted md:text-[13px]">
           {formatShortDate(renewal.date, today)} ·{' '}
           <span className="num">{formatMoney(payment.amount)}</span> {PER_PERIOD[payment.frequency]}{' '}

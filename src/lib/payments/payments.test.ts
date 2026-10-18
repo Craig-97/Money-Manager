@@ -94,8 +94,12 @@ const designPayments = toPayments(
 
 describe('recurrence', () => {
   it('keeps the day of the month, using the end of shorter months', () => {
-    expect(toIsoDate(occurrence(day('2026-01-31'), 'MONTHLY', 1))).toBe('2026-02-28');
-    expect(toIsoDate(occurrence(day('2026-01-31'), 'MONTHLY', 2))).toBe('2026-03-31');
+    expect(
+      toIsoDate(occurrence({ firstPaymentDate: day('2026-01-31'), frequency: 'MONTHLY' }, 1))
+    ).toBe('2026-02-28');
+    expect(
+      toIsoDate(occurrence({ firstPaymentDate: day('2026-01-31'), frequency: 'MONTHLY' }, 2))
+    ).toBe('2026-03-31');
   });
 
   it('finds the next date on or after a day, stopping at the last payment', () => {
@@ -237,7 +241,7 @@ describe('summarise', () => {
 
 describe('cycleDays', () => {
   it('has a day for each date from the last payday to the next', () => {
-    const days = cycleDays(cycle, today, designPayments);
+    const days = cycleDays(cycle, { today, payments: designPayments });
 
     expect(days).toHaveLength(36);
     expect(days[0]).toMatchObject({ kind: 'past', isLastPayday: true });
@@ -249,7 +253,7 @@ describe('cycleDays', () => {
 
   it('runs ghost days on from a payday brought forward to its usual date', () => {
     const early = { ...cycle, end: day('2026-10-23') };
-    const days = cycleDays(early, today, designPayments);
+    const days = cycleDays(early, { today, payments: designPayments });
 
     // The new payday is 23 Oct, a week before the usual 30 Oct: six ghost days, then the usual day
     expect(days).toHaveLength(36);
@@ -261,10 +265,12 @@ describe('cycleDays', () => {
 
 describe('scheduleText', () => {
   it('describes how a payment repeats', () => {
-    expect(scheduleText(day('2026-01-02'), 'MONTHLY')).toBe('Monthly on the 2nd');
-    expect(scheduleText(day('2026-10-02'), 'WEEKLY')).toBe('Weekly on Fridays');
-    expect(scheduleText(day('2026-10-02'), 'BIWEEKLY', { lower: true })).toBe('every other Friday');
-    expect(scheduleText(day('2025-07-01'), 'ANNUALLY')).toBe('Annually on 1 Jul');
+    expect(scheduleText(day('2026-01-02'), { frequency: 'MONTHLY' })).toBe('Monthly on the 2nd');
+    expect(scheduleText(day('2026-10-02'), { frequency: 'WEEKLY' })).toBe('Weekly on Fridays');
+    expect(scheduleText(day('2026-10-02'), { frequency: 'BIWEEKLY', lower: true })).toBe(
+      'every other Friday'
+    );
+    expect(scheduleText(day('2025-07-01'), { frequency: 'ANNUALLY' })).toBe('Annually on 1 Jul');
   });
 });
 
@@ -313,7 +319,7 @@ describe('a weekly payment through the cycle', () => {
   });
 
   it('offers to pay or skip the next date by name, or skip the rest of the cycle', () => {
-    expect(paymentChoices(cleaner('2026-10-05', [paid('2026-09-28')]), cycle, today)).toEqual({
+    expect(paymentChoices(cleaner('2026-10-05', [paid('2026-09-28')]), { cycle, today })).toEqual({
       pay: 'Mark Mon 5 Oct as paid',
       undo: 'Mark Mon 28 Sep as unpaid',
       skipNext: 'Skip Mon 5 Oct',
@@ -325,7 +331,7 @@ describe('a weekly payment through the cycle', () => {
     const done = cleaner('2026-11-02', [
       skipped('2026-09-28', '2026-10-05', '2026-10-12', '2026-10-19', '2026-10-26')
     ]);
-    expect(paymentChoices(done, cycle, today)).toEqual({
+    expect(paymentChoices(done, { cycle, today })).toEqual({
       pay: null,
       undo: 'Undo skipping 5 dates',
       skipNext: null,
@@ -346,18 +352,18 @@ describe('a monthly payment through the cycle', () => {
     )[0];
 
   it('keeps the labels it always had', () => {
-    expect(paymentChoices(netflix('2026-10-02'), cycle, today)).toEqual({
+    expect(paymentChoices(netflix('2026-10-02'), { cycle, today })).toEqual({
       pay: 'Mark as paid',
       undo: null,
       skipNext: 'Skip this cycle',
       skipRest: null
     });
-    expect(paymentChoices(netflix('2026-11-02', [paid('2026-10-02')]), cycle, today)).toMatchObject(
-      {
-        pay: null,
-        undo: 'Mark as unpaid'
-      }
-    );
+    expect(
+      paymentChoices(netflix('2026-11-02', [paid('2026-10-02')]), { cycle, today })
+    ).toMatchObject({
+      pay: null,
+      undo: 'Mark as unpaid'
+    });
   });
 });
 
@@ -376,7 +382,7 @@ describe('a payment added partway through a cycle', () => {
       nextDueDate: apiDate('2026-11-01')
     });
     expect(cycleStatus(mortgage, cycle)).toEqual({ tone: 'paid', label: 'Paid' });
-    expect(paymentChoices(mortgage, cycle, today)).toMatchObject({ pay: null, undo: null });
+    expect(paymentChoices(mortgage, { cycle, today })).toMatchObject({ pay: null, undo: null });
   });
 
   it('counts the weeks already gone as paid', () => {
@@ -395,6 +401,6 @@ describe('a payment added partway through a cycle', () => {
     });
     expect(cycleStatus(gym, cycle).label).toBe('Not due yet');
     // It can still be paid ahead
-    expect(paymentChoices(gym, cycle, today).pay).toBe('Mark as paid');
+    expect(paymentChoices(gym, { cycle, today }).pay).toBe('Mark as paid');
   });
 });

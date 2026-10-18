@@ -15,7 +15,10 @@ export interface DueInfo {
   detail: string;
 }
 
-export const dueInfo = (payment: Payment, today: Date, cycle: PayCycle): DueInfo => {
+export const dueInfo = (
+  payment: Payment,
+  { today, cycle }: { today: Date; cycle: PayCycle }
+): DueInfo => {
   if (!payment.dueDate)
     return { state: 'ended', days: null, label: 'Ended', detail: 'No upcoming date' };
   const days = daysBetween(today, payment.dueDate);

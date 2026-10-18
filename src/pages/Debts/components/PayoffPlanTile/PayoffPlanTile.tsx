@@ -13,7 +13,7 @@ import { StrategyNote } from '../StrategyNote';
  * Nothing changes until the extra is applied.
  */
 export const PayoffPlanTile = ({ debts, plan }: { debts: Debts; plan: PayoffPlan }) => {
-  const chart = chartText(plan.figures, debts.today, debts.totals.left);
+  const chart = chartText(plan.figures, { today: debts.today, left: debts.totals.left });
 
   return (
     <article

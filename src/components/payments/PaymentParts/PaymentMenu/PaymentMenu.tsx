@@ -17,7 +17,7 @@ interface PaymentMenuProps {
 export const PaymentMenu = ({ payment, cycle, today, actions }: PaymentMenuProps) => {
   const openEdit = usePaymentDialogStore(s => s.openEdit);
   const { pay, undo, skip, remove } = actions;
-  const choices = paymentChoices(payment, cycle, today);
+  const choices = paymentChoices(payment, { cycle, today });
   const recurring = payment.kind === 'recurring' ? payment : null;
 
   return (
@@ -28,7 +28,9 @@ export const PaymentMenu = ({ payment, cycle, today, actions }: PaymentMenuProps
         </IconButton>
       </MenuTrigger>
       <MenuContent aria-label={`Actions for ${payment.name}`}>
-        <MenuItem icon={<PenLine size={16} />} onSelect={() => openEdit(payment.kind, payment.id)}>
+        <MenuItem
+          icon={<PenLine size={16} />}
+          onSelect={() => openEdit(payment.kind, { paymentId: payment.id })}>
           Edit
         </MenuItem>
         {choices.pay ? (

@@ -22,7 +22,7 @@ export const StatusStrip = ({ payment, today, cycle, accountId }: StatusStripPro
     : payment.kind === 'oneOff' && payment.paidAt
       ? { tone: 'paid' as const, label: 'Paid' }
       : { tone: 'unpaid' as const, label: 'Unpaid' };
-  const choices = paymentChoices(payment, cycle, today);
+  const choices = paymentChoices(payment, { cycle, today });
   const days = payment.dueDate ? daysBetween(today, payment.dueDate) : null;
   const dueText =
     days === null

@@ -78,13 +78,13 @@ describe('BottomNav', () => {
   });
 
   it.each([
-    ['/dashboard', 'Add payment', 'Dashboard'],
-    ['/forecast', 'Add payment', 'Forecast'],
-    ['/profile', 'Add payment', 'Profile'],
-    ['/recurring', 'Add recurring payment', 'Recurring payments'],
-    ['/debts', 'Add a debt', 'Debts'],
-    ['/notes', 'Add note', 'Notes']
-  ])('on %s the add button is %s', async (route, label, heading) => {
+    { route: '/dashboard', label: 'Add payment', heading: 'Dashboard' },
+    { route: '/forecast', label: 'Add payment', heading: 'Forecast' },
+    { route: '/profile', label: 'Add payment', heading: 'Profile' },
+    { route: '/recurring', label: 'Add recurring payment', heading: 'Recurring payments' },
+    { route: '/debts', label: 'Add a debt', heading: 'Debts' },
+    { route: '/notes', label: 'Add note', heading: 'Notes' }
+  ])('on $route the add button is $label', async ({ route, label, heading }) => {
     const { nav } = await renderPage(route, heading);
 
     expect(within(nav).getByRole('button', { name: label })).toBeInTheDocument();

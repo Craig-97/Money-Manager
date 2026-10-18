@@ -130,16 +130,18 @@ const demoAccount = (scenario: string | null): FakeAccount => {
 };
 
 // Paid monthly, with a balance set from a statement a few weeks ago
-const demoDebt = (
-  id: string,
-  name: string,
-  category: string,
-  amount: number,
-  dueInDays: number,
-  debt: { balance: number; startingBalance: number; apr: number },
+interface DemoDebt {
+  id: string;
+  name: string;
+  category: string;
+  amount: number;
+  dueInDays: number;
+  debt: { balance: number; startingBalance: number; apr: number };
   // How many past payments it has, for its history
-  paid = 3
-) => ({
+  paid?: number;
+}
+
+const demoDebt = ({ id, name, category, amount, dueInDays, debt, paid = 3 }: DemoDebt) => ({
   id,
   name,
   amount,
@@ -150,7 +152,7 @@ const demoDebt = (
   lastPaymentDate: null,
   nextDueDate: fromToday(dueInDays),
   thisCycle: [],
-  history: pastPayments(amount, dueInDays, debt, paid),
+  history: pastPayments({ amount, dueInDays, debt, count: paid }),
   renewalDate: null,
   renewalReminderDays: 0,
   debt: { ...debt, balanceUpdatedAt: fromToday(-21) }
@@ -160,21 +162,30 @@ const demoDebt = (
  * Its last few monthly payments, newest first, from before this cycle so they can't be undone,
  * with the interest each one paid as the API works it out
  */
-const pastPayments = (
-  amount: number,
-  dueInDays: number,
-  { balance, apr }: { balance: number; apr: number },
-  count: number
-) => {
+const pastPayments = ({
+  amount,
+  dueInDays,
+  debt: { balance, apr },
+  count
+}: {
+  amount: number;
+  dueInDays: number;
+  debt: { balance: number; apr: number };
+  count: number;
+}) => {
   let after = balance;
   return Array.from({ length: count }, (_, i) => i + 1).map(monthsAgo => {
     const before = (after + amount) / (1 + apr / 100 / 12);
     const interest = Math.round(before * (apr / 100 / 12) * 100) / 100;
     const record = {
-      ...fakeRecord('PAID', [fromToday(dueInDays - monthsAgo * 30)], -amount, {
-        interest,
-        reduction: Math.round((amount - interest) * 100) / 100,
-        balanceAfter: Math.round(after * 100) / 100
+      ...fakeRecord('PAID', {
+        dates: [fromToday(dueInDays - monthsAgo * 30)],
+        balanceChange: -amount,
+        debt: {
+          interest,
+          reduction: Math.round((amount - interest) * 100) / 100,
+          balanceAfter: Math.round(after * 100) / 100
+        }
       }),
       open: false
     };
@@ -184,28 +195,42 @@ const pastPayments = (
 };
 
 const demoDebts = () => [
-  demoDebt(
-    'credit-card',
-    'Credit card',
-    'CREDIT_CARD',
-    150,
-    13,
-    {
+  demoDebt({
+    id: 'credit-card',
+    name: 'Credit card',
+    category: 'CREDIT_CARD',
+    amount: 150,
+    dueInDays: 13,
+    debt: {
       balance: 2340,
       startingBalance: 3500,
       apr: 24.9
     },
-    18
-  ),
-  demoDebt('car-finance', 'Car finance', 'LOAN', 245, 24, {
-    balance: 6860,
-    startingBalance: 12000,
-    apr: 6.9
+    paid: 18
   }),
-  demoDebt('family-loan', 'Family loan', 'LOAN', 100, 30, {
-    balance: 800,
-    startingBalance: 1500,
-    apr: 0
+  demoDebt({
+    id: 'car-finance',
+    name: 'Car finance',
+    category: 'LOAN',
+    amount: 245,
+    dueInDays: 24,
+    debt: {
+      balance: 6860,
+      startingBalance: 12000,
+      apr: 6.9
+    }
+  }),
+  demoDebt({
+    id: 'family-loan',
+    name: 'Family loan',
+    category: 'LOAN',
+    amount: 100,
+    dueInDays: 30,
+    debt: {
+      balance: 800,
+      startingBalance: 1500,
+      apr: 0
+    }
   })
 ];
 

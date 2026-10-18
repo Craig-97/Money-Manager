@@ -60,8 +60,7 @@ export const sortLabelOf = (sort: DebtSort) => DEBT_SORTS.find(s => s.value === 
 /* The debts in the chosen order; ties go by name */
 export const sortDebts = (
   debts: readonly DebtPayment[],
-  sort: DebtSort,
-  clearedIn: Record<string, number | null>
+  { sort, clearedIn }: { sort: DebtSort; clearedIn: Record<string, number | null> }
 ) => {
   // A debt that never clears at its payment goes last when sorting by when they clear
   const cleared = (debt: DebtPayment) => clearedIn[debt.id] ?? Number.POSITIVE_INFINITY;
@@ -97,12 +96,17 @@ export interface PlanFigures {
 }
 
 /* The payoff plan worked out for a strategy and some extra a month, against how things are now */
+interface PlanInput {
+  strategy: PayoffStrategy;
+  extra: number;
+  today: Date;
+  // As things are, to compare against
+  base: Payoff;
+}
+
 export const planFigures = (
   debts: readonly DebtPayment[],
-  strategy: PayoffStrategy,
-  extra: number,
-  today: Date,
-  base: Payoff
+  { strategy, extra, today, base }: PlanInput
 ): PlanFigures => {
   const plan = simulatePayoff(debts, { strategy, extra });
   const ids = payoffOrder(debts, strategy);
@@ -147,7 +151,7 @@ export const applyChange = (target: DebtPayment, extra: number) => {
 };
 
 /* The chart's words: where it starts, where the slower line ends, and the whole thing read out */
-export const chartText = (figures: PlanFigures, today: Date, left: number) => {
+export const chartText = (figures: PlanFigures, { today, left }: { today: Date; left: number }) => {
   const { base, plan } = figures;
   const longest = Math.max(base.series.length, plan.series.length) - 1;
   return {

@@ -20,7 +20,7 @@ export const Sidebar = ({ className }: { className?: string }) => {
   const toggleLabel = expanded ? 'Collapse sidebar' : 'Expand sidebar';
 
   // Escape closes the overlay wherever focus is
-  useEscapeKey(closeOverlay, isOverlay);
+  useEscapeKey(closeOverlay, { active: isOverlay });
 
   return (
     <>

@@ -6,7 +6,10 @@ import { AccountDocument, AccountFieldsFragment } from '~/graphql/generated';
  * the user's account. The account is stored as their default one too, so the dashboard opens with
  * it already loaded.
  */
-export const linkAccount = (cache: ApolloCache, userId: string, account: AccountFieldsFragment) => {
+export const linkAccount = (
+  cache: ApolloCache,
+  { userId, account }: { userId: string; account: AccountFieldsFragment }
+) => {
   cache.writeQuery({ query: AccountDocument, data: { account } });
   cache.modify({
     id: cache.identify({ __typename: 'User', id: userId }),

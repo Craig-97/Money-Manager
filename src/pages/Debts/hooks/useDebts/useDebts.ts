@@ -25,7 +25,7 @@ export const useDebts = (account: Account) => {
     today,
     cycle,
     debts,
-    sorted: sortDebts(debts, sort, base.clearedIn),
+    sorted: sortDebts(debts, { sort, clearedIn: base.clearedIn }),
     sort,
     setSort,
     totals: debtTotals(debts),

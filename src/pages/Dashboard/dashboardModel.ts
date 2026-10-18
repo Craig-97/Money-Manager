@@ -20,9 +20,7 @@ export const TABS: { value: PaymentTab; label: string }[] = [
 /* The payments a tab lists, in the chosen order */
 export const paymentsForTab = (
   payments: Payment[],
-  tab: PaymentTab,
-  cycle: PayCycle,
-  sort: PaymentSort
+  { tab, cycle, sort }: { tab: PaymentTab; cycle: PayCycle; sort: PaymentSort }
 ) =>
   sortPayments(
     payments.filter(payment =>

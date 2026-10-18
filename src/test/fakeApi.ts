@@ -174,9 +174,11 @@ let recordCount = 0;
 /* A payment record for tests to put on a payment's thisCycle: open, from this cycle */
 export const fakeRecord = (
   kind: FakeRecordKind,
-  dates: string[],
-  balanceChange = 0,
-  debt: FakeRecord['debt'] = null
+  {
+    dates,
+    balanceChange = 0,
+    debt = null
+  }: { dates: string[]; balanceChange?: number; debt?: FakeRecord['debt'] }
 ): FakeRecord => ({
   id: `record-${++recordCount}`,
   kind,
@@ -209,26 +211,31 @@ const removeRecord = (payment: FakeRecurringPayment, record: FakeRecord) => {
 // As the API: records dates as paid or skipped and moves the payment on to the date after the last
 const handle = (
   payment: FakeRecurringPayment,
-  kind: 'PAID' | 'SKIPPED',
-  dates: Date[],
-  balanceChange = 0,
-  debt: FakeRecord['debt'] = null
+  {
+    kind,
+    dates,
+    balanceChange = 0,
+    debt = null
+  }: {
+    kind: 'PAID' | 'SKIPPED';
+    dates: Date[];
+    balanceChange?: number;
+    debt?: FakeRecord['debt'];
+  }
 ) => {
   if (!dates.length) return;
   addRecord(
     payment,
-    fakeRecord(
-      kind,
-      dates.map(date => toApi(date)!),
-      balanceChange,
-      debt
-    )
+    fakeRecord(kind, { dates: dates.map(date => toApi(date)!), balanceChange, debt })
   );
   payment.nextDueDate = toApi(nextOccurrence(scheduleOf(payment), addDays(dates.at(-1)!, 1)));
 };
 
 // As the API: the period's interest goes on, then the payment comes off, never below nothing
-const payTowardsDebt = (debt: FakeDebt, amount: number, frequency: string) => {
+const payTowardsDebt = (
+  debt: FakeDebt,
+  { amount, frequency }: { amount: number; frequency: string }
+) => {
   const interest = roundPence((debt.balance * debt.apr) / 100 / PAYMENTS_PER_YEAR[frequency]);
   const balance = Math.max(0, roundPence(debt.balance + interest - amount));
   return { interest, reduction: roundPence(debt.balance - balance), balanceAfter: balance };
@@ -290,8 +297,13 @@ export const DEFAULT_ACCOUNT: FakeAccount = {
 
 const clone = <T>(value: T): T => structuredClone(value);
 
-const apiError = (code: string, message = code, extensions: Record<string, unknown> = {}) =>
-  new GraphQLError(message, { extensions: { code, ...extensions } });
+const apiError = (
+  code: string,
+  {
+    message = code,
+    extensions = {}
+  }: { message?: string; extensions?: Record<string, unknown> } = {}
+) => new GraphQLError(message, { extensions: { code, ...extensions } });
 
 export interface FakeApi {
   link: ApolloLink;
@@ -306,8 +318,7 @@ export interface FakeApi {
   // Makes the next call to an operation return a GraphQL error with this code
   failNext: (
     operationName: string,
-    code: string,
-    options?: { message?: string; extensions?: Record<string, unknown> }
+    error: { code: string; message?: string; extensions?: Record<string, unknown> }
   ) => void;
 }
 
@@ -341,15 +352,14 @@ export const createFakeApi = ({
 
   const checkPassword = (newPassword: string) => {
     if (newPassword.length < 8 || !/[0-9]/.test(newPassword)) {
-      throw apiError(
-        'INVALID_PASSWORD',
-        'Password must be at least 8 characters and contain a number'
-      );
+      throw apiError('INVALID_PASSWORD', {
+        message: 'Password must be at least 8 characters and contain a number'
+      });
     }
   };
 
   const requireAccount = () => {
-    if (!db.account) throw apiError('ACCOUNT_NOT_LINKED', 'Account not linked');
+    if (!db.account) throw apiError('ACCOUNT_NOT_LINKED', { message: 'Account not linked' });
     return db.account;
   };
 
@@ -359,18 +369,20 @@ export const createFakeApi = ({
     const taken = [...recurringPayments, ...oneOffPayments].some(
       payment => payment.name === name && payment.id !== exceptId
     );
-    if (taken) throw apiError('PAYMENT_EXISTS', `A payment called '${name}' already exists`);
+    if (taken)
+      throw apiError('PAYMENT_EXISTS', { message: `A payment called '${name}' already exists` });
   };
 
   const findRecurring = (id: string) => {
     const payment = requireAccount().recurringPayments.find(p => p.id === id);
-    if (!payment) throw apiError('RECURRING_PAYMENT_NOT_FOUND', `No recurring payment '${id}'`);
+    if (!payment)
+      throw apiError('RECURRING_PAYMENT_NOT_FOUND', { message: `No recurring payment '${id}'` });
     return payment;
   };
 
   const findOneOff = (id: string) => {
     const payment = requireAccount().oneOffPayments.find(p => p.id === id);
-    if (!payment) throw apiError('PAYMENT_NOT_FOUND', `No payment '${id}'`);
+    if (!payment) throw apiError('PAYMENT_NOT_FOUND', { message: `No payment '${id}'` });
     return payment;
   };
 
@@ -453,7 +465,7 @@ export const createFakeApi = ({
   const balanceSet = (payment: FakeRecurringPayment, previous: number | null) => {
     const balance = payment.debt?.balance ?? 0;
     addRecord(payment, {
-      ...fakeRecord('BALANCE_SET', [apiDateFromToday(0)]),
+      ...fakeRecord('BALANCE_SET', { dates: [apiDateFromToday(0)] }),
       debt: {
         interest: 0,
         reduction: roundPence((previous ?? balance) - balance),
@@ -470,7 +482,8 @@ export const createFakeApi = ({
     // With no id, the signed-in user's account
     account: ({ id }: Args) => {
       const current = requireAccount();
-      if (id && id !== current.id) throw apiError('ACCOUNT_NOT_FOUND', `No account '${id}'`);
+      if (id && id !== current.id)
+        throw apiError('ACCOUNT_NOT_FOUND', { message: `No account '${id}'` });
       return current;
     },
     recurringPayment: ({ id }: Args) => {
@@ -486,15 +499,20 @@ export const createFakeApi = ({
     refreshSession: authData,
     login: ({ email, password: attempt }: Args) => {
       if (email !== db.user.email) {
-        throw apiError('USER_EMAIL_NOT_FOUND', "We couldn't find a user with that email address");
+        throw apiError('USER_EMAIL_NOT_FOUND', {
+          message: "We couldn't find a user with that email address"
+        });
       }
-      if (attempt !== db.password) throw apiError('INVALID_CREDENTIALS', 'Password is incorrect');
+      if (attempt !== db.password)
+        throw apiError('INVALID_CREDENTIALS', { message: 'Password is incorrect' });
       return authData();
     },
     // Replaces the fake's one user with the new one, who has no account until setup
     registerAndLogin: ({ input }: Args) => {
       if (input.email === db.user.email) {
-        throw apiError('USER_EXISTS', 'Account with that email address already exists');
+        throw apiError('USER_EXISTS', {
+          message: 'Account with that email address already exists'
+        });
       }
       checkPassword(input.password);
       db.user = {
@@ -522,10 +540,9 @@ export const createFakeApi = ({
     },
     resetPassword: ({ token, password: newPassword }: Args) => {
       if (!resetTokens.has(token)) {
-        throw apiError(
-          'PASSWORD_RESET_TOKEN_INVALID',
-          'This password reset link is invalid or has expired'
-        );
+        throw apiError('PASSWORD_RESET_TOKEN_INVALID', {
+          message: 'This password reset link is invalid or has expired'
+        });
       }
       checkPassword(newPassword);
       resetTokens.delete(token);
@@ -543,7 +560,7 @@ export const createFakeApi = ({
     },
     changePassword: ({ currentPassword, newPassword }: Args) => {
       if (currentPassword !== db.password) {
-        throw apiError('INVALID_CREDENTIALS', 'Password is incorrect');
+        throw apiError('INVALID_CREDENTIALS', { message: 'Password is incorrect' });
       }
       checkPassword(newPassword);
       db.password = newPassword;
@@ -555,7 +572,7 @@ export const createFakeApi = ({
     },
 
     createAccount: ({ input }: Args) => {
-      if (db.account) throw apiError('ACCOUNT_EXISTS', 'Account already exists');
+      if (db.account) throw apiError('ACCOUNT_EXISTS', { message: 'Account already exists' });
       db.account = {
         id: 'account-new',
         bankBalance: input.bankBalance,
@@ -617,11 +634,19 @@ export const createFakeApi = ({
         if (!payment.nextDueDate) continue;
         let debt: FakeRecord['debt'] = null;
         if (payment.debt) {
-          debt = payTowardsDebt(payment.debt, payment.amount, payment.frequency);
+          debt = payTowardsDebt(payment.debt, {
+            amount: payment.amount,
+            frequency: payment.frequency
+          });
           payment.debt.balance = debt.balanceAfter;
         }
         current.bankBalance += change(payment);
-        handle(payment, 'PAID', [fromApiDate(payment.nextDueDate)!], change(payment), debt);
+        handle(payment, {
+          kind: 'PAID',
+          dates: [fromApiDate(payment.nextDueDate)!],
+          balanceChange: change(payment),
+          debt
+        });
       }
       for (const id of input.oneOffPaymentIds) {
         const payment = findOneOff(id);
@@ -663,21 +688,32 @@ export const createFakeApi = ({
     logDebtOverpayment: ({ input }: Args) => {
       const current = requireAccount();
       const payment = findRecurring(input.recurringPaymentId);
-      if (!payment.debt) throw apiError('DEBT_NOT_TRACKED', "That payment isn't tracked as a debt");
+      if (!payment.debt)
+        throw apiError('DEBT_NOT_TRACKED', { message: "That payment isn't tracked as a debt" });
       if (input.amount <= 0) {
-        throw apiError('BAD_USER_INPUT', 'Overpayments must be more than £0', { field: 'amount' });
+        throw apiError('BAD_USER_INPUT', {
+          message: 'Overpayments must be more than £0',
+          extensions: { field: 'amount' }
+        });
       }
       if (input.amount > payment.debt.balance) {
-        throw apiError('BAD_USER_INPUT', "That's more than is left to pay", { field: 'amount' });
+        throw apiError('BAD_USER_INPUT', {
+          message: "That's more than is left to pay",
+          extensions: { field: 'amount' }
+        });
       }
       payment.debt.balance = roundPence(payment.debt.balance - input.amount);
       current.bankBalance = roundPence(current.bankBalance - input.amount);
       addRecord(
         payment,
-        fakeRecord('OVERPAYMENT', [apiDateFromToday(0)], -input.amount, {
-          interest: 0,
-          reduction: input.amount,
-          balanceAfter: payment.debt.balance
+        fakeRecord('OVERPAYMENT', {
+          dates: [apiDateFromToday(0)],
+          balanceChange: -input.amount,
+          debt: {
+            interest: 0,
+            reduction: input.amount,
+            balanceAfter: payment.debt.balance
+          }
         })
       );
       return { account: current, success: true };
@@ -688,7 +724,7 @@ export const createFakeApi = ({
         const record = (payment.history ?? []).find(item => item.id === input.recordId);
         if (!record || record.kind !== 'OVERPAYMENT') continue;
         if (!record.open)
-          throw apiError('PAYMENT_RECORD_CLOSED', "It's from before the last payday");
+          throw apiError('PAYMENT_RECORD_CLOSED', { message: "It's from before the last payday" });
         removeRecord(payment, record);
         current.bankBalance = roundPence(current.bankBalance - record.balanceChange);
         if (payment.debt && record.debt) {
@@ -696,7 +732,9 @@ export const createFakeApi = ({
         }
         return { account: current, success: true };
       }
-      throw apiError('PAYMENT_RECORD_NOT_FOUND', `No payment record '${input.recordId}'`);
+      throw apiError('PAYMENT_RECORD_NOT_FOUND', {
+        message: `No payment record '${input.recordId}'`
+      });
     },
     // Skips the next date, or every date before `until`, without touching the balance
     skipRecurringPayments: ({ input }: Args) => {
@@ -706,13 +744,12 @@ export const createFakeApi = ({
         const next = fromApiDate(payment.nextDueDate);
         if (!next) continue;
         const dates = input.until
-          ? occurrencesBetween(
-              scheduleOf(payment),
-              next,
-              addDays(fromApiDate(fromInput(input.until))!, -1)
-            )
+          ? occurrencesBetween(scheduleOf(payment), {
+              from: next,
+              to: addDays(fromApiDate(fromInput(input.until))!, -1)
+            })
           : [next];
-        handle(payment, 'SKIPPED', dates);
+        handle(payment, { kind: 'SKIPPED', dates });
       }
       return { account: current, success: true };
     },
@@ -778,7 +815,7 @@ export const createFakeApi = ({
     createNote: ({ input }: Args) => {
       const current = requireAccount();
       if (current.notes.some(note => note.body === input.body)) {
-        throw apiError('NOTE_EXISTS', 'A note with that text already exists');
+        throw apiError('NOTE_EXISTS', { message: 'A note with that text already exists' });
       }
       const now = String(Date.now());
       const note = {
@@ -793,7 +830,7 @@ export const createFakeApi = ({
     },
     updateNote: ({ id, input }: Args) => {
       const note = requireAccount().notes.find(n => n.id === id);
-      if (!note) throw apiError('NOTE_NOT_FOUND', `No note '${id}'`);
+      if (!note) throw apiError('NOTE_NOT_FOUND', { message: `No note '${id}'` });
       Object.assign(note, input, { updatedAt: String(Date.now()) });
       return { note, success: true };
     },
@@ -854,8 +891,8 @@ export const createFakeApi = ({
     calls,
     currentUser,
     callsTo: name => calls.filter(c => c.operationName === name).map(c => c.variables),
-    failNext: (operationName, code, { message, extensions } = {}) => {
-      failures.set(operationName, apiError(code, message, extensions));
+    failNext: (operationName, { code, ...error }) => {
+      failures.set(operationName, apiError(code, error));
     }
   };
 };
