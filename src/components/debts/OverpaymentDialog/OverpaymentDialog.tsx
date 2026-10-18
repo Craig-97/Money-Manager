@@ -21,18 +21,16 @@ interface OverpaymentDialogProps {
  * off the bank balance too. Opened for one debt, or from the page header to pick which.
  */
 export const OverpaymentDialog = ({ debts, onOverpay }: OverpaymentDialogProps) => {
-  const { dialog, close } = useDebtDialogStore(
-    useShallow(s => ({ dialog: s.dialog, close: s.close }))
+  const { open, debtId, opened, close } = useDebtDialogStore(
+    useShallow(s => ({
+      open: s.open === 'overpayment',
+      debtId: s.overpaymentDebtId,
+      opened: s.opened,
+      close: s.close
+    }))
   );
-  const open = dialog.view === 'overpayment';
-  const debtId = dialog.view === 'overpayment' ? dialog.debtId : undefined;
-  const form = useOverpaymentForm(
-    debts,
-    debtId,
-    `${dialog.view}-${debtId ?? 'any'}`,
-    onOverpay,
-    close
-  );
+  // Each opening starts afresh; closing keeps it as it was while it animates away
+  const form = useOverpaymentForm(debts, debtId, String(opened), onOverpay, close);
   const { debt } = form;
 
   return (

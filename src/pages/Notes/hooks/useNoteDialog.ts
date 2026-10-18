@@ -13,8 +13,8 @@ export const useNoteDialog = (
   notes: readonly Note[],
   actions: ReturnType<typeof useNoteActions>
 ) => {
-  const { dialog, opened, close } = useNoteDialogStore(
-    useShallow(s => ({ dialog: s.dialog, opened: s.opened, close: s.close }))
+  const { dialog, open, opened, close } = useNoteDialogStore(
+    useShallow(s => ({ dialog: s.dialog, open: s.open, opened: s.opened, close: s.close }))
   );
   const note = dialog.view === 'edit' ? notes.find(item => item.id === dialog.noteId) : undefined;
   const draft = useNoteDraft({ body: note?.body, color: note?.color });
@@ -40,15 +40,15 @@ export const useNoteDialog = (
 
   return {
     // A note that's gone, e.g. deleted elsewhere, has nothing to edit
-    open: dialog.view === 'new' || (dialog.view === 'edit' && !!note),
-    note,
+    open: open && (dialog.view === 'new' || !!note),
+    // From what was opened, so it reads the same while closing, even once the note is deleted
+    editing: dialog.view === 'edit',
     draft,
     close,
     save: () => void save(),
     remove: () => {
-      if (!note) return;
       close();
-      void actions.remove(note);
+      if (note) void actions.remove(note);
     }
   };
 };

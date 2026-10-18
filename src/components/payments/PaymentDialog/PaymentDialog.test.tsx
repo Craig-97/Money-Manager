@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { screen, within } from '@testing-library/react';
+import { holdExitAnimations } from '~/test/exitAnimation';
 import {
   apiDate,
   createFakeApi,
@@ -8,6 +9,7 @@ import {
   FakeRecurringPayment
 } from '~/test/fakeApi';
 import { renderApp } from '~/test/renderApp';
+import { setViewportWidth } from '~/test/viewport';
 
 // Friday 2 October 2026. Only Date is faked.
 beforeEach(() => {
@@ -217,5 +219,41 @@ describe('editing a debt', () => {
 
     expect(await screen.findByText('Saved Mortgage')).toBeInTheDocument();
     expect(api.callsTo('UpdateRecurringPayment')[0].input).not.toHaveProperty('debt');
+  });
+});
+
+describe('closing the payment dialog', () => {
+  it('keeps showing the payment while the sheet slides away', async () => {
+    setViewportWidth(390);
+    holdExitAnimations();
+    const { user } = renderAt('/recurring');
+
+    await user.click(await screen.findByRole('button', { name: 'Edit Car finance' }));
+    const sheet = await screen.findByRole('dialog', { name: 'Edit recurring payment' });
+    await user.click(within(sheet).getByRole('button', { name: 'Cancel' }));
+
+    // Still on screen while it animates away, as the payment it was, not a new one or the chooser
+    const closing = await screen.findByRole('dialog', { hidden: true });
+    expect(closing).toHaveAttribute('data-state', 'closed');
+    expect(closing).toHaveAccessibleName('Edit recurring payment');
+    expect(within(closing).getByLabelText('Name')).toHaveValue('Car finance');
+    expect(within(closing).queryByText('What are you adding?')).not.toBeInTheDocument();
+  });
+
+  it('starts afresh each time it opens', async () => {
+    const { user } = renderAt('/recurring');
+
+    await user.click(await screen.findByRole('button', { name: 'Edit Car finance' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Edit recurring payment' });
+    await user.clear(within(dialog).getByLabelText('Name'));
+    await user.type(within(dialog).getByLabelText('Name'), 'Not saved');
+    await user.click(within(dialog).getByRole('button', { name: 'Cancel' }));
+
+    await user.click(await screen.findByRole('button', { name: 'Edit Car finance' }));
+    expect(
+      within(await screen.findByRole('dialog', { name: 'Edit recurring payment' })).getByLabelText(
+        'Name'
+      )
+    ).toHaveValue('Car finance');
   });
 });

@@ -21,14 +21,13 @@ export const useNoteDraft = (initial: { body?: string; color?: NoteColor } = {})
       setBody(start.body ?? '');
       setColor(start.color ?? 'BLUE');
     },
-    /* Saves the trimmed text; clears the draft if it worked */
+    /* Saves the trimmed text. The draft is left as it is, so the dialog shows it while it closes. */
     save: async (onSave: (draft: { body: string; color: NoteColor }) => Promise<boolean>) => {
       const text = body.trim();
       if (!text || saving) return false;
       setSaving(true);
       const saved = await onSave({ body: text, color });
       setSaving(false);
-      if (saved) setBody('');
       return saved;
     }
   };

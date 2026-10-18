@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
+import { holdExitAnimations } from '~/test/exitAnimation';
 import {
   apiDate,
   createFakeApi,
@@ -208,6 +209,26 @@ describe('debts on desktop', () => {
     expect(
       within(dialog).queryByRole('button', { name: 'Show older payments' })
     ).not.toBeInTheDocument();
+  });
+
+  it('keeps See payments as it was while Log an overpayment opens from it', async () => {
+    holdExitAnimations();
+    const { user } = renderDebts();
+
+    await user.click(await screen.findByRole('button', { name: 'More actions for Car finance' }));
+    await user.click(screen.getByRole('menuitem', { name: 'See payments' }));
+    const payments = await screen.findByRole('dialog', { name: 'Car finance payments' });
+    await user.click(within(payments).getByRole('button', { name: 'Log an overpayment' }));
+
+    const overpayment = await screen.findByRole('dialog', { name: 'Log an overpayment' });
+    // Opened for Car finance, so it doesn't ask which debt
+    expect(within(overpayment).queryByRole('combobox', { name: 'Debt' })).not.toBeInTheDocument();
+    expect(overpayment).toHaveTextContent('£6,860.00 left on Car finance');
+    const closing = screen
+      .getAllByRole('dialog', { hidden: true })
+      .find(dialog => dialog.getAttribute('data-state') === 'closed')!;
+    // Hidden from screen readers under the new dialog, so its title is checked as it reads
+    expect(closing).toHaveTextContent('Car finance payments');
   });
 
   it('logs an overpayment, which can be taken back', async () => {

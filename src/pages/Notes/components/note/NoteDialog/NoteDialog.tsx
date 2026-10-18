@@ -12,17 +12,17 @@ import { ColorSwatches } from '../ColorSwatches';
  */
 export const NoteDialog = ({ board }: { board: NotesBoard }) => {
   const dialog = useNoteDialog(board.all, board.actions);
-  const { draft, note } = dialog;
+  const { draft, editing } = dialog;
 
   return (
     <Modal
       open={dialog.open}
       onOpenChange={next => (next ? undefined : dialog.close())}
-      title={note ? 'Edit note' : 'New note'}
+      title={editing ? 'Edit note' : 'New note'}
       initialFocusId="note-text"
       footer={
         <>
-          {note ? (
+          {editing ? (
             <Button variant="dangerGhost" onClick={dialog.remove} className="max-md:-ml-2">
               <Trash size={16} aria-hidden="true" />
               Delete

@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { screen, waitFor, within } from '@testing-library/react';
+import { holdExitAnimations } from '~/test/exitAnimation';
 import { createFakeApi, DEFAULT_ACCOUNT, FakeAccount } from '~/test/fakeApi';
 import { renderApp } from '~/test/renderApp';
 import { resetViewport, setViewportWidth } from '~/test/viewport';
@@ -205,6 +206,29 @@ describe('notes', () => {
 describe('notes on mobile', () => {
   beforeEach(() => setViewportWidth(390));
   afterEach(resetViewport);
+
+  it('keeps showing the note while the sheet slides away after saving', async () => {
+    holdExitAnimations();
+    const { user } = renderNotes();
+    await board();
+
+    await user.click(screen.getByRole('button', { name: 'Edit note: Buy milk' }));
+    const sheet = await screen.findByRole('dialog', { name: 'Edit note' });
+    await user.type(within(sheet).getByLabelText('Note'), ' and eggs');
+    await user.click(within(sheet).getByRole('button', { name: 'Save note' }));
+
+    const closing = await waitFor(() => {
+      const dialog = screen.getByRole('dialog', { hidden: true });
+      expect(dialog).toHaveAttribute('data-state', 'closed');
+      return dialog;
+    });
+    // Not "New note", and not emptied
+    expect(closing).toHaveAccessibleName('Edit note');
+    expect(within(closing).getByLabelText('Note')).toHaveValue('Buy milk and eggs');
+    expect(
+      within(closing).getByRole('button', { name: 'Delete', hidden: true })
+    ).toBeInTheDocument();
+  });
 
   it('starts a new note from the add button in the nav, ready to type', async () => {
     const { user } = renderNotes();
