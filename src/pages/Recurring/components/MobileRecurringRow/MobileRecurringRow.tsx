@@ -84,7 +84,7 @@ export const MobileRecurringRow = ({
         <PaymentLetter payment={payment} className="size-10 rounded-[13px] text-[15px]" />
         <span className="min-w-0 grow">
           <span className="flex items-center gap-1.5 text-[15px] font-bold">
-            <span className="truncate">{payment.name}</span>
+            <span>{payment.name}</span>
             {tab === 'cycle' ? (
               <TimesDue payment={payment} cycle={cycle} today={today} hint={false} />
             ) : null}
@@ -94,7 +94,7 @@ export const MobileRecurringRow = ({
           ) : (
             <span className="mt-[3px] flex min-w-0 items-center gap-[5px] text-xs font-medium text-muted">
               <Repeat size={12} strokeWidth={2.25} className="shrink-0" aria-hidden="true" />
-              <span className="truncate">{subtitle(payment, { tab, cycle, today })}</span>
+              <span>{subtitle(payment, { tab, cycle, today })}</span>
             </span>
           )}
         </span>

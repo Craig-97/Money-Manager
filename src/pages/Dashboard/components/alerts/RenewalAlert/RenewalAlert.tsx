@@ -8,7 +8,12 @@ import {
   Renewal,
   renewalHeading
 } from '~/lib/payments';
-import { alertSublineClasses, alertTitleClasses, laterClasses } from '../alertClasses';
+import {
+  alertSublineClasses,
+  alertTextClasses,
+  alertTitleClasses,
+  laterClasses
+} from '../alertClasses';
 
 interface RenewalAlertProps {
   payment: RecurringPayment;
@@ -25,7 +30,7 @@ export const RenewalAlert = ({ payment, renewal, today, onLater, onUpdate }: Ren
       <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-accent-soft text-accent-text md:size-11">
         <RefreshCw size={20} className="size-[18px] md:size-5" aria-hidden="true" />
       </span>
-      <div className="min-w-0">
+      <div className={alertTextClasses}>
         <p className={alertTitleClasses}>{renewalHeading(payment, { renewal, today })}</p>
         <p className={alertSublineClasses}>
           {formatShortDate(renewal.date, today)} ·{' '}

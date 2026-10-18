@@ -20,7 +20,7 @@ export const MobileUpcomingRow = ({
         className="flex min-h-[72px] w-full cursor-pointer items-center gap-3.5 rounded-2xl px-2 py-2 text-left transition-colors hover:bg-hover aria-expanded:bg-hover">
         <DateBox date={reminder.date} today={page.today} accent={reminder.kind === 'payday'} />
         <span className="flex min-w-0 flex-1 flex-col">
-          <span className="truncate text-[15px] font-bold">{reminder.name}</span>
+          <span className="text-[15px] leading-[1.35] font-bold">{reminder.name}</span>
           <span className="text-xs leading-[1.35] font-semibold text-muted">
             {kindText(reminder)} · {reminder.timing.toLowerCase()}
           </span>

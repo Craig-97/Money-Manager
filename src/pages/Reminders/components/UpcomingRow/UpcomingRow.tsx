@@ -12,7 +12,11 @@ export const UpcomingRow = ({ reminder, page }: { reminder: Reminder; page: Remi
   <li className="grid min-h-[74px] grid-cols-[52px_minmax(0,1.3fr)_minmax(0,1fr)_120px_44px] items-center gap-x-3 rounded-2xl px-2 transition-colors hover:bg-hover">
     <DateBox date={reminder.date} today={page.today} accent={reminder.kind === 'payday'} />
     <span className="flex min-w-0 flex-col items-start gap-1">
-      <span className="max-w-full truncate text-[15px] font-bold">{reminder.name}</span>
+      <span
+        title={reminder.name}
+        className="line-clamp-2 max-w-full text-[15px] leading-[1.35] font-bold">
+        {reminder.name}
+      </span>
       <span className="inline-flex h-[22px] items-center rounded-full bg-surface-2 px-2.5 text-[11px] font-bold text-muted">
         {kindText(reminder)}
       </span>

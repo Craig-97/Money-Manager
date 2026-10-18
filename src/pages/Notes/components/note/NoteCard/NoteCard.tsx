@@ -34,7 +34,7 @@ export const NoteCard = ({ note, board }: { note: Note; board: NotesBoard }) => 
       <div className="-mr-2.5 -mb-2.5 flex items-center justify-between gap-2 max-md:-mt-1">
         <span className="inline-flex min-w-0 items-center gap-2 text-xs font-semibold text-muted">
           <span aria-hidden="true" className={cn('size-2 shrink-0 rounded-full', color.dot)} />
-          <span className="truncate num">
+          <span className="line-clamp-2 num">
             {noteFoot(note, { today: board.today, paymentLabel: board.paymentLabel })}
           </span>
         </span>

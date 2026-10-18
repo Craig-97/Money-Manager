@@ -69,12 +69,12 @@ export const MobileRow = ({ payment, dashboard }: { payment: Payment; dashboard:
         <PaymentLetter payment={payment} className="size-10 rounded-[13px] text-[15px]" />
         <span className="min-w-0 grow">
           <span className="flex items-center gap-1.5 text-[15px] font-bold">
-            <span className="truncate">{payment.name}</span>
+            <span className="min-w-0">{payment.name}</span>
             {tab === 'upcoming' ? (
               <TimesDue payment={payment} cycle={cycle} today={today} hint={false} />
             ) : null}
           </span>
-          <span className="mt-[3px] flex items-center gap-[5px] truncate text-xs font-medium text-muted">
+          <span className="mt-[3px] flex items-center gap-[5px] text-xs font-medium text-muted">
             {payment.kind === 'recurring' ? (
               <Repeat size={12} strokeWidth={2.25} className="shrink-0" aria-hidden="true" />
             ) : null}

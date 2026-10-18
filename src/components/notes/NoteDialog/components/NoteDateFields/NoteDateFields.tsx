@@ -8,13 +8,7 @@ import { IconButton } from '~/components/ui/IconButton';
 import { NoteRepeat, PaymentFrequency } from '~/graphql/generated';
 import { cn } from '~/lib/cn';
 import { toIsoDate } from '~/lib/dates';
-import {
-  followsByDefault,
-  REPEAT_LABELS,
-  reminderHint,
-  remindChoices,
-  NoteDraft
-} from '~/lib/notes';
+import { defaultRemind, REPEAT_LABELS, reminderHint, remindChoices, NoteDraft } from '~/lib/notes';
 import { daysBeforeText, formatShortDate } from '~/lib/payments';
 import { NoteDraftState } from '../../useNoteDraft';
 
@@ -84,12 +78,16 @@ export const NoteDateFields = ({ draft, payments, today }: NoteDateFieldsProps) 
       );
       return;
     }
-    // A note with nothing else set follows a payment that's monthly or less often
-    const follow = !draft.date && draft.repeat === 'NONE' && followsByDefault(chosen.frequency);
+    // A note with no date of its own follows the payment
+    const follow = !draft.date && draft.repeat === 'NONE';
+    const choices = remindChoices({ repeat: 'WITH_PAYMENT', paymentFrequency: chosen.frequency });
     change({
       paymentId: id,
       ...(follow
-        ? { repeat: 'WITH_PAYMENT', remind: draft.remind.length ? draft.remind : [7] }
+        ? {
+            repeat: 'WITH_PAYMENT',
+            remind: draft.remind.length ? draft.remind : defaultRemind(choices)
+          }
         : {})
     });
   };
@@ -139,17 +137,27 @@ export const NoteDateFields = ({ draft, payments, today }: NoteDateFieldsProps) 
           </label>
         )}
         {follows ? (
-          // Its dates are the payment's, so there's no date of its own to pick
-          <p
-            aria-labelledby="note-date-label"
-            className="flex h-12 items-center gap-2.5 rounded-2xl border border-accent bg-accent-soft px-4 text-[15px] font-bold">
-            <Repeat size={16} aria-hidden="true" className="shrink-0 text-accent-text" />
-            <span className="min-w-0 truncate">
-              {payment.due
-                ? `Each ${payment.name} payment · next ${formatShortDate(payment.due, today)}`
-                : `Each ${payment.name} payment · none left`}
-            </span>
-          </p>
+          // Its dates are the payment's, so there's no date of its own to pick. ✕ stops following
+          // it, taking the reminders off; the payment stays linked.
+          <div className="flex items-center gap-2">
+            <p
+              aria-labelledby="note-date-label"
+              className="flex min-h-12 min-w-0 flex-1 items-center gap-2.5 rounded-2xl border border-accent bg-accent-soft px-4 py-2.5 text-[15px] leading-[1.3] font-bold">
+              <Repeat size={16} aria-hidden="true" className="shrink-0 text-accent-text" />
+              <span className="min-w-0">
+                {payment.due
+                  ? `Each ${payment.name} payment · next ${formatShortDate(payment.due, today)}`
+                  : `Each ${payment.name} payment · none left`}
+              </span>
+            </p>
+            <IconButton
+              variant="outline"
+              aria-label="Take the date off"
+              onClick={() => change({ repeat: 'NONE', date: '', remind: [] })}
+              className="size-12">
+              <X size={18} strokeWidth={2.25} aria-hidden="true" />
+            </IconButton>
+          </div>
         ) : (
           <div className="flex items-center gap-2">
             <DatePicker
@@ -157,7 +165,6 @@ export const NoteDateFields = ({ draft, payments, today }: NoteDateFieldsProps) 
               value={draft.date}
               onChange={date => draft.set('date', date)}
               placeholder="No date"
-              defaultOpen={adding && !draft.date}
               className={cn(
                 'flex-1',
                 draft.date && 'border-accent bg-accent-soft font-bold [&>svg]:text-accent-text'

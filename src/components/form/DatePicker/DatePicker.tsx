@@ -16,8 +16,6 @@ interface DatePickerProps {
   placeholder?: string;
   invalid?: boolean;
   disabled?: boolean;
-  // Open with its calendar showing, e.g. straight after asking to add a date
-  defaultOpen?: boolean;
   id?: string;
   'aria-describedby'?: string;
   className?: string;
@@ -34,12 +32,11 @@ export const DatePicker = ({
   placeholder = 'Choose a date',
   invalid = false,
   disabled,
-  defaultOpen = false,
   id,
   className,
   ...aria
 }: DatePickerProps) => {
-  const [open, setOpen] = useState(defaultOpen);
+  const [open, setOpen] = useState(false);
   const selected = parseIsoDate(value);
   const minDate = parseIsoDate(min);
   const today = new Date();

@@ -103,9 +103,9 @@ export const remindChoices = ({
     : [...NOTE_REMIND_DAYS];
 };
 
-/* Whether linking this payment should make the note follow it: not one every week or two */
-export const followsByDefault = (frequency: PaymentFrequency) =>
-  GAP_DAYS[frequency] >= GAP_DAYS.MONTHLY;
+/* The reminder a note starts with: a week before, or the day before when that's too far ahead */
+export const defaultRemind = (choices: readonly number[]) =>
+  choices.includes(7) ? [7] : choices.includes(1) ? [1] : [0];
 
 /* Notes that follow their payment take its next date; one whose payment has ended has none */
 export const followPayments = (notes: readonly Note[], payments: readonly Payment[]): Note[] =>

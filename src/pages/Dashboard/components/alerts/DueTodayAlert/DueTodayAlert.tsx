@@ -2,7 +2,12 @@ import { Bell, Check } from 'lucide-react';
 import { Button } from '~/components/ui/Button';
 import { formatMoney } from '~/lib/format';
 import { categoryLabel, FREQUENCY_LABELS, Payment } from '~/lib/payments';
-import { alertSublineClasses, alertTitleClasses, laterClasses } from '../alertClasses';
+import {
+  alertSublineClasses,
+  alertTextClasses,
+  alertTitleClasses,
+  laterClasses
+} from '../alertClasses';
 
 const subline = (payment: Payment) =>
   [
@@ -28,7 +33,7 @@ export const DueTodayAlert = ({ payment, onLater, onPay }: DueTodayAlertProps) =
       <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-expense-bg text-expense md:size-11">
         <Bell size={20} className="size-[18px] md:size-5" aria-hidden="true" />
       </span>
-      <div className="min-w-0">
+      <div className={alertTextClasses}>
         <p className={alertTitleClasses}>
           {payment.name} · <span className="num">{formatMoney(payment.amount)}</span> is due today
         </p>

@@ -289,6 +289,9 @@ describe('a note with a date', () => {
     // Without a date it's a single row; adding one opens the calendar
     expect(within(dialog).queryByRole('group', { name: 'Remind me' })).not.toBeInTheDocument();
     await user.click(within(dialog).getByRole('button', { name: 'Add a date' }));
+    // The calendar opens from the date field, not by itself
+    expect(screen.queryByRole('button', { name: 'Today' })).not.toBeInTheDocument();
+    await user.click(within(dialog).getByLabelText('Date'));
     await user.click(await screen.findByRole('button', { name: 'Today' }));
     await user.click(within(dialog).getByRole('button', { name: '1 month before' }));
     await user.click(within(dialog).getByRole('radio', { name: 'Every year' }));
@@ -309,7 +312,6 @@ describe('a note with a date', () => {
     const dialog = await screen.findByRole('dialog', { name: 'New note' });
     await user.type(within(dialog).getByLabelText('Note'), 'Remortgage quotes');
     await user.click(within(dialog).getByRole('button', { name: 'Add a date' }));
-    await user.keyboard('{Escape}');
 
     await user.click(within(dialog).getByRole('combobox', { name: 'Payment' }));
     await user.click(await screen.findByRole('option', { name: /^Mortgage/ }));
@@ -322,5 +324,20 @@ describe('a note with a date', () => {
     expect(api.callsTo('CreateNote')[0]).toMatchObject({
       input: { date: null, repeat: 'WITH_PAYMENT', payment: 'recurring-1', remind: [7] }
     });
+  });
+
+  it('stops following its payment with the ✕, keeping the payment linked', async () => {
+    const { user } = renderNotes();
+    await user.click(await screen.findByRole('button', { name: 'Add note' }));
+    const dialog = await screen.findByRole('dialog', { name: 'New note' });
+    await user.click(within(dialog).getByRole('button', { name: 'Add a date' }));
+    await user.click(within(dialog).getByRole('combobox', { name: 'Payment' }));
+    await user.click(await screen.findByRole('option', { name: /^Mortgage/ }));
+
+    await user.click(within(dialog).getByRole('button', { name: 'Take the date off' }));
+
+    expect(within(dialog).queryByText(/^Each Mortgage payment/)).not.toBeInTheDocument();
+    expect(within(dialog).queryByText('Remind me')).not.toBeInTheDocument();
+    expect(within(dialog).getByRole('combobox', { name: 'Payment' })).toHaveTextContent('Mortgage');
   });
 });

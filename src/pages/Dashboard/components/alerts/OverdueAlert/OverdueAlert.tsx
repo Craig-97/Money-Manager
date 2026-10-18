@@ -3,7 +3,12 @@ import { Button } from '~/components/ui/Button';
 import { daysBetween } from '~/lib/dates';
 import { formatMoney } from '~/lib/format';
 import { formatShortDate, Payment } from '~/lib/payments';
-import { alertSublineClasses, alertTitleClasses, laterClasses } from '../alertClasses';
+import {
+  alertSublineClasses,
+  alertTextClasses,
+  alertTitleClasses,
+  laterClasses
+} from '../alertClasses';
 
 interface OverdueAlertProps {
   payment: Payment;
@@ -26,7 +31,7 @@ export const OverdueAlert = ({ payment, due, today, onLater, onPay }: OverdueAle
         <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-expense-bg text-expense md:size-11">
           <CircleAlert size={20} className="size-[18px] md:size-5" aria-hidden="true" />
         </span>
-        <div className="min-w-0">
+        <div className={alertTextClasses}>
           <p className={alertTitleClasses}>
             {payment.name} · <span className="num">{formatMoney(payment.amount)}</span> was due{' '}
             {formatShortDate(due, today)}

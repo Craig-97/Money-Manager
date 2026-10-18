@@ -132,7 +132,7 @@ export const ReminderRow = ({ reminder, today, open, onLater, onClear }: Reminde
           )}>
           <ReminderIcon reminder={reminder} />
           <span className="flex min-w-0 flex-1 flex-col">
-            <span className="truncate text-[15px] font-bold">
+            <span className="text-[15px] leading-[1.35] font-bold">
               {reminder.title}
               {reminder.read ? null : <span className="sr-only"> (new)</span>}
             </span>

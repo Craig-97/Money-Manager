@@ -4,7 +4,7 @@ import { Payment } from '~/lib/payments';
 import {
   BLANK_DRAFT,
   followPayments,
-  followsByDefault,
+  defaultRemind,
   Note,
   noteDateFrom,
   noteInput,
@@ -145,8 +145,11 @@ describe('repeats', () => {
     ]);
     expect(remindChoices({ repeat: 'MONTHLY' })).toEqual([0, 1, 7, 14]);
     expect(remindChoices({ repeat: 'YEARLY' })).toEqual([0, 1, 7, 14, 30]);
-    expect(followsByDefault('BIWEEKLY')).toBe(false);
-    expect(followsByDefault('MONTHLY')).toBe(true);
+    // Starting a week before, or the day before when a week is too far
+    expect(
+      defaultRemind(remindChoices({ repeat: 'WITH_PAYMENT', paymentFrequency: 'WEEKLY' }))
+    ).toEqual([1]);
+    expect(defaultRemind(remindChoices({ repeat: 'MONTHLY' }))).toEqual([7]);
   });
 
   it('sends a note that follows its payment without a date of its own', () => {
