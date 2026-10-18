@@ -34,10 +34,13 @@ export const ReminderRow = ({ reminder, today, open, onLater, onClear }: Reminde
   const [expanded, setExpanded] = useState(false);
   const [dragging, setDragging] = useState(false);
   const drag = useRef<{ x: number; from: number; moved: boolean } | null>(null);
-  // The click a swipe ends with, which isn't a tap
+  // Set when a swipe ends, so the click a mouse drag ends with isn't taken as a tap. A finger's
+  // swipe ends with no click, so it's cleared when the next touch starts rather than left to
+  // swallow the next tap.
   const swiped = useRef(false);
 
   const onPointerDown = (event: PointerEvent<HTMLButtonElement>) => {
+    swiped.current = false;
     drag.current = { x: event.clientX, from: offset, moved: false };
   };
   const onPointerMove = (event: PointerEvent<HTMLButtonElement>) => {
