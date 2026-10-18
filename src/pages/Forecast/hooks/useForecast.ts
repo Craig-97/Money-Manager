@@ -57,7 +57,7 @@ export const useForecast = (account: Account) => {
     income,
     recurring,
     spend,
-    spendMax: spendLimit(income, recurring, spend),
+    spendMax: spendLimit({ income, recurring, spend }),
     // A new spend goes back to the first page of the table
     setSpend: (amount: number) => {
       setSpendChoice(amount);

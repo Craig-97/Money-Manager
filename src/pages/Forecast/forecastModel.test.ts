@@ -66,9 +66,9 @@ describe('spend text', () => {
   });
 
   it('lets the slider go past the income', () => {
-    expect(spendLimit(3600, 770, 1000)).toBe(7500);
-    expect(spendLimit(0, 0, 0)).toBe(1000);
-    expect(spendLimit(3600, 770, 9200)).toBe(9500);
+    expect(spendLimit({ income: 3600, recurring: 770, spend: 1000 })).toBe(7500);
+    expect(spendLimit({ income: 0, recurring: 0, spend: 0 })).toBe(1000);
+    expect(spendLimit({ income: 3600, recurring: 770, spend: 9200 })).toBe(9500);
   });
 });
 

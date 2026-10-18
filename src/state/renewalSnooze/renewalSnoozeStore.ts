@@ -38,5 +38,7 @@ export const useRenewalSnoozeStore = create<RenewalSnoozeState>()(
 );
 
 /* Whether a renewal is put away for now */
-export const isSnoozed = (until: Record<string, number>, key: string, now = Date.now()) =>
-  (until[key] ?? 0) > now;
+export const isSnoozed = (
+  until: Record<string, number>,
+  { key, now = Date.now() }: { key: string; now?: number }
+) => (until[key] ?? 0) > now;

@@ -94,8 +94,7 @@ export const dueInText = (date: Date, today: Date) => {
  */
 export const debtHistory = (
   debt: DebtPayment,
-  records: readonly HistoryRecord[],
-  today: Date
+  { records, today }: { records: readonly HistoryRecord[]; today: Date }
 ): HistoryEntry[] => {
   const entries = records.map(recordEntry);
   if (!debt.dueDate || debt.debt.balance <= 0) return entries;

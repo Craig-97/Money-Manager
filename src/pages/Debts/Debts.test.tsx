@@ -19,14 +19,23 @@ beforeEach(() => {
 });
 afterEach(() => vi.useRealTimers());
 
-const debt = (
-  id: string,
-  name: string,
-  amount: number,
-  firstPaymentDate: string,
-  figures: { balance: number; startingBalance: number | null; apr: number },
-  fields: Partial<FakeRecurringPayment> = {}
-): FakeRecurringPayment => ({
+interface TestDebt {
+  id: string;
+  name: string;
+  amount: number;
+  firstPaymentDate: string;
+  figures: { balance: number; startingBalance: number | null; apr: number };
+  fields?: Partial<FakeRecurringPayment>;
+}
+
+const debt = ({
+  id,
+  name,
+  amount,
+  firstPaymentDate,
+  figures,
+  fields = {}
+}: TestDebt): FakeRecurringPayment => ({
   id,
   name,
   amount,
@@ -46,37 +55,53 @@ const debt = (
 
 // The design's three debts: two due before payday, one after
 const card = () =>
-  debt(
-    'credit-card',
-    'Credit card',
-    150,
-    '2026-01-15',
-    { balance: 2340, startingBalance: 3500, apr: 24.9 },
-    {
+  debt({
+    id: 'credit-card',
+    name: 'Credit card',
+    amount: 150,
+    firstPaymentDate: '2026-01-15',
+    figures: { balance: 2340, startingBalance: 3500, apr: 24.9 },
+    fields: {
       category: 'CREDIT_CARD',
       history: [
         {
-          ...fakeRecord('PAID', [apiDate('2026-09-15')], -150, {
-            interest: 49.12,
-            reduction: 100.88,
-            balanceAfter: 2340
+          ...fakeRecord('PAID', {
+            dates: [apiDate('2026-09-15')],
+            balanceChange: -150,
+            debt: {
+              interest: 49.12,
+              reduction: 100.88,
+              balanceAfter: 2340
+            }
           }),
           open: false
         }
       ]
     }
-  );
+  });
 const car = () =>
-  debt('car-finance', 'Car finance', 245, '2024-04-26', {
-    balance: 6860,
-    startingBalance: 12000,
-    apr: 6.9
+  debt({
+    id: 'car-finance',
+    name: 'Car finance',
+    amount: 245,
+    firstPaymentDate: '2024-04-26',
+    figures: {
+      balance: 6860,
+      startingBalance: 12000,
+      apr: 6.9
+    }
   });
 const family = () =>
-  debt('family-loan', 'Family loan', 100, '2025-03-01', {
-    balance: 800,
-    startingBalance: 1500,
-    apr: 0
+  debt({
+    id: 'family-loan',
+    name: 'Family loan',
+    amount: 100,
+    firstPaymentDate: '2025-03-01',
+    figures: {
+      balance: 800,
+      startingBalance: 1500,
+      apr: 0
+    }
   });
 
 // A card paid every month for the last `count` months, newest first, all before this cycle
@@ -85,10 +110,14 @@ const longPaidCard = (count: number) => {
     const date = new Date(2026, 8 - i, 15);
     const iso = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-15`;
     return {
-      ...fakeRecord('PAID', [apiDate(iso)], -150, {
-        interest: 40,
-        reduction: 110,
-        balanceAfter: 2340 + i * 110
+      ...fakeRecord('PAID', {
+        dates: [apiDate(iso)],
+        balanceChange: -150,
+        debt: {
+          interest: 40,
+          reduction: 110,
+          balanceAfter: 2340 + i * 110
+        }
       }),
       open: false
     };
@@ -424,15 +453,15 @@ describe('debts on mobile', () => {
 
 describe('a debt paid off', () => {
   it('offers to delete it once its last payment is marked paid', async () => {
-    const last = debt(
-      'loan',
-      'Old loan',
-      100,
-      '2025-10-15',
-      { balance: 60, startingBalance: 1200, apr: 0 },
+    const last = debt({
+      id: 'loan',
+      name: 'Old loan',
+      amount: 100,
+      firstPaymentDate: '2025-10-15',
+      figures: { balance: 60, startingBalance: 1200, apr: 0 },
       // As the API sends it, so the fake API can pay it
-      { nextDueDate: apiDate('2026-10-15') }
-    );
+      fields: { nextDueDate: apiDate('2026-10-15') }
+    });
     const { user } = renderDebts('/recurring', [last]);
 
     await user.click(await screen.findByRole('button', { name: 'More actions for Old loan' }));

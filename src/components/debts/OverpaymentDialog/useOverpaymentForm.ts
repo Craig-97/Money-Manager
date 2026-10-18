@@ -6,13 +6,17 @@ import { formatMoney, parseMoney } from '~/lib/format';
  * The overpayment form: which debt and how much. It starts afresh each time the dialog opens, on the
  * debt it was opened for, or the first debt when it was opened from the page header.
  */
-export const useOverpaymentForm = (
-  debts: readonly DebtPayment[],
-  debtId: string | undefined,
-  formKey: string,
-  onOverpay: (debt: DebtPayment, amount: number) => Promise<string | null>,
-  onDone: () => void
-) => {
+interface Options {
+  debts: readonly DebtPayment[];
+  // The debt it was opened for; the first debt when opened from the page header
+  debtId: string | undefined;
+  // Changes with each opening, which starts the form afresh
+  formKey: string;
+  onOverpay: (debt: DebtPayment, amount: number) => Promise<string | null>;
+  onDone: () => void;
+}
+
+export const useOverpaymentForm = ({ debts, debtId, formKey, onOverpay, onDone }: Options) => {
   const [chosen, setChosen] = useState(debtId);
   const [amountText, setAmountText] = useState('');
   const [touched, setTouched] = useState(false);

@@ -18,7 +18,7 @@ interface CategoryTileProps {
 export const CategoryTile = ({ breakdown, narrow, compact = false }: CategoryTileProps) => {
   const [page, setPage] = useState(0);
   const pageSize = narrow ? 4 : 8;
-  const legend = pageOf(breakdown.items, pageSize, page);
+  const legend = pageOf(breakdown.items, { size: pageSize, page });
   if (!breakdown.items.length) return null;
 
   return (

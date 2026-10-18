@@ -139,12 +139,14 @@ export interface PaydayPreview {
 /* The next few paydays, marking any a bank holiday or the user moved */
 export const paydayPreview = (
   config: PaydayConfig,
-  holidays: BankHolidays,
-  today: Date
+  { holidays, today }: { holidays: BankHolidays; today: Date }
 ): PaydayPreview[] => {
   // Weekends are allowed for in both lists, so any difference is a bank holiday
-  const before = getNextPaydays({ ...config, overrides: [] }, NO_HOLIDAYS, today, PREVIEW_COUNT);
-  return getNextPaydayDates(config, holidays, today, PREVIEW_COUNT).map(
+  const before = getNextPaydays(
+    { ...config, overrides: [] },
+    { holidays: NO_HOLIDAYS, from: today, count: PREVIEW_COUNT }
+  );
+  return getNextPaydayDates(config, { holidays, from: today, count: PREVIEW_COUNT }).map(
     ({ date, usual }, index) => {
       const original = before[index];
       const heldBack =

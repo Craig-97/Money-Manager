@@ -30,7 +30,7 @@ export const useNoteActions = (accountId: string) => {
         variables: { input: { accountId, ...draft } },
         update: (cache, { data }) => {
           const note = data?.createNote.note;
-          if (note) addNote(cache, accountId, note);
+          if (note) addNote(cache, { account: accountId, note });
         }
       });
       return true;
@@ -55,7 +55,8 @@ export const useNoteActions = (accountId: string) => {
     try {
       await deleteNote({
         variables: { id: note.id },
-        update: cache => removeFromAccount(cache, accountId, 'notes', [note.id])
+        update: cache =>
+          removeFromAccount(cache, { account: accountId, field: 'notes', ids: [note.id] })
       });
       showToast({
         message: 'Note deleted',

@@ -31,7 +31,7 @@ export const useRecurring = (account: Account) => {
   const [sort, setSort] = useState<PaymentSort>(DEFAULT_SORT);
 
   const payments = recurringOnly(toPayments(account, today));
-  const listed = filterPayments(payments, { tab, query, category }, cycle, today, sort);
+  const listed = filterPayments(payments, { tab, query, category, cycle, today, sort });
   const selection = usePaymentSelection(listed);
 
   // Changing what's listed clears the ticks, so nothing out of sight gets acted on
@@ -50,10 +50,10 @@ export const useRecurring = (account: Account) => {
     // The ones paying off a loan or card, for the Debts card
     debts: payments.filter(isDebt),
     isEmpty: payments.length === 0,
-    totals: listTotals(payments, cycle, today),
-    renewals: upcomingRenewals(payments, today),
+    totals: listTotals(payments, { cycle, today }),
+    renewals: upcomingRenewals(payments, { today }),
     breakdown: categoryBreakdown(payments),
-    counts: tabCounts(payments, cycle, today),
+    counts: tabCounts(payments, { cycle, today }),
     categories: categoriesUsed(payments),
     tab,
     setTab: narrow(setTab),
@@ -64,7 +64,7 @@ export const useRecurring = (account: Account) => {
     sort,
     setSort,
     listed,
-    listedTotals: listTotals(listed, cycle, today),
+    listedTotals: listTotals(listed, { cycle, today }),
     selection,
     // Payments with nothing left this cycle are left out, so they aren't paid ahead
     paySelected: () =>

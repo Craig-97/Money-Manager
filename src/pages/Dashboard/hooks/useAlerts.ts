@@ -33,7 +33,7 @@ export const useAlerts = ({ payments, today, dueToday }: AlertsInput) => {
       const renewal = renewalOf(payment, today);
       return renewal &&
         (renewal.passed || renewal.soon) &&
-        !isSnoozed(until, renewalKey(payment.id, renewal.date))
+        !isSnoozed(until, { key: renewalKey(payment.id, renewal.date) })
         ? [{ kind: 'renewal' as const, payment, renewal }]
         : [];
     })

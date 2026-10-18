@@ -22,7 +22,7 @@ export const DebtRow = ({ debt, debts }: { debt: DebtPayment; debts: Debts }) =>
           <button
             type="button"
             aria-label={`Edit ${debt.name}`}
-            onClick={() => openEdit('recurring', debt.id, { asDebt: true })}
+            onClick={() => openEdit('recurring', { paymentId: debt.id, asDebt: true })}
             className="-my-[11px] block max-w-full min-w-0 cursor-pointer truncate rounded-lg py-[11px] text-left text-[15px] leading-[22px] font-bold hover:text-accent-text hover:underline hover:underline-offset-3">
             {debt.name}
           </button>

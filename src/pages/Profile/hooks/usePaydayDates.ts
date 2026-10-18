@@ -17,11 +17,16 @@ const QUICK_DAYS: Record<Exclude<QuickPick, 'pick'>, number> = { before: -1, wee
  * payday; `locked` stops edits while the form above has changes that aren't saved, because a
  * move belongs to the date the saved rule gives.
  */
-export const usePaydayDates = (
-  paydayId: string | undefined,
-  preview: PaydayPreview[],
-  locked: boolean
-) => {
+export const usePaydayDates = ({
+  paydayId,
+  preview,
+  locked
+}: {
+  paydayId: string | undefined;
+  preview: PaydayPreview[];
+  // Saving is paused, e.g. while the payday rule itself is being changed
+  locked: boolean;
+}) => {
   const [setOverride, { loading: saving }] = useMutation(SetPaydayOverrideDocument);
   const [editing, setEditing] = useState<number | null>(null);
   const [quick, setQuick] = useState<QuickPick>('before');

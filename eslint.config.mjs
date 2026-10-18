@@ -49,6 +49,9 @@ export default [
         }
       ],
       '@typescript-eslint/no-empty-function': 'warn',
+      // Two arguments at most; more, or anything optional or a flag, go in one options object
+      'max-params': 'off',
+      '@typescript-eslint/max-params': ['error', { max: 2 }],
       // Import rules
       'import-x/order': [
         'error',

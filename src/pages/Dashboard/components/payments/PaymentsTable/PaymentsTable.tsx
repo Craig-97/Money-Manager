@@ -114,7 +114,7 @@ export const PaymentsTable = ({ dashboard }: { dashboard: Dashboard }) => {
             </div>
             <div className="mt-2.5 flex items-center justify-between gap-3 border-t border-border px-4 pt-4 pb-1 pl-5">
               <p className="text-[13px] font-semibold text-muted">
-                {footLabel(listed.length, tab, formatShortDate(cycle.end))}
+                {footLabel(listed.length, { tab, payday: formatShortDate(cycle.end) })}
               </p>
               <TabTotal dashboard={dashboard} />
             </div>

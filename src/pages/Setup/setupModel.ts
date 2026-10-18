@@ -216,8 +216,11 @@ export const isStepValid = (step: number, values: SetupValues) => {
 
 // ---- the first cycle, as the summary beside the form shows it ----
 
-export const summariseFirstCycle = (values: SetupValues, holidays: BankHolidays, today: Date) => {
-  const { end: cycleEnd } = getPayCycle(paydayConfig(values), holidays, today);
+export const summariseFirstCycle = (
+  values: SetupValues,
+  { holidays, today }: { holidays: BankHolidays; today: Date }
+) => {
+  const { end: cycleEnd } = getPayCycle(paydayConfig(values), { holidays, today });
   const lastDayOfCycle = addDays(cycleEnd, -1);
   const balance = parseMoney(values.balance) ?? 0;
 
@@ -231,8 +234,7 @@ export const summariseFirstCycle = (values: SetupValues, holidays: BankHolidays,
     if (!first) continue;
     const times = occurrencesBetween(
       { firstPaymentDate: first, frequency: regular.frequency },
-      today,
-      lastDayOfCycle
+      { from: today, to: lastDayOfCycle }
     ).length;
     if (times > 0) {
       regularsDue += amount * times;

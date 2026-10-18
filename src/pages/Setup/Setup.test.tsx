@@ -136,7 +136,7 @@ describe('setup', () => {
 
   it('keeps the answers when saving fails', async () => {
     const api = createFakeApi({ account: null });
-    api.failNext('CreateAccount', 'INTERNAL_SERVER_ERROR');
+    api.failNext('CreateAccount', { code: 'INTERNAL_SERVER_ERROR' });
     const { user } = renderApp({ route: '/setup', api });
 
     await user.type(await screen.findByLabelText('Take-home pay per month'), '3600');

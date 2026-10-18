@@ -24,9 +24,7 @@ const accountId = (cache: ApolloCache, id: string) => cache.identify({ __typenam
 
 const appendRef = (
   cache: ApolloCache,
-  account: string,
-  field: ListField,
-  ref: Reference | undefined
+  { account, field, ref }: { account: string; field: ListField; ref: Reference | undefined }
 ) => {
   if (!ref) return;
   cache.modify({
@@ -38,42 +36,38 @@ const appendRef = (
 
 export const addRecurringPayment = (
   cache: ApolloCache,
-  account: string,
-  payment: RecurringPaymentFieldsFragment
+  { account, payment }: { account: string; payment: RecurringPaymentFieldsFragment }
 ) =>
-  appendRef(
-    cache,
+  appendRef(cache, {
     account,
-    'recurringPayments',
-    cache.writeFragment({ fragment: RecurringPaymentFieldsFragmentDoc, data: payment })
-  );
+    field: 'recurringPayments',
+    ref: cache.writeFragment({ fragment: RecurringPaymentFieldsFragmentDoc, data: payment })
+  });
 
 export const addOneOffPayment = (
   cache: ApolloCache,
-  account: string,
-  payment: OneOffPaymentFieldsFragment
+  { account, payment }: { account: string; payment: OneOffPaymentFieldsFragment }
 ) =>
-  appendRef(
-    cache,
+  appendRef(cache, {
     account,
-    'oneOffPayments',
-    cache.writeFragment({ fragment: OneOffPaymentFieldsFragmentDoc, data: payment })
-  );
+    field: 'oneOffPayments',
+    ref: cache.writeFragment({ fragment: OneOffPaymentFieldsFragmentDoc, data: payment })
+  });
 
-export const addNote = (cache: ApolloCache, account: string, note: NoteFieldsFragment) =>
-  appendRef(
-    cache,
+export const addNote = (
+  cache: ApolloCache,
+  { account, note }: { account: string; note: NoteFieldsFragment }
+) =>
+  appendRef(cache, {
     account,
-    'notes',
-    cache.writeFragment({ fragment: NoteFieldsFragmentDoc, data: note })
-  );
+    field: 'notes',
+    ref: cache.writeFragment({ fragment: NoteFieldsFragmentDoc, data: note })
+  });
 
 /* Takes items off the account's list and drops them from the cache */
 export const removeFromAccount = (
   cache: ApolloCache,
-  account: string,
-  field: ListField,
-  ids: readonly string[]
+  { account, field, ids }: { account: string; field: ListField; ids: readonly string[] }
 ) => {
   if (!ids.length) return;
   cache.modify({

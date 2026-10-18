@@ -14,7 +14,7 @@ export const ProfileNav = ({ current, onJump, onLogout }: ProfileNavProps) => (
     {SECTIONS.map(section => (
       <a
         key={section.id}
-        {...jumpProps(section.id, current, onJump)}
+        {...jumpProps({ id: section.id, current, onJump })}
         className="flex h-11 items-center gap-3 rounded-full px-3.5 text-sm font-semibold text-muted no-underline transition-colors hover:bg-hover hover:text-text aria-[current]:bg-accent-soft aria-[current]:font-bold aria-[current]:text-text [&[aria-current]>svg]:text-accent-text">
         {SECTION_ICONS[section.id]}
         {section.label}

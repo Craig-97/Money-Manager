@@ -12,7 +12,7 @@ const tileClasses = 'flex flex-col gap-4 rounded-3xl border border-border bg-sur
 
 /* Mobile: the payoff plan as stacked cards, with the button to apply the extra at the end */
 export const MobilePayoffPlan = ({ debts, plan }: { debts: Debts; plan: PayoffPlan }) => {
-  const chart = chartText(plan.figures, debts.today, debts.totals.left);
+  const chart = chartText(plan.figures, { today: debts.today, left: debts.totals.left });
 
   return (
     <section aria-label="Payoff plan" className="flex flex-col gap-3.5">

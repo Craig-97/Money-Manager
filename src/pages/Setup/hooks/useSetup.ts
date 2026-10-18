@@ -178,7 +178,7 @@ export const useSetup = () => {
 
   // Linking the new account to the user lets the route guard take the person to their dashboard
   const goToDashboard = () => {
-    if (account && userId) linkAccount(client.cache, userId, account);
+    if (account && userId) linkAccount(client.cache, { userId, account });
   };
 
   return {

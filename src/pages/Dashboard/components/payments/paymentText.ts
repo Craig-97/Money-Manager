@@ -19,7 +19,7 @@ export const EMPTY_TEXT: Record<PaymentTab, { title: string; body: string; butto
 };
 
 /* What the list footer says about the tab */
-export const footLabel = (count: number, tab: PaymentTab, payday: string) =>
+export const footLabel = (count: number, { tab, payday }: { tab: PaymentTab; payday: string }) =>
   `${count} ${count === 1 ? 'payment' : 'payments'}` +
   (tab === 'upcoming'
     ? ` before payday · ${payday}`

@@ -31,7 +31,8 @@ describe('forgot password', () => {
 
   it('shows the wait when too many links have been asked for', async () => {
     const api = createFakeApi();
-    api.failNext('RequestPasswordReset', 'TOO_MANY_REQUESTS', {
+    api.failNext('RequestPasswordReset', {
+      code: 'TOO_MANY_REQUESTS',
       message: 'Too many attempts. Try again in 60 minutes.'
     });
     const { user } = renderApp({ route: '/forgot-password', session: null, api });

@@ -82,7 +82,10 @@ export const ordinal = (n: number) => {
  * How a recurring payment repeats: "Monthly on the 2nd", "Every other Friday". The lower-case
  * form reads inside a sentence: "Repeats monthly on the 2nd".
  */
-export const scheduleText = (first: Date, frequency: PaymentFrequency, { lower = false } = {}) => {
+export const scheduleText = (
+  first: Date,
+  { frequency, lower = false }: { frequency: PaymentFrequency; lower?: boolean }
+) => {
   const weekday = weekdayName.format(first);
   const day = ordinal(first.getDate());
   const text = {

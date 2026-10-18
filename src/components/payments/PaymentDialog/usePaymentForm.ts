@@ -67,12 +67,17 @@ const UNTOUCHED: Record<TouchedField, boolean> = {
 
 const iso = (date: Date | null) => (date ? toApiDate(date) : '');
 
-const initialValues = (
-  kind: PaymentKind,
-  payment: Payment | undefined,
-  today: Date,
+const initialValues = ({
+  kind,
+  payment,
+  today,
   asDebt = false
-): PaymentFormValues => {
+}: {
+  kind: PaymentKind;
+  payment: Payment | undefined;
+  today: Date;
+  asDebt?: boolean;
+}): PaymentFormValues => {
   const blank: PaymentFormValues = {
     type: 'EXPENSE',
     name: '',
@@ -203,8 +208,7 @@ export interface SummaryRow {
  */
 const scheduleSummary = (
   values: PaymentFormValues,
-  today: Date,
-  { renewalPassed = false } = {}
+  { today, renewalPassed = false }: { today: Date; renewalPassed?: boolean }
 ): { rows: SummaryRow[]; message?: string } => {
   const first = parseIsoDate(values.first);
   const { yearly, ends, reminds, reminder } = recurringEnding(values);
@@ -218,7 +222,7 @@ const scheduleSummary = (
   const next = nextOccurrence({ firstPaymentDate: first, frequency: values.frequency }, today);
   const noneLeft = !next || (!!end && end < next);
   const rows: SummaryRow[] = [
-    { label: 'Repeats', value: scheduleText(first, values.frequency) },
+    { label: 'Repeats', value: scheduleText(first, { frequency: values.frequency }) },
     {
       label: 'Next due',
       value: noneLeft
@@ -255,8 +259,7 @@ const scheduleSummary = (
 /* A debt's summary also says when it'd be paid off */
 const withPaidOff = (
   summary: ReturnType<typeof scheduleSummary>,
-  values: PaymentFormValues,
-  today: Date
+  { values, today }: { values: PaymentFormValues; today: Date }
 ) =>
   values.tracked && !summary.message
     ? {
@@ -315,7 +318,7 @@ export const usePaymentForm = ({
   onSaved,
   formKey
 }: Options) => {
-  const [values, setValues] = useState(() => initialValues(kind, payment, today, asDebt));
+  const [values, setValues] = useState(() => initialValues({ kind, payment, today, asDebt }));
   const [touched, setTouched] = useState(UNTOUCHED);
   const [nameTaken, setNameTaken] = useState<string>();
   const [saving, setSaving] = useState(false);
@@ -325,7 +328,7 @@ export const usePaymentForm = ({
   const [currentKey, setCurrentKey] = useState(formKey);
   if (formKey !== currentKey) {
     setCurrentKey(formKey);
-    setValues(initialValues(kind, payment, today, asDebt));
+    setValues(initialValues({ kind, payment, today, asDebt }));
     setTouched(UNTOUCHED);
     setNameTaken(undefined);
   }
@@ -412,8 +415,7 @@ export const usePaymentForm = ({
       first && renewal
         ? occurrencesBetween(
             { firstPaymentDate: first, frequency: values.frequency },
-            first,
-            renewal
+            { from: first, to: renewal }
           ).at(-1)
         : undefined;
     setValues(current => ({
@@ -430,7 +432,7 @@ export const usePaymentForm = ({
     }
     const name = values.name.trim();
     // Editing without changing anything just closes
-    if (payment && isUnchanged(values, initialValues(kind, payment, today, asDebt))) {
+    if (payment && isUnchanged(values, initialValues({ kind, payment, today, asDebt }))) {
       onSaved();
       return;
     }
@@ -441,7 +443,7 @@ export const usePaymentForm = ({
         const schedule = { frequency: values.frequency, firstPaymentDate: values.first };
         const category = values.category as RecurringPaymentCategory;
         if (payment) {
-          const before = initialValues(kind, payment, today, asDebt);
+          const before = initialValues({ kind, payment, today, asDebt });
           // Only send the schedule if it changed: a new schedule starts the payment unpaid again.
           // The ending can always go, as a new last payment keeps what's been paid.
           const scheduleChanged =
@@ -477,11 +479,10 @@ export const usePaymentForm = ({
             },
             update: (cache, { data }) => {
               if (data)
-                addRecurringPayment(
-                  cache,
-                  accountId,
-                  data.createRecurringPayment.recurringPayment!
-                );
+                addRecurringPayment(cache, {
+                  account: accountId,
+                  payment: data.createRecurringPayment.recurringPayment!
+                });
             }
           });
         }
@@ -497,7 +498,11 @@ export const usePaymentForm = ({
           await createOneOff({
             variables: { input: { ...fields, accountId } },
             update: (cache, { data }) => {
-              if (data) addOneOffPayment(cache, accountId, data.createOneOffPayment.oneOffPayment!);
+              if (data)
+                addOneOffPayment(cache, {
+                  account: accountId,
+                  payment: data.createOneOffPayment.oneOffPayment!
+                });
             }
           });
         }
@@ -524,7 +529,7 @@ export const usePaymentForm = ({
     canSave: nameOk && amountOk && datesOk && debtOk && !nameTaken,
     saving,
     save: () => void save(),
-    summary: withPaidOff(scheduleSummary(values, today, { renewalPassed }), values, today),
+    summary: withPaidOff(scheduleSummary(values, { today, renewalPassed }), { values, today }),
     // Opened from Debts: always a debt, so there's no switch to stop tracking it
     asDebt,
     endsHint: endsHint(values, today),

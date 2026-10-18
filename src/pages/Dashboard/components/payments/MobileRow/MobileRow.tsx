@@ -16,7 +16,10 @@ import { usePaymentDialogStore } from '~/state/paymentDialog';
 import { PaymentTab } from '../../../dashboardModel';
 import { Dashboard } from '../../../hooks';
 
-const metaFor = (payment: Payment, tab: PaymentTab, cycle: PayCycle, today: Date) => {
+const metaFor = (
+  payment: Payment,
+  { tab, cycle, today }: { tab: PaymentTab; cycle: PayCycle; today: Date }
+) => {
   const renewal = renewalNote(payment, today);
   const category = categoryLabel(payment.category) + (renewal ? ` · ${renewal}` : '');
   if (tab === 'recurring' && payment.kind === 'recurring') {
@@ -30,7 +33,7 @@ export const MobileRow = ({ payment, dashboard }: { payment: Payment; dashboard:
   const { tab, today, cycle, selection } = dashboard;
   const { selecting, toggle } = selection;
   const openEdit = usePaymentDialogStore(s => s.openEdit);
-  const due = dueInfo(payment, today, cycle);
+  const due = dueInfo(payment, { today, cycle });
   const isSelected = selecting && selection.selected.has(payment.id);
   const urgent = due.state === 'today' || due.state === 'overdue';
 
@@ -59,7 +62,9 @@ export const MobileRow = ({ payment, dashboard }: { payment: Payment; dashboard:
             : `Edit ${payment.name}`
         }
         aria-haspopup={selecting ? undefined : 'dialog'}
-        onClick={() => (selecting ? toggle(payment.id) : openEdit(payment.kind, payment.id))}
+        onClick={() =>
+          selecting ? toggle(payment.id) : openEdit(payment.kind, { paymentId: payment.id })
+        }
         className="flex min-h-[68px] min-w-0 flex-1 cursor-pointer items-center gap-3 rounded-[14px] text-left">
         <PaymentLetter payment={payment} className="size-10 rounded-[13px] text-[15px]" />
         <span className="min-w-0 grow">
@@ -73,7 +78,7 @@ export const MobileRow = ({ payment, dashboard }: { payment: Payment; dashboard:
             {payment.kind === 'recurring' ? (
               <Repeat size={12} strokeWidth={2.25} className="shrink-0" aria-hidden="true" />
             ) : null}
-            {metaFor(payment, tab, cycle, today)}
+            {metaFor(payment, { tab, cycle, today })}
           </span>
         </span>
         <span className="shrink-0 text-right">

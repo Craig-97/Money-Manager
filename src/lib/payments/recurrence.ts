@@ -27,7 +27,10 @@ export interface Schedule {
  * The kth date a payment falls on, counting the first as 0. Month-based payments keep the first
  * date's day, moving to the end of shorter months: the 31st falls on 28 Feb, then 31 Mar.
  */
-export const occurrence = (first: Date, frequency: PaymentFrequency, k: number) => {
+export const occurrence = (
+  { firstPaymentDate: first, frequency }: Pick<Schedule, 'firstPaymentDate' | 'frequency'>,
+  k: number
+) => {
   const days = DAYS_BETWEEN[frequency];
   if (days) return addDays(first, days * k);
 
@@ -39,12 +42,11 @@ export const occurrence = (first: Date, frequency: PaymentFrequency, k: number) 
 /* Every date the payment falls on from `from` to `to`, inclusive */
 export const occurrencesBetween = (
   { firstPaymentDate, frequency, lastPaymentDate }: Schedule,
-  from: Date,
-  to: Date
+  { from, to }: { from: Date; to: Date }
 ) => {
   const dates: Date[] = [];
   for (let k = 0; k < MAX_OCCURRENCES; k++) {
-    const date = occurrence(firstPaymentDate, frequency, k);
+    const date = occurrence({ firstPaymentDate, frequency }, k);
     if (date > to || (lastPaymentDate && date > lastPaymentDate)) break;
     if (date >= from) dates.push(date);
   }
@@ -54,7 +56,10 @@ export const occurrencesBetween = (
 /* The first date the payment falls on that is on or after `from`, or null once it has ended */
 export const nextOccurrence = (schedule: Schedule, from: Date) => {
   for (let k = 0; k < MAX_OCCURRENCES; k++) {
-    const date = occurrence(schedule.firstPaymentDate, schedule.frequency, k);
+    const date = occurrence(
+      { firstPaymentDate: schedule.firstPaymentDate, frequency: schedule.frequency },
+      k
+    );
     if (schedule.lastPaymentDate && date > schedule.lastPaymentDate) return null;
     if (date >= from) return date;
   }

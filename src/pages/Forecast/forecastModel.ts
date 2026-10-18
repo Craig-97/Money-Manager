@@ -37,8 +37,15 @@ export const defaultSpend = (recurring: number) => Math.max(500, roundUp500(recu
  * The top of the spend slider: twice the income, so spending more than comes in can be tried
  * too, and never short of the recurring total or what's been typed
  */
-export const spendLimit = (income: number, recurring: number, spend: number) =>
-  Math.max(1000, roundUp500(income * 2), roundUp500(recurring), roundUp500(spend));
+export const spendLimit = ({
+  income,
+  recurring,
+  spend
+}: {
+  income: number;
+  recurring: number;
+  spend: number;
+}) => Math.max(1000, roundUp500(income * 2), roundUp500(recurring), roundUp500(spend));
 
 interface ProjectionInput {
   // What's free to spend now: the projection's starting point
@@ -149,8 +156,11 @@ export const monthRows = ({
 }: RowsInput): MonthRow[] => {
   const first = new Date(today.getFullYear(), today.getMonth(), 1);
   const last = new Date(today.getFullYear(), today.getMonth() + TABLE_MONTHS, 0);
-  const paydays = getPaydayDates(payday, holidays, first, last);
-  const nominal = getPaydays({ ...payday, overrides: [] }, new Set(), first, last);
+  const paydays = getPaydayDates(payday, { holidays, from: first, to: last });
+  const nominal = getPaydays(
+    { ...payday, overrides: [] },
+    { holidays: new Set(), from: first, to: last }
+  );
   const monthKey = (date: Date) => `${date.getFullYear()}-${date.getMonth()}`;
   const byMonth = new Map<
     string,

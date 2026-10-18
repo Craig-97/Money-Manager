@@ -104,7 +104,10 @@ const SORTERS: Record<NoteSort, (a: Note, b: Note) => number> = {
 };
 
 /* The notes containing the search text, in the chosen order */
-export const findNotes = (notes: readonly Note[], query: string, sort: NoteSort) => {
+export const findNotes = (
+  notes: readonly Note[],
+  { query, sort }: { query: string; sort: NoteSort }
+) => {
   const search = query.trim().toLowerCase();
   return notes
     .filter(note => !search || note.body.toLowerCase().includes(search))

@@ -31,15 +31,15 @@ const ids = (list: Note[]) => list.map(note => note.id);
 
 describe('findNotes', () => {
   it('sorts by when notes were made or changed', () => {
-    expect(ids(findNotes(notes, '', 'newest'))).toEqual(['b', 'a', 'c']);
-    expect(ids(findNotes(notes, '', 'oldest'))).toEqual(['c', 'a', 'b']);
-    expect(ids(findNotes(notes, '', 'updated'))).toEqual(['a', 'b', 'c']);
-    expect(ids(findNotes(notes, '', 'updatedOldest'))).toEqual(['c', 'b', 'a']);
+    expect(ids(findNotes(notes, { query: '', sort: 'newest' }))).toEqual(['b', 'a', 'c']);
+    expect(ids(findNotes(notes, { query: '', sort: 'oldest' }))).toEqual(['c', 'a', 'b']);
+    expect(ids(findNotes(notes, { query: '', sort: 'updated' }))).toEqual(['a', 'b', 'c']);
+    expect(ids(findNotes(notes, { query: '', sort: 'updatedOldest' }))).toEqual(['c', 'b', 'a']);
   });
 
   it('matches the search text anywhere, ignoring case', () => {
-    expect(ids(findNotes(notes, '  PLUMBER ', 'newest'))).toEqual(['a', 'c']);
-    expect(findNotes(notes, 'rent', 'newest')).toEqual([]);
+    expect(ids(findNotes(notes, { query: '  PLUMBER ', sort: 'newest' }))).toEqual(['a', 'c']);
+    expect(findNotes(notes, { query: 'rent', sort: 'newest' })).toEqual([]);
   });
 });
 

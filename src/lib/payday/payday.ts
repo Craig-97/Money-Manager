@@ -52,7 +52,7 @@ const lastWeekdayOf = (lastDay: Date, weekday: number) =>
   addDays(lastDay, -((lastDay.getDay() - weekday + 7) % 7));
 
 /* The payday rule applied to one month, before moving off weekends and bank holidays */
-const paydayInMonth = (year: number, month: number, config: PaydayConfig) => {
+const paydayInMonth = (config: PaydayConfig, { year, month }: { year: number; month: number }) => {
   const lastDay = new Date(year, month + 1, 0);
 
   switch (config.type) {
@@ -65,8 +65,14 @@ const paydayInMonth = (year: number, month: number, config: PaydayConfig) => {
   }
 };
 
+interface PaydayRange {
+  holidays: BankHolidays;
+  from: Date;
+  to: Date;
+}
+
 /* Paydays for month-based pay, for the months between two dates */
-const monthlyPaydays = (config: PaydayConfig, holidays: BankHolidays, from: Date, to: Date) => {
+const monthlyPaydays = (config: PaydayConfig, { holidays, from, to }: PaydayRange) => {
   const step = MONTHS_BETWEEN[config.frequency] ?? 1;
   // Quarterly and longer count from the month of the first pay date
   const anchor = (step > 1 && fromApiDate(config.firstPayDate)) || from;
@@ -77,13 +83,18 @@ const monthlyPaydays = (config: PaydayConfig, holidays: BankHolidays, from: Date
   const paydays: Date[] = [];
   const first = anchorIndex + Math.floor((fromIndex - anchorIndex) / step) * step;
   for (let index = first; index <= toIndex; index += step) {
-    paydays.push(toWorkingDay(paydayInMonth(Math.floor(index / 12), index % 12, config), holidays));
+    paydays.push(
+      toWorkingDay(
+        paydayInMonth(config, { year: Math.floor(index / 12), month: index % 12 }),
+        holidays
+      )
+    );
   }
   return paydays;
 };
 
 /* Paydays for week-based pay, counting from the first pay date */
-const weeklyPaydays = (config: PaydayConfig, holidays: BankHolidays, from: Date, to: Date) => {
+const weeklyPaydays = (config: PaydayConfig, { holidays, from, to }: PaydayRange) => {
   const step = DAYS_BETWEEN[config.frequency] ?? 7;
   let anchor = fromApiDate(config.firstPayDate) ?? from;
   if (config.type === PAYDAY_TYPE.SET_WEEKDAY && config.weekday) {
@@ -118,34 +129,26 @@ const withOverrides = (paydays: Date[], config: PaydayConfig): PaydayDate[] => {
 };
 
 /* Every payday from a little before `from` to a little after `to`, in order */
-export const getPaydayDates = (
-  config: PaydayConfig,
-  holidays: BankHolidays,
-  from: Date,
-  to: Date
-): PaydayDate[] => {
+export const getPaydayDates = (config: PaydayConfig, range: PaydayRange): PaydayDate[] => {
   const paydays =
-    config.frequency in DAYS_BETWEEN
-      ? weeklyPaydays(config, holidays, from, to)
-      : monthlyPaydays(config, holidays, from, to);
+    config.frequency in DAYS_BETWEEN ? weeklyPaydays(config, range) : monthlyPaydays(config, range);
   return withOverrides(paydays, config).sort((a, b) => a.date.getTime() - b.date.getTime());
 };
 
-export const getPaydays = (
-  config: PaydayConfig,
-  holidays: BankHolidays,
-  from: Date,
-  to: Date
-): Date[] => getPaydayDates(config, holidays, from, to).map(payday => payday.date);
+export const getPaydays = (config: PaydayConfig, range: PaydayRange): Date[] =>
+  getPaydayDates(config, range).map(payday => payday.date);
 
 /* The pay cycle today falls in: from the last payday to the next */
 export const getPayCycle = (
   config: PaydayConfig,
-  holidays: BankHolidays,
-  today: Date
+  { holidays, today }: { holidays: BankHolidays; today: Date }
 ): PayCycle => {
   const step = (MONTHS_BETWEEN[config.frequency] ?? 1) * 31;
-  const paydays = getPaydayDates(config, holidays, addDays(today, -step), addDays(today, step));
+  const paydays = getPaydayDates(config, {
+    holidays,
+    from: addDays(today, -step),
+    to: addDays(today, step)
+  });
   const next = paydays.find(payday => payday.date > today);
   const end = next?.date ?? addDays(today, step);
   const start = paydays.findLast(payday => payday.date <= today)?.date ?? today;
@@ -159,22 +162,22 @@ export const getPayCycle = (
 };
 
 /* The next few paydays from a date, with any the user has moved marked */
+interface NextPaydays {
+  holidays: BankHolidays;
+  from: Date;
+  count: number;
+}
+
 export const getNextPaydayDates = (
   config: PaydayConfig,
-  holidays: BankHolidays,
-  from: Date,
-  count: number
+  { holidays, from, count }: NextPaydays
 ) => {
   const step = (MONTHS_BETWEEN[config.frequency] ?? 1) * 31;
-  return getPaydayDates(config, holidays, from, addDays(from, step * (count + 1)))
+  return getPaydayDates(config, { holidays, from, to: addDays(from, step * (count + 1)) })
     .filter(payday => payday.date >= from)
     .slice(0, count);
 };
 
 /* The next few paydays from a date, e.g. for setup's "Next payday ... then ..." */
-export const getNextPaydays = (
-  config: PaydayConfig,
-  holidays: BankHolidays,
-  from: Date,
-  count: number
-) => getNextPaydayDates(config, holidays, from, count).map(payday => payday.date);
+export const getNextPaydays = (config: PaydayConfig, next: NextPaydays) =>
+  getNextPaydayDates(config, next).map(payday => payday.date);

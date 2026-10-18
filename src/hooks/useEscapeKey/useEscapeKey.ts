@@ -1,7 +1,10 @@
 import { useEffect, useEffectEvent } from 'react';
 
 /* Calls onEscape when Escape is pressed anywhere, while active */
-export const useEscapeKey = (onEscape: () => void, active = true) => {
+export const useEscapeKey = (
+  onEscape: () => void,
+  { active = true }: { active?: boolean } = {}
+) => {
   const handleEscape = useEffectEvent(onEscape);
 
   useEffect(() => {

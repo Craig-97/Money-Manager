@@ -79,7 +79,7 @@ describe('routing', () => {
 
   it('offers a retry when the user fails to load', async () => {
     const api = createFakeApi();
-    api.failNext('CurrentUser', 'INTERNAL_SERVER_ERROR');
+    api.failNext('CurrentUser', { code: 'INTERNAL_SERVER_ERROR' });
     const { user } = renderApp({ route: '/dashboard', api, cacheUser: false });
 
     expect(await screen.findByRole('alert')).toHaveTextContent("Couldn't load your account");
@@ -90,7 +90,7 @@ describe('routing', () => {
 
   it('offers a retry when the account fails to load', async () => {
     const api = createFakeApi();
-    api.failNext('Account', 'INTERNAL_SERVER_ERROR');
+    api.failNext('Account', { code: 'INTERNAL_SERVER_ERROR' });
     const { user } = renderApp({ route: '/dashboard', api });
 
     await user.click(await screen.findByRole('button', { name: 'Try again' }));
@@ -113,7 +113,10 @@ describe('sessions', () => {
 
   it('ends the session and explains why when the API says the token expired', async () => {
     const api = createFakeApi();
-    api.failNext('Account', 'UNAUTHENTICATED', { extensions: { expired: true } });
+    api.failNext('Account', {
+      code: 'UNAUTHENTICATED',
+      extensions: { expired: true }
+    });
     renderApp({ route: '/dashboard', api });
 
     expect(await findPageHeading('Welcome back')).toBeInTheDocument();
@@ -123,7 +126,10 @@ describe('sessions', () => {
 
   it('swaps an expired token for a new one and carries on without signing out', async () => {
     const api = createFakeApi();
-    api.failNext('Account', 'UNAUTHENTICATED', { extensions: { expired: true } });
+    api.failNext('Account', {
+      code: 'UNAUTHENTICATED',
+      extensions: { expired: true }
+    });
     const refresh = vi.fn(async () => ({
       __typename: 'AuthData' as const,
       token: 'fresh-token',

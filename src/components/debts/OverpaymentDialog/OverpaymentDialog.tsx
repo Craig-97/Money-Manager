@@ -30,7 +30,13 @@ export const OverpaymentDialog = ({ debts, onOverpay }: OverpaymentDialogProps) 
     }))
   );
   // Each opening starts afresh; closing keeps it as it was while it animates away
-  const form = useOverpaymentForm(debts, debtId, String(opened), onOverpay, close);
+  const form = useOverpaymentForm({
+    debts,
+    debtId,
+    formKey: String(opened),
+    onOverpay,
+    onDone: close
+  });
   const { debt } = form;
 
   return (

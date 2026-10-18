@@ -9,7 +9,7 @@ export const ProfileJumpChips = ({ current, onJump }: Omit<ProfileNavProps, 'onL
     {SECTIONS.map(section => (
       <a
         key={section.id}
-        {...jumpProps(section.id, current, onJump)}
+        {...jumpProps({ id: section.id, current, onJump })}
         className="inline-flex h-11 shrink-0 items-center rounded-full border border-border bg-surface px-4 text-[13px] font-bold text-muted no-underline aria-[current]:border-transparent aria-[current]:bg-pill-active-bg aria-[current]:text-pill-active-text">
         {section.short}
       </a>

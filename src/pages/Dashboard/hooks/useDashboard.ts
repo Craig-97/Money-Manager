@@ -39,7 +39,7 @@ export const useDashboard = (account: Account) => {
   });
   const paydayOverride = usePaydayOverride({ account, cycle, today, holidays, payments });
   const alerts = useAlerts({ payments, today, dueToday: summary.dueToday });
-  const listed = paymentsForTab(payments, tab, cycle, sort);
+  const listed = paymentsForTab(payments, { tab, cycle, sort });
   const selection = usePaymentSelection(listed);
 
   const saveAccount = (fields: { bankBalance?: number; monthlyIncome?: number }) =>
@@ -63,7 +63,7 @@ export const useDashboard = (account: Account) => {
     payments,
     summary,
     paydayOverride,
-    days: cycleDays(cycle, today, payments),
+    days: cycleDays(cycle, { today, payments }),
     isEmpty: payments.length === 0,
     actions,
     balanceEditor,

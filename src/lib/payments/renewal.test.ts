@@ -130,29 +130,32 @@ describe('renewalWindow', () => {
 
   it('uses the shortest window that holds the soonest three', () => {
     const items = [item(5), item(12), item(20), item(200)];
-    expect(renewalWindow(items, TODAY)).toMatchObject({ label: 'Next month', count: 3 });
+    expect(renewalWindow(items)).toMatchObject({ label: 'Next month', count: 3 });
   });
 
   it('widens to fit renewals that are spread out', () => {
-    expect(renewalWindow([item(40), item(150), item(170)], TODAY).label).toBe('Next 6 months');
-    expect(renewalWindow([item(40), item(500)], TODAY).label).toBe('Next 2 years');
+    expect(renewalWindow([item(40), item(150), item(170)]).label).toBe('Next 6 months');
+    expect(renewalWindow([item(40), item(500)]).label).toBe('Next 2 years');
   });
 
   it('settles for a window holding the next one when the rest are further off', () => {
-    const result = renewalWindow([item(10), item(900), item(1000)], TODAY);
+    const result = renewalWindow([item(10), item(900), item(1000)]);
     expect(result).toMatchObject({ label: 'Next month', count: 1 });
     expect(result.shown).toHaveLength(1);
   });
 
   it('puts ones that need renewing first, without letting them set the window', () => {
-    const result = renewalWindow([item(100), item(-3, true)], TODAY);
+    const result = renewalWindow([item(100), item(-3, true)]);
     expect(result.shown.map(entry => entry.renewal.days)).toEqual([-3, 100]);
     expect(result).toMatchObject({ label: 'Next 6 months', count: 2 });
   });
 
   it('names the month when even the soonest is more than two years away', () => {
     const far = { renewal: { ...renewal(900), date: day('2029-03-21') } };
-    expect(renewalWindow([far], TODAY)).toMatchObject({ label: 'Next in Mar 2029', count: 0 });
+    expect(renewalWindow([far])).toMatchObject({
+      label: 'Next in Mar 2029',
+      count: 0
+    });
   });
 });
 

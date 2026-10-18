@@ -92,7 +92,10 @@ export interface CycleDay {
  * A day-by-day view of the cycle for the progress bar, from the last payday to the next. When the
  * next payday has been brought forward, the days up to its usual date follow as ghosts.
  */
-export const cycleDays = (cycle: PayCycle, today: Date, payments: Payment[]): CycleDay[] => {
+export const cycleDays = (
+  cycle: PayCycle,
+  { today, payments }: { today: Date; payments: Payment[] }
+): CycleDay[] => {
   const due = new Map<string, Payment[]>();
   for (const payment of payments) {
     for (const date of datesDue(payment, cycle)) {

@@ -24,7 +24,10 @@ import { RecurringTab } from '../../recurringModel';
  * where it stands this cycle ("Weekly · 1 of 4 paid"), otherwise its renewal ("Monthly · Renews
  * 2 Feb 2027"), or its category when it doesn't renew
  */
-const subtitle = (payment: RecurringPayment, tab: RecurringTab, cycle: PayCycle, today: Date) => {
+const subtitle = (
+  payment: RecurringPayment,
+  { tab, cycle, today }: { tab: RecurringTab; cycle: PayCycle; today: Date }
+) => {
   const frequency = FREQUENCY_LABELS[payment.frequency];
   if (tab === 'cycle') return `${frequency} · ${cycleStatus(payment, cycle).label}`;
   const renewal = renewalOf(payment, today);
@@ -45,7 +48,7 @@ export const MobileRecurringRow = ({
   const { tab, today, cycle, selection } = recurring;
   const { selecting, toggle } = selection;
   const openEdit = usePaymentDialogStore(s => s.openEdit);
-  const due = dueInfo(payment, today, cycle);
+  const due = dueInfo(payment, { today, cycle });
   const isSelected = selecting && selection.selected.has(payment.id);
   const urgent = due.state === 'today' || due.state === 'overdue';
 
@@ -74,7 +77,9 @@ export const MobileRecurringRow = ({
             : `Edit ${payment.name}`
         }
         aria-haspopup={selecting ? undefined : 'dialog'}
-        onClick={() => (selecting ? toggle(payment.id) : openEdit('recurring', payment.id))}
+        onClick={() =>
+          selecting ? toggle(payment.id) : openEdit('recurring', { paymentId: payment.id })
+        }
         className="flex min-h-[68px] min-w-0 flex-1 cursor-pointer items-center gap-3 rounded-[14px] text-left">
         <PaymentLetter payment={payment} className="size-10 rounded-[13px] text-[15px]" />
         <span className="min-w-0 grow">
@@ -89,7 +94,7 @@ export const MobileRecurringRow = ({
           ) : (
             <span className="mt-[3px] flex min-w-0 items-center gap-[5px] text-xs font-medium text-muted">
               <Repeat size={12} strokeWidth={2.25} className="shrink-0" aria-hidden="true" />
-              <span className="truncate">{subtitle(payment, tab, cycle, today)}</span>
+              <span className="truncate">{subtitle(payment, { tab, cycle, today })}</span>
             </span>
           )}
         </span>
