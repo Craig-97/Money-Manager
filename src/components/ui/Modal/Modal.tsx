@@ -3,8 +3,10 @@ import { ChevronLeft, X } from 'lucide-react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { MEDIA } from '~/constants';
 import { useMediaQuery } from '~/hooks/useMediaQuery';
+import { useScrollShade } from '~/hooks/useScrollShade';
 import { cn } from '~/lib/cn';
 import { IconButton } from '../IconButton';
+import { footerShade, headerShade, scrollBodyClasses } from './scrollShades';
 
 interface ModalProps {
   open: boolean;
@@ -41,6 +43,7 @@ export const Modal = ({
   initialFocusId
 }: ModalProps) => {
   const isDesktop = useMediaQuery(MEDIA.desktop);
+  const { ref: bodyRef, top: shadeTop, bottom: shadeBottom } = useScrollShade();
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -72,6 +75,7 @@ export const Modal = ({
           <div
             className={cn(
               'flex shrink-0 items-center gap-2',
+              headerShade(shadeTop),
               isDesktop ? 'pt-5 pr-[18px] pb-2' : 'px-4 pb-1',
               isDesktop && (onBack ? 'pl-3.5' : 'pl-7')
             )}>
@@ -98,8 +102,10 @@ export const Modal = ({
           ) : null}
 
           <div
+            ref={bodyRef}
             className={cn(
-              'flex min-h-0 flex-auto flex-col gap-[18px] overflow-y-auto',
+              'flex flex-col gap-[18px]',
+              scrollBodyClasses,
               isDesktop ? 'px-7 pt-2.5 pb-6' : 'px-4 pt-3 pb-[18px]'
             )}>
             {children}
@@ -108,7 +114,8 @@ export const Modal = ({
           {footer ? (
             <div
               className={cn(
-                'flex shrink-0 items-center gap-2 border-t border-border bg-surface px-5 pt-4',
+                'flex shrink-0 items-center gap-2 bg-surface px-5 pt-4',
+                footerShade(shadeBottom),
                 isDesktop ? 'pb-5' : 'pb-[calc(16px+env(safe-area-inset-bottom))]'
               )}>
               {footer}
