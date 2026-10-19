@@ -98,6 +98,12 @@ type Mutation {
   resetCalendarFeed(budgetId: ID!): BudgetResponse!
 }
 
+enum LeftOverOutcome {
+  PAID
+  SKIPPED
+  DUE
+}
+
 type Budget {
   id: ID!
   user: User
@@ -155,11 +161,22 @@ input LogDebtOverpaymentInput {
   amount: Float!
 }
 
+input LeftOverPaymentInput {
+  recurringPaymentId: ID!
+  outcome: LeftOverOutcome!
+}
+
+input AlreadyPaidInput {
+  recurringPaymentIds: [ID!]!
+  oneOffPaymentIds: [ID!]!
+}
+
 input StartPaydayCycleInput {
   budgetId: ID!
   payday: String!
   bankBalance: Float!
-  recurringPaymentIds: [ID!]!
+  leftOver: [LeftOverPaymentInput!]!
+  alreadyPaid: AlreadyPaidInput
 }
 
 type BudgetResponse {

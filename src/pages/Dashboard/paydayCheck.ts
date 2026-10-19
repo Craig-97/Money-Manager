@@ -1,0 +1,141 @@
+import { LeftOverOutcome } from '~/graphql/generated';
+import { addDays } from '~/lib/dates';
+import { payTowardsDebt } from '~/lib/debts';
+import { formatMoney } from '~/lib/format';
+import { PayCycle } from '~/lib/payday';
+import {
+  formatShortDate,
+  FREQUENCY_LABELS,
+  nextOccurrence,
+  occurrencesBetween,
+  OneOffPayment,
+  Payment,
+  RecurringPayment
+} from '~/lib/payments';
+
+/*
+ * The payday prompt's first step, "Check what's gone out", so nothing comes off the balance twice:
+ * recurring payments left over from last cycle, each with what happened to it, and payments due
+ * from payday to today, ticked if they've already gone out.
+ */
+
+const roundPence = (amount: number) => Math.round(amount * 100) / 100;
+
+// A recurring payment's dates from last cycle that were never paid or skipped
+export interface LeftOver {
+  payment: RecurringPayment;
+  dates: Date[];
+}
+
+// A payment due from payday to today: a recurring one's dates in that time, or a one-off
+export interface DueSince {
+  key: string;
+  payment: RecurringPayment | OneOffPayment;
+  dates: Date[];
+}
+
+export const leftOverOf = (payments: readonly Payment[], cycle: PayCycle): LeftOver[] =>
+  payments.flatMap(payment => {
+    if (payment.kind !== 'recurring' || !payment.dueDate || payment.dueDate >= cycle.start) {
+      return [];
+    }
+    const dates = occurrencesBetween(payment, {
+      from: payment.dueDate,
+      to: addDays(cycle.start, -1)
+    });
+    return dates.length ? [{ payment, dates }] : [];
+  });
+
+/*
+ * Payments due from payday up to today. A recurring payment still waiting on last cycle's dates
+ * only counts once those are dealt with, so one left still to pay isn't offered.
+ */
+export const dueSinceOf = (
+  payments: readonly Payment[],
+  { cycle, today, stillDue }: { cycle: PayCycle; today: Date; stillDue: ReadonlySet<string> }
+): DueSince[] =>
+  payments.flatMap((payment): DueSince[] => {
+    if (!payment.dueDate || payment.dueDate > today) return [];
+    if (payment.kind === 'oneOff') {
+      return !payment.paidAt && payment.dueDate >= cycle.start
+        ? [{ key: `oneOff:${payment.id}`, payment, dates: [payment.dueDate] }]
+        : [];
+    }
+    if (stillDue.has(payment.id)) return [];
+    const from = payment.dueDate < cycle.start ? cycle.start : payment.dueDate;
+    const dates = occurrencesBetween(payment, { from, to: today });
+    return dates.length ? [{ key: `recurring:${payment.id}`, payment, dates }] : [];
+  });
+
+/* What its dates add to the balance: negative for money out */
+const signedTotal = ({ payment, dates }: { payment: Payment; dates: Date[] }) =>
+  payment.signedAmount * dates.length;
+
+/*
+ * What the bank should show now: the balance as last confirmed, plus the income, less what has
+ * gone out without being marked paid. Last cycle's payments count as gone out unless the user says
+ * they didn't, and today's only once ticked.
+ */
+export const suggestedBalance = ({
+  bankBalance,
+  income,
+  leftOver,
+  outcomes,
+  goneOut
+}: {
+  bankBalance: number;
+  income: number;
+  leftOver: readonly LeftOver[];
+  outcomes: Readonly<Record<string, LeftOverOutcome>>;
+  goneOut: readonly DueSince[];
+}) => {
+  const paidLeftOver = leftOver.filter(item => (outcomes[item.payment.id] ?? 'PAID') === 'PAID');
+  const out = [...paidLeftOver, ...goneOut].reduce((total, item) => total + signedTotal(item), 0);
+  return roundPence(bankBalance + income + out);
+};
+
+/*
+ * The line under a left-over payment: only what else happens beyond the choice picked. Plain paid
+ * has none; a debt says how much less is owed, its interest taken first.
+ */
+export const leftOverNote = (
+  { payment, dates }: LeftOver,
+  { outcome, cycle, today }: { outcome: LeftOverOutcome; cycle: PayCycle; today: Date }
+) => {
+  if (outcome === 'DUE') return 'Stays due, shown as overdue';
+  if (outcome === 'SKIPPED') {
+    const next = nextOccurrence(payment, cycle.start);
+    if (!next) return 'No more payments';
+    return next.getTime() === today.getTime()
+      ? 'Next due today'
+      : `Next due ${formatShortDate(next, today)}`;
+  }
+  if (!payment.debt) return null;
+  const paidOff = payTowardsDebt(payment.debt, {
+    amount: payment.amount,
+    frequency: payment.frequency,
+    times: dates.length
+  });
+  return `${formatMoney(paidOff.reduction)} off what you owe, after ${formatMoney(paidOff.interest)} interest`;
+};
+
+/* "Monthly · was due Mon 26 Oct", or "Weekly · 3 dates from Mon 5 Oct" */
+export const leftOverDetail = ({ payment, dates }: LeftOver, today: Date) => {
+  const frequency = payment.debt ? 'Debt' : FREQUENCY_LABELS[payment.frequency];
+  return dates.length === 1
+    ? `${frequency} · was due ${formatShortDate(dates[0], today)}`
+    : `${frequency} · ${dates.length} dates from ${formatShortDate(dates[0], today)}`;
+};
+
+/* "Monthly · due today", or "One-off · due Sat 31 Oct" */
+export const dueSinceDetail = ({ payment, dates }: DueSince, today: Date) => {
+  const kind = payment.kind === 'oneOff' ? 'One-off' : FREQUENCY_LABELS[payment.frequency];
+  const last = dates[dates.length - 1];
+  const when =
+    last.getTime() === today.getTime() ? 'due today' : `due ${formatShortDate(last, today)}`;
+  return dates.length > 1 ? `${kind} · ${dates.length} dates, last ${when}` : `${kind} · ${when}`;
+};
+
+/* "Netflix", "Netflix and Gym", "Netflix, Gym and Rent" */
+export const listNames = (names: readonly string[]) =>
+  new Intl.ListFormat('en-GB', { style: 'long', type: 'conjunction' }).format(names);

@@ -23,7 +23,6 @@ export const DashboardContent = ({ budget }: { budget: Budget }) => {
     cycle: dashboard.cycle,
     today: dashboard.today,
     payments: dashboard.payments,
-    summary: dashboard.summary,
     markPaid: dashboard.actions.pay
   });
 

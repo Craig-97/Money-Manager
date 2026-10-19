@@ -9,6 +9,11 @@ export type Scalars = {
   Float: { input: number; output: number };
 };
 
+export type AlreadyPaidInput = {
+  oneOffPaymentIds: Array<Scalars['ID']['input']>;
+  recurringPaymentIds: Array<Scalars['ID']['input']>;
+};
+
 export type AuthData = {
   __typename: 'AuthData';
   token: Scalars['String']['output'];
@@ -114,6 +119,13 @@ export type DeleteResponse = {
   deletedCount: Scalars['Int']['output'];
   ids: Array<Scalars['ID']['output']>;
   success: Scalars['Boolean']['output'];
+};
+
+export type LeftOverOutcome = 'DUE' | 'PAID' | 'SKIPPED';
+
+export type LeftOverPaymentInput = {
+  outcome: LeftOverOutcome;
+  recurringPaymentId: Scalars['ID']['input'];
 };
 
 export type LogDebtOverpaymentInput = {
@@ -583,10 +595,11 @@ export type SkipRecurringPaymentsInput = {
 };
 
 export type StartPaydayCycleInput = {
+  alreadyPaid?: InputMaybe<AlreadyPaidInput>;
   bankBalance: Scalars['Float']['input'];
   budgetId: Scalars['ID']['input'];
+  leftOver: Array<LeftOverPaymentInput>;
   payday: Scalars['String']['input'];
-  recurringPaymentIds: Array<Scalars['ID']['input']>;
 };
 
 export type SuccessResponse = {

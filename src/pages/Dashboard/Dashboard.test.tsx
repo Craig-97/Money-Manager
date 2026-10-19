@@ -382,31 +382,92 @@ describe('payday prompt', () => {
       oneOffPayments: []
     });
 
-  it('confirms the balance and starts the new cycle', async () => {
+  const outcomeOf = (dialog: HTMLElement, name: string) =>
+    within(within(dialog).getByRole('radiogroup', { name: `What happened to ${name}` }));
+
+  it('takes last cycle’s left-over payments as paid, and starts the new cycle', async () => {
     const { user, api } = renderDashboard(paydayBudget());
 
     const dialog = await screen.findByRole('dialog', { name: 'It’s payday' });
+    expect(within(dialog).getByText('From last cycle')).toBeInTheDocument();
+    expect(outcomeOf(dialog, 'Netflix').getByRole('radio', { name: 'Paid' })).toBeChecked();
     const balance = within(dialog).getByLabelText(/Confirm your bank balance/);
-    // £1,000 plus £2,500 income, less Netflix's £20 left over from August and £20 due today
-    expect(balance).toHaveValue('3,460.00');
+    // £1,000 plus £2,500 income, less Netflix's £20 from August, which went out
+    expect(balance).toHaveValue('3,480.00');
     expect(within(dialog).getByText('Projected')).toBeInTheDocument();
 
     await user.clear(balance);
     await user.type(balance, '3,450');
     expect(within(dialog).getByText('Edited')).toBeInTheDocument();
-    expect(within(dialog).getByRole('checkbox', { name: /Netflix/ })).toBeChecked();
     await user.click(within(dialog).getByRole('button', { name: 'Start new cycle' }));
 
     expect(await within(dialog).findByText('New cycle started')).toBeInTheDocument();
     expect(dialog).toHaveTextContent(
-      'Bank balance set to £3,450.00. 1 recurring payment was moved on to the new cycle.'
+      'Bank balance set to £3,450.00. Netflix was recorded as paid.'
     );
     expect(api.callsTo('StartPaydayCycle')).toEqual([
       {
         input: expect.objectContaining({
           budgetId: 'budget-1',
           bankBalance: 3450,
-          recurringPaymentIds: ['netflix']
+          leftOver: [{ recurringPaymentId: 'netflix', outcome: 'PAID' }],
+          alreadyPaid: { recurringPaymentIds: [], oneOffPaymentIds: [] }
+        })
+      }
+    ]);
+  });
+
+  it('adds back a left-over payment that didn’t go out, and says when it’s next due', async () => {
+    const { user, api } = renderDashboard(paydayBudget());
+
+    const dialog = await screen.findByRole('dialog', { name: 'It’s payday' });
+    await user.click(outcomeOf(dialog, 'Netflix').getByRole('radio', { name: 'Didn’t go out' }));
+
+    expect(within(dialog).getByText('Next due today')).toBeInTheDocument();
+    expect(within(dialog).getByLabelText(/Confirm your bank balance/)).toHaveValue('3,500.00');
+    await user.click(within(dialog).getByRole('button', { name: 'Start new cycle' }));
+
+    expect(await within(dialog).findByText(/Netflix was recorded as skipped/)).toBeInTheDocument();
+    expect(api.callsTo('StartPaydayCycle')).toEqual([
+      {
+        input: expect.objectContaining({
+          leftOver: [{ recurringPaymentId: 'netflix', outcome: 'SKIPPED' }]
+        })
+      }
+    ]);
+  });
+
+  it('keeps a left-over payment still to pay overdue, and leaves today’s date for later', async () => {
+    const { user } = renderDashboard(paydayBudget());
+
+    const dialog = await screen.findByRole('dialog', { name: 'It’s payday' });
+    expect(within(dialog).getByRole('checkbox', { name: /Netflix/ })).toBeInTheDocument();
+    await user.click(outcomeOf(dialog, 'Netflix').getByRole('radio', { name: 'Still to pay' }));
+
+    expect(within(dialog).getByText('Stays due, shown as overdue')).toBeInTheDocument();
+    // August's date comes first, so today's isn't offered until that's dealt with
+    expect(within(dialog).queryByRole('checkbox', { name: /Netflix/ })).not.toBeInTheDocument();
+    expect(within(dialog).getByLabelText(/Confirm your bank balance/)).toHaveValue('3,500.00');
+  });
+
+  it('takes off a payment due today once it’s ticked as gone out', async () => {
+    const { user, api } = renderDashboard(paydayBudget());
+
+    const dialog = await screen.findByRole('dialog', { name: 'It’s payday' });
+    expect(within(dialog).getByText('Due today')).toBeInTheDocument();
+    await user.click(within(dialog).getByRole('checkbox', { name: /Netflix/ }));
+
+    // August's £20 and today's £20
+    expect(within(dialog).getByLabelText(/Confirm your bank balance/)).toHaveValue('3,460.00');
+    expect(dialog).toHaveTextContent('Projected: £1,000 + £2,500 income − £40 gone out.');
+    await user.click(within(dialog).getByRole('button', { name: 'Start new cycle' }));
+
+    expect(await within(dialog).findByText('New cycle started')).toBeInTheDocument();
+    expect(dialog).toHaveTextContent('Netflix was recorded as paid.');
+    expect(api.callsTo('StartPaydayCycle')).toEqual([
+      {
+        input: expect.objectContaining({
+          alreadyPaid: { recurringPaymentIds: ['netflix'], oneOffPaymentIds: [] }
         })
       }
     ]);
@@ -434,36 +495,40 @@ describe('payday prompt', () => {
     expect(dialog).toHaveTextContent('Payday was Wednesday 30 September · 4 days ago');
   });
 
-  it('leaves payments already in the new cycle where they are', async () => {
+  it('offers payments due since a payday that has been, rather than last cycle’s', async () => {
     setToday('2026-10-04');
     const data = paydayBudget();
-    data.recurringPayments[0].nextDueDate = apiDate('2026-09-29');
-    // Due after the payday being caught up on
+    // Due today, after the payday being caught up on
     data.recurringPayments.push({
       ...data.recurringPayments[0],
       id: 'gym',
       name: 'Gym',
+      firstPaymentDate: apiDateFromToday(0),
       nextDueDate: apiDateFromToday(0)
     });
     renderDashboard(data);
 
     const dialog = await screen.findByRole('dialog', { name: 'Start your new pay cycle' });
-    expect(within(dialog).getByRole('checkbox', { name: /Netflix/ })).toBeChecked();
-    expect(within(dialog).queryByRole('checkbox', { name: /Gym/ })).not.toBeInTheDocument();
+    expect(
+      within(dialog).getByRole('radiogroup', { name: 'What happened to Netflix' })
+    ).toBeInTheDocument();
+    expect(
+      within(dialog).queryByRole('radiogroup', { name: 'What happened to Gym' })
+    ).not.toBeInTheDocument();
+    expect(within(dialog).getByText('Due since payday')).toBeInTheDocument();
+    expect(within(dialog).getByRole('checkbox', { name: /Gym/ })).toBeInTheDocument();
   });
 
-  it('says when everything from the last cycle was paid or skipped', async () => {
+  it('leaves out the check when nothing is left over or due since payday', async () => {
+    setToday('2026-10-01');
     const data = paydayBudget();
-    // Paid for 30 August, so it has already moved on to today, in the new cycle
-    data.recurringPayments[0].nextDueDate = apiDateFromToday(0);
-    data.recurringPayments[0].thisCycle = [fakeRecord('PAID', { dates: [apiDateFromToday(-31)] })];
+    // Paid for 30 August, so it has moved on, and it isn't due again until 30 October
+    data.recurringPayments[0].nextDueDate = apiDate('2026-10-30');
     renderDashboard(data);
 
-    const dialog = await screen.findByRole('dialog', { name: 'It’s payday' });
-    expect(dialog).toHaveTextContent(
-      "Everything from the last cycle was paid or skipped, so there's nothing to move on."
-    );
-    expect(within(dialog).queryByRole('checkbox', { name: /Netflix/ })).not.toBeInTheDocument();
+    const dialog = await screen.findByRole('dialog', { name: 'Start your new pay cycle' });
+    expect(within(dialog).queryByText('Check what’s gone out')).not.toBeInTheDocument();
+    expect(within(dialog).getByLabelText(/Confirm your bank balance/)).toHaveValue('3,500.00');
   });
 
   it("doesn't show once this cycle has started", async () => {
