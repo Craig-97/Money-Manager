@@ -37,39 +37,49 @@ export const PageHeader = ({
   const today = new Date();
   const name = user ? `${user.firstName} ${user.surname}` : '';
 
+  // On desktop the title and bell share the top row. The actions sit between them when the header
+  // is wide enough, and on their own row under the title when it isn't, so they never wrap above it.
   return (
-    <header className="flex items-center justify-between gap-4 px-0.5 md:items-end md:px-0">
-      <div>
-        <p className="text-[13px] font-semibold text-muted md:text-sm">
-          <span className="md:hidden">{formatLongDate(today, { withYear: false })}</span>
-          <span className="hidden md:inline">{formatLongDate(today)}</span>
-        </p>
-        <div className="mt-0.5 flex items-baseline gap-2 md:mt-1.5">
-          <h1 className="text-[26px] font-extrabold tracking-[-0.035em] md:text-4xl md:leading-[1.1]">
-            {title}
-          </h1>
-          {titleNote ? (
-            <span className="num text-[15px] font-bold tracking-normal text-muted md:hidden">
-              {titleNote}
-            </span>
+    <header className="@container px-0.5 md:px-0">
+      <div className="flex items-center justify-between gap-4 md:grid md:grid-cols-[minmax(0,1fr)_auto] md:items-end md:gap-y-4 @min-[50rem]:grid-cols-[minmax(0,1fr)_auto_auto]">
+        <div className="md:col-start-1 md:row-start-1">
+          <p className="text-[13px] font-semibold text-muted md:text-sm">
+            <span className="md:hidden">{formatLongDate(today, { withYear: false })}</span>
+            <span className="hidden md:inline">{formatLongDate(today)}</span>
+          </p>
+          <div className="mt-0.5 flex items-baseline gap-2 md:mt-1.5">
+            <h1 className="text-[26px] font-extrabold tracking-[-0.035em] md:text-4xl md:leading-[1.1]">
+              {title}
+            </h1>
+            {titleNote ? (
+              <span className="num text-[15px] font-bold tracking-normal text-muted md:hidden">
+                {titleNote}
+              </span>
+            ) : null}
+          </div>
+          {description ? (
+            <p className="mt-1.5 hidden text-[15px] text-muted md:block">{description}</p>
           ) : null}
         </div>
-        {description ? (
-          <p className="mt-1.5 hidden text-[15px] text-muted md:block">{description}</p>
+        {actions ? (
+          <div className="hidden flex-wrap items-center gap-2 md:col-span-2 md:row-start-2 md:flex @min-[50rem]:col-span-1 @min-[50rem]:col-start-2 @min-[50rem]:row-start-1 @min-[50rem]:justify-end">
+            {actions}
+          </div>
         ) : null}
-      </div>
-      <div className="hidden flex-wrap items-center justify-end gap-2 md:flex">
-        {actions}
-        {isDesktop ? <ReminderBell /> : null}
-      </div>
-      <div className="flex shrink-0 items-center gap-2 md:hidden">
-        {isDesktop ? null : (mobileActions ?? <ReminderBell />)}
-        <Link
-          to={ROUTES.profile}
-          aria-label={`Profile, ${name}`}
-          className="rounded-full transition-shadow hover:shadow-[0_0_0_3px_var(--border-strong)]">
-          <Avatar initials={getInitials(user?.firstName, user?.surname)} />
-        </Link>
+        {isDesktop ? (
+          <div className="hidden md:col-start-2 md:row-start-1 md:block @min-[50rem]:col-start-3">
+            <ReminderBell />
+          </div>
+        ) : null}
+        <div className="flex shrink-0 items-center gap-2 md:hidden">
+          {isDesktop ? null : (mobileActions ?? <ReminderBell />)}
+          <Link
+            to={ROUTES.profile}
+            aria-label={`Profile, ${name}`}
+            className="rounded-full transition-shadow hover:shadow-[0_0_0_3px_var(--border-strong)]">
+            <Avatar initials={getInitials(user?.firstName, user?.surname)} />
+          </Link>
+        </div>
       </div>
     </header>
   );
