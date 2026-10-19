@@ -1,6 +1,7 @@
 import { useMatch } from 'react-router';
 import { useShallow } from 'zustand/react/shallow';
 import { ROUTES } from '~/constants';
+import { useAccountDialogStore } from '~/state/accountDialog';
 import { useNoteDialogStore } from '~/state/noteDialog';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
 import { useReminderChooserStore } from '~/state/reminderChooser';
@@ -12,8 +13,9 @@ export interface AddAction {
 }
 
 /*
- * What the mobile nav's add button adds: what the page is about on Recurring, Debts and Notes, a
- * note with a date or a recurring payment on Reminders, otherwise it asks which kind of payment.
+ * What the mobile nav's add button adds: what the page is about on Recurring, Debts, Notes and
+ * Accounts, a note with a date or a recurring payment on Reminders, otherwise it asks which kind of
+ * payment.
  */
 export const useAddAction = (): AddAction => {
   const { openChooser, openAdd, openAddDebt } = usePaymentDialogStore(
@@ -24,14 +26,17 @@ export const useAddAction = (): AddAction => {
     }))
   );
   const openNote = useNoteDialogStore(s => s.openNew);
+  const openAddAccount = useAccountDialogStore(s => s.openAdd);
   const openReminderChooser = useReminderChooserStore(s => s.show);
   const onReminders = useMatch(ROUTES.reminders) !== null;
   const onRecurring = useMatch(ROUTES.recurring) !== null;
   // A debt's own page too
   const onDebts = useMatch({ path: ROUTES.debts, end: false }) !== null;
   const onNotes = useMatch(ROUTES.notes) !== null;
+  const onAccounts = useMatch(ROUTES.accounts) !== null;
 
   if (onNotes) return { label: 'Add note', open: openNote };
+  if (onAccounts) return { label: 'Add savings account', open: openAddAccount };
   if (onReminders) return { label: 'Add a reminder', open: openReminderChooser };
   if (onRecurring) {
     return { label: 'Add recurring payment', open: () => openAdd('recurring') };

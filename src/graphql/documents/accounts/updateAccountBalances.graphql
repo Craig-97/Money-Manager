@@ -1,0 +1,12 @@
+# Several balances at once, e.g. the dashboard's bank balance across the accounts that count
+mutation UpdateAccountBalances($input: UpdateAccountBalancesInput!) {
+  updateAccountBalances(input: $input) {
+    budget {
+      id
+      bankBalance
+      accounts {
+        ...AccountFields
+      }
+    }
+  }
+}

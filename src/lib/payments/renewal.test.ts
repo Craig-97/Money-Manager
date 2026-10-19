@@ -21,6 +21,7 @@ const TODAY = day('2026-10-02');
 
 const payment = (overrides: Partial<RecurringPayment> = {}): RecurringPayment => ({
   kind: 'recurring',
+  paysInto: null,
   id: 'home',
   name: 'Home insurance',
   amount: 21,

@@ -24,6 +24,8 @@ export interface FakeRecord {
   dates: string[];
   balanceChange: number;
   debt: { interest: number; reduction: number; balanceAfter: number } | null;
+  // What it added to the savings account the payment pays into
+  transfer?: { account: string; amount: number } | null;
   open: boolean;
   createdAt: string;
 }
@@ -54,6 +56,8 @@ export interface FakeRecurringPayment {
   dueReminder?: FakeTiming;
   renewalReminder?: FakeTiming;
   debt?: FakeDebt | null;
+  // A savings account it pays into
+  paysInto?: string | null;
 }
 
 export interface FakeTiming {
@@ -120,9 +124,26 @@ export interface FakePayday {
   overrides?: { for: string; date: string }[];
 }
 
+// A savings account. The current account is the budget's bankBalance and currentAccount.
+export interface FakeAccount {
+  id: string;
+  name: string;
+  kind: 'SAVINGS';
+  balance: number;
+  counts: boolean;
+  interestRate: number | null;
+  purpose: string | null;
+  balanceUpdatedAt: string;
+}
+
 export interface FakeBudget {
   id: string;
+  // The current account's balance. The API's bankBalance adds any savings that count.
   bankBalance: number;
+  // Left out, "Current account", updated today
+  currentAccount?: { id?: string; name?: string; balanceUpdatedAt?: string };
+  // Savings accounts; left out, none
+  accounts?: FakeAccount[];
   monthlyIncome: number;
   cycleStartedOn: string | null;
   recurringPayments: FakeRecurringPayment[];
@@ -193,11 +214,37 @@ export const DEFAULT_CALENDAR_FEED: FakeCalendarFeed = {
 
 // Fields the fixtures can leave out, filled in as the API would
 type Loose = Record<string, unknown>;
+
+export const CURRENT_ACCOUNT_ID = 'account-current';
+
+/* As the API: the current account first, then savings */
+const accountsOf = (budget: FakeBudget) => [
+  {
+    id: budget.currentAccount?.id ?? CURRENT_ACCOUNT_ID,
+    name: budget.currentAccount?.name ?? 'Current account',
+    kind: 'CURRENT',
+    balance: budget.bankBalance,
+    counts: true,
+    interestRate: null,
+    purpose: null,
+    balanceUpdatedAt: budget.currentAccount?.balanceUpdatedAt ?? String(Date.now())
+  },
+  ...(budget.accounts ?? [])
+];
+
+/* As the API: the accounts that count, added up */
+const countedOf = (budget: FakeBudget) =>
+  Math.round(
+    accountsOf(budget)
+      .filter(account => account.counts)
+      .reduce((total, account) => total + account.balance * 100, 0)
+  ) / 100;
 const FIELD_DEFAULTS: Record<string, Record<string, (value: Loose) => unknown>> = {
   OneOffPayment: {
     dueReminder: p => p.dueReminder ?? USUAL_TIMING
   },
   RecurringPayment: {
+    paysInto: p => p.paysInto ?? null,
     dueReminder: p => p.dueReminder ?? USUAL_TIMING,
     renewalReminder: p => p.renewalReminder ?? USUAL_TIMING
   },
@@ -208,6 +255,8 @@ const FIELD_DEFAULTS: Record<string, Record<string, (value: Loose) => unknown>> 
     payment: n => n.payment ?? null
   },
   Budget: {
+    accounts: b => accountsOf(b as unknown as FakeBudget),
+    bankBalance: b => countedOf(b as unknown as FakeBudget),
     reminderSettings: a => a.reminderSettings ?? DEFAULT_REMINDER_SETTINGS,
     reminderStates: a => a.reminderStates ?? [],
     calendarFeed: a => a.calendarFeed ?? DEFAULT_CALENDAR_FEED
@@ -303,19 +352,21 @@ const handle = (
     kind,
     dates,
     balanceChange = 0,
-    debt = null
+    debt = null,
+    transfer = null
   }: {
     kind: 'PAID' | 'SKIPPED';
     dates: Date[];
     balanceChange?: number;
     debt?: FakeRecord['debt'];
+    transfer?: FakeRecord['transfer'];
   }
 ) => {
   if (!dates.length) return;
-  addRecord(
-    payment,
-    fakeRecord(kind, { dates: dates.map(date => toApi(date)!), balanceChange, debt })
-  );
+  addRecord(payment, {
+    ...fakeRecord(kind, { dates: dates.map(date => toApi(date)!), balanceChange, debt }),
+    transfer
+  });
   payment.nextDueDate = toApi(nextOccurrence(scheduleOf(payment), addDays(dates.at(-1)!, 1)));
 };
 
@@ -566,6 +617,42 @@ export const createFakeApi = ({
   // As the API's records for paid one-offs: what paying took off, to put back on undo
   const oneOffPaid = new Map<string, number>();
 
+  const isCurrent = (id: string) =>
+    id === (requireBudget().currentAccount?.id ?? CURRENT_ACCOUNT_ID);
+  const findSavings = (id: string) => {
+    const account = (requireBudget().accounts ?? []).find(item => item.id === id);
+    if (!account) throw apiError('ACCOUNT_NOT_FOUND', { message: `No account '${id}'` });
+    return account;
+  };
+  // As the API: a balance moves by an amount without being dated, as nobody typed it in
+  const moveInto = (id: string, amount: number) => {
+    const current = requireBudget();
+    if (isCurrent(id)) current.bankBalance = roundPence(current.bankBalance + amount);
+    else {
+      const account = (current.accounts ?? []).find(item => item.id === id);
+      if (account) account.balance = roundPence(account.balance + amount);
+    }
+  };
+  // As the API: a balance typed in, dated now
+  const setBalanceOf = (id: string, balance: number) => {
+    const current = requireBudget();
+    if (isCurrent(id)) {
+      current.bankBalance = balance;
+      current.currentAccount = { ...current.currentAccount, balanceUpdatedAt: String(Date.now()) };
+      return;
+    }
+    const account = findSavings(id);
+    account.balance = balance;
+    account.balanceUpdatedAt = String(Date.now());
+  };
+  // As the API: a payment into savings adds its amount there for each date paid
+  const payInto = (payment: FakeRecurringPayment, times: number) => {
+    if (!payment.paysInto || !times) return null;
+    const amount = roundPence(payment.amount * times);
+    moveInto(payment.paysInto, amount);
+    return { account: payment.paysInto, amount };
+  };
+
   const rootValue = {
     tokenFindUser: currentUser,
     // With no id, the signed-in user's budget
@@ -685,8 +772,62 @@ export const createFakeApi = ({
     },
     updateBudget: ({ input }: Args) => {
       const current = requireBudget();
-      if (input.bankBalance !== undefined) current.bankBalance = input.bankBalance;
       if (input.monthlyIncome !== undefined) current.monthlyIncome = input.monthlyIncome;
+      return { budget: current, success: true };
+    },
+    createAccount: ({ input }: Args) => {
+      const current = requireBudget();
+      const account: FakeAccount = {
+        id: newId('account'),
+        name: input.name.trim(),
+        kind: 'SAVINGS',
+        balance: input.balance,
+        counts: input.counts ?? false,
+        interestRate: input.interestRate ?? null,
+        purpose: input.purpose?.trim() || null,
+        balanceUpdatedAt: String(Date.now())
+      };
+      current.accounts = [...(current.accounts ?? []), account];
+      return { account, budget: current, success: true };
+    },
+    updateAccount: ({ id, input }: Args) => {
+      const current = requireBudget();
+      if (isCurrent(id)) {
+        if (input.counts === false) {
+          throw apiError('CURRENT_ACCOUNT_FIXED', {
+            message: "The current account can't be kept out of free to spend"
+          });
+        }
+        if (input.name !== undefined)
+          current.currentAccount = { ...current.currentAccount, name: input.name.trim() };
+        if (input.balance !== undefined) setBalanceOf(id, input.balance);
+        return { account: accountsOf(current)[0], budget: current, success: true };
+      }
+      const account = findSavings(id);
+      if (input.name !== undefined) account.name = input.name.trim();
+      if (input.balance !== undefined) setBalanceOf(id, input.balance);
+      if (input.counts !== undefined) account.counts = input.counts;
+      if (input.interestRate !== undefined) account.interestRate = input.interestRate;
+      if (input.purpose !== undefined) account.purpose = input.purpose?.trim() || null;
+      return { account, budget: current, success: true };
+    },
+    deleteAccount: ({ id }: Args) => {
+      const current = requireBudget();
+      if (isCurrent(id)) {
+        throw apiError('CURRENT_ACCOUNT_FIXED', {
+          message: "The current account can't be deleted"
+        });
+      }
+      findSavings(id);
+      current.accounts = (current.accounts ?? []).filter(account => account.id !== id);
+      for (const payment of current.recurringPayments) {
+        if (payment.paysInto === id) payment.paysInto = null;
+      }
+      return { account: null, budget: current, success: true };
+    },
+    updateAccountBalances: ({ input }: Args) => {
+      const current = requireBudget();
+      for (const { accountId, balance } of input.balances) setBalanceOf(accountId, balance);
       return { budget: current, success: true };
     },
     // As the API: closes the records of the cycle that ended, clears away paid one-offs due before
@@ -723,7 +864,7 @@ export const createFakeApi = ({
             balanceAfter: payment.debt.balance
           };
         }
-        handle(payment, { kind: 'PAID', dates, debt });
+        handle(payment, { kind: 'PAID', dates, debt, transfer: payInto(payment, dates.length) });
       };
 
       for (const payment of current.recurringPayments) {
@@ -760,7 +901,9 @@ export const createFakeApi = ({
         if (!payment.paidAt) payment.paidAt = toApi(new Date());
       }
 
-      current.bankBalance = input.bankBalance;
+      setBalanceOf(current.currentAccount?.id ?? CURRENT_ACCOUNT_ID, input.currentBalance);
+      for (const { accountId, balance } of input.accountBalances ?? [])
+        setBalanceOf(accountId, balance);
       current.cycleStartedOn = fromInput(input.payday);
       return { budget: current, success: true };
     },
@@ -786,7 +929,8 @@ export const createFakeApi = ({
           kind: 'PAID',
           dates: [fromApiDate(payment.nextDueDate)!],
           balanceChange: change(payment),
-          debt
+          debt,
+          transfer: payInto(payment, 1)
         });
       }
       for (const id of input.oneOffPaymentIds) {
@@ -810,6 +954,7 @@ export const createFakeApi = ({
         removeRecord(payment, latest);
         payment.nextDueDate = latest.dates[0];
         current.bankBalance -= latest.balanceChange;
+        if (latest.transfer) moveInto(latest.transfer.account, -latest.transfer.amount);
         if (payment.debt && latest.debt) {
           payment.debt.balance = roundPence(payment.debt.balance + latest.debt.reduction);
         }

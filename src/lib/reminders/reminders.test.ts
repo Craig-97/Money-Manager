@@ -31,6 +31,7 @@ const CYCLE = {
 
 const payment = (overrides: Partial<RecurringPayment> & { id: string }): RecurringPayment => ({
   kind: 'recurring',
+  paysInto: null,
   name: overrides.id,
   amount: 20,
   signedAmount: -20,
@@ -271,6 +272,44 @@ describe('coming up', () => {
 
     expect(filterReminders(list, 'notes').map(item => item.kind)).toEqual(['note']);
     expect(filterReminders(list, 'payments').map(item => item.kind)).toEqual(['due', 'payday']);
+  });
+});
+
+describe('old balances', () => {
+  const isa = (updated: string) => ({
+    id: 'isa',
+    name: 'Cash ISA',
+    kind: 'SAVINGS' as const,
+    balance: 8650,
+    counts: false,
+    interestRate: 4.5,
+    purpose: null,
+    balanceUpdatedAt: day(updated)
+  });
+
+  it('reminds once a balance is four weeks old, until it is updated', () => {
+    // Set on 28 August: five weeks ago
+    const reminder = newReminders(sources({ accounts: [isa('2026-08-28')] })).find(
+      item => item.kind === 'balance'
+    )!;
+    expect(reminder).toMatchObject({
+      kind: 'balance',
+      key: 'balance:isa:2026-08-28',
+      title: 'Cash ISA balance is 5 weeks old',
+      body: 'Your Accounts total may be out of date.'
+    });
+    expect(kindText(reminder)).toBe('Balance');
+    expect(canClear(reminder)).toBe(true);
+    expect(laterUntil(reminder, TODAY)).toEqual(day('2026-10-05'));
+
+    // Updated a week ago: nothing yet, and nothing in Coming up either
+    const kinds = (reminders: { kind: string }[]) => reminders.map(item => item.kind);
+    expect(kinds(newReminders(sources({ accounts: [isa('2026-09-25')] })))).not.toContain(
+      'balance'
+    );
+    expect(kinds(upcomingReminders(sources({ accounts: [isa('2026-09-25')] })))).not.toContain(
+      'balance'
+    );
   });
 });
 

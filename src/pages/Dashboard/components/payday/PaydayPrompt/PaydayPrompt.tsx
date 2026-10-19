@@ -12,6 +12,7 @@ import { formatDayMonth, formatLongDate } from '~/lib/dates';
 import { formatBalance, formatMoney, formatPayment } from '~/lib/format';
 import { PaydayPrompt as Prompt } from '../../../hooks/usePaydayPrompt';
 import { GoneOutCheck } from '../GoneOutCheck';
+import { SavingsCheck } from '../SavingsCheck';
 import { Step } from '../Step';
 import { StepNumber } from '../StepNumber';
 
@@ -65,7 +66,7 @@ export const PaydayPrompt = ({ prompt }: { prompt: Prompt }) => {
                 New cycle started
               </Dialog.Title>
               <p className="max-w-[400px] text-sm leading-[1.6] font-medium text-muted">
-                Bank balance set to{' '}
+                Current account set to{' '}
                 <span className="num font-bold text-text">
                   {formatBalance(prompt.resultBalance)}
                 </span>
@@ -126,7 +127,7 @@ export const PaydayPrompt = ({ prompt }: { prompt: Prompt }) => {
 
                 <Step
                   number={hasCheck ? 2 : 1}
-                  title="Confirm your bank balance"
+                  title="Confirm your current account"
                   titleFor="payday-balance">
                   <div className="mt-3 flex h-[60px] items-center gap-1.5 rounded-[18px] border-[1.5px] border-border-strong bg-surface-2 px-[18px] transition-[border-color,box-shadow] focus-within:border-accent focus-within:shadow-[0_0_0_4px_var(--accent-soft)]">
                     <span
@@ -151,7 +152,7 @@ export const PaydayPrompt = ({ prompt }: { prompt: Prompt }) => {
                     className="mt-2 text-xs leading-normal font-medium text-muted md:mt-2.5 md:text-[13px]">
                     Projected:{' '}
                     <span className="num font-bold text-text">
-                      {formatMoney(prompt.bankBalance, { whole: true })}
+                      {formatMoney(prompt.lastBalance, { whole: true })}
                     </span>{' '}
                     +{' '}
                     <span className="num font-bold text-text">
@@ -171,6 +172,10 @@ export const PaydayPrompt = ({ prompt }: { prompt: Prompt }) => {
                     . Adjust if your bank says otherwise.
                   </p>
                 </Step>
+
+                {prompt.savings.rows.length ? (
+                  <SavingsCheck prompt={prompt} number={hasCheck ? 3 : 2} />
+                ) : null}
 
                 {firstOverdue && firstOverdue.dueDate ? (
                   <div className="flex items-center gap-3 rounded-[18px] border border-border bg-surface-2 py-3 pr-3 pl-3.5 md:grid md:grid-cols-[32px_minmax(0,1fr)] md:gap-x-4 md:border-0 md:bg-transparent md:p-0">

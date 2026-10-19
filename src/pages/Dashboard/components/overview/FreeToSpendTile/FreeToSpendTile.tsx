@@ -131,7 +131,14 @@ export const FreeToSpendTile = ({ dashboard }: { dashboard: Dashboard }) => {
                 </span>
               </>
             ) : (
-              <p className="num text-lg font-extrabold">{formatBalance(dashboard.bankBalance)}</p>
+              <>
+                <p className="num text-lg font-extrabold">{formatBalance(dashboard.bankBalance)}</p>
+                {dashboard.countedAccounts > 1 ? (
+                  <p className="text-xs font-medium text-hero-muted">
+                    {dashboard.countedAccounts} accounts
+                  </p>
+                ) : null}
+              </>
             )}
           </div>
           <span

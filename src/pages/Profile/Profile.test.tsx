@@ -144,28 +144,30 @@ describe('profile', () => {
     ).toBeInTheDocument();
   });
 
-  it('shows what a new balance means before saving it', async () => {
+  it('shows the bank balance from the accounts, and what new income means before saving it', async () => {
     const { user, api } = renderProfile();
     const balances = await section('Balances');
-    const free = () => within(balances).getByText('Free to spend').nextElementSibling;
-    const before = free()?.textContent;
+    expect(within(balances).getByRole('link', { name: /Manage accounts/ })).toHaveAttribute(
+      'href',
+      '/accounts'
+    );
+    expect(within(balances).getByText('From 1 of your 1 account')).toBeInTheDocument();
+    const payday = () => within(balances).getByText('Payday balance').nextElementSibling;
+    const before = payday()?.textContent;
 
-    const save = within(balances).getByRole('button', { name: 'Save changes' });
+    const save = within(balances).getByRole('button', { name: 'Save income' });
     expect(save).toBeDisabled();
 
-    const bank = within(balances).getByLabelText('Bank balance');
-    await user.clear(bank);
-    await user.type(bank, '2000');
-    expect(free()?.textContent).not.toBe(before);
+    const income = within(balances).getByLabelText('Monthly income');
+    await user.clear(income);
+    await user.type(income, '3000');
+    expect(payday()?.textContent).not.toBe(before);
 
     await user.click(save);
 
-    expect(await screen.findByText('Balances saved')).toBeInTheDocument();
+    expect(await screen.findByText('Income saved')).toBeInTheDocument();
     expect(api.callsTo('UpdateBudget')).toEqual([
-      {
-        id: 'budget-1',
-        input: { bankBalance: 2000, monthlyIncome: DEFAULT_BUDGET.monthlyIncome }
-      }
+      { id: 'budget-1', input: { monthlyIncome: 3000 } }
     ]);
   });
 

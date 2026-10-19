@@ -116,6 +116,88 @@ describe('adding a recurring payment as a debt', () => {
   });
 });
 
+describe('paying into savings', () => {
+  const withSavings = (): FakeBudget => ({
+    ...budget(),
+    accounts: [
+      {
+        id: 'isa',
+        name: 'Cash ISA',
+        kind: 'SAVINGS',
+        balance: 8650,
+        counts: false,
+        interestRate: 4.5,
+        purpose: null,
+        balanceUpdatedAt: String(Date.now())
+      },
+      {
+        id: 'easy',
+        name: 'Easy access',
+        kind: 'SAVINGS',
+        balance: 4200,
+        counts: true,
+        interestRate: null,
+        purpose: null,
+        balanceUpdatedAt: String(Date.now())
+      }
+    ]
+  });
+
+  it('pays a new recurring expense into a savings account, saying what that means', async () => {
+    const { user, api } = renderApp({
+      route: '/recurring',
+      api: createFakeApi({ budget: withSavings() })
+    });
+
+    await user.click(await screen.findByRole('button', { name: 'Recurring payment' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Add recurring payment' });
+    await user.type(within(dialog).getByLabelText('Name'), 'ISA top-up');
+    await user.type(within(dialog).getByLabelText('Amount'), '250');
+    await user.click(within(dialog).getByRole('switch', { name: 'Pays into savings' }));
+
+    // Not a debt as well
+    expect(
+      within(dialog).queryByRole('switch', { name: 'Track as a debt' })
+    ).not.toBeInTheDocument();
+    expect(within(dialog).getByRole('combobox', { name: 'Into' })).toHaveTextContent('Cash ISA');
+    expect(dialog).toHaveTextContent('When it’s marked paid, £250.00 is added to Cash ISA.');
+
+    await user.click(within(dialog).getByRole('button', { name: 'Add recurring payment' }));
+
+    expect(await screen.findByText('Added ISA top-up')).toBeInTheDocument();
+    expect(api.callsTo('CreateRecurringPayment')).toEqual([
+      { input: expect.objectContaining({ name: 'ISA top-up', paysInto: 'isa' }) }
+    ]);
+  });
+
+  it('says a payment into savings that counts only moves money', async () => {
+    const { user } = renderApp({
+      route: '/recurring',
+      api: createFakeApi({ budget: withSavings() })
+    });
+
+    await user.click(await screen.findByRole('button', { name: 'Recurring payment' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Add recurring payment' });
+    await user.click(within(dialog).getByRole('switch', { name: 'Pays into savings' }));
+    await user.click(within(dialog).getByRole('combobox', { name: 'Into' }));
+    await user.click(await screen.findByRole('option', { name: 'Easy access' }));
+
+    expect(dialog).toHaveTextContent(
+      'Easy access counts in free to spend, so this only moves money between your accounts.'
+    );
+  });
+
+  it('isn’t offered without savings, or for income', async () => {
+    const { user } = renderAt('/recurring');
+
+    await user.click(await screen.findByRole('button', { name: 'Recurring payment' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Add recurring payment' });
+    expect(
+      within(dialog).queryByRole('switch', { name: 'Pays into savings' })
+    ).not.toBeInTheDocument();
+  });
+});
+
 describe('adding a debt from Debts', () => {
   it('is always a debt, with no switch', async () => {
     const { user, api } = renderAt('/debts');

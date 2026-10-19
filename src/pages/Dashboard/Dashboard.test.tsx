@@ -213,12 +213,51 @@ describe('dashboard', () => {
     await user.clear(field);
     await user.type(field, '1,500{Enter}');
 
+    // Only the current account counts, so the bank balance is its balance
     await waitFor(() =>
-      expect(api.callsTo('UpdateBudget')).toEqual([
-        { id: 'budget-1', input: { bankBalance: 1500 } }
+      expect(api.callsTo('UpdateAccount')).toEqual([
+        { id: 'account-current', input: { balance: 1500 } }
       ])
     );
     expect(await within(freeToSpend()).findByText('£1,530.00')).toBeInTheDocument();
+  });
+
+  it('checks each account’s balance once more than one counts', async () => {
+    const { user, api } = renderDashboard(
+      budget({
+        accounts: [
+          {
+            id: 'easy',
+            name: 'Easy access',
+            kind: 'SAVINGS',
+            balance: 4200,
+            counts: true,
+            interestRate: 4.1,
+            purpose: null,
+            balanceUpdatedAt: String(Date.now())
+          }
+        ]
+      })
+    );
+
+    const figures = await screen.findByRole('group', { name: 'How free to spend is worked out' });
+    expect(within(figures).getByText('2 accounts')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Edit bank balance' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Bank balance' });
+    expect(within(dialog).getByText('£5,200.00')).toBeInTheDocument();
+
+    const easy = within(dialog).getByLabelText('Easy access');
+    await user.clear(easy);
+    await user.type(easy, '4,300');
+    expect(within(dialog).getByText('£5,300.00')).toBeInTheDocument();
+    await user.click(within(dialog).getByRole('button', { name: 'Save' }));
+
+    await waitFor(() =>
+      expect(api.callsTo('UpdateAccountBalances')).toEqual([
+        { input: { budgetId: 'budget-1', balances: [{ accountId: 'easy', balance: 4300 }] } }
+      ])
+    );
+    expect(await within(freeToSpend()).findByText('£5,300.00')).toBeInTheDocument();
   });
 
   it('deletes the payments ticked in the list', async () => {
@@ -391,7 +430,7 @@ describe('payday prompt', () => {
     const dialog = await screen.findByRole('dialog', { name: 'It’s payday' });
     expect(within(dialog).getByText('From last cycle')).toBeInTheDocument();
     expect(outcomeOf(dialog, 'Netflix').getByRole('radio', { name: 'Paid' })).toBeChecked();
-    const balance = within(dialog).getByLabelText(/Confirm your bank balance/);
+    const balance = within(dialog).getByLabelText(/Confirm your current account/);
     // £1,000 plus £2,500 income, less Netflix's £20 from August, which went out
     expect(balance).toHaveValue('3,480.00');
     expect(within(dialog).getByText('Projected')).toBeInTheDocument();
@@ -403,13 +442,14 @@ describe('payday prompt', () => {
 
     expect(await within(dialog).findByText('New cycle started')).toBeInTheDocument();
     expect(dialog).toHaveTextContent(
-      'Bank balance set to £3,450.00. Netflix was recorded as paid.'
+      'Current account set to £3,450.00. Netflix was recorded as paid.'
     );
     expect(api.callsTo('StartPaydayCycle')).toEqual([
       {
         input: expect.objectContaining({
           budgetId: 'budget-1',
-          bankBalance: 3450,
+          currentBalance: 3450,
+          accountBalances: [],
           leftOver: [{ recurringPaymentId: 'netflix', outcome: 'PAID' }],
           alreadyPaid: { recurringPaymentIds: [], oneOffPaymentIds: [] }
         })
@@ -424,7 +464,7 @@ describe('payday prompt', () => {
     await user.click(outcomeOf(dialog, 'Netflix').getByRole('radio', { name: 'Didn’t go out' }));
 
     expect(within(dialog).getByText('Next due today')).toBeInTheDocument();
-    expect(within(dialog).getByLabelText(/Confirm your bank balance/)).toHaveValue('3,500.00');
+    expect(within(dialog).getByLabelText(/Confirm your current account/)).toHaveValue('3,500.00');
     await user.click(within(dialog).getByRole('button', { name: 'Start new cycle' }));
 
     expect(await within(dialog).findByText(/Netflix was recorded as skipped/)).toBeInTheDocument();
@@ -447,7 +487,7 @@ describe('payday prompt', () => {
     expect(within(dialog).getByText('Stays due, shown as overdue')).toBeInTheDocument();
     // August's date comes first, so today's isn't offered until that's dealt with
     expect(within(dialog).queryByRole('checkbox', { name: /Netflix/ })).not.toBeInTheDocument();
-    expect(within(dialog).getByLabelText(/Confirm your bank balance/)).toHaveValue('3,500.00');
+    expect(within(dialog).getByLabelText(/Confirm your current account/)).toHaveValue('3,500.00');
   });
 
   it('takes off a payment due today once it’s ticked as gone out', async () => {
@@ -458,7 +498,7 @@ describe('payday prompt', () => {
     await user.click(within(dialog).getByRole('checkbox', { name: /Netflix/ }));
 
     // August's £20 and today's £20
-    expect(within(dialog).getByLabelText(/Confirm your bank balance/)).toHaveValue('3,460.00');
+    expect(within(dialog).getByLabelText(/Confirm your current account/)).toHaveValue('3,460.00');
     expect(dialog).toHaveTextContent('Projected: £1,000 + £2,500 income − £40 gone out.');
     await user.click(within(dialog).getByRole('button', { name: 'Start new cycle' }));
 
@@ -470,6 +510,47 @@ describe('payday prompt', () => {
           alreadyPaid: { recurringPaymentIds: ['netflix'], oneOffPaymentIds: [] }
         })
       }
+    ]);
+  });
+
+  it('adds a top-up into savings, and asks about savings balances only if wanted', async () => {
+    const data = paydayBudget();
+    data.accounts = [
+      {
+        id: 'isa',
+        name: 'Cash ISA',
+        kind: 'SAVINGS',
+        balance: 8650,
+        counts: false,
+        interestRate: 4.5,
+        purpose: null,
+        balanceUpdatedAt: String(Date.now() - 40 * 86_400_000)
+      }
+    ];
+    data.recurringPayments[0] = {
+      ...data.recurringPayments[0],
+      name: 'ISA top-up',
+      paysInto: 'isa'
+    };
+    const { user, api } = renderDashboard(data);
+
+    const dialog = await screen.findByRole('dialog', { name: 'It’s payday' });
+    expect(within(dialog).getByText('Adds £20.00 to Cash ISA')).toBeInTheDocument();
+    expect(within(dialog).getByText('Into Cash ISA · due today')).toBeInTheDocument();
+
+    // Folded until asked for, saying which balance is old
+    const savings = within(dialog).getByRole('button', { name: /Update your savings too/ });
+    expect(savings).toHaveTextContent('1 account · Cash ISA updated 6 weeks ago');
+    await user.click(savings);
+    const isa = within(dialog).getByLabelText('Cash ISA');
+    expect(isa).toHaveValue('8,670.00');
+    expect(within(dialog).getByText('Includes £20.00 paid in')).toBeInTheDocument();
+
+    await user.click(within(dialog).getByRole('button', { name: 'Start new cycle' }));
+    expect(await within(dialog).findByText(/£20.00 added to Cash ISA/)).toBeInTheDocument();
+    // Left as filled in, so the API adds the top-up itself
+    expect(api.callsTo('StartPaydayCycle')).toEqual([
+      { input: expect.objectContaining({ accountBalances: [] }) }
     ]);
   });
 
@@ -528,7 +609,7 @@ describe('payday prompt', () => {
 
     const dialog = await screen.findByRole('dialog', { name: 'Start your new pay cycle' });
     expect(within(dialog).queryByText('Check what’s gone out')).not.toBeInTheDocument();
-    expect(within(dialog).getByLabelText(/Confirm your bank balance/)).toHaveValue('3,500.00');
+    expect(within(dialog).getByLabelText(/Confirm your current account/)).toHaveValue('3,500.00');
   });
 
   it("doesn't show once this cycle has started", async () => {

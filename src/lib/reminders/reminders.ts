@@ -1,3 +1,4 @@
+import { Account, balanceAge, STALE_DAYS } from '~/lib/accounts';
 import { addDays, daysBetween, fromApiDate, toIsoDate } from '~/lib/dates';
 import { formatMoney } from '~/lib/format';
 import { Note, noteDateFrom, noteHeading, remindText, repeatText } from '~/lib/notes';
@@ -17,11 +18,13 @@ import {
  * the user did with each one is kept, on the API, by a key that names what it's about and the date
  * it's for, so the next time round is a new reminder.
  *
- * New holds the ones that have gone off and haven't been cleared or put away until later. Coming up
- * is what's ahead: each payment's next date, renewals, dated notes and the next payday.
+ * New holds the ones that have gone off and haven't been cleared or put away until later, a balance
+ * that may be out of date among them. Coming up is what's ahead: each payment's next date,
+ * renewals, dated notes and the next payday.
  */
 
-export type ReminderKind = 'due' | 'overdue' | 'renewal' | 'renewed' | 'note' | 'payday';
+export type ReminderKind =
+  'due' | 'overdue' | 'renewal' | 'renewed' | 'note' | 'payday' | 'balance';
 
 // The Coming up filters; paydays count as payments
 export type ReminderFilter = 'all' | 'payments' | 'renewals' | 'notes';
@@ -51,6 +54,8 @@ export interface Reminder {
   read: boolean;
   // A payday whose new cycle hasn't been started on the dashboard yet
   awaitingStart?: boolean;
+  // An account whose balance hasn't been typed in for a while
+  account?: Account | null;
 }
 
 export interface ReminderState {
@@ -90,6 +95,8 @@ export interface ReminderSources {
   payAmount: number | null;
   states: ReminderStates;
   today: Date;
+  // Left out, no balances to remind about
+  accounts?: readonly Account[];
 }
 
 // A payday's reminder stays in New for a week
@@ -103,7 +110,8 @@ const LATER_DAYS: Record<ReminderKind, number> = {
   renewal: 3,
   renewed: 3,
   note: 3,
-  payday: 1
+  payday: 1,
+  balance: 3
 };
 
 const keyOf = (kind: string, ...parts: (string | Date)[]) =>
@@ -311,6 +319,33 @@ const paydayEvents = ({ settings, cycle, cycleStartedOn, payAmount, today }: Rem
   return events;
 };
 
+/*
+ * A balance not typed in for four weeks: it may be out of date. The key has the day it was last
+ * set, so updating it clears this one, and the next is four weeks after that.
+ */
+const balanceEvents = ({ accounts = [], today }: ReminderSources): Omit<Reminder, 'read'>[] =>
+  accounts.flatMap(account => {
+    const firesOn = addDays(account.balanceUpdatedAt, STALE_DAYS);
+    const weeks = Math.max(4, Math.round(balanceAge(account, today) / 7));
+    return [
+      {
+        key: keyOf('balance', account.id, account.balanceUpdatedAt),
+        kind: 'balance',
+        date: firesOn,
+        firesOn,
+        timing: 'After 4 weeks',
+        title: `${account.name} balance is ${weeks} weeks old`,
+        name: `${account.name} balance`,
+        body: 'Your Accounts total may be out of date.',
+        amount: null,
+        payment: null,
+        note: null,
+        paymentNote: null,
+        account
+      }
+    ];
+  });
+
 const isPutAway = (state: ReminderState | undefined, today: Date) =>
   !!state?.snoozedUntil && state.snoozedUntil > today;
 
@@ -340,7 +375,8 @@ export const allReminders = (sources: ReminderSources): Reminder[] =>
     ...paymentEvents(sources),
     ...renewalEvents(sources),
     ...noteEvents(sources),
-    ...paydayEvents(sources)
+    ...paydayEvents(sources),
+    ...balanceEvents(sources)
   ].map(reminder => ({ ...reminder, read: sources.states.get(reminder.key)?.read ?? false }));
 
 /* New: the ones that have gone off, overdue payments first, then the latest first */
@@ -368,6 +404,8 @@ export const upcomingReminders = (sources: ReminderSources) =>
         reminder.date >= sources.today &&
         reminder.kind !== 'overdue' &&
         reminder.kind !== 'renewed' &&
+        // Not an event, only a nudge once it's due one
+        reminder.kind !== 'balance' &&
         !isYearlyDue(reminder)
     )
     .sort((a, b) => byTime(a.date, b.date) || a.name.localeCompare(b.name));
@@ -412,5 +450,7 @@ export const kindText = (reminder: Reminder) => {
       return 'Note';
     case 'payday':
       return 'Payday';
+    case 'balance':
+      return 'Balance';
   }
 };

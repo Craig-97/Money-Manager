@@ -4,6 +4,7 @@ import { useMediaQuery } from '~/hooks/useMediaQuery';
 import { useDashboard, usePaydayPrompt } from '../../hooks';
 import { AlertStack } from '../alerts';
 import {
+  BankBalanceDialog,
   FreeToSpendTile,
   MobileDiscretionary,
   MobileFigures,
@@ -29,6 +30,7 @@ export const DashboardContent = ({ budget }: { budget: Budget }) => {
   return (
     <>
       <PaydayPrompt prompt={prompt} />
+      <BankBalanceDialog dialog={dashboard.bankBalanceDialog} today={dashboard.today} />
       <AlertStack dashboard={dashboard} />
       {isDesktop ? (
         <section

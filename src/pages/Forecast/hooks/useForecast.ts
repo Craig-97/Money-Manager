@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Budget } from '~/hooks/useBudget';
 import { usePayCycle } from '~/hooks/usePayCycle';
+import { forFreeToSpend, toAccounts } from '~/lib/accounts';
 import { daysBetween } from '~/lib/dates';
 import { summarise, toPayments } from '~/lib/payments';
 import { defaultSpend, monthRows, project, spendLimit } from '../forecastModel';
@@ -12,7 +13,8 @@ export type RowsPerPage = (typeof ROWS_PER_PAGE)[number];
 export const useForecast = (budget: Budget) => {
   const { today, cycle, holidays } = usePayCycle(budget.payday);
   const summary = summarise({
-    payments: toPayments(budget, today),
+    // A payment into savings that count only moves money within the bank balance
+    payments: forFreeToSpend(toPayments(budget, today), toAccounts(budget.accounts, today)),
     bankBalance: budget.bankBalance,
     monthlyIncome: budget.monthlyIncome,
     cycle,

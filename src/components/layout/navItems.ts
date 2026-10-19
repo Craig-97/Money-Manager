@@ -1,6 +1,7 @@
 import { ComponentType } from 'react';
 import { PageName } from '~/app/routes/pageModules';
 import {
+  AccountsIcon,
   DashboardIcon,
   DebtsIcon,
   ForecastIcon,
@@ -37,6 +38,13 @@ export const MAIN_NAV: NavItem[] = [
     section: 'main'
   },
   { to: ROUTES.forecast, label: 'Forecast', page: 'forecast', Icon: ForecastIcon, section: 'main' },
+  {
+    to: ROUTES.accounts,
+    label: 'Accounts',
+    page: 'accounts',
+    Icon: AccountsIcon,
+    section: 'more'
+  },
   { to: ROUTES.debts, label: 'Debts', page: 'debts', Icon: DebtsIcon, section: 'more' },
   { to: ROUTES.notes, label: 'Notes', page: 'notes', Icon: NotesIcon, section: 'more' },
   {

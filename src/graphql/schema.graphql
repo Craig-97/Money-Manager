@@ -81,6 +81,10 @@ type Mutation {
   skipRecurringPayments(input: SkipRecurringPaymentsInput!): BudgetResponse!
   logDebtOverpayment(input: LogDebtOverpaymentInput!): BudgetResponse!
   undoDebtOverpayment(input: UndoDebtOverpaymentInput!): BudgetResponse!
+  createAccount(input: CreateAccountInput!): AccountResponse!
+  updateAccount(id: ID!, input: UpdateAccountInput!): AccountResponse!
+  deleteAccount(id: ID!): AccountResponse!
+  updateAccountBalances(input: UpdateAccountBalancesInput!): BudgetResponse!
   createOneOffPayment(input: CreateOneOffPaymentInput!): OneOffPaymentResponse!
   updateOneOffPayment(id: ID!, input: UpdateOneOffPaymentInput!): OneOffPaymentResponse!
   batchDeleteOneOffPayments(ids: [ID!]!): DeleteResponse!
@@ -108,6 +112,7 @@ type Budget {
   id: ID!
   user: User
   bankBalance: Float!
+  accounts: [Account!]!
   monthlyIncome: Float!
   oneOffPayments: [OneOffPayment]
   recurringPayments: [RecurringPayment]
@@ -128,7 +133,6 @@ input CreateBudgetInput {
 }
 
 input UpdateBudgetInput {
-  bankBalance: Float
   monthlyIncome: Float
 }
 
@@ -174,12 +178,62 @@ input AlreadyPaidInput {
 input StartPaydayCycleInput {
   budgetId: ID!
   payday: String!
-  bankBalance: Float!
+  currentBalance: Float!
+  accountBalances: [AccountBalanceInput!]
   leftOver: [LeftOverPaymentInput!]!
   alreadyPaid: AlreadyPaidInput
 }
 
 type BudgetResponse {
+  budget: Budget
+  success: Boolean!
+}
+
+enum AccountKind {
+  CURRENT
+  SAVINGS
+}
+
+type Account {
+  id: ID!
+  name: String!
+  kind: AccountKind!
+  balance: Float!
+  counts: Boolean!
+  interestRate: Float
+  purpose: String
+  balanceUpdatedAt: String!
+}
+
+input CreateAccountInput {
+  budgetId: ID!
+  name: String!
+  balance: Float!
+  counts: Boolean
+  interestRate: Float
+  purpose: String
+}
+
+input UpdateAccountInput {
+  name: String
+  balance: Float
+  counts: Boolean
+  interestRate: Float
+  purpose: String
+}
+
+input AccountBalanceInput {
+  accountId: ID!
+  balance: Float!
+}
+
+input UpdateAccountBalancesInput {
+  budgetId: ID!
+  balances: [AccountBalanceInput!]!
+}
+
+type AccountResponse {
+  account: Account
   budget: Budget
   success: Boolean!
 }
@@ -314,6 +368,7 @@ type RecurringPayment {
   dueReminder: ReminderTiming!
   renewalReminder: ReminderTiming!
   debt: Debt
+  paysInto: ID
 }
 
 type Debt {
@@ -336,8 +391,14 @@ type PaymentRecord {
   dates: [String!]!
   balanceChange: Float!
   debt: PaymentRecordDebt
+  transfer: PaymentRecordTransfer
   open: Boolean!
   createdAt: String!
+}
+
+type PaymentRecordTransfer {
+  account: ID!
+  amount: Float!
 }
 
 type PaymentRecordDebt {
@@ -359,6 +420,7 @@ input CreateRecurringPaymentInput {
   dueReminder: ReminderTimingInput
   renewalReminder: ReminderTimingInput
   debt: DebtInput
+  paysInto: ID
 }
 
 input RecurringPaymentInput {
@@ -373,6 +435,7 @@ input RecurringPaymentInput {
   dueReminder: ReminderTimingInput
   renewalReminder: ReminderTimingInput
   debt: DebtInput
+  paysInto: ID
 }
 
 input UpdateRecurringPaymentInput {
@@ -387,6 +450,7 @@ input UpdateRecurringPaymentInput {
   dueReminder: ReminderTimingInput
   renewalReminder: ReminderTimingInput
   debt: DebtInput
+  paysInto: ID
 }
 
 type RecurringPaymentResponse {

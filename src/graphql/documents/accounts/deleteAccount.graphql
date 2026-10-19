@@ -1,0 +1,15 @@
+# A savings account. Payments into it carry on as plain expenses.
+mutation DeleteAccount($id: ID!) {
+  deleteAccount(id: $id) {
+    budget {
+      id
+      bankBalance
+      accounts {
+        ...AccountFields
+      }
+      recurringPayments {
+        ...RecurringPaymentFields
+      }
+    }
+  }
+}

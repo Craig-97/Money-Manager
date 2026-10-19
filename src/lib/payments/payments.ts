@@ -78,6 +78,8 @@ export interface RecurringPayment extends BasePayment {
   renewalReminderDays: number;
   // Set when it's paying off a loan or card
   debt: Debt | null;
+  // The savings account it moves money into, like a standing order
+  paysInto: string | null;
 }
 
 export interface OneOffPayment extends BasePayment {
@@ -136,7 +138,8 @@ const toRecurringPayment = (
           balanceUpdatedAt: fromApiDate(payment.debt.balanceUpdatedAt),
           paidOffThisCycle: payment.debt.paidOffThisCycle
         }
-      : null
+      : null,
+    paysInto: payment.paysInto ?? null
   };
 };
 

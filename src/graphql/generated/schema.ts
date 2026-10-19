@@ -9,6 +9,32 @@ export type Scalars = {
   Float: { input: number; output: number };
 };
 
+export type Account = {
+  __typename: 'Account';
+  balance: Scalars['Float']['output'];
+  balanceUpdatedAt: Scalars['String']['output'];
+  counts: Scalars['Boolean']['output'];
+  id: Scalars['ID']['output'];
+  interestRate: Maybe<Scalars['Float']['output']>;
+  kind: AccountKind;
+  name: Scalars['String']['output'];
+  purpose: Maybe<Scalars['String']['output']>;
+};
+
+export type AccountBalanceInput = {
+  accountId: Scalars['ID']['input'];
+  balance: Scalars['Float']['input'];
+};
+
+export type AccountKind = 'CURRENT' | 'SAVINGS';
+
+export type AccountResponse = {
+  __typename: 'AccountResponse';
+  account: Maybe<Account>;
+  budget: Maybe<Budget>;
+  success: Scalars['Boolean']['output'];
+};
+
 export type AlreadyPaidInput = {
   oneOffPaymentIds: Array<Scalars['ID']['input']>;
   recurringPaymentIds: Array<Scalars['ID']['input']>;
@@ -25,6 +51,7 @@ export type BankHolidayRegion = 'ENGLAND_AND_WALES' | 'NORTHERN_IRELAND' | 'SCOT
 
 export type Budget = {
   __typename: 'Budget';
+  accounts: Array<Account>;
   bankBalance: Scalars['Float']['output'];
   calendarFeed: CalendarFeed;
   cycleStartedOn: Maybe<Scalars['String']['output']>;
@@ -54,6 +81,15 @@ export type CalendarFeed = {
   renewals: Scalars['Boolean']['output'];
   showAmounts: Scalars['Boolean']['output'];
   token: Maybe<Scalars['String']['output']>;
+};
+
+export type CreateAccountInput = {
+  balance: Scalars['Float']['input'];
+  budgetId: Scalars['ID']['input'];
+  counts?: InputMaybe<Scalars['Boolean']['input']>;
+  interestRate?: InputMaybe<Scalars['Float']['input']>;
+  name: Scalars['String']['input'];
+  purpose?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type CreateBudgetInput = {
@@ -94,6 +130,7 @@ export type CreateRecurringPaymentInput = {
   frequency: PaymentFrequency;
   lastPaymentDate?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
+  paysInto?: InputMaybe<Scalars['ID']['input']>;
   renewalDate?: InputMaybe<Scalars['String']['input']>;
   renewalReminder?: InputMaybe<ReminderTimingInput>;
   type: PaymentType;
@@ -151,10 +188,12 @@ export type Mutation = {
   batchDeleteOneOffPayments: DeleteResponse;
   batchDeleteRecurringPayments: DeleteResponse;
   changePassword: UserResponse;
+  createAccount: AccountResponse;
   createBudget: BudgetResponse;
   createNote: NoteResponse;
   createOneOffPayment: OneOffPaymentResponse;
   createRecurringPayment: RecurringPaymentResponse;
+  deleteAccount: AccountResponse;
   deleteCurrentUser: UserResponse;
   deleteNote: DeleteResponse;
   logDebtOverpayment: BudgetResponse;
@@ -172,6 +211,8 @@ export type Mutation = {
   skipRecurringPayments: BudgetResponse;
   startPaydayCycle: BudgetResponse;
   undoDebtOverpayment: BudgetResponse;
+  updateAccount: AccountResponse;
+  updateAccountBalances: BudgetResponse;
   updateBudget: BudgetResponse;
   updateCalendarFeed: BudgetResponse;
   updateCurrentUser: UserResponse;
@@ -197,6 +238,10 @@ export type MutationChangePasswordArgs = {
   newPassword: Scalars['String']['input'];
 };
 
+export type MutationCreateAccountArgs = {
+  input: CreateAccountInput;
+};
+
 export type MutationCreateBudgetArgs = {
   input: CreateBudgetInput;
 };
@@ -211,6 +256,10 @@ export type MutationCreateOneOffPaymentArgs = {
 
 export type MutationCreateRecurringPaymentArgs = {
   input: CreateRecurringPaymentInput;
+};
+
+export type MutationDeleteAccountArgs = {
+  id: Scalars['ID']['input'];
 };
 
 export type MutationDeleteNoteArgs = {
@@ -267,6 +316,15 @@ export type MutationStartPaydayCycleArgs = {
 
 export type MutationUndoDebtOverpaymentArgs = {
   input: UndoDebtOverpaymentInput;
+};
+
+export type MutationUpdateAccountArgs = {
+  id: Scalars['ID']['input'];
+  input: UpdateAccountInput;
+};
+
+export type MutationUpdateAccountBalancesArgs = {
+  input: UpdateAccountBalancesInput;
 };
 
 export type MutationUpdateBudgetArgs = {
@@ -447,6 +505,7 @@ export type PaymentRecord = {
   id: Scalars['ID']['output'];
   kind: PaymentRecordKind;
   open: Scalars['Boolean']['output'];
+  transfer: Maybe<PaymentRecordTransfer>;
 };
 
 export type PaymentRecordDebt = {
@@ -457,6 +516,12 @@ export type PaymentRecordDebt = {
 };
 
 export type PaymentRecordKind = 'BALANCE_SET' | 'OVERPAYMENT' | 'PAID' | 'SKIPPED';
+
+export type PaymentRecordTransfer = {
+  __typename: 'PaymentRecordTransfer';
+  account: Scalars['ID']['output'];
+  amount: Scalars['Float']['output'];
+};
 
 export type PaymentType = 'EXPENSE' | 'INCOME';
 
@@ -494,6 +559,7 @@ export type RecurringPayment = {
   lastPaymentDate: Maybe<Scalars['String']['output']>;
   name: Scalars['String']['output'];
   nextDueDate: Maybe<Scalars['String']['output']>;
+  paysInto: Maybe<Scalars['ID']['output']>;
   renewalDate: Maybe<Scalars['String']['output']>;
   renewalReminder: ReminderTiming;
   thisCycle: Array<PaymentRecord>;
@@ -536,6 +602,7 @@ export type RecurringPaymentInput = {
   frequency: PaymentFrequency;
   lastPaymentDate?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
+  paysInto?: InputMaybe<Scalars['ID']['input']>;
   renewalDate?: InputMaybe<Scalars['String']['input']>;
   renewalReminder?: InputMaybe<ReminderTimingInput>;
   type: PaymentType;
@@ -595,9 +662,10 @@ export type SkipRecurringPaymentsInput = {
 };
 
 export type StartPaydayCycleInput = {
+  accountBalances?: InputMaybe<Array<AccountBalanceInput>>;
   alreadyPaid?: InputMaybe<AlreadyPaidInput>;
-  bankBalance: Scalars['Float']['input'];
   budgetId: Scalars['ID']['input'];
+  currentBalance: Scalars['Float']['input'];
   leftOver: Array<LeftOverPaymentInput>;
   payday: Scalars['String']['input'];
 };
@@ -614,8 +682,20 @@ export type UndoDebtOverpaymentInput = {
   recordId: Scalars['ID']['input'];
 };
 
+export type UpdateAccountBalancesInput = {
+  balances: Array<AccountBalanceInput>;
+  budgetId: Scalars['ID']['input'];
+};
+
+export type UpdateAccountInput = {
+  balance?: InputMaybe<Scalars['Float']['input']>;
+  counts?: InputMaybe<Scalars['Boolean']['input']>;
+  interestRate?: InputMaybe<Scalars['Float']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  purpose?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type UpdateBudgetInput = {
-  bankBalance?: InputMaybe<Scalars['Float']['input']>;
   monthlyIncome?: InputMaybe<Scalars['Float']['input']>;
 };
 
@@ -657,6 +737,7 @@ export type UpdateRecurringPaymentInput = {
   frequency?: InputMaybe<PaymentFrequency>;
   lastPaymentDate?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
+  paysInto?: InputMaybe<Scalars['ID']['input']>;
   renewalDate?: InputMaybe<Scalars['String']['input']>;
   renewalReminder?: InputMaybe<ReminderTimingInput>;
   type?: InputMaybe<PaymentType>;

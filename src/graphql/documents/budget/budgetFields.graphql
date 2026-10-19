@@ -2,7 +2,11 @@
 # so a mutation that returns one updates every page that shows it.
 fragment BudgetFields on Budget {
   id
+  # The accounts that count in free to spend, added up
   bankBalance
+  accounts {
+    ...AccountFields
+  }
   monthlyIncome
   cycleStartedOn
   payday {

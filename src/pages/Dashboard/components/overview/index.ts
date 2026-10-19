@@ -1,3 +1,4 @@
+export * from './BankBalanceDialog';
 export * from './FreeToSpendTile';
 export * from './IncomeSplit';
 export * from './MobileDiscretionary';

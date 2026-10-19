@@ -38,13 +38,14 @@ describe('BottomNav', () => {
     const links = within(sheet).getAllByRole('link');
     // Each with a line saying what's there
     expect(links.map(link => link.textContent)).toEqual([
+      'Accounts1 account',
       'DebtsLoans and cards you’re paying off',
       expect.stringMatching(/^Notes(\d+ notes?|Nothing written yet)$/),
       expect.stringMatching(/^Reminders(\d+ new|What’s due, renewing and coming up)$/),
       'ProfileTest Account'
     ]);
 
-    await user.click(links[0]);
+    await user.click(links[1]);
 
     expect(await screen.findByRole('heading', { level: 1, name: 'Debts' })).toBeInTheDocument();
     expect(screen.queryByRole('dialog', { name: 'More' })).not.toBeInTheDocument();

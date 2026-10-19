@@ -4,6 +4,7 @@ export const pageModules = {
   dashboard: () => import('~/pages/Dashboard'),
   recurring: () => import('~/pages/Recurring'),
   forecast: () => import('~/pages/Forecast'),
+  accounts: () => import('~/pages/Accounts'),
   debts: () => import('~/pages/Debts'),
   debt: () => import('~/pages/DebtDetail'),
   notes: () => import('~/pages/Notes'),

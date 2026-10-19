@@ -76,6 +76,7 @@ describe('Sidebar', () => {
       'Dashboard',
       'Recurring',
       'Forecast',
+      'Accounts',
       'Debts',
       'Notes',
       // With how many are new beside it
@@ -83,7 +84,7 @@ describe('Sidebar', () => {
     ]);
     const divider = nav.querySelector('hr')!;
     expect(divider.previousElementSibling).toHaveTextContent('Forecast');
-    expect(divider.nextElementSibling).toHaveTextContent('Debts');
+    expect(divider.nextElementSibling).toHaveTextContent('Accounts');
 
     await user.click(within(nav).getByRole('link', { name: 'Debts' }));
 

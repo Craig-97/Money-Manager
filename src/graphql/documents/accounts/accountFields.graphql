@@ -1,0 +1,11 @@
+# A bank account: the current account, or savings. Balances are typed in, never linked to a bank.
+fragment AccountFields on Account {
+  id
+  name
+  kind
+  balance
+  counts
+  interestRate
+  purpose
+  balanceUpdatedAt
+}

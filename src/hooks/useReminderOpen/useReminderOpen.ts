@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router';
 import { ROUTES } from '~/constants';
 import { usePaymentActions } from '~/hooks/usePaymentActions';
 import { Reminder } from '~/lib/reminders';
+import { useAccountDialogStore } from '~/state/accountDialog';
 import { useNoteDialogStore } from '~/state/noteDialog';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
 
@@ -14,13 +15,14 @@ export interface ReminderOpen {
 
 /*
  * What to do about a reminder, if anything: pay a payment, update a renewal (as the dashboard's
- * alert does), open the note it's about, or start the new cycle on the dashboard. A renewal with a
- * note about it offers the note as well.
+ * alert does), open the note it's about, start the new cycle on the dashboard, or update an old
+ * balance. A renewal with a note about it offers the note as well.
  */
 export const useReminderOpen = (budgetId: string) => {
   const navigate = useNavigate();
   const openPayment = usePaymentDialogStore(s => s.openEdit);
   const openNote = useNoteDialogStore(s => s.openEdit);
+  const openAccount = useAccountDialogStore(s => s.openEdit);
   const { pay } = usePaymentActions(budgetId);
 
   return (reminder: Reminder): ReminderOpen | null => {
@@ -48,6 +50,10 @@ export const useReminderOpen = (budgetId: string) => {
         return reminder.awaitingStart
           ? { label: 'Open dashboard', run: () => void navigate(ROUTES.dashboard) }
           : null;
+      case 'balance': {
+        const { account } = reminder;
+        return account ? { label: 'Update', run: () => openAccount(account.id) } : null;
+      }
     }
   };
 };

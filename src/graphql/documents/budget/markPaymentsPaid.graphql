@@ -5,6 +5,9 @@ mutation MarkPaymentsPaid($input: MarkPaymentsPaidInput!) {
     budget {
       id
       bankBalance
+      accounts {
+        ...AccountFields
+      }
       recurringPayments {
         ...RecurringPaymentFields
       }

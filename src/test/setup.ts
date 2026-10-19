@@ -3,6 +3,7 @@
 import '@testing-library/jest-dom/vitest';
 import { afterEach, vi } from 'vitest';
 import { cleanup, configure } from '@testing-library/react';
+import { useAccountDialogStore } from '~/state/accountDialog';
 import { useDebtDialogStore } from '~/state/debtDialog';
 import { useNoteDialogStore } from '~/state/noteDialog';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
@@ -50,6 +51,7 @@ afterEach(() => {
   localStorage.clear();
   usePrefsStore.setState({ theme: 'dark', accent: DEFAULT_ACCENT });
   useNoteDialogStore.setState(useNoteDialogStore.getInitialState(), true);
+  useAccountDialogStore.setState(useAccountDialogStore.getInitialState(), true);
   usePaymentDialogStore.setState(usePaymentDialogStore.getInitialState(), true);
   useDebtDialogStore.setState(useDebtDialogStore.getInitialState(), true);
   useReminderChooserStore.setState(useReminderChooserStore.getInitialState(), true);

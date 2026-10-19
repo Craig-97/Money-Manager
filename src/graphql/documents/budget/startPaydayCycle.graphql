@@ -5,6 +5,9 @@ mutation StartPaydayCycle($input: StartPaydayCycleInput!) {
     budget {
       id
       bankBalance
+      accounts {
+        ...AccountFields
+      }
       cycleStartedOn
       recurringPayments {
         ...RecurringPaymentFields

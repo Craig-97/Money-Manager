@@ -1,4 +1,4 @@
-import { CalendarDays, CircleAlert, Clock, FileText, RefreshCw } from 'lucide-react';
+import { CalendarDays, CircleAlert, Clock, FileText, Landmark, RefreshCw } from 'lucide-react';
 import { cn } from '~/lib/cn';
 import { Reminder, ReminderKind } from '~/lib/reminders';
 
@@ -8,7 +8,8 @@ const ICONS: Record<ReminderKind, typeof Clock> = {
   renewal: RefreshCw,
   renewed: RefreshCw,
   note: FileText,
-  payday: CalendarDays
+  payday: CalendarDays,
+  balance: Landmark
 };
 
 interface ReminderIconProps {

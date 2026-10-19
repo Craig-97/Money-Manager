@@ -59,6 +59,15 @@ export const ForecastIcon = (props: IconProps) => (
 );
 
 /* A line heading down, the way a debt should */
+/* A bank: the Accounts page */
+export const AccountsIcon = (props: IconProps) => (
+  <Svg {...props}>
+    <path d="M3 10l9-6 9 6" />
+    <path d="M5 10v8M9.5 10v8M14.5 10v8M19 10v8" />
+    <path d="M3 21h18" />
+  </Svg>
+);
+
 export const DebtsIcon = (props: IconProps) => (
   <Svg {...props}>
     <path d="M3 7l6 6 4-4 8 8" />

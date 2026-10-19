@@ -1,0 +1,12 @@
+# Only what's given changes; a balance that's given is dated now
+mutation UpdateAccount($id: ID!, $input: UpdateAccountInput!) {
+  updateAccount(id: $id, input: $input) {
+    account {
+      ...AccountFields
+    }
+    budget {
+      id
+      bankBalance
+    }
+  }
+}

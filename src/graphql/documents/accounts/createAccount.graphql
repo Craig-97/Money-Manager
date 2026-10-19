@@ -1,0 +1,15 @@
+# A new savings account, kept out of free to spend unless switched on
+mutation CreateAccount($input: CreateAccountInput!) {
+  createAccount(input: $input) {
+    account {
+      ...AccountFields
+    }
+    budget {
+      id
+      bankBalance
+      accounts {
+        ...AccountFields
+      }
+    }
+  }
+}

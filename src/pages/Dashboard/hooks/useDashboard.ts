@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useMutation } from '@apollo/client/react';
-import { UpdateBudgetDocument } from '~/graphql/generated';
+import { UpdateAccountDocument, UpdateBudgetDocument } from '~/graphql/generated';
 import { Budget } from '~/hooks/useBudget';
 import { usePayCycle } from '~/hooks/usePayCycle';
 import { usePaymentActions } from '~/hooks/usePaymentActions';
 import { usePaymentSelection } from '~/hooks/usePaymentSelection';
+import { currentAccountOf, forFreeToSpend, toAccounts } from '~/lib/accounts';
 import { getApiErrorMessage } from '~/lib/errors';
 import {
   canPay,
@@ -18,6 +19,7 @@ import { toReminderStates } from '~/lib/reminders';
 import { showToast } from '~/state/toast';
 import { PaymentTab, paymentsForTab } from '../dashboardModel';
 import { useAlerts } from './useAlerts';
+import { useBankBalanceDialog } from './useBankBalanceDialog';
 import { useMoneyEditor } from './useMoneyEditor';
 import { usePaydayOverride } from './usePaydayOverride';
 
@@ -26,13 +28,17 @@ export const useDashboard = (budget: Budget) => {
   const { today, holidays, cycle } = usePayCycle(budget.payday);
   const actions = usePaymentActions(budget.id);
   const [updateBudget] = useMutation(UpdateBudgetDocument);
+  const [updateAccount] = useMutation(UpdateAccountDocument);
 
   const [tab, setTab] = useState<PaymentTab>('upcoming');
   const [sort, setSort] = useState<PaymentSort>(DEFAULT_SORT);
 
   const payments = toPayments(budget, today);
+  const accounts = toAccounts(budget.accounts, today);
+  const counted = accounts.filter(account => account.counts);
+  const current = currentAccountOf(accounts);
   const summary = summarise({
-    payments,
+    payments: forFreeToSpend(payments, accounts),
     bankBalance: budget.bankBalance,
     monthlyIncome: budget.monthlyIncome,
     cycle,
@@ -49,16 +55,21 @@ export const useDashboard = (budget: Budget) => {
   const listed = paymentsForTab(payments, { tab, cycle, sort });
   const selection = usePaymentSelection(listed);
 
-  const saveBudget = (fields: { bankBalance?: number; monthlyIncome?: number }) =>
-    updateBudget({ variables: { id: budget.id, input: fields } }).catch(error =>
-      showToast({ message: getApiErrorMessage(error, "Couldn't save that. Try again.") })
-    );
+  const failed = (error: unknown) =>
+    showToast({ message: getApiErrorMessage(error, "Couldn't save that. Try again.") });
 
-  const balanceEditor = useMoneyEditor(budget.bankBalance, bankBalance =>
-    saveBudget({ bankBalance })
+  // With only the current account counting, the bank balance is its balance, edited in place.
+  // Once more count, the pencil opens each one's balance instead.
+  const bankBalanceDialog = useBankBalanceDialog({ budgetId: budget.id, accounts: counted });
+  const inPlace = useMoneyEditor(budget.bankBalance, balance =>
+    current
+      ? updateAccount({ variables: { id: current.id, input: { balance } } }).catch(failed)
+      : Promise.resolve()
   );
+  const balanceEditor =
+    counted.length > 1 ? { ...inPlace, editing: false, start: bankBalanceDialog.start } : inPlace;
   const incomeEditor = useMoneyEditor(budget.monthlyIncome, monthlyIncome =>
-    saveBudget({ monthlyIncome })
+    updateBudget({ variables: { id: budget.id, input: { monthlyIncome } } }).catch(failed)
   );
 
   return {
@@ -74,6 +85,9 @@ export const useDashboard = (budget: Budget) => {
     isEmpty: payments.length === 0,
     actions,
     balanceEditor,
+    bankBalanceDialog,
+    // How many accounts make up the bank balance, when it's more than one
+    countedAccounts: counted.length,
     incomeEditor,
     alerts,
     tab,

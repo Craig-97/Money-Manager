@@ -1,3 +1,4 @@
+# The income; balances are set on the accounts
 mutation UpdateBudget($id: ID!, $input: UpdateBudgetInput!) {
   updateBudget(id: $id, input: $input) {
     budget {

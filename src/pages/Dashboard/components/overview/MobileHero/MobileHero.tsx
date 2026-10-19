@@ -130,7 +130,10 @@ export const MobileHero = ({ dashboard }: { dashboard: Dashboard }) => {
           </div>
         ) : (
           <div className="flex items-center justify-between gap-2 py-2">
-            <span className="text-hero-muted">Bank balance</span>
+            <span className="text-hero-muted">
+              Bank balance
+              {dashboard.countedAccounts > 1 ? ` · ${dashboard.countedAccounts} accounts` : ''}
+            </span>
             <span className="inline-flex items-center gap-1">
               <span className="num font-extrabold">{formatBalance(bankBalance)}</span>
               <button

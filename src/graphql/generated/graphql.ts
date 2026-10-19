@@ -6,6 +6,161 @@ export type Incremental<T> =
 import type * as Types from './schema';
 
 import type { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
+export type AccountFieldsFragment = {
+  __typename: 'Account';
+  id: string;
+  name: string;
+  kind: Types.AccountKind;
+  balance: number;
+  counts: boolean;
+  interestRate: number | null;
+  purpose: string | null;
+  balanceUpdatedAt: string;
+};
+
+export type CreateAccountMutationVariables = Exact<{
+  input: Types.CreateAccountInput;
+}>;
+
+export type CreateAccountMutation = {
+  createAccount: {
+    __typename: 'AccountResponse';
+    account: {
+      __typename: 'Account';
+      id: string;
+      name: string;
+      kind: Types.AccountKind;
+      balance: number;
+      counts: boolean;
+      interestRate: number | null;
+      purpose: string | null;
+      balanceUpdatedAt: string;
+    } | null;
+    budget: {
+      __typename: 'Budget';
+      id: string;
+      bankBalance: number;
+      accounts: Array<{
+        __typename: 'Account';
+        id: string;
+        name: string;
+        kind: Types.AccountKind;
+        balance: number;
+        counts: boolean;
+        interestRate: number | null;
+        purpose: string | null;
+        balanceUpdatedAt: string;
+      }>;
+    } | null;
+  };
+};
+
+export type DeleteAccountMutationVariables = Exact<{
+  id: string | number;
+}>;
+
+export type DeleteAccountMutation = {
+  deleteAccount: {
+    __typename: 'AccountResponse';
+    budget: {
+      __typename: 'Budget';
+      id: string;
+      bankBalance: number;
+      accounts: Array<{
+        __typename: 'Account';
+        id: string;
+        name: string;
+        kind: Types.AccountKind;
+        balance: number;
+        counts: boolean;
+        interestRate: number | null;
+        purpose: string | null;
+        balanceUpdatedAt: string;
+      }>;
+      recurringPayments: Array<{
+        __typename: 'RecurringPayment';
+        id: string;
+        name: string;
+        amount: number;
+        category: Types.RecurringPaymentCategory;
+        frequency: Types.PaymentFrequency;
+        type: Types.PaymentType;
+        firstPaymentDate: string;
+        lastPaymentDate: string | null;
+        nextDueDate: string | null;
+        renewalDate: string | null;
+        paysInto: string | null;
+        dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
+        renewalReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
+        thisCycle: Array<{
+          __typename: 'PaymentRecord';
+          id: string;
+          kind: Types.PaymentRecordKind;
+          dates: Array<string>;
+          balanceChange: number;
+        }>;
+        debt: {
+          __typename: 'Debt';
+          balance: number;
+          startingBalance: number | null;
+          apr: number;
+          balanceUpdatedAt: string | null;
+          paidOffThisCycle: number;
+        } | null;
+      } | null> | null;
+    } | null;
+  };
+};
+
+export type UpdateAccountMutationVariables = Exact<{
+  id: string | number;
+  input: Types.UpdateAccountInput;
+}>;
+
+export type UpdateAccountMutation = {
+  updateAccount: {
+    __typename: 'AccountResponse';
+    account: {
+      __typename: 'Account';
+      id: string;
+      name: string;
+      kind: Types.AccountKind;
+      balance: number;
+      counts: boolean;
+      interestRate: number | null;
+      purpose: string | null;
+      balanceUpdatedAt: string;
+    } | null;
+    budget: { __typename: 'Budget'; id: string; bankBalance: number } | null;
+  };
+};
+
+export type UpdateAccountBalancesMutationVariables = Exact<{
+  input: Types.UpdateAccountBalancesInput;
+}>;
+
+export type UpdateAccountBalancesMutation = {
+  updateAccountBalances: {
+    __typename: 'BudgetResponse';
+    budget: {
+      __typename: 'Budget';
+      id: string;
+      bankBalance: number;
+      accounts: Array<{
+        __typename: 'Account';
+        id: string;
+        name: string;
+        kind: Types.AccountKind;
+        balance: number;
+        counts: boolean;
+        interestRate: number | null;
+        purpose: string | null;
+        balanceUpdatedAt: string;
+      }>;
+    } | null;
+  };
+};
+
 export type AuthSessionFragment = {
   __typename: 'AuthData';
   token: string;
@@ -149,6 +304,17 @@ export type BudgetQuery = {
     bankBalance: number;
     monthlyIncome: number;
     cycleStartedOn: string | null;
+    accounts: Array<{
+      __typename: 'Account';
+      id: string;
+      name: string;
+      kind: Types.AccountKind;
+      balance: number;
+      counts: boolean;
+      interestRate: number | null;
+      purpose: string | null;
+      balanceUpdatedAt: string;
+    }>;
     payday: {
       __typename: 'Payday';
       id: string;
@@ -172,6 +338,7 @@ export type BudgetQuery = {
       lastPaymentDate: string | null;
       nextDueDate: string | null;
       renewalDate: string | null;
+      paysInto: string | null;
       dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
       renewalReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
       thisCycle: Array<{
@@ -245,6 +412,17 @@ export type BudgetFieldsFragment = {
   bankBalance: number;
   monthlyIncome: number;
   cycleStartedOn: string | null;
+  accounts: Array<{
+    __typename: 'Account';
+    id: string;
+    name: string;
+    kind: Types.AccountKind;
+    balance: number;
+    counts: boolean;
+    interestRate: number | null;
+    purpose: string | null;
+    balanceUpdatedAt: string;
+  }>;
   payday: {
     __typename: 'Payday';
     id: string;
@@ -268,6 +446,7 @@ export type BudgetFieldsFragment = {
     lastPaymentDate: string | null;
     nextDueDate: string | null;
     renewalDate: string | null;
+    paysInto: string | null;
     dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
     renewalReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
     thisCycle: Array<{
@@ -347,6 +526,17 @@ export type CreateBudgetMutation = {
       bankBalance: number;
       monthlyIncome: number;
       cycleStartedOn: string | null;
+      accounts: Array<{
+        __typename: 'Account';
+        id: string;
+        name: string;
+        kind: Types.AccountKind;
+        balance: number;
+        counts: boolean;
+        interestRate: number | null;
+        purpose: string | null;
+        balanceUpdatedAt: string;
+      }>;
       payday: {
         __typename: 'Payday';
         id: string;
@@ -370,6 +560,7 @@ export type CreateBudgetMutation = {
         lastPaymentDate: string | null;
         nextDueDate: string | null;
         renewalDate: string | null;
+        paysInto: string | null;
         dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
         renewalReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
         thisCycle: Array<{
@@ -449,6 +640,17 @@ export type LogDebtOverpaymentMutation = {
       __typename: 'Budget';
       id: string;
       bankBalance: number;
+      accounts: Array<{
+        __typename: 'Account';
+        id: string;
+        name: string;
+        kind: Types.AccountKind;
+        balance: number;
+        counts: boolean;
+        interestRate: number | null;
+        purpose: string | null;
+        balanceUpdatedAt: string;
+      }>;
       recurringPayments: Array<{
         __typename: 'RecurringPayment';
         id: string;
@@ -461,6 +663,7 @@ export type LogDebtOverpaymentMutation = {
         lastPaymentDate: string | null;
         nextDueDate: string | null;
         renewalDate: string | null;
+        paysInto: string | null;
         dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
         renewalReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
         thisCycle: Array<{
@@ -494,6 +697,17 @@ export type MarkPaymentsPaidMutation = {
       __typename: 'Budget';
       id: string;
       bankBalance: number;
+      accounts: Array<{
+        __typename: 'Account';
+        id: string;
+        name: string;
+        kind: Types.AccountKind;
+        balance: number;
+        counts: boolean;
+        interestRate: number | null;
+        purpose: string | null;
+        balanceUpdatedAt: string;
+      }>;
       recurringPayments: Array<{
         __typename: 'RecurringPayment';
         id: string;
@@ -506,6 +720,7 @@ export type MarkPaymentsPaidMutation = {
         lastPaymentDate: string | null;
         nextDueDate: string | null;
         renewalDate: string | null;
+        paysInto: string | null;
         dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
         renewalReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
         thisCycle: Array<{
@@ -550,6 +765,17 @@ export type MarkPaymentsUnpaidMutation = {
       __typename: 'Budget';
       id: string;
       bankBalance: number;
+      accounts: Array<{
+        __typename: 'Account';
+        id: string;
+        name: string;
+        kind: Types.AccountKind;
+        balance: number;
+        counts: boolean;
+        interestRate: number | null;
+        purpose: string | null;
+        balanceUpdatedAt: string;
+      }>;
       recurringPayments: Array<{
         __typename: 'RecurringPayment';
         id: string;
@@ -562,6 +788,7 @@ export type MarkPaymentsUnpaidMutation = {
         lastPaymentDate: string | null;
         nextDueDate: string | null;
         renewalDate: string | null;
+        paysInto: string | null;
         dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
         renewalReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
         thisCycle: Array<{
@@ -617,6 +844,7 @@ export type SkipRecurringPaymentsMutation = {
         lastPaymentDate: string | null;
         nextDueDate: string | null;
         renewalDate: string | null;
+        paysInto: string | null;
         dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
         renewalReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
         thisCycle: Array<{
@@ -651,6 +879,17 @@ export type StartPaydayCycleMutation = {
       id: string;
       bankBalance: number;
       cycleStartedOn: string | null;
+      accounts: Array<{
+        __typename: 'Account';
+        id: string;
+        name: string;
+        kind: Types.AccountKind;
+        balance: number;
+        counts: boolean;
+        interestRate: number | null;
+        purpose: string | null;
+        balanceUpdatedAt: string;
+      }>;
       recurringPayments: Array<{
         __typename: 'RecurringPayment';
         id: string;
@@ -663,6 +902,7 @@ export type StartPaydayCycleMutation = {
         lastPaymentDate: string | null;
         nextDueDate: string | null;
         renewalDate: string | null;
+        paysInto: string | null;
         dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
         renewalReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
         thisCycle: Array<{
@@ -707,6 +947,17 @@ export type UndoDebtOverpaymentMutation = {
       __typename: 'Budget';
       id: string;
       bankBalance: number;
+      accounts: Array<{
+        __typename: 'Account';
+        id: string;
+        name: string;
+        kind: Types.AccountKind;
+        balance: number;
+        counts: boolean;
+        interestRate: number | null;
+        purpose: string | null;
+        balanceUpdatedAt: string;
+      }>;
       recurringPayments: Array<{
         __typename: 'RecurringPayment';
         id: string;
@@ -719,6 +970,7 @@ export type UndoDebtOverpaymentMutation = {
         lastPaymentDate: string | null;
         nextDueDate: string | null;
         renewalDate: string | null;
+        paysInto: string | null;
         dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
         renewalReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
         thisCycle: Array<{
@@ -930,6 +1182,7 @@ export type CreateRecurringPaymentMutation = {
       lastPaymentDate: string | null;
       nextDueDate: string | null;
       renewalDate: string | null;
+      paysInto: string | null;
       dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
       renewalReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
       thisCycle: Array<{
@@ -1002,6 +1255,7 @@ export type RecurringPaymentFieldsFragment = {
   lastPaymentDate: string | null;
   nextDueDate: string | null;
   renewalDate: string | null;
+  paysInto: string | null;
   dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
   renewalReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
   thisCycle: Array<{
@@ -1063,6 +1317,7 @@ export type UpdateRecurringPaymentMutation = {
       lastPaymentDate: string | null;
       nextDueDate: string | null;
       renewalDate: string | null;
+      paysInto: string | null;
       dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
       renewalReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
       thisCycle: Array<{
@@ -1334,6 +1589,29 @@ export const AuthSessionFragmentDoc = {
     }
   ]
 } as unknown as DocumentNode<AuthSessionFragment, unknown>;
+export const AccountFieldsFragmentDoc = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'AccountFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'Account' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'kind' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'balance' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'counts' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'interestRate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'purpose' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } }
+        ]
+      }
+    }
+  ]
+} as unknown as DocumentNode<AccountFieldsFragment, unknown>;
 export const PaydayFieldsFragmentDoc = {
   kind: 'Document',
   definitions: [
@@ -1422,6 +1700,7 @@ export const RecurringPaymentFieldsFragmentDoc = {
               ]
             }
           },
+          { kind: 'Field', name: { kind: 'Name', value: 'paysInto' } },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'debt' },
@@ -1569,6 +1848,16 @@ export const BudgetFieldsFragmentDoc = {
         selections: [
           { kind: 'Field', name: { kind: 'Name', value: 'id' } },
           { kind: 'Field', name: { kind: 'Name', value: 'bankBalance' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'accounts' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'FragmentSpread', name: { kind: 'Name', value: 'AccountFields' } }
+              ]
+            }
+          },
           { kind: 'Field', name: { kind: 'Name', value: 'monthlyIncome' } },
           { kind: 'Field', name: { kind: 'Name', value: 'cycleStartedOn' } },
           {
@@ -1639,6 +1928,24 @@ export const BudgetFieldsFragmentDoc = {
               ]
             }
           }
+        ]
+      }
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'AccountFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'Account' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'kind' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'balance' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'counts' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'interestRate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'purpose' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } }
         ]
       }
     },
@@ -1722,6 +2029,7 @@ export const BudgetFieldsFragmentDoc = {
               ]
             }
           },
+          { kind: 'Field', name: { kind: 'Name', value: 'paysInto' } },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'debt' },
@@ -1832,6 +2140,441 @@ export const BudgetFieldsFragmentDoc = {
     }
   ]
 } as unknown as DocumentNode<BudgetFieldsFragment, unknown>;
+export const CreateAccountDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'CreateAccount' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'CreateAccountInput' } }
+          }
+        }
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'createAccount' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } }
+              }
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'account' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'FragmentSpread', name: { kind: 'Name', value: 'AccountFields' } }
+                    ]
+                  }
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'budget' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'bankBalance' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'accounts' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'FragmentSpread',
+                              name: { kind: 'Name', value: 'AccountFields' }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'AccountFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'Account' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'kind' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'balance' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'counts' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'interestRate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'purpose' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } }
+        ]
+      }
+    }
+  ]
+} as unknown as DocumentNode<CreateAccountMutation, CreateAccountMutationVariables>;
+export const DeleteAccountDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'DeleteAccount' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } }
+          }
+        }
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'deleteAccount' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'id' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'id' } }
+              }
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'budget' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'bankBalance' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'accounts' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'FragmentSpread',
+                              name: { kind: 'Name', value: 'AccountFields' }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'recurringPayments' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'FragmentSpread',
+                              name: { kind: 'Name', value: 'RecurringPaymentFields' }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'AccountFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'Account' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'kind' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'balance' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'counts' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'interestRate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'purpose' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } }
+        ]
+      }
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'RecurringPaymentFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'RecurringPayment' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'amount' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'category' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'frequency' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'type' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'firstPaymentDate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'lastPaymentDate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'nextDueDate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'renewalDate' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'dueReminder' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'off' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'days' } }
+              ]
+            }
+          },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'renewalReminder' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'off' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'days' } }
+              ]
+            }
+          },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'thisCycle' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'kind' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'dates' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'balanceChange' } }
+              ]
+            }
+          },
+          { kind: 'Field', name: { kind: 'Name', value: 'paysInto' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'debt' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'balance' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'startingBalance' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'apr' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'paidOffThisCycle' } }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+} as unknown as DocumentNode<DeleteAccountMutation, DeleteAccountMutationVariables>;
+export const UpdateAccountDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'UpdateAccount' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } }
+          }
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'UpdateAccountInput' } }
+          }
+        }
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'updateAccount' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'id' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'id' } }
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } }
+              }
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'account' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'FragmentSpread', name: { kind: 'Name', value: 'AccountFields' } }
+                    ]
+                  }
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'budget' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'bankBalance' } }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'AccountFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'Account' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'kind' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'balance' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'counts' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'interestRate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'purpose' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } }
+        ]
+      }
+    }
+  ]
+} as unknown as DocumentNode<UpdateAccountMutation, UpdateAccountMutationVariables>;
+export const UpdateAccountBalancesDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'UpdateAccountBalances' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'UpdateAccountBalancesInput' } }
+          }
+        }
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'updateAccountBalances' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } }
+              }
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'budget' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'bankBalance' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'accounts' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'FragmentSpread',
+                              name: { kind: 'Name', value: 'AccountFields' }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'AccountFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'Account' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'kind' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'balance' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'counts' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'interestRate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'purpose' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } }
+        ]
+      }
+    }
+  ]
+} as unknown as DocumentNode<UpdateAccountBalancesMutation, UpdateAccountBalancesMutationVariables>;
 export const LoginDocument = {
   kind: 'Document',
   definitions: [
@@ -2303,6 +3046,24 @@ export const BudgetDocument = {
     },
     {
       kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'AccountFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'Account' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'kind' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'balance' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'counts' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'interestRate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'purpose' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } }
+        ]
+      }
+    },
+    {
+      kind: 'FragmentDefinition',
       name: { kind: 'Name', value: 'PaydayFields' },
       typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'Payday' } },
       selectionSet: {
@@ -2381,6 +3142,7 @@ export const BudgetDocument = {
               ]
             }
           },
+          { kind: 'Field', name: { kind: 'Name', value: 'paysInto' } },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'debt' },
@@ -2498,6 +3260,16 @@ export const BudgetDocument = {
         selections: [
           { kind: 'Field', name: { kind: 'Name', value: 'id' } },
           { kind: 'Field', name: { kind: 'Name', value: 'bankBalance' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'accounts' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'FragmentSpread', name: { kind: 'Name', value: 'AccountFields' } }
+              ]
+            }
+          },
           { kind: 'Field', name: { kind: 'Name', value: 'monthlyIncome' } },
           { kind: 'Field', name: { kind: 'Name', value: 'cycleStartedOn' } },
           {
@@ -2624,6 +3396,24 @@ export const CreateBudgetDocument = {
     },
     {
       kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'AccountFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'Account' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'kind' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'balance' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'counts' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'interestRate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'purpose' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } }
+        ]
+      }
+    },
+    {
+      kind: 'FragmentDefinition',
       name: { kind: 'Name', value: 'PaydayFields' },
       typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'Payday' } },
       selectionSet: {
@@ -2702,6 +3492,7 @@ export const CreateBudgetDocument = {
               ]
             }
           },
+          { kind: 'Field', name: { kind: 'Name', value: 'paysInto' } },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'debt' },
@@ -2819,6 +3610,16 @@ export const CreateBudgetDocument = {
         selections: [
           { kind: 'Field', name: { kind: 'Name', value: 'id' } },
           { kind: 'Field', name: { kind: 'Name', value: 'bankBalance' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'accounts' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'FragmentSpread', name: { kind: 'Name', value: 'AccountFields' } }
+              ]
+            }
+          },
           { kind: 'Field', name: { kind: 'Name', value: 'monthlyIncome' } },
           { kind: 'Field', name: { kind: 'Name', value: 'cycleStartedOn' } },
           {
@@ -2937,6 +3738,19 @@ export const LogDebtOverpaymentDocument = {
                       { kind: 'Field', name: { kind: 'Name', value: 'bankBalance' } },
                       {
                         kind: 'Field',
+                        name: { kind: 'Name', value: 'accounts' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'FragmentSpread',
+                              name: { kind: 'Name', value: 'AccountFields' }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        kind: 'Field',
                         name: { kind: 'Name', value: 'recurringPayments' },
                         selectionSet: {
                           kind: 'SelectionSet',
@@ -2954,6 +3768,24 @@ export const LogDebtOverpaymentDocument = {
               ]
             }
           }
+        ]
+      }
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'AccountFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'Account' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'kind' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'balance' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'counts' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'interestRate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'purpose' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } }
         ]
       }
     },
@@ -3009,6 +3841,7 @@ export const LogDebtOverpaymentDocument = {
               ]
             }
           },
+          { kind: 'Field', name: { kind: 'Name', value: 'paysInto' } },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'debt' },
@@ -3071,6 +3904,19 @@ export const MarkPaymentsPaidDocument = {
                       { kind: 'Field', name: { kind: 'Name', value: 'bankBalance' } },
                       {
                         kind: 'Field',
+                        name: { kind: 'Name', value: 'accounts' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'FragmentSpread',
+                              name: { kind: 'Name', value: 'AccountFields' }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        kind: 'Field',
                         name: { kind: 'Name', value: 'recurringPayments' },
                         selectionSet: {
                           kind: 'SelectionSet',
@@ -3101,6 +3947,24 @@ export const MarkPaymentsPaidDocument = {
               ]
             }
           }
+        ]
+      }
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'AccountFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'Account' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'kind' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'balance' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'counts' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'interestRate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'purpose' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } }
         ]
       }
     },
@@ -3156,6 +4020,7 @@ export const MarkPaymentsPaidDocument = {
               ]
             }
           },
+          { kind: 'Field', name: { kind: 'Name', value: 'paysInto' } },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'debt' },
@@ -3246,6 +4111,19 @@ export const MarkPaymentsUnpaidDocument = {
                       { kind: 'Field', name: { kind: 'Name', value: 'bankBalance' } },
                       {
                         kind: 'Field',
+                        name: { kind: 'Name', value: 'accounts' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'FragmentSpread',
+                              name: { kind: 'Name', value: 'AccountFields' }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        kind: 'Field',
                         name: { kind: 'Name', value: 'recurringPayments' },
                         selectionSet: {
                           kind: 'SelectionSet',
@@ -3276,6 +4154,24 @@ export const MarkPaymentsUnpaidDocument = {
               ]
             }
           }
+        ]
+      }
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'AccountFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'Account' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'kind' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'balance' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'counts' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'interestRate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'purpose' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } }
         ]
       }
     },
@@ -3331,6 +4227,7 @@ export const MarkPaymentsUnpaidDocument = {
               ]
             }
           },
+          { kind: 'Field', name: { kind: 'Name', value: 'paysInto' } },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'debt' },
@@ -3492,6 +4389,7 @@ export const SkipRecurringPaymentsDocument = {
               ]
             }
           },
+          { kind: 'Field', name: { kind: 'Name', value: 'paysInto' } },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'debt' },
@@ -3552,6 +4450,19 @@ export const StartPaydayCycleDocument = {
                     selections: [
                       { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                       { kind: 'Field', name: { kind: 'Name', value: 'bankBalance' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'accounts' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'FragmentSpread',
+                              name: { kind: 'Name', value: 'AccountFields' }
+                            }
+                          ]
+                        }
+                      },
                       { kind: 'Field', name: { kind: 'Name', value: 'cycleStartedOn' } },
                       {
                         kind: 'Field',
@@ -3585,6 +4496,24 @@ export const StartPaydayCycleDocument = {
               ]
             }
           }
+        ]
+      }
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'AccountFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'Account' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'kind' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'balance' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'counts' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'interestRate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'purpose' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } }
         ]
       }
     },
@@ -3640,6 +4569,7 @@ export const StartPaydayCycleDocument = {
               ]
             }
           },
+          { kind: 'Field', name: { kind: 'Name', value: 'paysInto' } },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'debt' },
@@ -3730,6 +4660,19 @@ export const UndoDebtOverpaymentDocument = {
                       { kind: 'Field', name: { kind: 'Name', value: 'bankBalance' } },
                       {
                         kind: 'Field',
+                        name: { kind: 'Name', value: 'accounts' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'FragmentSpread',
+                              name: { kind: 'Name', value: 'AccountFields' }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        kind: 'Field',
                         name: { kind: 'Name', value: 'recurringPayments' },
                         selectionSet: {
                           kind: 'SelectionSet',
@@ -3747,6 +4690,24 @@ export const UndoDebtOverpaymentDocument = {
               ]
             }
           }
+        ]
+      }
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'AccountFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'Account' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'kind' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'balance' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'counts' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'interestRate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'purpose' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } }
         ]
       }
     },
@@ -3802,6 +4763,7 @@ export const UndoDebtOverpaymentDocument = {
               ]
             }
           },
+          { kind: 'Field', name: { kind: 'Name', value: 'paysInto' } },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'debt' },
@@ -4561,6 +5523,7 @@ export const CreateRecurringPaymentDocument = {
               ]
             }
           },
+          { kind: 'Field', name: { kind: 'Name', value: 'paysInto' } },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'debt' },
@@ -4882,6 +5845,7 @@ export const UpdateRecurringPaymentDocument = {
               ]
             }
           },
+          { kind: 'Field', name: { kind: 'Name', value: 'paysInto' } },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'debt' },

@@ -47,7 +47,8 @@ const debt = (
   dueReminder: { off: false, days: null },
   renewalReminder: { off: false, days: null },
   dueReminderDays: 1,
-  debt: { balance, startingBalance, apr, balanceUpdatedAt: null, paidOffThisCycle: 0 }
+  debt: { balance, startingBalance, apr, balanceUpdatedAt: null, paidOffThisCycle: 0 },
+  paysInto: null
 });
 
 // The Debts design's three: a card, car finance and a loan from family

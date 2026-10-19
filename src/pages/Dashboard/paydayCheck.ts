@@ -96,11 +96,17 @@ export const suggestedBalance = ({
 
 /*
  * The line under a left-over payment: only what else happens beyond the choice picked. Plain paid
- * has none; a debt says how much less is owed, its interest taken first.
+ * has none; a debt says how much less is owed, its interest taken first, and a payment into savings
+ * what it adds there.
  */
 export const leftOverNote = (
   { payment, dates }: LeftOver,
-  { outcome, cycle, today }: { outcome: LeftOverOutcome; cycle: PayCycle; today: Date }
+  {
+    outcome,
+    cycle,
+    today,
+    intoName = null
+  }: { outcome: LeftOverOutcome; cycle: PayCycle; today: Date; intoName?: string | null }
 ) => {
   if (outcome === 'DUE') return 'Stays due, shown as overdue';
   if (outcome === 'SKIPPED') {
@@ -110,6 +116,7 @@ export const leftOverNote = (
       ? 'Next due today'
       : `Next due ${formatShortDate(next, today)}`;
   }
+  if (intoName) return `Adds ${formatMoney(payment.amount * dates.length)} to ${intoName}`;
   if (!payment.debt) return null;
   const paidOff = payTowardsDebt(payment.debt, {
     amount: payment.amount,
@@ -127,9 +134,16 @@ export const leftOverDetail = ({ payment, dates }: LeftOver, today: Date) => {
     : `${frequency} · ${dates.length} dates from ${formatShortDate(dates[0], today)}`;
 };
 
-/* "Monthly · due today", or "One-off · due Sat 31 Oct" */
-export const dueSinceDetail = ({ payment, dates }: DueSince, today: Date) => {
-  const kind = payment.kind === 'oneOff' ? 'One-off' : FREQUENCY_LABELS[payment.frequency];
+/* "Monthly · due today", "Into Cash ISA · due today", or "One-off · due Sat 31 Oct" */
+export const dueSinceDetail = (
+  { payment, dates }: DueSince,
+  { today, intoName = null }: { today: Date; intoName?: string | null }
+) => {
+  const kind = intoName
+    ? `Into ${intoName}`
+    : payment.kind === 'oneOff'
+      ? 'One-off'
+      : FREQUENCY_LABELS[payment.frequency];
   const last = dates[dates.length - 1];
   const when =
     last.getTime() === today.getTime() ? 'due today' : `due ${formatShortDate(last, today)}`;

@@ -11,6 +11,7 @@ import {
   UpdateOneOffPaymentDocument,
   UpdateRecurringPaymentDocument
 } from '~/graphql/generated';
+import { Account } from '~/lib/accounts';
 import { addDays, formatShortDay, parseIsoDate, toApiDate } from '~/lib/dates';
 import { getApiErrorMessage, getErrorCode } from '~/lib/errors';
 import { formatMoneyInput, parseMoney } from '~/lib/format';
@@ -57,6 +58,8 @@ interface PaymentFormValues {
   category: RecurringPaymentCategory | OneOffPaymentCategory;
   // Recurring payments tracked as a debt: what's owed now, its APR, and what was borrowed
   tracked: boolean;
+  // A savings account a recurring expense pays into, like a standing order; '' for none
+  paysInto: string;
   balance: string;
   apr: string;
   started: string;
@@ -98,6 +101,7 @@ const initialValues = ({
     reminder: 'usual',
     category: asDebt ? 'CREDIT_CARD' : kind === 'recurring' ? 'SUBSCRIPTION' : 'OTHER',
     tracked: asDebt,
+    paysInto: '',
     balance: '',
     apr: '',
     started: ''
@@ -122,6 +126,7 @@ const initialValues = ({
         renewal: iso(payment.renewalDate),
         reminder: toTimingChoice(payment.renewalReminder),
         tracked: payment.debt !== null,
+        paysInto: payment.paysInto ?? '',
         balance: payment.debt ? formatMoneyInput(payment.debt.balance) : '',
         apr: payment.debt ? String(payment.debt.apr) : '',
         started:
@@ -179,8 +184,13 @@ const sameDebt = (a: PaymentFormValues, b: PaymentFormValues) => {
 };
 
 /* Whether the form still holds what the payment already has */
+// Only an expense that isn't a debt can pay into savings
+const paysIntoOf = (values: PaymentFormValues) =>
+  values.type === 'EXPENSE' && !values.tracked && values.paysInto ? values.paysInto : null;
+
 const isUnchanged = (values: PaymentFormValues, before: PaymentFormValues) =>
   values.name.trim() === before.name &&
+  paysIntoOf(values) === paysIntoOf(before) &&
   parseMoney(values.amount) === parseMoney(before.amount) &&
   values.type === before.type &&
   values.category === before.category &&
@@ -305,6 +315,8 @@ interface Options {
   today: Date;
   // The budget's usual reminder timing, for payments that follow it
   settings: ReminderSettings;
+  // The savings accounts a recurring expense can pay into
+  savings: readonly Pick<Account, 'id' | 'name' | 'counts'>[];
   onSaved: () => void;
   // Changes when the dialog switches to another payment or kind, which starts the form afresh
   formKey: string;
@@ -318,6 +330,7 @@ export const usePaymentForm = ({
   payment,
   today,
   settings,
+  savings,
   onSaved,
   formKey
 }: Options) => {
@@ -459,6 +472,10 @@ export const usePaymentForm = ({
                 category,
                 ...endingFields(values),
                 ...(scheduleChanged ? schedule : {}),
+                // Sent when it changes; null stops it
+                ...(paysIntoOf(values) !== paysIntoOf(before)
+                  ? { paysInto: paysIntoOf(values) }
+                  : {}),
                 // Sent when it's a debt, and as null to stop tracking one
                 ...(values.tracked
                   ? { debt: debtFields(values) }
@@ -477,6 +494,7 @@ export const usePaymentForm = ({
                 ...endingFields(values),
                 category,
                 budgetId,
+                ...(paysIntoOf(values) ? { paysInto: paysIntoOf(values) } : {}),
                 ...(values.tracked ? { debt: debtFields(values) } : {})
               }
             },
@@ -544,6 +562,7 @@ export const usePaymentForm = ({
     },
     // Opened from Debts: always a debt, so there's no switch to stop tracking it
     asDebt,
+    savings,
     endsHint: endsHint(values, today),
     ending,
     renewalPassed,

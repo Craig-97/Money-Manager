@@ -9,6 +9,7 @@ import { FREQUENCY_OPTIONS, ONE_OFF_OPTIONS, RECURRING_OPTIONS } from '../../pay
 import { PaymentForm } from '../../usePaymentForm';
 import { DebtFields } from '../DebtFields';
 import { PaymentTypeToggle } from '../PaymentTypeToggle';
+import { PaysInto } from '../PaysInto';
 import { RecurringEnding } from '../RecurringEnding';
 import { TrackAsDebt } from '../TrackAsDebt';
 
@@ -16,13 +17,23 @@ const pairClasses = 'grid gap-3.5 max-md:grid-cols-2 max-md:gap-2.5 min-[35rem]:
 
 /*
  * The payment's fields: type, name, amount and category, then its date or schedule. A recurring
- * expense can be tracked as a debt, which is always money out and ends when it's paid off.
+ * expense can be tracked as a debt, which is always money out and ends when it's paid off, or pay
+ * into one of the budget's savings accounts, but not both.
  */
 export const FormBody = ({ form, kind }: { form: PaymentForm; kind: Payment['kind'] }) => {
   const { values, set, touch, errors } = form;
   const debt = kind === 'recurring' && values.tracked;
-  // From Debts it's always a debt; otherwise only an expense can be one
-  const canTrack = kind === 'recurring' && !form.asDebt && (values.type === 'EXPENSE' || debt);
+  // A recurring expense can pay into savings, like a standing order; it's then not a debt
+  const paysInto = kind === 'recurring' && values.type === 'EXPENSE' && !debt && !!values.paysInto;
+  const canPayInto =
+    kind === 'recurring' &&
+    !form.asDebt &&
+    values.type === 'EXPENSE' &&
+    !debt &&
+    form.savings.length > 0;
+  // From Debts it's always a debt; otherwise only an expense can be one, and not one into savings
+  const canTrack =
+    kind === 'recurring' && !form.asDebt && !paysInto && (values.type === 'EXPENSE' || debt);
   const amountField = (
     <div>
       <Label tone="muted" htmlFor="payment-amount">
@@ -117,6 +128,7 @@ export const FormBody = ({ form, kind }: { form: PaymentForm; kind: Payment['kin
           {canTrack ? (
             <TrackAsDebt checked={values.tracked} onCheckedChange={on => set('tracked', on)} />
           ) : null}
+          {canPayInto ? <PaysInto form={form} /> : null}
           <div className={pairClasses}>
             <div>
               <Label tone="muted" htmlFor="payment-frequency">

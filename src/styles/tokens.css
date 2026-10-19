@@ -22,6 +22,9 @@
   --income-bg: #13301e;
   --expense: #ff7a7a;
   --expense-bg: #3d1a1c;
+  /* A balance that may be out of date */
+  --warn: #fbbf24;
+  --warn-bg: #3a2e12;
   /* The design mixes the accent towards white / the surface colour in sRGB */
   --accent-text: color-mix(in srgb, var(--accent) 50%, #ffffff);
   --accent-soft: color-mix(in srgb, var(--accent) 22%, #171a1f);
@@ -77,6 +80,9 @@
   --income-bg: #dcfce7;
   --expense: #c81e1e;
   --expense-bg: #fde2e2;
+  /* A balance that may be out of date */
+  --warn: #92400e;
+  --warn-bg: #fdf0d2;
   --accent-text: color-mix(in srgb, var(--accent) 75%, #000000);
   --accent-soft: color-mix(in srgb, var(--accent) 14%, #ffffff);
   --hero-bg: #111318;

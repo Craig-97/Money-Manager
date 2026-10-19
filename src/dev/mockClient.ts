@@ -29,6 +29,39 @@ const demoBudget = (scenario: string | null): FakeBudget => {
     id: 'budget-1',
     bankBalance: scenario === 'overdrawn' ? 420 : 10000,
     monthlyIncome: 3600,
+    // The design's savings: a Cash ISA last updated five weeks ago, so its reminder shows
+    accounts: [
+      {
+        id: 'easy',
+        name: 'Easy access',
+        kind: 'SAVINGS',
+        balance: 4200,
+        counts: false,
+        interestRate: 4.1,
+        purpose: null,
+        balanceUpdatedAt: fromToday(-9)
+      },
+      {
+        id: 'isa',
+        name: 'Cash ISA',
+        kind: 'SAVINGS',
+        balance: 8650,
+        counts: false,
+        interestRate: 4.5,
+        purpose: null,
+        balanceUpdatedAt: fromToday(-36)
+      },
+      {
+        id: 'pot',
+        name: 'Bills pot',
+        kind: 'SAVINGS',
+        balance: 1240,
+        counts: false,
+        interestRate: null,
+        purpose: 'For yearly bills',
+        balanceUpdatedAt: fromToday(0)
+      }
+    ],
     // The payday scenario hasn't started this cycle yet, so the prompt shows
     cycleStartedOn: scenario === 'payday' ? null : fromToday(0),
     payday: {

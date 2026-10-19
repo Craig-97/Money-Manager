@@ -1,5 +1,6 @@
 import { useBudget } from '~/hooks/useBudget';
 import { usePayCycle } from '~/hooks/usePayCycle';
+import { toAccounts } from '~/lib/accounts';
 import { fromApiDate } from '~/lib/dates';
 import { followPayments, toNotes } from '~/lib/notes';
 import { DEFAULT_REMINDER_SETTINGS, toPayments } from '~/lib/payments';
@@ -33,7 +34,8 @@ export const useReminders = () => {
         payAmount:
           (budget.payday?.frequency ?? 'MONTHLY') === 'MONTHLY' ? budget.monthlyIncome : null,
         states,
-        today
+        today,
+        accounts: toAccounts(budget.accounts, today)
       }
     : null;
   const fresh = sources ? newReminders(sources) : [];

@@ -4,6 +4,9 @@ mutation UndoDebtOverpayment($input: UndoDebtOverpaymentInput!) {
     budget {
       id
       bankBalance
+      accounts {
+        ...AccountFields
+      }
       recurringPayments {
         ...RecurringPaymentFields
       }

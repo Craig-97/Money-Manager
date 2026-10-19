@@ -4,6 +4,9 @@ mutation LogDebtOverpayment($input: LogDebtOverpaymentInput!) {
     budget {
       id
       bankBalance
+      accounts {
+        ...AccountFields
+      }
       recurringPayments {
         ...RecurringPaymentFields
       }

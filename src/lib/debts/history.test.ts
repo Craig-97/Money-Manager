@@ -32,7 +32,8 @@ const card: DebtPayment = {
     apr: 24.9,
     balanceUpdatedAt: null,
     paidOffThisCycle: 0
-  }
+  },
+  paysInto: null
 };
 
 const record = (

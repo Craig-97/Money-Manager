@@ -85,6 +85,8 @@
   --color-income-bg: var(--income-bg);
   --color-expense: var(--expense);
   --color-expense-bg: var(--expense-bg);
+  --color-warn: var(--warn);
+  --color-warn-bg: var(--warn-bg);
   --color-accent: var(--accent);
   --color-accent-text: var(--accent-text);
   --color-accent-soft: var(--accent-soft);

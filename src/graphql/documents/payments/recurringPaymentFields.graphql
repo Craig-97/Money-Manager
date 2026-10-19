@@ -25,6 +25,8 @@ fragment RecurringPaymentFields on RecurringPayment {
     dates
     balanceChange
   }
+  # The savings account it pays into, like a standing order
+  paysInto
   debt {
     balance
     startingBalance
