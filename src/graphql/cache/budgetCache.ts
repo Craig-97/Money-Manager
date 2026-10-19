@@ -11,8 +11,8 @@ import {
   ReminderStateFieldsFragmentDoc
 } from '~/graphql/generated';
 
-// The account's lists in the cache. Mutations that return an updated payment or note update it
-// everywhere by themselves; creating or deleting one also has to change the account's list.
+// The budget's lists in the cache. Mutations that return an updated payment or note update it
+// everywhere by themselves; creating or deleting one also has to change the budget's list.
 
 type ListField = 'recurringPayments' | 'oneOffPayments' | 'notes';
 
@@ -22,15 +22,15 @@ const TYPENAMES: Record<ListField, string> = {
   notes: 'Note'
 };
 
-const accountId = (cache: ApolloCache, id: string) => cache.identify({ __typename: 'Account', id });
+const budgetId = (cache: ApolloCache, id: string) => cache.identify({ __typename: 'Budget', id });
 
 const appendRef = (
   cache: ApolloCache,
-  { account, field, ref }: { account: string; field: ListField; ref: Reference | undefined }
+  { budget, field, ref }: { budget: string; field: ListField; ref: Reference | undefined }
 ) => {
   if (!ref) return;
   cache.modify({
-    id: accountId(cache, account),
+    id: budgetId(cache, budget),
     // The field is picked at runtime, which Apollo's typed modifiers can't follow
     fields: { [field]: (refs: readonly Reference[] = []) => [...refs, ref] } as Modifiers
   });
@@ -38,42 +38,42 @@ const appendRef = (
 
 export const addRecurringPayment = (
   cache: ApolloCache,
-  { account, payment }: { account: string; payment: RecurringPaymentFieldsFragment }
+  { budget, payment }: { budget: string; payment: RecurringPaymentFieldsFragment }
 ) =>
   appendRef(cache, {
-    account,
+    budget,
     field: 'recurringPayments',
     ref: cache.writeFragment({ fragment: RecurringPaymentFieldsFragmentDoc, data: payment })
   });
 
 export const addOneOffPayment = (
   cache: ApolloCache,
-  { account, payment }: { account: string; payment: OneOffPaymentFieldsFragment }
+  { budget, payment }: { budget: string; payment: OneOffPaymentFieldsFragment }
 ) =>
   appendRef(cache, {
-    account,
+    budget,
     field: 'oneOffPayments',
     ref: cache.writeFragment({ fragment: OneOffPaymentFieldsFragmentDoc, data: payment })
   });
 
 export const addNote = (
   cache: ApolloCache,
-  { account, note }: { account: string; note: NoteFieldsFragment }
+  { budget, note }: { budget: string; note: NoteFieldsFragment }
 ) =>
   appendRef(cache, {
-    account,
+    budget,
     field: 'notes',
     ref: cache.writeFragment({ fragment: NoteFieldsFragmentDoc, data: note })
   });
 
-/* Takes items off the account's list and drops them from the cache */
-export const removeFromAccount = (
+/* Takes items off the budget's list and drops them from the cache */
+export const removeFromBudget = (
   cache: ApolloCache,
-  { account, field, ids }: { account: string; field: ListField; ids: readonly string[] }
+  { budget, field, ids }: { budget: string; field: ListField; ids: readonly string[] }
 ) => {
   if (!ids.length) return;
   cache.modify({
-    id: accountId(cache, account),
+    id: budgetId(cache, budget),
     fields: {
       [field]: (refs: readonly Reference[] = [], { readField }: ModifierDetails) =>
         refs.filter(ref => !ids.includes(readField<string>('id', ref) ?? ''))
@@ -84,19 +84,19 @@ export const removeFromAccount = (
 };
 
 /*
- * Puts reminder states the API sent back on the account's list. A state already there is updated
+ * Puts reminder states the API sent back on the budget's list. A state already there is updated
  * by its key on its own; a new one is added.
  */
 export const addReminderStates = (
   cache: ApolloCache,
-  { account, states }: { account: string; states: readonly ReminderStateFieldsFragment[] }
+  { budget, states }: { budget: string; states: readonly ReminderStateFieldsFragment[] }
 ) => {
   const refs = states.flatMap(state => {
     const ref = cache.writeFragment({ fragment: ReminderStateFieldsFragmentDoc, data: state });
     return ref ? [ref] : [];
   });
   cache.modify({
-    id: accountId(cache, account),
+    id: budgetId(cache, budget),
     fields: {
       reminderStates: (existing: readonly Reference[] = []) => [
         ...existing,

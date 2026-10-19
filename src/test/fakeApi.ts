@@ -120,7 +120,7 @@ export interface FakePayday {
   overrides?: { for: string; date: string }[];
 }
 
-export interface FakeAccount {
+export interface FakeBudget {
   id: string;
   bankBalance: number;
   monthlyIncome: number;
@@ -147,8 +147,8 @@ export interface FakeUser {
 export interface FakeDb {
   user: FakeUser;
   password: string;
-  // null means the user has no linked account yet (the app redirects to /setup)
-  account: FakeAccount | null;
+  // null means the user has no linked budget yet (the app redirects to /setup)
+  budget: FakeBudget | null;
 }
 
 export interface Call {
@@ -207,7 +207,7 @@ const FIELD_DEFAULTS: Record<string, Record<string, (value: Loose) => unknown>> 
     repeat: n => n.repeat ?? 'NONE',
     payment: n => n.payment ?? null
   },
-  Account: {
+  Budget: {
     reminderSettings: a => a.reminderSettings ?? DEFAULT_REMINDER_SETTINGS,
     reminderStates: a => a.reminderStates ?? [],
     calendarFeed: a => a.calendarFeed ?? DEFAULT_CALENDAR_FEED
@@ -329,8 +329,8 @@ const payTowardsDebt = (
   return { interest, reduction: roundPence(debt.balance - balance), balanceAfter: balance };
 };
 
-export const DEFAULT_ACCOUNT: FakeAccount = {
-  id: 'account-1',
+export const DEFAULT_BUDGET: FakeBudget = {
+  id: 'budget-1',
   bankBalance: 1000,
   monthlyIncome: 2500,
   // Started today, so the payday prompt doesn't show unless a test asks for it
@@ -398,8 +398,8 @@ export interface FakeApi {
   fetch: typeof fetch;
   db: FakeDb;
   calls: Call[];
-  // The signed-in user as the API returns them, with their account's id once setup is finished
-  currentUser: () => FakeUser & { account: string | null };
+  // The signed-in user as the API returns them, with their budget's id once setup is finished
+  currentUser: () => FakeUser & { budget: string | null };
   // Returns the variables of every call to an operation
   callsTo: (operationName: string) => Record<string, unknown>[];
   // Makes the next call to an operation return a GraphQL error with this code
@@ -412,8 +412,8 @@ export interface FakeApi {
 interface Options {
   user?: FakeUser;
   password?: string;
-  // Pass null to simulate a user without an account
-  account?: FakeAccount | null;
+  // Pass null to simulate a user without a budget
+  budget?: FakeBudget | null;
 }
 
 // Loosely typed resolver args: the schema validates the real shapes before resolvers run
@@ -424,16 +424,16 @@ type Args = Record<string, any>; // eslint-disable-line @typescript-eslint/no-ex
 export const createFakeApi = ({
   user = DEFAULT_USER,
   password = DEFAULT_PASSWORD,
-  account = clone(DEFAULT_ACCOUNT)
+  budget = clone(DEFAULT_BUDGET)
 }: Options = {}): FakeApi => {
-  const db: FakeDb = { user: clone(user), password, account: account ? clone(account) : null };
+  const db: FakeDb = { user: clone(user), password, budget: budget ? clone(budget) : null };
   const resetTokens = new Set([VALID_RESET_TOKEN]);
   const calls: Call[] = [];
   const failures = new Map<string, GraphQLError>();
   let nextId = 1;
   const newId = (prefix: string) => `${prefix}-new-${nextId++}`;
 
-  const currentUser = () => ({ ...db.user, account: db.account?.id ?? null });
+  const currentUser = () => ({ ...db.user, budget: db.budget?.id ?? null });
 
   const authData = () => ({ user: currentUser(), token: 'test-token', tokenExpiration: 1 });
 
@@ -445,14 +445,14 @@ export const createFakeApi = ({
     }
   };
 
-  const requireAccount = () => {
-    if (!db.account) throw apiError('ACCOUNT_NOT_LINKED', { message: 'Account not linked' });
-    return db.account;
+  const requireBudget = () => {
+    if (!db.budget) throw apiError('BUDGET_NOT_LINKED', { message: 'Budget not linked' });
+    return db.budget;
   };
 
-  // Names are unique across an account's payments, as the API enforces
+  // Names are unique across a budget's payments, as the API enforces
   const checkUniqueName = (name: string, exceptId?: string) => {
-    const { recurringPayments, oneOffPayments } = requireAccount();
+    const { recurringPayments, oneOffPayments } = requireBudget();
     const taken = [...recurringPayments, ...oneOffPayments].some(
       payment => payment.name === name && payment.id !== exceptId
     );
@@ -461,14 +461,14 @@ export const createFakeApi = ({
   };
 
   const findRecurring = (id: string) => {
-    const payment = requireAccount().recurringPayments.find(p => p.id === id);
+    const payment = requireBudget().recurringPayments.find(p => p.id === id);
     if (!payment)
       throw apiError('RECURRING_PAYMENT_NOT_FOUND', { message: `No recurring payment '${id}'` });
     return payment;
   };
 
   const findOneOff = (id: string) => {
-    const payment = requireAccount().oneOffPayments.find(p => p.id === id);
+    const payment = requireBudget().oneOffPayments.find(p => p.id === id);
     if (!payment) throw apiError('PAYMENT_NOT_FOUND', { message: `No payment '${id}'` });
     return payment;
   };
@@ -568,11 +568,11 @@ export const createFakeApi = ({
 
   const rootValue = {
     tokenFindUser: currentUser,
-    // With no id, the signed-in user's account
-    account: ({ id }: Args) => {
-      const current = requireAccount();
+    // With no id, the signed-in user's budget
+    budget: ({ id }: Args) => {
+      const current = requireBudget();
       if (id && id !== current.id)
-        throw apiError('ACCOUNT_NOT_FOUND', { message: `No account '${id}'` });
+        throw apiError('BUDGET_NOT_FOUND', { message: `No budget '${id}'` });
       return current;
     },
     recurringPayment: ({ id }: Args) => {
@@ -596,7 +596,7 @@ export const createFakeApi = ({
         throw apiError('INVALID_CREDENTIALS', { message: 'Password is incorrect' });
       return authData();
     },
-    // Replaces the fake's one user with the new one, who has no account until setup
+    // Replaces the fake's one user with the new one, who has no budget until setup
     registerAndLogin: ({ input }: Args) => {
       if (input.email === db.user.email) {
         throw apiError('USER_EXISTS', {
@@ -613,7 +613,7 @@ export const createFakeApi = ({
         accent: null
       };
       db.password = input.password;
-      db.account = null;
+      db.budget = null;
       return authData();
     },
     requestPasswordReset: () => ({ success: true }),
@@ -656,14 +656,14 @@ export const createFakeApi = ({
       return { user: currentUser(), success: true };
     },
     deleteCurrentUser: () => {
-      db.account = null;
+      db.budget = null;
       return { success: true };
     },
 
-    createAccount: ({ input }: Args) => {
-      if (db.account) throw apiError('ACCOUNT_EXISTS', { message: 'Account already exists' });
-      db.account = {
-        id: 'account-new',
+    createBudget: ({ input }: Args) => {
+      if (db.budget) throw apiError('BUDGET_EXISTS', { message: 'Budget already exists' });
+      db.budget = {
+        id: 'budget-new',
         bankBalance: input.bankBalance,
         monthlyIncome: input.monthlyIncome,
         cycleStartedOn: apiDateFromToday(0),
@@ -679,20 +679,20 @@ export const createFakeApi = ({
             }
           : null
       };
-      db.account.recurringPayments = (input.recurringPayments ?? []).map(newRecurring);
-      db.account.oneOffPayments = (input.oneOffPayments ?? []).map(newOneOff);
-      return { account: db.account, success: true };
+      db.budget.recurringPayments = (input.recurringPayments ?? []).map(newRecurring);
+      db.budget.oneOffPayments = (input.oneOffPayments ?? []).map(newOneOff);
+      return { budget: db.budget, success: true };
     },
-    updateAccount: ({ input }: Args) => {
-      const current = requireAccount();
+    updateBudget: ({ input }: Args) => {
+      const current = requireBudget();
       if (input.bankBalance !== undefined) current.bankBalance = input.bankBalance;
       if (input.monthlyIncome !== undefined) current.monthlyIncome = input.monthlyIncome;
-      return { account: current, success: true };
+      return { budget: current, success: true };
     },
     // As the API: closes the records of the cycle that ended, clears away paid one-offs due before
     // payday, and moves the chosen payments on from dates left over to their first date from payday
     startPaydayCycle: ({ input }: Args) => {
-      const current = requireAccount();
+      const current = requireBudget();
       const cycleStart = fromApiDate(fromInput(input.payday))!;
       input.recurringPaymentIds.forEach(findRecurring);
       const inNewCycle = (record: FakeRecord) =>
@@ -710,12 +710,12 @@ export const createFakeApi = ({
       }
       current.bankBalance = input.bankBalance;
       current.cycleStartedOn = fromInput(input.payday);
-      return { account: current, success: true };
+      return { budget: current, success: true };
     },
     // As the API: paid payments come off the balance (income goes on), with a debt's interest
     // added first. One-offs are marked paid until payday.
     markPaymentsPaid: ({ input }: Args) => {
-      const current = requireAccount();
+      const current = requireBudget();
       const change = (p: { amount: number; type: string }) =>
         p.type === 'INCOME' ? p.amount : -p.amount;
       for (const id of input.recurringPaymentIds) {
@@ -745,12 +745,12 @@ export const createFakeApi = ({
         payment.paidAt = String(Date.now());
       }
       current.bankBalance = roundPence(current.bankBalance);
-      return { account: current, success: true };
+      return { budget: current, success: true };
     },
     // As the API: undoes the latest pay or skip this cycle, bringing its dates back, and makes
     // paid one-offs unpaid, putting back exactly what paying did
     markPaymentsUnpaid: ({ input }: Args) => {
-      const current = requireAccount();
+      const current = requireBudget();
       for (const id of input.recurringPaymentIds) {
         const payment = findRecurring(id);
         const latest = payment.thisCycle.at(-1);
@@ -771,11 +771,11 @@ export const createFakeApi = ({
         payment.paidAt = null;
       }
       current.bankBalance = roundPence(current.bankBalance);
-      return { account: current, success: true };
+      return { budget: current, success: true };
     },
     // As the API: extra off a debt and off the bank balance
     logDebtOverpayment: ({ input }: Args) => {
-      const current = requireAccount();
+      const current = requireBudget();
       const payment = findRecurring(input.recurringPaymentId);
       if (!payment.debt)
         throw apiError('DEBT_NOT_TRACKED', { message: "That payment isn't tracked as a debt" });
@@ -805,10 +805,10 @@ export const createFakeApi = ({
           }
         })
       );
-      return { account: current, success: true };
+      return { budget: current, success: true };
     },
     undoDebtOverpayment: ({ input }: Args) => {
-      const current = requireAccount();
+      const current = requireBudget();
       for (const payment of current.recurringPayments) {
         const record = (payment.history ?? []).find(item => item.id === input.recordId);
         if (!record || record.kind !== 'OVERPAYMENT') continue;
@@ -819,7 +819,7 @@ export const createFakeApi = ({
         if (payment.debt && record.debt) {
           payment.debt.balance = roundPence(payment.debt.balance + record.debt.reduction);
         }
-        return { account: current, success: true };
+        return { budget: current, success: true };
       }
       throw apiError('PAYMENT_RECORD_NOT_FOUND', {
         message: `No payment record '${input.recordId}'`
@@ -827,7 +827,7 @@ export const createFakeApi = ({
     },
     // Skips the next date, or every date before `until`, without touching the balance
     skipRecurringPayments: ({ input }: Args) => {
-      const current = requireAccount();
+      const current = requireBudget();
       for (const id of input.recurringPaymentIds) {
         const payment = findRecurring(id);
         const next = fromApiDate(payment.nextDueDate);
@@ -840,10 +840,10 @@ export const createFakeApi = ({
           : [next];
         handle(payment, { kind: 'SKIPPED', dates });
       }
-      return { account: current, success: true };
+      return { budget: current, success: true };
     },
     updatePayday: ({ input }: Args) => {
-      const current = requireAccount();
+      const current = requireBudget();
       current.payday = {
         id: current.payday?.id ?? 'payday-new',
         ...input,
@@ -853,7 +853,7 @@ export const createFakeApi = ({
       return { payday: current.payday, success: true };
     },
     setPaydayOverride: ({ for: usual, date }: Args) => {
-      const current = requireAccount();
+      const current = requireBudget();
       const rest = (current.payday?.overrides ?? []).filter(item => item.for !== usual);
       current.payday = {
         ...current.payday!,
@@ -865,7 +865,7 @@ export const createFakeApi = ({
     createRecurringPayment: ({ input }: Args) => {
       checkUniqueName(input.name);
       const payment = newRecurring(input);
-      requireAccount().recurringPayments.push(payment);
+      requireBudget().recurringPayments.push(payment);
       return { recurringPayment: payment, success: true };
     },
     updateRecurringPayment: ({ id, input }: Args) => ({
@@ -873,7 +873,7 @@ export const createFakeApi = ({
       success: true
     }),
     batchDeleteRecurringPayments: ({ ids }: Args) => {
-      const current = requireAccount();
+      const current = requireBudget();
       ids.forEach(findRecurring);
       current.recurringPayments = current.recurringPayments.filter(p => !ids.includes(p.id));
       for (const note of current.notes)
@@ -884,7 +884,7 @@ export const createFakeApi = ({
     createOneOffPayment: ({ input }: Args) => {
       checkUniqueName(input.name);
       const payment = newOneOff(input);
-      requireAccount().oneOffPayments.push(payment);
+      requireBudget().oneOffPayments.push(payment);
       return { oneOffPayment: payment, success: true };
     },
     updateOneOffPayment: ({ id, input }: Args) => {
@@ -897,14 +897,14 @@ export const createFakeApi = ({
       return { oneOffPayment: payment, success: true };
     },
     batchDeleteOneOffPayments: ({ ids }: Args) => {
-      const current = requireAccount();
+      const current = requireBudget();
       ids.forEach(findOneOff);
       current.oneOffPayments = current.oneOffPayments.filter(p => !ids.includes(p.id));
       return { success: true, deletedCount: ids.length, ids };
     },
 
     createNote: ({ input }: Args) => {
-      const current = requireAccount();
+      const current = requireBudget();
       if (current.notes.some(note => note.body === input.body)) {
         throw apiError('NOTE_EXISTS', { message: 'A note with that text already exists' });
       }
@@ -924,7 +924,7 @@ export const createFakeApi = ({
       return { note, success: true };
     },
     updateNote: ({ id, input }: Args) => {
-      const note = requireAccount().notes.find(n => n.id === id);
+      const note = requireBudget().notes.find(n => n.id === id);
       if (!note) throw apiError('NOTE_NOT_FOUND', { message: `No note '${id}'` });
       Object.assign(note, input, {
         ...('date' in input ? { date: input.date ? fromInput(input.date) : null } : {}),
@@ -933,7 +933,7 @@ export const createFakeApi = ({
       return { note, success: true };
     },
     updateReminders: ({ input }: Args) => {
-      const current = requireAccount();
+      const current = requireBudget();
       const states = (current.reminderStates ??= []);
       const changed = (input.keys as string[]).map(key => {
         let state = states.find(item => item.key === key);
@@ -953,34 +953,34 @@ export const createFakeApi = ({
       return { states: changed, success: true };
     },
     updateReminderSettings: ({ input }: Args) => {
-      const current = requireAccount();
-      const { accountId: _, ...changes } = input;
+      const current = requireBudget();
+      const { budgetId: _, ...changes } = input;
       current.reminderSettings = {
         ...(current.reminderSettings ?? DEFAULT_REMINDER_SETTINGS),
         ...Object.fromEntries(Object.entries(changes).filter(([, value]) => value != null))
       };
-      return { account: current, success: true };
+      return { budget: current, success: true };
     },
     updateCalendarFeed: ({ input }: Args) => {
-      const current = requireAccount();
-      const { accountId: _, enabled, ...changes } = input;
+      const current = requireBudget();
+      const { budgetId: _, enabled, ...changes } = input;
       const feed = { ...(current.calendarFeed ?? DEFAULT_CALENDAR_FEED), ...changes };
       if (enabled === true && !feed.token) feed.token = `feed-token-${nextId++}`;
       if (enabled === false) feed.token = null;
       current.calendarFeed = feed;
-      return { account: current, success: true };
+      return { budget: current, success: true };
     },
     resetCalendarFeed: () => {
-      const current = requireAccount();
+      const current = requireBudget();
       current.calendarFeed = {
         ...(current.calendarFeed ?? DEFAULT_CALENDAR_FEED),
         token: `feed-token-${nextId++}`
       };
-      return { account: current, success: true };
+      return { budget: current, success: true };
     },
 
     deleteNote: ({ id }: Args) => {
-      const current = requireAccount();
+      const current = requireBudget();
       const deleted = current.notes.some(note => note.id === id);
       current.notes = current.notes.filter(note => note.id !== id);
       return { success: true, deletedCount: deleted ? 1 : 0, ids: deleted ? [id] : [] };

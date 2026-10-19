@@ -1,6 +1,6 @@
 import { useMutation } from '@apollo/client/react';
 import { ResetCalendarFeedDocument, UpdateCalendarFeedDocument } from '~/graphql/generated';
-import { Account } from '~/hooks/useAccount';
+import { Budget } from '~/hooks/useBudget';
 import { getApiErrorMessage } from '~/lib/errors';
 import { showToast } from '~/state/toast';
 
@@ -35,10 +35,10 @@ export const feedUrls = (token: string, origin = window.location.origin) => {
 };
 
 /* The calendar feed: turning it on or off, what it carries, and a new address */
-export const useCalendarFeed = (account: Account) => {
+export const useCalendarFeed = (budget: Budget) => {
   const [updateFeed] = useMutation(UpdateCalendarFeedDocument);
   const [resetFeed, { loading: resetting }] = useMutation(ResetCalendarFeedDocument);
-  const feed = account.calendarFeed;
+  const feed = budget.calendarFeed;
 
   const update = async (
     changes: Partial<Record<FeedInclude | 'showAmounts' | 'enabled', boolean>>
@@ -46,16 +46,16 @@ export const useCalendarFeed = (account: Account) => {
     const { enabled, ...include } = changes;
     try {
       await updateFeed({
-        variables: { input: { accountId: account.id, ...changes } },
+        variables: { input: { budgetId: budget.id, ...changes } },
         // Switches move at once; turning it on waits for its new address
         ...(enabled === undefined
           ? {
               optimisticResponse: {
                 updateCalendarFeed: {
-                  __typename: 'AccountResponse' as const,
-                  account: {
-                    __typename: 'Account' as const,
-                    id: account.id,
+                  __typename: 'BudgetResponse' as const,
+                  budget: {
+                    __typename: 'Budget' as const,
+                    id: budget.id,
                     calendarFeed: { ...feed, ...include }
                   }
                 }
@@ -78,7 +78,7 @@ export const useCalendarFeed = (account: Account) => {
     resetting,
     reset: async () => {
       try {
-        await resetFeed({ variables: { accountId: account.id } });
+        await resetFeed({ variables: { budgetId: budget.id } });
         showToast({ message: 'New link made. Add it to your calendar again.' });
       } catch (error) {
         showError(error);

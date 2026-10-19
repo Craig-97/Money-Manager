@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useMutation } from '@apollo/client/react';
-import { UpdateAccountDocument } from '~/graphql/generated';
-import { Account } from '~/hooks/useAccount';
+import { UpdateBudgetDocument } from '~/graphql/generated';
+import { Budget } from '~/hooks/useBudget';
 import { usePayCycle } from '~/hooks/usePayCycle';
 import { usePaymentActions } from '~/hooks/usePaymentActions';
 import { usePaymentSelection } from '~/hooks/usePaymentSelection';
@@ -21,50 +21,50 @@ import { useAlerts } from './useAlerts';
 import { useMoneyEditor } from './useMoneyEditor';
 import { usePaydayOverride } from './usePaydayOverride';
 
-/* Everything the dashboard shows and does, worked out from the account */
-export const useDashboard = (account: Account) => {
-  const { today, holidays, cycle } = usePayCycle(account.payday);
-  const actions = usePaymentActions(account.id);
-  const [updateAccount] = useMutation(UpdateAccountDocument);
+/* Everything the dashboard shows and does, worked out from the budget */
+export const useDashboard = (budget: Budget) => {
+  const { today, holidays, cycle } = usePayCycle(budget.payday);
+  const actions = usePaymentActions(budget.id);
+  const [updateBudget] = useMutation(UpdateBudgetDocument);
 
   const [tab, setTab] = useState<PaymentTab>('upcoming');
   const [sort, setSort] = useState<PaymentSort>(DEFAULT_SORT);
 
-  const payments = toPayments(account, today);
+  const payments = toPayments(budget, today);
   const summary = summarise({
     payments,
-    bankBalance: account.bankBalance,
-    monthlyIncome: account.monthlyIncome,
+    bankBalance: budget.bankBalance,
+    monthlyIncome: budget.monthlyIncome,
     cycle,
     today
   });
-  const paydayOverride = usePaydayOverride({ account, cycle, today, holidays, payments });
+  const paydayOverride = usePaydayOverride({ budget, cycle, today, holidays, payments });
   const alerts = useAlerts({
-    accountId: account.id,
+    budgetId: budget.id,
     payments,
     today,
     dueToday: summary.dueToday,
-    states: toReminderStates(account.reminderStates)
+    states: toReminderStates(budget.reminderStates)
   });
   const listed = paymentsForTab(payments, { tab, cycle, sort });
   const selection = usePaymentSelection(listed);
 
-  const saveAccount = (fields: { bankBalance?: number; monthlyIncome?: number }) =>
-    updateAccount({ variables: { id: account.id, input: fields } }).catch(error =>
+  const saveBudget = (fields: { bankBalance?: number; monthlyIncome?: number }) =>
+    updateBudget({ variables: { id: budget.id, input: fields } }).catch(error =>
       showToast({ message: getApiErrorMessage(error, "Couldn't save that. Try again.") })
     );
 
-  const balanceEditor = useMoneyEditor(account.bankBalance, bankBalance =>
-    saveAccount({ bankBalance })
+  const balanceEditor = useMoneyEditor(budget.bankBalance, bankBalance =>
+    saveBudget({ bankBalance })
   );
-  const incomeEditor = useMoneyEditor(account.monthlyIncome, monthlyIncome =>
-    saveAccount({ monthlyIncome })
+  const incomeEditor = useMoneyEditor(budget.monthlyIncome, monthlyIncome =>
+    saveBudget({ monthlyIncome })
   );
 
   return {
-    bankBalance: account.bankBalance,
-    monthlyIncome: account.monthlyIncome,
-    payday: account.payday,
+    bankBalance: budget.bankBalance,
+    monthlyIncome: budget.monthlyIncome,
+    payday: budget.payday,
     today,
     cycle,
     payments,

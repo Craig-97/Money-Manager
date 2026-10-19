@@ -6,11 +6,145 @@ export type Incremental<T> =
 import type * as Types from './schema';
 
 import type { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
-export type AccountQueryVariables = Exact<{ [key: string]: never }>;
+export type AuthSessionFragment = {
+  __typename: 'AuthData';
+  token: string;
+  tokenExpiration: number;
+  user: {
+    __typename: 'User';
+    id: string;
+    budget: string | null;
+    email: string;
+    firstName: string;
+    surname: string;
+    theme: Types.ThemePreference | null;
+    accent: string | null;
+  };
+};
 
-export type AccountQuery = {
-  account: {
-    __typename: 'Account';
+export type LoginMutationVariables = Exact<{
+  email: string;
+  password: string;
+}>;
+
+export type LoginMutation = {
+  login: {
+    __typename: 'AuthData';
+    token: string;
+    tokenExpiration: number;
+    user: {
+      __typename: 'User';
+      id: string;
+      budget: string | null;
+      email: string;
+      firstName: string;
+      surname: string;
+      theme: Types.ThemePreference | null;
+      accent: string | null;
+    };
+  };
+};
+
+export type LogoutMutationVariables = Exact<{ [key: string]: never }>;
+
+export type LogoutMutation = { logout: { __typename: 'SuccessResponse'; success: boolean } };
+
+export type LogoutEverywhereMutationVariables = Exact<{ [key: string]: never }>;
+
+export type LogoutEverywhereMutation = {
+  logoutEverywhere: { __typename: 'SuccessResponse'; success: boolean };
+};
+
+export type PasswordResetTokenValidQueryVariables = Exact<{
+  token: string;
+}>;
+
+export type PasswordResetTokenValidQuery = {
+  passwordResetTokenValid: {
+    __typename: 'PasswordResetTokenCheck';
+    valid: boolean;
+    email: string | null;
+  };
+};
+
+export type RefreshSessionMutationVariables = Exact<{ [key: string]: never }>;
+
+export type RefreshSessionMutation = {
+  refreshSession: {
+    __typename: 'AuthData';
+    token: string;
+    tokenExpiration: number;
+    user: {
+      __typename: 'User';
+      id: string;
+      budget: string | null;
+      email: string;
+      firstName: string;
+      surname: string;
+      theme: Types.ThemePreference | null;
+      accent: string | null;
+    };
+  };
+};
+
+export type RegisterAndLoginMutationVariables = Exact<{
+  input: Types.RegisterInput;
+}>;
+
+export type RegisterAndLoginMutation = {
+  registerAndLogin: {
+    __typename: 'AuthData';
+    token: string;
+    tokenExpiration: number;
+    user: {
+      __typename: 'User';
+      id: string;
+      budget: string | null;
+      email: string;
+      firstName: string;
+      surname: string;
+      theme: Types.ThemePreference | null;
+      accent: string | null;
+    };
+  };
+};
+
+export type RequestPasswordResetMutationVariables = Exact<{
+  email: string;
+}>;
+
+export type RequestPasswordResetMutation = {
+  requestPasswordReset: { __typename: 'SuccessResponse'; success: boolean };
+};
+
+export type ResetPasswordMutationVariables = Exact<{
+  token: string;
+  password: string;
+}>;
+
+export type ResetPasswordMutation = {
+  resetPassword: {
+    __typename: 'AuthData';
+    token: string;
+    tokenExpiration: number;
+    user: {
+      __typename: 'User';
+      id: string;
+      budget: string | null;
+      email: string;
+      firstName: string;
+      surname: string;
+      theme: Types.ThemePreference | null;
+      accent: string | null;
+    };
+  };
+};
+
+export type BudgetQueryVariables = Exact<{ [key: string]: never }>;
+
+export type BudgetQuery = {
+  budget: {
+    __typename: 'Budget';
     id: string;
     bankBalance: number;
     monthlyIncome: number;
@@ -105,8 +239,8 @@ export type AccountQuery = {
   } | null;
 };
 
-export type AccountFieldsFragment = {
-  __typename: 'Account';
+export type BudgetFieldsFragment = {
+  __typename: 'Budget';
   id: string;
   bankBalance: number;
   monthlyIncome: number;
@@ -200,15 +334,15 @@ export type AccountFieldsFragment = {
   };
 };
 
-export type CreateAccountMutationVariables = Exact<{
-  input: Types.CreateAccountInput;
+export type CreateBudgetMutationVariables = Exact<{
+  input: Types.CreateBudgetInput;
 }>;
 
-export type CreateAccountMutation = {
-  createAccount: {
-    __typename: 'AccountResponse';
-    account: {
-      __typename: 'Account';
+export type CreateBudgetMutation = {
+  createBudget: {
+    __typename: 'BudgetResponse';
+    budget: {
+      __typename: 'Budget';
       id: string;
       bankBalance: number;
       monthlyIncome: number;
@@ -310,9 +444,9 @@ export type LogDebtOverpaymentMutationVariables = Exact<{
 
 export type LogDebtOverpaymentMutation = {
   logDebtOverpayment: {
-    __typename: 'AccountResponse';
-    account: {
-      __typename: 'Account';
+    __typename: 'BudgetResponse';
+    budget: {
+      __typename: 'Budget';
       id: string;
       bankBalance: number;
       recurringPayments: Array<{
@@ -355,9 +489,9 @@ export type MarkPaymentsPaidMutationVariables = Exact<{
 
 export type MarkPaymentsPaidMutation = {
   markPaymentsPaid: {
-    __typename: 'AccountResponse';
-    account: {
-      __typename: 'Account';
+    __typename: 'BudgetResponse';
+    budget: {
+      __typename: 'Budget';
       id: string;
       bankBalance: number;
       recurringPayments: Array<{
@@ -411,9 +545,9 @@ export type MarkPaymentsUnpaidMutationVariables = Exact<{
 
 export type MarkPaymentsUnpaidMutation = {
   markPaymentsUnpaid: {
-    __typename: 'AccountResponse';
-    account: {
-      __typename: 'Account';
+    __typename: 'BudgetResponse';
+    budget: {
+      __typename: 'Budget';
       id: string;
       bankBalance: number;
       recurringPayments: Array<{
@@ -467,9 +601,9 @@ export type SkipRecurringPaymentsMutationVariables = Exact<{
 
 export type SkipRecurringPaymentsMutation = {
   skipRecurringPayments: {
-    __typename: 'AccountResponse';
-    account: {
-      __typename: 'Account';
+    __typename: 'BudgetResponse';
+    budget: {
+      __typename: 'Budget';
       id: string;
       recurringPayments: Array<{
         __typename: 'RecurringPayment';
@@ -511,9 +645,9 @@ export type StartPaydayCycleMutationVariables = Exact<{
 
 export type StartPaydayCycleMutation = {
   startPaydayCycle: {
-    __typename: 'AccountResponse';
-    account: {
-      __typename: 'Account';
+    __typename: 'BudgetResponse';
+    budget: {
+      __typename: 'Budget';
       id: string;
       bankBalance: number;
       cycleStartedOn: string | null;
@@ -568,9 +702,9 @@ export type UndoDebtOverpaymentMutationVariables = Exact<{
 
 export type UndoDebtOverpaymentMutation = {
   undoDebtOverpayment: {
-    __typename: 'AccountResponse';
-    account: {
-      __typename: 'Account';
+    __typename: 'BudgetResponse';
+    budget: {
+      __typename: 'Budget';
       id: string;
       bankBalance: number;
       recurringPayments: Array<{
@@ -607,154 +741,15 @@ export type UndoDebtOverpaymentMutation = {
   };
 };
 
-export type UpdateAccountMutationVariables = Exact<{
+export type UpdateBudgetMutationVariables = Exact<{
   id: string | number;
-  input: Types.UpdateAccountInput;
+  input: Types.UpdateBudgetInput;
 }>;
 
-export type UpdateAccountMutation = {
-  updateAccount: {
-    __typename: 'AccountResponse';
-    account: {
-      __typename: 'Account';
-      id: string;
-      bankBalance: number;
-      monthlyIncome: number;
-    } | null;
-  };
-};
-
-export type AuthSessionFragment = {
-  __typename: 'AuthData';
-  token: string;
-  tokenExpiration: number;
-  user: {
-    __typename: 'User';
-    id: string;
-    account: string | null;
-    email: string;
-    firstName: string;
-    surname: string;
-    theme: Types.ThemePreference | null;
-    accent: string | null;
-  };
-};
-
-export type LoginMutationVariables = Exact<{
-  email: string;
-  password: string;
-}>;
-
-export type LoginMutation = {
-  login: {
-    __typename: 'AuthData';
-    token: string;
-    tokenExpiration: number;
-    user: {
-      __typename: 'User';
-      id: string;
-      account: string | null;
-      email: string;
-      firstName: string;
-      surname: string;
-      theme: Types.ThemePreference | null;
-      accent: string | null;
-    };
-  };
-};
-
-export type LogoutMutationVariables = Exact<{ [key: string]: never }>;
-
-export type LogoutMutation = { logout: { __typename: 'SuccessResponse'; success: boolean } };
-
-export type LogoutEverywhereMutationVariables = Exact<{ [key: string]: never }>;
-
-export type LogoutEverywhereMutation = {
-  logoutEverywhere: { __typename: 'SuccessResponse'; success: boolean };
-};
-
-export type PasswordResetTokenValidQueryVariables = Exact<{
-  token: string;
-}>;
-
-export type PasswordResetTokenValidQuery = {
-  passwordResetTokenValid: {
-    __typename: 'PasswordResetTokenCheck';
-    valid: boolean;
-    email: string | null;
-  };
-};
-
-export type RefreshSessionMutationVariables = Exact<{ [key: string]: never }>;
-
-export type RefreshSessionMutation = {
-  refreshSession: {
-    __typename: 'AuthData';
-    token: string;
-    tokenExpiration: number;
-    user: {
-      __typename: 'User';
-      id: string;
-      account: string | null;
-      email: string;
-      firstName: string;
-      surname: string;
-      theme: Types.ThemePreference | null;
-      accent: string | null;
-    };
-  };
-};
-
-export type RegisterAndLoginMutationVariables = Exact<{
-  input: Types.RegisterInput;
-}>;
-
-export type RegisterAndLoginMutation = {
-  registerAndLogin: {
-    __typename: 'AuthData';
-    token: string;
-    tokenExpiration: number;
-    user: {
-      __typename: 'User';
-      id: string;
-      account: string | null;
-      email: string;
-      firstName: string;
-      surname: string;
-      theme: Types.ThemePreference | null;
-      accent: string | null;
-    };
-  };
-};
-
-export type RequestPasswordResetMutationVariables = Exact<{
-  email: string;
-}>;
-
-export type RequestPasswordResetMutation = {
-  requestPasswordReset: { __typename: 'SuccessResponse'; success: boolean };
-};
-
-export type ResetPasswordMutationVariables = Exact<{
-  token: string;
-  password: string;
-}>;
-
-export type ResetPasswordMutation = {
-  resetPassword: {
-    __typename: 'AuthData';
-    token: string;
-    tokenExpiration: number;
-    user: {
-      __typename: 'User';
-      id: string;
-      account: string | null;
-      email: string;
-      firstName: string;
-      surname: string;
-      theme: Types.ThemePreference | null;
-      accent: string | null;
-    };
+export type UpdateBudgetMutation = {
+  updateBudget: {
+    __typename: 'BudgetResponse';
+    budget: { __typename: 'Budget'; id: string; bankBalance: number; monthlyIncome: number } | null;
   };
 };
 
@@ -1116,14 +1111,14 @@ export type CalendarFeedFieldsFragment = {
 };
 
 export type ResetCalendarFeedMutationVariables = Exact<{
-  accountId: string | number;
+  budgetId: string | number;
 }>;
 
 export type ResetCalendarFeedMutation = {
   resetCalendarFeed: {
-    __typename: 'AccountResponse';
-    account: {
-      __typename: 'Account';
+    __typename: 'BudgetResponse';
+    budget: {
+      __typename: 'Budget';
       id: string;
       calendarFeed: {
         __typename: 'CalendarFeed';
@@ -1145,9 +1140,9 @@ export type UpdateCalendarFeedMutationVariables = Exact<{
 
 export type UpdateCalendarFeedMutation = {
   updateCalendarFeed: {
-    __typename: 'AccountResponse';
-    account: {
-      __typename: 'Account';
+    __typename: 'BudgetResponse';
+    budget: {
+      __typename: 'Budget';
       id: string;
       calendarFeed: {
         __typename: 'CalendarFeed';
@@ -1169,9 +1164,9 @@ export type UpdateReminderSettingsMutationVariables = Exact<{
 
 export type UpdateReminderSettingsMutation = {
   updateReminderSettings: {
-    __typename: 'AccountResponse';
-    account: {
-      __typename: 'Account';
+    __typename: 'BudgetResponse';
+    budget: {
+      __typename: 'Budget';
       id: string;
       reminderSettings: {
         __typename: 'ReminderSettings';
@@ -1215,7 +1210,7 @@ export type CurrentUserQuery = {
   tokenFindUser: {
     __typename: 'User';
     id: string;
-    account: string | null;
+    budget: string | null;
     email: string;
     firstName: string;
     surname: string;
@@ -1267,7 +1262,7 @@ export type UpdatePreferencesMutation = {
 export type UserFieldsFragment = {
   __typename: 'User';
   id: string;
-  account: string | null;
+  budget: string | null;
   email: string;
   firstName: string;
   surname: string;
@@ -1275,6 +1270,70 @@ export type UserFieldsFragment = {
   accent: string | null;
 };
 
+export const UserFieldsFragmentDoc = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'UserFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'User' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'budget' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'email' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'surname' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'theme' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'accent' } }
+        ]
+      }
+    }
+  ]
+} as unknown as DocumentNode<UserFieldsFragment, unknown>;
+export const AuthSessionFragmentDoc = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'AuthSession' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'AuthData' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'token' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'tokenExpiration' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'user' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [{ kind: 'FragmentSpread', name: { kind: 'Name', value: 'UserFields' } }]
+            }
+          }
+        ]
+      }
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'UserFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'User' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'budget' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'email' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'surname' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'theme' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'accent' } }
+        ]
+      }
+    }
+  ]
+} as unknown as DocumentNode<AuthSessionFragment, unknown>;
 export const PaydayFieldsFragmentDoc = {
   kind: 'Document',
   definitions: [
@@ -1498,13 +1557,13 @@ export const CalendarFeedFieldsFragmentDoc = {
     }
   ]
 } as unknown as DocumentNode<CalendarFeedFieldsFragment, unknown>;
-export const AccountFieldsFragmentDoc = {
+export const BudgetFieldsFragmentDoc = {
   kind: 'Document',
   definitions: [
     {
       kind: 'FragmentDefinition',
-      name: { kind: 'Name', value: 'AccountFields' },
-      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'Account' } },
+      name: { kind: 'Name', value: 'BudgetFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'Budget' } },
       selectionSet: {
         kind: 'SelectionSet',
         selections: [
@@ -1772,10 +1831,58 @@ export const AccountFieldsFragmentDoc = {
       }
     }
   ]
-} as unknown as DocumentNode<AccountFieldsFragment, unknown>;
-export const UserFieldsFragmentDoc = {
+} as unknown as DocumentNode<BudgetFieldsFragment, unknown>;
+export const LoginDocument = {
   kind: 'Document',
   definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'Login' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'email' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } }
+          }
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'password' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } }
+          }
+        }
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'login' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'email' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'email' } }
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'password' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'password' } }
+              }
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [{ kind: 'FragmentSpread', name: { kind: 'Name', value: 'AuthSession' } }]
+            }
+          }
+        ]
+      }
+    },
     {
       kind: 'FragmentDefinition',
       name: { kind: 'Name', value: 'UserFields' },
@@ -1784,7 +1891,7 @@ export const UserFieldsFragmentDoc = {
         kind: 'SelectionSet',
         selections: [
           { kind: 'Field', name: { kind: 'Name', value: 'id' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'account' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'budget' } },
           { kind: 'Field', name: { kind: 'Name', value: 'email' } },
           { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
           { kind: 'Field', name: { kind: 'Name', value: 'surname' } },
@@ -1792,12 +1899,7 @@ export const UserFieldsFragmentDoc = {
           { kind: 'Field', name: { kind: 'Name', value: 'accent' } }
         ]
       }
-    }
-  ]
-} as unknown as DocumentNode<UserFieldsFragment, unknown>;
-export const AuthSessionFragmentDoc = {
-  kind: 'Document',
-  definitions: [
+    },
     {
       kind: 'FragmentDefinition',
       name: { kind: 'Name', value: 'AuthSession' },
@@ -1817,6 +1919,118 @@ export const AuthSessionFragmentDoc = {
           }
         ]
       }
+    }
+  ]
+} as unknown as DocumentNode<LoginMutation, LoginMutationVariables>;
+export const LogoutDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'Logout' },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'logout' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [{ kind: 'Field', name: { kind: 'Name', value: 'success' } }]
+            }
+          }
+        ]
+      }
+    }
+  ]
+} as unknown as DocumentNode<LogoutMutation, LogoutMutationVariables>;
+export const LogoutEverywhereDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'LogoutEverywhere' },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'logoutEverywhere' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [{ kind: 'Field', name: { kind: 'Name', value: 'success' } }]
+            }
+          }
+        ]
+      }
+    }
+  ]
+} as unknown as DocumentNode<LogoutEverywhereMutation, LogoutEverywhereMutationVariables>;
+export const PasswordResetTokenValidDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'PasswordResetTokenValid' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'token' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } }
+          }
+        }
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'passwordResetTokenValid' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'token' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'token' } }
+              }
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'valid' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'email' } }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+} as unknown as DocumentNode<PasswordResetTokenValidQuery, PasswordResetTokenValidQueryVariables>;
+export const RefreshSessionDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'RefreshSession' },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'refreshSession' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [{ kind: 'FragmentSpread', name: { kind: 'Name', value: 'AuthSession' } }]
+            }
+          }
+        ]
+      }
     },
     {
       kind: 'FragmentDefinition',
@@ -1826,7 +2040,7 @@ export const AuthSessionFragmentDoc = {
         kind: 'SelectionSet',
         selections: [
           { kind: 'Field', name: { kind: 'Name', value: 'id' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'account' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'budget' } },
           { kind: 'Field', name: { kind: 'Name', value: 'email' } },
           { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
           { kind: 'Field', name: { kind: 'Name', value: 'surname' } },
@@ -1834,26 +2048,253 @@ export const AuthSessionFragmentDoc = {
           { kind: 'Field', name: { kind: 'Name', value: 'accent' } }
         ]
       }
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'AuthSession' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'AuthData' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'token' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'tokenExpiration' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'user' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [{ kind: 'FragmentSpread', name: { kind: 'Name', value: 'UserFields' } }]
+            }
+          }
+        ]
+      }
     }
   ]
-} as unknown as DocumentNode<AuthSessionFragment, unknown>;
-export const AccountDocument = {
+} as unknown as DocumentNode<RefreshSessionMutation, RefreshSessionMutationVariables>;
+export const RegisterAndLoginDocument = {
   kind: 'Document',
   definitions: [
     {
       kind: 'OperationDefinition',
-      operation: 'query',
-      name: { kind: 'Name', value: 'Account' },
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'RegisterAndLogin' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'RegisterInput' } }
+          }
+        }
+      ],
       selectionSet: {
         kind: 'SelectionSet',
         selections: [
           {
             kind: 'Field',
-            name: { kind: 'Name', value: 'account' },
+            name: { kind: 'Name', value: 'registerAndLogin' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } }
+              }
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [{ kind: 'FragmentSpread', name: { kind: 'Name', value: 'AuthSession' } }]
+            }
+          }
+        ]
+      }
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'UserFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'User' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'budget' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'email' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'surname' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'theme' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'accent' } }
+        ]
+      }
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'AuthSession' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'AuthData' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'token' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'tokenExpiration' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'user' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [{ kind: 'FragmentSpread', name: { kind: 'Name', value: 'UserFields' } }]
+            }
+          }
+        ]
+      }
+    }
+  ]
+} as unknown as DocumentNode<RegisterAndLoginMutation, RegisterAndLoginMutationVariables>;
+export const RequestPasswordResetDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'RequestPasswordReset' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'email' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } }
+          }
+        }
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'requestPasswordReset' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'email' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'email' } }
+              }
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [{ kind: 'Field', name: { kind: 'Name', value: 'success' } }]
+            }
+          }
+        ]
+      }
+    }
+  ]
+} as unknown as DocumentNode<RequestPasswordResetMutation, RequestPasswordResetMutationVariables>;
+export const ResetPasswordDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'ResetPassword' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'token' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } }
+          }
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'password' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } }
+          }
+        }
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'resetPassword' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'token' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'token' } }
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'password' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'password' } }
+              }
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [{ kind: 'FragmentSpread', name: { kind: 'Name', value: 'AuthSession' } }]
+            }
+          }
+        ]
+      }
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'UserFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'User' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'budget' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'email' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'surname' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'theme' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'accent' } }
+        ]
+      }
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'AuthSession' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'AuthData' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'token' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'tokenExpiration' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'user' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [{ kind: 'FragmentSpread', name: { kind: 'Name', value: 'UserFields' } }]
+            }
+          }
+        ]
+      }
+    }
+  ]
+} as unknown as DocumentNode<ResetPasswordMutation, ResetPasswordMutationVariables>;
+export const BudgetDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'Budget' },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'budget' },
             selectionSet: {
               kind: 'SelectionSet',
               selections: [
-                { kind: 'FragmentSpread', name: { kind: 'Name', value: 'AccountFields' } }
+                { kind: 'FragmentSpread', name: { kind: 'Name', value: 'BudgetFields' } }
               ]
             }
           }
@@ -2050,8 +2491,8 @@ export const AccountDocument = {
     },
     {
       kind: 'FragmentDefinition',
-      name: { kind: 'Name', value: 'AccountFields' },
-      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'Account' } },
+      name: { kind: 'Name', value: 'BudgetFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'Budget' } },
       selectionSet: {
         kind: 'SelectionSet',
         selections: [
@@ -2131,21 +2572,21 @@ export const AccountDocument = {
       }
     }
   ]
-} as unknown as DocumentNode<AccountQuery, AccountQueryVariables>;
-export const CreateAccountDocument = {
+} as unknown as DocumentNode<BudgetQuery, BudgetQueryVariables>;
+export const CreateBudgetDocument = {
   kind: 'Document',
   definitions: [
     {
       kind: 'OperationDefinition',
       operation: 'mutation',
-      name: { kind: 'Name', value: 'CreateAccount' },
+      name: { kind: 'Name', value: 'CreateBudget' },
       variableDefinitions: [
         {
           kind: 'VariableDefinition',
           variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
           type: {
             kind: 'NonNullType',
-            type: { kind: 'NamedType', name: { kind: 'Name', value: 'CreateAccountInput' } }
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'CreateBudgetInput' } }
           }
         }
       ],
@@ -2154,7 +2595,7 @@ export const CreateAccountDocument = {
         selections: [
           {
             kind: 'Field',
-            name: { kind: 'Name', value: 'createAccount' },
+            name: { kind: 'Name', value: 'createBudget' },
             arguments: [
               {
                 kind: 'Argument',
@@ -2167,11 +2608,11 @@ export const CreateAccountDocument = {
               selections: [
                 {
                   kind: 'Field',
-                  name: { kind: 'Name', value: 'account' },
+                  name: { kind: 'Name', value: 'budget' },
                   selectionSet: {
                     kind: 'SelectionSet',
                     selections: [
-                      { kind: 'FragmentSpread', name: { kind: 'Name', value: 'AccountFields' } }
+                      { kind: 'FragmentSpread', name: { kind: 'Name', value: 'BudgetFields' } }
                     ]
                   }
                 }
@@ -2371,8 +2812,8 @@ export const CreateAccountDocument = {
     },
     {
       kind: 'FragmentDefinition',
-      name: { kind: 'Name', value: 'AccountFields' },
-      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'Account' } },
+      name: { kind: 'Name', value: 'BudgetFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'Budget' } },
       selectionSet: {
         kind: 'SelectionSet',
         selections: [
@@ -2452,7 +2893,7 @@ export const CreateAccountDocument = {
       }
     }
   ]
-} as unknown as DocumentNode<CreateAccountMutation, CreateAccountMutationVariables>;
+} as unknown as DocumentNode<CreateBudgetMutation, CreateBudgetMutationVariables>;
 export const LogDebtOverpaymentDocument = {
   kind: 'Document',
   definitions: [
@@ -2488,7 +2929,7 @@ export const LogDebtOverpaymentDocument = {
               selections: [
                 {
                   kind: 'Field',
-                  name: { kind: 'Name', value: 'account' },
+                  name: { kind: 'Name', value: 'budget' },
                   selectionSet: {
                     kind: 'SelectionSet',
                     selections: [
@@ -2622,7 +3063,7 @@ export const MarkPaymentsPaidDocument = {
               selections: [
                 {
                   kind: 'Field',
-                  name: { kind: 'Name', value: 'account' },
+                  name: { kind: 'Name', value: 'budget' },
                   selectionSet: {
                     kind: 'SelectionSet',
                     selections: [
@@ -2797,7 +3238,7 @@ export const MarkPaymentsUnpaidDocument = {
               selections: [
                 {
                   kind: 'Field',
-                  name: { kind: 'Name', value: 'account' },
+                  name: { kind: 'Name', value: 'budget' },
                   selectionSet: {
                     kind: 'SelectionSet',
                     selections: [
@@ -2972,7 +3413,7 @@ export const SkipRecurringPaymentsDocument = {
               selections: [
                 {
                   kind: 'Field',
-                  name: { kind: 'Name', value: 'account' },
+                  name: { kind: 'Name', value: 'budget' },
                   selectionSet: {
                     kind: 'SelectionSet',
                     selections: [
@@ -3105,7 +3546,7 @@ export const StartPaydayCycleDocument = {
               selections: [
                 {
                   kind: 'Field',
-                  name: { kind: 'Name', value: 'account' },
+                  name: { kind: 'Name', value: 'budget' },
                   selectionSet: {
                     kind: 'SelectionSet',
                     selections: [
@@ -3281,7 +3722,7 @@ export const UndoDebtOverpaymentDocument = {
               selections: [
                 {
                   kind: 'Field',
-                  name: { kind: 'Name', value: 'account' },
+                  name: { kind: 'Name', value: 'budget' },
                   selectionSet: {
                     kind: 'SelectionSet',
                     selections: [
@@ -3380,13 +3821,13 @@ export const UndoDebtOverpaymentDocument = {
     }
   ]
 } as unknown as DocumentNode<UndoDebtOverpaymentMutation, UndoDebtOverpaymentMutationVariables>;
-export const UpdateAccountDocument = {
+export const UpdateBudgetDocument = {
   kind: 'Document',
   definitions: [
     {
       kind: 'OperationDefinition',
       operation: 'mutation',
-      name: { kind: 'Name', value: 'UpdateAccount' },
+      name: { kind: 'Name', value: 'UpdateBudget' },
       variableDefinitions: [
         {
           kind: 'VariableDefinition',
@@ -3401,7 +3842,7 @@ export const UpdateAccountDocument = {
           variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
           type: {
             kind: 'NonNullType',
-            type: { kind: 'NamedType', name: { kind: 'Name', value: 'UpdateAccountInput' } }
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'UpdateBudgetInput' } }
           }
         }
       ],
@@ -3410,7 +3851,7 @@ export const UpdateAccountDocument = {
         selections: [
           {
             kind: 'Field',
-            name: { kind: 'Name', value: 'updateAccount' },
+            name: { kind: 'Name', value: 'updateBudget' },
             arguments: [
               {
                 kind: 'Argument',
@@ -3428,7 +3869,7 @@ export const UpdateAccountDocument = {
               selections: [
                 {
                   kind: 'Field',
-                  name: { kind: 'Name', value: 'account' },
+                  name: { kind: 'Name', value: 'budget' },
                   selectionSet: {
                     kind: 'SelectionSet',
                     selections: [
@@ -3445,453 +3886,7 @@ export const UpdateAccountDocument = {
       }
     }
   ]
-} as unknown as DocumentNode<UpdateAccountMutation, UpdateAccountMutationVariables>;
-export const LoginDocument = {
-  kind: 'Document',
-  definitions: [
-    {
-      kind: 'OperationDefinition',
-      operation: 'mutation',
-      name: { kind: 'Name', value: 'Login' },
-      variableDefinitions: [
-        {
-          kind: 'VariableDefinition',
-          variable: { kind: 'Variable', name: { kind: 'Name', value: 'email' } },
-          type: {
-            kind: 'NonNullType',
-            type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } }
-          }
-        },
-        {
-          kind: 'VariableDefinition',
-          variable: { kind: 'Variable', name: { kind: 'Name', value: 'password' } },
-          type: {
-            kind: 'NonNullType',
-            type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } }
-          }
-        }
-      ],
-      selectionSet: {
-        kind: 'SelectionSet',
-        selections: [
-          {
-            kind: 'Field',
-            name: { kind: 'Name', value: 'login' },
-            arguments: [
-              {
-                kind: 'Argument',
-                name: { kind: 'Name', value: 'email' },
-                value: { kind: 'Variable', name: { kind: 'Name', value: 'email' } }
-              },
-              {
-                kind: 'Argument',
-                name: { kind: 'Name', value: 'password' },
-                value: { kind: 'Variable', name: { kind: 'Name', value: 'password' } }
-              }
-            ],
-            selectionSet: {
-              kind: 'SelectionSet',
-              selections: [{ kind: 'FragmentSpread', name: { kind: 'Name', value: 'AuthSession' } }]
-            }
-          }
-        ]
-      }
-    },
-    {
-      kind: 'FragmentDefinition',
-      name: { kind: 'Name', value: 'UserFields' },
-      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'User' } },
-      selectionSet: {
-        kind: 'SelectionSet',
-        selections: [
-          { kind: 'Field', name: { kind: 'Name', value: 'id' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'account' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'email' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'surname' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'theme' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'accent' } }
-        ]
-      }
-    },
-    {
-      kind: 'FragmentDefinition',
-      name: { kind: 'Name', value: 'AuthSession' },
-      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'AuthData' } },
-      selectionSet: {
-        kind: 'SelectionSet',
-        selections: [
-          { kind: 'Field', name: { kind: 'Name', value: 'token' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'tokenExpiration' } },
-          {
-            kind: 'Field',
-            name: { kind: 'Name', value: 'user' },
-            selectionSet: {
-              kind: 'SelectionSet',
-              selections: [{ kind: 'FragmentSpread', name: { kind: 'Name', value: 'UserFields' } }]
-            }
-          }
-        ]
-      }
-    }
-  ]
-} as unknown as DocumentNode<LoginMutation, LoginMutationVariables>;
-export const LogoutDocument = {
-  kind: 'Document',
-  definitions: [
-    {
-      kind: 'OperationDefinition',
-      operation: 'mutation',
-      name: { kind: 'Name', value: 'Logout' },
-      selectionSet: {
-        kind: 'SelectionSet',
-        selections: [
-          {
-            kind: 'Field',
-            name: { kind: 'Name', value: 'logout' },
-            selectionSet: {
-              kind: 'SelectionSet',
-              selections: [{ kind: 'Field', name: { kind: 'Name', value: 'success' } }]
-            }
-          }
-        ]
-      }
-    }
-  ]
-} as unknown as DocumentNode<LogoutMutation, LogoutMutationVariables>;
-export const LogoutEverywhereDocument = {
-  kind: 'Document',
-  definitions: [
-    {
-      kind: 'OperationDefinition',
-      operation: 'mutation',
-      name: { kind: 'Name', value: 'LogoutEverywhere' },
-      selectionSet: {
-        kind: 'SelectionSet',
-        selections: [
-          {
-            kind: 'Field',
-            name: { kind: 'Name', value: 'logoutEverywhere' },
-            selectionSet: {
-              kind: 'SelectionSet',
-              selections: [{ kind: 'Field', name: { kind: 'Name', value: 'success' } }]
-            }
-          }
-        ]
-      }
-    }
-  ]
-} as unknown as DocumentNode<LogoutEverywhereMutation, LogoutEverywhereMutationVariables>;
-export const PasswordResetTokenValidDocument = {
-  kind: 'Document',
-  definitions: [
-    {
-      kind: 'OperationDefinition',
-      operation: 'query',
-      name: { kind: 'Name', value: 'PasswordResetTokenValid' },
-      variableDefinitions: [
-        {
-          kind: 'VariableDefinition',
-          variable: { kind: 'Variable', name: { kind: 'Name', value: 'token' } },
-          type: {
-            kind: 'NonNullType',
-            type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } }
-          }
-        }
-      ],
-      selectionSet: {
-        kind: 'SelectionSet',
-        selections: [
-          {
-            kind: 'Field',
-            name: { kind: 'Name', value: 'passwordResetTokenValid' },
-            arguments: [
-              {
-                kind: 'Argument',
-                name: { kind: 'Name', value: 'token' },
-                value: { kind: 'Variable', name: { kind: 'Name', value: 'token' } }
-              }
-            ],
-            selectionSet: {
-              kind: 'SelectionSet',
-              selections: [
-                { kind: 'Field', name: { kind: 'Name', value: 'valid' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'email' } }
-              ]
-            }
-          }
-        ]
-      }
-    }
-  ]
-} as unknown as DocumentNode<PasswordResetTokenValidQuery, PasswordResetTokenValidQueryVariables>;
-export const RefreshSessionDocument = {
-  kind: 'Document',
-  definitions: [
-    {
-      kind: 'OperationDefinition',
-      operation: 'mutation',
-      name: { kind: 'Name', value: 'RefreshSession' },
-      selectionSet: {
-        kind: 'SelectionSet',
-        selections: [
-          {
-            kind: 'Field',
-            name: { kind: 'Name', value: 'refreshSession' },
-            selectionSet: {
-              kind: 'SelectionSet',
-              selections: [{ kind: 'FragmentSpread', name: { kind: 'Name', value: 'AuthSession' } }]
-            }
-          }
-        ]
-      }
-    },
-    {
-      kind: 'FragmentDefinition',
-      name: { kind: 'Name', value: 'UserFields' },
-      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'User' } },
-      selectionSet: {
-        kind: 'SelectionSet',
-        selections: [
-          { kind: 'Field', name: { kind: 'Name', value: 'id' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'account' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'email' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'surname' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'theme' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'accent' } }
-        ]
-      }
-    },
-    {
-      kind: 'FragmentDefinition',
-      name: { kind: 'Name', value: 'AuthSession' },
-      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'AuthData' } },
-      selectionSet: {
-        kind: 'SelectionSet',
-        selections: [
-          { kind: 'Field', name: { kind: 'Name', value: 'token' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'tokenExpiration' } },
-          {
-            kind: 'Field',
-            name: { kind: 'Name', value: 'user' },
-            selectionSet: {
-              kind: 'SelectionSet',
-              selections: [{ kind: 'FragmentSpread', name: { kind: 'Name', value: 'UserFields' } }]
-            }
-          }
-        ]
-      }
-    }
-  ]
-} as unknown as DocumentNode<RefreshSessionMutation, RefreshSessionMutationVariables>;
-export const RegisterAndLoginDocument = {
-  kind: 'Document',
-  definitions: [
-    {
-      kind: 'OperationDefinition',
-      operation: 'mutation',
-      name: { kind: 'Name', value: 'RegisterAndLogin' },
-      variableDefinitions: [
-        {
-          kind: 'VariableDefinition',
-          variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
-          type: {
-            kind: 'NonNullType',
-            type: { kind: 'NamedType', name: { kind: 'Name', value: 'RegisterInput' } }
-          }
-        }
-      ],
-      selectionSet: {
-        kind: 'SelectionSet',
-        selections: [
-          {
-            kind: 'Field',
-            name: { kind: 'Name', value: 'registerAndLogin' },
-            arguments: [
-              {
-                kind: 'Argument',
-                name: { kind: 'Name', value: 'input' },
-                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } }
-              }
-            ],
-            selectionSet: {
-              kind: 'SelectionSet',
-              selections: [{ kind: 'FragmentSpread', name: { kind: 'Name', value: 'AuthSession' } }]
-            }
-          }
-        ]
-      }
-    },
-    {
-      kind: 'FragmentDefinition',
-      name: { kind: 'Name', value: 'UserFields' },
-      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'User' } },
-      selectionSet: {
-        kind: 'SelectionSet',
-        selections: [
-          { kind: 'Field', name: { kind: 'Name', value: 'id' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'account' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'email' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'surname' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'theme' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'accent' } }
-        ]
-      }
-    },
-    {
-      kind: 'FragmentDefinition',
-      name: { kind: 'Name', value: 'AuthSession' },
-      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'AuthData' } },
-      selectionSet: {
-        kind: 'SelectionSet',
-        selections: [
-          { kind: 'Field', name: { kind: 'Name', value: 'token' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'tokenExpiration' } },
-          {
-            kind: 'Field',
-            name: { kind: 'Name', value: 'user' },
-            selectionSet: {
-              kind: 'SelectionSet',
-              selections: [{ kind: 'FragmentSpread', name: { kind: 'Name', value: 'UserFields' } }]
-            }
-          }
-        ]
-      }
-    }
-  ]
-} as unknown as DocumentNode<RegisterAndLoginMutation, RegisterAndLoginMutationVariables>;
-export const RequestPasswordResetDocument = {
-  kind: 'Document',
-  definitions: [
-    {
-      kind: 'OperationDefinition',
-      operation: 'mutation',
-      name: { kind: 'Name', value: 'RequestPasswordReset' },
-      variableDefinitions: [
-        {
-          kind: 'VariableDefinition',
-          variable: { kind: 'Variable', name: { kind: 'Name', value: 'email' } },
-          type: {
-            kind: 'NonNullType',
-            type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } }
-          }
-        }
-      ],
-      selectionSet: {
-        kind: 'SelectionSet',
-        selections: [
-          {
-            kind: 'Field',
-            name: { kind: 'Name', value: 'requestPasswordReset' },
-            arguments: [
-              {
-                kind: 'Argument',
-                name: { kind: 'Name', value: 'email' },
-                value: { kind: 'Variable', name: { kind: 'Name', value: 'email' } }
-              }
-            ],
-            selectionSet: {
-              kind: 'SelectionSet',
-              selections: [{ kind: 'Field', name: { kind: 'Name', value: 'success' } }]
-            }
-          }
-        ]
-      }
-    }
-  ]
-} as unknown as DocumentNode<RequestPasswordResetMutation, RequestPasswordResetMutationVariables>;
-export const ResetPasswordDocument = {
-  kind: 'Document',
-  definitions: [
-    {
-      kind: 'OperationDefinition',
-      operation: 'mutation',
-      name: { kind: 'Name', value: 'ResetPassword' },
-      variableDefinitions: [
-        {
-          kind: 'VariableDefinition',
-          variable: { kind: 'Variable', name: { kind: 'Name', value: 'token' } },
-          type: {
-            kind: 'NonNullType',
-            type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } }
-          }
-        },
-        {
-          kind: 'VariableDefinition',
-          variable: { kind: 'Variable', name: { kind: 'Name', value: 'password' } },
-          type: {
-            kind: 'NonNullType',
-            type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } }
-          }
-        }
-      ],
-      selectionSet: {
-        kind: 'SelectionSet',
-        selections: [
-          {
-            kind: 'Field',
-            name: { kind: 'Name', value: 'resetPassword' },
-            arguments: [
-              {
-                kind: 'Argument',
-                name: { kind: 'Name', value: 'token' },
-                value: { kind: 'Variable', name: { kind: 'Name', value: 'token' } }
-              },
-              {
-                kind: 'Argument',
-                name: { kind: 'Name', value: 'password' },
-                value: { kind: 'Variable', name: { kind: 'Name', value: 'password' } }
-              }
-            ],
-            selectionSet: {
-              kind: 'SelectionSet',
-              selections: [{ kind: 'FragmentSpread', name: { kind: 'Name', value: 'AuthSession' } }]
-            }
-          }
-        ]
-      }
-    },
-    {
-      kind: 'FragmentDefinition',
-      name: { kind: 'Name', value: 'UserFields' },
-      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'User' } },
-      selectionSet: {
-        kind: 'SelectionSet',
-        selections: [
-          { kind: 'Field', name: { kind: 'Name', value: 'id' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'account' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'email' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'surname' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'theme' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'accent' } }
-        ]
-      }
-    },
-    {
-      kind: 'FragmentDefinition',
-      name: { kind: 'Name', value: 'AuthSession' },
-      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'AuthData' } },
-      selectionSet: {
-        kind: 'SelectionSet',
-        selections: [
-          { kind: 'Field', name: { kind: 'Name', value: 'token' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'tokenExpiration' } },
-          {
-            kind: 'Field',
-            name: { kind: 'Name', value: 'user' },
-            selectionSet: {
-              kind: 'SelectionSet',
-              selections: [{ kind: 'FragmentSpread', name: { kind: 'Name', value: 'UserFields' } }]
-            }
-          }
-        ]
-      }
-    }
-  ]
-} as unknown as DocumentNode<ResetPasswordMutation, ResetPasswordMutationVariables>;
+} as unknown as DocumentNode<UpdateBudgetMutation, UpdateBudgetMutationVariables>;
 export const CreateNoteDocument = {
   kind: 'Document',
   definitions: [
@@ -4919,7 +4914,7 @@ export const ResetCalendarFeedDocument = {
       variableDefinitions: [
         {
           kind: 'VariableDefinition',
-          variable: { kind: 'Variable', name: { kind: 'Name', value: 'accountId' } },
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'budgetId' } },
           type: {
             kind: 'NonNullType',
             type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } }
@@ -4935,8 +4930,8 @@ export const ResetCalendarFeedDocument = {
             arguments: [
               {
                 kind: 'Argument',
-                name: { kind: 'Name', value: 'accountId' },
-                value: { kind: 'Variable', name: { kind: 'Name', value: 'accountId' } }
+                name: { kind: 'Name', value: 'budgetId' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'budgetId' } }
               }
             ],
             selectionSet: {
@@ -4944,7 +4939,7 @@ export const ResetCalendarFeedDocument = {
               selections: [
                 {
                   kind: 'Field',
-                  name: { kind: 'Name', value: 'account' },
+                  name: { kind: 'Name', value: 'budget' },
                   selectionSet: {
                     kind: 'SelectionSet',
                     selections: [
@@ -5025,7 +5020,7 @@ export const UpdateCalendarFeedDocument = {
               selections: [
                 {
                   kind: 'Field',
-                  name: { kind: 'Name', value: 'account' },
+                  name: { kind: 'Name', value: 'budget' },
                   selectionSet: {
                     kind: 'SelectionSet',
                     selections: [
@@ -5109,7 +5104,7 @@ export const UpdateReminderSettingsDocument = {
               selections: [
                 {
                   kind: 'Field',
-                  name: { kind: 'Name', value: 'account' },
+                  name: { kind: 'Name', value: 'budget' },
                   selectionSet: {
                     kind: 'SelectionSet',
                     selections: [
@@ -5304,7 +5299,7 @@ export const CurrentUserDocument = {
         kind: 'SelectionSet',
         selections: [
           { kind: 'Field', name: { kind: 'Name', value: 'id' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'account' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'budget' } },
           { kind: 'Field', name: { kind: 'Name', value: 'email' } },
           { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
           { kind: 'Field', name: { kind: 'Name', value: 'surname' } },

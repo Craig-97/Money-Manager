@@ -1,5 +1,5 @@
 import { useMutation } from '@apollo/client/react';
-import { addNote, removeFromAccount } from '~/graphql/cache';
+import { addNote, removeFromBudget } from '~/graphql/cache';
 import { CreateNoteDocument, DeleteNoteDocument, UpdateNoteDocument } from '~/graphql/generated';
 import { getApiErrorMessage } from '~/lib/errors';
 import { Note, NoteDraft, noteInput, toDraft } from '~/lib/notes';
@@ -9,7 +9,7 @@ const showError = (error: unknown) =>
   showToast({ message: getApiErrorMessage(error, "Couldn't save that. Try again.") });
 
 /* Adding, changing and deleting notes. Each returns whether it worked. */
-export const useNoteActions = (accountId: string) => {
+export const useNoteActions = (budgetId: string) => {
   const [createNote] = useMutation(CreateNoteDocument);
   const [updateNote] = useMutation(UpdateNoteDocument);
   const [deleteNote] = useMutation(DeleteNoteDocument);
@@ -17,10 +17,10 @@ export const useNoteActions = (accountId: string) => {
   const create = async (draft: NoteDraft) => {
     try {
       await createNote({
-        variables: { input: { accountId, ...noteInput(draft) } },
+        variables: { input: { budgetId, ...noteInput(draft) } },
         update: (cache, { data }) => {
           const note = data?.createNote.note;
-          if (note) addNote(cache, { account: accountId, note });
+          if (note) addNote(cache, { budget: budgetId, note });
         }
       });
       return true;
@@ -46,7 +46,7 @@ export const useNoteActions = (accountId: string) => {
       await deleteNote({
         variables: { id: note.id },
         update: cache =>
-          removeFromAccount(cache, { account: accountId, field: 'notes', ids: [note.id] })
+          removeFromBudget(cache, { budget: budgetId, field: 'notes', ids: [note.id] })
       });
       showToast({
         message: 'Note deleted',

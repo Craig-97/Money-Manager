@@ -9,7 +9,7 @@ type DashboardAlert =
   | { kind: 'renewal'; payment: RecurringPayment; renewal: Renewal };
 
 interface AlertsInput {
-  accountId: string;
+  budgetId: string;
   payments: Payment[];
   today: Date;
   dueToday: Payment | undefined;
@@ -21,13 +21,13 @@ interface AlertsInput {
  * The alerts at the top of the dashboard, one at a time: payments gone by unpaid, something due
  * today, then renewals, both coming up within their reminder and gone by without the next one being
  * set. "Later" hides due today for this visit. For an overdue payment or a renewal it's the same as
- * its reminder's Later: put away on the account, so it stays away on other devices and under
+ * its reminder's Later: put away on the budget, so it stays away on other devices and under
  * Reminders too.
  */
-export const useAlerts = ({ accountId, payments, today, dueToday, states }: AlertsInput) => {
+export const useAlerts = ({ budgetId, payments, today, dueToday, states }: AlertsInput) => {
   const [dueDismissed, setDueDismissed] = useState(false);
   const [index, setIndex] = useState(0);
-  const actions = useReminderActions({ accountId, states, today });
+  const actions = useReminderActions({ budgetId, states, today });
 
   // Put away with Later, or cleared under Reminders
   const isAway = (key: string) => {

@@ -1,22 +1,22 @@
-import { AccountError } from '~/components/feedback/AccountError';
+import { BudgetError } from '~/components/feedback/BudgetError';
 import { PageHeader } from '~/components/layout/PageHeader';
-import { useAccount } from '~/hooks/useAccount';
+import { useBudget } from '~/hooks/useBudget';
 import { useCurrentUser } from '~/hooks/useCurrentUser';
 import { ProfileContent, ProfileSkeleton } from './components';
 
 export const Profile = () => {
-  const { account, loading, retry } = useAccount();
+  const { budget, loading, retry } = useBudget();
   const { user, error: userError, refetch } = useCurrentUser();
 
   return (
     <>
       <PageHeader title="Profile" />
-      {account && user ? (
-        <ProfileContent user={user} account={account} />
+      {budget && user ? (
+        <ProfileContent user={user} budget={budget} />
       ) : loading || (!user && !userError) ? (
         <ProfileSkeleton />
       ) : (
-        <AccountError
+        <BudgetError
           onRetry={() => {
             retry();
             void refetch();

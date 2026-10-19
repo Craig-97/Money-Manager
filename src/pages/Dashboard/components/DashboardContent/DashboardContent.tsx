@@ -1,5 +1,5 @@
 import { MEDIA } from '~/constants';
-import { Account } from '~/hooks/useAccount';
+import { Budget } from '~/hooks/useBudget';
 import { useMediaQuery } from '~/hooks/useMediaQuery';
 import { useDashboard, usePaydayPrompt } from '../../hooks';
 import { AlertStack } from '../alerts';
@@ -15,11 +15,11 @@ import { PaydayPrompt } from '../payday';
 import { MobileBulkBar, MobilePayments, PaymentsTable } from '../payments';
 
 // Only one layout is rendered, so each control exists once
-export const DashboardContent = ({ account }: { account: Account }) => {
-  const dashboard = useDashboard(account);
+export const DashboardContent = ({ budget }: { budget: Budget }) => {
+  const dashboard = useDashboard(budget);
   const isDesktop = useMediaQuery(MEDIA.desktop);
   const prompt = usePaydayPrompt({
-    account,
+    budget,
     cycle: dashboard.cycle,
     today: dashboard.today,
     payments: dashboard.payments,

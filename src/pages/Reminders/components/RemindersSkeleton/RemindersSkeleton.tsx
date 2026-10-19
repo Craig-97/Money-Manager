@@ -3,7 +3,7 @@ import { cn } from '~/lib/cn';
 
 const TITLE_WIDTHS = ['w-[62%]', 'w-[48%]', 'w-[70%]', 'w-[54%]'];
 
-/* The page's shape while the account loads */
+/* The page's shape while the budget loads */
 export const RemindersSkeleton = () => (
   <section aria-label="Reminders" aria-busy="true" className="flex flex-col gap-4">
     <span role="status" className="sr-only">

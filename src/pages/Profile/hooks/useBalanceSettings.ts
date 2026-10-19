@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useMutation } from '@apollo/client/react';
-import { UpdateAccountDocument } from '~/graphql/generated';
-import { Account } from '~/hooks/useAccount';
+import { UpdateBudgetDocument } from '~/graphql/generated';
+import { Budget } from '~/hooks/useBudget';
 import { usePayCycle } from '~/hooks/usePayCycle';
 import { getApiErrorMessage } from '~/lib/errors';
 import { formatMoneyInput, parseMoney } from '~/lib/format';
@@ -11,11 +11,11 @@ import { showToast } from '~/state/toast';
 const AMOUNT_ERROR = 'Enter an amount, like 1,250.00';
 
 /* Bank balance and income, with what they'd mean for free to spend shown as they're typed */
-export const useBalanceSettings = (account: Account) => {
-  const { today, cycle } = usePayCycle(account.payday);
-  const [updateAccount, { loading: saving }] = useMutation(UpdateAccountDocument);
-  const [balance, setBalance] = useState(() => formatMoneyInput(account.bankBalance));
-  const [income, setIncome] = useState(() => formatMoneyInput(account.monthlyIncome));
+export const useBalanceSettings = (budget: Budget) => {
+  const { today, cycle } = usePayCycle(budget.payday);
+  const [updateBudget, { loading: saving }] = useMutation(UpdateBudgetDocument);
+  const [balance, setBalance] = useState(() => formatMoneyInput(budget.bankBalance));
+  const [income, setIncome] = useState(() => formatMoneyInput(budget.monthlyIncome));
   const [submitted, setSubmitted] = useState(false);
   // What was last saved, so the form knows when it has changed
   const [saved, setSaved] = useState({ balance, income });
@@ -23,9 +23,9 @@ export const useBalanceSettings = (account: Account) => {
   const bankBalance = parseMoney(balance);
   const monthlyIncome = parseMoney(income);
   const summary = summarise({
-    payments: toPayments(account, today),
-    bankBalance: bankBalance ?? account.bankBalance,
-    monthlyIncome: monthlyIncome ?? account.monthlyIncome,
+    payments: toPayments(budget, today),
+    bankBalance: bankBalance ?? budget.bankBalance,
+    monthlyIncome: monthlyIncome ?? budget.monthlyIncome,
     cycle,
     today
   });
@@ -34,7 +34,7 @@ export const useBalanceSettings = (account: Account) => {
     setSubmitted(true);
     if (bankBalance === null || monthlyIncome === null) return;
     try {
-      await updateAccount({ variables: { id: account.id, input: { bankBalance, monthlyIncome } } });
+      await updateBudget({ variables: { id: budget.id, input: { bankBalance, monthlyIncome } } });
       setSubmitted(false);
       setSaved({ balance, income });
       showToast({ message: 'Balances saved' });

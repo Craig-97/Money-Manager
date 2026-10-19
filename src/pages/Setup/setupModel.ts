@@ -1,6 +1,6 @@
 import {
   BankHolidayRegion,
-  CreateAccountInput,
+  CreateBudgetInput,
   OneOffPaymentCategory,
   PayFrequency,
   PaydayType,
@@ -272,8 +272,8 @@ export const summariseFirstCycle = (
 /* How the first pay cycle looks from the answers, for the review step and its summary */
 export type FirstCycle = ReturnType<typeof summariseFirstCycle>;
 
-/* The answers as the API's createAccount input */
-export const toCreateAccountInput = (values: SetupValues): CreateAccountInput => {
+/* The answers as the API's createBudget input */
+export const toCreateBudgetInput = (values: SetupValues): CreateBudgetInput => {
   const payday = paydayConfig(values);
   return {
     bankBalance: parseMoney(values.balance) ?? 0,

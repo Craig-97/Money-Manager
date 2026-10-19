@@ -1,7 +1,7 @@
 import { CalendarDays } from 'lucide-react';
 import { tileLift } from '~/components/ui/Tile';
 import { CurrentUserQuery } from '~/graphql/generated';
-import { Account } from '~/hooks/useAccount';
+import { Budget } from '~/hooks/useBudget';
 import { usePayCycle } from '~/hooks/usePayCycle';
 import { cn } from '~/lib/cn';
 import { formatShortDay } from '~/lib/dates';
@@ -12,16 +12,16 @@ type User = NonNullable<CurrentUserQuery['tokenFindUser']>;
 
 interface ProfileSummaryProps {
   user: User;
-  account: Account;
+  budget: Budget;
   compact: boolean;
 }
 
 /* Who's signed in and how they're paid. On mobile it's the accent hero card. */
-export const ProfileSummary = ({ user, account, compact }: ProfileSummaryProps) => {
-  const { cycle } = usePayCycle(account.payday);
+export const ProfileSummary = ({ user, budget, compact }: ProfileSummaryProps) => {
+  const { cycle } = usePayCycle(budget.payday);
   const initials = getInitials(user.firstName, user.surname);
   const name = `${user.firstName} ${user.surname}`;
-  const plan = paydayPlan(account.payday);
+  const plan = paydayPlan(budget.payday);
   const next = formatShortDay(cycle.end);
 
   if (compact) {

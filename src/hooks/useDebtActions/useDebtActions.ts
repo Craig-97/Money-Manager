@@ -16,9 +16,9 @@ const showError = (error: unknown) =>
   showToast({ message: getApiErrorMessage(error, "Couldn't save that. Try again.") });
 
 /* Overpaying a debt, taking an overpayment back, and paying more each time from the payoff plan */
-export const useDebtActions = (accountId: string) => {
+export const useDebtActions = (budgetId: string) => {
   const client = useApolloClient();
-  const { remove, showPaidOff } = usePaymentActions(accountId);
+  const { remove, showPaidOff } = usePaymentActions(budgetId);
   const [logOverpayment] = useMutation(LogDebtOverpaymentDocument);
   const [undoOverpaymentMutation] = useMutation(UndoDebtOverpaymentDocument);
   const [updateRecurring] = useMutation(UpdateRecurringPaymentDocument);
@@ -26,7 +26,7 @@ export const useDebtActions = (accountId: string) => {
   /* Puts an overpayment from this cycle back on the debt and the bank balance */
   const undoOverpayment = async (recordId: string, name: string) => {
     try {
-      await undoOverpaymentMutation({ variables: { input: { accountId, recordId } } });
+      await undoOverpaymentMutation({ variables: { input: { budgetId, recordId } } });
       showToast({ message: `Took back the overpayment on ${name}` });
     } catch (error) {
       showError(error);
@@ -40,9 +40,9 @@ export const useDebtActions = (accountId: string) => {
   const overpay = async (debt: DebtPayment, amount: number): Promise<string | null> => {
     try {
       const { data } = await logOverpayment({
-        variables: { input: { accountId, recurringPaymentId: debt.id, amount } }
+        variables: { input: { budgetId, recurringPaymentId: debt.id, amount } }
       });
-      const after = data?.logDebtOverpayment.account?.recurringPayments?.find(
+      const after = data?.logDebtOverpayment.budget?.recurringPayments?.find(
         payment => payment?.id === debt.id
       );
       if (after?.debt?.balance === 0) {

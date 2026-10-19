@@ -1,7 +1,0 @@
-# The signed-in user's account. With no id the API returns their default account, and fails with
-# ACCOUNT_NOT_LINKED until setup is finished.
-query Account {
-  account {
-    ...AccountFields
-  }
-}

@@ -1,5 +1,5 @@
 import { useMutation } from '@apollo/client/react';
-import { removeFromAccount } from '~/graphql/cache';
+import { removeFromBudget } from '~/graphql/cache';
 import {
   BatchDeleteOneOffPaymentsDocument,
   BatchDeleteRecurringPaymentsDocument,
@@ -32,7 +32,7 @@ const showError = (error: unknown) =>
   showToast({ message: getApiErrorMessage(error, "Couldn't save that. Try again.") });
 
 /* Paying, skipping and deleting payments, with a toast to say it's done */
-export const usePaymentActions = (accountId: string) => {
+export const usePaymentActions = (budgetId: string) => {
   const [markPaid] = useMutation(MarkPaymentsPaidDocument);
   const [markUnpaid] = useMutation(MarkPaymentsUnpaidDocument);
   const [skipRecurring] = useMutation(SkipRecurringPaymentsDocument);
@@ -51,14 +51,14 @@ export const usePaymentActions = (accountId: string) => {
       const { data } = await markPaid({
         variables: {
           input: {
-            accountId,
+            budgetId,
             recurringPaymentIds: idsOf(payments, 'recurring'),
             oneOffPaymentIds: idsOf(payments, 'oneOff')
           }
         }
       });
       // A debt that payment cleared offers to go, as there's nothing left to pay
-      const after = data?.markPaymentsPaid.account?.recurringPayments ?? [];
+      const after = data?.markPaymentsPaid.budget?.recurringPayments ?? [];
       const cleared = payments.filter(
         payment =>
           payment.kind === 'recurring' &&
@@ -89,7 +89,7 @@ export const usePaymentActions = (accountId: string) => {
       await markUnpaid({
         variables: {
           input: {
-            accountId,
+            budgetId,
             recurringPaymentIds: payment.kind === 'recurring' ? [payment.id] : [],
             oneOffPaymentIds: payment.kind === 'oneOff' ? [payment.id] : []
           }
@@ -114,7 +114,7 @@ export const usePaymentActions = (accountId: string) => {
       await skipRecurring({
         variables: {
           input: {
-            accountId,
+            budgetId,
             recurringPaymentIds: [payment.id],
             until: until ? toApiDate(until) : undefined
           }
@@ -141,8 +141,8 @@ export const usePaymentActions = (accountId: string) => {
           ? deleteRecurring({
               variables: { ids: recurring },
               update: cache =>
-                removeFromAccount(cache, {
-                  account: accountId,
+                removeFromBudget(cache, {
+                  budget: budgetId,
                   field: 'recurringPayments',
                   ids: recurring
                 })
@@ -152,8 +152,8 @@ export const usePaymentActions = (accountId: string) => {
           ? deleteOneOffs({
               variables: { ids: oneOffs },
               update: cache =>
-                removeFromAccount(cache, {
-                  account: accountId,
+                removeFromBudget(cache, {
+                  budget: budgetId,
                   field: 'oneOffPayments',
                   ids: oneOffs
                 })

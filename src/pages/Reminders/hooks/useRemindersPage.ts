@@ -15,7 +15,7 @@ import { groupByMonth, RemindersTab } from '../remindersModel';
 export const useRemindersPage = () => {
   const reminders = useReminders();
   const actions = useReminderActions(reminders);
-  const openOf = useReminderOpen(reminders.accountId ?? '');
+  const openOf = useReminderOpen(reminders.budgetId ?? '');
   const openPayment = usePaymentDialogStore(s => s.openEdit);
   const openNote = useNoteDialogStore(s => s.openEdit);
   const [params, setParams] = useSearchParams();

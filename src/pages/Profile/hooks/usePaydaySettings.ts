@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useMutation } from '@apollo/client/react';
 import { UpdatePaydayDocument } from '~/graphql/generated';
-import { Account } from '~/hooks/useAccount';
 import { useBankHolidays } from '~/hooks/useBankHolidays';
+import { Budget } from '~/hooks/useBudget';
 import { startOfToday } from '~/lib/dates';
 import { getApiErrorMessage } from '~/lib/errors';
 import { showToast } from '~/state/toast';
@@ -18,9 +18,9 @@ import {
 } from '../profileModel';
 
 /* The payday form, with the next few paydays it gives updating as it changes */
-export const usePaydaySettings = (account: Account) => {
+export const usePaydaySettings = (budget: Budget) => {
   const [updatePayday, { loading: saving }] = useMutation(UpdatePaydayDocument);
-  const [values, setValues] = useState(() => toPaydayValues(account.payday));
+  const [values, setValues] = useState(() => toPaydayValues(budget.payday));
   const [submitted, setSubmitted] = useState(false);
   // What was last saved, so the form knows when it has changed
   const [saved, setSaved] = useState(values);
@@ -31,19 +31,19 @@ export const usePaydaySettings = (account: Account) => {
   const today = startOfToday();
 
   const preview = valid
-    ? paydayPreview(toPaydayConfig(values, account.payday?.overrides), { holidays, today })
+    ? paydayPreview(toPaydayConfig(values, budget.payday?.overrides), { holidays, today })
     : [];
 
   const isDirty = (Object.keys(values) as (keyof PaydayValues)[]).some(
     key => values[key] !== saved[key]
   );
-  const dates = usePaydayDates({ paydayId: account.payday?.id, preview, locked: isDirty });
+  const dates = usePaydayDates({ paydayId: budget.payday?.id, preview, locked: isDirty });
 
   const save = async () => {
     setSubmitted(true);
-    if (!valid || !account.payday) return;
+    if (!valid || !budget.payday) return;
     try {
-      await updatePayday({ variables: { id: account.payday.id, input: toPaydayInput(values) } });
+      await updatePayday({ variables: { id: budget.payday.id, input: toPaydayInput(values) } });
       setSubmitted(false);
       setSaved(values);
       showToast({ message: 'Payday settings saved' });

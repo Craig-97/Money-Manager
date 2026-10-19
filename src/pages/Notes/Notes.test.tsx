@@ -1,14 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { screen, waitFor, within } from '@testing-library/react';
 import { holdExitAnimations } from '~/test/exitAnimation';
-import { createFakeApi, DEFAULT_ACCOUNT, FakeAccount } from '~/test/fakeApi';
+import { createFakeApi, DEFAULT_BUDGET, FakeBudget } from '~/test/fakeApi';
 import { renderApp } from '~/test/renderApp';
 import { resetViewport, setViewportWidth } from '~/test/viewport';
 
 const NOTE_TIME = String(Date.parse('2024-12-09T10:00:00'));
 
-const account = (overrides: Partial<FakeAccount> = {}): FakeAccount => ({
-  ...structuredClone(DEFAULT_ACCOUNT),
+const budget = (overrides: Partial<FakeBudget> = {}): FakeBudget => ({
+  ...structuredClone(DEFAULT_BUDGET),
   notes: [
     { id: 'milk', body: 'Buy milk', color: 'BLUE', createdAt: NOTE_TIME, updatedAt: NOTE_TIME },
     {
@@ -22,8 +22,8 @@ const account = (overrides: Partial<FakeAccount> = {}): FakeAccount => ({
   ...overrides
 });
 
-const renderNotes = (data = account()) => {
-  const api = createFakeApi({ account: data });
+const renderNotes = (data = budget()) => {
+  const api = createFakeApi({ budget: data });
   return { ...renderApp({ route: '/notes', api }), api };
 };
 
@@ -84,7 +84,7 @@ describe('notes', () => {
     expect(api.callsTo('CreateNote')).toEqual([
       {
         input: {
-          accountId: 'account-1',
+          budgetId: 'budget-1',
           body: 'Renew the car insurance',
           color: 'GREEN',
           date: null,
@@ -210,7 +210,7 @@ describe('notes', () => {
     expect(api.callsTo('CreateNote')).toEqual([
       {
         input: {
-          accountId: 'account-1',
+          budgetId: 'budget-1',
           body: 'Buy milk',
           color: 'BLUE',
           date: null,
@@ -223,7 +223,7 @@ describe('notes', () => {
   });
 
   it('invites a first note when there are none', async () => {
-    const { user } = renderNotes(account({ notes: [] }));
+    const { user } = renderNotes(budget({ notes: [] }));
 
     expect(await screen.findByText('No notes yet')).toBeInTheDocument();
     const add = screen.getAllByRole('button', { name: 'Add note' });

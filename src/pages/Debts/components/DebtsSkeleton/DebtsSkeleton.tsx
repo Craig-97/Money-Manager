@@ -1,10 +1,10 @@
 import { Skeleton } from '~/components/ui/Skeleton';
 
-/* The debts page's shape while the account loads */
+/* The debts page's shape while the budget loads */
 export const DebtsSkeleton = () => (
   <section aria-busy="true" aria-label="Debts" className="flex flex-col gap-3.5 md:gap-4">
     <span role="status" className="sr-only">
-      Loading your account
+      Loading your budget
     </span>
     <article
       aria-hidden="true"

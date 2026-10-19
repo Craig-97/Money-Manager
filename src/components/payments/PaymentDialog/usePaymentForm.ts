@@ -300,10 +300,10 @@ interface Options {
   kind: PaymentKind;
   // Opened from Debts, so it's always a debt
   asDebt?: boolean;
-  accountId: string;
+  budgetId: string;
   payment: Payment | undefined;
   today: Date;
-  // The account's usual reminder timing, for payments that follow it
+  // The budget's usual reminder timing, for payments that follow it
   settings: ReminderSettings;
   onSaved: () => void;
   // Changes when the dialog switches to another payment or kind, which starts the form afresh
@@ -314,7 +314,7 @@ interface Options {
 export const usePaymentForm = ({
   kind,
   asDebt = false,
-  accountId,
+  budgetId,
   payment,
   today,
   settings,
@@ -476,14 +476,14 @@ export const usePaymentForm = ({
                 ...schedule,
                 ...endingFields(values),
                 category,
-                accountId,
+                budgetId,
                 ...(values.tracked ? { debt: debtFields(values) } : {})
               }
             },
             update: (cache, { data }) => {
               if (data)
                 addRecurringPayment(cache, {
-                  account: accountId,
+                  budget: budgetId,
                   payment: data.createRecurringPayment.recurringPayment!
                 });
             }
@@ -500,11 +500,11 @@ export const usePaymentForm = ({
           await updateOneOff({ variables: { id: payment.id, input: fields } });
         } else {
           await createOneOff({
-            variables: { input: { ...fields, accountId } },
+            variables: { input: { ...fields, budgetId } },
             update: (cache, { data }) => {
               if (data)
                 addOneOffPayment(cache, {
-                  account: accountId,
+                  budget: budgetId,
                   payment: data.createOneOffPayment.oneOffPayment!
                 });
             }

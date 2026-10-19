@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { screen, within } from '@testing-library/react';
 import { usePrefsStore } from '~/state/prefs';
-import { createFakeApi, DEFAULT_ACCOUNT, DEFAULT_PASSWORD } from '~/test/fakeApi';
+import { createFakeApi, DEFAULT_BUDGET, DEFAULT_PASSWORD } from '~/test/fakeApi';
 import { renderApp } from '~/test/renderApp';
 
 const renderProfile = () => {
-  const api = createFakeApi({ account: structuredClone(DEFAULT_ACCOUNT) });
+  const api = createFakeApi({ budget: structuredClone(DEFAULT_BUDGET) });
   return { ...renderApp({ route: '/profile', api }), api };
 };
 
@@ -161,10 +161,10 @@ describe('profile', () => {
     await user.click(save);
 
     expect(await screen.findByText('Balances saved')).toBeInTheDocument();
-    expect(api.callsTo('UpdateAccount')).toEqual([
+    expect(api.callsTo('UpdateBudget')).toEqual([
       {
-        id: 'account-1',
-        input: { bankBalance: 2000, monthlyIncome: DEFAULT_ACCOUNT.monthlyIncome }
+        id: 'budget-1',
+        input: { bankBalance: 2000, monthlyIncome: DEFAULT_BUDGET.monthlyIncome }
       }
     ]);
   });
@@ -242,8 +242,8 @@ describe('the calendar feed', () => {
 
     expect(within(reminders).getByRole('checkbox', { name: 'Debt-free dates' })).toBeChecked();
     expect(api.callsTo('UpdateCalendarFeed')).toEqual([
-      { input: { accountId: 'account-1', enabled: true } },
-      { input: { accountId: 'account-1', debtFree: true } }
+      { input: { budgetId: 'budget-1', enabled: true } },
+      { input: { budgetId: 'budget-1', debtFree: true } }
     ]);
   });
 });

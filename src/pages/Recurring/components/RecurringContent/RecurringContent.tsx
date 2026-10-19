@@ -1,6 +1,6 @@
 import { DebtsCard } from '~/components/debts';
 import { MEDIA } from '~/constants';
-import { Account } from '~/hooks/useAccount';
+import { Budget } from '~/hooks/useBudget';
 import { useMediaQuery } from '~/hooks/useMediaQuery';
 import { useRecurring } from '../../hooks';
 import { CategoryTile } from '../CategoryTile';
@@ -14,9 +14,9 @@ import { SummaryStats } from '../SummaryStats';
 // From here the renewals and categories sit side by side, so the category legend is one column
 const SPLIT = '(min-width: 56.25rem)';
 
-/* The page once the account has loaded. Only one layout is rendered, so each control exists once. */
-export const RecurringContent = ({ account }: { account: Account }) => {
-  const recurring = useRecurring(account);
+/* The page once the budget has loaded. Only one layout is rendered, so each control exists once. */
+export const RecurringContent = ({ budget }: { budget: Budget }) => {
+  const recurring = useRecurring(budget);
   const isDesktop = useMediaQuery(MEDIA.desktop);
   const isSplit = useMediaQuery(SPLIT);
 

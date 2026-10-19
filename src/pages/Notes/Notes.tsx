@@ -1,12 +1,12 @@
-import { AccountError } from '~/components/feedback/AccountError';
+import { BudgetError } from '~/components/feedback/BudgetError';
 import { PageHeader } from '~/components/layout/PageHeader';
-import { useAccount } from '~/hooks/useAccount';
+import { useBudget } from '~/hooks/useBudget';
 import { NotesContent, NotesSkeleton } from './components';
 import { countNotes, toNotes } from './notesModel';
 
 export const Notes = () => {
-  const { account, loading, retry } = useAccount();
-  const count = account ? countNotes(toNotes(account.notes).length) : '–';
+  const { budget, loading, retry } = useBudget();
+  const count = budget ? countNotes(toNotes(budget.notes).length) : '–';
 
   return (
     <>
@@ -20,12 +20,12 @@ export const Notes = () => {
           </>
         }
       />
-      {account ? (
-        <NotesContent account={account} />
+      {budget ? (
+        <NotesContent budget={budget} />
       ) : loading ? (
         <NotesSkeleton />
       ) : (
-        <AccountError onRetry={retry} />
+        <BudgetError onRetry={retry} />
       )}
     </>
   );

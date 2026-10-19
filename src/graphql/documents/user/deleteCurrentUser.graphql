@@ -1,4 +1,4 @@
-# Deletes the signed-in user and everything on their account
+# Deletes the signed-in user and everything on their budget
 mutation DeleteCurrentUser {
   deleteCurrentUser {
     success

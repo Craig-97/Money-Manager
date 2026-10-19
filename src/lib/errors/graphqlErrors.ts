@@ -1,7 +1,7 @@
 import { CombinedGraphQLErrors } from '@apollo/client/errors';
 import { ErrorCode } from '~/constants';
 
-/* The API's error code from the first GraphQL error, e.g. ACCOUNT_NOT_LINKED */
+/* The API's error code from the first GraphQL error, e.g. BUDGET_NOT_LINKED */
 export const getErrorCode = (error: unknown): ErrorCode | undefined => {
   if (!CombinedGraphQLErrors.is(error)) return undefined;
   return error.errors[0]?.extensions?.code as ErrorCode | undefined;

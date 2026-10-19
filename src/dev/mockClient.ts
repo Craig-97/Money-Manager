@@ -1,15 +1,15 @@
 import { createApolloClient } from '~/graphql/client/createApolloClient';
 import { addDays, startOfToday, toIsoDate } from '~/lib/dates';
 import { useAuthStore } from '~/state/auth';
-import { apiDate, createFakeApi, DEFAULT_USER, FakeAccount, fakeRecord } from '~/test/fakeApi';
+import { apiDate, createFakeApi, DEFAULT_USER, FakeBudget, fakeRecord } from '~/test/fakeApi';
 
 /*
  * Development only (VITE_MOCK_API=true): the app runs against the in-memory fake API from the
  * tests, already signed in, so pages can be reviewed and screenshotted without the real API or a
  * database. Data resets on every page load. Add ?mock=<scenario> to the URL for other states:
- *   setup    - no account yet, so setup shows
+ *   setup    - no budget yet, so setup shows
  *   payday   - today is payday, so the payday prompt shows
- *   empty    - an account with no payments or notes
+ *   empty    - a budget with no payments or notes
  *   overdrawn - more going out before payday than is in the bank
  *   debts    - the design's three debts: a credit card, car finance and a loan from family
  *   reminders - the design's reminders: Spotify overdue, renewals, dated notes
@@ -18,15 +18,15 @@ import { apiDate, createFakeApi, DEFAULT_USER, FakeAccount, fakeRecord } from '~
 const fromToday = (days: number) => apiDate(toIsoDate(addDays(startOfToday(), days)));
 
 // The design's example data, moved so it's always current
-const demoAccount = (scenario: string | null): FakeAccount => {
+const demoBudget = (scenario: string | null): FakeBudget => {
   const today = startOfToday();
   const payday =
     scenario === 'payday'
       ? { type: 'SET_DAY', dayOfMonth: today.getDate() }
       : { type: 'LAST_WEEKDAY', weekday: 'FRIDAY', dayOfMonth: null };
 
-  const account: FakeAccount = {
-    id: 'account-1',
+  const budget: FakeBudget = {
+    id: 'budget-1',
     bankBalance: scenario === 'overdrawn' ? 420 : 10000,
     monthlyIncome: 3600,
     // The payday scenario hasn't started this cycle yet, so the prompt shows
@@ -119,19 +119,19 @@ const demoAccount = (scenario: string | null): FakeAccount => {
   };
 
   if (scenario === 'empty') {
-    return { ...account, recurringPayments: [], oneOffPayments: [], notes: [] };
+    return { ...budget, recurringPayments: [], oneOffPayments: [], notes: [] };
   }
   if (scenario === 'debts') {
-    return { ...account, recurringPayments: [...account.recurringPayments, ...demoDebts()] };
+    return { ...budget, recurringPayments: [...budget.recurringPayments, ...demoDebts()] };
   }
   if (scenario === 'reminders') {
     return {
-      ...account,
-      recurringPayments: [...account.recurringPayments, ...demoReminderPayments()],
-      notes: [...demoDatedNotes(), ...account.notes]
+      ...budget,
+      recurringPayments: [...budget.recurringPayments, ...demoReminderPayments()],
+      notes: [...demoDatedNotes(), ...budget.notes]
     };
   }
-  return account;
+  return budget;
 };
 
 const demoPayment = (fields: {
@@ -329,7 +329,7 @@ const demoDebts = () => [
 
 export const createMockClient = () => {
   const scenario = new URLSearchParams(window.location.search).get('mock');
-  const api = createFakeApi({ account: scenario === 'setup' ? null : demoAccount(scenario) });
+  const api = createFakeApi({ budget: scenario === 'setup' ? null : demoBudget(scenario) });
 
   useAuthStore.setState({
     session: { token: 'test-token', userId: DEFAULT_USER.id, expiresAt: Date.now() + 86_400_000 },

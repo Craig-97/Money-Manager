@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Account } from '~/hooks/useAccount';
+import { Budget } from '~/hooks/useBudget';
 import { useDebtActions } from '~/hooks/useDebtActions';
 import { usePayCycle } from '~/hooks/usePayCycle';
 import { formatMonthYear } from '~/lib/dates';
@@ -18,13 +18,13 @@ const maxExtra = (debt: DebtPayment) => Math.max(200, Math.ceil((debt.amount * 2
  * One debt, and paying it off sooner: some extra a month against how it's going now. Applying the
  * extra raises its payment from the next one.
  */
-export const useDebtDetail = (account: Account, id: string) => {
-  const { today } = usePayCycle(account.payday);
-  const actions = useDebtActions(account.id);
+export const useDebtDetail = (budget: Budget, id: string) => {
+  const { today } = usePayCycle(budget.payday);
+  const actions = useDebtActions(budget.id);
   const [extra, setExtra] = useState(0);
   const [applying, setApplying] = useState(false);
 
-  const debt = toPayments(account, today)
+  const debt = toPayments(budget, today)
     .filter((payment): payment is RecurringPayment => payment.kind === 'recurring')
     .filter(isDebt)
     .find(payment => payment.id === id);

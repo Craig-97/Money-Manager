@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useMutation } from '@apollo/client/react';
 import { StartPaydayCycleDocument } from '~/graphql/generated';
-import { Account } from '~/hooks/useAccount';
+import { Budget } from '~/hooks/useBudget';
 import { daysBetween, fromApiDate, toApiDate } from '~/lib/dates';
 import { getApiErrorMessage } from '~/lib/errors';
 import { formatMoneyInput, parseMoney } from '~/lib/format';
@@ -10,7 +10,7 @@ import { nextOccurrence, Payment, RecurringPayment, Summary } from '~/lib/paymen
 import { showToast } from '~/state/toast';
 
 interface Options {
-  account: Account;
+  budget: Budget;
   cycle: PayCycle;
   today: Date;
   payments: Payment[];
@@ -20,7 +20,7 @@ interface Options {
 
 /*
  * Whether the latest payday's cycle still needs starting: it's after the last cycle was started.
- * Setup counts as a start, so a new account waits for its first payday. That also catches a
+ * Setup counts as a start, so a new budget waits for its first payday. That also catches a
  * payday missed over a weekend.
  */
 const needsNewCycle = (cycle: PayCycle, cycleStartedOn: string | null | undefined) => {
@@ -34,16 +34,9 @@ const movesTo = (payment: RecurringPayment, cycle: PayCycle) =>
   nextOccurrence(payment, cycle.start);
 
 /* The payday prompt: confirm the balance, start the next cycle, and catch up on anything overdue */
-export const usePaydayPrompt = ({
-  account,
-  cycle,
-  today,
-  payments,
-  summary,
-  markPaid
-}: Options) => {
+export const usePaydayPrompt = ({ budget, cycle, today, payments, summary, markPaid }: Options) => {
   const [startCycle, { loading: starting }] = useMutation(StartPaydayCycleDocument);
-  const due = needsNewCycle(cycle, account.cycleStartedOn);
+  const due = needsNewCycle(cycle, budget.cycleStartedOn);
   const [view, setView] = useState<'open' | 'closed' | 'done'>(due ? 'open' : 'closed');
 
   // Recurring payments whose next date is before payday weren't paid or skipped in the cycle that
@@ -57,7 +50,7 @@ export const usePaydayPrompt = ({
       payment.kind === 'oneOff' && !payment.paidAt && payment.dueDate && payment.dueDate < today
   );
 
-  const projected = summary.freeToSpend + account.monthlyIncome;
+  const projected = summary.freeToSpend + budget.monthlyIncome;
   const [balance, setBalance] = useState(() => formatMoneyInput(projected));
   const [chosen, setChosen] = useState<ReadonlySet<string>>(() => new Set(toReset.map(p => p.id)));
   const [overduePaid, setOverduePaid] = useState(false);
@@ -73,7 +66,7 @@ export const usePaydayPrompt = ({
       await startCycle({
         variables: {
           input: {
-            accountId: account.id,
+            budgetId: budget.id,
             payday: toApiDate(cycle.start),
             bankBalance,
             recurringPaymentIds: ids
@@ -103,7 +96,7 @@ export const usePaydayPrompt = ({
     payday: cycle.start,
     // Days since payday, when the prompt is catching up on one that's been and gone
     daysLate: Math.max(0, daysBetween(cycle.start, today)),
-    income: account.monthlyIncome,
+    income: budget.monthlyIncome,
     projectedBase: summary.freeToSpend,
     balance,
     setBalance,

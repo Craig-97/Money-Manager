@@ -12,7 +12,7 @@ const SKELETON_LINES = [
   ['w-[52%]', 'w-[38%]']
 ];
 
-/* The board's shape while the account loads */
+/* The board's shape while the budget loads */
 export const NotesSkeleton = () => (
   <section aria-label="Notes" aria-busy="true" className={noteGridClasses}>
     <span role="status" className="sr-only">

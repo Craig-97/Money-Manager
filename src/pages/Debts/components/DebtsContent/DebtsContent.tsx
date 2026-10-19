@@ -3,7 +3,7 @@ import { OverpaymentDialog, PaymentsDialog } from '~/components/debts';
 import { SegmentedControl } from '~/components/ui/SegmentedControl';
 import { Tile } from '~/components/ui/Tile';
 import { MEDIA } from '~/constants';
-import { Account } from '~/hooks/useAccount';
+import { Budget } from '~/hooks/useBudget';
 import { useMediaQuery } from '~/hooks/useMediaQuery';
 import { useDebts, usePayoffPlan } from '../../hooks';
 import { DebtsHero } from '../DebtsHero';
@@ -19,11 +19,11 @@ import { PayoffPlanTile } from '../PayoffPlanTile';
 type DebtsView = 'debts' | 'plan';
 
 /*
- * The page once the account has loaded: what's left, then the debts or the payoff plan behind a
+ * The page once the budget has loaded: what's left, then the debts or the payoff plan behind a
  * tab, so the list stays the main view. Only one layout is rendered.
  */
-export const DebtsContent = ({ account }: { account: Account }) => {
-  const debts = useDebts(account);
+export const DebtsContent = ({ budget }: { budget: Budget }) => {
+  const debts = useDebts(budget);
   const plan = usePayoffPlan(debts);
   const isDesktop = useMediaQuery(MEDIA.desktop);
   const [view, setView] = useState<DebtsView>('debts');

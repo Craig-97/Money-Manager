@@ -2,7 +2,7 @@
 # closes the last cycle's records and clears away paid one-offs
 mutation StartPaydayCycle($input: StartPaydayCycleInput!) {
   startPaydayCycle(input: $input) {
-    account {
+    budget {
       id
       bankBalance
       cycleStartedOn

@@ -11,7 +11,7 @@ interface SetupDoneProps {
   onContinue: () => void;
 }
 
-/* Shown once the account is saved */
+/* Shown once the budget is saved */
 export const SetupDone = ({ cycleEnd, freeToSpend, onReview, onContinue }: SetupDoneProps) => {
   const { user } = useCurrentUser();
 

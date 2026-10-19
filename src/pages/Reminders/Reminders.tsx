@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { SlidersHorizontal } from 'lucide-react';
-import { AccountError } from '~/components/feedback/AccountError';
+import { BudgetError } from '~/components/feedback/BudgetError';
 import { PageHeader } from '~/components/layout/PageHeader';
 import { IconButton } from '~/components/ui/IconButton';
-import { useAccount } from '~/hooks/useAccount';
+import { useBudget } from '~/hooks/useBudget';
 import { RemindersContent, RemindersSkeleton, SettingsSheet } from './components';
 import { useRemindersPage } from './hooks';
 
 export const Reminders = () => {
-  const { account, loading, retry } = useAccount();
+  const { budget, loading, retry } = useBudget();
   const page = useRemindersPage();
   const [settingsOpen, setSettingsOpen] = useState(false);
 
@@ -27,7 +27,7 @@ export const Reminders = () => {
           </IconButton>
         }
       />
-      {account ? (
+      {budget ? (
         <>
           <RemindersContent page={page} />
           <SettingsSheet page={page} open={settingsOpen} onOpenChange={setSettingsOpen} />
@@ -35,7 +35,7 @@ export const Reminders = () => {
       ) : loading ? (
         <RemindersSkeleton />
       ) : (
-        <AccountError onRetry={retry} />
+        <BudgetError onRetry={retry} />
       )}
     </>
   );

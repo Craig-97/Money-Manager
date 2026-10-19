@@ -1,8 +1,8 @@
 # Takes the payments off the bank balance: recurring ones have their next date paid, and one-offs
-# are marked paid until payday. The account comes back with its new balance and lists.
+# are marked paid until payday. The budget comes back with its new balance and lists.
 mutation MarkPaymentsPaid($input: MarkPaymentsPaidInput!) {
   markPaymentsPaid(input: $input) {
-    account {
+    budget {
       id
       bankBalance
       recurringPayments {

@@ -46,12 +46,12 @@ describe('sign in', () => {
       route: '/sign-in',
       email: DEFAULT_USER.email,
       password: DEFAULT_PASSWORD,
-      api: createFakeApi({ account: null })
+      api: createFakeApi({ budget: null })
     });
 
     expect(await findPageHeading('When do you get paid?')).toBeInTheDocument();
-    // The dashboard never opened to find there's no account
-    expect(api.callsTo('Account')).toHaveLength(0);
+    // The dashboard never opened to find there's no budget
+    expect(api.callsTo('Budget')).toHaveLength(0);
   });
 
   it('returns to the page they were heading for after signing in', async () => {

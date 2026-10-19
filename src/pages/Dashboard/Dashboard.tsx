@@ -1,13 +1,13 @@
 import { Plus, Repeat } from 'lucide-react';
-import { AccountError } from '~/components/feedback/AccountError';
+import { BudgetError } from '~/components/feedback/BudgetError';
 import { PageHeader } from '~/components/layout/PageHeader';
 import { Button } from '~/components/ui/Button';
-import { useAccount } from '~/hooks/useAccount';
+import { useBudget } from '~/hooks/useBudget';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
 import { DashboardContent, DashboardSkeleton } from './components';
 
 export const Dashboard = () => {
-  const { account, loading, retry } = useAccount();
+  const { budget, loading, retry } = useBudget();
   const openAdd = usePaymentDialogStore(s => s.openAdd);
 
   return (
@@ -15,7 +15,7 @@ export const Dashboard = () => {
       <PageHeader
         title="Dashboard"
         actions={
-          account ? (
+          budget ? (
             <>
               <Button size="lg" onClick={() => openAdd('oneOff')} className="px-5">
                 <Plus size={16} strokeWidth={2.25} aria-hidden="true" />
@@ -33,12 +33,12 @@ export const Dashboard = () => {
           ) : null
         }
       />
-      {account ? (
-        <DashboardContent account={account} />
+      {budget ? (
+        <DashboardContent budget={budget} />
       ) : loading ? (
         <DashboardSkeleton />
       ) : (
-        <AccountError onRetry={retry} />
+        <BudgetError onRetry={retry} />
       )}
     </>
   );

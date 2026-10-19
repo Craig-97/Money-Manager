@@ -1,4 +1,4 @@
-import { useAccount } from '~/hooks/useAccount';
+import { useBudget } from '~/hooks/useBudget';
 import { usePayCycle } from '~/hooks/usePayCycle';
 import { fromApiDate } from '~/lib/dates';
 import { followPayments, toNotes } from '~/lib/notes';
@@ -11,27 +11,27 @@ import {
 } from '~/lib/reminders';
 
 /*
- * The account's reminders: New, the ones that have gone off, and Coming up. Worked out from the
- * account each time, so they follow every change straight away. Empty until the account loads.
+ * The budget's reminders: New, the ones that have gone off, and Coming up. Worked out from the
+ * budget each time, so they follow every change straight away. Empty until the budget loads.
  */
 export const useReminders = () => {
-  const { account } = useAccount();
-  const { today, cycle } = usePayCycle(account?.payday);
-  const settings = account?.reminderSettings ?? DEFAULT_REMINDER_SETTINGS;
-  const states = toReminderStates(account?.reminderStates);
+  const { budget } = useBudget();
+  const { today, cycle } = usePayCycle(budget?.payday);
+  const settings = budget?.reminderSettings ?? DEFAULT_REMINDER_SETTINGS;
+  const states = toReminderStates(budget?.reminderStates);
 
-  const payments = account ? toPayments(account, today) : [];
-  const sources: ReminderSources | null = account
+  const payments = budget ? toPayments(budget, today) : [];
+  const sources: ReminderSources | null = budget
     ? {
         payments,
         // Notes that follow a payment take its next date
-        notes: followPayments(toNotes(account.notes), payments),
+        notes: followPayments(toNotes(budget.notes), payments),
         settings,
         cycle,
-        cycleStartedOn: fromApiDate(account.cycleStartedOn),
+        cycleStartedOn: fromApiDate(budget.cycleStartedOn),
         // Monthly pay is the one where the monthly income is what comes in on the day
         payAmount:
-          (account.payday?.frequency ?? 'MONTHLY') === 'MONTHLY' ? account.monthlyIncome : null,
+          (budget.payday?.frequency ?? 'MONTHLY') === 'MONTHLY' ? budget.monthlyIncome : null,
         states,
         today
       }
@@ -39,7 +39,7 @@ export const useReminders = () => {
   const fresh = sources ? newReminders(sources) : [];
 
   return {
-    accountId: account?.id ?? null,
+    budgetId: budget?.id ?? null,
     today,
     settings,
     states,

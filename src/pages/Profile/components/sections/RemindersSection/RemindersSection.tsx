@@ -4,7 +4,7 @@ import { ReminderWay, WayTag } from '~/components/reminders';
 import { Button } from '~/components/ui/Button';
 import { buttonVariants } from '~/components/ui/Button/buttonVariants';
 import { Switch } from '~/components/ui/Switch';
-import { Account } from '~/hooks/useAccount';
+import { Budget } from '~/hooks/useBudget';
 import { cn } from '~/lib/cn';
 import { FEED_INCLUDES, useCalendarFeed } from '../../../hooks';
 import { SECTION_ICONS } from '../sectionIcons';
@@ -14,8 +14,8 @@ import { SettingsTile } from '../SettingsTile';
  * How the app tells you about things: in the app, always, and a calendar feed your phone's
  * calendar subscribes to, so it alerts you with the app closed. Email comes later.
  */
-export const RemindersSection = ({ account }: { account: Account }) => {
-  const calendar = useCalendarFeed(account);
+export const RemindersSection = ({ budget }: { budget: Budget }) => {
+  const calendar = useCalendarFeed(budget);
   const { feed, urls } = calendar;
 
   return (

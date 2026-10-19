@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { screen, within } from '@testing-library/react';
-import { createFakeApi, DEFAULT_ACCOUNT } from '~/test/fakeApi';
+import { createFakeApi, DEFAULT_BUDGET } from '~/test/fakeApi';
 import { renderApp } from '~/test/renderApp';
 
 const findPageHeading = (name: string) => screen.findByRole('heading', { level: 1, name });
 
-const renderSetup = () => renderApp({ route: '/setup', api: createFakeApi({ account: null }) });
+const renderSetup = () => renderApp({ route: '/setup', api: createFakeApi({ budget: null }) });
 
 type User = ReturnType<typeof renderApp>['user'];
 
@@ -71,8 +71,8 @@ describe('setup', () => {
     );
   });
 
-  it('saves the account and opens the dashboard', async () => {
-    const api = createFakeApi({ account: null });
+  it('saves the budget and opens the dashboard', async () => {
+    const api = createFakeApi({ budget: null });
     const { user } = renderApp({ route: '/setup', api });
 
     await user.type(await screen.findByLabelText('Take-home pay per month'), '3,600');
@@ -93,7 +93,7 @@ describe('setup', () => {
     expect(
       await screen.findByRole('heading', { name: "You're all set, Test" })
     ).toBeInTheDocument();
-    const [{ input }] = api.callsTo('CreateAccount') as [{ input: Record<string, unknown> }];
+    const [{ input }] = api.callsTo('CreateBudget') as [{ input: Record<string, unknown> }];
     expect(input).toMatchObject({
       bankBalance: 9165,
       monthlyIncome: 3600,
@@ -113,12 +113,12 @@ describe('setup', () => {
     await user.click(screen.getByRole('button', { name: 'Go to dashboard' }));
 
     expect(await findPageHeading('Dashboard')).toBeInTheDocument();
-    // It opens with the account setup saved, rather than loading it again
-    expect(api.callsTo('Account')).toHaveLength(0);
+    // It opens with the budget setup saved, rather than loading it again
+    expect(api.callsTo('Budget')).toHaveLength(0);
   });
 
   it('opens the dashboard when setup was finished on another device', async () => {
-    const api = createFakeApi({ account: null });
+    const api = createFakeApi({ budget: null });
     const { user } = renderApp({ route: '/setup', api });
 
     await user.type(await screen.findByLabelText('Take-home pay per month'), '3600');
@@ -128,15 +128,15 @@ describe('setup', () => {
     await cont(user);
     await user.click(await screen.findByRole('button', { name: 'Skip for now' }));
     // Finished elsewhere while this page was open
-    api.db.account = structuredClone(DEFAULT_ACCOUNT);
+    api.db.budget = structuredClone(DEFAULT_BUDGET);
     await user.click(await screen.findByRole('button', { name: 'Finish setup' }));
 
     expect(await findPageHeading('Dashboard')).toBeInTheDocument();
   });
 
   it('keeps the answers when saving fails', async () => {
-    const api = createFakeApi({ account: null });
-    api.failNext('CreateAccount', { code: 'INTERNAL_SERVER_ERROR' });
+    const api = createFakeApi({ budget: null });
+    api.failNext('CreateBudget', { code: 'INTERNAL_SERVER_ERROR' });
     const { user } = renderApp({ route: '/setup', api });
 
     await user.type(await screen.findByLabelText('Take-home pay per month'), '3600');

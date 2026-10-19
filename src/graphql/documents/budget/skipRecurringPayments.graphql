@@ -1,7 +1,7 @@
 # Skips recurring payments' next date, or every date before `until`, with no change to the balance
 mutation SkipRecurringPayments($input: SkipRecurringPaymentsInput!) {
   skipRecurringPayments(input: $input) {
-    account {
+    budget {
       id
       recurringPayments {
         ...RecurringPaymentFields

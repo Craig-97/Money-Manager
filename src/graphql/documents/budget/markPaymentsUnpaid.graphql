@@ -2,7 +2,7 @@
 # putting back exactly what paying did to the balance and any debt
 mutation MarkPaymentsUnpaid($input: MarkPaymentsUnpaidInput!) {
   markPaymentsUnpaid(input: $input) {
-    account {
+    budget {
       id
       bankBalance
       recurringPayments {

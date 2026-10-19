@@ -3,7 +3,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { Button } from '~/components/ui/Button';
 import { Modal } from '~/components/ui/Modal';
 import { MEDIA } from '~/constants';
-import { useAccount } from '~/hooks/useAccount';
+import { useBudget } from '~/hooks/useBudget';
 import { useMediaQuery } from '~/hooks/useMediaQuery';
 import { usePayCycle } from '~/hooks/usePayCycle';
 import { usePaymentActions } from '~/hooks/usePaymentActions';
@@ -27,30 +27,30 @@ export const PaymentDialog = () => {
     }))
   );
   const isDesktop = useMediaQuery(MEDIA.desktop);
-  const { account } = useAccount();
-  const { today, cycle } = usePayCycle(account?.payday);
-  const { remove } = usePaymentActions(account?.id ?? '');
+  const { budget } = useBudget();
+  const { today, cycle } = usePayCycle(budget?.payday);
+  const { remove } = usePaymentActions(budget?.id ?? '');
 
   const target = dialog.view === 'form' ? dialog : null;
   const kind = target?.kind ?? 'oneOff';
   const asDebt = target?.asDebt ?? false;
   const payment =
-    account && target?.paymentId
-      ? toPayments(account, today).find(p => p.id === target.paymentId && p.kind === kind)
+    budget && target?.paymentId
+      ? toPayments(budget, today).find(p => p.id === target.paymentId && p.kind === kind)
       : undefined;
   const form = usePaymentForm({
     kind,
     asDebt,
-    accountId: account?.id ?? '',
+    budgetId: budget?.id ?? '',
     payment,
     today,
-    settings: account?.reminderSettings ?? DEFAULT_REMINDER_SETTINGS,
+    settings: budget?.reminderSettings ?? DEFAULT_REMINDER_SETTINGS,
     onSaved: close,
     // Each opening starts afresh. Closing keeps the form as it was while the dialog animates away.
     formKey: String(opened)
   });
 
-  if (!account) return null;
+  if (!budget) return null;
 
   // From what was opened, so it reads the same while closing, even once the payment is deleted
   const editing = !!target?.paymentId;
@@ -112,7 +112,7 @@ export const PaymentDialog = () => {
       {target ? (
         <>
           {payment ? (
-            <StatusStrip payment={payment} today={today} cycle={cycle} accountId={account.id} />
+            <StatusStrip payment={payment} today={today} cycle={cycle} budgetId={budget.id} />
           ) : null}
           <FormBody form={form} kind={kind} />
         </>

@@ -4,8 +4,8 @@ import {
   apiDate,
   apiDateFromToday,
   createFakeApi,
-  DEFAULT_ACCOUNT,
-  FakeAccount,
+  DEFAULT_BUDGET,
+  FakeBudget,
   fakeRecord
 } from '~/test/fakeApi';
 import { renderApp } from '~/test/renderApp';
@@ -13,8 +13,8 @@ import { resetViewport, setViewportWidth } from '~/test/viewport';
 
 // Everything due today, so it falls once before payday. Tests pin today themselves, as a payday a
 // month or more before the next one would put a monthly payment in the cycle twice.
-const account = (overrides: Partial<FakeAccount> = {}): FakeAccount => ({
-  ...structuredClone(DEFAULT_ACCOUNT),
+const budget = (overrides: Partial<FakeBudget> = {}): FakeBudget => ({
+  ...structuredClone(DEFAULT_BUDGET),
   cycleStartedOn: apiDateFromToday(0),
   bankBalance: 1000,
   monthlyIncome: 2500,
@@ -47,8 +47,8 @@ const account = (overrides: Partial<FakeAccount> = {}): FakeAccount => ({
   ...overrides
 });
 
-const renderDashboard = (data = account()) => {
-  const api = createFakeApi({ account: data });
+const renderDashboard = (data = budget()) => {
+  const api = createFakeApi({ budget: data });
   return { ...renderApp({ route: '/dashboard', api }), api };
 };
 
@@ -89,7 +89,7 @@ describe('dashboard', () => {
       await screen.findByText('Netflix marked as paid · £20.00 off your balance')
     ).toBeInTheDocument();
     expect(api.callsTo('MarkPaymentsPaid')).toEqual([
-      { input: { accountId: 'account-1', recurringPaymentIds: ['netflix'], oneOffPaymentIds: [] } }
+      { input: { budgetId: 'budget-1', recurringPaymentIds: ['netflix'], oneOffPaymentIds: [] } }
     ]);
     // It comes off the balance and out of what's still due, so free to spend stays the same
     expect(within(freeToSpend()).getByText('£980.00')).toBeInTheDocument();
@@ -106,7 +106,7 @@ describe('dashboard', () => {
     expect(
       await screen.findByText('Refund marked as paid · £50.00 added to your balance')
     ).toBeInTheDocument();
-    expect(api.db.account?.oneOffPayments[0]).toMatchObject({
+    expect(api.db.budget?.oneOffPayments[0]).toMatchObject({
       name: 'Refund',
       paidAt: expect.any(String)
     });
@@ -126,9 +126,9 @@ describe('dashboard', () => {
       await screen.findByText('Refund marked as unpaid · £50.00 off your balance')
     ).toBeInTheDocument();
     expect(api.callsTo('MarkPaymentsUnpaid')).toEqual([
-      { input: { accountId: 'account-1', recurringPaymentIds: [], oneOffPaymentIds: ['refund'] } }
+      { input: { budgetId: 'budget-1', recurringPaymentIds: [], oneOffPaymentIds: ['refund'] } }
     ]);
-    expect(api.db.account?.oneOffPayments[0].paidAt).toBeNull();
+    expect(api.db.budget?.oneOffPayments[0].paidAt).toBeNull();
     expect(within(freeToSpend()).getByText('£1,000.00')).toBeInTheDocument();
   });
 
@@ -145,7 +145,7 @@ describe('dashboard', () => {
     expect(api.callsTo('CreateOneOffPayment')).toEqual([
       {
         input: expect.objectContaining({
-          accountId: 'account-1',
+          budgetId: 'budget-1',
           name: 'Concert',
           amount: 45,
           type: 'EXPENSE',
@@ -181,13 +181,13 @@ describe('dashboard', () => {
 
     expect(await screen.findByText('Netflix skipped this cycle')).toBeInTheDocument();
     expect(api.callsTo('SkipRecurringPayments')).toEqual([
-      { input: { accountId: 'account-1', recurringPaymentIds: ['netflix'] } }
+      { input: { budgetId: 'budget-1', recurringPaymentIds: ['netflix'] } }
     ]);
     expect(api.callsTo('UpdateRecurringPayment')).toEqual([]);
-    expect(api.db.account?.recurringPayments[0].thisCycle).toEqual([
+    expect(api.db.budget?.recurringPayments[0].thisCycle).toEqual([
       expect.objectContaining({ kind: 'SKIPPED', dates: [apiDateFromToday(0)] })
     ]);
-    expect(api.db.account?.bankBalance).toBe(1000);
+    expect(api.db.budget?.bankBalance).toBe(1000);
     expect(await within(dialog).findByText(/^Skipped · next due/)).toBeInTheDocument();
   });
 
@@ -214,8 +214,8 @@ describe('dashboard', () => {
     await user.type(field, '1,500{Enter}');
 
     await waitFor(() =>
-      expect(api.callsTo('UpdateAccount')).toEqual([
-        { id: 'account-1', input: { bankBalance: 1500 } }
+      expect(api.callsTo('UpdateBudget')).toEqual([
+        { id: 'budget-1', input: { bankBalance: 1500 } }
       ])
     );
     expect(await within(freeToSpend()).findByText('£1,530.00')).toBeInTheDocument();
@@ -234,8 +234,8 @@ describe('dashboard', () => {
     expect(await screen.findByText('Nothing due before payday')).toBeInTheDocument();
   });
 
-  it('suggests adding payments to a new account', async () => {
-    renderDashboard(account({ recurringPayments: [], oneOffPayments: [] }));
+  it('suggests adding payments to a new budget', async () => {
+    renderDashboard(budget({ recurringPayments: [], oneOffPayments: [] }));
 
     expect(
       await screen.findByText('Add your payments to see what is free to spend')
@@ -253,8 +253,8 @@ describe('a payment due more than once before payday', () => {
   afterEach(() => vi.useRealTimers());
 
   // A £50 cleaner every Wednesday: 7, 14, 21 and 28 October fall before payday
-  const cleanerAccount = () =>
-    account({
+  const cleanerBudget = () =>
+    budget({
       bankBalance: 1000,
       cycleStartedOn: apiDate('2026-09-30'),
       recurringPayments: [
@@ -281,7 +281,7 @@ describe('a payment due more than once before payday', () => {
   };
 
   it('counts every date before payday, then pays them one at a time', async () => {
-    const { user, api } = renderDashboard(cleanerAccount());
+    const { user, api } = renderDashboard(cleanerBudget());
 
     // One row, marked as due four times
     expect(await screen.findByText('×4')).toBeInTheDocument();
@@ -311,12 +311,12 @@ describe('a payment due more than once before payday', () => {
     ).toBeInTheDocument();
     // Still in the upcoming list, now due next week
     expect(await screen.findByText('×3')).toBeInTheDocument();
-    expect(api.db.account?.recurringPayments[0].nextDueDate).toBe(apiDate('2026-10-14'));
+    expect(api.db.budget?.recurringPayments[0].nextDueDate).toBe(apiDate('2026-10-14'));
     expect(within(freeToSpend()).getByText('£800.00')).toBeInTheDocument();
   });
 
   it('skips the rest of the cycle at once', async () => {
-    const { user, api } = renderDashboard(cleanerAccount());
+    const { user, api } = renderDashboard(cleanerBudget());
 
     await chooseFromMenu(user, 'Skip the rest of this cycle (4)');
 
@@ -324,16 +324,16 @@ describe('a payment due more than once before payday', () => {
       await screen.findByText('Cleaner skipped for the rest of this cycle')
     ).toBeInTheDocument();
     expect(api.callsTo('SkipRecurringPayments')).toEqual([
-      { input: { accountId: 'account-1', recurringPaymentIds: ['cleaner'], until: '2026-10-30' } }
+      { input: { budgetId: 'budget-1', recurringPaymentIds: ['cleaner'], until: '2026-10-30' } }
     ]);
     await waitFor(() =>
       expect(screen.queryByRole('button', { name: 'Edit Cleaner' })).not.toBeInTheDocument()
     );
-    expect(api.db.account?.bankBalance).toBe(1000);
+    expect(api.db.budget?.bankBalance).toBe(1000);
   });
 
   it('shows how far through the cycle it is on the recurring tab', async () => {
-    const data = cleanerAccount();
+    const data = cleanerBudget();
     data.recurringPayments[0].nextDueDate = apiDate('2026-10-14');
     data.recurringPayments[0].thisCycle = [
       fakeRecord('PAID', { dates: [apiDate('2026-10-07')], balanceChange: -50 })
@@ -350,7 +350,7 @@ describe('a payment due more than once before payday', () => {
 });
 
 describe('payday prompt', () => {
-  // Wednesday 30 September 2026 is the last day of the month, the accounts' payday. Only Date is
+  // Wednesday 30 September 2026 is the last day of the month, the budgets' payday. Only Date is
   // faked, so timers and user events run as normal.
   const setToday = (iso: string) => {
     vi.useFakeTimers({ toFake: ['Date'] });
@@ -361,8 +361,8 @@ describe('payday prompt', () => {
 
   // A monthly payment whose 30 August date was left unpaid in the cycle that's ending, with this
   // cycle not started yet. It falls again today, 30 September.
-  const paydayAccount = () =>
-    account({
+  const paydayBudget = () =>
+    budget({
       cycleStartedOn: null,
       recurringPayments: [
         {
@@ -383,7 +383,7 @@ describe('payday prompt', () => {
     });
 
   it('confirms the balance and starts the new cycle', async () => {
-    const { user, api } = renderDashboard(paydayAccount());
+    const { user, api } = renderDashboard(paydayBudget());
 
     const dialog = await screen.findByRole('dialog', { name: 'It’s payday' });
     const balance = within(dialog).getByLabelText(/Confirm your bank balance/);
@@ -404,7 +404,7 @@ describe('payday prompt', () => {
     expect(api.callsTo('StartPaydayCycle')).toEqual([
       {
         input: expect.objectContaining({
-          accountId: 'account-1',
+          budgetId: 'budget-1',
           bankBalance: 3450,
           recurringPaymentIds: ['netflix']
         })
@@ -413,7 +413,7 @@ describe('payday prompt', () => {
   });
 
   it('can be skipped and shown again', async () => {
-    const { user } = renderDashboard(paydayAccount());
+    const { user } = renderDashboard(paydayBudget());
 
     const dialog = await screen.findByRole('dialog', { name: 'It’s payday' });
     await user.click(within(dialog).getByRole('button', { name: 'Skip for now' }));
@@ -428,7 +428,7 @@ describe('payday prompt', () => {
 
   it('says when it is catching up on a payday that has been', async () => {
     setToday('2026-10-04');
-    renderDashboard(paydayAccount());
+    renderDashboard(paydayBudget());
 
     const dialog = await screen.findByRole('dialog', { name: 'Start your new pay cycle' });
     expect(dialog).toHaveTextContent('Payday was Wednesday 30 September · 4 days ago');
@@ -436,7 +436,7 @@ describe('payday prompt', () => {
 
   it('leaves payments already in the new cycle where they are', async () => {
     setToday('2026-10-04');
-    const data = paydayAccount();
+    const data = paydayBudget();
     data.recurringPayments[0].nextDueDate = apiDate('2026-09-29');
     // Due after the payday being caught up on
     data.recurringPayments.push({
@@ -453,7 +453,7 @@ describe('payday prompt', () => {
   });
 
   it('says when everything from the last cycle was paid or skipped', async () => {
-    const data = paydayAccount();
+    const data = paydayBudget();
     // Paid for 30 August, so it has already moved on to today, in the new cycle
     data.recurringPayments[0].nextDueDate = apiDateFromToday(0);
     data.recurringPayments[0].thisCycle = [fakeRecord('PAID', { dates: [apiDateFromToday(-31)] })];
@@ -486,7 +486,7 @@ describe('moving a payday', () => {
   });
 
   // The cycle started on the last payday, so there's no payday prompt in the way
-  const movable = () => account({ cycleStartedOn: apiDate('2026-11-30') });
+  const movable = () => budget({ cycleStartedOn: apiDate('2026-11-30') });
 
   const openPicker = async (user: ReturnType<typeof renderDashboard>['user']) => {
     await user.click(await screen.findByRole('button', { name: 'Change this payday' }));
@@ -557,8 +557,8 @@ describe('alerts', () => {
   afterEach(() => vi.useRealTimers());
 
   // Netflix is due today, and breakdown cover renewed on 28 September without a new date set
-  const renewedAccount = () => {
-    const data = account();
+  const renewedBudget = () => {
+    const data = budget();
     data.recurringPayments.push({
       ...data.recurringPayments[0],
       id: 'breakdown',
@@ -574,7 +574,7 @@ describe('alerts', () => {
   };
 
   it('shows one alert at a time, moving between them', async () => {
-    const { user } = renderDashboard(renewedAccount());
+    const { user } = renderDashboard(renewedBudget());
 
     const alerts = await screen.findByRole('region', { name: 'Alerts' });
     expect(within(alerts).getByRole('region', { name: 'Due today' })).toBeInTheDocument();
@@ -591,7 +591,7 @@ describe('alerts', () => {
   });
 
   // Put away with Later until a day, as the API keeps it
-  const putAway = (data: ReturnType<typeof renewedAccount>, until: string) => ({
+  const putAway = (data: ReturnType<typeof renewedBudget>, until: string) => ({
     ...data,
     reminderStates: [
       {
@@ -603,8 +603,8 @@ describe('alerts', () => {
     ]
   });
 
-  it('puts a renewal away for three days with Later, on the account', async () => {
-    const { user, unmount, api } = renderDashboard(renewedAccount());
+  it('puts a renewal away for three days with Later, on the budget', async () => {
+    const { user, unmount, api } = renderDashboard(renewedBudget());
 
     const alerts = await screen.findByRole('region', { name: 'Alerts' });
     await user.click(within(alerts).getByRole('button', { name: 'Next alert' }));
@@ -617,7 +617,7 @@ describe('alerts', () => {
     expect(api.callsTo('UpdateReminders')).toEqual([
       {
         input: {
-          accountId: 'account-1',
+          budgetId: 'budget-1',
           keys: ['renewed:breakdown:2026-09-28'],
           action: 'LATER',
           until: '2026-10-11'
@@ -628,7 +628,7 @@ describe('alerts', () => {
     // Still away two days later
     unmount();
     vi.setSystemTime(new Date('2026-10-10T09:00:00'));
-    renderDashboard(putAway(renewedAccount(), '2026-10-11'));
+    renderDashboard(putAway(renewedBudget(), '2026-10-11'));
     await screen.findByRole('region', { name: 'Alerts' });
     expect(screen.queryByText('Breakdown cover has renewed')).not.toBeInTheDocument();
     expect(screen.queryByText('1 of 2')).not.toBeInTheDocument();
@@ -636,7 +636,7 @@ describe('alerts', () => {
 
   it('flags a renewal coming up within its reminder, after one that has gone by', async () => {
     // Car insurance is paid yearly on 24 October, 16 days away, with a reminder a month before
-    const data = renewedAccount();
+    const data = renewedBudget();
     data.recurringPayments.push({
       ...data.recurringPayments[0],
       id: 'car',
@@ -668,7 +668,7 @@ describe('alerts', () => {
   });
 
   it('leaves a renewal alone with its reminder off until it has gone by', async () => {
-    const data = account();
+    const data = budget();
     data.recurringPayments.push({
       ...data.recurringPayments[0],
       id: 'car',
@@ -688,13 +688,13 @@ describe('alerts', () => {
 
   it('asks again once the day it was put away until comes', async () => {
     vi.setSystemTime(new Date('2026-10-11T09:30:00'));
-    renderDashboard(putAway(renewedAccount(), '2026-10-11'));
+    renderDashboard(putAway(renewedBudget(), '2026-10-11'));
 
     expect(await screen.findByText('1 of 2')).toBeInTheDocument();
   });
 
   it('puts a payment gone by unpaid first, to mark paid', async () => {
-    const data = renewedAccount();
+    const data = renewedBudget();
     data.recurringPayments.push({
       ...data.recurringPayments[0],
       id: 'spotify',

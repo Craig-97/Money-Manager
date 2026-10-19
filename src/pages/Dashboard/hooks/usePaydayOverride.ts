@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useMutation } from '@apollo/client/react';
 import { SetPaydayOverrideDocument } from '~/graphql/generated';
-import { Account } from '~/hooks/useAccount';
+import { Budget } from '~/hooks/useBudget';
 import { addDays, toIsoDate } from '~/lib/dates';
 import { getApiErrorMessage } from '~/lib/errors';
 import { BankHolidays, getNextPaydays, PayCycle } from '~/lib/payday';
@@ -13,7 +13,7 @@ import { overridePreview } from '../dashboardModel';
 const FALLBACK_DAYS = 28;
 
 interface Options {
-  account: Account;
+  budget: Budget;
   cycle: PayCycle;
   today: Date;
   holidays: BankHolidays;
@@ -21,12 +21,12 @@ interface Options {
 }
 
 /* Moving just the next payday, e.g. paid early before Christmas, and putting it back */
-export const usePaydayOverride = ({ account, cycle, today, holidays, payments }: Options) => {
+export const usePaydayOverride = ({ budget, cycle, today, holidays, payments }: Options) => {
   const [setOverride, { loading: saving }] = useMutation(SetPaydayOverrideDocument);
   const [open, setOpen] = useState(false);
   const [picked, setPicked] = useState(cycle.end);
 
-  const { payday } = account;
+  const { payday } = budget;
   const moved = cycle.end.getTime() !== cycle.endUsual.getTime();
   // It can't run into the payday after this one
   const following = payday
@@ -89,8 +89,8 @@ export const usePaydayOverride = ({ account, cycle, today, holidays, payments }:
     changed,
     preview: overridePreview({
       payments,
-      bankBalance: account.bankBalance,
-      monthlyIncome: account.monthlyIncome,
+      bankBalance: budget.bankBalance,
+      monthlyIncome: budget.monthlyIncome,
       cycle,
       today,
       picked

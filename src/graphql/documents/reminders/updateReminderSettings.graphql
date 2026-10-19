@@ -1,6 +1,6 @@
 mutation UpdateReminderSettings($input: UpdateReminderSettingsInput!) {
   updateReminderSettings(input: $input) {
-    account {
+    budget {
       id
       reminderSettings {
         ...ReminderSettingsFields

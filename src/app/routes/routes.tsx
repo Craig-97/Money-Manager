@@ -2,7 +2,7 @@ import { Navigate, RouteObject } from 'react-router';
 import { FullPageLoader } from '~/components/feedback/FullPageLoader';
 import { AppShell } from '~/components/layout/AppShell';
 import { ROUTES } from '~/constants';
-import { PublicOnly, RequireAccount, RequireAuth, RequireNoAccount } from '../guards';
+import { PublicOnly, RequireBudget, RequireAuth, RequireNoBudget } from '../guards';
 import { RootLayout } from '../RootLayout';
 import { RouteError } from '../RouteError';
 import { pageModules } from './pageModules';
@@ -46,7 +46,7 @@ export const routes: RouteObject[] = [
         Component: RequireAuth,
         children: [
           {
-            Component: RequireNoAccount,
+            Component: RequireNoBudget,
             children: [
               {
                 path: ROUTES.setup,
@@ -55,7 +55,7 @@ export const routes: RouteObject[] = [
             ]
           },
           {
-            Component: RequireAccount,
+            Component: RequireBudget,
             children: [
               {
                 Component: AppShell,

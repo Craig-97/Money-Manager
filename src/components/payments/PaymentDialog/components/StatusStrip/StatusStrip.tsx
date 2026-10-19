@@ -10,12 +10,12 @@ interface StatusStripProps {
   payment: Payment;
   today: Date;
   cycle: PayCycle;
-  accountId: string;
+  budgetId: string;
 }
 
 /* Where an existing payment stands, with shortcuts to pay, skip or undo */
-export const StatusStrip = ({ payment, today, cycle, accountId }: StatusStripProps) => {
-  const { pay, undo, skip } = usePaymentActions(accountId);
+export const StatusStrip = ({ payment, today, cycle, budgetId }: StatusStripProps) => {
+  const { pay, undo, skip } = usePaymentActions(budgetId);
   const recurring = payment.kind === 'recurring' ? payment : null;
   const status = recurring
     ? cycleStatus(recurring, cycle)

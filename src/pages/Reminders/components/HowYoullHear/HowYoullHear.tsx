@@ -2,12 +2,12 @@ import { Bell, CalendarDays, Mail } from 'lucide-react';
 import { Link } from 'react-router';
 import { ReminderWay, WayTag } from '~/components/reminders';
 import { ROUTES } from '~/constants';
-import { useAccount } from '~/hooks/useAccount';
+import { useBudget } from '~/hooks/useBudget';
 
 /* The ways reminders reach you: in the app, your phone's calendar, and (later) email */
 export const HowYoullHear = () => {
-  const { account } = useAccount();
-  const calendarOn = !!account?.calendarFeed.token;
+  const { budget } = useBudget();
+  const calendarOn = !!budget?.calendarFeed.token;
 
   return (
     <div className="flex flex-col gap-2">

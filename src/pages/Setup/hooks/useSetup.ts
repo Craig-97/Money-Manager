@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useApolloClient, useMutation } from '@apollo/client/react';
 import { ERRORS } from '~/constants';
-import { linkAccount } from '~/graphql/cache';
+import { linkBudget } from '~/graphql/cache';
 import {
-  AccountFieldsFragment,
-  CreateAccountDocument,
+  BudgetFieldsFragment,
+  CreateBudgetDocument,
   CurrentUserDocument,
   PayFrequency
 } from '~/graphql/generated';
@@ -21,18 +21,18 @@ import {
   PRESETS,
   RegularDraft,
   SetupValues,
-  toCreateAccountInput
+  toCreateBudgetInput
 } from '../setupModel';
 
 let nextDraftId = 1;
 const draftId = (prefix: string) => `${prefix}-${nextDraftId++}`;
 
-/* Setup's answers, which step is showing, and saving it all as the account at the end */
+/* Setup's answers, which step is showing, and saving it all as the budget at the end */
 export const useSetup = () => {
   const client = useApolloClient();
   const userId = useAuthStore(s => s.session?.userId);
-  const [createAccount, { loading: saving, error: saveError, reset: clearSaveError }] =
-    useMutation(CreateAccountDocument);
+  const [createBudget, { loading: saving, error: saveError, reset: clearSaveError }] =
+    useMutation(CreateBudgetDocument);
 
   const [values, setValues] = useState<SetupValues>(INITIAL_VALUES);
   const [step, setStep] = useState(0);
@@ -41,7 +41,7 @@ export const useSetup = () => {
   // Errors only show once someone has tried to continue past them
   const [showErrors, setShowErrors] = useState(false);
   // Set once saved; the person stays in setup until they choose to go to the dashboard
-  const [account, setAccount] = useState<AccountFieldsFragment | null>(null);
+  const [budget, setBudget] = useState<BudgetFieldsFragment | null>(null);
   const [finished, setFinished] = useState(false);
 
   const update = <K extends keyof SetupValues>(key: K, value: SetupValues[K]) =>
@@ -129,19 +129,19 @@ export const useSetup = () => {
 
   const finish = async () => {
     // Already saved, e.g. after going back to review: there's nothing more to save
-    if (account) {
+    if (budget) {
       setFinished(true);
       return;
     }
     clearSaveError();
     try {
-      const { data } = await createAccount({ variables: { input: toCreateAccountInput(values) } });
-      setAccount(data?.createAccount.account ?? null);
+      const { data } = await createBudget({ variables: { input: toCreateBudgetInput(values) } });
+      setBudget(data?.createBudget.budget ?? null);
       setFinished(true);
     } catch (error) {
-      // Setup was finished on another device. Loading the user again shows they have an account,
+      // Setup was finished on another device. Loading the user again shows they have a budget,
       // and the route guard takes them to it. If that fails too, Try again repeats both.
-      if (hasErrorCode(error, ERRORS.ACCOUNT_EXISTS)) {
+      if (hasErrorCode(error, ERRORS.BUDGET_EXISTS)) {
         await client
           .query({ query: CurrentUserDocument, fetchPolicy: 'network-only' })
           .catch(() => undefined);
@@ -176,9 +176,9 @@ export const useSetup = () => {
     setShowErrors(false);
   };
 
-  // Linking the new account to the user lets the route guard take the person to their dashboard
+  // Linking the new budget to the user lets the route guard take the person to their dashboard
   const goToDashboard = () => {
-    if (account && userId) linkAccount(client.cache, { userId, account });
+    if (budget && userId) linkBudget(client.cache, { userId, budget });
   };
 
   return {

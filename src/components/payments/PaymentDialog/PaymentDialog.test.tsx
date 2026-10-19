@@ -4,8 +4,8 @@ import { holdExitAnimations } from '~/test/exitAnimation';
 import {
   apiDate,
   createFakeApi,
-  DEFAULT_ACCOUNT,
-  FakeAccount,
+  DEFAULT_BUDGET,
+  FakeBudget,
   FakeRecurringPayment
 } from '~/test/fakeApi';
 import { renderApp } from '~/test/renderApp';
@@ -33,13 +33,12 @@ const carFinance: FakeRecurringPayment = {
   debt: { balance: 6860, startingBalance: 12000, apr: 6.9, balanceUpdatedAt: null }
 };
 
-const account = (): FakeAccount => ({
-  ...structuredClone(DEFAULT_ACCOUNT),
-  recurringPayments: [...structuredClone(DEFAULT_ACCOUNT.recurringPayments), carFinance]
+const budget = (): FakeBudget => ({
+  ...structuredClone(DEFAULT_BUDGET),
+  recurringPayments: [...structuredClone(DEFAULT_BUDGET.recurringPayments), carFinance]
 });
 
-const renderAt = (route: string) =>
-  renderApp({ route, api: createFakeApi({ account: account() }) });
+const renderAt = (route: string) => renderApp({ route, api: createFakeApi({ budget: budget() }) });
 
 describe('adding a recurring payment as a debt', () => {
   it('turns the form into a debt with the switch', async () => {

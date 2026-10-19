@@ -7,7 +7,7 @@ import { Radio } from '~/components/form/Radio';
 import { Select } from '~/components/form/Select';
 import { TextInput } from '~/components/form/TextInput';
 import { Button } from '~/components/ui/Button';
-import { Account } from '~/hooks/useAccount';
+import { Budget } from '~/hooks/useBudget';
 import { cn } from '~/lib/cn';
 import { formatShortDay } from '~/lib/dates';
 import { allowedRules, REGIONS, ruleDescription, RULES, usesWeekday, WEEKDAYS } from '~/lib/payday';
@@ -21,8 +21,8 @@ import { SettingsTile } from '../SettingsTile';
 const PREVIEW_LABELS = ['Next', 'Then', 'After that'];
 
 /* How often and on which day pay arrives, with the next paydays that gives */
-export const PaydaySection = ({ account }: { account: Account }) => {
-  const payday = usePaydaySettings(account);
+export const PaydaySection = ({ budget }: { budget: Budget }) => {
+  const payday = usePaydaySettings(budget);
   const { values, update, errors, preview, dates } = payday;
 
   return (
@@ -170,7 +170,7 @@ export const PaydaySection = ({ account }: { account: Account }) => {
                 <li key={item.date.getTime()} className="flex">
                   <button
                     type="button"
-                    disabled={dates.locked || !account.payday}
+                    disabled={dates.locked || !budget.payday}
                     aria-expanded={editing}
                     data-inline=""
                     aria-label={`${label}, ${formatShortDay(item.date)}${item.moved ? ', moved by you' : ''}. Change`}

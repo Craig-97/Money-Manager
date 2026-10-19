@@ -1,6 +1,6 @@
 import { BankHolidayRegion, PayFrequency, PaydayType, Weekday } from '~/graphql/generated';
 
-// How someone is paid, as stored on the account's payday
+// How someone is paid, as stored on the budget's payday
 export interface PaydayConfig {
   frequency: PayFrequency;
   type: PaydayType;

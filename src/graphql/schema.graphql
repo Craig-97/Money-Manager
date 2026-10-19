@@ -17,13 +17,13 @@ enum ThemePreference {
 type Query {
   tokenFindUser: User
   passwordResetTokenValid(token: String!): PasswordResetTokenCheck!
-  account(id: ID): Account
+  budget(id: ID): Budget
   recurringPayment(id: ID!): RecurringPayment
 }
 
 type User {
   id: ID!
-  account: ID
+  budget: ID
   email: String!
   firstName: String!
   surname: String!
@@ -46,7 +46,7 @@ input UserDetailsInput {
 
 type UserResponse {
   user: User
-  account: ID
+  budget: ID
   success: Boolean!
 }
 
@@ -73,14 +73,14 @@ type Mutation {
   changePassword(currentPassword: String!, newPassword: String!): UserResponse!
   deleteCurrentUser: UserResponse!
   updatePreferences(theme: ThemePreference, accent: String): UserResponse!
-  createAccount(input: CreateAccountInput!): AccountResponse!
-  updateAccount(id: ID!, input: UpdateAccountInput!): AccountResponse!
-  startPaydayCycle(input: StartPaydayCycleInput!): AccountResponse!
-  markPaymentsPaid(input: MarkPaymentsPaidInput!): AccountResponse!
-  markPaymentsUnpaid(input: MarkPaymentsUnpaidInput!): AccountResponse!
-  skipRecurringPayments(input: SkipRecurringPaymentsInput!): AccountResponse!
-  logDebtOverpayment(input: LogDebtOverpaymentInput!): AccountResponse!
-  undoDebtOverpayment(input: UndoDebtOverpaymentInput!): AccountResponse!
+  createBudget(input: CreateBudgetInput!): BudgetResponse!
+  updateBudget(id: ID!, input: UpdateBudgetInput!): BudgetResponse!
+  startPaydayCycle(input: StartPaydayCycleInput!): BudgetResponse!
+  markPaymentsPaid(input: MarkPaymentsPaidInput!): BudgetResponse!
+  markPaymentsUnpaid(input: MarkPaymentsUnpaidInput!): BudgetResponse!
+  skipRecurringPayments(input: SkipRecurringPaymentsInput!): BudgetResponse!
+  logDebtOverpayment(input: LogDebtOverpaymentInput!): BudgetResponse!
+  undoDebtOverpayment(input: UndoDebtOverpaymentInput!): BudgetResponse!
   createOneOffPayment(input: CreateOneOffPaymentInput!): OneOffPaymentResponse!
   updateOneOffPayment(id: ID!, input: UpdateOneOffPaymentInput!): OneOffPaymentResponse!
   batchDeleteOneOffPayments(ids: [ID!]!): DeleteResponse!
@@ -92,13 +92,13 @@ type Mutation {
   deleteNote(id: ID!): DeleteResponse!
   updatePayday(id: ID!, input: PaydayInput!): PaydayResponse!
   setPaydayOverride(id: ID!, for: String!, date: String): PaydayResponse!
-  updateReminderSettings(input: UpdateReminderSettingsInput!): AccountResponse!
+  updateReminderSettings(input: UpdateReminderSettingsInput!): BudgetResponse!
   updateReminders(input: UpdateRemindersInput!): ReminderStatesResponse!
-  updateCalendarFeed(input: UpdateCalendarFeedInput!): AccountResponse!
-  resetCalendarFeed(accountId: ID!): AccountResponse!
+  updateCalendarFeed(input: UpdateCalendarFeedInput!): BudgetResponse!
+  resetCalendarFeed(budgetId: ID!): BudgetResponse!
 }
 
-type Account {
+type Budget {
   id: ID!
   user: User
   bankBalance: Float!
@@ -113,7 +113,7 @@ type Account {
   calendarFeed: CalendarFeed!
 }
 
-input CreateAccountInput {
+input CreateBudgetInput {
   bankBalance: Float!
   monthlyIncome: Float!
   oneOffPayments: [OneOffPaymentInput!]
@@ -121,49 +121,49 @@ input CreateAccountInput {
   payday: PaydayInput
 }
 
-input UpdateAccountInput {
+input UpdateBudgetInput {
   bankBalance: Float
   monthlyIncome: Float
 }
 
 input MarkPaymentsPaidInput {
-  accountId: ID!
+  budgetId: ID!
   recurringPaymentIds: [ID!]!
   oneOffPaymentIds: [ID!]!
 }
 
 input MarkPaymentsUnpaidInput {
-  accountId: ID!
+  budgetId: ID!
   recurringPaymentIds: [ID!]!
   oneOffPaymentIds: [ID!]
 }
 
 input UndoDebtOverpaymentInput {
-  accountId: ID!
+  budgetId: ID!
   recordId: ID!
 }
 
 input SkipRecurringPaymentsInput {
-  accountId: ID!
+  budgetId: ID!
   recurringPaymentIds: [ID!]!
   until: String
 }
 
 input LogDebtOverpaymentInput {
-  accountId: ID!
+  budgetId: ID!
   recurringPaymentId: ID!
   amount: Float!
 }
 
 input StartPaydayCycleInput {
-  accountId: ID!
+  budgetId: ID!
   payday: String!
   bankBalance: Float!
   recurringPaymentIds: [ID!]!
 }
 
-type AccountResponse {
-  account: Account
+type BudgetResponse {
+  budget: Budget
   success: Boolean!
 }
 
@@ -197,7 +197,7 @@ enum OneOffPaymentCategory {
 
 type OneOffPayment {
   id: ID!
-  account: ID!
+  budget: ID!
   name: String!
   amount: Float!
   dueDate: String!
@@ -208,7 +208,7 @@ type OneOffPayment {
 }
 
 input CreateOneOffPaymentInput {
-  accountId: ID!
+  budgetId: ID!
   name: String!
   amount: Float!
   dueDate: String!
@@ -282,7 +282,7 @@ enum PaymentRecordKind {
 
 type RecurringPayment {
   id: ID!
-  account: ID!
+  budget: ID!
   name: String!
   amount: Float!
   category: RecurringPaymentCategory!
@@ -330,7 +330,7 @@ type PaymentRecordDebt {
 }
 
 input CreateRecurringPaymentInput {
-  accountId: ID!
+  budgetId: ID!
   name: String!
   amount: Float!
   category: RecurringPaymentCategory!
@@ -396,7 +396,7 @@ enum NoteRepeat {
 
 type Note {
   id: ID!
-  account: ID!
+  budget: ID!
   body: String!
   color: NoteColor!
   date: String
@@ -408,7 +408,7 @@ type Note {
 }
 
 input CreateNoteInput {
-  accountId: ID!
+  budgetId: ID!
   body: String!
   color: NoteColor
   date: String
@@ -469,7 +469,7 @@ type PaydayOverride {
 
 type Payday {
   id: ID!
-  account: ID!
+  budget: ID!
   frequency: PayFrequency!
   type: PaydayType!
   dayOfMonth: Int
@@ -534,21 +534,21 @@ type CalendarFeed {
 }
 
 input UpdateReminderSettingsInput {
-  accountId: ID!
+  budgetId: ID!
   paymentDays: Int
   renewalDays: Int
   payday: Boolean
 }
 
 input UpdateRemindersInput {
-  accountId: ID!
+  budgetId: ID!
   keys: [String!]!
   action: ReminderAction!
   until: String
 }
 
 input UpdateCalendarFeedInput {
-  accountId: ID!
+  budgetId: ID!
   enabled: Boolean
   payments: Boolean
   paydays: Boolean

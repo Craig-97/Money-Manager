@@ -2,7 +2,7 @@ import { AmountInput } from '~/components/form/AmountInput';
 import { FieldError } from '~/components/form/FieldError';
 import { Label } from '~/components/form/Label';
 import { Button } from '~/components/ui/Button';
-import { Account } from '~/hooks/useAccount';
+import { Budget } from '~/hooks/useBudget';
 import { cn } from '~/lib/cn';
 import { formatBalance } from '~/lib/format';
 import { useBalanceSettings } from '../../../hooks';
@@ -11,8 +11,8 @@ import { helpClasses } from '../settingsClasses';
 import { SettingsTile } from '../SettingsTile';
 
 /* Bank balance and monthly income, and the figures they give */
-export const BalancesSection = ({ account }: { account: Account }) => {
-  const balances = useBalanceSettings(account);
+export const BalancesSection = ({ budget }: { budget: Budget }) => {
+  const balances = useBalanceSettings(budget);
   const { errors, summary } = balances;
   const figures = [
     { label: 'Free to spend', value: formatBalance(summary.freeToSpend) },

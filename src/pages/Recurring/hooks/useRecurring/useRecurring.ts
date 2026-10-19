@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Account } from '~/hooks/useAccount';
+import { Budget } from '~/hooks/useBudget';
 import { usePayCycle } from '~/hooks/usePayCycle';
 import { usePaymentActions } from '~/hooks/usePaymentActions';
 import { usePaymentSelection } from '~/hooks/usePaymentSelection';
@@ -20,17 +20,17 @@ import {
 // The payments table's heading, which "View all renewals" scrolls to
 export const PAYMENTS_HEADING_ID = 'recurring-payments-title';
 
-/* Everything the recurring page shows and does, worked out from the account */
-export const useRecurring = (account: Account) => {
-  const { today, cycle } = usePayCycle(account.payday);
-  const actions = usePaymentActions(account.id);
+/* Everything the recurring page shows and does, worked out from the budget */
+export const useRecurring = (budget: Budget) => {
+  const { today, cycle } = usePayCycle(budget.payday);
+  const actions = usePaymentActions(budget.id);
 
   const [tab, setTab] = useState<RecurringTab>('all');
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState<string>(ALL_CATEGORIES);
   const [sort, setSort] = useState<PaymentSort>(DEFAULT_SORT);
 
-  const payments = recurringOnly(toPayments(account, today));
+  const payments = recurringOnly(toPayments(budget, today));
   const listed = filterPayments(payments, { tab, query, category, cycle, today, sort });
   const selection = usePaymentSelection(listed);
 

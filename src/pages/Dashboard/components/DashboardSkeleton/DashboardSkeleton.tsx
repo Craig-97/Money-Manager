@@ -2,14 +2,14 @@ import { Skeleton } from '~/components/ui/Skeleton';
 
 const heroChip = 'flex min-w-0 flex-col gap-1 rounded-[18px] bg-hero-chip px-3.5 py-3';
 
-/* The dashboard's shape while the account loads */
+/* The dashboard's shape while the budget loads */
 export const DashboardSkeleton = () => (
   <section
     aria-busy="true"
     aria-label="Overview"
     className="grid gap-3.5 md:gap-4 wide:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
     <span role="status" className="sr-only">
-      Loading your account
+      Loading your budget
     </span>
 
     <article

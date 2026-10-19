@@ -3,7 +3,7 @@ import { cn } from '~/lib/cn';
 
 const card = 'flex min-w-0 flex-col rounded-3xl border border-border bg-surface';
 
-/* The forecast's shape while the account loads */
+/* The forecast's shape while the budget loads */
 export const ForecastSkeleton = () => (
   <div aria-busy="true" aria-label="Forecast" className="contents">
     <span role="status" className="sr-only">

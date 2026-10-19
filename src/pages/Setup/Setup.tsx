@@ -25,7 +25,7 @@ import {
   summariseFirstCycle
 } from './setupModel';
 
-/* First-time setup: pay, balance and payments, saved as the account at the end */
+/* First-time setup: pay, balance and payments, saved as the budget at the end */
 export const Setup = () => {
   const setup = useSetup();
   const { values, step, showErrors, finished } = setup;

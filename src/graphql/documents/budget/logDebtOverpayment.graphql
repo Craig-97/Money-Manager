@@ -1,7 +1,7 @@
 # Pays extra off a debt today: it comes off the debt's balance and the bank balance
 mutation LogDebtOverpayment($input: LogDebtOverpaymentInput!) {
   logDebtOverpayment(input: $input) {
-    account {
+    budget {
       id
       bankBalance
       recurringPayments {

@@ -1,5 +1,5 @@
 import { PageName } from '~/app/routes/pageModules';
-import { useAccount } from '~/hooks/useAccount';
+import { useBudget } from '~/hooks/useBudget';
 import { useCurrentUser } from '~/hooks/useCurrentUser';
 import { usePayCycle } from '~/hooks/usePayCycle';
 import { useReminders } from '~/hooks/useReminders';
@@ -9,17 +9,17 @@ import { RecurringPayment, toPayments } from '~/lib/payments';
 
 /* The line under each of More's pages: what's left on the debts, how many notes, who's signed in */
 export const useMoreSubtitles = (): Partial<Record<PageName, string>> => {
-  const { account } = useAccount();
+  const { budget } = useBudget();
   const { user } = useCurrentUser();
-  const { today } = usePayCycle(account?.payday);
+  const { today } = usePayCycle(budget?.payday);
 
-  const debts = account
-    ? toPayments(account, today)
+  const debts = budget
+    ? toPayments(budget, today)
         .filter((payment): payment is RecurringPayment => payment.kind === 'recurring')
         .filter(isDebt)
     : [];
   const { months } = simulatePayoff(debts);
-  const notes = account?.notes?.length ?? 0;
+  const notes = budget?.notes?.length ?? 0;
   const { unread } = useReminders();
 
   return {

@@ -9,7 +9,7 @@ export const useBell = () => {
   const [open, setOpen] = useState(false);
   const reminders = useReminders();
   const actions = useReminderActions(reminders);
-  const openOf = useReminderOpen(reminders.accountId ?? '');
+  const openOf = useReminderOpen(reminders.budgetId ?? '');
 
   return {
     open,

@@ -1,8 +1,8 @@
 import { RefreshCw, TriangleAlert } from 'lucide-react';
 import { Button } from '~/components/ui/Button';
 
-/* When the account couldn't be loaded */
-export const AccountError = ({ onRetry }: { onRetry: () => void }) => (
+/* When the budget couldn't be loaded */
+export const BudgetError = ({ onRetry }: { onRetry: () => void }) => (
   <article
     role="alert"
     className="flex min-h-[520px] flex-col items-center justify-center gap-2 rounded-3xl border border-border bg-surface px-5 py-8 text-center md:px-6 md:py-10">

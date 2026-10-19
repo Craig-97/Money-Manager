@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Account } from '~/hooks/useAccount';
+import { Budget } from '~/hooks/useBudget';
 import { usePayCycle } from '~/hooks/usePayCycle';
 import { daysBetween } from '~/lib/dates';
 import { summarise, toPayments } from '~/lib/payments';
@@ -8,17 +8,17 @@ import { defaultSpend, monthRows, project, spendLimit } from '../forecastModel';
 export const ROWS_PER_PAGE = [6, 12, 24] as const;
 export type RowsPerPage = (typeof ROWS_PER_PAGE)[number];
 
-/* The forecast from the account: today's figures and where they're heading at a monthly spend */
-export const useForecast = (account: Account) => {
-  const { today, cycle, holidays } = usePayCycle(account.payday);
+/* The forecast from the budget: today's figures and where they're heading at a monthly spend */
+export const useForecast = (budget: Budget) => {
+  const { today, cycle, holidays } = usePayCycle(budget.payday);
   const summary = summarise({
-    payments: toPayments(account, today),
-    bankBalance: account.bankBalance,
-    monthlyIncome: account.monthlyIncome,
+    payments: toPayments(budget, today),
+    bankBalance: budget.bankBalance,
+    monthlyIncome: budget.monthlyIncome,
     cycle,
     today
   });
-  const income = account.monthlyIncome;
+  const income = budget.monthlyIncome;
   const recurring = summary.monthlyRecurring;
 
   const [spendChoice, setSpendChoice] = useState<number | null>(null);
@@ -29,14 +29,14 @@ export const useForecast = (account: Account) => {
   // Spending more than comes in is allowed, to see how quickly the balance runs down
   const spend = Math.max(0, spendChoice ?? defaultSpend(recurring));
   const projection = project({ start: summary.freeToSpend, income, spend, recurring });
-  const rows = account.payday
+  const rows = budget.payday
     ? monthRows({
         today,
         start: summary.freeToSpend,
         net: projection.net,
         income,
         afterPayday,
-        payday: account.payday,
+        payday: budget.payday,
         holidays
       })
     : [];
@@ -49,11 +49,11 @@ export const useForecast = (account: Account) => {
   return {
     today,
     cycle,
-    bankBalance: account.bankBalance,
+    bankBalance: budget.bankBalance,
     // "October 2027", the month the 12-month projection reaches
     yearLabel: inAYear.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }),
     summary,
-    payday: account.payday,
+    payday: budget.payday,
     income,
     recurring,
     spend,

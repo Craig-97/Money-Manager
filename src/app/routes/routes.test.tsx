@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { screen, waitFor } from '@testing-library/react';
 import { useAuthStore } from '~/state/auth';
-import { createFakeApi, DEFAULT_ACCOUNT, DEFAULT_USER } from '~/test/fakeApi';
+import { createFakeApi, DEFAULT_BUDGET, DEFAULT_USER } from '~/test/fakeApi';
 import { renderApp } from '~/test/renderApp';
 
 const findPageHeading = (name: string) => screen.findByRole('heading', { level: 1, name });
@@ -45,8 +45,8 @@ describe('routing', () => {
     expect(main.scrollTop).toBe(0);
   });
 
-  it('sends people without an account to setup', async () => {
-    renderApp({ route: '/dashboard', api: createFakeApi({ account: null }) });
+  it('sends people without a budget to setup', async () => {
+    renderApp({ route: '/dashboard', api: createFakeApi({ budget: null }) });
 
     expect(await findPageHeading('When do you get paid?')).toBeInTheDocument();
   });
@@ -63,11 +63,11 @@ describe('routing', () => {
     expect(await findPageHeading('Dashboard')).toBeInTheDocument();
   });
 
-  it('knows whether setup is finished from the session, without waiting on the account', async () => {
+  it('knows whether setup is finished from the session, without waiting on the budget', async () => {
     const { api } = renderApp({ route: '/dashboard' });
 
     await findPageHeading('Dashboard');
-    expect(api.calls.map(call => call.operationName)).toEqual(['Account']);
+    expect(api.calls.map(call => call.operationName)).toEqual(['Budget']);
   });
 
   it('brings the user back on a page load, keeping setup closed once it is finished', async () => {
@@ -88,9 +88,9 @@ describe('routing', () => {
     expect(await findPageHeading('Dashboard')).toBeInTheDocument();
   });
 
-  it('offers a retry when the account fails to load', async () => {
+  it('offers a retry when the budget fails to load', async () => {
     const api = createFakeApi();
-    api.failNext('Account', { code: 'INTERNAL_SERVER_ERROR' });
+    api.failNext('Budget', { code: 'INTERNAL_SERVER_ERROR' });
     const { user } = renderApp({ route: '/dashboard', api });
 
     await user.click(await screen.findByRole('button', { name: 'Try again' }));
@@ -113,7 +113,7 @@ describe('sessions', () => {
 
   it('ends the session and explains why when the API says the token expired', async () => {
     const api = createFakeApi();
-    api.failNext('Account', {
+    api.failNext('Budget', {
       code: 'UNAUTHENTICATED',
       extensions: { expired: true }
     });
@@ -126,7 +126,7 @@ describe('sessions', () => {
 
   it('swaps an expired token for a new one and carries on without signing out', async () => {
     const api = createFakeApi();
-    api.failNext('Account', {
+    api.failNext('Budget', {
       code: 'UNAUTHENTICATED',
       extensions: { expired: true }
     });
@@ -134,7 +134,7 @@ describe('sessions', () => {
       __typename: 'AuthData' as const,
       token: 'fresh-token',
       tokenExpiration: 1,
-      user: { ...DEFAULT_USER, account: DEFAULT_ACCOUNT.id, __typename: 'User' as const }
+      user: { ...DEFAULT_USER, budget: DEFAULT_BUDGET.id, __typename: 'User' as const }
     }));
     renderApp({ route: '/dashboard', api, refresh });
 

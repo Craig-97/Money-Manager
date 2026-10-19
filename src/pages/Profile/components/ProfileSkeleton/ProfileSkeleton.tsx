@@ -2,7 +2,7 @@ import { Skeleton } from '~/components/ui/Skeleton';
 
 const tile = 'flex min-w-0 flex-col gap-5 rounded-3xl border border-border bg-surface p-5 md:p-6';
 
-/* The profile's shape while the account loads */
+/* The profile's shape while the budget loads */
 export const ProfileSkeleton = () => (
   <div aria-busy="true" aria-label="Profile" className="contents">
     <span role="status" className="sr-only">

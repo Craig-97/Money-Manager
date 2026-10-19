@@ -17,11 +17,11 @@ export interface ReminderOpen {
  * alert does), open the note it's about, or start the new cycle on the dashboard. A renewal with a
  * note about it offers the note as well.
  */
-export const useReminderOpen = (accountId: string) => {
+export const useReminderOpen = (budgetId: string) => {
   const navigate = useNavigate();
   const openPayment = usePaymentDialogStore(s => s.openEdit);
   const openNote = useNoteDialogStore(s => s.openEdit);
-  const { pay } = usePaymentActions(accountId);
+  const { pay } = usePaymentActions(budgetId);
 
   return (reminder: Reminder): ReminderOpen | null => {
     const { payment } = reminder;

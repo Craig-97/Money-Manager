@@ -4,8 +4,8 @@ import { holdExitAnimations } from '~/test/exitAnimation';
 import {
   apiDate,
   createFakeApi,
-  DEFAULT_ACCOUNT,
-  FakeAccount,
+  DEFAULT_BUDGET,
+  FakeBudget,
   fakeRecord,
   FakeRecurringPayment
 } from '~/test/fakeApi';
@@ -124,15 +124,15 @@ const longPaidCard = (count: number) => {
   return { ...card(), history };
 };
 
-const account = (recurringPayments = [card(), car(), family()]): FakeAccount => ({
-  ...structuredClone(DEFAULT_ACCOUNT),
+const budget = (recurringPayments = [card(), car(), family()]): FakeBudget => ({
+  ...structuredClone(DEFAULT_BUDGET),
   cycleStartedOn: apiDate('2026-09-30'),
   oneOffPayments: [],
   recurringPayments
 });
 
 const renderDebts = (route = '/debts', payments?: FakeRecurringPayment[]) =>
-  renderApp({ route, api: createFakeApi({ account: account(payments) }) });
+  renderApp({ route, api: createFakeApi({ budget: budget(payments) }) });
 
 describe('debts on desktop', () => {
   it("shows what's left, how it's worked out, and what's due before payday", async () => {
@@ -278,7 +278,7 @@ describe('debts on desktop', () => {
       await screen.findByText('£200.00 paid off Credit card · off your balance')
     ).toBeInTheDocument();
     expect(api.callsTo('LogDebtOverpayment')).toEqual([
-      { input: { accountId: 'account-1', recurringPaymentId: 'credit-card', amount: 200 } }
+      { input: { budgetId: 'budget-1', recurringPaymentId: 'credit-card', amount: 200 } }
     ]);
     expect(screen.getByRole('article', { name: 'Left to pay' })).toHaveTextContent('£9,800.00');
     expect(screen.getByText('£200 paid off since payday')).toBeInTheDocument();

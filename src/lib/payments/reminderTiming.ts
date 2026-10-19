@@ -1,6 +1,6 @@
 /*
  * When a payment's reminders go off. Each payment has a timing for when it's due and one for when
- * it renews: off, a number of days before, or (no days) the account's usual timing.
+ * it renews: off, a number of days before, or (no days) the budget's usual timing.
  */
 
 export interface ReminderTiming {
@@ -21,7 +21,7 @@ export interface ReminderSettings {
 
 export const USUAL_TIMING: ReminderTiming = { off: false, days: null };
 
-// What a new account starts with, and what's assumed before the account has loaded
+// What a new budget starts with, and what's assumed before the budget has loaded
 export const DEFAULT_REMINDER_SETTINGS: ReminderSettings = {
   paymentDays: 1,
   renewalDays: 30,

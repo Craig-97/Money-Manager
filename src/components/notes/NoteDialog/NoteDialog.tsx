@@ -1,7 +1,7 @@
 import { Trash } from 'lucide-react';
 import { Button } from '~/components/ui/Button';
 import { Modal } from '~/components/ui/Modal';
-import { Account, useAccount } from '~/hooks/useAccount';
+import { Budget, useBudget } from '~/hooks/useBudget';
 import { useNoteActions } from '~/hooks/useNoteActions';
 import { usePayCycle } from '~/hooks/usePayCycle';
 import { cn } from '~/lib/cn';
@@ -15,8 +15,8 @@ import { useNoteDialog } from './useNoteDialog';
  * The recurring payments a note can be about, by name: "Car insurance · £612.00 a year", with
  * each one's next date and how often, for a note that follows it
  */
-const paymentOptions = (account: Account, today: Date): NotePaymentOption[] =>
-  toPayments(account, today)
+const paymentOptions = (budget: Budget, today: Date): NotePaymentOption[] =>
+  toPayments(budget, today)
     .flatMap(payment => (payment.kind === 'recurring' ? [payment] : []))
     .toSorted((a, b) => a.name.localeCompare(b.name))
     .map(payment => ({
@@ -33,13 +33,13 @@ const paymentOptions = (account: Account, today: Date): NotePaymentOption[] =>
  * The text box takes the note's colour. Ctrl/⌘+Enter saves; Escape closes, as any dialog.
  */
 export const NoteDialog = () => {
-  const { account } = useAccount();
-  const { today } = usePayCycle(account?.payday);
-  const actions = useNoteActions(account?.id ?? '');
-  const dialog = useNoteDialog({ notes: toNotes(account?.notes), actions });
+  const { budget } = useBudget();
+  const { today } = usePayCycle(budget?.payday);
+  const actions = useNoteActions(budget?.id ?? '');
+  const dialog = useNoteDialog({ notes: toNotes(budget?.notes), actions });
   const { draft, editing } = dialog;
 
-  if (!account) return null;
+  if (!budget) return null;
 
   return (
     <Modal
@@ -117,7 +117,7 @@ export const NoteDialog = () => {
       </div>
       <NotePaymentAndReminder
         draft={draft}
-        payments={paymentOptions(account, today)}
+        payments={paymentOptions(budget, today)}
         today={today}
       />
     </Modal>

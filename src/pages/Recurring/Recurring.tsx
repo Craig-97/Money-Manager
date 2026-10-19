@@ -1,13 +1,13 @@
 import { Repeat } from 'lucide-react';
-import { AccountError } from '~/components/feedback/AccountError';
+import { BudgetError } from '~/components/feedback/BudgetError';
 import { PageHeader } from '~/components/layout/PageHeader';
 import { Button } from '~/components/ui/Button';
-import { useAccount } from '~/hooks/useAccount';
+import { useBudget } from '~/hooks/useBudget';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
 import { RecurringContent, RecurringSkeleton } from './components';
 
 export const Recurring = () => {
-  const { account, loading, retry } = useAccount();
+  const { budget, loading, retry } = useBudget();
   const openAdd = usePaymentDialogStore(s => s.openAdd);
 
   return (
@@ -15,7 +15,7 @@ export const Recurring = () => {
       <PageHeader
         title="Recurring payments"
         actions={
-          account ? (
+          budget ? (
             <Button
               variant="accent"
               size="lg"
@@ -27,12 +27,12 @@ export const Recurring = () => {
           ) : null
         }
       />
-      {account ? (
-        <RecurringContent account={account} />
+      {budget ? (
+        <RecurringContent budget={budget} />
       ) : loading ? (
         <RecurringSkeleton />
       ) : (
-        <AccountError onRetry={retry} />
+        <BudgetError onRetry={retry} />
       )}
     </>
   );

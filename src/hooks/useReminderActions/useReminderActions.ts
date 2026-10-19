@@ -20,16 +20,16 @@ const showError = (error: unknown) =>
 const apiDay = (date: Date) => String(Date.parse(`${toApiDate(date)}T00:00:00Z`));
 
 interface Options {
-  accountId: string | null;
+  budgetId: string | null;
   states: ReminderStates;
   today: Date;
 }
 
 /*
  * What can be done with reminders: read, clear or put them away until later, each undoable, and
- * when they go off. Each change shows straight away and is saved to the account.
+ * when they go off. Each change shows straight away and is saved to the budget.
  */
-export const useReminderActions = ({ accountId, states, today }: Options) => {
+export const useReminderActions = ({ budgetId, states, today }: Options) => {
   const [updateReminders] = useMutation(UpdateRemindersDocument);
   const [updateSettings] = useMutation(UpdateReminderSettingsDocument);
   const [updateRecurring] = useMutation(UpdateRecurringPaymentDocument);
@@ -39,7 +39,7 @@ export const useReminderActions = ({ accountId, states, today }: Options) => {
     keys: string[],
     { action, until }: { action: ReminderAction; until?: Date }
   ) => {
-    if (!accountId || !keys.length) return false;
+    if (!budgetId || !keys.length) return false;
     // What each will be once saved, so it shows at once
     const optimistic = keys.map(key => {
       const state = states.get(key);
@@ -61,14 +61,14 @@ export const useReminderActions = ({ accountId, states, today }: Options) => {
     try {
       await updateReminders({
         variables: {
-          input: { accountId, keys, action, until: until ? toApiDate(until) : undefined }
+          input: { budgetId, keys, action, until: until ? toApiDate(until) : undefined }
         },
         optimisticResponse: {
           updateReminders: { __typename: 'ReminderStatesResponse', states: optimistic }
         },
         update: (cache, { data }) => {
           if (data)
-            addReminderStates(cache, { account: accountId, states: data.updateReminders.states });
+            addReminderStates(cache, { budget: budgetId, states: data.updateReminders.states });
         }
       });
       return true;
@@ -122,16 +122,16 @@ export const useReminderActions = ({ accountId, states, today }: Options) => {
 
     /* The usual timing, for anything without its own */
     changeSettings: async (changes: Partial<ReminderSettings>, current: ReminderSettings) => {
-      if (!accountId) return;
+      if (!budgetId) return;
       try {
         await updateSettings({
-          variables: { input: { accountId, ...changes } },
+          variables: { input: { budgetId, ...changes } },
           optimisticResponse: {
             updateReminderSettings: {
-              __typename: 'AccountResponse',
-              account: {
-                __typename: 'Account',
-                id: accountId,
+              __typename: 'BudgetResponse',
+              budget: {
+                __typename: 'Budget',
+                id: budgetId,
                 reminderSettings: { __typename: 'ReminderSettings', ...current, ...changes }
               }
             }

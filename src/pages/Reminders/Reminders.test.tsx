@@ -3,8 +3,8 @@ import { screen, within } from '@testing-library/react';
 import {
   apiDate,
   createFakeApi,
-  DEFAULT_ACCOUNT,
-  FakeAccount,
+  DEFAULT_BUDGET,
+  FakeBudget,
   FakeRecurringPayment
 } from '~/test/fakeApi';
 import { renderApp } from '~/test/renderApp';
@@ -32,8 +32,8 @@ const monthly = (fields: Partial<FakeRecurringPayment> & { id: string; name: str
 });
 
 // Spotify went by unpaid yesterday, energy is due tomorrow, and the MOT is in three weeks
-const account = (): FakeAccount => ({
-  ...structuredClone(DEFAULT_ACCOUNT),
+const budget = (): FakeBudget => ({
+  ...structuredClone(DEFAULT_BUDGET),
   recurringPayments: [
     monthly({ id: 'spotify', name: 'Spotify', nextDueDate: apiDate('2026-10-01') }),
     monthly({
@@ -62,8 +62,8 @@ const account = (): FakeAccount => ({
   cycleStartedOn: apiDate('2026-09-30')
 });
 
-const renderReminders = (route = '/reminders', data = account()) => {
-  const api = createFakeApi({ account: data });
+const renderReminders = (route = '/reminders', data = budget()) => {
+  const api = createFakeApi({ budget: data });
   return { ...renderApp({ route, api }), api };
 };
 
@@ -88,7 +88,7 @@ describe('reminders page', () => {
     expect(within(list).queryByRole('button', { name: /^Clear: Spotify/ })).not.toBeInTheDocument();
   });
 
-  it('clears a reminder on the account, with undo', async () => {
+  it('clears a reminder on the budget, with undo', async () => {
     const { user, api } = renderReminders();
 
     await user.click(
@@ -97,7 +97,7 @@ describe('reminders page', () => {
 
     expect(screen.queryByText('Energy is due tomorrow')).not.toBeInTheDocument();
     expect(api.callsTo('UpdateReminders')).toEqual([
-      { input: { accountId: 'account-1', keys: ['due:energy:2026-10-03'], action: 'CLEAR' } }
+      { input: { budgetId: 'budget-1', keys: ['due:energy:2026-10-03'], action: 'CLEAR' } }
     ]);
     await user.click(await screen.findByRole('button', { name: 'Undo' }));
 
@@ -117,7 +117,7 @@ describe('reminders page', () => {
     expect(api.callsTo('UpdateReminders')).toEqual([
       {
         input: {
-          accountId: 'account-1',
+          budgetId: 'budget-1',
           keys: ['overdue:spotify:2026-10-01'],
           action: 'LATER',
           until: '2026-10-03'
@@ -178,7 +178,7 @@ describe('reminders page', () => {
 
     expect(within(timing).getByRole('radio', { name: '3 days before' })).toBeChecked();
     expect(api.callsTo('UpdateReminderSettings')).toEqual([
-      { input: { accountId: 'account-1', paymentDays: 3 } }
+      { input: { budgetId: 'budget-1', paymentDays: 3 } }
     ]);
   });
 });

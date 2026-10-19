@@ -2,14 +2,14 @@ import { Skeleton } from '~/components/ui/Skeleton';
 
 const tileClasses = 'rounded-3xl border border-border bg-surface';
 
-/* The recurring page's shape while the account loads */
+/* The recurring page's shape while the budget loads */
 export const RecurringSkeleton = () => (
   <section
     aria-busy="true"
     aria-label="Recurring payments"
     className="flex flex-col gap-3.5 md:gap-4">
     <span role="status" className="sr-only">
-      Loading your account
+      Loading your budget
     </span>
 
     <article

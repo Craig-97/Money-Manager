@@ -1,6 +1,6 @@
-mutation ResetCalendarFeed($accountId: ID!) {
-  resetCalendarFeed(accountId: $accountId) {
-    account {
+mutation ResetCalendarFeed($budgetId: ID!) {
+  resetCalendarFeed(budgetId: $budgetId) {
+    budget {
       id
       calendarFeed {
         ...CalendarFeedFields

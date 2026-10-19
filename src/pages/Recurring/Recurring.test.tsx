@@ -3,8 +3,8 @@ import { screen, within } from '@testing-library/react';
 import {
   apiDate,
   createFakeApi,
-  DEFAULT_ACCOUNT,
-  FakeAccount,
+  DEFAULT_BUDGET,
+  FakeBudget,
   FakeRecurringPayment
 } from '~/test/fakeApi';
 import { renderApp } from '~/test/renderApp';
@@ -36,8 +36,8 @@ const recurring = (
   ...fields
 });
 
-const account = (): FakeAccount => ({
-  ...structuredClone(DEFAULT_ACCOUNT),
+const budget = (): FakeBudget => ({
+  ...structuredClone(DEFAULT_BUDGET),
   cycleStartedOn: apiDate('2026-09-30'),
   oneOffPayments: [],
   recurringPayments: [
@@ -82,8 +82,8 @@ const account = (): FakeAccount => ({
   ]
 });
 
-const renderRecurring = (data = account()) => {
-  const api = createFakeApi({ account: data });
+const renderRecurring = (data = budget()) => {
+  const api = createFakeApi({ budget: data });
   return { ...renderApp({ route: '/recurring', api }), api };
 };
 
@@ -176,7 +176,7 @@ describe('recurring page', () => {
 
   it('keeps the category legend the same height on its last, shorter page', async () => {
     // A fifth category makes two pages of four beside the renewals
-    const data = account();
+    const data = budget();
     data.recurringPayments.push(
       recurring({ id: 'gym', name: 'Gym', amount: 34, category: 'MEMBERSHIP' })
     );

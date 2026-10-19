@@ -1,6 +1,6 @@
 mutation UpdateCalendarFeed($input: UpdateCalendarFeedInput!) {
   updateCalendarFeed(input: $input) {
-    account {
+    budget {
       id
       calendarFeed {
         ...CalendarFeedFields

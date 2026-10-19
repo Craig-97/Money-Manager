@@ -1,6 +1,6 @@
 # Everything the signed-in pages show. Payments and notes are separate entities in the cache,
 # so a mutation that returns one updates every page that shows it.
-fragment AccountFields on Account {
+fragment BudgetFields on Budget {
   id
   bankBalance
   monthlyIncome

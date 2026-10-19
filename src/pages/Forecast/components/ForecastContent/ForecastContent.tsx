@@ -1,14 +1,14 @@
 import { MEDIA } from '~/constants';
-import { Account } from '~/hooks/useAccount';
+import { Budget } from '~/hooks/useBudget';
 import { useMediaQuery } from '~/hooks/useMediaQuery';
 import { useForecast } from '../../hooks';
 import { ProjectionChart } from '../chart';
 import { KeyFigures, MobileKeyFigures, SpendCard } from '../figures';
 import { MonthTable } from '../table';
 
-/* The forecast once the account has loaded. Only one layout is rendered. */
-export const ForecastContent = ({ account }: { account: Account }) => {
-  const forecast = useForecast(account);
+/* The forecast once the budget has loaded. Only one layout is rendered. */
+export const ForecastContent = ({ budget }: { budget: Budget }) => {
+  const forecast = useForecast(budget);
   const isDesktop = useMediaQuery(MEDIA.desktop);
 
   return isDesktop ? (

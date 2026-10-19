@@ -157,21 +157,21 @@ const toOneOffPayment = (
   dueReminderDays: reminderDays(payment.dueReminder, settings.paymentDays)
 });
 
-interface AccountPayments {
+interface BudgetPayments {
   recurringPayments?: (RecurringPaymentFieldsFragment | null)[] | null;
   oneOffPayments?: (OneOffPaymentFieldsFragment | null)[] | null;
   // The usual reminder timing, for payments that follow it
   reminderSettings?: ReminderSettings | null;
 }
 
-/* Both kinds of payment on the account as one list */
-export const toPayments = (account: AccountPayments, today: Date): Payment[] => {
-  const settings = account.reminderSettings ?? DEFAULT_REMINDER_SETTINGS;
+/* Both kinds of payment on the budget as one list */
+export const toPayments = (budget: BudgetPayments, today: Date): Payment[] => {
+  const settings = budget.reminderSettings ?? DEFAULT_REMINDER_SETTINGS;
   return [
-    ...(account.recurringPayments ?? [])
+    ...(budget.recurringPayments ?? [])
       .filter(payment => payment !== null)
       .map(payment => toRecurringPayment(payment, { today, settings })),
-    ...(account.oneOffPayments ?? [])
+    ...(budget.oneOffPayments ?? [])
       .filter(payment => payment !== null)
       .map(payment => toOneOffPayment(payment, settings))
   ];
