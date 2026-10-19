@@ -85,7 +85,7 @@ export const RecurringRow = ({
         {beforePayday ? (
           <StatusTag payment={payment} cycle={cycle} />
         ) : renewal ? (
-          <RenewalTag renewal={renewal} today={today} />
+          <RenewalTag renewal={renewal} today={today} short />
         ) : (
           <span className="text-sm text-faint">—</span>
         )}

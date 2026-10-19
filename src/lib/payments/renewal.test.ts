@@ -5,6 +5,7 @@ import {
   Renewal,
   renewalNote,
   renewalOf,
+  renewalDay,
   renewalTag,
   renewalWhen,
   renewalWindow
@@ -111,6 +112,13 @@ describe('renewal labels', () => {
     );
     expect(renewalTag({ ...renewal(30), date: day('2026-11-01') }, TODAY)).toBe('Renews 1 Nov');
     expect(renewalTag(renewal(-4, { passed: true }), TODAY)).toBe('Needs renewing');
+  });
+
+  it('says when it renews without "Renews" for the Renewal column', () => {
+    expect(renewalDay(renewal(22, { soon: true }), TODAY)).toBe('In 22 days');
+    expect(renewalDay(renewal(0, { soon: true }), TODAY)).toBe('Today');
+    expect(renewalDay({ ...renewal(30), date: day('2026-11-01') }, TODAY)).toBe('1 Nov');
+    expect(renewalDay(renewal(-4, { passed: true }), TODAY)).toBe('Needs renewing');
   });
 
   it('says how far off it is in days, weeks, months or years', () => {

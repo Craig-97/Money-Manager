@@ -123,7 +123,8 @@ describe('recurring page', () => {
     expect(screen.getByRole('radio', { name: /Renewals/ })).toBeChecked();
     const table = screen.getByRole('table', { name: 'Recurring payments' });
     expect(within(table).queryByRole('button', { name: 'Edit Netflix' })).not.toBeInTheDocument();
-    // In its column, and under the name for narrower screens
+    // Under its column heading without "Renews", and in full under the name for narrower screens
+    expect(within(table).getAllByText('In 22 days')).not.toHaveLength(0);
     expect(within(table).getAllByText('Renews in 22 days')).not.toHaveLength(0);
     expect(within(table).getByText('3 payments · renewing')).toBeInTheDocument();
   });

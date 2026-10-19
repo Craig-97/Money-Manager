@@ -55,17 +55,24 @@ export const renewalOf = (payment: RecurringPayment, today: Date): Renewal | nul
   };
 };
 
-/* "Renews in 22 days", "Renews 19 Jan", "Needs renewing" */
-export const renewalTag = (renewal: Renewal, today: Date) => {
+/* For the Renewal column, whose heading says what it is: "In 22 days", "19 Jan", "Needs renewing" */
+export const renewalDay = (renewal: Renewal, today: Date) => {
   if (renewal.passed) return 'Needs renewing';
   if (!renewal.soon) {
     const year =
       renewal.date.getFullYear() === today.getFullYear() ? '' : ` ${renewal.date.getFullYear()}`;
-    return `Renews ${formatDayMonth(renewal.date)}${year}`;
+    return `${formatDayMonth(renewal.date)}${year}`;
   }
-  if (renewal.days === 0) return 'Renews today';
-  if (renewal.days === 1) return 'Renews tomorrow';
-  return `Renews in ${renewal.days} days`;
+  if (renewal.days === 0) return 'Today';
+  if (renewal.days === 1) return 'Tomorrow';
+  return `In ${renewal.days} days`;
+};
+
+/* "Renews in 22 days", "Renews 19 Jan", "Needs renewing" */
+export const renewalTag = (renewal: Renewal, today: Date) => {
+  if (renewal.passed) return 'Needs renewing';
+  const day = renewalDay(renewal, today);
+  return `Renews ${day.charAt(0).toLowerCase()}${day.slice(1)}`;
 };
 
 /* An alert's heading: "Car insurance renews in 22 days", or "Breakdown cover has renewed" */
