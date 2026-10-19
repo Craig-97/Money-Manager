@@ -113,6 +113,20 @@ const demoBudget = (scenario: string | null): FakeBudget => {
         nextDueDate: fromToday(272),
         thisCycle: [],
         renewalDate: null
+      },
+      {
+        id: 'isa-top-up',
+        name: 'ISA top-up',
+        amount: 250,
+        category: 'SAVINGS',
+        frequency: 'MONTHLY',
+        type: 'EXPENSE',
+        firstPaymentDate: fromToday(-180),
+        lastPaymentDate: null,
+        nextDueDate: fromToday(3),
+        thisCycle: [],
+        renewalDate: null,
+        paysInto: 'isa'
       }
     ],
     oneOffPayments: [

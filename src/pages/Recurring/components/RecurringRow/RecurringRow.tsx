@@ -24,12 +24,13 @@ export const RecurringRow = ({
   payment: RecurringPayment;
   recurring: Recurring;
 }) => {
-  const { tab, today, cycle, selection, actions } = recurring;
+  const { tab, today, cycle, selection, actions, intoText } = recurring;
   const openEdit = usePaymentDialogStore(s => s.openEdit);
   // Before payday is about what's left to pay, so it shows where each payment stands this cycle.
   // Renewals have their own tab.
   const beforePayday = tab === 'cycle';
   const renewal = beforePayday ? null : renewalOf(payment, today);
+  const into = intoText(payment);
   const isSelected = selection.selected.has(payment.id);
   const checkboxId = `recurring-${payment.id}`;
 
@@ -61,6 +62,8 @@ export const RecurringRow = ({
           <div className="mt-0.5 flex items-center gap-2 text-xs font-medium text-muted">
             {isDebt(payment) ? (
               <DebtLeft debt={payment} />
+            ) : into ? (
+              <span className="min-w-0">{into}</span>
             ) : (
               <span className="truncate">{categoryLabel(payment.category)}</span>
             )}

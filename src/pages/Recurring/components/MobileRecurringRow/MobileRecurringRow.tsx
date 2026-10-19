@@ -22,16 +22,22 @@ import { RecurringTab } from '../../recurringModel';
 /*
  * The line under the name, as the dashboard's mobile rows have it: how often, then before payday
  * where it stands this cycle ("Weekly · 1 of 4 paid"), otherwise its renewal ("Monthly · Renews
- * 2 Feb 2027"), or its category when it doesn't renew
+ * 2 Feb 2027"), otherwise the savings it pays into ("Monthly · Into Cash ISA"), or its category
  */
 const subtitle = (
   payment: RecurringPayment,
-  { tab, cycle, today }: { tab: RecurringTab; cycle: PayCycle; today: Date }
+  {
+    tab,
+    cycle,
+    today,
+    into
+  }: { tab: RecurringTab; cycle: PayCycle; today: Date; into: string | null }
 ) => {
   const frequency = FREQUENCY_LABELS[payment.frequency];
   if (tab === 'cycle') return `${frequency} · ${cycleStatus(payment, cycle).label}`;
   const renewal = renewalOf(payment, today);
-  return `${frequency} · ${renewal ? renewalTag(renewal, today) : categoryLabel(payment.category)}`;
+  const detail = renewal ? renewalTag(renewal, today) : (into ?? categoryLabel(payment.category));
+  return `${frequency} · ${detail}`;
 };
 
 /*
@@ -45,7 +51,7 @@ export const MobileRecurringRow = ({
   payment: RecurringPayment;
   recurring: Recurring;
 }) => {
-  const { tab, today, cycle, selection } = recurring;
+  const { tab, today, cycle, selection, intoText } = recurring;
   const { selecting, toggle } = selection;
   const openEdit = usePaymentDialogStore(s => s.openEdit);
   const due = dueInfo(payment, { today, cycle });
@@ -94,7 +100,7 @@ export const MobileRecurringRow = ({
           ) : (
             <span className="mt-[3px] flex min-w-0 items-center gap-[5px] text-xs font-medium text-muted">
               <Repeat size={12} strokeWidth={2.25} className="shrink-0" aria-hidden="true" />
-              <span>{subtitle(payment, { tab, cycle, today })}</span>
+              <span>{subtitle(payment, { tab, cycle, today, into: intoText(payment) })}</span>
             </span>
           )}
         </span>

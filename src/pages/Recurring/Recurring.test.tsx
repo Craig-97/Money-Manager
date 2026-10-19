@@ -82,6 +82,30 @@ const budget = (): FakeBudget => ({
   ]
 });
 
+// An ISA top-up paid into a Cash ISA
+const withSavings = (): FakeBudget => {
+  const data = budget();
+  return {
+    ...data,
+    accounts: [
+      {
+        id: 'isa',
+        name: 'Cash ISA',
+        kind: 'SAVINGS',
+        balance: 8650,
+        counts: false,
+        interestRate: 4.5,
+        purpose: null,
+        balanceUpdatedAt: apiDate('2026-09-30')
+      }
+    ],
+    recurringPayments: [
+      ...data.recurringPayments,
+      recurring({ id: 'top-up', name: 'ISA top-up', amount: 250, paysInto: 'isa' })
+    ]
+  };
+};
+
 const renderRecurring = (data = budget()) => {
   const api = createFakeApi({ budget: data });
   return { ...renderApp({ route: '/recurring', api }), api };
@@ -193,6 +217,16 @@ describe('recurring page', () => {
     // One category, and room kept for three more
     expect(within(tile).getAllByRole('listitem')).toHaveLength(1);
     expect(rows()).toHaveLength(4);
+  });
+
+  it('says which savings account a payment goes into, in place of its category', async () => {
+    renderRecurring(withSavings());
+
+    const row = (await screen.findByRole('button', { name: 'Edit ISA top-up' })).closest(
+      '[role=row]'
+    )!;
+    expect(row).toHaveTextContent('Into Cash ISA');
+    expect(row).not.toHaveTextContent('Subscription');
   });
 
   it('sets a renewal on a payment', async () => {
@@ -322,6 +356,14 @@ describe('recurring page on mobile', () => {
     expect(await row('Netflix')).toContain('Monthly · Unpaid');
     // Its 30 September date was before it was added, so it counts as paid, as on the dashboard
     expect(await row('Cleaner')).toContain('Weekly · 1 of 5 paid');
+  });
+
+  it('says which savings account a payment goes into', async () => {
+    renderRecurring(withSavings());
+
+    expect(await screen.findByRole('button', { name: 'Edit ISA top-up' })).toHaveTextContent(
+      'Monthly · Into Cash ISA'
+    );
   });
 
   it('steps the sort through date, amount and name', async () => {

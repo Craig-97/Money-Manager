@@ -4,7 +4,7 @@ import { usePayCycle } from '~/hooks/usePayCycle';
 import { usePaymentActions } from '~/hooks/usePaymentActions';
 import { usePaymentSelection } from '~/hooks/usePaymentSelection';
 import { isDebt } from '~/lib/debts';
-import { canPay, DEFAULT_SORT, PaymentSort, toPayments } from '~/lib/payments';
+import { canPay, DEFAULT_SORT, PaymentSort, RecurringPayment, toPayments } from '~/lib/payments';
 import {
   ALL_CATEGORIES,
   categoriesUsed,
@@ -33,6 +33,7 @@ export const useRecurring = (budget: Budget) => {
   const payments = recurringOnly(toPayments(budget, today));
   const listed = filterPayments(payments, { tab, query, category, cycle, today, sort });
   const selection = usePaymentSelection(listed);
+  const accountNames = new Map(budget.accounts.map(account => [account.id, account.name]));
 
   // Changing what's listed clears the ticks, so nothing out of sight gets acted on
   const narrow =
@@ -49,6 +50,11 @@ export const useRecurring = (budget: Budget) => {
     payments,
     // The ones paying off a loan or card, for the Debts card
     debts: payments.filter(isDebt),
+    // "Into Cash ISA" for a payment into savings, shown in place of its category
+    intoText: (payment: RecurringPayment) => {
+      const name = payment.paysInto ? accountNames.get(payment.paysInto) : undefined;
+      return name ? `Into ${name}` : null;
+    },
     isEmpty: payments.length === 0,
     totals: listTotals(payments, { cycle, today }),
     renewals: upcomingRenewals(payments, { today }),
