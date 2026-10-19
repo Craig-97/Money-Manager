@@ -202,6 +202,11 @@ const isUnchanged = (values: PaymentFormValues, before: PaymentFormValues) =>
   values.tracked === before.tracked &&
   sameDebt(values, before);
 
+const sameSchedule = (values: PaymentFormValues, before: PaymentFormValues) =>
+  values.frequency === before.frequency &&
+  values.first === before.first &&
+  sameEnding(values, before);
+
 export interface SummaryRow {
   label: string;
   value: string;
@@ -555,6 +560,12 @@ export const usePaymentForm = ({
       values,
       today
     }),
+    // Editing, the status strip already says when it's next due, so the summary only shows once the
+    // schedule changes. A debt's always shows, for when it'd be paid off.
+    showSummary:
+      !payment ||
+      values.tracked ||
+      !sameSchedule(values, initialValues({ kind, payment, today, asDebt })),
     // The choices for each reminder, saying what the usual timing is
     reminderOptions: {
       due: timingOptions({ days: PAYMENT_REMINDER_DAYS, usual: settings.paymentDays }),

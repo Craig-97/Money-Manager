@@ -14,11 +14,16 @@ import { RecurringEnding } from '../RecurringEnding';
 import { TrackAsDebt } from '../TrackAsDebt';
 
 const pairClasses = 'grid gap-3.5 max-md:grid-cols-2 max-md:gap-2.5 min-[35rem]:grid-cols-2';
+// Side by side in the desktop dialog only; the mobile sheet stacks them
+const desktopPairClasses = 'grid gap-[inherit] md:grid-cols-2 md:gap-3.5';
+// The name gets the wider half
+const nameAmountClasses = 'grid gap-[inherit] md:grid-cols-[3fr_2fr] md:gap-3.5';
 
 /*
- * The payment's fields: type, name, amount and category, then its date or schedule. A recurring
- * expense can be tracked as a debt, which is always money out and ends when it's paid off, or pay
- * into one of the budget's savings accounts, but not both.
+ * The payment's fields: name and amount, type and category, then its date or schedule. On desktop
+ * each pair shares a row, so the dialog isn't so tall. A recurring expense can be tracked as a
+ * debt, which is always money out and ends when it's paid off, or pay into one of the budget's
+ * savings accounts, but not both.
  */
 export const FormBody = ({ form, kind }: { form: PaymentForm; kind: Payment['kind'] }) => {
   const { values, set, touch, errors } = form;
@@ -51,7 +56,6 @@ export const FormBody = ({ form, kind }: { form: PaymentForm; kind: Payment['kin
       {errors.amount ? <FieldError id="payment-amount-error">{errors.amount}</FieldError> : null}
     </div>
   );
-  // Recurring payments ask for it straight after the amount, one-offs at the end
   const categoryField = (
     <div>
       <Label tone="muted" htmlFor="payment-category">
@@ -68,47 +72,53 @@ export const FormBody = ({ form, kind }: { form: PaymentForm; kind: Payment['kin
 
   return (
     <>
-      {debt ? null : <PaymentTypeToggle value={values.type} onChange={type => set('type', type)} />}
-
-      <div>
-        <Label tone="muted" htmlFor="payment-name">
-          Name
-        </Label>
-        <TextInput
-          id="payment-name"
-          value={values.name}
-          onChange={event => set('name', event.target.value)}
-          onBlur={() => touch('name')}
-          placeholder={
-            debt
-              ? 'e.g. Credit card'
-              : kind === 'recurring'
-                ? 'e.g. Spotify'
-                : 'e.g. Concert tickets'
-          }
-          autoComplete="off"
-          invalid={!!errors.name}
-          aria-describedby={errors.name ? 'payment-name-error' : undefined}
-        />
-        {errors.name ? <FieldError id="payment-name-error">{errors.name}</FieldError> : null}
+      <div className={nameAmountClasses}>
+        <div>
+          <Label tone="muted" htmlFor="payment-name">
+            Name
+          </Label>
+          <TextInput
+            id="payment-name"
+            value={values.name}
+            onChange={event => set('name', event.target.value)}
+            onBlur={() => touch('name')}
+            placeholder={
+              debt
+                ? 'e.g. Credit card'
+                : kind === 'recurring'
+                  ? 'e.g. Spotify'
+                  : 'e.g. Concert tickets'
+            }
+            autoComplete="off"
+            invalid={!!errors.name}
+            aria-describedby={errors.name ? 'payment-name-error' : undefined}
+          />
+          {errors.name ? <FieldError id="payment-name-error">{errors.name}</FieldError> : null}
+        </div>
+        {amountField}
       </div>
 
-      {kind === 'oneOff' ? (
-        <>
-          <div className={pairClasses}>
-            {amountField}
-            <div>
-              <Label tone="muted" htmlFor="payment-date">
-                Due date
-              </Label>
-              <DatePicker
-                id="payment-date"
-                value={values.date}
-                onChange={date => set('date', date)}
-              />
-            </div>
-          </div>
+      {debt ? (
+        categoryField
+      ) : (
+        <div className={desktopPairClasses}>
+          <PaymentTypeToggle value={values.type} onChange={type => set('type', type)} />
           {categoryField}
+        </div>
+      )}
+
+      {kind === 'oneOff' ? (
+        <div className={desktopPairClasses}>
+          <div>
+            <Label tone="muted" htmlFor="payment-date">
+              Due date
+            </Label>
+            <DatePicker
+              id="payment-date"
+              value={values.date}
+              onChange={date => set('date', date)}
+            />
+          </div>
           <div>
             <Label tone="muted" htmlFor="payment-due-reminder">
               Remind me before it’s due
@@ -120,11 +130,9 @@ export const FormBody = ({ form, kind }: { form: PaymentForm; kind: Payment['kin
               options={form.reminderOptions.due}
             />
           </div>
-        </>
+        </div>
       ) : (
         <>
-          {amountField}
-          {categoryField}
           {canTrack ? (
             <TrackAsDebt checked={values.tracked} onCheckedChange={on => set('tracked', on)} />
           ) : null}

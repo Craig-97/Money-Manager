@@ -106,7 +106,7 @@ export const RecurringEnding = ({ form }: { form: PaymentForm }) => {
         ) : null}
       </div>
 
-      <ScheduleSummary rows={summary.rows} message={summary.message} />
+      {form.showSummary ? <ScheduleSummary rows={summary.rows} message={summary.message} /> : null}
       {form.renewalMoved ? (
         <p className="-mt-1.5 ml-1 text-xs font-semibold text-muted">
           Check the amount above is your new price.
