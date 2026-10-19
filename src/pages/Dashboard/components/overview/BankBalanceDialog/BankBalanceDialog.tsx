@@ -43,10 +43,10 @@ export const BankBalanceDialog = ({ dialog, today }: { dialog: Dialog; today: Da
       {dialog.rows.map(({ account, value, setValue }) => (
         <div
           key={account.id}
-          className="flex items-center gap-3 rounded-[18px] border border-border bg-surface-2 py-2.5 pr-2.5 pl-3">
+          className="flex items-center gap-2.5 rounded-[18px] border border-border bg-surface-2 py-2.5 pr-2.5 pl-3.5 md:gap-3 md:pl-3">
           <span
             aria-hidden="true"
-            className="inline-flex size-9 shrink-0 items-center justify-center rounded-xl border border-border bg-surface text-sm font-extrabold">
+            className="hidden size-9 shrink-0 items-center justify-center rounded-xl border border-border bg-surface text-sm font-extrabold md:inline-flex">
             {accountLetter(account)}
           </span>
           <span className="flex min-w-0 grow flex-col gap-0.5">
@@ -65,7 +65,7 @@ export const BankBalanceDialog = ({ dialog, today }: { dialog: Dialog; today: Da
             id={`balance-${account.id}`}
             value={value}
             onChange={event => setValue(event.target.value)}
-            className="w-[136px] shrink-0 md:w-[150px]"
+            boxClassName="w-[148px] shrink-0 md:w-[168px]"
           />
         </div>
       ))}

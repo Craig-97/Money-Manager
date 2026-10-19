@@ -36,7 +36,8 @@ const demoBudget = (scenario: string | null): FakeBudget => {
         name: 'Easy access',
         kind: 'SAVINGS',
         balance: 4200,
-        counts: false,
+        // Counted in the accounts scenario, so the bank balance opens as a dialog
+        counts: scenario === 'accounts',
         interestRate: 4.1,
         purpose: null,
         balanceUpdatedAt: fromToday(-9)

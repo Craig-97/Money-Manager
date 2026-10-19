@@ -72,7 +72,7 @@ export const SavingsCheck = ({ prompt, number }: { prompt: PaydayPrompt; number:
                     id={`payday-savings-${row.account.id}`}
                     value={row.value}
                     onChange={event => row.setValue(event.target.value)}
-                    className="w-[128px] shrink-0 md:w-[150px]"
+                    boxClassName="w-[148px] shrink-0 md:w-[168px]"
                   />
                 </div>
               ))}
