@@ -66,7 +66,7 @@ const jointBill = (
   category: 'UTILITIES',
   frequency: 'MONTHLY',
   type: 'EXPENSE',
-  firstPaymentDate: fromToday(due - 120),
+  firstPaymentDate: fromToday(due),
   lastPaymentDate: null,
   nextDueDate: fromToday(due),
   thisCycle: [],

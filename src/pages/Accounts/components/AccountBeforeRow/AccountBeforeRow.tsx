@@ -3,7 +3,8 @@ import { AlertTriangle, ChevronDown } from 'lucide-react';
 import { AccountBeforePayday, accountLetter, goesBelowZero } from '~/lib/accounts';
 import { cn } from '~/lib/cn';
 import { formatBalance, formatMoney, formatPayment } from '~/lib/format';
-import { categoryLabel, formatShortDate } from '~/lib/payments';
+import { categoryLabel, formatShortDate, FREQUENCY_LABELS } from '~/lib/payments';
+import { DateBox } from '../DateBox';
 import { PaidIntoTag } from '../PaidIntoTag';
 
 interface AccountBeforeRowProps {
@@ -13,14 +14,25 @@ interface AccountBeforeRowProps {
   isDesktop: boolean;
 }
 
-// The line under a payment: what it's for, and the account at the other end of money moving
-const detailsOf = (item: AccountBeforePayday['movements'][number]) =>
+type Item = AccountBeforePayday['movements'][number];
+
+// The line under a payment: how often, what it's for, and the account at the other end of money
+// moving. "Monthly · Utilities · To Joint bills"
+const detailsOf = (item: Item) =>
   [
-    item.payment.kind === 'oneOff' ? 'One-off' : categoryLabel(item.payment.category),
-    item.other ? (item.amount < 0 ? `Into ${item.other.name}` : `From ${item.other.name}`) : null
+    item.payment.kind === 'oneOff' ? 'One-off' : FREQUENCY_LABELS[item.payment.frequency],
+    categoryLabel(item.payment.category),
+    item.other ? (item.amount < 0 ? `To ${item.other.name}` : `From ${item.other.name}`) : null
   ]
     .filter(Boolean)
     .join(' · ');
+
+// A recurring expense that doesn't say which account it goes out of yet
+const unchosen = (item: Item) =>
+  item.payment.kind === 'recurring' &&
+  item.payment.type === 'EXPENSE' &&
+  item.amount < 0 &&
+  !item.payment.account;
 
 /*
  * One account to spend from, before payday: its balance, what goes out and what's left, then its
@@ -145,60 +157,108 @@ export const AccountBeforeRow = ({ row, today, several, isDesktop }: AccountBefo
         </button>
       </h3>
 
-      <div id={listId} role="region" aria-label={`${account.name} before payday`} hidden={!open}>
-        <div className={cn('flex flex-col pb-3', isDesktop && 'pl-[52px]')}>
-          {below && lowest ? (
-            <p className="mx-2 mb-2 flex items-start gap-2.5 rounded-[18px] bg-warn-bg px-3.5 py-3 text-[13px] font-semibold text-warn">
+      <div
+        id={listId}
+        role="region"
+        aria-label={`${account.name} before payday`}
+        hidden={!open}
+        className={isDesktop ? 'pr-4 pb-4 pl-[60px]' : 'px-2.5 pb-3'}>
+        <div className="flex flex-col gap-1.5">
+          {lowest && below ? (
+            <p className="mb-1 flex items-start gap-2.5 rounded-2xl bg-warn-bg px-3.5 py-3 text-[13px] leading-[1.45] font-semibold text-warn">
               <AlertTriangle size={16} className="mt-px shrink-0" aria-hidden="true" />
               <span>
-                Goes below £0 on {formatShortDate(lowest.date, today)}{' '}
-                <span className="whitespace-nowrap">({formatBalance(lowest.amount)}).</span> Move
-                money in before then.
+                <b>
+                  Goes below £0 on {formatShortDate(lowest.date, today)}{' '}
+                  <span className="whitespace-nowrap">({formatBalance(lowest.amount)}).</span>
+                </b>{' '}
+                Move money in before then.
               </span>
             </p>
           ) : null}
           {row.movements.length || row.onPayday.length ? (
-            <>
+            <ul className="flex flex-col">
               {row.movements.map(item => (
-                <div key={item.key} className="flex items-center gap-3 rounded-xl px-2 py-2">
-                  <span className="w-[74px] shrink-0 text-xs font-semibold text-muted">
-                    {formatShortDate(item.date, today)}
-                  </span>
-                  <span className="flex min-w-0 flex-1 flex-col">
-                    <span className="text-sm font-bold [overflow-wrap:anywhere]">
-                      {item.payment.name}
+                <li
+                  key={item.key}
+                  className={cn(
+                    'flex items-center',
+                    isDesktop ? 'min-h-16 gap-3.5 py-1.5' : 'min-h-[60px] gap-3 py-1.5'
+                  )}>
+                  <DateBox date={item.date} compact={!isDesktop} />
+                  <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                    <span className="flex flex-wrap items-center gap-2">
+                      <span
+                        className={cn(
+                          'font-bold [overflow-wrap:anywhere]',
+                          isDesktop ? 'text-[15px]' : 'text-sm'
+                        )}>
+                        {item.payment.name}
+                      </span>
+                      {several && unchosen(item) ? (
+                        <span className="inline-flex h-5 items-center rounded-full bg-warn-bg px-2 text-[10px] font-bold whitespace-nowrap text-warn md:h-[22px] md:text-[11px]">
+                          Account not chosen
+                        </span>
+                      ) : null}
                     </span>
-                    <span className="text-xs font-semibold text-muted">{detailsOf(item)}</span>
+                    <span className="text-xs leading-[1.35] font-semibold text-muted">
+                      {detailsOf(item)}
+                    </span>
                   </span>
                   <span
                     className={cn(
-                      'num text-sm font-extrabold whitespace-nowrap',
+                      'shrink-0 num font-extrabold whitespace-nowrap',
+                      isDesktop ? 'w-[130px] text-right text-[15px]' : 'text-sm',
                       item.amount < 0 ? 'text-expense' : 'text-income'
                     )}>
                     {formatPayment(item.amount)}
                   </span>
-                </div>
+                  {isDesktop ? <span aria-hidden="true" className="w-8 shrink-0" /> : null}
+                </li>
               ))}
               {row.onPayday.map(item => (
-                <div
+                <li
                   key={item.key}
-                  className="flex items-center gap-3 rounded-xl px-2 py-2 text-muted">
-                  <span className="w-[74px] shrink-0 text-xs font-semibold">Next cycle</span>
-                  <span className="flex min-w-0 flex-1 flex-col">
-                    <span className="text-sm font-bold [overflow-wrap:anywhere]">
+                  className={cn(
+                    'mt-1.5 flex items-center border-t border-dashed border-border-strong pt-3',
+                    isDesktop ? 'gap-3.5' : 'gap-3'
+                  )}>
+                  <DateBox date={item.date} accent compact={!isDesktop} />
+                  <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                    <span
+                      className={cn(
+                        'font-bold [overflow-wrap:anywhere]',
+                        isDesktop ? 'text-[15px]' : 'text-sm'
+                      )}>
                       {item.payment.name}
                     </span>
-                    <span className="text-xs font-semibold">On payday · {detailsOf(item)}</span>
+                    <span className="text-xs leading-[1.35] font-semibold text-muted">
+                      {detailsOf(item)}
+                    </span>
                   </span>
-                  <span className="num text-sm font-extrabold whitespace-nowrap">
-                    {formatPayment(item.amount)}
+                  <span
+                    className={cn(
+                      'flex shrink-0 flex-col items-end gap-1',
+                      isDesktop && 'w-[130px]'
+                    )}>
+                    <span
+                      className={cn(
+                        'num font-extrabold whitespace-nowrap text-muted',
+                        isDesktop ? 'text-[15px]' : 'text-sm'
+                      )}>
+                      {formatPayment(item.amount)}
+                    </span>
+                    <span className="inline-flex h-5 items-center rounded-full border border-border bg-surface-2 px-2 text-[10px] font-bold whitespace-nowrap text-muted">
+                      Next cycle
+                    </span>
                   </span>
-                </div>
+                  {isDesktop ? <span aria-hidden="true" className="w-8 shrink-0" /> : null}
+                </li>
               ))}
-            </>
+            </ul>
           ) : (
-            <p className="px-2 py-2 text-sm font-medium text-muted">
-              Nothing goes out before payday.
+            <p className="text-[13px] font-semibold text-muted">
+              Nothing goes out of this account before payday.
             </p>
           )}
         </div>

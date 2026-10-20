@@ -47,18 +47,20 @@ export const AccountRow = ({ account, today, several, onCounts }: AccountRowProp
           {accountLetter(account)}
         </span>
         <div className="min-w-0">
-          <button
-            type="button"
-            aria-label={`Edit ${account.name}`}
-            aria-haspopup="dialog"
-            onClick={() => openEdit(account.id)}
-            className="-my-[11px] block max-w-full cursor-pointer rounded-lg py-[11px] text-left text-[15px] leading-[22px] font-bold [overflow-wrap:anywhere] hover:text-accent-text hover:underline hover:underline-offset-3">
-            {account.name}
-          </button>
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <button
+              type="button"
+              aria-label={`Edit ${account.name}`}
+              aria-haspopup="dialog"
+              onClick={() => openEdit(account.id)}
+              className="-my-[11px] block max-w-full cursor-pointer rounded-lg py-[11px] text-left text-[15px] leading-[22px] font-bold [overflow-wrap:anywhere] hover:text-accent-text hover:underline hover:underline-offset-3">
+              {account.name}
+            </button>
+            {several && account.paidInto ? <PaidIntoTag /> : null}
+          </div>
           <p className="mt-0.5 text-xs font-semibold text-muted">
             {accountMeta(account, { several })}
           </p>
-          {several && account.paidInto ? <PaidIntoTag className="mt-1.5" /> : null}
           <div className="mt-1.5 wide:hidden">{updated}</div>
         </div>
       </div>
