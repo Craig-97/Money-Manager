@@ -33,9 +33,12 @@ export const StatusStrip = ({ payment, today, cycle, budgetId }: StatusStripProp
           `${days < 0 ? 'overdue since' : status.tone === 'paid' || status.tone === 'skipped' ? 'next due' : 'due'} ${formatShortDate(payment.dueDate!, today)}`;
   const text =
     status.tone === 'ended' ? 'Ended · no upcoming date' : `${status.label} · ${dueText}`;
+  const skipNext = recurring && choices.skipNext ? choices.skipNext : null;
+  const hasActions = !!(skipNext || choices.pay || choices.undo);
 
   return (
-    <div className="flex flex-col gap-2.5 rounded-[22px] border border-border bg-surface-2 p-3 md:flex-row md:items-center md:gap-2 md:rounded-[28px] md:py-1.5 md:pr-1.5 md:pl-[18px]">
+    // With no buttons it keeps the height it has with one, so the strip doesn't shrink on desktop
+    <div className="flex flex-col gap-2.5 rounded-[22px] border border-border bg-surface-2 p-3 md:min-h-[58px] md:flex-row md:items-center md:gap-2 md:rounded-[28px] md:py-1.5 md:pr-1.5 md:pl-[18px]">
       <div className="flex min-w-0 flex-1 items-center gap-2.5 px-1 md:px-0">
         <span
           aria-hidden="true"
@@ -52,34 +55,36 @@ export const StatusStrip = ({ payment, today, cycle, budgetId }: StatusStripProp
         />
         <span className="text-sm leading-[1.3] font-bold">{text}</span>
       </div>
-      <div className="flex gap-2">
-        {recurring && choices.skipNext ? (
-          <Button
-            variant="ghost"
-            onClick={() => void skip(recurring)}
-            className="flex-1 bg-surface-2 text-[13px] text-text max-md:border-border md:flex-none md:bg-transparent md:px-3.5 md:text-muted">
-            <SkipForward size={15} aria-hidden="true" />
-            {choices.skipNext}
-          </Button>
-        ) : null}
-        {choices.pay ? (
-          <Button
-            variant="solid"
-            onClick={() => void pay([payment])}
-            className="flex-1 text-[13px] md:flex-none md:px-3.5">
-            <Check size={15} strokeWidth={2.5} aria-hidden="true" />
-            {choices.pay}
-          </Button>
-        ) : choices.undo ? (
-          <Button
-            variant="solid"
-            onClick={() => void undo(payment)}
-            className="flex-1 text-[13px] md:flex-none md:px-3.5">
-            <Undo2 size={15} aria-hidden="true" />
-            {choices.undo}
-          </Button>
-        ) : null}
-      </div>
+      {hasActions ? (
+        <div className="flex gap-2">
+          {recurring && skipNext ? (
+            <Button
+              variant="ghost"
+              onClick={() => void skip(recurring)}
+              className="flex-1 bg-surface-2 text-[13px] text-text max-md:border-border md:flex-none md:bg-transparent md:px-3.5 md:text-muted">
+              <SkipForward size={15} aria-hidden="true" />
+              {skipNext}
+            </Button>
+          ) : null}
+          {choices.pay ? (
+            <Button
+              variant="solid"
+              onClick={() => void pay([payment])}
+              className="flex-1 text-[13px] md:flex-none md:px-3.5">
+              <Check size={15} strokeWidth={2.5} aria-hidden="true" />
+              {choices.pay}
+            </Button>
+          ) : choices.undo ? (
+            <Button
+              variant="solid"
+              onClick={() => void undo(payment)}
+              className="flex-1 text-[13px] md:flex-none md:px-3.5">
+              <Undo2 size={15} aria-hidden="true" />
+              {choices.undo}
+            </Button>
+          ) : null}
+        </div>
+      ) : null}
     </div>
   );
 };

@@ -5,7 +5,7 @@ import { DebtFields } from '../DebtFields';
 /*
  * The recurring form's card for a payment that's paying off a loan or card: a switch, and once
  * it's on, the debt's balance, rate and starting balance inside it. Opened from Debts it's always
- * a debt, so the card has no switch.
+ * a debt, so the card has no switch. Once tracked, the hint reads as it does there.
  */
 export const TrackAsDebt = ({ form }: { form: PaymentForm }) => {
   const { values, set, asDebt } = form;
@@ -23,7 +23,8 @@ export const TrackAsDebt = ({ form }: { form: PaymentForm }) => {
           <span
             id="payment-track-debt-hint"
             className="text-xs leading-[1.4] font-semibold text-muted">
-            {asDebt
+            {/* Once it's a debt, the same line Debts shows */}
+            {values.tracked
               ? 'Used for the payoff date on Debts'
               : 'For loans and cards. Shows it on Debts with a payoff date'}
           </span>

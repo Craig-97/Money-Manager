@@ -61,8 +61,8 @@ export const PaymentDialog = () => {
       ? isDesktop
         ? 'Add a payment'
         : 'What are you adding?'
-      : asDebt && !editing
-        ? 'Add a debt'
+      : asDebt
+        ? `${editing ? 'Edit' : 'Add a'} debt`
         : `${editing ? 'Edit' : 'Add'} ${kind === 'recurring' ? 'recurring' : 'one-off'} payment`;
   const submitLabel = editing ? 'Save changes' : asDebt ? 'Add debt' : 'Add payment';
 
