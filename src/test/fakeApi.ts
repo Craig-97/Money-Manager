@@ -820,7 +820,7 @@ export const createFakeApi = ({
           name: account.name,
           kind: spending ? 'SPENDING' : 'SAVINGS',
           balance: account.balance,
-          counts: spending || (account.counts ?? false),
+          counts: account.counts ?? spending,
           paidInto: false,
           interestRate: account.interestRate ?? null,
           purpose: account.purpose ?? null,
@@ -853,7 +853,7 @@ export const createFakeApi = ({
         name: input.name.trim(),
         kind: spending ? 'SPENDING' : 'SAVINGS',
         balance: input.balance,
-        counts: spending || (input.counts ?? false),
+        counts: input.counts ?? spending,
         paidInto: false,
         interestRate: input.interestRate ?? null,
         purpose: input.purpose?.trim() || null,
@@ -862,7 +862,7 @@ export const createFakeApi = ({
       current.accounts = [...(current.accounts ?? []), account];
       return { account, budget: current, success: true };
     },
-    // As the API: spending accounts always count; making one where pay lands moves it from the
+    // As the API: where pay lands always counts; making one where pay lands moves it from the
     // other; one made savings sends its expenses back to where pay lands
     updateAccount: ({ id, input }: Args) => {
       const current = requireBudget();
@@ -875,11 +875,8 @@ export const createFakeApi = ({
           message: 'Only a spending account can be where you get paid'
         });
       }
-      if (kind === 'SPENDING' && input.counts === false) {
-        throw apiError('SPENDING_ALWAYS_COUNTS', {
-          message: 'A spending account always counts in free to spend'
-        });
-      }
+      const paidIntoNext = before.paidInto || input.paidInto === true;
+      if (paidIntoNext && input.counts === false) throw paidIntoFixed('kept out of free to spend');
       if (input.paidInto) {
         for (const account of current.accounts ?? []) account.paidInto = account.id === id;
       }
@@ -896,12 +893,14 @@ export const createFakeApi = ({
       }
       const account = findSavings(id);
       const becameSavings = account.kind === 'SPENDING' && kind === 'SAVINGS';
+      const becameSpending = account.kind === 'SAVINGS' && kind === 'SPENDING';
       account.kind = kind;
       if (input.name !== undefined) account.name = input.name.trim();
       if (input.balance !== undefined) setBalanceOf(id, input.balance);
-      if (kind === 'SPENDING') account.counts = true;
+      if (paidIntoNext) account.counts = true;
       else if (input.counts !== undefined) account.counts = input.counts;
       else if (becameSavings) account.counts = false;
+      else if (becameSpending) account.counts = true;
       if (input.interestRate !== undefined) account.interestRate = input.interestRate;
       if (input.purpose !== undefined) account.purpose = input.purpose?.trim() || null;
       if (becameSavings) {

@@ -12,9 +12,10 @@ import { useReminderChooserStore } from '~/state/reminderChooser';
 import { useSetupAccountsStore } from '~/state/setupAccounts';
 import { installMatchMedia, resetViewport } from './viewport';
 
-// Component tests render the whole app, so give async queries (findBy*, waitFor) more time
-// than the 1s default; they otherwise fail intermittently when test files run in parallel
-configure({ asyncUtilTimeout: 5000 });
+// Component tests render the whole app, so give async queries (findBy*, waitFor) more time than
+// the 1s default. The first test in a file also waits for its page's code to load, which can take
+// several seconds when every file runs at once; the test itself still times out at 15 seconds.
+configure({ asyncUtilTimeout: 10000 });
 
 const noop = () => undefined;
 

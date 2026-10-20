@@ -7,7 +7,7 @@ import { TextInput } from '~/components/form/TextInput';
 import { Payment } from '~/lib/payments';
 import { FREQUENCY_OPTIONS, ONE_OFF_OPTIONS, RECURRING_OPTIONS } from '../../paymentOptions';
 import { PaymentForm } from '../../usePaymentForm';
-import { DebtFields } from '../DebtFields';
+import { DebtEnding } from '../DebtEnding';
 import { FromAccount } from '../FromAccount';
 import { PaymentTypeToggle } from '../PaymentTypeToggle';
 import { PaysInto } from '../PaysInto';
@@ -17,15 +17,16 @@ import { TrackAsDebt } from '../TrackAsDebt';
 const pairClasses = 'grid gap-3.5 max-md:grid-cols-2 max-md:gap-2.5 min-[35rem]:grid-cols-2';
 // Side by side in the desktop dialog only; the mobile sheet stacks them
 const desktopPairClasses = 'grid gap-[inherit] md:grid-cols-2 md:gap-3.5';
-// The name gets the wider half
-const nameAmountClasses = 'grid gap-[inherit] md:grid-cols-[3fr_2fr] md:gap-3.5';
+// The name gets the wider part
+const nameAmountClasses =
+  'grid gap-[inherit] md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] md:gap-3.5';
 
 /*
  * The payment's fields: name and amount, type and category, then its date or schedule. On desktop
  * each pair shares a row, so the dialog isn't so tall. With more than one account to spend from,
  * it says which one it goes out of (or an income lands in). A recurring expense can be tracked as
- * a debt, which is always money out and ends when it's paid off, or move money into another of the
- * budget's accounts, but not both.
+ * a debt, with its balance and rate in the switch's card, which is always money out and ends when
+ * it's paid off, or move money into another of the budget's accounts, but not both.
  */
 export const FormBody = ({ form, kind }: { form: PaymentForm; kind: Payment['kind'] }) => {
   const { values, set, touch, errors } = form;
@@ -41,7 +42,7 @@ export const FormBody = ({ form, kind }: { form: PaymentForm; kind: Payment['kin
     form.choices.targets.length > 0;
   // From Debts it's always a debt; otherwise only an expense can be one, and not one into savings
   const canTrack =
-    kind === 'recurring' && !form.asDebt && !paysInto && (values.type === 'EXPENSE' || debt);
+    kind === 'recurring' && (form.asDebt || (!paysInto && (values.type === 'EXPENSE' || debt)));
   const amountField = (
     <div>
       <Label tone="muted" htmlFor="payment-amount">
@@ -89,7 +90,7 @@ export const FormBody = ({ form, kind }: { form: PaymentForm; kind: Payment['kin
               debt
                 ? 'e.g. Credit card'
                 : kind === 'recurring'
-                  ? 'e.g. Spotify'
+                  ? 'e.g. Car insurance'
                   : 'e.g. Concert tickets'
             }
             autoComplete="off"
@@ -138,9 +139,7 @@ export const FormBody = ({ form, kind }: { form: PaymentForm; kind: Payment['kin
         </div>
       ) : (
         <>
-          {canTrack ? (
-            <TrackAsDebt checked={values.tracked} onCheckedChange={on => set('tracked', on)} />
-          ) : null}
+          {canTrack ? <TrackAsDebt form={form} /> : null}
           {canPayInto ? <PaysInto form={form} /> : null}
           <div className={pairClasses}>
             <div>
@@ -165,7 +164,7 @@ export const FormBody = ({ form, kind }: { form: PaymentForm; kind: Payment['kin
               />
             </div>
           </div>
-          {debt ? <DebtFields form={form} /> : <RecurringEnding form={form} />}
+          {debt ? <DebtEnding form={form} /> : <RecurringEnding form={form} />}
         </>
       )}
     </>

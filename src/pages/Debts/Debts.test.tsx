@@ -298,7 +298,7 @@ describe('debts on desktop', () => {
     await user.click(screen.getByRole('menuitem', { name: 'Update balance' }));
 
     const dialog = await screen.findByRole('dialog', { name: 'Edit recurring payment' });
-    await waitFor(() => expect(within(dialog).getByLabelText('Balance now')).toHaveFocus());
+    await waitFor(() => expect(within(dialog).getByLabelText('Balance left')).toHaveFocus());
     // From Debts it's always a debt
     expect(within(dialog).queryByRole('switch')).not.toBeInTheDocument();
   });

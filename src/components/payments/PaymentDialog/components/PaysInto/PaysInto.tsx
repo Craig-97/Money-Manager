@@ -3,6 +3,7 @@ import { Select } from '~/components/form/Select';
 import { Switch } from '~/components/ui/Switch';
 import { isSpending } from '~/lib/accounts';
 import { formatMoney, parseMoney } from '~/lib/format';
+import { targetDescription } from '../../paymentAccounts';
 import { PaymentForm } from '../../usePaymentForm';
 
 /*
@@ -45,7 +46,11 @@ export const PaysInto = ({ form }: { form: PaymentForm }) => {
               id="payment-pays-into-account"
               value={into.id}
               onValueChange={id => set('paysInto', id)}
-              options={targets.map(account => ({ value: account.id, label: account.name }))}
+              options={targets.map(account => ({
+                value: account.id,
+                label: account.name,
+                description: targetDescription(account)
+              }))}
               className="bg-surface"
             />
           </div>

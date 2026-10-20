@@ -48,7 +48,7 @@ describe('adding a recurring payment as a debt', () => {
     const dialog = await screen.findByRole('dialog', { name: 'Add recurring payment' });
     const track = within(dialog).getByRole('switch', { name: 'Track as a debt' });
     expect(track).not.toBeChecked();
-    expect(within(dialog).queryByRole('group', { name: 'Debt details' })).not.toBeInTheDocument();
+    expect(within(dialog).queryByLabelText('Balance left')).not.toBeInTheDocument();
 
     await user.type(within(dialog).getByLabelText('Name'), 'Personal loan');
     await user.type(within(dialog).getByLabelText('Amount'), '100');
@@ -63,14 +63,15 @@ describe('adding a recurring payment as a debt', () => {
       'Paid offShown once you add the balance'
     );
 
-    const details = within(dialog).getByRole('group', { name: 'Debt details' });
-    await user.type(within(details).getByLabelText('Balance now'), '1200');
-    await user.type(within(details).getByLabelText('APR'), '0');
+    // The debt's figures are in the switch's card
+    const details = within(dialog).getByRole('group', { name: 'Track as a debt' });
+    await user.type(within(details).getByLabelText('Balance left'), '1200');
+    await user.type(within(details).getByLabelText('Interest (APR)'), '0');
     expect(within(dialog).getByRole('status')).toHaveTextContent(
       'Paid offAbout Oct 2027 at £100 a month'
     );
 
-    await user.click(within(dialog).getByRole('button', { name: 'Add debt' }));
+    await user.click(within(dialog).getByRole('button', { name: 'Add payment' }));
 
     expect(await screen.findByText('Added Personal loan')).toBeInTheDocument();
     expect(api.callsTo('CreateRecurringPayment')).toEqual([
@@ -107,8 +108,8 @@ describe('adding a recurring payment as a debt', () => {
     const dialog = await screen.findByRole('dialog', { name: 'Add recurring payment' });
     await user.type(within(dialog).getByLabelText('Amount'), '5');
     await user.click(within(dialog).getByRole('switch', { name: 'Track as a debt' }));
-    await user.type(within(dialog).getByLabelText('Balance now'), '1200');
-    await user.type(within(dialog).getByLabelText('APR'), '12');
+    await user.type(within(dialog).getByLabelText('Balance left'), '1200');
+    await user.type(within(dialog).getByLabelText('Interest (APR)'), '12');
 
     expect(within(dialog).getByRole('status')).toHaveTextContent(
       "Not at £5 a month: it doesn't cover the interest"
@@ -162,7 +163,7 @@ describe('paying into savings', () => {
     expect(within(dialog).getByRole('combobox', { name: 'Into' })).toHaveTextContent('Cash ISA');
     expect(dialog).toHaveTextContent('When it’s marked paid, £250.00 is added to Cash ISA.');
 
-    await user.click(within(dialog).getByRole('button', { name: 'Add recurring payment' }));
+    await user.click(within(dialog).getByRole('button', { name: 'Add payment' }));
 
     expect(await screen.findByText('Added ISA top-up')).toBeInTheDocument();
     expect(api.callsTo('CreateRecurringPayment')).toEqual([
@@ -245,9 +246,16 @@ describe('several accounts to spend from', () => {
     await user.click(within(dialog).getByRole('combobox', { name: 'From' }));
     // Only accounts to spend from
     expect(screen.queryByRole('option', { name: 'Cash ISA' })).not.toBeInTheDocument();
-    await user.click(await screen.findByRole('option', { name: 'Joint bills' }));
+    // Each says what kind of account it is and its balance
+    expect(await screen.findByRole('option', { name: 'Joint bills' })).toHaveTextContent(
+      'Joint billsSpending · £2,105.00'
+    );
+    expect(screen.getByRole('option', { name: 'Current account' })).toHaveTextContent(
+      /Where you get paid · £/
+    );
+    await user.click(screen.getByRole('option', { name: 'Joint bills' }));
     expect(dialog).toHaveTextContent('Comes off Joint bills when it’s marked paid');
-    await user.click(within(dialog).getByRole('button', { name: 'Add recurring payment' }));
+    await user.click(within(dialog).getByRole('button', { name: 'Add payment' }));
 
     expect(await screen.findByText('Added Energy')).toBeInTheDocument();
     expect(api.callsTo('CreateRecurringPayment')).toEqual([
@@ -266,6 +274,13 @@ describe('several accounts to spend from', () => {
       'Joint bills counts in free to spend, so this only moves money between your accounts. It’s left out of your monthly totals.'
     );
     expect(within(dialog).getByLabelText('Category')).toBeInTheDocument();
+    // The summary says where it goes
+    expect(within(dialog).getByRole('status')).toHaveTextContent('IntoJoint bills');
+
+    await user.click(within(dialog).getByRole('combobox', { name: 'Into' }));
+    expect(await screen.findByRole('option', { name: 'Cash ISA' })).toHaveTextContent(
+      'Savings · £8,650.00 · kept out of free to spend'
+    );
   });
 
   it('lands an income in an account', async () => {
@@ -301,17 +316,17 @@ describe('adding a debt from Debts', () => {
     expect(within(dialog).getByRole('button', { name: 'Add debt' })).toBeDisabled();
 
     // What's owed and the rate are needed for the payoff date
-    await user.click(within(dialog).getByLabelText('Balance now'));
-    await user.click(within(dialog).getByLabelText('APR'));
-    await user.type(within(dialog).getByLabelText('APR'), '120');
+    await user.click(within(dialog).getByLabelText('Balance left'));
+    await user.click(within(dialog).getByLabelText('Interest (APR)'));
+    await user.type(within(dialog).getByLabelText('Interest (APR)'), '120');
     await user.tab();
     expect(within(dialog).getByText('Enter what you owe now')).toBeInTheDocument();
     expect(within(dialog).getByText('Enter a rate from 0 to 100%')).toBeInTheDocument();
 
-    await user.type(within(dialog).getByLabelText('Balance now'), '600');
-    await user.clear(within(dialog).getByLabelText('APR'));
-    await user.type(within(dialog).getByLabelText('APR'), '29.9');
-    await user.type(within(dialog).getByLabelText('Started at'), '900');
+    await user.type(within(dialog).getByLabelText('Balance left'), '600');
+    await user.clear(within(dialog).getByLabelText('Interest (APR)'));
+    await user.type(within(dialog).getByLabelText('Interest (APR)'), '29.9');
+    await user.type(within(dialog).getByLabelText('Starting balance'), '900');
     await user.click(within(dialog).getByRole('button', { name: 'Add debt' }));
 
     expect(await screen.findByText('Added Store card')).toBeInTheDocument();
@@ -333,12 +348,12 @@ describe('editing a debt', () => {
     const dialog = await screen.findByRole('dialog', { name: 'Edit recurring payment' });
 
     expect(within(dialog).getByRole('switch', { name: 'Track as a debt' })).toBeChecked();
-    expect(within(dialog).getByLabelText('Balance now')).toHaveValue('6,860.00');
-    expect(within(dialog).getByLabelText('APR')).toHaveValue('6.9');
-    expect(within(dialog).getByLabelText('Started at')).toHaveValue('12,000.00');
+    expect(within(dialog).getByLabelText('Balance left')).toHaveValue('6,860.00');
+    expect(within(dialog).getByLabelText('Interest (APR)')).toHaveValue('6.9');
+    expect(within(dialog).getByLabelText('Starting balance')).toHaveValue('12,000.00');
 
-    await user.clear(within(dialog).getByLabelText('Balance now'));
-    await user.type(within(dialog).getByLabelText('Balance now'), '6500');
+    await user.clear(within(dialog).getByLabelText('Balance left'));
+    await user.type(within(dialog).getByLabelText('Balance left'), '6500');
     await user.click(within(dialog).getByRole('button', { name: 'Save changes' }));
 
     expect(await screen.findByText('Saved Car finance')).toBeInTheDocument();

@@ -265,6 +265,27 @@ const demoBudget = (scenario: string | null): FakeBudget => {
       oneOffPayments: [...budget.oneOffPayments, ...demoHolidayPayments()]
     };
   }
+  if (scenario === 'payday') {
+    // A second account to spend from, with a bill left over from last cycle out of it and its
+    // top-up due today, so the prompt shows which account each goes out of
+    return {
+      ...budget,
+      accounts: [demoSpendingAccounts()[0], ...(budget.accounts ?? [])],
+      recurringPayments: [
+        ...budget.recurringPayments,
+        jointBill('energy', { name: 'Energy', amount: 120, due: -3, account: 'joint' }),
+        {
+          ...jointBill('joint-top-up', {
+            name: 'Joint bills top-up',
+            amount: 600,
+            due: 0,
+            account: null
+          }),
+          paysInto: 'joint'
+        }
+      ]
+    };
+  }
   if (scenario === 'reminders') {
     return {
       ...budget,

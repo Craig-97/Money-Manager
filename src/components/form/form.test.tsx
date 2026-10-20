@@ -119,7 +119,8 @@ describe('DatePicker', () => {
     render(<ControlledDatePicker initial="2026-10-28" />);
     const trigger = screen.getByRole('button', { name: 'Due date' });
 
-    expect(trigger).toHaveTextContent('Wed 28 Oct 2026');
+    // This year's dates leave the year off, so they fit a half-width field
+    expect(trigger).toHaveTextContent(/^Wed 28 Oct$/);
 
     await user.click(trigger);
     expect(await screen.findByText('October 2026')).toBeInTheDocument();
@@ -127,7 +128,7 @@ describe('DatePicker', () => {
     await user.click(screen.getByRole('button', { name: 'Thursday, 15 October 2026' }));
 
     expect(screen.getByRole('status')).toHaveTextContent('2026-10-15');
-    expect(trigger).toHaveTextContent('Thu 15 Oct 2026');
+    expect(trigger).toHaveTextContent(/^Thu 15 Oct$/);
     expect(screen.queryByText('October 2026')).not.toBeInTheDocument();
   });
 

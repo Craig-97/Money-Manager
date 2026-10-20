@@ -202,7 +202,7 @@ describe('dashboard', () => {
 
     expect(within(dialog).getByText('Enter a name')).toBeInTheDocument();
     expect(within(dialog).getByText('Enter an amount above £0')).toBeInTheDocument();
-    expect(within(dialog).getByRole('button', { name: 'Add recurring payment' })).toBeDisabled();
+    expect(within(dialog).getByRole('button', { name: 'Add payment' })).toBeDisabled();
   });
 
   it('edits the bank balance in place', async () => {
@@ -477,10 +477,16 @@ describe('payday prompt', () => {
     const dialog = await screen.findByRole('dialog', { name: 'It’s payday' });
     // Netflix comes out of Joint bills, so only the income goes on here
     expect(within(dialog).getByLabelText(/Confirm your current account/)).toHaveValue('3,500.00');
-    await user.click(within(dialog).getByRole('button', { name: /Update your other accounts/ }));
+    // With two accounts to spend from, each payment says which it goes out of
+    expect(dialog).toHaveTextContent('From Joint bills · was due');
+    // Another account to spend from, so the last step starts open
+    expect(
+      within(dialog).getByRole('button', { name: /Update your other accounts/ })
+    ).toHaveAttribute('aria-expanded', 'true');
+    expect(dialog).toHaveTextContent('SpendingCounts in free to spend');
     const joint = within(dialog).getByLabelText('Joint bills');
     expect(joint).toHaveValue('2,085.00');
-    expect(dialog).toHaveTextContent('£20.00 gone out');
+    expect(dialog).toHaveTextContent('After £20.00 of bills · updated today');
     await user.click(within(dialog).getByRole('button', { name: 'Start new cycle' }));
 
     expect(await within(dialog).findByText('New cycle started')).toBeInTheDocument();
@@ -537,7 +543,10 @@ describe('payday prompt', () => {
 
     // August's £20 and today's £20
     expect(within(dialog).getByLabelText(/Confirm your current account/)).toHaveValue('3,460.00');
-    expect(dialog).toHaveTextContent('Projected: £1,000 + £2,500 income − £40 gone out.');
+    // From the balance with last cycle's Netflix taken off, then today's
+    expect(dialog).toHaveTextContent(
+      'Projected: £980.00 + £2,500.00 pay − £20.00 gone out. Adjust if your bank says otherwise.'
+    );
     await user.click(within(dialog).getByRole('button', { name: 'Start new cycle' }));
 
     expect(await within(dialog).findByText('New cycle started')).toBeInTheDocument();
@@ -590,6 +599,41 @@ describe('payday prompt', () => {
     expect(api.callsTo('StartPaydayCycle')).toEqual([
       { input: expect.objectContaining({ accountBalances: [] }) }
     ]);
+  });
+
+  it('moves a ticked top-up into another account to spend from', async () => {
+    const data = paydayBudget();
+    data.accounts = [
+      {
+        id: 'joint',
+        name: 'Joint bills',
+        kind: 'SPENDING',
+        balance: 2105,
+        counts: true,
+        interestRate: null,
+        purpose: null,
+        balanceUpdatedAt: apiDateFromToday(0)
+      }
+    ];
+    data.recurringPayments[0] = {
+      ...data.recurringPayments[0],
+      name: 'Joint bills top-up',
+      paysInto: 'joint'
+    };
+    const { user } = renderDashboard(data);
+
+    const dialog = await screen.findByRole('dialog', { name: 'It’s payday' });
+    expect(
+      within(dialog).getByText('From Current account into Joint bills · due today')
+    ).toBeInTheDocument();
+    await user.click(within(dialog).getByRole('checkbox', { name: /Joint bills top-up/ }));
+
+    expect(dialog).toHaveTextContent('The £20.00 is added to Joint bills.');
+    expect(dialog).toHaveTextContent('− £20.00 to Joint bills');
+    expect(dialog).toHaveTextContent('With the £40.00 top-up');
+    await user.click(within(dialog).getByRole('button', { name: 'Start new cycle' }));
+
+    expect(await within(dialog).findByText(/£40.00 moved to Joint bills/)).toBeInTheDocument();
   });
 
   it('can be skipped and shown again', async () => {

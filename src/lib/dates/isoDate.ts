@@ -24,4 +24,6 @@ export const toIsoDate = (date: Date) =>
   ].join('-');
 
 /* "Fri 2 Oct 2026", as the design's date fields show it */
-export const formatPickerDate = (date: Date) => formatShortDay(date, { withYear: true });
+// The year only when it isn't this one, so the date fits a half-width field on a phone
+export const formatPickerDate = (date: Date, today = new Date()) =>
+  formatShortDay(date, { withYear: date.getFullYear() !== today.getFullYear() });

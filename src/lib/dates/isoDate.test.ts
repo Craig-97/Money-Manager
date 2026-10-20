@@ -23,6 +23,7 @@ describe('ISO dates', () => {
   });
 
   it('formats like the design date fields', () => {
-    expect(formatPickerDate(new Date(2026, 9, 2))).toBe('Fri 2 Oct 2026');
+    expect(formatPickerDate(new Date(2026, 9, 2), new Date(2026, 0, 1))).toBe('Fri 2 Oct');
+    expect(formatPickerDate(new Date(2027, 1, 2), new Date(2026, 0, 1))).toBe('Tue 2 Feb 2027');
   });
 });

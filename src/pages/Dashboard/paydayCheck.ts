@@ -126,28 +126,96 @@ export const leftOverNote = (
   return `${formatMoney(paidOff.reduction)} off what you owe, after ${formatMoney(paidOff.interest)} interest`;
 };
 
-/* "Monthly · was due Mon 26 Oct", or "Weekly · 3 dates from Mon 5 Oct" */
-export const leftOverDetail = ({ payment, dates }: LeftOver, today: Date) => {
-  const frequency = payment.debt ? 'Debt' : FREQUENCY_LABELS[payment.frequency];
+/*
+ * "Monthly · was due Mon 26 Oct", or "Weekly · 3 dates from Mon 5 Oct". With more than one account
+ * to spend from it names the account instead: "From Everyday · was due Wed 21 Oct", and for a debt
+ * "Debt · from Everyday · was due Thu 15 Oct".
+ */
+export const leftOverDetail = (
+  { payment, dates }: LeftOver,
+  { today, fromName = null }: { today: Date; fromName?: string | null }
+) => {
+  const kind = fromName
+    ? payment.debt
+      ? `Debt · from ${fromName}`
+      : `From ${fromName}`
+    : payment.debt
+      ? 'Debt'
+      : FREQUENCY_LABELS[payment.frequency];
   return dates.length === 1
-    ? `${frequency} · was due ${formatShortDate(dates[0], today)}`
-    : `${frequency} · ${dates.length} dates from ${formatShortDate(dates[0], today)}`;
+    ? `${kind} · was due ${formatShortDate(dates[0], today)}`
+    : `${kind} · ${dates.length} dates from ${formatShortDate(dates[0], today)}`;
 };
 
-/* "Monthly · due today", "Into Cash ISA · due today", or "One-off · due Sat 31 Oct" */
+/*
+ * "Monthly · due today", "Into Cash ISA · due today", or "One-off · due Sat 31 Oct". With more
+ * than one account to spend from it names the account: "From Everyday into Joint bills · due
+ * today", "One-off · from Everyday · due Sat 31 Oct".
+ */
 export const dueSinceDetail = (
   { payment, dates }: DueSince,
-  { today, intoName = null }: { today: Date; intoName?: string | null }
+  {
+    today,
+    intoName = null,
+    fromName = null
+  }: { today: Date; intoName?: string | null; fromName?: string | null }
 ) => {
+  const from = fromName ? `From ${fromName}` : null;
   const kind = intoName
-    ? `Into ${intoName}`
+    ? from
+      ? `${from} into ${intoName}`
+      : `Into ${intoName}`
     : payment.kind === 'oneOff'
-      ? 'One-off'
-      : FREQUENCY_LABELS[payment.frequency];
+      ? from
+        ? `One-off · from ${fromName}`
+        : 'One-off'
+      : (from ?? FREQUENCY_LABELS[payment.frequency]);
   const last = dates[dates.length - 1];
   const when =
     last.getTime() === today.getTime() ? 'due today' : `due ${formatShortDate(last, today)}`;
   return dates.length > 1 ? `${kind} · ${dates.length} dates, last ${when}` : `${kind} · ${when}`;
+};
+
+/*
+ * The parts of the suggested balance, for the line under it: "£7,250.02 + £3,600.00 pay − £600.00
+ * to Joint bills + £12.99 not gone out". It starts from the balance with last cycle's payments all
+ * taken off, then adds back any that didn't go out, so the parts add up to the suggestion.
+ */
+export const balanceParts = ({
+  bankBalance,
+  leftOver,
+  outcomes,
+  goneOut,
+  intoNameOf
+}: {
+  bankBalance: number;
+  leftOver: readonly LeftOver[];
+  outcomes: Readonly<Record<string, LeftOverOutcome>>;
+  goneOut: readonly DueSince[];
+  // Where a payment moves money to, if it does
+  intoNameOf: (payment: Payment) => string | null;
+}) => {
+  const start = roundPence(
+    leftOver.reduce((total, item) => total + signedTotal(item), bankBalance)
+  );
+  // Money out is negative here; each part is shown with its own sign
+  const changes: { amount: number; label: string }[] = [];
+  const addChange = (amount: number, label: string) => {
+    const found = changes.find(change => change.label === label);
+    if (found) found.amount = roundPence(found.amount + amount);
+    else changes.push({ amount: roundPence(amount), label });
+  };
+  for (const item of goneOut) {
+    const into = intoNameOf(item.payment);
+    const amount = signedTotal(item);
+    addChange(amount, into ? `to ${into}` : amount < 0 ? 'gone out' : 'paid in');
+  }
+  for (const item of leftOver) {
+    if ((outcomes[item.payment.id] ?? 'PAID') === 'PAID') continue;
+    const amount = -signedTotal(item);
+    addChange(amount, amount > 0 ? 'not gone out' : 'not paid in');
+  }
+  return { start, changes: changes.filter(change => change.amount !== 0) };
 };
 
 /* "Netflix", "Netflix and Gym", "Netflix, Gym and Rent" */

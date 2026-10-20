@@ -20,8 +20,14 @@ interface ModalProps {
   children: ReactNode;
   // Buttons pinned below the scrolling body
   footer?: ReactNode;
+  // Shown before the title, e.g. an account's letter
+  leading?: ReactNode;
+  // Shown under the title, e.g. how old a balance is or a line saying what the dialog is for
+  subtitle?: ReactNode;
   // Wider on desktop, for a table
   wide?: boolean;
+  // Wider still, for a table with a column of pickers
+  extraWide?: boolean;
   // The field to focus when it opens, in place of the first control
   initialFocusId?: string;
 }
@@ -39,7 +45,10 @@ export const Modal = ({
   backLabel = 'Back',
   children,
   footer,
+  leading,
+  subtitle,
   wide = false,
+  extraWide = false,
   initialFocusId
 }: ModalProps) => {
   const isDesktop = useMediaQuery(MEDIA.desktop);
@@ -60,7 +69,11 @@ export const Modal = ({
           className={cn(
             'fixed z-90 flex flex-col overflow-hidden border border-border bg-surface outline-none',
             isDesktop &&
-              (wide ? 'w-[min(640px,calc(100%-32px))]' : 'w-[min(560px,calc(100%-32px))]'),
+              (extraWide
+                ? 'w-[min(720px,calc(100%-32px))]'
+                : wide
+                  ? 'w-[min(640px,calc(100%-32px))]'
+                  : 'w-[min(560px,calc(100%-32px))]'),
             isDesktop
               ? 'top-1/2 left-1/2 max-h-[calc(100dvh-48px)] -translate-1/2 rounded-[32px] shadow-[0_40px_90px_-30px_var(--shadow)] data-[state=closed]:animate-dialog-out data-[state=open]:animate-dialog-in'
               : 'inset-x-0 bottom-0 max-h-[min(760px,calc(100dvh-24px))] rounded-t-[28px] border-b-0 pt-2.5 shadow-[0_-20px_48px_-16px_var(--shadow)] data-[state=closed]:animate-sheet-out data-[state=open]:animate-sheet-in'
@@ -74,7 +87,9 @@ export const Modal = ({
 
           <div
             className={cn(
-              'flex shrink-0 items-center gap-2',
+              'flex shrink-0 gap-2',
+              // A subtitle of a few lines keeps the close button at the top
+              subtitle && !leading ? 'items-start' : 'items-center',
               headerShade(shadeTop),
               isDesktop ? 'pt-5 pr-[18px] pb-2' : 'px-4 pb-1',
               isDesktop && (onBack ? 'pl-3.5' : 'pl-7')
@@ -84,13 +99,22 @@ export const Modal = ({
                 <ChevronLeft size={20} strokeWidth={2.25} aria-hidden="true" />
               </IconButton>
             ) : null}
-            <Dialog.Title
+            {leading ? <span className={isDesktop ? undefined : 'pl-1'}>{leading}</span> : null}
+            <div
               className={cn(
-                'm-0 flex-1 leading-[1.2] font-extrabold tracking-[-0.03em]',
-                isDesktop ? 'text-[22px]' : 'pl-1 text-xl'
+                'flex min-w-0 flex-1 flex-col',
+                leading && 'ml-1.5',
+                isDesktop || leading ? undefined : 'pl-1'
               )}>
-              {title}
-            </Dialog.Title>
+              <Dialog.Title
+                className={cn(
+                  'm-0 leading-[1.2] font-extrabold tracking-[-0.03em]',
+                  isDesktop ? 'text-[22px]' : 'text-xl'
+                )}>
+                {title}
+              </Dialog.Title>
+              {subtitle}
+            </div>
             <Dialog.Close asChild>
               <IconButton aria-label="Close" variant={isDesktop ? 'outline' : 'ghost'}>
                 <X size={18} strokeWidth={2.25} aria-hidden="true" />

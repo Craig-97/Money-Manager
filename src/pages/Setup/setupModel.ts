@@ -5,6 +5,7 @@ import {
   OneOffPaymentInput,
   PayFrequency,
   PaydayType,
+  PaymentType,
   RecurringPaymentCategory,
   RecurringPaymentInput,
   Weekday
@@ -69,7 +70,16 @@ export const INITIAL_VALUES: SetupValues = {
   oneOffs: []
 };
 
-export const STEPS = [
+// Each step's title, heading and intro. Mobile words some of them for the narrower screen.
+interface StepCopy {
+  title: string;
+  heading: string;
+  intro: string;
+  mobileHeading?: string;
+  mobileIntro?: string;
+}
+
+export const STEPS: StepCopy[] = [
   {
     title: 'Pay',
     heading: 'When do you get paid?',
@@ -79,13 +89,18 @@ export const STEPS = [
     title: 'Your accounts',
     heading: 'Where do you keep your money?',
     intro:
-      'The account your pay goes into, and any others. Use the balances your banking app shows today.'
+      'Start with the account you get paid into. Use the balances your banking app shows today.',
+    mobileHeading: 'Your accounts',
+    mobileIntro:
+      'Start with the account your pay goes into, then any savings you want to keep an eye on.'
   },
   {
     title: 'Regular payments',
     heading: 'Add your regular payments',
     intro:
-      'Bills, subscriptions and anything else that goes out on a schedule. Tap a suggestion or add your own.'
+      'Bills, subscriptions and anything else that goes out or comes in on a schedule. Tap a suggestion or add your own.',
+    mobileIntro:
+      'Bills, subscriptions, income and anything else on a schedule. Tap a suggestion or add your own.'
   },
   {
     title: 'Coming up',
@@ -98,7 +113,10 @@ export const STEPS = [
     heading: 'Check and finish',
     intro: 'Make sure this looks right. You can change any of it later.'
   }
-] as const;
+];
+
+// Setup's desktop layout, with the steps down the side, from 860px
+export const SETUP_DESKTOP = '(min-width: 53.75rem)';
 
 export const LAST_STEP = STEPS.length - 1;
 export const COMING_UP_STEP = 3;
@@ -117,22 +135,41 @@ export {
   WEEKDAYS
 } from '~/lib/payday';
 
-// The suggestions on the regular payments step
-export const PRESETS: { key: string; name: string; category: RecurringPaymentCategory }[] = [
-  { key: 'rent', name: 'Rent', category: 'RENT' },
-  { key: 'mortgage', name: 'Mortgage', category: 'MORTGAGE' },
-  { key: 'counciltax', name: 'Council tax', category: 'TAX' },
-  { key: 'energy', name: 'Energy', category: 'UTILITIES' },
-  { key: 'water', name: 'Water', category: 'UTILITIES' },
-  { key: 'broadband', name: 'Broadband', category: 'UTILITIES' },
-  { key: 'mobile', name: 'Mobile', category: 'UTILITIES' },
-  { key: 'carins', name: 'Car insurance', category: 'INSURANCE' },
-  { key: 'carfin', name: 'Car finance', category: 'VEHICLE' },
-  { key: 'netflix', name: 'Netflix', category: 'SUBSCRIPTION' },
-  { key: 'spotify', name: 'Spotify', category: 'SUBSCRIPTION' },
-  { key: 'gym', name: 'Gym', category: 'MEMBERSHIP' },
-  { key: 'credit', name: 'Credit card', category: 'CREDIT_CARD' },
-  { key: 'savings', name: 'Savings', category: 'SAVINGS' }
+// The suggestions on the regular payments step. Each starts the payment form as money out or in.
+export interface Preset {
+  key: string;
+  name: string;
+  category: RecurringPaymentCategory;
+  type: PaymentType;
+}
+
+// Money out, as key, name and category
+const SPENDING_PRESETS: [string, string, RecurringPaymentCategory][] = [
+  ['rent', 'Rent', 'RENT'],
+  ['mortgage', 'Mortgage', 'MORTGAGE'],
+  ['counciltax', 'Council tax', 'TAX'],
+  ['energy', 'Energy', 'UTILITIES'],
+  ['water', 'Water', 'UTILITIES'],
+  ['broadband', 'Broadband', 'UTILITIES'],
+  ['mobile', 'Mobile', 'UTILITIES'],
+  ['carins', 'Car insurance', 'INSURANCE'],
+  ['carfin', 'Car finance', 'VEHICLE'],
+  ['netflix', 'Netflix', 'SUBSCRIPTION'],
+  ['spotify', 'Spotify', 'SUBSCRIPTION'],
+  ['gym', 'Gym', 'MEMBERSHIP'],
+  ['credit', 'Credit card', 'CREDIT_CARD'],
+  ['isa', 'ISA top-up', 'SAVINGS']
+];
+
+export const PRESETS: Preset[] = [
+  ...SPENDING_PRESETS.map(([key, name, category]): Preset => ({
+    key,
+    name,
+    category,
+    type: 'EXPENSE'
+  })),
+  // Recurring payments have no benefits category, so it's Other
+  { key: 'childbenefit', name: 'Child Benefit', category: 'OTHER', type: 'INCOME' }
 ];
 
 const isPositive = (value: string) => (parseMoney(value) ?? 0) > 0;
@@ -242,6 +279,19 @@ export const setupAccounts = (values: SetupValues): SetupAccountView[] => [
   }))
 ];
 
+// "Spending · Shared household bills", "Savings · 4.5% · Counts in free to spend"
+export const accountDetails = (account: SetupAccountView) =>
+  [
+    account.kind === 'SPENDING' ? 'Spending' : 'Savings',
+    account.kind === 'SAVINGS' && account.draft?.interestRate.trim()
+      ? `${account.draft.interestRate.replace(/[%\s]/g, '')}%`
+      : null,
+    account.draft?.purpose.trim() || null,
+    account.kind === 'SAVINGS' && account.counts ? 'Counts in free to spend' : null
+  ]
+    .filter(Boolean)
+    .join(' · ');
+
 // Paid every three months or less often: kept apart from the monthly figure, never averaged in
 const YEARLY_FREQUENCIES = ['QUARTERLY', 'BIANNUALLY', 'ANNUALLY'];
 
@@ -269,11 +319,15 @@ export const summariseFirstCycle = (
     (counts(input.account) ? (input.type === 'INCOME' ? input.amount : -input.amount) : 0) +
     (input.paysInto && counts(input.paysInto) ? input.amount : 0);
 
-  let regularsNet = 0;
-  let regularsDueCount = 0;
+  // Regular payments due this cycle, split into money out and money in, as the summary lists them
+  let regularsOut = 0;
+  let regularsOutCount = 0;
+  let regularsIn = 0;
+  let regularsInCount = 0;
   let monthly = 0;
   let yearly = 0;
   let goingOut = 0;
+  let comingIn = 0;
   for (const { input } of values.regulars) {
     // Money moving between accounts that both count isn't spending
     const moving = !!input.paysInto && counts(input.paysInto);
@@ -290,11 +344,13 @@ export const summariseFirstCycle = (
       { firstPaymentDate: first, frequency: input.frequency },
       { from: today, to: lastDayOfCycle }
     ).length;
-    if (times > 0) {
-      const effect = effectOf(input) * times;
-      regularsNet += effect;
-      if (effect < 0) goingOut -= effect;
-      regularsDueCount++;
+    const effect = effectOf(input) * times;
+    if (effect < 0) {
+      regularsOut -= effect;
+      regularsOutCount++;
+    } else if (effect > 0) {
+      regularsIn += effect;
+      regularsInCount++;
     }
   }
 
@@ -307,20 +363,29 @@ export const summariseFirstCycle = (
     oneOffsDueCount++;
     oneOffsNet += effect;
     if (effect < 0) goingOut -= effect;
+    else comingIn += effect;
   }
+  goingOut += regularsOut;
+  comingIn += regularsIn;
+  const regularsNet = regularsIn - regularsOut;
 
   return {
     cycleEnd,
     balance,
     // How many accounts make the balance
     countedCount: counted.length,
+    // Savings left out of free to spend, named under the summary
+    keptOut: accounts.filter(account => !account.counts),
     monthly,
     yearly,
-    regularsNet,
-    regularsDueCount,
+    regularsOut,
+    regularsOutCount,
+    regularsIn,
+    regularsInCount,
     oneOffsNet,
     oneOffsDueCount,
     goingOut,
+    comingIn,
     freeToSpend: balance + regularsNet + oneOffsNet,
     spokenForPercent: balance > 0 ? Math.min(100, Math.round((goingOut / balance) * 100)) : 100
   };

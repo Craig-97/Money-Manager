@@ -308,6 +308,10 @@ const withPaidOff = (
       }
     : summary;
 
+/* A payment moving money into another account says which, last */
+const withInto = (summary: ReturnType<typeof scheduleSummary>, into: string | null) =>
+  into && !summary.message ? { rows: [...summary.rows, { label: 'Into', value: into }] } : summary;
+
 /* What the chosen ending means, under the Ends choice */
 export const endsHint = (values: PaymentFormValues, today: Date) => {
   const { yearly, ends } = recurringEnding(values);
@@ -340,8 +344,8 @@ interface Options {
   // Setup: hands over the payment as the API would take it instead of saving it, returning a
   // message when its name is already used
   draft?: (payment: DraftPayment) => string | undefined;
-  // A new payment's name and category to start with, e.g. from a suggestion
-  start?: { name: string; category: RecurringPaymentCategory };
+  // A new payment's name, category and type to start with, e.g. from a suggestion
+  start?: { name: string; category: RecurringPaymentCategory; type?: PaymentType };
 }
 
 /* A payment as setup keeps it until the budget is made */
@@ -411,6 +415,7 @@ export const usePaymentForm = ({
     });
   };
 
+  const choices = accountChoices(values, accounts);
   const amount = parseMoney(values.amount);
   const first = parseIsoDate(values.first);
   const end = parseIsoDate(values.end);
@@ -625,10 +630,11 @@ export const usePaymentForm = ({
     canSave: nameOk && amountOk && datesOk && debtOk && !nameTaken,
     saving,
     save: () => void save(),
-    summary: withPaidOff(scheduleSummary(values, { today, settings, renewalPassed }), {
-      values,
-      today
-    }),
+    summary: withInto(
+      withPaidOff(scheduleSummary(values, { today, settings, renewalPassed }), { values, today }),
+      // Adding, it also says where the money moves to; editing, the status strip covers it
+      payment ? null : (choices.into?.name ?? null)
+    ),
     // Editing, the status strip already says when it's next due, so the summary only shows once the
     // schedule changes. A debt's always shows, for when it'd be paid off.
     showSummary:
@@ -644,7 +650,7 @@ export const usePaymentForm = ({
     asDebt,
     accounts,
     // Which account it goes out of, and where money can move to
-    choices: accountChoices(values, accounts),
+    choices,
     endsHint: endsHint(values, today),
     ending,
     renewalPassed,

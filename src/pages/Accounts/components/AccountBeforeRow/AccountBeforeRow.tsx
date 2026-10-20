@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { AlertTriangle, ChevronDown } from 'lucide-react';
+import { DateBox } from '~/components/ui/DateBox';
 import { AccountBeforePayday, accountLetter, goesBelowZero } from '~/lib/accounts';
 import { cn } from '~/lib/cn';
 import { formatBalance, formatMoney, formatPayment } from '~/lib/format';
 import { categoryLabel, formatShortDate, FREQUENCY_LABELS } from '~/lib/payments';
-import { DateBox } from '../DateBox';
 import { PaidIntoTag } from '../PaidIntoTag';
 
 interface AccountBeforeRowProps {
@@ -82,7 +82,8 @@ export const AccountBeforeRow = ({ row, today, several, isDesktop }: AccountBefo
   );
 
   return (
-    <div className="border-t border-border first:border-t-0">
+    // Every account has a rule above it, the first included, as the board draws it
+    <div className="border-t border-border">
       <h3>
         <button
           type="button"
@@ -185,7 +186,7 @@ export const AccountBeforeRow = ({ row, today, several, isDesktop }: AccountBefo
                     'flex items-center',
                     isDesktop ? 'min-h-16 gap-3.5 py-1.5' : 'min-h-[60px] gap-3 py-1.5'
                   )}>
-                  <DateBox date={item.date} compact={!isDesktop} />
+                  <DateBox date={item.date} top="weekday" size={isDesktop ? 'md' : 'sm'} />
                   <span className="flex min-w-0 flex-1 flex-col gap-0.5">
                     <span className="flex flex-wrap items-center gap-2">
                       <span
@@ -223,7 +224,7 @@ export const AccountBeforeRow = ({ row, today, several, isDesktop }: AccountBefo
                     'mt-1.5 flex items-center border-t border-dashed border-border-strong pt-3',
                     isDesktop ? 'gap-3.5' : 'gap-3'
                   )}>
-                  <DateBox date={item.date} accent compact={!isDesktop} />
+                  <DateBox date={item.date} top="weekday" accent size={isDesktop ? 'md' : 'sm'} />
                   <span className="flex min-w-0 flex-1 flex-col gap-0.5">
                     <span
                       className={cn(

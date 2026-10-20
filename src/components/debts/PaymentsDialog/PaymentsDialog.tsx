@@ -2,6 +2,7 @@ import { ArrowUp, Info } from 'lucide-react';
 import { useShallow } from 'zustand/react/shallow';
 import { accentTagClasses, greenTagClasses, tagClasses } from '~/components/payments/PaymentParts';
 import { Button } from '~/components/ui/Button';
+import { DateBox } from '~/components/ui/DateBox';
 import { Modal } from '~/components/ui/Modal';
 import { Skeleton } from '~/components/ui/Skeleton';
 import { useDebtHistory } from '~/hooks/useDebtHistory';
@@ -26,7 +27,7 @@ const TAGS: Record<HistoryEntry['kind'], string> = {
   balance: tagClasses
 };
 
-const columns = 'grid grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)_100px_110px] items-center gap-x-3';
+const columns = 'grid grid-cols-[64px_minmax(0,1fr)_100px_110px] items-center gap-x-3';
 
 /*
  * Desktop: a debt's payments, newest first and by month, with the balance after each. The column
@@ -89,8 +90,8 @@ export const PaymentsDialog = ({ debts, today, onUndoOverpayment }: PaymentsDial
         </div>
         {history.loading
           ? [0, 1, 2].map(row => (
-              <div key={row} className={cn(columns, 'min-h-[52px] px-2')}>
-                <Skeleton className="h-4 w-24" />
+              <div key={row} className={cn(columns, 'min-h-16 px-2')}>
+                <Skeleton className="h-[46px] w-[52px] rounded-[14px]" />
                 <Skeleton className="h-6 w-20 rounded-full" />
                 <Skeleton className="ml-auto h-4 w-16" />
                 <Skeleton className="ml-auto h-4 w-16" />
@@ -106,9 +107,10 @@ export const PaymentsDialog = ({ debts, today, onUndoOverpayment }: PaymentsDial
                     <div
                       key={entry.id}
                       role="row"
-                      className={cn(columns, 'min-h-[52px] rounded-2xl px-2 hover:bg-hover')}>
-                      <span role="cell" className="text-sm font-bold">
-                        {formatShortDay(entry.date)}
+                      className={cn(columns, 'min-h-16 rounded-2xl px-2 py-1.5 hover:bg-hover')}>
+                      <span role="cell">
+                        <DateBox date={entry.date} top="weekday" accent={entry.kind === 'due'} />
+                        <span className="sr-only">{formatShortDay(entry.date)}</span>
                       </span>
                       <span role="cell" className="flex items-center gap-1.5">
                         <span className={TAGS[entry.kind]}>{entry.label}</span>

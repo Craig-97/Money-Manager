@@ -1,7 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import { RecurringPaymentFieldsFragment } from '~/graphql/generated';
 import { toPayments } from '~/lib/payments';
-import { dueSinceOf, leftOverNote, leftOverOf, suggestedBalance } from './paydayCheck';
+import {
+  balanceParts,
+  dueSinceDetail,
+  dueSinceOf,
+  leftOverDetail,
+  leftOverNote,
+  leftOverOf,
+  suggestedBalance
+} from './paydayCheck';
 
 const day = (iso: string) => {
   const [year, month, date] = iso.split('-').map(Number);
@@ -110,6 +118,45 @@ describe('the payday check', () => {
     expect(leftOverNote(card, { outcome: 'SKIPPED', cycle, today })).toBe('Next due Fri 27 Nov');
     expect(leftOverNote(card, { outcome: 'DUE', cycle, today })).toBe(
       'Stays due, shown as overdue'
+    );
+  });
+
+  it('names the account each goes out of when there’s more than one', () => {
+    const [netflix, card] = leftOver;
+    const [gym] = dueSinceOf(payments, { cycle, today, stillDue: new Set() });
+    expect(leftOverDetail(netflix, { today })).toBe('Monthly · was due Mon 26 Oct');
+    expect(leftOverDetail(netflix, { today, fromName: 'Everyday' })).toBe(
+      'From Everyday · was due Mon 26 Oct'
+    );
+    expect(leftOverDetail(card, { today, fromName: 'Everyday' })).toBe(
+      'Debt · from Everyday · was due Tue 27 Oct'
+    );
+    expect(dueSinceDetail(gym, { today, fromName: 'Everyday', intoName: 'Joint bills' })).toBe(
+      'From Everyday into Joint bills · due Fri 30 Oct'
+    );
+  });
+
+  it('splits the suggestion into the parts that add up to it', () => {
+    const goneOut = dueSinceOf(payments, { cycle, today, stillDue: new Set() });
+    const outcomes = { card: 'SKIPPED' as const };
+    const parts = balanceParts({
+      bankBalance: 1000,
+      leftOver,
+      outcomes,
+      goneOut,
+      intoNameOf: payment => (payment.name === 'Gym' ? 'Joint bills' : null)
+    });
+    // Both left-overs taken off first, then the card added back
+    expect(parts).toEqual({
+      start: 830,
+      changes: [
+        { amount: -35, label: 'to Joint bills' },
+        { amount: 150, label: 'not gone out' }
+      ]
+    });
+    const total = parts.changes.reduce((sum, change) => sum + change.amount, parts.start + 3600);
+    expect(total).toBe(
+      suggestedBalance({ bankBalance: 1000, income: 3600, leftOver, outcomes, goneOut })
     );
   });
 });

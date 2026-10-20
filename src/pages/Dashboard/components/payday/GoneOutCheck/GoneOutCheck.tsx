@@ -1,11 +1,14 @@
+import { cn } from '~/lib/cn';
+import { formatMoney } from '~/lib/format';
 import { PaydayPrompt } from '../../../hooks/usePaydayPrompt';
 import { DueSinceRow } from '../DueSinceRow';
 import { LeftOverRow } from '../LeftOverRow';
 import { Step } from '../Step';
 
 const groupHeadClasses =
-  'mt-4 mb-2 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 px-0.5 text-xs font-extrabold tracking-[0.04em] text-muted uppercase';
+  'mt-3.5 mb-2 flex flex-wrap md:mt-4 items-baseline justify-between gap-x-3 gap-y-0.5 px-0.5 text-xs font-extrabold tracking-[0.04em] text-muted uppercase';
 const groupNoteClasses = 'text-xs font-semibold tracking-normal normal-case';
+const helpClasses = 'mt-2 text-xs leading-normal font-medium text-muted md:mt-2.5 md:text-[13px]';
 const groupClasses = 'overflow-hidden rounded-[20px] border border-border bg-surface-2';
 
 /*
@@ -37,15 +40,30 @@ export const GoneOutCheck = ({ prompt }: { prompt: PaydayPrompt }) => (
       <>
         <div className={groupHeadClasses}>
           {prompt.daysLate ? 'Due since payday' : 'Due today'}
-          <span className={groupNoteClasses}>Tick any that have already left</span>
+          <span className={cn(groupNoteClasses, 'max-md:hidden')}>
+            Tick any that have already left the account.
+          </span>
         </div>
         <div className={groupClasses}>
           {prompt.dueSince.map(item => (
             <DueSinceRow key={item.key} item={item} />
           ))}
         </div>
-        <p className="mt-2 text-xs leading-normal font-medium text-muted md:mt-2.5 md:text-[13px]">
-          Ticked ones are recorded as paid. Ones left unticked stay due.
+        <p className={helpClasses}>
+          {/* The mobile sheet has no room for the note beside the heading, so it leads here */}
+          <span className="md:hidden">
+            Tick any that have already left. Ticked ones are recorded as paid.
+          </span>
+          <span className="max-md:hidden">
+            Ticked ones are recorded as paid. Ones left unticked stay due.
+          </span>
+          {prompt.movedIn.map(moved => (
+            <span key={moved.name}>
+              {' '}
+              The <b className="num font-bold text-text">{formatMoney(moved.amount)}</b> is added to{' '}
+              {moved.name}.
+            </span>
+          ))}
         </p>
       </>
     ) : null}

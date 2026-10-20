@@ -1,5 +1,6 @@
 import { Label } from '~/components/form/Label';
 import { Select } from '~/components/form/Select';
+import { accountDescription } from '../../paymentAccounts';
 import { PaymentForm } from '../../usePaymentForm';
 
 /*
@@ -21,7 +22,11 @@ export const FromAccount = ({ form }: { form: PaymentForm }) => {
         id="payment-account"
         value={from.id}
         onValueChange={account => set('account', account)}
-        options={choices.options.map(account => ({ value: account.id, label: account.name }))}
+        options={choices.options.map(account => ({
+          value: account.id,
+          label: account.name,
+          description: accountDescription(account)
+        }))}
         aria-describedby="payment-account-hint"
       />
       <p id="payment-account-hint" className="mt-2 ml-1 text-xs font-semibold text-muted">

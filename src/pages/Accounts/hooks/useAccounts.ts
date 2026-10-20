@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useMutation } from '@apollo/client/react';
 import { UpdateAccountDocument } from '~/graphql/generated';
 import { Budget } from '~/hooks/useBudget';
@@ -9,7 +8,6 @@ import {
   beforePaydayByAccount,
   hasSeveralSpending,
   isSpending,
-  isStale,
   paidIntoAccountOf,
   savingsOf,
   spendingOf,
@@ -21,15 +19,12 @@ import { getApiErrorMessage } from '~/lib/errors';
 import { RecurringPayment, toPayments } from '~/lib/payments';
 import { showToast } from '~/state/toast';
 
-export type AccountsView = 'balances' | 'before';
-
 const roundPence = (amount: number) => Math.round(amount * 100) / 100;
 
 /* Everything the Accounts page shows and does, worked out from the budget */
 export const useAccounts = (budget: Budget) => {
   const { today, cycle } = usePayCycle(budget.payday);
   const [updateAccount] = useMutation(UpdateAccountDocument);
-  const [chosenView, setView] = useState<AccountsView>('balances');
 
   const accounts = toAccounts(budget.accounts, today);
   const payments = toPayments(budget, today);
@@ -38,15 +33,15 @@ export const useAccounts = (budget: Budget) => {
     .filter(isDebt)
     .filter(debt => debt.debt.balance > 0);
   const totals = accountTotals(accounts, { owed: debtTotals(debts).left });
-  // With one account to spend from there's nothing to split by account, so only Balances shows
   const several = hasSeveralSpending(accounts);
-  const view = several ? chosenView : 'balances';
 
   const byAccount = beforePaydayByAccount(accounts, { payments, cycle });
   const spendingRows = byAccount.filter(row => isSpending(row.account));
   const savingsRows = byAccount.filter(row => !isSpending(row.account));
-  const now = roundPence(spendingRows.reduce((sum, row) => sum + row.account.balance, 0));
-  const left = roundPence(spendingRows.reduce((sum, row) => sum + row.left, 0));
+  // The hero adds up the spending accounts that count in free to spend, as the board does
+  const countedRows = spendingRows.filter(row => row.account.counts);
+  const now = roundPence(countedRows.reduce((sum, row) => sum + row.account.balance, 0));
+  const left = roundPence(countedRows.reduce((sum, row) => sum + row.left, 0));
   const paidInto = paidIntoAccountOf(accounts);
 
   // Switching an account in or out of free to spend, straight from its row
@@ -102,12 +97,12 @@ export const useAccounts = (budget: Budget) => {
     paidInto,
     debts,
     totals,
-    view,
-    setView,
     // Recurring expenses that don't say which account they go out of, once there's a choice
     unchosen: unchosenOf(payments, accounts),
     beforePayday: {
       spending: spendingRows,
+      // The accounts the hero's figures are across
+      counted: countedRows.map(row => row.account),
       savings: savingsRows,
       now,
       left,
@@ -120,8 +115,6 @@ export const useAccounts = (budget: Budget) => {
           .map(item => ({ ...item, account: row.account }))
       )
     },
-    // The first balance that may be out of date, for the mobile banner
-    stale: accounts.find(account => !account.paidInto && isStale(account, today)) ?? null,
     setCounts: (account: Account, counts: boolean) => void setCounts(account, counts)
   };
 };

@@ -7,6 +7,9 @@ import { fieldClasses } from '../fieldClasses';
 interface SelectOption<T extends string = string> {
   value: T;
   label: string;
+  // A muted line under the label in the list, e.g. an account's kind and balance. The trigger
+  // shows the label only.
+  description?: string;
 }
 
 interface SelectProps<T extends string> {
@@ -88,7 +91,16 @@ export const Select = <T extends string>({
                 optionClasses,
                 'justify-between py-2.5 leading-[1.3] data-[state=checked]:bg-accent-soft data-[state=checked]:font-bold'
               )}>
-              <SelectPrimitive.ItemText>{option.label}</SelectPrimitive.ItemText>
+              {option.description ? (
+                <span className="flex min-w-0 flex-col gap-0.5">
+                  <SelectPrimitive.ItemText>{option.label}</SelectPrimitive.ItemText>
+                  <span className="text-xs leading-[1.35] font-semibold text-muted">
+                    {option.description}
+                  </span>
+                </span>
+              ) : (
+                <SelectPrimitive.ItemText>{option.label}</SelectPrimitive.ItemText>
+              )}
               <SelectPrimitive.ItemIndicator>
                 <Check
                   size={16}

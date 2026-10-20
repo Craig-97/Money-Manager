@@ -1,12 +1,5 @@
 import { Switch } from '~/components/ui/Switch';
-import {
-  Account,
-  accountLetter,
-  accountMeta,
-  isSpending,
-  isStale,
-  updatedText
-} from '~/lib/accounts';
+import { Account, accountLetter, accountMeta, isStale, updatedText } from '~/lib/accounts';
 import { cn } from '~/lib/cn';
 import { formatBalance } from '~/lib/format';
 import { useAccountDialogStore } from '~/state/accountDialog';
@@ -22,8 +15,8 @@ interface AccountRowProps {
 }
 
 /*
- * Desktop: one account. Its name opens it to edit; the switch counts savings in free to spend,
- * which spending accounts always are. How old the balance is sits under the name below 1101px.
+ * Desktop: one account. Its name opens it to edit; the switch counts it in free to spend, which
+ * where pay lands always is. How old the balance is sits under the name below 1101px.
  */
 export const AccountRow = ({ account, today, several, onCounts }: AccountRowProps) => {
   const openEdit = useAccountDialogStore(s => s.openEdit);
@@ -69,7 +62,7 @@ export const AccountRow = ({ account, today, several, onCounts }: AccountRowProp
         {formatBalance(account.balance)}
       </span>
       <span className="flex items-center justify-end gap-2.5">
-        {isSpending(account) ? (
+        {account.paidInto ? (
           <span className="text-xs font-semibold text-muted">Always counts</span>
         ) : (
           <>

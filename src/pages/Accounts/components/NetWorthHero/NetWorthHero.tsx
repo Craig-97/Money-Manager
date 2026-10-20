@@ -4,6 +4,7 @@ import { formatMoney, splitPence } from '~/lib/format';
 import { Accounts } from '../../hooks';
 
 const chipClasses = 'flex min-w-0 flex-col gap-1 rounded-[18px] bg-hero-chip px-3.5 py-3';
+const compactChipClasses = 'flex min-w-0 flex-col gap-1 rounded-[16px] bg-hero-chip px-3 py-2.5';
 const opClasses = 'flex items-center justify-center text-xl font-bold text-hero-muted';
 
 /*
@@ -64,45 +65,71 @@ export const NetWorthHero = ({
         )}
       </div>
 
-      <div
-        role="group"
-        aria-label="How it is worked out"
-        className={`relative mt-auto grid items-stretch gap-1.5 md:gap-2 ${owes ? 'grid-cols-[minmax(0,1fr)_14px_minmax(0,1fr)_14px_minmax(0,1fr)] md:grid-cols-[minmax(0,1fr)_20px_minmax(0,1fr)_20px_minmax(0,1fr)]' : 'grid-cols-[minmax(0,1fr)_14px_minmax(0,1fr)] md:grid-cols-[minmax(0,1fr)_20px_minmax(0,1fr)]'}`}>
-        {chips.map((chip, index) => (
-          <div key={chip.label} className="contents">
-            {index ? (
-              <span aria-hidden="true" className={opClasses}>
-                +
+      {compact ? (
+        // On a phone the sum drops its signs so each figure has room, pence and all
+        <div
+          role="group"
+          aria-label="How it is worked out"
+          className={`relative grid gap-2 ${owes ? 'grid-cols-3' : 'grid-cols-2'}`}>
+          {chips.map(chip => (
+            <div key={chip.label} className={compactChipClasses}>
+              <span className="text-[11px] font-bold text-hero-muted">{chip.label}</span>
+              <span className="num text-[13px] font-extrabold [overflow-wrap:anywhere]">
+                {formatMoney(chip.value)}
               </span>
-            ) : null}
-            <div className={chipClasses}>
-              <span className="text-xs font-semibold text-hero-muted">{chip.label}</span>
-              <p className="num text-base font-extrabold [overflow-wrap:anywhere] md:text-lg">
-                {formatMoney(chip.value, { whole: compact })}
-              </p>
             </div>
-          </div>
-        ))}
-        {owes ? (
-          <>
-            <span aria-hidden="true" className={opClasses}>
-              −
-            </span>
+          ))}
+          {owes ? (
             <PageLink
               page="debts"
               to={ROUTES.debts}
-              className={`${chipClasses} text-hero-text no-underline hover:bg-hero-chip/80`}>
-              <span className="text-xs font-semibold text-hero-muted">Owed</span>
-              <p className="num text-base font-extrabold [overflow-wrap:anywhere] md:text-lg">
-                {formatMoney(totals.owed, { whole: compact })}
-              </p>
-              {compact ? null : (
-                <span className="text-xs font-medium text-hero-muted">On Debts</span>
-              )}
+              className={`${compactChipClasses} text-hero-text no-underline hover:bg-hero-chip/80`}>
+              <span className="text-[11px] font-bold text-hero-muted">Owed</span>
+              <span className="num text-[13px] font-extrabold [overflow-wrap:anywhere]">
+                −{formatMoney(totals.owed)}
+              </span>
             </PageLink>
-          </>
-        ) : null}
-      </div>
+          ) : null}
+        </div>
+      ) : (
+        <div
+          role="group"
+          aria-label="How it is worked out"
+          className={`relative mt-auto grid items-stretch gap-1.5 md:gap-2 ${owes ? 'grid-cols-[minmax(0,1fr)_14px_minmax(0,1fr)_14px_minmax(0,1fr)] md:grid-cols-[minmax(0,1fr)_20px_minmax(0,1fr)_20px_minmax(0,1fr)]' : 'grid-cols-[minmax(0,1fr)_14px_minmax(0,1fr)] md:grid-cols-[minmax(0,1fr)_20px_minmax(0,1fr)]'}`}>
+          {chips.map((chip, index) => (
+            <div key={chip.label} className="contents">
+              {index ? (
+                <span aria-hidden="true" className={opClasses}>
+                  +
+                </span>
+              ) : null}
+              <div className={chipClasses}>
+                <span className="text-xs font-semibold text-hero-muted">{chip.label}</span>
+                <p className="num text-base font-extrabold [overflow-wrap:anywhere] md:text-lg">
+                  {formatMoney(chip.value)}
+                </p>
+              </div>
+            </div>
+          ))}
+          {owes ? (
+            <>
+              <span aria-hidden="true" className={opClasses}>
+                −
+              </span>
+              <PageLink
+                page="debts"
+                to={ROUTES.debts}
+                className={`${chipClasses} text-hero-text no-underline hover:bg-hero-chip/80`}>
+                <span className="text-xs font-semibold text-hero-muted">Owed</span>
+                <p className="num text-base font-extrabold [overflow-wrap:anywhere] md:text-lg">
+                  {formatMoney(totals.owed)}
+                </p>
+                <span className="text-xs font-medium text-hero-muted">On Debts</span>
+              </PageLink>
+            </>
+          ) : null}
+        </div>
+      )}
     </article>
   );
 };

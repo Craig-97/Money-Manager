@@ -1,10 +1,10 @@
 import { ArrowUp } from 'lucide-react';
 import { ShowOlderPayments } from '~/components/debts';
 import { Button } from '~/components/ui/Button';
+import { DateBox } from '~/components/ui/DateBox';
 import { Skeleton } from '~/components/ui/Skeleton';
 import { useDebtHistory } from '~/hooks/useDebtHistory';
 import { cn } from '~/lib/cn';
-import { formatShortMonth } from '~/lib/dates';
 import { DebtPayment } from '~/lib/debts';
 import { formatMoney } from '~/lib/format';
 import { useDebtDialogStore } from '~/state/debtDialog';
@@ -26,7 +26,7 @@ export const DebtPayments = ({ debt, today, onUndoOverpayment }: DebtPaymentsPro
         {history.loading ? (
           [0, 1, 2].map(row => (
             <div key={row} className="flex min-h-[68px] items-center gap-3 px-2.5">
-              <Skeleton className="size-12 rounded-[14px]" />
+              <Skeleton className="h-[46px] w-[52px] rounded-[14px]" />
               <div className="flex flex-1 flex-col gap-1.5">
                 <Skeleton className="h-4 w-[45%]" />
                 <Skeleton className="h-3 w-[60%]" />
@@ -48,18 +48,7 @@ export const DebtPayments = ({ debt, today, onUndoOverpayment }: DebtPaymentsPro
                 <ul className="flex flex-col gap-0.5">
                   {month.entries.map(entry => (
                     <li key={entry.id} className="flex min-h-[68px] items-center gap-3 px-2.5 py-2">
-                      <span
-                        className={cn(
-                          'flex size-12 shrink-0 flex-col items-center justify-center rounded-[14px] border leading-none',
-                          entry.kind === 'due'
-                            ? 'border-transparent bg-accent-soft text-accent-text'
-                            : 'border-border bg-surface-2'
-                        )}>
-                        <span className="text-[10px] font-bold uppercase">
-                          {formatShortMonth(entry.date)}
-                        </span>
-                        <span className="num text-lg font-extrabold">{entry.date.getDate()}</span>
-                      </span>
+                      <DateBox date={entry.date} top="weekday" accent={entry.kind === 'due'} />
                       <span className="flex min-w-0 flex-1 flex-col gap-0.5">
                         <span className="truncate text-[15px] font-bold">
                           {entry.kind === 'due' ? entry.detail : entry.label}

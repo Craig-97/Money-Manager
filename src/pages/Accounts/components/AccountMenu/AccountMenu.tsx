@@ -12,9 +12,9 @@ interface AccountMenuProps {
 }
 
 /*
- * Edit, then for savings count in or keep out of free to spend, or for another spending account
- * make it where you get paid, and delete, from the row's more button. Where pay lands always
- * counts and stays, so it only has Edit.
+ * Edit, make another spending account where you get paid, count in or keep out of free to spend,
+ * and delete, from the row's more button. Where pay lands always counts and stays, so it only has
+ * Edit.
  */
 export const AccountMenu = ({ account, several, onCounts }: AccountMenuProps) => {
   const openEdit = useAccountDialogStore(s => s.openEdit);
@@ -34,19 +34,16 @@ export const AccountMenu = ({ account, several, onCounts }: AccountMenuProps) =>
         </MenuItem>
         {fixed ? null : (
           <>
-            {isSpending(account) ? (
-              several ? (
-                <MenuItem
-                  icon={<Landmark size={16} />}
-                  onSelect={() => openEdit(account.id, { paidInto: true })}>
-                  Make where you get paid
-                </MenuItem>
-              ) : null
-            ) : (
-              <MenuItem icon={<Check size={16} />} onSelect={() => onCounts(!account.counts)}>
-                {account.counts ? 'Keep out of free to spend' : 'Count in free to spend'}
+            {isSpending(account) && several ? (
+              <MenuItem
+                icon={<Landmark size={16} />}
+                onSelect={() => openEdit(account.id, { paidInto: true })}>
+                Make where you get paid
               </MenuItem>
-            )}
+            ) : null}
+            <MenuItem icon={<Check size={16} />} onSelect={() => onCounts(!account.counts)}>
+              {account.counts ? 'Keep out of free to spend' : 'Count in free to spend'}
+            </MenuItem>
             <MenuSeparator />
             <MenuItem danger icon={<Trash size={16} />} onSelect={() => openDelete(account.id)}>
               Delete

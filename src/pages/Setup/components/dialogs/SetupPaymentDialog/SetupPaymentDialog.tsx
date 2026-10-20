@@ -31,7 +31,7 @@ export const SetupPaymentDialog = ({ setup, today }: { setup: SetupState; today:
     formKey: String(dialog.opened),
     draft: dialog.save,
     start: dialog.preset
-      ? { name: dialog.preset.name, category: dialog.preset.category }
+      ? { name: dialog.preset.name, category: dialog.preset.category, type: dialog.preset.type }
       : undefined
   });
 

@@ -1,6 +1,7 @@
 import { fromApiDate, parseIsoDate } from '~/lib/dates';
 import { formatMoney } from '~/lib/format';
 import {
+  categoryLabel,
   DEFAULT_REMINDER_SETTINGS,
   FREQUENCY_LABELS,
   formatShortDate,
@@ -89,27 +90,37 @@ const nameOf = (accounts: readonly SetupAccountView[], key: string | null | unde
   key ? (accounts.find(account => account.id === key)?.name ?? null) : null;
 
 /*
- * The line under a payment in setup's lists: how often and when, then what else it does. "Monthly ·
- * Thu 25 Oct · Renews 2 Feb 2027", "Monthly · Thu 15 Oct · Debt · £2,340.00 left", "Into Cash ISA".
+ * The line under a regular payment in setup's lists: how often, then what else it does, or its
+ * category when there's nothing else to say. "Monthly · Subscription", "Monthly · Into Cash ISA",
+ * "Monthly · Debt · £2,340.00 left", "Annually · Renews Tue 2 Feb 2027".
  */
 export const regularDetails = (
   { input }: SetupRegular,
   { accounts, today }: { accounts: readonly SetupAccountView[]; today: Date }
 ) => {
-  const first = day(input.firstPaymentDate);
   const renewal = day(input.renewalDate);
+  const last = day(input.lastPaymentDate);
   const into = nameOf(accounts, input.paysInto);
   const from = nameOf(accounts, input.account);
-  return [
-    FREQUENCY_LABELS[input.frequency],
-    first ? formatShortDate(first, today) : null,
-    renewal ? `Renews ${formatShortDate(renewal, today)}` : null,
+  const income = input.type === 'INCOME';
+  const extras = [
+    income ? 'Income' : null,
     input.debt ? `Debt · ${formatMoney(input.debt.balance)} left` : null,
     into ? `Into ${into}` : null,
-    from && input.account ? `${input.type === 'INCOME' ? 'Into' : 'From'} ${from}` : null
-  ]
-    .filter(Boolean)
-    .join(' · ');
+    from ? `${income ? 'Into' : 'From'} ${from}` : null,
+    renewal ? `Renews ${formatShortDate(renewal, today)}` : null,
+    last ? `Last payment ${formatShortDate(last, today)}` : null
+  ].filter(Boolean);
+  return [
+    FREQUENCY_LABELS[input.frequency],
+    ...(extras.length ? extras : [categoryLabel(input.category)])
+  ].join(' · ');
+};
+
+/* When a regular payment is next due, under its amount: "Next Tue 2 Nov" */
+export const regularNext = (regular: SetupRegular, { today }: { today: Date }) => {
+  const { dueDate } = regularAsPayment(regular, { today });
+  return dueDate ? `Next ${formatShortDate(dueDate, today)}` : undefined;
 };
 
 export const oneOffDetails = (

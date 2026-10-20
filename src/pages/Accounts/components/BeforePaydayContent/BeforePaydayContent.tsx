@@ -122,8 +122,8 @@ export const BeforePaydayContent = ({
                   key={row.account.id}
                   className={
                     isDesktop
-                      ? 'flex min-h-[72px] items-center gap-3.5 border-t border-border px-2 first:border-t-0 [&:nth-child(2)]:border-t-0'
-                      : 'flex min-h-[72px] items-center gap-3 border-t border-border px-2.5 py-2 first:border-t-0'
+                      ? 'flex min-h-[72px] items-center gap-3.5 px-2'
+                      : 'flex min-h-[72px] items-center gap-3 px-2.5 py-2'
                   }>
                   <span
                     aria-hidden="true"

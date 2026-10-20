@@ -1,7 +1,8 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { screen, within } from '@testing-library/react';
 import { createFakeApi, DEFAULT_BUDGET } from '~/test/fakeApi';
 import { renderApp } from '~/test/renderApp';
+import { resetViewport, setViewportWidth } from '~/test/viewport';
 
 const findPageHeading = (name: string) => screen.findByRole('heading', { level: 1, name });
 
@@ -89,6 +90,11 @@ describe('setup', () => {
     expect(await screen.findByRole('button', { name: 'Edit Cash ISA' })).toHaveTextContent(
       'Savings · 4.5%'
     );
+    // Savings stay out of free to spend, and the summary says so
+    const summary = screen.getByRole('complementary', { name: 'Your first cycle' });
+    expect(summary).toHaveTextContent('Everyday£7,895.00');
+    expect(summary).toHaveTextContent('Kept out of free to spend: Cash ISA (£8,650.00).');
+    expect(screen.getByRole('button', { name: /Your accounts/ })).toHaveTextContent('2 accounts');
     await cont(user);
 
     await user.click(await screen.findByRole('button', { name: 'Add custom payment' }));
@@ -214,5 +220,28 @@ describe('setup', () => {
     expect(
       await screen.findByRole('heading', { name: "You're all set, Test" })
     ).toBeInTheDocument();
+  });
+
+  describe('on mobile', () => {
+    afterEach(() => resetViewport());
+
+    it('goes back with the arrow in the header, and shows free to spend on the payment steps', async () => {
+      setViewportWidth(390);
+      const { user } = renderSetup();
+
+      await user.type(await screen.findByLabelText('Take-home pay per month'), '3600');
+      await cont(user);
+      expect(await findPageHeading('Your accounts')).toBeInTheDocument();
+      // The header says which step this is, so it isn't repeated above the heading
+      expect(screen.getAllByText('Step 2 of 5 · Your accounts')).toHaveLength(1);
+
+      await user.type(screen.getByLabelText('Balance now'), '1000');
+      await cont(user);
+      expect(await findPageHeading('Add your regular payments')).toBeInTheDocument();
+      expect(screen.getByText(/^Free to spend · until/)).toBeInTheDocument();
+
+      await user.click(screen.getByRole('button', { name: 'Back' }));
+      expect(await findPageHeading('Your accounts')).toBeInTheDocument();
+    });
   });
 });

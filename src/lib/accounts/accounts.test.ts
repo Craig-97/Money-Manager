@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { PayCycle } from '~/lib/payday';
 import { OneOffPayment, RecurringPayment } from '~/lib/payments';
 import {
+  joinNames,
   Account,
   accountMeta,
   accountOf,
@@ -215,5 +216,14 @@ describe('before payday by account', () => {
     expect(rowOf('holiday').lowest).toEqual({ amount: -40, date: day('2026-10-23') });
     expect(goesBelowZero(rowOf('holiday'))).toBe(true);
     expect(goesBelowZero(rowOf('joint'))).toBe(false);
+  });
+});
+
+describe('joinNames', () => {
+  it('lists names as a sentence would', () => {
+    expect(joinNames([])).toBe('');
+    expect(joinNames(['Netflix'])).toBe('Netflix');
+    expect(joinNames(['Netflix', 'Gym'])).toBe('Netflix and Gym');
+    expect(joinNames(['Netflix', 'Gym', 'Phone'])).toBe('Netflix, Gym and Phone');
   });
 });

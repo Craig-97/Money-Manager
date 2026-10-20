@@ -43,7 +43,7 @@ export interface AccountDraftErrors {
 
 /*
  * What's wrong with a draft, once someone has tried to save it, and its fields as the API takes
- * them when nothing is. Spending accounts always count and have no rate.
+ * them when nothing is. Spending accounts have no rate.
  */
 export const checkAccountDraft = (draft: AccountDraft, { submitted }: { submitted: boolean }) => {
   const name = draft.name.trim();
@@ -67,7 +67,7 @@ export const checkAccountDraft = (draft: AccountDraft, { submitted }: { submitte
     fields:
       valid && balance !== null
         ? spending
-          ? { name, balance, purpose: purpose || null }
+          ? { name, balance, counts: draft.counts, purpose: purpose || null }
           : { name, balance, counts: draft.counts, interestRate: rate, purpose: purpose || null }
         : null
   };

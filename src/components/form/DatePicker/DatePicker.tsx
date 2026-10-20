@@ -59,7 +59,7 @@ export const DatePicker = ({
           className
         )}
         {...aria}>
-        <span className={cn('min-w-0 truncate', !selected && 'text-muted')}>
+        <span className={cn('min-w-0 [overflow-wrap:anywhere]', !selected && 'text-muted')}>
           {selected ? formatPickerDate(selected) : placeholder}
         </span>
         <CalendarDays size={17} className="shrink-0 text-muted" aria-hidden="true" />

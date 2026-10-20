@@ -1,3 +1,4 @@
+import { Fragment } from 'react';
 import { ArrowRight, Check, Clock, X } from 'lucide-react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { PaydayIcon } from '~/components/icons';
@@ -128,6 +129,7 @@ export const PaydayPrompt = ({ prompt }: { prompt: Prompt }) => {
                 <Step
                   number={hasCheck ? 2 : 1}
                   title={`Confirm ${prompt.paidIntoName === 'Current account' ? 'your current account' : prompt.paidIntoName}`}
+                  subtitle="Where you get paid"
                   titleFor="payday-balance">
                   <div className="mt-3 flex h-[60px] items-center gap-1.5 rounded-[18px] border-[1.5px] border-border-strong bg-surface-2 px-[18px] transition-[border-color,box-shadow] focus-within:border-accent focus-within:shadow-[0_0_0_4px_var(--accent-soft)]">
                     <span
@@ -152,23 +154,20 @@ export const PaydayPrompt = ({ prompt }: { prompt: Prompt }) => {
                     className="mt-2 text-xs leading-normal font-medium text-muted md:mt-2.5 md:text-[13px]">
                     Projected:{' '}
                     <span className="num font-bold text-text">
-                      {formatMoney(prompt.lastBalance, { whole: true })}
+                      {formatBalance(prompt.parts.start)}
                     </span>{' '}
-                    +{' '}
-                    <span className="num font-bold text-text">
-                      {formatMoney(prompt.income, { whole: true })}
-                    </span>{' '}
-                    income
-                    {prompt.goneOutTotal > 0 ? (
-                      <>
+                    + <span className="num font-bold text-text">{formatMoney(prompt.income)}</span>{' '}
+                    pay
+                    {prompt.parts.changes.map(change => (
+                      <Fragment key={change.label}>
                         {' '}
-                        −{' '}
+                        {change.amount < 0 ? '−' : '+'}{' '}
                         <span className="num font-bold text-text">
-                          {formatMoney(prompt.goneOutTotal, { whole: true })}
+                          {formatMoney(change.amount)}
                         </span>{' '}
-                        gone out
-                      </>
-                    ) : null}
+                        {change.label}
+                      </Fragment>
+                    ))}
                     . Adjust if your bank says otherwise.
                   </p>
                 </Step>
@@ -206,7 +205,7 @@ export const PaydayPrompt = ({ prompt }: { prompt: Prompt }) => {
                         <button
                           type="button"
                           onClick={() => void prompt.payOverdue()}
-                          className="inline-flex h-11 cursor-pointer items-center gap-1.5 rounded-full px-3.5 text-[13px] font-bold whitespace-nowrap text-accent-text md:bg-accent-soft">
+                          className="inline-flex h-11 cursor-pointer items-center gap-1.5 rounded-full bg-accent-soft px-3.5 text-[13px] font-bold whitespace-nowrap text-accent-text">
                           <Check
                             size={15}
                             strokeWidth={2.5}
@@ -253,7 +252,7 @@ export const PaydayPrompt = ({ prompt }: { prompt: Prompt }) => {
                     loading={prompt.starting}>
                     Start new cycle
                   </Button>
-                  <Button size="xl" onClick={prompt.skip} className="border-border bg-surface-2">
+                  <Button variant="ghost" size="xl" onClick={prompt.skip}>
                     Skip for now
                   </Button>
                 </footer>

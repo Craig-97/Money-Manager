@@ -184,12 +184,16 @@ describe('accounts on mobile', () => {
   beforeEach(() => setViewportWidth(390));
   afterEach(() => setViewportWidth(1440));
 
-  it('flags an old balance, and opens it to update', async () => {
+  it('shows what counts, flags an old balance on its row, and opens it to update', async () => {
     const { user } = renderAccounts();
 
-    await user.click(
-      await screen.findByRole('button', { name: /Cash ISA hasn’t been updated in 5 weeks/ })
-    );
+    const counted = await screen.findByRole('region', { name: 'Counted in free to spend' });
+    expect(counted).toHaveTextContent('£1,000.00');
+    const isa = screen.getByRole('button', { name: 'Edit Cash ISA' });
+    expect(isa).toHaveTextContent('Savings · 4.5%');
+    expect(isa).toHaveTextContent('Updated 5 weeks ago');
+    expect(isa).toHaveTextContent('Kept out');
+    await user.click(isa);
 
     const sheet = await screen.findByRole('dialog', { name: 'Edit Cash ISA' });
     expect(within(sheet).getByLabelText('Balance now')).toHaveValue('8,650.00');
@@ -266,9 +270,11 @@ describe('several accounts to spend from', () => {
       within(spendingGroup).getByText('Spending · Shared household bills')
     ).toBeInTheDocument();
     // The mortgage doesn't say which account it comes out of
-    const banner = screen.getByRole('status', { name: /say which account/ });
+    const banner = screen.getByRole('region', { name: 'Payments without an account' });
     expect(banner).toHaveTextContent('1 payment doesn’t say which account it comes from');
-    expect(banner).toHaveTextContent('Until you choose, it comes out of Current account');
+    expect(banner).toHaveTextContent(
+      'Mortgage comes out of Current account, where you get paid, until you choose.'
+    );
 
     await user.click(within(banner).getByRole('button', { name: 'Choose accounts' }));
     expect(await screen.findByRole('dialog', { name: 'Set up your accounts' })).toBeInTheDocument();
@@ -294,6 +300,30 @@ describe('several accounts to spend from', () => {
     );
   });
 
+  it('keeps a spending account out of free to spend, but not where you get paid', async () => {
+    const { user, api } = renderAccounts(several());
+
+    const spendingGroup = await screen.findByRole('region', { name: 'Spending' });
+    expect(within(spendingGroup).getByText('Always counts')).toBeInTheDocument();
+    expect(
+      within(spendingGroup).queryByRole('switch', {
+        name: 'Count Current account in free to spend'
+      })
+    ).not.toBeInTheDocument();
+    await user.click(
+      within(spendingGroup).getByRole('switch', { name: 'Count Holiday spending in free to spend' })
+    );
+
+    expect(
+      await screen.findByText('Holiday spending is kept out of free to spend')
+    ).toBeInTheDocument();
+    expect(api.callsTo('UpdateAccount')).toEqual([{ id: 'holiday', input: { counts: false } }]);
+    // £1,000 + £2,105
+    expect(screen.getByRole('region', { name: 'Counted in free to spend' })).toHaveTextContent(
+      '£3,105.00'
+    );
+  });
+
   it('moves where you get paid from an account’s menu', async () => {
     const { user, api } = renderAccounts(several());
 
@@ -301,15 +331,17 @@ describe('several accounts to spend from', () => {
     await user.click(await screen.findByRole('menuitem', { name: 'Make where you get paid' }));
     const dialog = await screen.findByRole('dialog', { name: 'Edit Joint bills' });
     expect(dialog).toHaveTextContent(
-      'Your pay goes into Joint bills from your next payday. Current account stops being where you get paid.'
+      /Your pay goes into Joint bills from \w{3} \d{1,2} \w{3}\. Current account stops being where you get paid\./
     );
+    // Where pay lands always counts, so there's no count switch while it moves
+    expect(within(dialog).getAllByRole('switch')).toHaveLength(1);
     await user.click(within(dialog).getByRole('button', { name: 'Save' }));
 
     expect(await screen.findByText('Joint bills saved')).toBeInTheDocument();
     expect(api.callsTo('UpdateAccount')).toEqual([
       {
         id: 'joint',
-        input: expect.objectContaining({ paidInto: true })
+        input: expect.objectContaining({ paidInto: true, counts: true })
       }
     ]);
   });
@@ -321,7 +353,15 @@ describe('several accounts to spend from', () => {
     const dialog = await screen.findByRole('dialog', { name: 'Set up your accounts' });
     expect(within(dialog).getByRole('radio', { name: /Current account/ })).toBeChecked();
     await user.click(within(dialog).getByRole('checkbox', { name: 'Select Mortgage' }));
-    await user.click(within(dialog).getByRole('button', { name: 'Move' }));
+    expect(dialog).toHaveTextContent(
+      '1 from Current account · 1 from Joint bills · 0 from Holiday spending'
+    );
+    // Three accounts to spend from, so the bar picks where they go: the first one they're not on
+    expect(
+      within(dialog).getByRole('combobox', { name: 'Account to move them to' })
+    ).toHaveTextContent('Joint bills');
+    await user.click(within(dialog).getByRole('button', { name: 'Move 1' }));
+    expect(dialog).toHaveTextContent('0 from Current account · 2 from Joint bills');
     await user.click(within(dialog).getByRole('button', { name: 'Save' }));
 
     expect(await screen.findByText('Accounts set up')).toBeInTheDocument();
@@ -348,8 +388,8 @@ describe('several accounts to spend from', () => {
     await user.type(within(dialog).getByLabelText('Balance now'), '2105');
     await user.type(within(dialog).getByLabelText('Name'), 'Joint bills');
     await user.click(within(dialog).getByRole('radio', { name: 'Spending' }));
-    // Spending accounts always count, and have no rate
-    expect(within(dialog).queryByRole('switch')).not.toBeInTheDocument();
+    // Spending accounts count unless switched out, and have no rate
+    expect(within(dialog).getByRole('switch', { name: 'Count in free to spend' })).toBeChecked();
     expect(within(dialog).queryByLabelText('Interest rate (optional)')).not.toBeInTheDocument();
     await user.click(within(dialog).getByRole('button', { name: 'Add account' }));
 
@@ -361,6 +401,7 @@ describe('several accounts to spend from', () => {
           kind: 'SPENDING',
           name: 'Joint bills',
           balance: 2105,
+          counts: true,
           purpose: null
         }
       }

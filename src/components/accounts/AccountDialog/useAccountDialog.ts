@@ -101,7 +101,8 @@ export const useAccountDialog = ({
             input: {
               ...fields,
               ...(isPaidInto || draft.kind === account.kind ? {} : { kind: draft.kind }),
-              ...(canBePaidInto && draft.paidInto ? { paidInto: true } : {})
+              // Where pay lands always counts
+              ...(canBePaidInto && draft.paidInto ? { paidInto: true, counts: true } : {})
             }
           }
         });
@@ -141,6 +142,8 @@ export const useAccountDialog = ({
     // Where pay lands, with another account to spend from, shows its switch locked on
     showPaidInto: isPaidInto ? otherSpending.length > 0 : canBePaidInto,
     paidIntoMove,
+    // Where pay lands, or about to be, always counts, so there's nothing to switch
+    showCounts: !isPaidInto && !paidIntoMove,
     paidIntoName: paidIntoNow?.name ?? null,
     canDelete: !!account && !isPaidInto,
     draft,

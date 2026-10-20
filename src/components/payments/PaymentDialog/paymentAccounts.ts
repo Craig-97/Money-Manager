@@ -1,7 +1,8 @@
 import { PaymentType } from '~/graphql/generated';
 import { Account, isSpending } from '~/lib/accounts';
+import { formatBalance } from '~/lib/format';
 
-export type FormAccount = Pick<Account, 'id' | 'name' | 'counts' | 'kind' | 'paidInto'>;
+export type FormAccount = Pick<Account, 'id' | 'name' | 'counts' | 'kind' | 'paidInto' | 'balance'>;
 
 interface AccountValues {
   type: PaymentType;
@@ -29,3 +30,11 @@ export const accountChoices = (values: AccountValues, accounts: readonly FormAcc
       : null;
   return { paidInto, several, options, from, targets, into };
 };
+
+/* The line under an account in the From and Into lists: "Where you get paid · £7,895.00" */
+export const accountDescription = (account: FormAccount) =>
+  `${account.paidInto ? 'Where you get paid' : isSpending(account) ? 'Spending' : 'Savings'} · ${formatBalance(account.balance)}`;
+
+/* An account to move money into also says whether it counts in free to spend */
+export const targetDescription = (account: FormAccount) =>
+  `${accountDescription(account)} · ${account.counts ? 'counts in free to spend' : 'kept out of free to spend'}`;

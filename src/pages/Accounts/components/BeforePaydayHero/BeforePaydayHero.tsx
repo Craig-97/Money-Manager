@@ -1,3 +1,4 @@
+import { joinNames } from '~/lib/accounts';
 import { daysBetween } from '~/lib/dates';
 import { formatBalance, formatMoney, splitPence } from '~/lib/format';
 import { formatShortDate } from '~/lib/payments';
@@ -7,7 +8,8 @@ const chipClasses = 'flex min-w-0 flex-col gap-1 rounded-[18px] bg-hero-chip px-
 const opClasses = 'flex items-center justify-center text-xl font-bold text-hero-muted';
 
 /*
- * What the accounts to spend from have left by payday, once their own payments go out, with the sum
+ * What the accounts to spend from that count in free to spend have left by payday, once their own
+ * payments go out, named in the line under the figure, with the sum
  * underneath as the Balances view shows its own: balance now − goes out = left at payday. Money
  * moving between them doesn't change it.
  */
@@ -21,13 +23,12 @@ export const BeforePaydayHero = ({
   const { beforePayday, cycle, today } = model;
   const [whole, pence] = splitPence(beforePayday.left);
   const days = Math.max(0, daysBetween(today, cycle.end));
-  const count = beforePayday.spending.length;
   const chips = [
     { label: 'Balance now', value: formatBalance(beforePayday.now) },
     { label: 'Goes out', value: formatMoney(beforePayday.goesOut) },
     { label: compact ? 'Left' : 'Left at payday', value: formatBalance(beforePayday.left) }
   ];
-  const across = `Across ${count} spending ${count === 1 ? 'account' : 'accounts'}, once their own payments go out.`;
+  const across = `Across ${joinNames(beforePayday.counted.map(account => account.name))}, once the payments due before payday go out.`;
 
   return (
     <article

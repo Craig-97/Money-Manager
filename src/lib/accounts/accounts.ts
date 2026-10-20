@@ -163,3 +163,7 @@ export const forFreeToSpend = <T extends { kind: string; paysInto?: string | nul
     payment => !(payment.kind === 'recurring' && payment.paysInto && counted.has(payment.paysInto))
   );
 };
+
+/* Names in a sentence: "Netflix", "Netflix and Gym", "Netflix, Gym and Phone" */
+export const joinNames = (names: readonly string[]) =>
+  names.length <= 1 ? (names[0] ?? '') : `${names.slice(0, -1).join(', ')} and ${names.at(-1)}`;

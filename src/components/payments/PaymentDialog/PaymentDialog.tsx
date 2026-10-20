@@ -64,13 +64,7 @@ export const PaymentDialog = () => {
       : asDebt && !editing
         ? 'Add a debt'
         : `${editing ? 'Edit' : 'Add'} ${kind === 'recurring' ? 'recurring' : 'one-off'} payment`;
-  const submitLabel = editing
-    ? 'Save changes'
-    : kind === 'recurring' && form.values.tracked
-      ? 'Add debt'
-      : kind === 'recurring' && isDesktop
-        ? 'Add recurring payment'
-        : 'Add payment';
+  const submitLabel = editing ? 'Save changes' : asDebt ? 'Add debt' : 'Add payment';
 
   return (
     <Modal
