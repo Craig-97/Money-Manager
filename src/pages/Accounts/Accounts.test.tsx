@@ -407,4 +407,35 @@ describe('several accounts to spend from', () => {
       }
     ]);
   });
+
+  it('adds a spending account that pay goes into from payday', async () => {
+    const { user, api } = renderAccounts();
+
+    await user.click(await screen.findByRole('button', { name: 'Add account' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Add account' });
+    // Only an account to spend from can be where you get paid
+    expect(within(dialog).queryByRole('switch', { name: 'Where you get paid' })).toBeNull();
+    await user.type(within(dialog).getByLabelText('Balance now'), '400');
+    await user.type(within(dialog).getByLabelText('Name'), 'New current');
+    await user.click(within(dialog).getByRole('radio', { name: 'Spending' }));
+    await user.click(within(dialog).getByRole('switch', { name: 'Where you get paid' }));
+    expect(dialog).toHaveTextContent(
+      /Your pay goes into New current from \w{3} \d{1,2} \w{3}\. Current account stops being where you get paid\./
+    );
+    // Where pay lands always counts, so there's no count switch
+    expect(within(dialog).getAllByRole('switch')).toHaveLength(1);
+    await user.click(within(dialog).getByRole('button', { name: 'Add account' }));
+
+    expect(await screen.findByText('New current added')).toBeInTheDocument();
+    expect(api.callsTo('CreateAccount')).toEqual([
+      {
+        input: expect.objectContaining({
+          kind: 'SPENDING',
+          name: 'New current',
+          paidInto: true,
+          counts: true
+        })
+      }
+    ]);
+  });
 });

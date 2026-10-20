@@ -845,16 +845,25 @@ export const createFakeApi = ({
       if (input.monthlyIncome !== undefined) current.monthlyIncome = input.monthlyIncome;
       return { budget: current, success: true };
     },
+    // As the API: one made where pay lands takes that over from the other, and always counts
     createAccount: ({ input }: Args) => {
       const current = requireBudget();
       const spending = input.kind === 'SPENDING';
+      const paidInto = input.paidInto === true;
+      if (paidInto && !spending) {
+        throw apiError('PAID_INTO_NOT_SPENDING', {
+          message: 'Only a spending account can be where you get paid'
+        });
+      }
+      if (paidInto && input.counts === false) throw paidIntoFixed('kept out of free to spend');
+      if (paidInto) for (const other of current.accounts ?? []) other.paidInto = false;
       const account: FakeAccount = {
         id: newId('account'),
         name: input.name.trim(),
         kind: spending ? 'SPENDING' : 'SAVINGS',
         balance: input.balance,
-        counts: input.counts ?? spending,
-        paidInto: false,
+        counts: paidInto || (input.counts ?? spending),
+        paidInto,
         interestRate: input.interestRate ?? null,
         purpose: input.purpose?.trim() || null,
         balanceUpdatedAt: String(Date.now())

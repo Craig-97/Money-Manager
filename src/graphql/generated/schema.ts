@@ -106,6 +106,7 @@ export type CreateAccountInput = {
   interestRate?: InputMaybe<Scalars['Float']['input']>;
   kind?: InputMaybe<AccountKind>;
   name: Scalars['String']['input'];
+  paidInto?: InputMaybe<Scalars['Boolean']['input']>;
   purpose?: InputMaybe<Scalars['String']['input']>;
 };
 

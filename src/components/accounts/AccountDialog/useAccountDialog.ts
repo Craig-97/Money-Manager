@@ -79,13 +79,15 @@ export const useAccountDialog = ({
   const spending = draft.kind === 'SPENDING';
   const otherSpending = spendingOf(accounts).filter(item => item.id !== account?.id);
   const paidIntoNow = paidIntoAccountOf(accounts);
-  // Only an existing spending account can take over where pay lands, and only from another one
-  const canBePaidInto = !!account && spending && !isPaidInto && otherSpending.length > 0;
+  // A spending account, new or not, can take over where pay lands from another one
+  const canBePaidInto = spending && !isPaidInto && otherSpending.length > 0;
   // Moving where pay lands: "Your pay goes into Joint bills from your next payday…"
   const paidIntoMove =
     canBePaidInto && draft.paidInto && paidIntoNow
-      ? { from: paidIntoNow.name, to: name || account.name }
+      ? { from: paidIntoNow.name, to: name || account?.name || 'this account' }
       : null;
+  // Where pay lands always counts
+  const paidIntoInput = canBePaidInto && draft.paidInto ? { paidInto: true, counts: true } : {};
 
   const failed = (error: unknown, fallback: string) =>
     showToast({ message: getApiErrorMessage(error, fallback) });
@@ -101,13 +103,14 @@ export const useAccountDialog = ({
             input: {
               ...fields,
               ...(isPaidInto || draft.kind === account.kind ? {} : { kind: draft.kind }),
-              // Where pay lands always counts
-              ...(canBePaidInto && draft.paidInto ? { paidInto: true, counts: true } : {})
+              ...paidIntoInput
             }
           }
         });
       } else {
-        await create({ variables: { input: { budgetId, kind: draft.kind, ...fields } } });
+        await create({
+          variables: { input: { budgetId, kind: draft.kind, ...fields, ...paidIntoInput } }
+        });
       }
       close();
       showToast({ message: account ? `${name} saved` : `${name} added` });

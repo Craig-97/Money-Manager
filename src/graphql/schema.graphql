@@ -225,6 +225,7 @@ input CreateAccountInput {
   kind: AccountKind
   balance: Float!
   counts: Boolean
+  paidInto: Boolean
   interestRate: Float
   purpose: String
 }
