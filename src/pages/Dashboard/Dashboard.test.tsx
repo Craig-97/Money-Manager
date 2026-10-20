@@ -448,10 +448,48 @@ describe('payday prompt', () => {
       {
         input: expect.objectContaining({
           budgetId: 'budget-1',
-          currentBalance: 3450,
+          paidIntoBalance: 3450,
           accountBalances: [],
           leftOver: [{ recurringPaymentId: 'netflix', outcome: 'PAID' }],
           alreadyPaid: { recurringPaymentIds: [], oneOffPaymentIds: [] }
+        })
+      }
+    ]);
+  });
+
+  it('confirms where pay lands, and takes what went out of other accounts off theirs', async () => {
+    const data = paydayBudget();
+    data.recurringPayments[0].account = 'joint';
+    data.accounts = [
+      {
+        id: 'joint',
+        name: 'Joint bills',
+        kind: 'SPENDING',
+        balance: 2105,
+        counts: true,
+        interestRate: null,
+        purpose: null,
+        balanceUpdatedAt: apiDateFromToday(0)
+      }
+    ];
+    const { user, api } = renderDashboard(data);
+
+    const dialog = await screen.findByRole('dialog', { name: 'It’s payday' });
+    // Netflix comes out of Joint bills, so only the income goes on here
+    expect(within(dialog).getByLabelText(/Confirm your current account/)).toHaveValue('3,500.00');
+    await user.click(within(dialog).getByRole('button', { name: /Update your other accounts/ }));
+    const joint = within(dialog).getByLabelText('Joint bills');
+    expect(joint).toHaveValue('2,085.00');
+    expect(dialog).toHaveTextContent('£20.00 gone out');
+    await user.click(within(dialog).getByRole('button', { name: 'Start new cycle' }));
+
+    expect(await within(dialog).findByText('New cycle started')).toBeInTheDocument();
+    expect(api.callsTo('StartPaydayCycle')).toEqual([
+      {
+        input: expect.objectContaining({
+          paidIntoBalance: 3500,
+          // Not what the API would leave it at, so it's sent
+          accountBalances: [{ accountId: 'joint', balance: 2085 }]
         })
       }
     ]);

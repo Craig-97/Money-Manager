@@ -8,6 +8,7 @@ import { Payment } from '~/lib/payments';
 import { FREQUENCY_OPTIONS, ONE_OFF_OPTIONS, RECURRING_OPTIONS } from '../../paymentOptions';
 import { PaymentForm } from '../../usePaymentForm';
 import { DebtFields } from '../DebtFields';
+import { FromAccount } from '../FromAccount';
 import { PaymentTypeToggle } from '../PaymentTypeToggle';
 import { PaysInto } from '../PaysInto';
 import { RecurringEnding } from '../RecurringEnding';
@@ -21,21 +22,23 @@ const nameAmountClasses = 'grid gap-[inherit] md:grid-cols-[3fr_2fr] md:gap-3.5'
 
 /*
  * The payment's fields: name and amount, type and category, then its date or schedule. On desktop
- * each pair shares a row, so the dialog isn't so tall. A recurring expense can be tracked as a
- * debt, which is always money out and ends when it's paid off, or pay into one of the budget's
- * savings accounts, but not both.
+ * each pair shares a row, so the dialog isn't so tall. With more than one account to spend from,
+ * it says which one it goes out of (or an income lands in). A recurring expense can be tracked as
+ * a debt, which is always money out and ends when it's paid off, or move money into another of the
+ * budget's accounts, but not both.
  */
 export const FormBody = ({ form, kind }: { form: PaymentForm; kind: Payment['kind'] }) => {
   const { values, set, touch, errors } = form;
   const debt = kind === 'recurring' && values.tracked;
-  // A recurring expense can pay into savings, like a standing order; it's then not a debt
-  const paysInto = kind === 'recurring' && values.type === 'EXPENSE' && !debt && !!values.paysInto;
+  // A recurring expense can move money into another account, like a standing order; it's then
+  // not a debt
+  const paysInto = kind === 'recurring' && !!form.choices.into;
   const canPayInto =
     kind === 'recurring' &&
     !form.asDebt &&
     values.type === 'EXPENSE' &&
     !debt &&
-    form.savings.length > 0;
+    form.choices.targets.length > 0;
   // From Debts it's always a debt; otherwise only an expense can be one, and not one into savings
   const canTrack =
     kind === 'recurring' && !form.asDebt && !paysInto && (values.type === 'EXPENSE' || debt);
@@ -106,6 +109,8 @@ export const FormBody = ({ form, kind }: { form: PaymentForm; kind: Payment['kin
           {categoryField}
         </div>
       )}
+
+      {form.choices.several ? <FromAccount form={form} /> : null}
 
       {kind === 'oneOff' ? (
         <div className={desktopPairClasses}>

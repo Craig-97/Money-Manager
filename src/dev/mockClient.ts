@@ -1,7 +1,16 @@
 import { createApolloClient } from '~/graphql/client/createApolloClient';
 import { addDays, startOfToday, toIsoDate } from '~/lib/dates';
 import { useAuthStore } from '~/state/auth';
-import { apiDate, createFakeApi, DEFAULT_USER, FakeBudget, fakeRecord } from '~/test/fakeApi';
+import {
+  apiDate,
+  createFakeApi,
+  DEFAULT_USER,
+  FakeAccount,
+  FakeBudget,
+  FakeOneOffPayment,
+  fakeRecord,
+  FakeRecurringPayment
+} from '~/test/fakeApi';
 
 /*
  * Development only (VITE_MOCK_API=true): the app runs against the in-memory fake API from the
@@ -16,6 +25,82 @@ import { apiDate, createFakeApi, DEFAULT_USER, FakeBudget, fakeRecord } from '~/
  */
 
 const fromToday = (days: number) => apiDate(toIsoDate(addDays(startOfToday(), days)));
+
+// The accounts scenario's other spending accounts: a joint one for bills, and a holiday one that
+// would go below £0 before payday
+const demoSpendingAccounts = (): FakeAccount[] => [
+  {
+    id: 'joint',
+    name: 'Joint bills',
+    kind: 'SPENDING',
+    balance: 2105,
+    counts: true,
+    interestRate: null,
+    purpose: 'Shared household bills',
+    balanceUpdatedAt: fromToday(-3)
+  },
+  {
+    id: 'holiday',
+    name: 'Holiday spending',
+    kind: 'SPENDING',
+    balance: 180,
+    counts: true,
+    interestRate: null,
+    purpose: null,
+    balanceUpdatedAt: fromToday(0)
+  }
+];
+
+const jointBill = (
+  id: string,
+  {
+    name,
+    amount,
+    due,
+    account
+  }: { name: string; amount: number; due: number; account: string | null }
+): FakeRecurringPayment => ({
+  id,
+  name,
+  amount,
+  category: 'UTILITIES',
+  frequency: 'MONTHLY',
+  type: 'EXPENSE',
+  firstPaymentDate: fromToday(due - 120),
+  lastPaymentDate: null,
+  nextDueDate: fromToday(due),
+  thisCycle: [],
+  renewalDate: null,
+  account
+});
+
+// Bills out of Joint bills, water not saying which account yet, and a top-up into it
+const demoJointPayments = (): FakeRecurringPayment[] => [
+  jointBill('energy', { name: 'Energy', amount: 120, due: 7, account: 'joint' }),
+  jointBill('broadband', { name: 'Broadband', amount: 32, due: 12, account: 'joint' }),
+  jointBill('water', { name: 'Water', amount: 43.02, due: 16, account: null }),
+  {
+    ...jointBill('joint-top-up', {
+      name: 'Joint bills top-up',
+      amount: 600,
+      due: 5,
+      account: null
+    }),
+    paysInto: 'joint'
+  }
+];
+
+const demoHolidayPayments = (): FakeOneOffPayment[] => [
+  {
+    id: 'hotel',
+    name: 'Hotel deposit',
+    amount: 220,
+    dueDate: fromToday(9),
+    type: 'EXPENSE',
+    category: 'TRAVEL',
+    account: 'holiday'
+  }
+];
 
 // The design's example data, moved so it's always current
 const demoBudget = (scenario: string | null): FakeBudget => {
@@ -171,6 +256,14 @@ const demoBudget = (scenario: string | null): FakeBudget => {
   }
   if (scenario === 'debts') {
     return { ...budget, recurringPayments: [...budget.recurringPayments, ...demoDebts()] };
+  }
+  if (scenario === 'accounts') {
+    return {
+      ...budget,
+      accounts: [...demoSpendingAccounts(), ...(budget.accounts ?? [])],
+      recurringPayments: [...budget.recurringPayments, ...demoJointPayments()],
+      oneOffPayments: [...budget.oneOffPayments, ...demoHolidayPayments()]
+    };
   }
   if (scenario === 'reminders') {
     return {

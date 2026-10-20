@@ -198,6 +198,87 @@ describe('paying into savings', () => {
   });
 });
 
+describe('several accounts to spend from', () => {
+  const withJoint = (): FakeBudget => ({
+    ...budget(),
+    accounts: [
+      {
+        id: 'joint',
+        name: 'Joint bills',
+        kind: 'SPENDING',
+        balance: 2105,
+        counts: true,
+        interestRate: null,
+        purpose: null,
+        balanceUpdatedAt: String(Date.now())
+      },
+      {
+        id: 'isa',
+        name: 'Cash ISA',
+        kind: 'SAVINGS',
+        balance: 8650,
+        counts: false,
+        interestRate: 4.5,
+        purpose: null,
+        balanceUpdatedAt: String(Date.now())
+      }
+    ]
+  });
+  const openAdd = async () => {
+    const rendered = renderApp({
+      route: '/recurring',
+      api: createFakeApi({ budget: withJoint() })
+    });
+    await rendered.user.click(await screen.findByRole('button', { name: 'Recurring payment' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Add recurring payment' });
+    return { ...rendered, dialog };
+  };
+
+  it('says which account a payment comes out of, starting on where you get paid', async () => {
+    const { user, api, dialog } = await openAdd();
+    await user.type(within(dialog).getByLabelText('Name'), 'Energy');
+    await user.type(within(dialog).getByLabelText('Amount'), '120');
+    expect(within(dialog).getByRole('combobox', { name: 'From' })).toHaveTextContent(
+      'Current account'
+    );
+
+    await user.click(within(dialog).getByRole('combobox', { name: 'From' }));
+    // Only accounts to spend from
+    expect(screen.queryByRole('option', { name: 'Cash ISA' })).not.toBeInTheDocument();
+    await user.click(await screen.findByRole('option', { name: 'Joint bills' }));
+    expect(dialog).toHaveTextContent('Comes off Joint bills when it’s marked paid');
+    await user.click(within(dialog).getByRole('button', { name: 'Add recurring payment' }));
+
+    expect(await screen.findByText('Added Energy')).toBeInTheDocument();
+    expect(api.callsTo('CreateRecurringPayment')).toEqual([
+      { input: expect.objectContaining({ name: 'Energy', account: 'joint' }) }
+    ]);
+  });
+
+  it('moves money into another account to spend from, keeping its category', async () => {
+    const { user, dialog } = await openAdd();
+    await user.click(
+      within(dialog).getByRole('switch', { name: 'Moves money to another account' })
+    );
+
+    expect(within(dialog).getByRole('combobox', { name: 'Into' })).toHaveTextContent('Joint bills');
+    expect(dialog).toHaveTextContent(
+      'Joint bills counts in free to spend, so this only moves money between your accounts. It’s left out of your monthly totals.'
+    );
+    expect(within(dialog).getByLabelText('Category')).toBeInTheDocument();
+  });
+
+  it('lands an income in an account', async () => {
+    const { user, dialog } = await openAdd();
+    await user.click(within(dialog).getByRole('button', { name: 'Income' }));
+
+    await user.click(within(dialog).getByRole('combobox', { name: 'Into' }));
+    // Income can land in savings
+    await user.click(await screen.findByRole('option', { name: 'Cash ISA' }));
+    expect(dialog).toHaveTextContent('Goes into Cash ISA when it’s marked paid');
+  });
+});
+
 describe('adding a debt from Debts', () => {
   it('is always a debt, with no switch', async () => {
     const { user, api } = renderAt('/debts');

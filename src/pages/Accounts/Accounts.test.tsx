@@ -124,7 +124,7 @@ describe('accounts', () => {
     const { user, api } = renderAccounts();
 
     await user.click(await screen.findByRole('button', { name: 'Add account' }));
-    const dialog = await screen.findByRole('dialog', { name: 'Add savings account' });
+    const dialog = await screen.findByRole('dialog', { name: 'Add account' });
     // Asks for what's missing rather than sending it
     await user.click(within(dialog).getByRole('button', { name: 'Add account' }));
     expect(within(dialog).getByText('Give it a name')).toBeInTheDocument();
@@ -139,6 +139,7 @@ describe('accounts', () => {
       {
         input: {
           budgetId: 'budget-1',
+          kind: 'SAVINGS',
           name: 'Easy access',
           balance: 4200,
           counts: false,
@@ -201,5 +202,168 @@ describe('accounts on mobile', () => {
     expect(row).toHaveTextContent('For yearly bills');
     expect(screen.getByRole('button', { name: `Edit Current account` })).toBeInTheDocument();
     expect(CURRENT_ACCOUNT_ID).toBe('account-current');
+  });
+});
+
+describe('several accounts to spend from', () => {
+  const spending = (fields: Partial<FakeAccount> & { id: string; name: string }): FakeAccount => ({
+    ...savings(fields),
+    kind: 'SPENDING',
+    counts: true,
+    ...fields
+  });
+
+  // Joint bills alongside the current account, with energy going out of it and the mortgage not
+  // saying which account it uses. A holiday account would go below £0 before payday.
+  const several = (): FakeBudget => ({
+    ...budget(),
+    accounts: [
+      spending({
+        id: 'joint',
+        name: 'Joint bills',
+        balance: 2105,
+        purpose: 'Shared household bills'
+      }),
+      spending({ id: 'holiday', name: 'Holiday spending', balance: 180 }),
+      ...budget().accounts!
+    ],
+    recurringPayments: [
+      ...DEFAULT_BUDGET.recurringPayments,
+      {
+        id: 'energy',
+        name: 'Energy',
+        amount: 120,
+        category: 'UTILITIES',
+        frequency: 'MONTHLY',
+        type: 'EXPENSE',
+        firstPaymentDate: apiDate('2026-01-09'),
+        lastPaymentDate: null,
+        nextDueDate: null,
+        thisCycle: [],
+        renewalDate: null,
+        account: 'joint'
+      }
+    ],
+    oneOffPayments: [
+      {
+        id: 'hotel',
+        name: 'Hotel deposit',
+        amount: 220,
+        dueDate: apiDate('2026-10-23'),
+        type: 'EXPENSE',
+        category: 'TRAVEL',
+        account: 'holiday'
+      }
+    ]
+  });
+
+  it('tags where you get paid, and asks about payments that don’t say', async () => {
+    const { user } = renderAccounts(several());
+
+    const spendingGroup = await screen.findByRole('region', { name: 'Spending' });
+    expect(within(spendingGroup).getByText('Where you get paid')).toBeInTheDocument();
+    expect(
+      within(spendingGroup).getByText('Spending · Shared household bills')
+    ).toBeInTheDocument();
+    // The mortgage doesn't say which account it comes out of
+    const banner = screen.getByRole('status', { name: /say which account/ });
+    expect(banner).toHaveTextContent('1 payment doesn’t say which account it comes from');
+    expect(banner).toHaveTextContent('Until you choose, it comes out of Current account');
+
+    await user.click(within(banner).getByRole('button', { name: 'Choose accounts' }));
+    expect(await screen.findByRole('dialog', { name: 'Set up your accounts' })).toBeInTheDocument();
+  });
+
+  it('shows what each account has left by payday, opening one that would go below £0', async () => {
+    const { user } = renderAccounts(several());
+
+    await user.click(await screen.findByRole('radio', { name: 'Before payday' }));
+
+    // £1,000 + £2,105 + £180, less the mortgage, energy and the hotel deposit
+    expect(screen.getByRole('article', { name: 'Left at payday' })).toHaveTextContent('£2,195.00');
+    const holiday = screen.getByRole('button', { name: /Holiday spending/ });
+    expect(holiday).toHaveAttribute('aria-expanded', 'true');
+    expect(
+      screen.getByRole('region', { name: 'Holiday spending before payday' })
+    ).toHaveTextContent('Goes below £0 on Fri 23 Oct (−£40.00). Move money in before then.');
+    const joint = screen.getByRole('button', { name: /Joint bills/ });
+    expect(joint).toHaveAttribute('aria-expanded', 'false');
+    await user.click(joint);
+    expect(screen.getByRole('region', { name: 'Joint bills before payday' })).toHaveTextContent(
+      'Energy'
+    );
+  });
+
+  it('moves where you get paid from an account’s menu', async () => {
+    const { user, api } = renderAccounts(several());
+
+    await user.click(await screen.findByRole('button', { name: 'More actions for Joint bills' }));
+    await user.click(await screen.findByRole('menuitem', { name: 'Make where you get paid' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Edit Joint bills' });
+    expect(dialog).toHaveTextContent(
+      'Your pay goes into Joint bills from your next payday. Current account stops being where you get paid.'
+    );
+    await user.click(within(dialog).getByRole('button', { name: 'Save' }));
+
+    expect(await screen.findByText('Joint bills saved')).toBeInTheDocument();
+    expect(api.callsTo('UpdateAccount')).toEqual([
+      {
+        id: 'joint',
+        input: expect.objectContaining({ paidInto: true })
+      }
+    ]);
+  });
+
+  it('says which account each payment comes out of, moving several at once', async () => {
+    const { user, api } = renderAccounts(several());
+
+    await user.click(await screen.findByRole('button', { name: 'Choose accounts' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Set up your accounts' });
+    expect(within(dialog).getByRole('radio', { name: /Current account/ })).toBeChecked();
+    await user.click(within(dialog).getByRole('checkbox', { name: 'Select Mortgage' }));
+    await user.click(within(dialog).getByRole('button', { name: 'Move' }));
+    await user.click(within(dialog).getByRole('button', { name: 'Save' }));
+
+    expect(await screen.findByText('Accounts set up')).toBeInTheDocument();
+    expect(api.callsTo('AssignPaymentAccounts')).toEqual([
+      {
+        input: {
+          budgetId: 'budget-1',
+          payments: [
+            { recurringPaymentId: 'recurring-1', accountId: 'joint' },
+            { recurringPaymentId: 'energy', accountId: 'joint' }
+          ]
+        }
+      }
+    ]);
+    // Nothing left unchosen
+    expect(screen.queryByRole('button', { name: 'Choose accounts' })).not.toBeInTheDocument();
+  });
+
+  it('asks to set up accounts once a second one to spend from is added', async () => {
+    const { user, api } = renderAccounts();
+
+    await user.click(await screen.findByRole('button', { name: 'Add account' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Add account' });
+    await user.type(within(dialog).getByLabelText('Balance now'), '2105');
+    await user.type(within(dialog).getByLabelText('Name'), 'Joint bills');
+    await user.click(within(dialog).getByRole('radio', { name: 'Spending' }));
+    // Spending accounts always count, and have no rate
+    expect(within(dialog).queryByRole('switch')).not.toBeInTheDocument();
+    expect(within(dialog).queryByLabelText('Interest rate (optional)')).not.toBeInTheDocument();
+    await user.click(within(dialog).getByRole('button', { name: 'Add account' }));
+
+    expect(await screen.findByRole('dialog', { name: 'Set up your accounts' })).toBeInTheDocument();
+    expect(api.callsTo('CreateAccount')).toEqual([
+      {
+        input: {
+          budgetId: 'budget-1',
+          kind: 'SPENDING',
+          name: 'Joint bills',
+          balance: 2105,
+          purpose: null
+        }
+      }
+    ]);
   });
 });

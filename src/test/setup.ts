@@ -9,6 +9,7 @@ import { useNoteDialogStore } from '~/state/noteDialog';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
 import { DEFAULT_ACCENT, usePrefsStore } from '~/state/prefs';
 import { useReminderChooserStore } from '~/state/reminderChooser';
+import { useSetupAccountsStore } from '~/state/setupAccounts';
 import { installMatchMedia, resetViewport } from './viewport';
 
 // Component tests render the whole app, so give async queries (findBy*, waitFor) more time
@@ -52,6 +53,7 @@ afterEach(() => {
   usePrefsStore.setState({ theme: 'dark', accent: DEFAULT_ACCENT });
   useNoteDialogStore.setState(useNoteDialogStore.getInitialState(), true);
   useAccountDialogStore.setState(useAccountDialogStore.getInitialState(), true);
+  useSetupAccountsStore.setState(useSetupAccountsStore.getInitialState(), true);
   usePaymentDialogStore.setState(usePaymentDialogStore.getInitialState(), true);
   useDebtDialogStore.setState(useDebtDialogStore.getInitialState(), true);
   useReminderChooserStore.setState(useReminderChooserStore.getInitialState(), true);

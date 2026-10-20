@@ -11,7 +11,6 @@ import {
   UpdateOneOffPaymentDocument,
   UpdateRecurringPaymentDocument
 } from '~/graphql/generated';
-import { Account } from '~/lib/accounts';
 import { addDays, formatShortDay, parseIsoDate, toApiDate } from '~/lib/dates';
 import { getApiErrorMessage, getErrorCode } from '~/lib/errors';
 import { formatMoneyInput, parseMoney } from '~/lib/format';
@@ -35,6 +34,7 @@ import {
 } from '~/lib/payments';
 import { showToast } from '~/state/toast';
 import { paidOffText, parseApr } from './debtFields';
+import { accountChoices, FormAccount } from './paymentAccounts';
 
 // How a recurring payment ends: it carries on, renews on a date (the payments carry on), or stops
 // after a last payment. One choice, so a renewal and a last payment can't both be set.
@@ -58,7 +58,9 @@ interface PaymentFormValues {
   category: RecurringPaymentCategory | OneOffPaymentCategory;
   // Recurring payments tracked as a debt: what's owed now, its APR, and what was borrowed
   tracked: boolean;
-  // A savings account a recurring expense pays into, like a standing order; '' for none
+  // The account it goes out of, or an income lands in; '' for the one pay lands in
+  account: string;
+  // Another account a recurring expense moves money into, like a standing order; '' for none
   paysInto: string;
   balance: string;
   apr: string;
@@ -101,6 +103,7 @@ const initialValues = ({
     reminder: 'usual',
     category: asDebt ? 'CREDIT_CARD' : kind === 'recurring' ? 'SUBSCRIPTION' : 'OTHER',
     tracked: asDebt,
+    account: '',
     paysInto: '',
     balance: '',
     apr: '',
@@ -114,7 +117,8 @@ const initialValues = ({
     name: payment.name,
     amount: formatMoneyInput(payment.amount),
     category: payment.category,
-    dueReminder: toTimingChoice(payment.dueReminder)
+    dueReminder: toTimingChoice(payment.dueReminder),
+    account: payment.account ?? ''
   };
   return payment.kind === 'recurring'
     ? {
@@ -183,14 +187,20 @@ const sameDebt = (a: PaymentFormValues, b: PaymentFormValues) => {
   );
 };
 
-/* Whether the form still holds what the payment already has */
-// Only an expense that isn't a debt can pay into savings
-const paysIntoOf = (values: PaymentFormValues) =>
-  values.type === 'EXPENSE' && !values.tracked && values.paysInto ? values.paysInto : null;
+// Only an expense that isn't a debt can move money into another account
+const paysIntoOf = (values: PaymentFormValues, accounts: readonly FormAccount[]) =>
+  accountChoices(values, accounts).into?.id ?? null;
+const fromOf = (values: PaymentFormValues, accounts: readonly FormAccount[]) =>
+  accountChoices(values, accounts).from?.id ?? null;
 
-const isUnchanged = (values: PaymentFormValues, before: PaymentFormValues) =>
+/* Whether the form still holds what the payment already has */
+const isUnchanged = (
+  values: PaymentFormValues,
+  { before, accounts }: { before: PaymentFormValues; accounts: readonly FormAccount[] }
+) =>
   values.name.trim() === before.name &&
-  paysIntoOf(values) === paysIntoOf(before) &&
+  paysIntoOf(values, accounts) === paysIntoOf(before, accounts) &&
+  fromOf(values, accounts) === fromOf(before, accounts) &&
   parseMoney(values.amount) === parseMoney(before.amount) &&
   values.type === before.type &&
   values.category === before.category &&
@@ -320,8 +330,8 @@ interface Options {
   today: Date;
   // The budget's usual reminder timing, for payments that follow it
   settings: ReminderSettings;
-  // The savings accounts a recurring expense can pay into
-  savings: readonly Pick<Account, 'id' | 'name' | 'counts'>[];
+  // The budget's accounts, for which one it goes out of and moving money between them
+  accounts: readonly FormAccount[];
   onSaved: () => void;
   // Changes when the dialog switches to another payment or kind, which starts the form afresh
   formKey: string;
@@ -335,7 +345,7 @@ export const usePaymentForm = ({
   payment,
   today,
   settings,
-  savings,
+  accounts,
   onSaved,
   formKey
 }: Options) => {
@@ -453,18 +463,23 @@ export const usePaymentForm = ({
     }
     const name = values.name.trim();
     // Editing without changing anything just closes
-    if (payment && isUnchanged(values, initialValues({ kind, payment, today, asDebt }))) {
+    const before = payment ? initialValues({ kind, payment, today, asDebt }) : null;
+    if (before && isUnchanged(values, { before, accounts })) {
       onSaved();
       return;
     }
+    const { several, from } = accountChoices(values, accounts);
+    // With more than one to spend from, saving says which account, so it's no longer unchosen
+    const account = several && from ? from.id : null;
+    const accountField = (saved: string | null) =>
+      account && account !== saved ? { account } : {};
     const common = { name, amount: amount!, type: values.type };
     setSaving(true);
     try {
       if (kind === 'recurring') {
         const schedule = { frequency: values.frequency, firstPaymentDate: values.first };
         const category = values.category as RecurringPaymentCategory;
-        if (payment) {
-          const before = initialValues({ kind, payment, today, asDebt });
+        if (payment && before) {
           // Only send the schedule if it changed: a new schedule starts the payment unpaid again.
           // The ending can always go, as a new last payment keeps what's been paid.
           const scheduleChanged =
@@ -477,9 +492,10 @@ export const usePaymentForm = ({
                 category,
                 ...endingFields(values),
                 ...(scheduleChanged ? schedule : {}),
+                ...accountField(payment.account),
                 // Sent when it changes; null stops it
-                ...(paysIntoOf(values) !== paysIntoOf(before)
-                  ? { paysInto: paysIntoOf(values) }
+                ...(paysIntoOf(values, accounts) !== paysIntoOf(before, accounts)
+                  ? { paysInto: paysIntoOf(values, accounts) }
                   : {}),
                 // Sent when it's a debt, and as null to stop tracking one
                 ...(values.tracked
@@ -499,7 +515,8 @@ export const usePaymentForm = ({
                 ...endingFields(values),
                 category,
                 budgetId,
-                ...(paysIntoOf(values) ? { paysInto: paysIntoOf(values) } : {}),
+                ...accountField(null),
+                ...(paysIntoOf(values, accounts) ? { paysInto: paysIntoOf(values, accounts) } : {}),
                 ...(values.tracked ? { debt: debtFields(values) } : {})
               }
             },
@@ -520,10 +537,12 @@ export const usePaymentForm = ({
           dueReminder: fromTimingChoice(values.dueReminder)
         };
         if (payment) {
-          await updateOneOff({ variables: { id: payment.id, input: fields } });
+          await updateOneOff({
+            variables: { id: payment.id, input: { ...fields, ...accountField(payment.account) } }
+          });
         } else {
           await createOneOff({
-            variables: { input: { ...fields, budgetId } },
+            variables: { input: { ...fields, ...accountField(null), budgetId } },
             update: (cache, { data }) => {
               if (data)
                 addOneOffPayment(cache, {
@@ -573,7 +592,9 @@ export const usePaymentForm = ({
     },
     // Opened from Debts: always a debt, so there's no switch to stop tracking it
     asDebt,
-    savings,
+    accounts,
+    // Which account it goes out of, and where money can move to
+    choices: accountChoices(values, accounts),
     endsHint: endsHint(values, today),
     ending,
     renewalPassed,

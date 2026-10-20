@@ -31,6 +31,7 @@ const CYCLE = {
 
 const payment = (overrides: Partial<RecurringPayment> & { id: string }): RecurringPayment => ({
   kind: 'recurring',
+  account: null,
   paysInto: null,
   name: overrides.id,
   amount: 20,
@@ -193,6 +194,7 @@ describe('one-off payments', () => {
     paidAt: null,
     dueReminder: { off: false, days: null },
     dueReminderDays: 1,
+    account: null,
     ...overrides
   });
 
@@ -282,6 +284,7 @@ describe('old balances', () => {
     kind: 'SAVINGS' as const,
     balance: 8650,
     counts: false,
+    paidInto: false,
     interestRate: 4.5,
     purpose: null,
     balanceUpdatedAt: day(updated)

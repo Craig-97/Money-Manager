@@ -41,6 +41,7 @@ const recurring = (
   dueReminder: { __typename: 'ReminderTiming', off: false, days: null },
   renewalReminder: { __typename: 'ReminderTiming', off: false, days: null },
   debt: null,
+  account: null,
   paysInto: null,
   ...overrides
 });
@@ -56,6 +57,7 @@ const oneOff = (
   category: 'OTHER',
   paidAt: null,
   dueReminder: { __typename: 'ReminderTiming', off: false, days: null },
+  account: null,
   ...overrides
 });
 

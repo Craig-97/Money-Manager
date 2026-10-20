@@ -3,7 +3,7 @@ import {
   Account,
   accountLetter,
   accountMeta,
-  isCurrent,
+  isSpending,
   isStale,
   updatedText
 } from '~/lib/accounts';
@@ -11,18 +11,21 @@ import { cn } from '~/lib/cn';
 import { formatBalance } from '~/lib/format';
 import { useAccountDialogStore } from '~/state/accountDialog';
 import { AccountMenu } from '../AccountMenu';
+import { PaidIntoTag } from '../PaidIntoTag';
 
 interface AccountRowProps {
   account: Account;
   today: Date;
+  // More than one account to spend from: say which one pay lands in
+  several: boolean;
   onCounts: (counts: boolean) => void;
 }
 
 /*
- * Desktop: one account. Its name opens it to edit; the switch counts it in free to spend, which the
- * current account always is. How old the balance is sits under the name below 1101px.
+ * Desktop: one account. Its name opens it to edit; the switch counts savings in free to spend,
+ * which spending accounts always are. How old the balance is sits under the name below 1101px.
  */
-export const AccountRow = ({ account, today, onCounts }: AccountRowProps) => {
+export const AccountRow = ({ account, today, several, onCounts }: AccountRowProps) => {
   const openEdit = useAccountDialogStore(s => s.openEdit);
   const stale = isStale(account, today);
   const updated = (
@@ -52,7 +55,10 @@ export const AccountRow = ({ account, today, onCounts }: AccountRowProps) => {
             className="-my-[11px] block max-w-full cursor-pointer rounded-lg py-[11px] text-left text-[15px] leading-[22px] font-bold [overflow-wrap:anywhere] hover:text-accent-text hover:underline hover:underline-offset-3">
             {account.name}
           </button>
-          <p className="mt-0.5 text-xs font-semibold text-muted">{accountMeta(account)}</p>
+          <p className="mt-0.5 text-xs font-semibold text-muted">
+            {accountMeta(account, { several })}
+          </p>
+          {several && account.paidInto ? <PaidIntoTag className="mt-1.5" /> : null}
           <div className="mt-1.5 wide:hidden">{updated}</div>
         </div>
       </div>
@@ -61,7 +67,7 @@ export const AccountRow = ({ account, today, onCounts }: AccountRowProps) => {
         {formatBalance(account.balance)}
       </span>
       <span className="flex items-center justify-end gap-2.5">
-        {isCurrent(account) ? (
+        {isSpending(account) ? (
           <span className="text-xs font-semibold text-muted">Always counts</span>
         ) : (
           <>
@@ -77,7 +83,7 @@ export const AccountRow = ({ account, today, onCounts }: AccountRowProps) => {
         )}
       </span>
       <span className="flex justify-end">
-        <AccountMenu account={account} onCounts={onCounts} />
+        <AccountMenu account={account} several={several} onCounts={onCounts} />
       </span>
     </div>
   );

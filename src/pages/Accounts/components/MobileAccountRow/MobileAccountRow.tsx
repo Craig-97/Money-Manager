@@ -1,14 +1,22 @@
 import { ChevronRight } from 'lucide-react';
-import { Account, accountLetter, isCurrent, isStale, updatedText } from '~/lib/accounts';
+import { Account, accountLetter, isStale, updatedText } from '~/lib/accounts';
 import { cn } from '~/lib/cn';
 import { formatBalance } from '~/lib/format';
 import { useAccountDialogStore } from '~/state/accountDialog';
+import { PaidIntoTag } from '../PaidIntoTag';
+
+interface MobileAccountRowProps {
+  account: Account;
+  today: Date;
+  // More than one account to spend from: say which one pay lands in
+  several: boolean;
+}
 
 /*
  * Mobile: one account, tapped to edit in a sheet. What it's for shows under the name and wraps, so
  * a long one never pushes the balance off, however big that is.
  */
-export const MobileAccountRow = ({ account, today }: { account: Account; today: Date }) => {
+export const MobileAccountRow = ({ account, today, several }: MobileAccountRowProps) => {
   const openEdit = useAccountDialogStore(s => s.openEdit);
   const stale = isStale(account, today);
 
@@ -26,7 +34,8 @@ export const MobileAccountRow = ({ account, today }: { account: Account; today: 
       </span>
       <span className="flex min-w-0 grow flex-col gap-[3px]">
         <span className="text-[15px] font-bold [overflow-wrap:anywhere]">{account.name}</span>
-        {!isCurrent(account) && account.purpose ? (
+        {several && account.paidInto ? <PaidIntoTag /> : null}
+        {account.purpose ? (
           <span className="text-xs leading-[1.35] font-semibold [overflow-wrap:anywhere] text-muted">
             {account.purpose}
           </span>

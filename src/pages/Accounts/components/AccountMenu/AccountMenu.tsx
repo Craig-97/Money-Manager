@@ -1,22 +1,25 @@
-import { Check, Ellipsis, PenLine, Trash } from 'lucide-react';
+import { Check, Ellipsis, Landmark, PenLine, Trash } from 'lucide-react';
 import { IconButton } from '~/components/ui/IconButton';
 import { Menu, MenuContent, MenuItem, MenuSeparator, MenuTrigger } from '~/components/ui/Menu';
-import { Account, isCurrent } from '~/lib/accounts';
+import { Account, isSpending } from '~/lib/accounts';
 import { useAccountDialogStore } from '~/state/accountDialog';
 
 interface AccountMenuProps {
   account: Account;
+  // More than one account to spend from, so pay can move to another
+  several: boolean;
   onCounts: (counts: boolean) => void;
 }
 
 /*
- * Edit, count in or keep out of free to spend, and delete, from the row's more button. The current
- * account always counts and stays, so it only has Edit.
+ * Edit, then for savings count in or keep out of free to spend, or for another spending account
+ * make it where you get paid, and delete, from the row's more button. Where pay lands always
+ * counts and stays, so it only has Edit.
  */
-export const AccountMenu = ({ account, onCounts }: AccountMenuProps) => {
+export const AccountMenu = ({ account, several, onCounts }: AccountMenuProps) => {
   const openEdit = useAccountDialogStore(s => s.openEdit);
   const openDelete = useAccountDialogStore(s => s.openDelete);
-  const fixed = isCurrent(account);
+  const fixed = account.paidInto;
 
   return (
     <Menu>
@@ -31,9 +34,19 @@ export const AccountMenu = ({ account, onCounts }: AccountMenuProps) => {
         </MenuItem>
         {fixed ? null : (
           <>
-            <MenuItem icon={<Check size={16} />} onSelect={() => onCounts(!account.counts)}>
-              {account.counts ? 'Keep out of free to spend' : 'Count in free to spend'}
-            </MenuItem>
+            {isSpending(account) ? (
+              several ? (
+                <MenuItem
+                  icon={<Landmark size={16} />}
+                  onSelect={() => openEdit(account.id, { paidInto: true })}>
+                  Make where you get paid
+                </MenuItem>
+              ) : null
+            ) : (
+              <MenuItem icon={<Check size={16} />} onSelect={() => onCounts(!account.counts)}>
+                {account.counts ? 'Keep out of free to spend' : 'Count in free to spend'}
+              </MenuItem>
+            )}
             <MenuSeparator />
             <MenuItem danger icon={<Trash size={16} />} onSelect={() => openDelete(account.id)}>
               Delete

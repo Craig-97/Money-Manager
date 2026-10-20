@@ -66,7 +66,7 @@ export const PaydayPrompt = ({ prompt }: { prompt: Prompt }) => {
                 New cycle started
               </Dialog.Title>
               <p className="max-w-[400px] text-sm leading-[1.6] font-medium text-muted">
-                Current account set to{' '}
+                {prompt.paidIntoName} set to{' '}
                 <span className="num font-bold text-text">
                   {formatBalance(prompt.resultBalance)}
                 </span>
@@ -127,7 +127,7 @@ export const PaydayPrompt = ({ prompt }: { prompt: Prompt }) => {
 
                 <Step
                   number={hasCheck ? 2 : 1}
-                  title="Confirm your current account"
+                  title={`Confirm ${prompt.paidIntoName === 'Current account' ? 'your current account' : prompt.paidIntoName}`}
                   titleFor="payday-balance">
                   <div className="mt-3 flex h-[60px] items-center gap-1.5 rounded-[18px] border-[1.5px] border-border-strong bg-surface-2 px-[18px] transition-[border-color,box-shadow] focus-within:border-accent focus-within:shadow-[0_0_0_4px_var(--accent-soft)]">
                     <span

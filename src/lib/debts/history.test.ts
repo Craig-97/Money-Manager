@@ -33,6 +33,7 @@ const card: DebtPayment = {
     balanceUpdatedAt: null,
     paidOffThisCycle: 0
   },
+  account: null,
   paysInto: null
 };
 

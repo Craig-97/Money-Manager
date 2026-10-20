@@ -2,6 +2,7 @@ import { ChevronRight, Clock, Plus } from 'lucide-react';
 import { DebtsIcon } from '~/components/icons';
 import { Button } from '~/components/ui/Button';
 import { PageLink } from '~/components/ui/PageLink';
+import { SegmentedControl } from '~/components/ui/SegmentedControl';
 import { Tile } from '~/components/ui/Tile';
 import { MEDIA, ROUTES } from '~/constants';
 import { Budget } from '~/hooks/useBudget';
@@ -9,11 +10,18 @@ import { useMediaQuery } from '~/hooks/useMediaQuery';
 import { staleText } from '~/lib/accounts';
 import { formatBalance, formatMoney } from '~/lib/format';
 import { useAccountDialogStore } from '~/state/accountDialog';
-import { useAccounts } from '../../hooks';
+import { AccountsView, useAccounts } from '../../hooks';
 import { AccountRow } from '../AccountRow';
+import { BeforePaydayContent } from '../BeforePaydayContent';
 import { CountedTile } from '../CountedTile';
 import { MobileAccountRow } from '../MobileAccountRow';
 import { NetWorthHero } from '../NetWorthHero';
+import { UnchosenBanner } from '../UnchosenBanner';
+
+const VIEWS: { value: AccountsView; label: string }[] = [
+  { value: 'balances', label: 'Balances' },
+  { value: 'before', label: 'Before payday' }
+];
 
 const groupHeadClasses = 'flex min-h-11 items-center justify-between gap-3 px-1';
 const groupTitleClasses = 'text-[17px] font-extrabold tracking-[-0.02em]';
@@ -22,16 +30,35 @@ const mobileHeadClasses =
 
 /*
  * The page once the budget has loaded: everything you have, what counts in free to spend, then the
- * current account, savings and what's owed. Only one layout is rendered.
+ * accounts to spend from, savings and what's owed. With more than one account to spend from,
+ * Before payday shows what each has left by payday. Only one layout is rendered.
  */
 export const AccountsContent = ({ budget }: { budget: Budget }) => {
   const model = useAccounts(budget);
   const isDesktop = useMediaQuery(MEDIA.desktop);
   const openAdd = useAccountDialogStore(s => s.openAdd);
   const openEdit = useAccountDialogStore(s => s.openEdit);
-  const { today, current, savings, debts, totals, stale } = model;
-  const spending = current ? [current] : [];
+  const { today, spending, savings, debts, totals, stale, several, unchosen, paidInto } = model;
   const debtNames = debts.map(debt => debt.name).join(', ');
+
+  // Shown above either view, once there's more than one account to spend from
+  const top = (
+    <>
+      {several ? (
+        <SegmentedControl
+          aria-label="Accounts view"
+          value={model.view}
+          onValueChange={model.setView}
+          options={VIEWS}
+          className={isDesktop ? 'self-start' : undefined}
+          fullWidth={!isDesktop}
+        />
+      ) : null}
+      {unchosen.length && paidInto ? (
+        <UnchosenBanner count={unchosen.length} paidIntoName={paidInto.name} />
+      ) : null}
+    </>
+  );
 
   const noSavings = (
     <div className="flex flex-col items-start gap-3 px-2 py-3">
@@ -70,9 +97,21 @@ export const AccountsContent = ({ budget }: { budget: Budget }) => {
     </PageLink>
   ) : null;
 
+  if (model.view === 'before') {
+    return (
+      <section
+        aria-label="Accounts"
+        className={isDesktop ? 'flex flex-col gap-4' : 'flex flex-col gap-3.5'}>
+        {top}
+        <BeforePaydayContent accounts={model} isDesktop={isDesktop} />
+      </section>
+    );
+  }
+
   if (isDesktop) {
     return (
       <section aria-label="Accounts" className="flex flex-col gap-4">
+        {top}
         <div className="grid items-stretch gap-4 min-[68.75rem]:grid-cols-[minmax(0,1.65fr)_minmax(0,1fr)]">
           <NetWorthHero accounts={model} />
           <CountedTile accounts={model} />
@@ -92,6 +131,7 @@ export const AccountsContent = ({ budget }: { budget: Budget }) => {
               key={account.id}
               account={account}
               today={today}
+              several={several}
               onCounts={counts => model.setCounts(account, counts)}
             />
           ))}
@@ -114,6 +154,7 @@ export const AccountsContent = ({ budget }: { budget: Budget }) => {
                   key={account.id}
                   account={account}
                   today={today}
+                  several={several}
                   onCounts={counts => model.setCounts(account, counts)}
                 />
               ))
@@ -143,6 +184,7 @@ export const AccountsContent = ({ budget }: { budget: Budget }) => {
 
   return (
     <section aria-label="Accounts" className="flex flex-col gap-3.5">
+      {top}
       <NetWorthHero accounts={model} compact />
       {stale ? (
         <button
@@ -168,11 +210,13 @@ export const AccountsContent = ({ budget }: { budget: Budget }) => {
       </h2>
       <div className="rounded-3xl border border-border bg-surface p-1.5">
         {spending.map(account => (
-          <MobileAccountRow key={account.id} account={account} today={today} />
+          <MobileAccountRow key={account.id} account={account} today={today} several={several} />
         ))}
       </div>
       <p className="-mt-1.5 px-1 text-xs font-semibold text-muted">
-        Your current account is the bank balance on your dashboard, plus any savings you switch on.
+        {several
+          ? 'Your spending accounts make the bank balance on your dashboard, plus any savings you switch on.'
+          : 'Your current account is the bank balance on your dashboard, plus any savings you switch on.'}
       </p>
 
       <h2 className={mobileHeadClasses}>
@@ -184,7 +228,12 @@ export const AccountsContent = ({ budget }: { budget: Budget }) => {
       <div className="rounded-3xl border border-border bg-surface p-1.5">
         {savings.length
           ? savings.map(account => (
-              <MobileAccountRow key={account.id} account={account} today={today} />
+              <MobileAccountRow
+                key={account.id}
+                account={account}
+                today={today}
+                several={several}
+              />
             ))
           : noSavings}
       </div>

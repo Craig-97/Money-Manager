@@ -48,6 +48,7 @@ const debt = (
   renewalReminder: { off: false, days: null },
   dueReminderDays: 1,
   debt: { balance, startingBalance, apr, balanceUpdatedAt: null, paidOffThisCycle: 0 },
+  account: null,
   paysInto: null
 });
 

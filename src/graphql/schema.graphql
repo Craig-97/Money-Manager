@@ -85,6 +85,7 @@ type Mutation {
   updateAccount(id: ID!, input: UpdateAccountInput!): AccountResponse!
   deleteAccount(id: ID!): AccountResponse!
   updateAccountBalances(input: UpdateAccountBalancesInput!): BudgetResponse!
+  assignPaymentAccounts(input: AssignPaymentAccountsInput!): BudgetResponse!
   createOneOffPayment(input: CreateOneOffPaymentInput!): OneOffPaymentResponse!
   updateOneOffPayment(id: ID!, input: UpdateOneOffPaymentInput!): OneOffPaymentResponse!
   batchDeleteOneOffPayments(ids: [ID!]!): DeleteResponse!
@@ -178,7 +179,7 @@ input AlreadyPaidInput {
 input StartPaydayCycleInput {
   budgetId: ID!
   payday: String!
-  currentBalance: Float!
+  paidIntoBalance: Float!
   accountBalances: [AccountBalanceInput!]
   leftOver: [LeftOverPaymentInput!]!
   alreadyPaid: AlreadyPaidInput
@@ -190,7 +191,7 @@ type BudgetResponse {
 }
 
 enum AccountKind {
-  CURRENT
+  SPENDING
   SAVINGS
 }
 
@@ -200,6 +201,7 @@ type Account {
   kind: AccountKind!
   balance: Float!
   counts: Boolean!
+  paidInto: Boolean!
   interestRate: Float
   purpose: String
   balanceUpdatedAt: String!
@@ -208,6 +210,7 @@ type Account {
 input CreateAccountInput {
   budgetId: ID!
   name: String!
+  kind: AccountKind
   balance: Float!
   counts: Boolean
   interestRate: Float
@@ -216,8 +219,10 @@ input CreateAccountInput {
 
 input UpdateAccountInput {
   name: String
+  kind: AccountKind
   balance: Float
   counts: Boolean
+  paidInto: Boolean
   interestRate: Float
   purpose: String
 }
@@ -230,6 +235,16 @@ input AccountBalanceInput {
 input UpdateAccountBalancesInput {
   budgetId: ID!
   balances: [AccountBalanceInput!]!
+}
+
+input PaymentAccountInput {
+  recurringPaymentId: ID!
+  accountId: ID
+}
+
+input AssignPaymentAccountsInput {
+  budgetId: ID!
+  payments: [PaymentAccountInput!]!
 }
 
 type AccountResponse {
@@ -276,6 +291,7 @@ type OneOffPayment {
   category: OneOffPaymentCategory!
   paidAt: String
   dueReminder: ReminderTiming!
+  account: ID
 }
 
 input CreateOneOffPaymentInput {
@@ -286,6 +302,7 @@ input CreateOneOffPaymentInput {
   type: PaymentType!
   category: OneOffPaymentCategory!
   dueReminder: ReminderTimingInput
+  account: ID
 }
 
 input OneOffPaymentInput {
@@ -295,6 +312,7 @@ input OneOffPaymentInput {
   type: PaymentType!
   category: OneOffPaymentCategory!
   dueReminder: ReminderTimingInput
+  account: ID
 }
 
 input UpdateOneOffPaymentInput {
@@ -304,6 +322,7 @@ input UpdateOneOffPaymentInput {
   type: PaymentType
   category: OneOffPaymentCategory
   dueReminder: ReminderTimingInput
+  account: ID
 }
 
 type OneOffPaymentResponse {
@@ -368,6 +387,7 @@ type RecurringPayment {
   dueReminder: ReminderTiming!
   renewalReminder: ReminderTiming!
   debt: Debt
+  account: ID
   paysInto: ID
 }
 
@@ -420,6 +440,7 @@ input CreateRecurringPaymentInput {
   dueReminder: ReminderTimingInput
   renewalReminder: ReminderTimingInput
   debt: DebtInput
+  account: ID
   paysInto: ID
 }
 
@@ -435,6 +456,7 @@ input RecurringPaymentInput {
   dueReminder: ReminderTimingInput
   renewalReminder: ReminderTimingInput
   debt: DebtInput
+  account: ID
   paysInto: ID
 }
 
@@ -450,6 +472,7 @@ input UpdateRecurringPaymentInput {
   dueReminder: ReminderTimingInput
   renewalReminder: ReminderTimingInput
   debt: DebtInput
+  account: ID
   paysInto: ID
 }
 

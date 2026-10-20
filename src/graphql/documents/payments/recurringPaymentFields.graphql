@@ -25,7 +25,9 @@ fragment RecurringPaymentFields on RecurringPayment {
     dates
     balanceChange
   }
-  # The savings account it pays into, like a standing order
+  # The account it goes out of or into; null for the one pay lands in
+  account
+  # Another account it moves money into, like a standing order
   paysInto
   debt {
     balance

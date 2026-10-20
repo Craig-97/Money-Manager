@@ -5,10 +5,12 @@ import { Label } from '~/components/form/Label';
 import { TextInput } from '~/components/form/TextInput';
 import { Button } from '~/components/ui/Button';
 import { Modal } from '~/components/ui/Modal';
+import { SegmentedControl } from '~/components/ui/SegmentedControl';
 import { Switch } from '~/components/ui/Switch';
+import { AccountKind } from '~/graphql/generated';
 import { useBudget } from '~/hooks/useBudget';
 import { usePayCycle } from '~/hooks/usePayCycle';
-import { toAccounts, updatedText } from '~/lib/accounts';
+import { accountOf, toAccounts, updatedText } from '~/lib/accounts';
 import { formatMoney } from '~/lib/format';
 import { PER_PERIOD, toPayments } from '~/lib/payments';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
@@ -18,9 +20,20 @@ const helpClasses = 'mt-2 ml-1 text-xs font-semibold text-muted';
 const panelClasses =
   'flex items-center gap-3 rounded-[18px] border border-border bg-surface-2 px-4 py-3.5';
 
+const KINDS: { value: AccountKind; label: string }[] = [
+  { value: 'SPENDING', label: 'Spending' },
+  { value: 'SAVINGS', label: 'Savings' }
+];
+
+const KIND_HINTS: Record<AccountKind, string> = {
+  SPENDING: 'Money you spend from, like a current or joint account. It always counts.',
+  SAVINGS: 'Money put aside. Kept out of free to spend unless you count it.'
+};
+
 /*
- * Adding a savings account or changing one: a dialog on desktop, a bottom sheet on mobile. The
- * balance is first and focused. The current account always counts and can't be deleted.
+ * Adding an account or changing one: a dialog on desktop, a bottom sheet on mobile. The balance is
+ * first and focused. Spending accounts always count in free to spend; the one pay lands in can't
+ * be deleted, and another spending account takes that over with its own switch.
  */
 export const AccountDialog = () => {
   const { budget } = useBudget();
@@ -41,7 +54,7 @@ export const AccountDialog = () => {
     ? `Delete ${account?.name ?? 'account'}?`
     : account
       ? `Edit ${account.name}`
-      : 'Add savings account';
+      : 'Add account';
 
   return (
     <Modal
@@ -66,7 +79,7 @@ export const AccountDialog = () => {
           </>
         ) : (
           <>
-            {account && !dialog.isCurrent ? (
+            {dialog.canDelete ? (
               <Button variant="dangerGhost" onClick={dialog.askDelete} className="max-md:-ml-2">
                 <Trash size={16} aria-hidden="true" />
                 Delete
@@ -137,7 +150,66 @@ export const AccountDialog = () => {
             {errors.name ? <FieldError id="account-name-error">{errors.name}</FieldError> : null}
           </div>
 
-          {dialog.isCurrent ? null : (
+          {dialog.canChangeKind ? (
+            <div>
+              <p id="account-kind" className="mb-2 text-[13px] font-bold text-muted">
+                Type
+              </p>
+              <SegmentedControl
+                aria-labelledby="account-kind"
+                value={draft.kind}
+                onValueChange={kind => dialog.set({ kind })}
+                options={KINDS}
+                size="lg"
+                fullWidth
+              />
+              <p className={helpClasses}>{KIND_HINTS[draft.kind]}</p>
+            </div>
+          ) : null}
+
+          {dialog.showPaidInto ? (
+            <div className={panelClasses}>
+              <span className="flex min-w-0 grow flex-col gap-0.5">
+                <span id="account-paid-into" className="text-sm font-bold">
+                  Where you get paid
+                </span>
+                <span className="text-xs font-semibold text-muted">
+                  {dialog.isPaidInto
+                    ? 'Your pay lands here. To move it, turn this on for another account.'
+                    : dialog.paidIntoMove
+                      ? `Your pay goes into ${dialog.paidIntoMove.to} from your next payday. ${dialog.paidIntoMove.from} stops being where you get paid.`
+                      : `Turn on if your pay goes in here instead of ${dialog.paidIntoName}.`}
+                </span>
+              </span>
+              <Switch
+                checked={draft.paidInto}
+                disabled={dialog.isPaidInto}
+                onCheckedChange={paidInto => dialog.set({ paidInto })}
+                aria-labelledby="account-paid-into"
+              />
+            </div>
+          ) : null}
+
+          {dialog.spending ? (
+            <div>
+              <Label tone="muted" htmlFor="account-purpose">
+                What it’s for (optional)
+              </Label>
+              <TextInput
+                id="account-purpose"
+                value={draft.purpose}
+                onChange={event => dialog.set({ purpose: event.target.value })}
+                placeholder="e.g. Shared household bills"
+                maxLength={60}
+                autoComplete="off"
+                invalid={!!errors.purpose}
+                aria-describedby={errors.purpose ? 'account-purpose-error' : undefined}
+              />
+              {errors.purpose ? (
+                <FieldError id="account-purpose-error">{errors.purpose}</FieldError>
+              ) : null}
+            </div>
+          ) : (
             <>
               <div className="grid gap-[18px] md:grid-cols-2">
                 <div>
@@ -194,7 +266,9 @@ export const AccountDialog = () => {
                     <Repeat size={16} />
                   </span>
                   <span className="flex min-w-0 grow flex-col gap-0.5">
-                    <span className="text-sm font-bold">Paid in from your current account</span>
+                    <span className="text-sm font-bold">
+                      Paid in from {accountOf(payment, accounts)?.name ?? 'your account'}
+                    </span>
                     <span className="text-xs font-semibold text-muted">
                       {payment.name} · {formatMoney(payment.amount)} {PER_PERIOD[payment.frequency]}
                     </span>

@@ -14,7 +14,7 @@ export const Accounts = () => {
     <>
       <PageHeader
         title="Accounts"
-        description="Your current account, savings and what you owe, all in one place."
+        description="Your accounts, savings and what you owe, all in one place."
         actions={
           budget ? (
             <Button variant="accent" size="lg" onClick={openAdd} className="px-5">

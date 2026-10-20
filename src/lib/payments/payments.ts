@@ -58,6 +58,8 @@ interface BasePayment {
   dueReminder: ReminderTiming;
   // Days before it's due it reminds, worked out with the usual timing; null when it's off
   dueReminderDays: number | null;
+  // The account it goes out of, or an income lands in; null for the one pay lands in
+  account: string | null;
 }
 
 export interface RecurringPayment extends BasePayment {
@@ -78,7 +80,7 @@ export interface RecurringPayment extends BasePayment {
   renewalReminderDays: number;
   // Set when it's paying off a loan or card
   debt: Debt | null;
-  // The savings account it moves money into, like a standing order
+  // Another account it moves money into, like a standing order
   paysInto: string | null;
 }
 
@@ -139,6 +141,7 @@ const toRecurringPayment = (
           paidOffThisCycle: payment.debt.paidOffThisCycle
         }
       : null,
+    account: payment.account ?? null,
     paysInto: payment.paysInto ?? null
   };
 };
@@ -157,7 +160,8 @@ const toOneOffPayment = (
   dueDate: fromApiDate(payment.dueDate),
   paidAt: fromApiDate(payment.paidAt),
   dueReminder: payment.dueReminder,
-  dueReminderDays: reminderDays(payment.dueReminder, settings.paymentDays)
+  dueReminderDays: reminderDays(payment.dueReminder, settings.paymentDays),
+  account: payment.account ?? null
 });
 
 interface BudgetPayments {

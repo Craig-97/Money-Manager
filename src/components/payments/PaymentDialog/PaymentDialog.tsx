@@ -7,7 +7,7 @@ import { useBudget } from '~/hooks/useBudget';
 import { useMediaQuery } from '~/hooks/useMediaQuery';
 import { usePayCycle } from '~/hooks/usePayCycle';
 import { usePaymentActions } from '~/hooks/usePaymentActions';
-import { savingsOf, toAccounts } from '~/lib/accounts';
+import { toAccounts } from '~/lib/accounts';
 import { DEFAULT_REMINDER_SETTINGS, toPayments } from '~/lib/payments';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
 import { Chooser, FormBody, StatusStrip } from './components';
@@ -46,7 +46,7 @@ export const PaymentDialog = () => {
     payment,
     today,
     settings: budget?.reminderSettings ?? DEFAULT_REMINDER_SETTINGS,
-    savings: savingsOf(toAccounts(budget?.accounts, today)),
+    accounts: toAccounts(budget?.accounts, today),
     onSaved: close,
     // Each opening starts afresh. Closing keeps the form as it was while the dialog animates away.
     formKey: String(opened)

@@ -2,9 +2,9 @@ import { AccountFieldsFragment, AccountKind } from '~/graphql/generated';
 import { daysBetween, fromApiDate } from '~/lib/dates';
 
 /*
- * A budget's bank accounts: its current account, where pay lands, and any savings. Balances are
- * typed in, never linked to a bank. The bank balance on the dashboard is the ones that count in
- * free to spend, added up.
+ * A budget's bank accounts: ones to spend from, one of them where pay lands, and any savings.
+ * Balances are typed in, never linked to a bank. The bank balance on the dashboard is the ones that
+ * count in free to spend, added up.
  */
 
 export interface Account {
@@ -13,6 +13,8 @@ export interface Account {
   kind: AccountKind;
   balance: number;
   counts: boolean;
+  // Where pay lands, and where payments that don't name an account go out of
+  paidInto: boolean;
   interestRate: number | null;
   purpose: string | null;
   // The day the balance was last typed in
@@ -34,17 +36,52 @@ export const toAccounts = (
     kind: account.kind,
     balance: account.balance,
     counts: account.counts,
+    paidInto: account.paidInto,
     interestRate: account.interestRate ?? null,
     purpose: account.purpose ?? null,
     balanceUpdatedAt: fromApiDate(account.balanceUpdatedAt) ?? today
   }));
 
-export const isCurrent = (account: Pick<Account, 'kind'>) => account.kind === 'CURRENT';
+export const isSpending = (account: Pick<Account, 'kind'>) => account.kind === 'SPENDING';
 
-export const currentAccountOf = (accounts: readonly Account[]) => accounts.find(isCurrent) ?? null;
+export const spendingOf = (accounts: readonly Account[]) => accounts.filter(isSpending);
 
 export const savingsOf = (accounts: readonly Account[]) =>
-  accounts.filter(account => !isCurrent(account));
+  accounts.filter(account => !isSpending(account));
+
+export const paidIntoAccountOf = (accounts: readonly Account[]) =>
+  accounts.find(account => account.paidInto) ?? null;
+
+// With one account to spend from, everything goes out of it: choosing accounts only appears once
+// there's another
+export const hasSeveralSpending = (accounts: readonly Account[]) => spendingOf(accounts).length > 1;
+
+/*
+ * The account a payment goes out of, or an income lands in: the one it names while that's still
+ * there, else where pay lands
+ */
+export const accountOf = (
+  payment: { account: string | null },
+  accounts: readonly Account[]
+): Account | null =>
+  accounts.find(account => account.id === payment.account) ?? paidIntoAccountOf(accounts);
+
+/*
+ * Recurring expenses that don't say which account they go out of, once there's a choice. Until
+ * they do, they come out of where pay lands.
+ */
+export const unchosenOf = <T extends { kind: string; type: string; account: string | null }>(
+  payments: readonly T[],
+  accounts: readonly Account[]
+) =>
+  hasSeveralSpending(accounts)
+    ? payments.filter(
+        payment =>
+          payment.kind === 'recurring' &&
+          payment.type === 'EXPENSE' &&
+          !accounts.some(account => account.id === payment.account)
+      )
+    : [];
 
 const total = (accounts: readonly Account[]) =>
   roundPence(accounts.reduce((sum, account) => sum + account.balance, 0));
@@ -54,7 +91,7 @@ const total = (accounts: readonly Account[]) =>
  * net worth, as far as the app knows it.
  */
 export const accountTotals = (accounts: readonly Account[], { owed }: { owed: number }) => {
-  const spending = total(accounts.filter(isCurrent));
+  const spending = total(spendingOf(accounts));
   const savings = total(savingsOf(accounts));
   const counted = accounts.filter(account => account.counts);
   return {
@@ -91,11 +128,15 @@ export const staleText = (account: Pick<Account, 'name' | 'balanceUpdatedAt'>, t
 };
 
 /*
- * The line under an account's name: "Where you get paid", or for savings its rate and what it's
- * for, "Savings · 4.5% · Holiday fund"
+ * The line under an account's name. With one account to spend from it's "Where you get paid";
+ * with several, "Spending · Shared household bills" (a tag says which one pay lands in). Savings
+ * have their rate and what they're for: "Savings · 4.5% · Holiday fund".
  */
-export const accountMeta = (account: Account) => {
-  if (isCurrent(account)) return 'Where you get paid';
+export const accountMeta = (account: Account, { several }: { several: boolean }) => {
+  if (isSpending(account)) {
+    if (account.paidInto && !several) return 'Where you get paid';
+    return ['Spending', account.purpose].filter(Boolean).join(' · ');
+  }
   return [
     'Savings',
     account.interestRate !== null ? `${account.interestRate}%` : null,

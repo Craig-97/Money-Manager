@@ -1,10 +1,12 @@
-# A bank account: the current account, or savings. Balances are typed in, never linked to a bank.
+# A bank account: one to spend from, or savings. Balances are typed in, never linked to a bank.
 fragment AccountFields on Account {
   id
   name
   kind
   balance
   counts
+  # Where pay lands
+  paidInto
   interestRate
   purpose
   balanceUpdatedAt

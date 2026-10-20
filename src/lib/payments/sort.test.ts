@@ -16,7 +16,8 @@ const payment = (
   paidAt: null,
   dueDate: due ? new Date(`${due}T00:00:00`) : null,
   dueReminder: { off: false, days: null },
-  dueReminderDays: 1
+  dueReminderDays: 1,
+  account: null
 });
 
 const list = [

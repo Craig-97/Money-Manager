@@ -1,4 +1,6 @@
-# Only what's given changes; a balance that's given is dated now
+# Only what's given changes; a balance that's given is dated now. Making an account where pay lands
+# moves it from another, and one made savings sends its expenses back to where pay lands, so the
+# budget's accounts and payments come back too.
 mutation UpdateAccount($id: ID!, $input: UpdateAccountInput!) {
   updateAccount(id: $id, input: $input) {
     account {
@@ -7,6 +9,15 @@ mutation UpdateAccount($id: ID!, $input: UpdateAccountInput!) {
     budget {
       id
       bankBalance
+      accounts {
+        ...AccountFields
+      }
+      recurringPayments {
+        ...RecurringPaymentFields
+      }
+      oneOffPayments {
+        ...OneOffPaymentFields
+      }
     }
   }
 }

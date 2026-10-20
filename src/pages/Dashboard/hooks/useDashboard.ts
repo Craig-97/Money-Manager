@@ -5,7 +5,7 @@ import { Budget } from '~/hooks/useBudget';
 import { usePayCycle } from '~/hooks/usePayCycle';
 import { usePaymentActions } from '~/hooks/usePaymentActions';
 import { usePaymentSelection } from '~/hooks/usePaymentSelection';
-import { currentAccountOf, forFreeToSpend, toAccounts } from '~/lib/accounts';
+import { forFreeToSpend, paidIntoAccountOf, toAccounts } from '~/lib/accounts';
 import { getApiErrorMessage } from '~/lib/errors';
 import {
   canPay,
@@ -36,7 +36,7 @@ export const useDashboard = (budget: Budget) => {
   const payments = toPayments(budget, today);
   const accounts = toAccounts(budget.accounts, today);
   const counted = accounts.filter(account => account.counts);
-  const current = currentAccountOf(accounts);
+  const current = paidIntoAccountOf(accounts);
   const summary = summarise({
     payments: forFreeToSpend(payments, accounts),
     bankBalance: budget.bankBalance,
@@ -58,7 +58,7 @@ export const useDashboard = (budget: Budget) => {
   const failed = (error: unknown) =>
     showToast({ message: getApiErrorMessage(error, "Couldn't save that. Try again.") });
 
-  // With only the current account counting, the bank balance is its balance, edited in place.
+  // With only the account pay lands in counting, the bank balance is its balance, edited in place.
   // Once more count, the pencil opens each one's balance instead.
   const bankBalanceDialog = useBankBalanceDialog({ budgetId: budget.id, accounts: counted });
   const inPlace = useMoneyEditor(budget.bankBalance, balance =>

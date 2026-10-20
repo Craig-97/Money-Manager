@@ -1,0 +1,12 @@
+# Which account each of several recurring payments goes out of: setting up accounts once there's
+# more than one to spend from
+mutation AssignPaymentAccounts($input: AssignPaymentAccountsInput!) {
+  assignPaymentAccounts(input: $input) {
+    budget {
+      id
+      recurringPayments {
+        ...RecurringPaymentFields
+      }
+    }
+  }
+}
