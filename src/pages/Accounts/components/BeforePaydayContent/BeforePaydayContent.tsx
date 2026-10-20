@@ -30,16 +30,51 @@ export const BeforePaydayContent = ({
         <OnPaydayTile accounts={model} />
       </div>
 
-      <Tile flat aria-labelledby="before-spending" className="gap-1 md:gap-1">
-        <h2 id="before-spending" className={titleClasses}>
-          Spending accounts
-        </h2>
-        <div>
-          {beforePayday.spending.map(row => (
-            <AccountBeforeRow key={row.account.id} row={row} today={today} several={several} />
-          ))}
-        </div>
-      </Tile>
+      {isDesktop ? (
+        <Tile flat aria-labelledby="before-spending" className="gap-1 md:gap-1">
+          <div className="flex min-h-12 flex-wrap items-center justify-between gap-x-3 px-2 pb-1">
+            <h2 id="before-spending" className="text-[17px] font-extrabold tracking-[-0.02em]">
+              Spending accounts
+            </h2>
+            <span className="text-[13px] font-semibold text-muted">
+              Open one to see what goes out of it
+            </span>
+          </div>
+          <div>
+            {beforePayday.spending.map(row => (
+              <AccountBeforeRow
+                key={row.account.id}
+                row={row}
+                today={today}
+                several={several}
+                isDesktop
+              />
+            ))}
+          </div>
+        </Tile>
+      ) : (
+        <>
+          <h2
+            id="before-spending"
+            className="flex items-center justify-between px-1 pt-1 text-xs font-extrabold tracking-[0.04em] text-muted uppercase">
+            <span>Spending accounts</span>
+            <span className="num tracking-normal">{formatBalance(beforePayday.left)} left</span>
+          </h2>
+          <section
+            aria-labelledby="before-spending"
+            className="rounded-3xl border border-border bg-surface p-1.5">
+            {beforePayday.spending.map(row => (
+              <AccountBeforeRow
+                key={row.account.id}
+                row={row}
+                today={today}
+                several={several}
+                isDesktop={false}
+              />
+            ))}
+          </section>
+        </>
+      )}
 
       {savings.length ? (
         <Tile flat aria-labelledby="before-savings" className="gap-1 md:gap-1">

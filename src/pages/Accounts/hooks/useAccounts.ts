@@ -114,7 +114,11 @@ export const useAccounts = (budget: Budget) => {
       goesOut: roundPence(now - left),
       monthlyIncome: budget.monthlyIncome ?? 0,
       // Money moving on payday itself, into or out of the spending accounts
-      onPayday: spendingRows.flatMap(row => row.onPayday.filter(item => item.amount > 0))
+      onPayday: spendingRows.flatMap(row =>
+        row.onPayday
+          .filter(item => item.amount > 0)
+          .map(item => ({ ...item, account: row.account }))
+      )
     },
     // The first balance that may be out of date, for the mobile banner
     stale: accounts.find(account => !account.paidInto && isStale(account, today)) ?? null,
