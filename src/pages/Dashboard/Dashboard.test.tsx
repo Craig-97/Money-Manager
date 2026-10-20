@@ -479,10 +479,10 @@ describe('payday prompt', () => {
     expect(within(dialog).getByLabelText(/Confirm your current account/)).toHaveValue('3,500.00');
     // With two accounts to spend from, each payment says which it goes out of
     expect(dialog).toHaveTextContent('From Joint bills · was due');
-    // Another account to spend from, so the last step starts open
-    expect(
-      within(dialog).getByRole('button', { name: /Update your other accounts/ })
-    ).toHaveAttribute('aria-expanded', 'true');
+    // The last step starts folded away, even with another account to spend from
+    const others = within(dialog).getByRole('button', { name: /Update your other accounts/ });
+    expect(others).toHaveAttribute('aria-expanded', 'false');
+    await user.click(others);
     expect(dialog).toHaveTextContent('SpendingCounts in free to spend');
     const joint = within(dialog).getByLabelText('Joint bills');
     expect(joint).toHaveValue('2,085.00');
@@ -630,6 +630,7 @@ describe('payday prompt', () => {
 
     expect(dialog).toHaveTextContent('The £20.00 is added to Joint bills.');
     expect(dialog).toHaveTextContent('− £20.00 to Joint bills');
+    await user.click(within(dialog).getByRole('button', { name: /Update your other accounts/ }));
     expect(dialog).toHaveTextContent('With the £40.00 top-up');
     await user.click(within(dialog).getByRole('button', { name: 'Start new cycle' }));
 

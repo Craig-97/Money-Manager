@@ -74,8 +74,8 @@ export const usePaydayPrompt = ({ budget, cycle, today, payments, markPaid }: Op
   const [ticked, setTicked] = useState<ReadonlySet<string>>(new Set());
   // What the user typed over the suggestion, if anything
   const [typed, setTyped] = useState<string | null>(null);
-  // Unset until it's toggled: it starts open when there's another account to spend from
-  const [savingsOpen, setSavingsOpen] = useState<boolean | null>(null);
+  // The optional last step starts folded away
+  const [savingsOpen, setSavingsOpen] = useState(false);
   const [savingsTyped, setSavingsTyped] = useState<Record<string, string>>({});
   const [overduePaid, setOverduePaid] = useState(false);
   const [result, setResult] = useState({ balance: 0, text: '' });
@@ -310,8 +310,8 @@ export const usePaydayPrompt = ({ budget, cycle, today, payments, markPaid }: Op
     edited,
     savings: {
       rows: savingsRows,
-      open: savingsOpen ?? otherSpending,
-      toggle: () => setSavingsOpen(!(savingsOpen ?? otherSpending)),
+      open: savingsOpen,
+      toggle: () => setSavingsOpen(open => !open),
       // "3 accounts", then "Cash ISA updated 5 weeks ago" in amber when one is old
       count: `${others.length} ${others.length === 1 ? 'account' : 'accounts'}`,
       staleText: staleSavings[0]
