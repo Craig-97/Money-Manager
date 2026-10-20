@@ -92,8 +92,8 @@ export const OverpaymentDialog = ({ debts, onOverpay }: OverpaymentDialogProps) 
               <FieldError id="overpayment-amount-error">{form.error}</FieldError>
             ) : (
               <p id="overpayment-left" className="mt-2 ml-1 text-xs font-semibold text-muted">
-                <span className="num text-text">{formatMoney(debt.debt.balance)}</span> left on{' '}
-                {debt.name}
+                <span className="mr-0.5 num text-text">{formatMoney(debt.debt.balance)}</span> left
+                on {debt.name}
               </p>
             )}
           </div>

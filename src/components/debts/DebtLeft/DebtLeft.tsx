@@ -8,7 +8,7 @@ export const DebtLeft = ({ debt, className }: { debt: DebtPayment; className?: s
   <span className={cn('flex min-w-0 items-center gap-2', className)}>
     <DebtProgress share={paidOffShare(debt)} className="w-[72px] shrink-0" />
     <span className="truncate">
-      <span className="num font-semibold text-text">
+      <span className="mr-0.5 num font-semibold text-text">
         {formatMoney(debt.debt.balance, { whole: true })}
       </span>{' '}
       left

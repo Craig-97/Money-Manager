@@ -68,8 +68,11 @@ export const PaymentsDialog = ({ debts, today, onUndoOverpayment }: PaymentsDial
         </>
       }>
       <p className="-mt-2 text-[13px] font-semibold text-muted">
-        <span className="num font-extrabold text-text">{formatMoney(debt.debt.balance)}</span> left
-        · {formatMoney(paid, { whole: true })} paid off · {Math.round(paidOffShare(debt) * 100)}%
+        <span className="mr-0.5 num font-extrabold text-text">
+          {formatMoney(debt.debt.balance)}
+        </span>{' '}
+        left · {formatMoney(paid, { whole: true })} paid off ·{' '}
+        {Math.round(paidOffShare(debt) * 100)}%
       </p>
       <div role="table" aria-label="Payments" className="flex flex-col">
         <div
