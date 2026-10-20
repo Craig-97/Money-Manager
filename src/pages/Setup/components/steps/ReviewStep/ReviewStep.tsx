@@ -1,23 +1,30 @@
 import { cn } from '~/lib/cn';
-import { formatLongDate, parseIsoDate } from '~/lib/dates';
-import { formatBalance, formatMoney, parseMoney } from '~/lib/format';
-import { categoryLabel, FREQUENCY_LABELS, formatShortDate } from '~/lib/payments';
+import { formatLongDate } from '~/lib/dates';
+import { formatBalance, formatMoney, formatPayment, parseMoney } from '~/lib/format';
 import { SetupState } from '../../../hooks';
-import { FirstCycle, PAY_FREQUENCY_LABELS, RULES } from '../../../setupModel';
+import { FirstCycle, PAY_FREQUENCY_LABELS, RULES, setupAccounts } from '../../../setupModel';
+import { oneOffDetails, regularDetails } from '../../../setupPayments';
 import { ReviewCard } from '../ReviewCard';
-import { linkButtonClasses, stepCardClasses } from '../setupClasses';
+import { ReviewLines } from '../ReviewLines';
 
 interface ReviewStepProps {
   setup: SetupState;
   firstCycle: FirstCycle;
   nextPayday: Date | undefined;
+  today: Date;
 }
 
-/* Step 5: everything on one page before it's saved */
-export const ReviewStep = ({ setup, firstCycle, nextPayday }: ReviewStepProps) => {
+/*
+ * Step 5: everything on one page before it's saved, in the order it was asked. Each card is full
+ * width, so a long list never leaves a gap beside a short one.
+ */
+export const ReviewStep = ({ setup, firstCycle, nextPayday, today }: ReviewStepProps) => {
   const { values, saving, goTo } = setup;
   const income = parseMoney(values.income) ?? 0;
-  const { oneOffs, regulars } = values;
+  const accounts = setupAccounts(values);
+  const signed = (input: { amount: number; type: string }) =>
+    formatPayment(input.type === 'INCOME' ? input.amount : -input.amount);
+  const toneOf = (input: { type: string }) => (input.type === 'INCOME' ? 'income' : 'expense');
 
   return (
     <section className="flex flex-col gap-3.5">
@@ -39,79 +46,61 @@ export const ReviewStep = ({ setup, firstCycle, nextPayday }: ReviewStepProps) =
         </p>
       </div>
 
-      <div className="grid gap-3.5 min-[53.75rem]:grid-cols-2">
-        <ReviewCard label="Payday" onEdit={() => goTo(0)} disabled={saving}>
-          <p className="text-base font-bold">
-            {PAY_FREQUENCY_LABELS[values.frequency]} · {RULES[values.rule].title.toLowerCase()}
-          </p>
-          {nextPayday ? (
-            <p className="text-[13px] text-muted">
-              Next {formatLongDate(nextPayday, { withYear: false })}
-            </p>
-          ) : null}
-        </ReviewCard>
-        <ReviewCard label="Take-home pay" onEdit={() => goTo(0)} disabled={saving}>
-          <p className="num text-xl font-extrabold">{formatMoney(income)}</p>
-          <p className="text-[13px] text-muted">per month</p>
-        </ReviewCard>
-        <ReviewCard label="Bank balance" onEdit={() => goTo(1)} disabled={saving}>
-          <p className="num text-xl font-extrabold">{formatMoney(firstCycle.balance)}</p>
-          <p className="text-[13px] text-muted">as of today</p>
-        </ReviewCard>
-        <ReviewCard label="Coming up" onEdit={() => goTo(3)} disabled={saving}>
-          <p className="text-base font-bold">
-            {oneOffs.length
-              ? `${oneOffs.length} one-off ${oneOffs.length === 1 ? 'payment' : 'payments'}`
-              : 'Nothing added'}
-          </p>
-          <p className="text-[13px] text-muted">{firstCycle.oneOffsDueCount} due this cycle</p>
-        </ReviewCard>
-      </div>
+      <ReviewCard label="Pay" onEdit={() => goTo(0)} disabled={saving}>
+        <p className="text-base font-bold">
+          {PAY_FREQUENCY_LABELS[values.frequency]} · {RULES[values.rule].title.toLowerCase()}
+        </p>
+        <p className="text-[13px] text-muted">
+          <span className="num font-bold text-text">{formatMoney(income)}</span> take-home pay
+          {nextPayday ? ` · next ${formatLongDate(nextPayday, { withYear: false })}` : ''}
+        </p>
+      </ReviewCard>
 
-      <div className={cn(stepCardClasses, 'overflow-hidden')}>
-        <div className="flex items-center gap-2 px-5 py-3.5 text-[13px] font-semibold text-muted">
-          Regular payments ·{' '}
-          <span className="num text-expense">{formatMoney(firstCycle.monthly)}</span> a month
-          <button
-            type="button"
-            disabled={saving}
-            onClick={() => goTo(2)}
-            aria-label="Edit regular payments"
-            className={cn(linkButtonClasses, 'ml-auto')}>
-            Edit
-          </button>
-        </div>
-        <ul>
-          {regulars.map(regular => {
-            const name = regular.name.trim();
-            const date = parseIsoDate(regular.date);
-            return (
-              <li
-                key={regular.id}
-                className="flex min-h-16 items-center gap-3 border-t border-border pr-5 pl-[18px]">
-                <span
-                  aria-hidden="true"
-                  className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-expense-bg text-sm font-extrabold text-expense">
-                  {(name || '?').charAt(0).toUpperCase()}
-                </span>
-                <span className="flex min-w-0 grow flex-col gap-0.5">
-                  <span className="text-sm font-semibold">{name || 'Untitled payment'}</span>
-                  <span className="text-xs text-muted">
-                    {FREQUENCY_LABELS[regular.frequency]} · next{' '}
-                    {date ? formatShortDate(date) : 'No date'}
-                  </span>
-                </span>
-                <span className="inline-flex h-[26px] items-center rounded-full bg-accent-soft px-2.5 text-xs font-bold whitespace-nowrap text-accent-text">
-                  {categoryLabel(regular.category)}
-                </span>
-                <span className="min-w-[84px] text-right num text-sm font-extrabold text-expense">
-                  {formatMoney(parseMoney(regular.amount) ?? 0)}
-                </span>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
+      <ReviewCard label="Your accounts" onEdit={() => goTo(1)} disabled={saving}>
+        <ReviewLines
+          empty="None added"
+          lines={accounts.map(account => ({
+            key: account.id,
+            name: account.name,
+            details: account.paidInto
+              ? 'Spending'
+              : [
+                  account.kind === 'SPENDING' ? 'Spending' : 'Savings',
+                  account.counts ? null : 'Kept out of free to spend'
+                ]
+                  .filter(Boolean)
+                  .join(' · '),
+            amount: formatBalance(account.balance),
+            tag: account.paidInto && accounts.length > 1 ? 'Where you get paid' : undefined
+          }))}
+        />
+      </ReviewCard>
+
+      <ReviewCard label="Regular payments" onEdit={() => goTo(2)} disabled={saving}>
+        <ReviewLines
+          empty="None added"
+          lines={values.regulars.map(regular => ({
+            key: regular.id,
+            name: regular.input.name,
+            details: regularDetails(regular, { accounts, today }),
+            amount: signed(regular.input),
+            tone: toneOf(regular.input)
+          }))}
+        />
+      </ReviewCard>
+
+      <ReviewCard label="Coming up" onEdit={() => goTo(3)} disabled={saving}>
+        <ReviewLines
+          empty="Nothing added"
+          lines={values.oneOffs.map(oneOff => ({
+            key: oneOff.id,
+            name: oneOff.input.name,
+            details: oneOffDetails(oneOff, { accounts, today }),
+            amount: signed(oneOff.input),
+            tone: toneOf(oneOff.input)
+          }))}
+        />
+      </ReviewCard>
     </section>
   );
 };

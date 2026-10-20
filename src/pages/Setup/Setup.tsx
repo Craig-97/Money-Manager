@@ -3,20 +3,22 @@ import { addDays, startOfToday } from '~/lib/dates';
 import { formatMoney } from '~/lib/format';
 import { getNextPaydays } from '~/lib/payday';
 import {
-  BalanceStep,
+  AccountsStep,
   ComingUpStep,
   FirstCycleSummary,
   PayStep,
   RegularsStep,
   ReviewStep,
+  SetupAccountDialog,
   SetupDone,
   SetupFooter,
   SetupMobileHeader,
+  SetupPaymentDialog,
   SetupSidebar
 } from './components';
 import { useSetup } from './hooks';
 import {
-  balanceError,
+  accountsErrors,
   PAY_FREQUENCY_LABELS,
   payErrors,
   paydayConfig,
@@ -25,7 +27,7 @@ import {
   summariseFirstCycle
 } from './setupModel';
 
-/* First-time setup: pay, balance and payments, saved as the budget at the end */
+/* First-time setup: pay, accounts and payments, saved as the budget at the end */
 export const Setup = () => {
   const setup = useSetup();
   const { values, step, showErrors, finished } = setup;
@@ -43,7 +45,9 @@ export const Setup = () => {
 
   const stepSummaries = [
     `${PAY_FREQUENCY_LABELS[values.frequency]} · ${RULES[values.rule].title.toLowerCase()}`,
-    firstCycle.balance > 0 ? formatMoney(firstCycle.balance) : 'Not set yet',
+    firstCycle.balance > 0
+      ? `${formatMoney(firstCycle.balance)}${values.accounts.length ? ` · ${values.accounts.length + 1} accounts` : ''}`
+      : 'Not set yet',
     `${values.regulars.length} ${values.regulars.length === 1 ? 'payment' : 'payments'}`,
     values.oneOffs.length
       ? `${values.oneOffs.length} ${values.oneOffs.length === 1 ? 'payment' : 'payments'}`
@@ -84,12 +88,24 @@ export const Setup = () => {
                 <PayStep setup={setup} errors={shownPayErrors} nextPaydays={nextPaydays} />
               ) : null}
               {step === 1 ? (
-                <BalanceStep setup={setup} error={showErrors ? balanceError(values) : undefined} />
+                <AccountsStep setup={setup} errors={showErrors ? accountsErrors(values) : {}} />
               ) : null}
-              {step === 2 ? <RegularsStep setup={setup} monthlyTotal={firstCycle.monthly} /> : null}
-              {step === 3 ? <ComingUpStep setup={setup} /> : null}
+              {step === 2 ? (
+                <RegularsStep
+                  setup={setup}
+                  monthlyTotal={firstCycle.monthly}
+                  yearlyTotal={firstCycle.yearly}
+                  today={today}
+                />
+              ) : null}
+              {step === 3 ? <ComingUpStep setup={setup} today={today} /> : null}
               {step === 4 ? (
-                <ReviewStep setup={setup} firstCycle={firstCycle} nextPayday={nextPaydays[0]} />
+                <ReviewStep
+                  setup={setup}
+                  firstCycle={firstCycle}
+                  nextPayday={nextPaydays[0]}
+                  today={today}
+                />
               ) : null}
 
               <SetupFooter setup={setup} />
@@ -99,6 +115,8 @@ export const Setup = () => {
           </div>
         )}
       </main>
+      <SetupPaymentDialog setup={setup} today={today} />
+      <SetupAccountDialog setup={setup} />
     </div>
   );
 };

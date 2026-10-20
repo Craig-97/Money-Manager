@@ -5,9 +5,11 @@ import {
   CreateOneOffPaymentDocument,
   CreateRecurringPaymentDocument,
   OneOffPaymentCategory,
+  OneOffPaymentInput,
   PaymentFrequency,
   PaymentType,
   RecurringPaymentCategory,
+  RecurringPaymentInput,
   UpdateOneOffPaymentDocument,
   UpdateRecurringPaymentDocument
 } from '~/graphql/generated';
@@ -335,7 +337,17 @@ interface Options {
   onSaved: () => void;
   // Changes when the dialog switches to another payment or kind, which starts the form afresh
   formKey: string;
+  // Setup: hands over the payment as the API would take it instead of saving it, returning a
+  // message when its name is already used
+  draft?: (payment: DraftPayment) => string | undefined;
+  // A new payment's name and category to start with, e.g. from a suggestion
+  start?: { name: string; category: RecurringPaymentCategory };
 }
+
+/* A payment as setup keeps it until the budget is made */
+export type DraftPayment =
+  | { kind: 'recurring'; input: RecurringPaymentInput }
+  | { kind: 'oneOff'; input: OneOffPaymentInput };
 
 /* The add or edit payment form: its values, what's wrong with them, and saving */
 export const usePaymentForm = ({
@@ -347,9 +359,15 @@ export const usePaymentForm = ({
   settings,
   accounts,
   onSaved,
-  formKey
+  formKey,
+  draft,
+  start
 }: Options) => {
-  const [values, setValues] = useState(() => initialValues({ kind, payment, today, asDebt }));
+  const startValues = () => ({
+    ...initialValues({ kind, payment, today, asDebt }),
+    ...(payment || !start ? {} : start)
+  });
+  const [values, setValues] = useState(startValues);
   const [touched, setTouched] = useState(UNTOUCHED);
   const [nameTaken, setNameTaken] = useState<string>();
   const [saving, setSaving] = useState(false);
@@ -359,7 +377,7 @@ export const usePaymentForm = ({
   const [currentKey, setCurrentKey] = useState(formKey);
   if (formKey !== currentKey) {
     setCurrentKey(formKey);
-    setValues(initialValues({ kind, payment, today, asDebt }));
+    setValues(startValues());
     setTouched(UNTOUCHED);
     setNameTaken(undefined);
   }
@@ -474,6 +492,38 @@ export const usePaymentForm = ({
     const accountField = (saved: string | null) =>
       account && account !== saved ? { account } : {};
     const common = { name, amount: amount!, type: values.type };
+    if (draft) {
+      const paysInto = paysIntoOf(values, accounts);
+      const taken = draft(
+        kind === 'recurring'
+          ? {
+              kind,
+              input: {
+                ...common,
+                frequency: values.frequency,
+                firstPaymentDate: values.first,
+                ...endingFields(values),
+                category: values.category as RecurringPaymentCategory,
+                ...(account ? { account } : {}),
+                ...(paysInto ? { paysInto } : {}),
+                ...(values.tracked ? { debt: debtFields(values) } : {})
+              }
+            }
+          : {
+              kind,
+              input: {
+                ...common,
+                dueDate: values.date,
+                category: values.category as OneOffPaymentCategory,
+                dueReminder: fromTimingChoice(values.dueReminder),
+                ...(account ? { account } : {})
+              }
+            }
+      );
+      if (taken) setNameTaken(taken);
+      else onSaved();
+      return;
+    }
     setSaving(true);
     try {
       if (kind === 'recurring') {

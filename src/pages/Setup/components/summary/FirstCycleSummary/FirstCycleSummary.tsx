@@ -11,7 +11,8 @@ const rowClasses =
 export const FirstCycleSummary = ({
   cycleEnd,
   balance,
-  regularsDue,
+  countedCount,
+  regularsNet,
   regularsDueCount,
   oneOffsNet,
   oneOffsDueCount,
@@ -29,7 +30,10 @@ export const FirstCycleSummary = ({
         Today to {formatShortDate(cycleEnd)}
       </p>
       <div className={rowClasses}>
-        <span className="text-hero-muted">Bank balance</span>
+        <span className="text-hero-muted">
+          Bank balance
+          {countedCount > 1 ? <span className="num"> ({countedCount} accounts)</span> : null}
+        </span>
         <span className="num">{formatMoney(balance)}</span>
       </div>
       <div className={rowClasses}>
@@ -37,8 +41,8 @@ export const FirstCycleSummary = ({
           Regular payments <span className="num">({regularsDueCount})</span>
         </span>
         <span className="num">
-          {MINUS}
-          {formatMoney(regularsDue)}
+          {regularsNet < 0 ? MINUS : regularsNet > 0 ? '+' : ''}
+          {formatMoney(regularsNet)}
         </span>
       </div>
       <div className={rowClasses}>

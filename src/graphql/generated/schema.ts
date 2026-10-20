@@ -72,6 +72,16 @@ export type Budget = {
   user: Maybe<User>;
 };
 
+export type BudgetAccountInput = {
+  balance: Scalars['Float']['input'];
+  counts?: InputMaybe<Scalars['Boolean']['input']>;
+  interestRate?: InputMaybe<Scalars['Float']['input']>;
+  key: Scalars['String']['input'];
+  kind?: InputMaybe<AccountKind>;
+  name: Scalars['String']['input'];
+  purpose?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type BudgetResponse = {
   __typename: 'BudgetResponse';
   budget: Maybe<Budget>;
@@ -100,9 +110,11 @@ export type CreateAccountInput = {
 };
 
 export type CreateBudgetInput = {
+  accounts?: InputMaybe<Array<BudgetAccountInput>>;
   bankBalance: Scalars['Float']['input'];
   monthlyIncome: Scalars['Float']['input'];
   oneOffPayments?: InputMaybe<Array<OneOffPaymentInput>>;
+  paidIntoName?: InputMaybe<Scalars['String']['input']>;
   payday?: InputMaybe<PaydayInput>;
   recurringPayments?: InputMaybe<Array<RecurringPaymentInput>>;
 };

@@ -1,34 +1,15 @@
 import { ChevronRight, Repeat, Trash } from 'lucide-react';
-import { AmountInput } from '~/components/form/AmountInput';
-import { FieldError } from '~/components/form/FieldError';
-import { Label } from '~/components/form/Label';
-import { TextInput } from '~/components/form/TextInput';
 import { Button } from '~/components/ui/Button';
 import { Modal } from '~/components/ui/Modal';
-import { SegmentedControl } from '~/components/ui/SegmentedControl';
 import { Switch } from '~/components/ui/Switch';
-import { AccountKind } from '~/graphql/generated';
 import { useBudget } from '~/hooks/useBudget';
 import { usePayCycle } from '~/hooks/usePayCycle';
 import { accountOf, toAccounts, updatedText } from '~/lib/accounts';
 import { formatMoney } from '~/lib/format';
 import { PER_PERIOD, toPayments } from '~/lib/payments';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
+import { AccountFields, panelClasses } from '../AccountFields';
 import { useAccountDialog } from './useAccountDialog';
-
-const helpClasses = 'mt-2 ml-1 text-xs font-semibold text-muted';
-const panelClasses =
-  'flex items-center gap-3 rounded-[18px] border border-border bg-surface-2 px-4 py-3.5';
-
-const KINDS: { value: AccountKind; label: string }[] = [
-  { value: 'SPENDING', label: 'Spending' },
-  { value: 'SAVINGS', label: 'Savings' }
-];
-
-const KIND_HINTS: Record<AccountKind, string> = {
-  SPENDING: 'Money you spend from, like a current or joint account. It always counts.',
-  SAVINGS: 'Money put aside. Kept out of free to spend unless you count it.'
-};
 
 /*
  * Adding an account or changing one: a dialog on desktop, a bottom sheet on mobile. The balance is
@@ -109,194 +90,62 @@ export const AccountDialog = () => {
           This can’t be undone.
         </p>
       ) : (
-        <>
-          <div>
-            <Label tone="muted" htmlFor="account-balance">
-              Balance now
-            </Label>
-            <AmountInput
-              id="account-balance"
-              size="hero"
-              value={draft.balance}
-              onChange={event => dialog.set({ balance: event.target.value })}
-              placeholder="0.00"
-              invalid={!!errors.balance}
-              aria-describedby={errors.balance ? 'account-balance-error' : 'account-balance-help'}
-            />
-            {errors.balance ? (
-              <FieldError id="account-balance-error">{errors.balance}</FieldError>
-            ) : (
-              <p id="account-balance-help" className={helpClasses}>
-                Check your banking app and type what it says.
-                {account ? ` ${updatedText(account, today)}.` : ''}
-              </p>
-            )}
-          </div>
-
-          <div>
-            <Label tone="muted" htmlFor="account-name">
-              Name
-            </Label>
-            <TextInput
-              id="account-name"
-              value={draft.name}
-              onChange={event => dialog.set({ name: event.target.value })}
-              placeholder="e.g. Easy access"
-              maxLength={50}
-              autoComplete="off"
-              invalid={!!errors.name}
-              aria-describedby={errors.name ? 'account-name-error' : undefined}
-            />
-            {errors.name ? <FieldError id="account-name-error">{errors.name}</FieldError> : null}
-          </div>
-
-          {dialog.canChangeKind ? (
-            <div>
-              <p id="account-kind" className="mb-2 text-[13px] font-bold text-muted">
-                Type
-              </p>
-              <SegmentedControl
-                aria-labelledby="account-kind"
-                value={draft.kind}
-                onValueChange={kind => dialog.set({ kind })}
-                options={KINDS}
-                size="lg"
-                fullWidth
-              />
-              <p className={helpClasses}>{KIND_HINTS[draft.kind]}</p>
-            </div>
-          ) : null}
-
-          {dialog.showPaidInto ? (
-            <div className={panelClasses}>
-              <span className="flex min-w-0 grow flex-col gap-0.5">
-                <span id="account-paid-into" className="text-sm font-bold">
-                  Where you get paid
-                </span>
-                <span className="text-xs font-semibold text-muted">
-                  {dialog.isPaidInto
-                    ? 'Your pay lands here. To move it, turn this on for another account.'
-                    : dialog.paidIntoMove
-                      ? `Your pay goes into ${dialog.paidIntoMove.to} from your next payday. ${dialog.paidIntoMove.from} stops being where you get paid.`
-                      : `Turn on if your pay goes in here instead of ${dialog.paidIntoName}.`}
-                </span>
-              </span>
-              <Switch
-                checked={draft.paidInto}
-                disabled={dialog.isPaidInto}
-                onCheckedChange={paidInto => dialog.set({ paidInto })}
-                aria-labelledby="account-paid-into"
-              />
-            </div>
-          ) : null}
-
-          {dialog.spending ? (
-            <div>
-              <Label tone="muted" htmlFor="account-purpose">
-                What it’s for (optional)
-              </Label>
-              <TextInput
-                id="account-purpose"
-                value={draft.purpose}
-                onChange={event => dialog.set({ purpose: event.target.value })}
-                placeholder="e.g. Shared household bills"
-                maxLength={60}
-                autoComplete="off"
-                invalid={!!errors.purpose}
-                aria-describedby={errors.purpose ? 'account-purpose-error' : undefined}
-              />
-              {errors.purpose ? (
-                <FieldError id="account-purpose-error">{errors.purpose}</FieldError>
-              ) : null}
-            </div>
-          ) : (
-            <>
-              <div className="grid gap-[18px] md:grid-cols-2">
-                <div>
-                  <Label tone="muted" htmlFor="account-rate">
-                    Interest rate (optional)
-                  </Label>
-                  <TextInput
-                    id="account-rate"
-                    inputMode="decimal"
-                    value={draft.interestRate}
-                    onChange={event => dialog.set({ interestRate: event.target.value })}
-                    placeholder="e.g. 4.5"
-                    autoComplete="off"
-                    suffix={<span className="pr-1 font-bold text-muted">%</span>}
-                    invalid={!!errors.interestRate}
-                    aria-describedby={errors.interestRate ? 'account-rate-error' : undefined}
-                  />
-                  {errors.interestRate ? (
-                    <FieldError id="account-rate-error">{errors.interestRate}</FieldError>
-                  ) : null}
-                </div>
-                <div>
-                  <Label tone="muted" htmlFor="account-purpose">
-                    What it’s for (optional)
-                  </Label>
-                  <TextInput
-                    id="account-purpose"
-                    value={draft.purpose}
-                    onChange={event => dialog.set({ purpose: event.target.value })}
-                    placeholder="e.g. Holiday fund"
-                    maxLength={60}
-                    autoComplete="off"
-                    invalid={!!errors.purpose}
-                    aria-describedby={errors.purpose ? 'account-purpose-error' : undefined}
-                  />
-                  {errors.purpose ? (
-                    <FieldError id="account-purpose-error">{errors.purpose}</FieldError>
-                  ) : null}
-                </div>
-              </div>
-
-              {paidIn.map(payment => (
-                <button
-                  key={payment.id}
-                  type="button"
-                  onClick={() => {
-                    dialog.close();
-                    openPayment('recurring', { paymentId: payment.id });
-                  }}
-                  className={`${panelClasses} cursor-pointer text-left hover:border-border-strong`}>
-                  <span
-                    aria-hidden="true"
-                    className="inline-flex size-9 shrink-0 items-center justify-center rounded-xl border border-border bg-surface text-muted">
-                    <Repeat size={16} />
-                  </span>
-                  <span className="flex min-w-0 grow flex-col gap-0.5">
-                    <span className="text-sm font-bold">
-                      Paid in from {accountOf(payment, accounts)?.name ?? 'your account'}
-                    </span>
-                    <span className="text-xs font-semibold text-muted">
-                      {payment.name} · {formatMoney(payment.amount)} {PER_PERIOD[payment.frequency]}
-                    </span>
-                  </span>
-                  <ChevronRight size={18} className="shrink-0 text-muted" aria-hidden="true" />
-                </button>
-              ))}
-
+        <AccountFields
+          draft={draft}
+          set={dialog.set}
+          errors={errors}
+          balanceHint={account ? `${updatedText(account, today)}.` : undefined}
+          canChangeKind={dialog.canChangeKind}
+          afterKind={
+            dialog.showPaidInto ? (
               <div className={panelClasses}>
                 <span className="flex min-w-0 grow flex-col gap-0.5">
-                  <span id="account-counts" className="text-sm font-bold">
-                    Count in free to spend
+                  <span id="account-paid-into" className="text-sm font-bold">
+                    Where you get paid
                   </span>
                   <span className="text-xs font-semibold text-muted">
-                    {draft.counts
-                      ? 'Adds to the bank balance on your dashboard'
-                      : 'Kept out of free to spend. Money you’ve put aside isn’t money to spend.'}
+                    {dialog.isPaidInto
+                      ? 'Your pay lands here. To move it, turn this on for another account.'
+                      : dialog.paidIntoMove
+                        ? `Your pay goes into ${dialog.paidIntoMove.to} from your next payday. ${dialog.paidIntoMove.from} stops being where you get paid.`
+                        : `Turn on if your pay goes in here instead of ${dialog.paidIntoName}.`}
                   </span>
                 </span>
                 <Switch
-                  checked={draft.counts}
-                  onCheckedChange={counts => dialog.set({ counts })}
-                  aria-labelledby="account-counts"
+                  checked={draft.paidInto}
+                  disabled={dialog.isPaidInto}
+                  onCheckedChange={paidInto => dialog.set({ paidInto })}
+                  aria-labelledby="account-paid-into"
                 />
               </div>
-            </>
-          )}
-        </>
+            ) : null
+          }
+          beforeCounts={paidIn.map(payment => (
+            <button
+              key={payment.id}
+              type="button"
+              onClick={() => {
+                dialog.close();
+                openPayment('recurring', { paymentId: payment.id });
+              }}
+              className={`${panelClasses} cursor-pointer text-left hover:border-border-strong`}>
+              <span
+                aria-hidden="true"
+                className="inline-flex size-9 shrink-0 items-center justify-center rounded-xl border border-border bg-surface text-muted">
+                <Repeat size={16} />
+              </span>
+              <span className="flex min-w-0 grow flex-col gap-0.5">
+                <span className="text-sm font-bold">
+                  Paid in from {accountOf(payment, accounts)?.name ?? 'your account'}
+                </span>
+                <span className="text-xs font-semibold text-muted">
+                  {payment.name} · {formatMoney(payment.amount)} {PER_PERIOD[payment.frequency]}
+                </span>
+              </span>
+              <ChevronRight size={18} className="shrink-0 text-muted" aria-hidden="true" />
+            </button>
+          ))}
+        />
       )}
     </Modal>
   );

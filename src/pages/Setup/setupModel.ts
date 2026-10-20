@@ -1,12 +1,12 @@
+import { AccountDraft, checkAccountDraft } from '~/components/accounts';
 import {
   BankHolidayRegion,
   CreateBudgetInput,
-  OneOffPaymentCategory,
+  OneOffPaymentInput,
   PayFrequency,
   PaydayType,
-  PaymentFrequency,
-  PaymentType,
   RecurringPaymentCategory,
+  RecurringPaymentInput,
   Weekday
 } from '~/graphql/generated';
 import { addDays, parseIsoDate, PaydayConfig } from '~/lib/dates';
@@ -14,27 +14,28 @@ import { parseMoney } from '~/lib/format';
 import { BankHolidays, getPayCycle, usesWeekday } from '~/lib/payday';
 import { occurrencesBetween, PER_MONTH } from '~/lib/payments';
 
-// Setup's answers. Amounts and dates are kept as typed until they're saved.
+// Setup's answers. The pay and the first account are kept as typed until they're saved; other
+// accounts as their dialog's draft, and payments as the API will take them.
 
-export interface RegularDraft {
-  id: string;
-  // Which suggestion added it, so tapping the suggestion again removes it
-  preset: string | null;
-  name: string;
-  amount: string;
-  frequency: PaymentFrequency;
-  // 'YYYY-MM-DD' of the next payment
-  date: string;
-  category: RecurringPaymentCategory;
+// The key payments use for the account pay lands in, as the API's createBudget takes it
+export const PAID_INTO_KEY = 'paid-into';
+
+export interface SetupAccount {
+  // How payments set up alongside it name it
+  key: string;
+  draft: AccountDraft;
 }
 
-export interface OneOffDraft {
+export interface SetupRegular {
   id: string;
-  name: string;
-  amount: string;
-  date: string;
-  type: PaymentType;
-  category: OneOffPaymentCategory;
+  // Which suggestion added it, so tapping the suggestion again opens it
+  preset: string | null;
+  input: RecurringPaymentInput;
+}
+
+export interface SetupOneOff {
+  id: string;
+  input: OneOffPaymentInput;
 }
 
 export interface SetupValues {
@@ -45,9 +46,12 @@ export interface SetupValues {
   firstPayDate: string;
   region: BankHolidayRegion;
   income: string;
+  // The account pay lands in
+  paidIntoName: string;
   balance: string;
-  regulars: RegularDraft[];
-  oneOffs: OneOffDraft[];
+  accounts: SetupAccount[];
+  regulars: SetupRegular[];
+  oneOffs: SetupOneOff[];
 }
 
 export const INITIAL_VALUES: SetupValues = {
@@ -58,7 +62,9 @@ export const INITIAL_VALUES: SetupValues = {
   firstPayDate: '',
   region: 'ENGLAND_AND_WALES',
   income: '',
+  paidIntoName: 'Current account',
   balance: '',
+  accounts: [],
   regulars: [],
   oneOffs: []
 };
@@ -70,9 +76,10 @@ export const STEPS = [
     intro: 'This sets the length of each cycle. Your dashboard starts fresh every payday.'
   },
   {
-    title: 'Balance',
-    heading: "What's in your bank right now?",
-    intro: 'Use the balance your banking app shows today. You can correct it every payday.'
+    title: 'Your accounts',
+    heading: 'Where do you keep your money?',
+    intro:
+      'The account your pay goes into, and any others. Use the balances your banking app shows today.'
   },
   {
     title: 'Regular payments',
@@ -164,55 +171,79 @@ export const payErrors = (values: SetupValues): PayErrors => {
   };
 };
 
-export const balanceError = (values: SetupValues) =>
-  isPositive(values.balance) ? undefined : 'Enter your current balance. It must be more than £0.';
+export interface AccountsErrors {
+  paidIntoName?: string;
+  balance?: string;
+}
 
-export type RegularField = 'name' | 'amount' | 'date';
+export const accountsErrors = (values: SetupValues): AccountsErrors => ({
+  paidIntoName: values.paidIntoName.trim() ? undefined : 'Give the account a name',
+  balance: isPositive(values.balance)
+    ? undefined
+    : 'Enter your current balance. It must be more than £0.'
+});
 
-/* Names must be unique across every payment, as the API requires */
-const usedNames = (values: SetupValues) => {
-  const counts = new Map<string, number>();
-  for (const { name } of [...values.regulars, ...values.oneOffs]) {
-    const key = name.trim().toLowerCase();
-    if (key) counts.set(key, (counts.get(key) ?? 0) + 1);
-  }
-  return counts;
-};
-
-const DUPLICATE_NAME = "You've already used this name. Names need to be unique.";
-
-export const regularErrors = (regular: RegularDraft, values: SetupValues) => {
-  const errors: { field: RegularField; message: string }[] = [];
-  const key = regular.name.trim().toLowerCase();
-  if (!key) errors.push({ field: 'name', message: 'Give this payment a name' });
-  else if ((usedNames(values).get(key) ?? 0) > 1) {
-    errors.push({ field: 'name', message: DUPLICATE_NAME });
-  }
-  if (!isPositive(regular.amount)) {
-    errors.push({ field: 'amount', message: 'Add an amount more than £0' });
-  }
-  if (!regular.date) errors.push({ field: 'date', message: 'Add the date of the next payment' });
-  return errors;
-};
-
-/* The first problem with a one-off payment before it's added to the list */
-export const oneOffError = (draft: Omit<OneOffDraft, 'id'>, values: SetupValues) => {
-  const key = draft.name.trim().toLowerCase();
-  if (values.oneOffs.length >= MAX_ONE_OFFS)
+/*
+ * Why a payment can't be added or saved: names must be unique across every payment, as the API
+ * requires, and there's a limit on one-offs. `id` is the payment being changed, if any.
+ */
+export const paymentProblem = (
+  values: SetupValues,
+  { name, id, oneOff }: { name: string; id?: string; oneOff: boolean }
+) => {
+  const key = name.trim().toLowerCase();
+  const taken = [...values.regulars, ...values.oneOffs].some(
+    payment => payment.id !== id && payment.input.name.trim().toLowerCase() === key
+  );
+  if (taken) return "You've already used this name. Names need to be unique.";
+  if (oneOff && !id && values.oneOffs.length >= MAX_ONE_OFFS) {
     return `You can add up to ${MAX_ONE_OFFS} one-off payments`;
-  if (!key) return 'Give this payment a name';
-  if ((usedNames(values).get(key) ?? 0) > 0) return DUPLICATE_NAME;
-  if (!isPositive(draft.amount)) return 'Add an amount more than £0';
-  if (!draft.date) return 'Add a due date';
+  }
   return undefined;
 };
 
 export const isStepValid = (step: number, values: SetupValues) => {
   if (step === 0) return Object.values(payErrors(values)).every(error => !error);
-  if (step === 1) return !balanceError(values);
-  if (step === 2) return values.regulars.every(regular => !regularErrors(regular, values).length);
+  if (step === 1) return Object.values(accountsErrors(values)).every(error => !error);
   return true;
 };
+
+// ---- the accounts, as the payment form and the sums see them ----
+
+export interface SetupAccountView {
+  id: string;
+  name: string;
+  kind: AccountDraft['kind'];
+  counts: boolean;
+  paidInto: boolean;
+  balance: number;
+  draft: AccountDraft | null;
+}
+
+/* Where pay lands first, then the other accounts as added */
+export const setupAccounts = (values: SetupValues): SetupAccountView[] => [
+  {
+    id: PAID_INTO_KEY,
+    name: values.paidIntoName.trim() || 'Current account',
+    kind: 'SPENDING',
+    counts: true,
+    paidInto: true,
+    balance: parseMoney(values.balance) ?? 0,
+    draft: null
+  },
+  ...values.accounts.map(({ key, draft }) => ({
+    id: key,
+    name: draft.name.trim(),
+    kind: draft.kind,
+    counts: draft.kind === 'SPENDING' || draft.counts,
+    paidInto: false,
+    balance: parseMoney(draft.balance) ?? 0,
+    draft
+  }))
+];
+
+// Paid every three months or less often: kept apart from the monthly figure, never averaged in
+const YEARLY_FREQUENCIES = ['QUARTERLY', 'BIANNUALLY', 'ANNUALLY'];
 
 // ---- the first cycle, as the summary beside the form shows it ----
 
@@ -222,49 +253,75 @@ export const summariseFirstCycle = (
 ) => {
   const { end: cycleEnd } = getPayCycle(paydayConfig(values), { holidays, today });
   const lastDayOfCycle = addDays(cycleEnd, -1);
-  const balance = parseMoney(values.balance) ?? 0;
+  const accounts = setupAccounts(values);
+  const counted = accounts.filter(account => account.counts);
+  const balance = counted.reduce((total, account) => total + account.balance, 0);
+  const counts = (key: string | null | undefined) =>
+    counted.some(account => account.id === (key || PAID_INTO_KEY));
+  // What a payment does to free to spend: off (or onto) the account it uses when that counts, and
+  // onto the one it moves money into when that counts. Between two that count, nothing.
+  const effectOf = (input: {
+    amount: number;
+    type: string;
+    account?: string | null;
+    paysInto?: string | null;
+  }) =>
+    (counts(input.account) ? (input.type === 'INCOME' ? input.amount : -input.amount) : 0) +
+    (input.paysInto && counts(input.paysInto) ? input.amount : 0);
 
-  let regularsDue = 0;
+  let regularsNet = 0;
   let regularsDueCount = 0;
   let monthly = 0;
-  for (const regular of values.regulars) {
-    const amount = parseMoney(regular.amount) ?? 0;
-    monthly += amount * PER_MONTH[regular.frequency];
-    const first = parseIsoDate(regular.date);
+  let yearly = 0;
+  let goingOut = 0;
+  for (const { input } of values.regulars) {
+    // Money moving between accounts that both count isn't spending
+    const moving = !!input.paysInto && counts(input.paysInto);
+    if (input.type === 'EXPENSE' && !moving) {
+      if (YEARLY_FREQUENCIES.includes(input.frequency)) {
+        yearly += input.amount * PER_MONTH[input.frequency] * 12;
+      } else {
+        monthly += input.amount * PER_MONTH[input.frequency];
+      }
+    }
+    const first = parseIsoDate(input.firstPaymentDate);
     if (!first) continue;
     const times = occurrencesBetween(
-      { firstPaymentDate: first, frequency: regular.frequency },
+      { firstPaymentDate: first, frequency: input.frequency },
       { from: today, to: lastDayOfCycle }
     ).length;
     if (times > 0) {
-      regularsDue += amount * times;
+      const effect = effectOf(input) * times;
+      regularsNet += effect;
+      if (effect < 0) goingOut -= effect;
       regularsDueCount++;
     }
   }
 
-  let oneOffsOut = 0;
-  let oneOffsIn = 0;
+  let oneOffsNet = 0;
   let oneOffsDueCount = 0;
-  for (const oneOff of values.oneOffs) {
-    const date = parseIsoDate(oneOff.date);
+  for (const { input } of values.oneOffs) {
+    const date = parseIsoDate(input.dueDate);
     if (!date || date < today || date >= cycleEnd) continue;
-    const amount = parseMoney(oneOff.amount) ?? 0;
+    const effect = effectOf(input);
     oneOffsDueCount++;
-    if (oneOff.type === 'INCOME') oneOffsIn += amount;
-    else oneOffsOut += amount;
+    oneOffsNet += effect;
+    if (effect < 0) goingOut -= effect;
   }
 
-  const goingOut = regularsDue + oneOffsOut;
   return {
     cycleEnd,
     balance,
+    // How many accounts make the balance
+    countedCount: counted.length,
     monthly,
-    regularsDue,
+    yearly,
+    regularsNet,
     regularsDueCount,
-    oneOffsNet: oneOffsIn - oneOffsOut,
+    oneOffsNet,
     oneOffsDueCount,
     goingOut,
-    freeToSpend: balance - regularsDue - oneOffsOut + oneOffsIn,
+    freeToSpend: balance + regularsNet + oneOffsNet,
     spokenForPercent: balance > 0 ? Math.min(100, Math.round((goingOut / balance) * 100)) : 100
   };
 };
@@ -277,6 +334,11 @@ export const toCreateBudgetInput = (values: SetupValues): CreateBudgetInput => {
   const payday = paydayConfig(values);
   return {
     bankBalance: parseMoney(values.balance) ?? 0,
+    paidIntoName: values.paidIntoName.trim() || 'Current account',
+    accounts: values.accounts.flatMap(({ key, draft }) => {
+      const { fields } = checkAccountDraft(draft, { submitted: true });
+      return fields ? [{ key, kind: draft.kind, ...fields }] : [];
+    }),
     monthlyIncome: parseMoney(values.income) ?? 0,
     payday: {
       frequency: payday.frequency,
@@ -286,20 +348,7 @@ export const toCreateBudgetInput = (values: SetupValues): CreateBudgetInput => {
       firstPayDate: payday.firstPayDate,
       bankHolidayRegion: values.region
     },
-    recurringPayments: values.regulars.map(regular => ({
-      name: regular.name.trim(),
-      amount: parseMoney(regular.amount) ?? 0,
-      category: regular.category,
-      frequency: regular.frequency,
-      type: 'EXPENSE',
-      firstPaymentDate: regular.date
-    })),
-    oneOffPayments: values.oneOffs.map(oneOff => ({
-      name: oneOff.name.trim(),
-      amount: parseMoney(oneOff.amount) ?? 0,
-      dueDate: oneOff.date,
-      type: oneOff.type,
-      category: oneOff.category
-    }))
+    recurringPayments: values.regulars.map(regular => regular.input),
+    oneOffPayments: values.oneOffs.map(oneOff => oneOff.input)
   };
 };

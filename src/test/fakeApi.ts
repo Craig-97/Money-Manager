@@ -808,8 +808,36 @@ export const createFakeApi = ({
             }
           : null
       };
-      db.budget.recurringPayments = (input.recurringPayments ?? []).map(newRecurring);
-      db.budget.oneOffPayments = (input.oneOffPayments ?? []).map(newOneOff);
+      // As the API: the account pay lands in, then the others; payments name them by key
+      db.budget.currentAccount = { name: input.paidIntoName ?? 'Current account' };
+      const ids = new Map<string, string>([['paid-into', CURRENT_ACCOUNT_ID]]);
+      db.budget.accounts = (input.accounts ?? []).map((account: Args) => {
+        const id = newId('account');
+        ids.set(account.key, id);
+        const spending = account.kind === 'SPENDING';
+        return {
+          id,
+          name: account.name,
+          kind: spending ? 'SPENDING' : 'SAVINGS',
+          balance: account.balance,
+          counts: spending || (account.counts ?? false),
+          paidInto: false,
+          interestRate: account.interestRate ?? null,
+          purpose: account.purpose ?? null,
+          balanceUpdatedAt: String(Date.now())
+        };
+      });
+      const idOf = (key: string | null | undefined) => (key ? (ids.get(key) ?? null) : null);
+      db.budget.recurringPayments = (input.recurringPayments ?? []).map((payment: Args) =>
+        newRecurring({
+          ...payment,
+          account: idOf(payment.account),
+          paysInto: idOf(payment.paysInto)
+        })
+      );
+      db.budget.oneOffPayments = (input.oneOffPayments ?? []).map((payment: Args) =>
+        newOneOff({ ...payment, account: idOf(payment.account) })
+      );
       return { budget: db.budget, success: true };
     },
     updateBudget: ({ input }: Args) => {

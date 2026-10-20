@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useApolloClient, useMutation } from '@apollo/client/react';
+import { AccountDraft } from '~/components/accounts';
+import { DraftPayment } from '~/components/payments/PaymentDialog';
 import { ERRORS } from '~/constants';
 import { linkBudget } from '~/graphql/cache';
 import {
@@ -16,16 +18,19 @@ import {
   INITIAL_VALUES,
   isStepValid,
   LAST_STEP,
-  oneOffError,
-  OneOffDraft,
+  PAID_INTO_KEY,
+  paymentProblem,
   PRESETS,
-  RegularDraft,
   SetupValues,
   toCreateBudgetInput
 } from '../setupModel';
 
 let nextDraftId = 1;
 const draftId = (prefix: string) => `${prefix}-${nextDraftId++}`;
+
+// The payment dialog: adding one (from a suggestion, or blank) or changing one in the list
+export type SetupPaymentTarget =
+  { kind: 'recurring'; id?: string; preset?: string } | { kind: 'oneOff'; id?: string };
 
 /* Setup's answers, which step is showing, and saving it all as the budget at the end */
 export const useSetup = () => {
@@ -43,6 +48,12 @@ export const useSetup = () => {
   // Set once saved; the person stays in setup until they choose to go to the dashboard
   const [budget, setBudget] = useState<BudgetFieldsFragment | null>(null);
   const [finished, setFinished] = useState(false);
+  // The dialogs' targets, kept while they animate closed; each opening counts up for a fresh form
+  const [paymentTarget, setPaymentTarget] = useState<SetupPaymentTarget>({ kind: 'recurring' });
+  const [paymentOpen, setPaymentOpen] = useState(false);
+  const [accountKey, setAccountKey] = useState<string | null>(null);
+  const [accountOpen, setAccountOpen] = useState(false);
+  const [opened, setOpened] = useState(0);
 
   const update = <K extends keyof SetupValues>(key: K, value: SetupValues[K]) =>
     setValues(current => ({ ...current, [key]: value }));
@@ -57,68 +68,99 @@ export const useSetup = () => {
       };
     });
 
-  const togglePreset = (key: string) =>
-    setValues(current => {
-      if (current.regulars.some(regular => regular.preset === key)) {
-        return { ...current, regulars: current.regulars.filter(r => r.preset !== key) };
-      }
-      const preset = PRESETS.find(p => p.key === key)!;
-      const regular: RegularDraft = {
-        id: draftId('regular'),
-        preset: key,
-        name: preset.name,
-        amount: '',
-        frequency: 'MONTHLY',
-        date: '',
-        category: preset.category
-      };
-      return { ...current, regulars: [...current.regulars, regular] };
+  const presetKey = paymentTarget.kind === 'recurring' ? paymentTarget.preset : undefined;
+
+  const openPayment = (target: SetupPaymentTarget) => {
+    setPaymentTarget(target);
+    setPaymentOpen(true);
+    setOpened(count => count + 1);
+  };
+
+  // A suggestion already added opens that payment; otherwise the form starts with its name
+  const openPreset = (key: string) => {
+    const added = values.regulars.find(regular => regular.preset === key);
+    openPayment(added ? { kind: 'recurring', id: added.id } : { kind: 'recurring', preset: key });
+  };
+
+  /* Adds or replaces a payment from the dialog, or says why it can't */
+  const savePayment = (draft: DraftPayment) => {
+    const { id } = paymentTarget;
+    const problem = paymentProblem(values, {
+      name: draft.input.name,
+      id,
+      oneOff: draft.kind === 'oneOff'
     });
-
-  const addCustomRegular = () =>
-    update('regulars', [
-      ...values.regulars,
-      {
-        id: draftId('regular'),
-        preset: null,
-        name: '',
-        amount: '',
-        frequency: 'MONTHLY',
-        date: '',
-        category: 'OTHER'
+    if (problem) return problem;
+    setValues(current => {
+      if (draft.kind === 'recurring') {
+        const preset = paymentTarget.kind === 'recurring' ? (paymentTarget.preset ?? null) : null;
+        const regulars = id
+          ? current.regulars.map(regular =>
+              regular.id === id ? { ...regular, input: draft.input } : regular
+            )
+          : [...current.regulars, { id: draftId('regular'), preset, input: draft.input }];
+        return { ...current, regulars };
       }
-    ]);
-
-  const updateRegular = (id: string, patch: Partial<RegularDraft>) =>
-    setValues(current => ({
-      ...current,
-      regulars: current.regulars.map(regular =>
-        regular.id === id ? { ...regular, ...patch } : regular
-      )
-    }));
-
-  const removeRegular = (id: string) =>
-    update(
-      'regulars',
-      values.regulars.filter(regular => regular.id !== id)
-    );
-
-  /* Adds a one-off payment, or returns why it can't be added */
-  const addOneOff = (draft: Omit<OneOffDraft, 'id'>) => {
-    const error = oneOffError(draft, values);
-    if (error) return error;
-    update('oneOffs', [
-      ...values.oneOffs,
-      { ...draft, name: draft.name.trim(), id: draftId('one-off') }
-    ]);
+      const oneOffs = id
+        ? current.oneOffs.map(oneOff =>
+            oneOff.id === id ? { ...oneOff, input: draft.input } : oneOff
+          )
+        : [...current.oneOffs, { id: draftId('one-off'), input: draft.input }];
+      return { ...current, oneOffs };
+    });
     return undefined;
   };
 
-  const removeOneOff = (id: string) =>
-    update(
-      'oneOffs',
-      values.oneOffs.filter(oneOff => oneOff.id !== id)
-    );
+  const removePayment = (id: string) => {
+    setValues(current => ({
+      ...current,
+      regulars: current.regulars.filter(regular => regular.id !== id),
+      oneOffs: current.oneOffs.filter(oneOff => oneOff.id !== id)
+    }));
+    setPaymentOpen(false);
+  };
+
+  const openAccount = (key: string | null) => {
+    setAccountKey(key);
+    setAccountOpen(true);
+    setOpened(count => count + 1);
+  };
+
+  const saveAccount = (draft: AccountDraft) => {
+    setValues(current => ({
+      ...current,
+      accounts: accountKey
+        ? current.accounts.map(account =>
+            account.key === accountKey ? { ...account, draft } : account
+          )
+        : [...current.accounts, { key: draftId('account'), draft }]
+    }));
+    setAccountOpen(false);
+  };
+
+  // Payments that used it go back to where pay lands, and ones moving money into it stop
+  const removeAccount = (key: string) => {
+    setValues(current => ({
+      ...current,
+      accounts: current.accounts.filter(account => account.key !== key),
+      regulars: current.regulars.map(regular => ({
+        ...regular,
+        input: {
+          ...regular.input,
+          account: regular.input.account === key ? null : regular.input.account,
+          paysInto: regular.input.paysInto === key ? null : regular.input.paysInto
+        }
+      })),
+      oneOffs: current.oneOffs.map(oneOff => ({
+        ...oneOff,
+        input: {
+          ...oneOff.input,
+          account: oneOff.input.account === key ? null : oneOff.input.account
+        }
+      }))
+    }));
+    setAccountOpen(false);
+  };
 
   const goTo = (target: number) => {
     if (target > maxStep || saving) return;
@@ -185,12 +227,28 @@ export const useSetup = () => {
     values,
     update,
     setFrequency,
-    togglePreset,
-    addCustomRegular,
-    updateRegular,
-    removeRegular,
-    addOneOff,
-    removeOneOff,
+    payment: {
+      target: paymentTarget,
+      open: paymentOpen,
+      opened,
+      // The suggestion it was opened from, for the name and category to start with
+      preset: PRESETS.find(preset => preset.key === presetKey) ?? null,
+      close: () => setPaymentOpen(false),
+      save: savePayment,
+      remove: removePayment
+    },
+    openPreset,
+    openPayment,
+    account: {
+      key: accountKey,
+      open: accountOpen,
+      opened,
+      close: () => setAccountOpen(false),
+      save: saveAccount,
+      remove: removeAccount
+    },
+    openAccount,
+    paidIntoKey: PAID_INTO_KEY,
     step,
     maxStep,
     showErrors,

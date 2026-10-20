@@ -125,8 +125,20 @@ type Budget {
   calendarFeed: CalendarFeed!
 }
 
+input BudgetAccountInput {
+  key: String!
+  name: String!
+  kind: AccountKind
+  balance: Float!
+  counts: Boolean
+  interestRate: Float
+  purpose: String
+}
+
 input CreateBudgetInput {
   bankBalance: Float!
+  paidIntoName: String
+  accounts: [BudgetAccountInput!]
   monthlyIncome: Float!
   oneOffPayments: [OneOffPaymentInput!]
   recurringPayments: [RecurringPaymentInput!]

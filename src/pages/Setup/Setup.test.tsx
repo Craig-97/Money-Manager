@@ -9,11 +9,6 @@ const renderSetup = () => renderApp({ route: '/setup', api: createFakeApi({ budg
 
 type User = ReturnType<typeof renderApp>['user'];
 
-const pickToday = async (user: User, field: HTMLElement) => {
-  await user.click(field);
-  await user.click(await screen.findByRole('button', { name: 'Today' }));
-};
-
 const cont = (user: User) => user.click(screen.getByRole('button', { name: 'Continue' }));
 
 describe('setup', () => {
@@ -34,7 +29,7 @@ describe('setup', () => {
     await user.type(screen.getByLabelText('Take-home pay per month'), '3600');
     await cont(user);
 
-    expect(await findPageHeading("What's in your bank right now?")).toBeInTheDocument();
+    expect(await findPageHeading('Where do you keep your money?')).toBeInTheDocument();
   });
 
   it('only offers the payday rules that fit how often you are paid', async () => {
@@ -54,21 +49,82 @@ describe('setup', () => {
     expect(screen.getByLabelText('Date of your next pay')).toBeInTheDocument();
   });
 
-  it('checks regular payments have a name, amount and date', async () => {
+  it('adds a regular payment from a suggestion with the payment form', async () => {
     const { user } = renderSetup();
 
     await user.type(await screen.findByLabelText('Take-home pay per month'), '3600');
     await cont(user);
-    await user.type(await screen.findByLabelText('Current bank balance'), '1000');
+    await user.type(await screen.findByLabelText('Balance now'), '1000');
     await cont(user);
     await user.click(await screen.findByRole('button', { name: 'Netflix' }));
+
+    const dialog = await screen.findByRole('dialog', { name: 'Add recurring payment' });
+    expect(within(dialog).getByLabelText('Name')).toHaveValue('Netflix');
+    // Asks for what's missing rather than adding it
+    await user.click(within(dialog).getByRole('button', { name: 'Add payment' }));
+    expect(within(dialog).getByText('Enter an amount above £0')).toBeInTheDocument();
+    await user.type(within(dialog).getByLabelText('Amount'), '20');
+    await user.click(within(dialog).getByRole('button', { name: 'Add payment' }));
+
+    const row = await screen.findByRole('button', { name: 'Edit Netflix' });
+    expect(row).toHaveTextContent('Monthly');
+    expect(screen.getByRole('button', { name: 'Netflix' })).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('adds other accounts, and payments that move money into them', async () => {
+    const api = createFakeApi({ budget: null });
+    const { user } = renderApp({ route: '/setup', api });
+
+    await user.type(await screen.findByLabelText('Take-home pay per month'), '3600');
+    await cont(user);
+    await user.clear(await screen.findByLabelText('Account name'));
+    await user.type(screen.getByLabelText('Account name'), 'Everyday');
+    await user.type(screen.getByLabelText('Balance now'), '7895');
+    await user.click(screen.getByRole('button', { name: 'Add an account' }));
+    const accountDialog = await screen.findByRole('dialog', { name: 'Add account' });
+    await user.type(within(accountDialog).getByLabelText('Balance now'), '8650');
+    await user.type(within(accountDialog).getByLabelText('Name'), 'Cash ISA');
+    await user.type(within(accountDialog).getByLabelText('Interest rate (optional)'), '4.5');
+    await user.click(within(accountDialog).getByRole('button', { name: 'Add account' }));
+    expect(await screen.findByRole('button', { name: 'Edit Cash ISA' })).toHaveTextContent(
+      'Savings · 4.5%'
+    );
     await cont(user);
 
-    expect(screen.getByText('Add an amount more than £0')).toBeInTheDocument();
-    expect(screen.getByText('Add the date of the next payment')).toBeInTheDocument();
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
-      'Add your regular payments'
+    await user.click(await screen.findByRole('button', { name: 'Add custom payment' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Add recurring payment' });
+    await user.type(within(dialog).getByLabelText('Name'), 'ISA top-up');
+    await user.type(within(dialog).getByLabelText('Amount'), '250');
+    await user.click(within(dialog).getByRole('switch', { name: 'Pays into savings' }));
+    await user.click(within(dialog).getByRole('button', { name: 'Add payment' }));
+    expect(await screen.findByRole('button', { name: 'Edit ISA top-up' })).toHaveTextContent(
+      'Into Cash ISA'
     );
+    await cont(user);
+    await user.click(await screen.findByRole('button', { name: 'Skip for now' }));
+    await user.click(await screen.findByRole('button', { name: 'Finish setup' }));
+
+    expect(
+      await screen.findByRole('heading', { name: "You're all set, Test" })
+    ).toBeInTheDocument();
+    const [{ input }] = api.callsTo('CreateBudget') as [{ input: Record<string, unknown> }];
+    expect(input).toMatchObject({
+      bankBalance: 7895,
+      paidIntoName: 'Everyday',
+      accounts: [
+        {
+          key: expect.any(String),
+          kind: 'SAVINGS',
+          name: 'Cash ISA',
+          balance: 8650,
+          counts: false,
+          interestRate: 4.5
+        }
+      ],
+      recurringPayments: [expect.objectContaining({ name: 'ISA top-up', amount: 250 })]
+    });
+    const [account] = input.accounts as { key: string }[];
+    expect((input.recurringPayments as { paysInto: string }[])[0].paysInto).toBe(account.key);
   });
 
   it('saves the budget and opens the dashboard', async () => {
@@ -77,12 +133,14 @@ describe('setup', () => {
 
     await user.type(await screen.findByLabelText('Take-home pay per month'), '3,600');
     await cont(user);
-    await user.type(await screen.findByLabelText('Current bank balance'), '9165');
+    await user.type(await screen.findByLabelText('Balance now'), '9165');
     await cont(user);
 
     await user.click(await screen.findByRole('button', { name: 'Netflix' }));
-    await user.type(screen.getByLabelText('Amount'), '20');
-    await pickToday(user, screen.getByLabelText('Next payment'));
+    const dialog = await screen.findByRole('dialog', { name: 'Add recurring payment' });
+    await user.type(within(dialog).getByLabelText('Amount'), '20');
+    await user.click(within(dialog).getByRole('button', { name: 'Add payment' }));
+    await screen.findByRole('button', { name: 'Edit Netflix' });
     await cont(user);
 
     // Coming up is optional
@@ -96,6 +154,8 @@ describe('setup', () => {
     const [{ input }] = api.callsTo('CreateBudget') as [{ input: Record<string, unknown> }];
     expect(input).toMatchObject({
       bankBalance: 9165,
+      paidIntoName: 'Current account',
+      accounts: [],
       monthlyIncome: 3600,
       payday: { frequency: 'MONTHLY', type: 'LAST_DAY', bankHolidayRegion: 'ENGLAND_AND_WALES' },
       recurringPayments: [
@@ -123,7 +183,7 @@ describe('setup', () => {
 
     await user.type(await screen.findByLabelText('Take-home pay per month'), '3600');
     await cont(user);
-    await user.type(await screen.findByLabelText('Current bank balance'), '500');
+    await user.type(await screen.findByLabelText('Balance now'), '500');
     await cont(user);
     await cont(user);
     await user.click(await screen.findByRole('button', { name: 'Skip for now' }));
@@ -141,7 +201,7 @@ describe('setup', () => {
 
     await user.type(await screen.findByLabelText('Take-home pay per month'), '3600');
     await cont(user);
-    await user.type(await screen.findByLabelText('Current bank balance'), '500');
+    await user.type(await screen.findByLabelText('Balance now'), '500');
     await cont(user);
     await cont(user);
     await user.click(await screen.findByRole('button', { name: 'Skip for now' }));

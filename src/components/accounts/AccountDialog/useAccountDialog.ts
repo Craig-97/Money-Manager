@@ -2,42 +2,22 @@ import { useState } from 'react';
 import { useMutation } from '@apollo/client/react';
 import { useShallow } from 'zustand/react/shallow';
 import {
-  AccountKind,
   CreateAccountDocument,
   DeleteAccountDocument,
   UpdateAccountDocument
 } from '~/graphql/generated';
 import { Account, paidIntoAccountOf, spendingOf } from '~/lib/accounts';
 import { getApiErrorMessage } from '~/lib/errors';
-import { formatMoneyInput, parseMoney } from '~/lib/format';
+import { formatMoneyInput } from '~/lib/format';
 import { useAccountDialogStore } from '~/state/accountDialog';
 import { useSetupAccountsStore } from '~/state/setupAccounts';
 import { showToast } from '~/state/toast';
+import { AccountDraft, checkAccountDraft, EMPTY_ACCOUNT_DRAFT } from '../accountDraft';
 
-const NAME_MAX = 50;
-const PURPOSE_MAX = 60;
-
-interface Draft {
-  name: string;
-  kind: AccountKind;
-  balance: string;
-  interestRate: string;
-  purpose: string;
-  counts: boolean;
-  paidInto: boolean;
-}
-
-const EMPTY: Draft = {
-  name: '',
-  kind: 'SAVINGS',
-  balance: '',
-  interestRate: '',
-  purpose: '',
-  counts: false,
-  paidInto: false
-};
-
-const draftOf = (account: Account | undefined, { paidInto }: { paidInto?: boolean }): Draft =>
+const draftOf = (
+  account: Account | undefined,
+  { paidInto }: { paidInto?: boolean }
+): AccountDraft =>
   account
     ? {
         name: account.name,
@@ -48,15 +28,7 @@ const draftOf = (account: Account | undefined, { paidInto }: { paidInto?: boolea
         counts: account.counts,
         paidInto: account.paidInto || !!paidInto
       }
-    : EMPTY;
-
-/* A rate as typed: blank for none, otherwise a percentage from 0 to 100 */
-const parseRate = (value: string) => {
-  const cleaned = value.replace(/[%\s]/g, '');
-  if (!cleaned) return { rate: null, valid: true };
-  const rate = Number(cleaned);
-  return { rate, valid: Number.isFinite(rate) && rate >= 0 && rate <= 100 };
-};
+    : EMPTY_ACCOUNT_DRAFT;
 
 /*
  * The account dialog's form: a new account, or one being changed. The balance comes first and is
@@ -96,27 +68,11 @@ export const useAccountDialog = ({
   const [update, { loading: updating }] = useMutation(UpdateAccountDocument);
   const [remove, { loading: deleting }] = useMutation(DeleteAccountDocument);
 
-  const set = (fields: Partial<Draft>) =>
+  const set = (fields: Partial<AccountDraft>) =>
     setDraft(currentDraft => ({ ...currentDraft, ...fields }));
 
   const name = draft.name.trim();
-  const balance = parseMoney(draft.balance);
-  const { rate, valid: rateValid } = parseRate(draft.interestRate);
-  const errors = {
-    balance: submitted && balance === null ? 'Enter the balance, like 1,250.00' : undefined,
-    name: !submitted
-      ? undefined
-      : !name
-        ? 'Give it a name'
-        : name.length > NAME_MAX
-          ? `Keep it to ${NAME_MAX} characters`
-          : undefined,
-    interestRate: submitted && !rateValid ? 'Enter a rate from 0 to 100, like 4.5' : undefined,
-    purpose:
-      submitted && draft.purpose.trim().length > PURPOSE_MAX
-        ? `Keep it to ${PURPOSE_MAX} characters`
-        : undefined
-  };
+  const { errors, fields } = checkAccountDraft(draft, { submitted });
 
   // Where pay lands stays put until another account takes it over
   const isPaidInto = !!account?.paidInto;
@@ -136,13 +92,7 @@ export const useAccountDialog = ({
 
   const save = async () => {
     setSubmitted(true);
-    if (balance === null || !name || name.length > NAME_MAX || !rateValid) return;
-    if (draft.purpose.trim().length > PURPOSE_MAX) return;
-    const purpose = draft.purpose.trim() || null;
-    // Spending accounts always count and have no rate
-    const fields = spending
-      ? { name, balance, purpose }
-      : { name, balance, counts: draft.counts, interestRate: rate, purpose };
+    if (!fields) return;
     try {
       if (account) {
         await update({
