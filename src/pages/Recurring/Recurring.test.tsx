@@ -24,7 +24,7 @@ const recurring = (
   fields: Partial<FakeRecurringPayment> & Pick<FakeRecurringPayment, 'id' | 'name'>
 ): FakeRecurringPayment => ({
   amount: 20,
-  category: 'SUBSCRIPTION',
+  category: 'SUBSCRIPTIONS',
   frequency: 'MONTHLY',
   type: 'EXPENSE',
   firstPaymentDate: apiDate('2026-01-02'),
@@ -46,7 +46,7 @@ const budget = (): FakeBudget => ({
       id: 'home',
       name: 'Home insurance',
       amount: 21,
-      category: 'INSURANCE',
+      category: 'FINANCES',
       firstPaymentDate: apiDate('2025-02-20'),
       renewalDate: apiDate('2027-02-02'),
       renewalReminder: { off: false, days: 30 }
@@ -55,7 +55,7 @@ const budget = (): FakeBudget => ({
       id: 'car',
       name: 'Car insurance',
       amount: 612,
-      category: 'INSURANCE',
+      category: 'FINANCES',
       frequency: 'ANNUALLY',
       firstPaymentDate: apiDate('2023-10-24'),
       renewalReminder: { off: false, days: 30 }
@@ -65,7 +65,7 @@ const budget = (): FakeBudget => ({
       id: 'breakdown',
       name: 'Breakdown cover',
       amount: 7.5,
-      category: 'VEHICLE',
+      category: 'TRANSPORT',
       firstPaymentDate: apiDate('2025-09-28'),
       renewalDate: apiDate('2026-09-28'),
       renewalReminder: { off: false, days: 30 }
@@ -75,7 +75,7 @@ const budget = (): FakeBudget => ({
       id: 'cleaner',
       name: 'Cleaner',
       amount: 50,
-      category: 'HOME_MAINTENANCE',
+      category: 'BILLS',
       frequency: 'WEEKLY',
       firstPaymentDate: apiDate('2026-01-07')
     })
@@ -202,7 +202,7 @@ describe('recurring page', () => {
     // A fifth category makes two pages of four beside the renewals
     const data = budget();
     data.recurringPayments.push(
-      recurring({ id: 'gym', name: 'Gym', amount: 34, category: 'MEMBERSHIP' })
+      recurring({ id: 'gym', name: 'Gym', amount: 34, category: 'ENTERTAINMENT' })
     );
     const { user } = renderRecurring(data);
 
@@ -349,7 +349,7 @@ describe('recurring page on mobile', () => {
     expect(await row('Car insurance')).toContain('Annually · Renews in 22 days');
     expect(await row('Breakdown cover')).toContain('Monthly · Needs renewing');
     // No renewal: its category instead
-    expect(await row('Netflix')).toContain('Monthly · Subscription');
+    expect(await row('Netflix')).toContain('Monthly · Subscriptions');
 
     await user.click(screen.getByRole('radio', { name: /Before payday/ }));
 

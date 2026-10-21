@@ -19,7 +19,7 @@ afterEach(() => vi.useRealTimers());
 
 const monthly = (fields: Partial<FakeRecurringPayment> & { id: string; name: string }) => ({
   amount: 20,
-  category: 'SUBSCRIPTION',
+  category: 'SUBSCRIPTIONS',
   frequency: 'MONTHLY',
   type: 'EXPENSE' as const,
   firstPaymentDate: apiDate('2026-01-01'),
@@ -40,7 +40,7 @@ const budget = (): FakeBudget => ({
       id: 'energy',
       name: 'Energy',
       amount: 120,
-      category: 'UTILITIES',
+      category: 'BILLS',
       firstPaymentDate: apiDate('2026-01-03'),
       nextDueDate: apiDate('2026-10-03')
     })

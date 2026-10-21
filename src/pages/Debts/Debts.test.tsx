@@ -39,7 +39,7 @@ const debt = ({
   id,
   name,
   amount,
-  category: 'LOAN',
+  category: 'FINANCES',
   frequency: 'MONTHLY',
   type: 'EXPENSE',
   firstPaymentDate: apiDate(firstPaymentDate),
@@ -61,7 +61,7 @@ const card = () =>
     firstPaymentDate: '2026-01-15',
     figures: { balance: 2340, startingBalance: 3500, apr: 24.9 },
     fields: {
-      category: 'CREDIT_CARD',
+      category: 'FINANCES',
       history: [
         {
           ...fakeRecord('PAID', {

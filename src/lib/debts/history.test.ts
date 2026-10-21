@@ -15,7 +15,7 @@ const card: DebtPayment = {
   amount: 150,
   signedAmount: -150,
   type: 'EXPENSE',
-  category: 'CREDIT_CARD',
+  category: 'FINANCES',
   frequency: 'MONTHLY',
   firstPaymentDate: new Date(2026, 0, 15),
   lastPaymentDate: null,

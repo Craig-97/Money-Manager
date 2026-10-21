@@ -1,9 +1,8 @@
 import {
-  OneOffPaymentCategory,
   OneOffPaymentFieldsFragment,
+  PaymentCategory,
   PaymentFrequency,
   PaymentType,
-  RecurringPaymentCategory,
   RecurringPaymentFieldsFragment
 } from '~/graphql/generated';
 import { fromApiDate } from '~/lib/dates';
@@ -64,7 +63,7 @@ interface BasePayment {
 
 export interface RecurringPayment extends BasePayment {
   kind: 'recurring';
-  category: RecurringPaymentCategory;
+  category: PaymentCategory;
   frequency: PaymentFrequency;
   firstPaymentDate: Date;
   lastPaymentDate: Date | null;
@@ -86,7 +85,7 @@ export interface RecurringPayment extends BasePayment {
 
 export interface OneOffPayment extends BasePayment {
   kind: 'oneOff';
-  category: OneOffPaymentCategory;
+  category: PaymentCategory;
   // When it was marked paid. It stays until the next payday, so paying can be undone.
   paidAt: Date | null;
 }

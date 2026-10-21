@@ -420,7 +420,7 @@ export const DEFAULT_BUDGET: FakeBudget = {
       id: 'recurring-1',
       name: 'Mortgage',
       amount: 750,
-      category: 'MORTGAGE',
+      category: 'BILLS',
       frequency: 'MONTHLY',
       type: 'EXPENSE',
       firstPaymentDate: apiDate('2026-01-28'),
@@ -438,7 +438,7 @@ export const DEFAULT_BUDGET: FakeBudget = {
       amount: 200,
       dueDate: apiDate('2099-06-15'),
       type: 'EXPENSE',
-      category: 'TRAVEL'
+      category: 'HOLIDAYS'
     }
   ],
   notes: [

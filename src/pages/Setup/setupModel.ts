@@ -6,7 +6,7 @@ import {
   PayFrequency,
   PaydayType,
   PaymentType,
-  RecurringPaymentCategory,
+  PaymentCategory,
   RecurringPaymentInput,
   Weekday
 } from '~/graphql/generated';
@@ -139,25 +139,25 @@ export {
 export interface Preset {
   key: string;
   name: string;
-  category: RecurringPaymentCategory;
+  category: PaymentCategory;
   type: PaymentType;
 }
 
 // Money out, as key, name and category
-const SPENDING_PRESETS: [string, string, RecurringPaymentCategory][] = [
-  ['rent', 'Rent', 'RENT'],
-  ['mortgage', 'Mortgage', 'MORTGAGE'],
-  ['counciltax', 'Council tax', 'TAX'],
-  ['energy', 'Energy', 'UTILITIES'],
-  ['water', 'Water', 'UTILITIES'],
-  ['broadband', 'Broadband', 'UTILITIES'],
-  ['mobile', 'Mobile', 'UTILITIES'],
-  ['carins', 'Car insurance', 'INSURANCE'],
-  ['carfin', 'Car finance', 'VEHICLE'],
-  ['netflix', 'Netflix', 'SUBSCRIPTION'],
-  ['spotify', 'Spotify', 'SUBSCRIPTION'],
-  ['gym', 'Gym', 'MEMBERSHIP'],
-  ['credit', 'Credit card', 'CREDIT_CARD'],
+const SPENDING_PRESETS: [string, string, PaymentCategory][] = [
+  ['rent', 'Rent', 'BILLS'],
+  ['mortgage', 'Mortgage', 'BILLS'],
+  ['counciltax', 'Council tax', 'BILLS'],
+  ['energy', 'Energy', 'BILLS'],
+  ['water', 'Water', 'BILLS'],
+  ['broadband', 'Broadband', 'BILLS'],
+  ['mobile', 'Mobile', 'BILLS'],
+  ['carins', 'Car insurance', 'FINANCES'],
+  ['carfin', 'Car finance', 'FINANCES'],
+  ['netflix', 'Netflix', 'SUBSCRIPTIONS'],
+  ['spotify', 'Spotify', 'SUBSCRIPTIONS'],
+  ['gym', 'Gym', 'SUBSCRIPTIONS'],
+  ['credit', 'Credit card', 'FINANCES'],
   ['isa', 'ISA top-up', 'SAVINGS']
 ];
 
@@ -168,8 +168,7 @@ export const PRESETS: Preset[] = [
     category,
     type: 'EXPENSE'
   })),
-  // Recurring payments have no benefits category, so it's Other
-  { key: 'childbenefit', name: 'Child Benefit', category: 'OTHER', type: 'INCOME' }
+  { key: 'childbenefit', name: 'Child Benefit', category: 'INCOME', type: 'INCOME' }
 ];
 
 const isPositive = (value: string) => (parseMoney(value) ?? 0) > 0;

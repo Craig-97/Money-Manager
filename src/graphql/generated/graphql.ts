@@ -34,7 +34,7 @@ export type AssignPaymentAccountsMutation = {
         id: string;
         name: string;
         amount: number;
-        category: Types.RecurringPaymentCategory;
+        category: Types.PaymentCategory;
         frequency: Types.PaymentFrequency;
         type: Types.PaymentType;
         firstPaymentDate: string;
@@ -132,7 +132,7 @@ export type DeleteAccountMutation = {
         id: string;
         name: string;
         amount: number;
-        category: Types.RecurringPaymentCategory;
+        category: Types.PaymentCategory;
         frequency: Types.PaymentFrequency;
         type: Types.PaymentType;
         firstPaymentDate: string;
@@ -166,7 +166,7 @@ export type DeleteAccountMutation = {
         amount: number;
         dueDate: string;
         type: Types.PaymentType;
-        category: Types.OneOffPaymentCategory;
+        category: Types.PaymentCategory;
         paidAt: string | null;
         account: string | null;
         dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
@@ -216,7 +216,7 @@ export type UpdateAccountMutation = {
         id: string;
         name: string;
         amount: number;
-        category: Types.RecurringPaymentCategory;
+        category: Types.PaymentCategory;
         frequency: Types.PaymentFrequency;
         type: Types.PaymentType;
         firstPaymentDate: string;
@@ -250,7 +250,7 @@ export type UpdateAccountMutation = {
         amount: number;
         dueDate: string;
         type: Types.PaymentType;
-        category: Types.OneOffPaymentCategory;
+        category: Types.PaymentCategory;
         paidAt: string | null;
         account: string | null;
         dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
@@ -457,7 +457,7 @@ export type BudgetQuery = {
       id: string;
       name: string;
       amount: number;
-      category: Types.RecurringPaymentCategory;
+      category: Types.PaymentCategory;
       frequency: Types.PaymentFrequency;
       type: Types.PaymentType;
       firstPaymentDate: string;
@@ -491,7 +491,7 @@ export type BudgetQuery = {
       amount: number;
       dueDate: string;
       type: Types.PaymentType;
-      category: Types.OneOffPaymentCategory;
+      category: Types.PaymentCategory;
       paidAt: string | null;
       account: string | null;
       dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
@@ -568,7 +568,7 @@ export type BudgetFieldsFragment = {
     id: string;
     name: string;
     amount: number;
-    category: Types.RecurringPaymentCategory;
+    category: Types.PaymentCategory;
     frequency: Types.PaymentFrequency;
     type: Types.PaymentType;
     firstPaymentDate: string;
@@ -602,7 +602,7 @@ export type BudgetFieldsFragment = {
     amount: number;
     dueDate: string;
     type: Types.PaymentType;
-    category: Types.OneOffPaymentCategory;
+    category: Types.PaymentCategory;
     paidAt: string | null;
     account: string | null;
     dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
@@ -685,7 +685,7 @@ export type CreateBudgetMutation = {
         id: string;
         name: string;
         amount: number;
-        category: Types.RecurringPaymentCategory;
+        category: Types.PaymentCategory;
         frequency: Types.PaymentFrequency;
         type: Types.PaymentType;
         firstPaymentDate: string;
@@ -719,7 +719,7 @@ export type CreateBudgetMutation = {
         amount: number;
         dueDate: string;
         type: Types.PaymentType;
-        category: Types.OneOffPaymentCategory;
+        category: Types.PaymentCategory;
         paidAt: string | null;
         account: string | null;
         dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
@@ -791,7 +791,7 @@ export type LogDebtOverpaymentMutation = {
         id: string;
         name: string;
         amount: number;
-        category: Types.RecurringPaymentCategory;
+        category: Types.PaymentCategory;
         frequency: Types.PaymentFrequency;
         type: Types.PaymentType;
         firstPaymentDate: string;
@@ -850,7 +850,7 @@ export type MarkPaymentsPaidMutation = {
         id: string;
         name: string;
         amount: number;
-        category: Types.RecurringPaymentCategory;
+        category: Types.PaymentCategory;
         frequency: Types.PaymentFrequency;
         type: Types.PaymentType;
         firstPaymentDate: string;
@@ -884,7 +884,7 @@ export type MarkPaymentsPaidMutation = {
         amount: number;
         dueDate: string;
         type: Types.PaymentType;
-        category: Types.OneOffPaymentCategory;
+        category: Types.PaymentCategory;
         paidAt: string | null;
         account: string | null;
         dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
@@ -921,7 +921,7 @@ export type MarkPaymentsUnpaidMutation = {
         id: string;
         name: string;
         amount: number;
-        category: Types.RecurringPaymentCategory;
+        category: Types.PaymentCategory;
         frequency: Types.PaymentFrequency;
         type: Types.PaymentType;
         firstPaymentDate: string;
@@ -955,7 +955,7 @@ export type MarkPaymentsUnpaidMutation = {
         amount: number;
         dueDate: string;
         type: Types.PaymentType;
-        category: Types.OneOffPaymentCategory;
+        category: Types.PaymentCategory;
         paidAt: string | null;
         account: string | null;
         dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
@@ -979,7 +979,7 @@ export type SkipRecurringPaymentsMutation = {
         id: string;
         name: string;
         amount: number;
-        category: Types.RecurringPaymentCategory;
+        category: Types.PaymentCategory;
         frequency: Types.PaymentFrequency;
         type: Types.PaymentType;
         firstPaymentDate: string;
@@ -1039,7 +1039,7 @@ export type StartPaydayCycleMutation = {
         id: string;
         name: string;
         amount: number;
-        category: Types.RecurringPaymentCategory;
+        category: Types.PaymentCategory;
         frequency: Types.PaymentFrequency;
         type: Types.PaymentType;
         firstPaymentDate: string;
@@ -1073,7 +1073,7 @@ export type StartPaydayCycleMutation = {
         amount: number;
         dueDate: string;
         type: Types.PaymentType;
-        category: Types.OneOffPaymentCategory;
+        category: Types.PaymentCategory;
         paidAt: string | null;
         account: string | null;
         dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
@@ -1110,7 +1110,7 @@ export type UndoDebtOverpaymentMutation = {
         id: string;
         name: string;
         amount: number;
-        category: Types.RecurringPaymentCategory;
+        category: Types.PaymentCategory;
         frequency: Types.PaymentFrequency;
         type: Types.PaymentType;
         firstPaymentDate: string;
@@ -1304,7 +1304,7 @@ export type CreateOneOffPaymentMutation = {
       amount: number;
       dueDate: string;
       type: Types.PaymentType;
-      category: Types.OneOffPaymentCategory;
+      category: Types.PaymentCategory;
       paidAt: string | null;
       account: string | null;
       dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
@@ -1324,7 +1324,7 @@ export type CreateRecurringPaymentMutation = {
       id: string;
       name: string;
       amount: number;
-      category: Types.RecurringPaymentCategory;
+      category: Types.PaymentCategory;
       frequency: Types.PaymentFrequency;
       type: Types.PaymentType;
       firstPaymentDate: string;
@@ -1388,7 +1388,7 @@ export type OneOffPaymentFieldsFragment = {
   amount: number;
   dueDate: string;
   type: Types.PaymentType;
-  category: Types.OneOffPaymentCategory;
+  category: Types.PaymentCategory;
   paidAt: string | null;
   account: string | null;
   dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
@@ -1399,7 +1399,7 @@ export type RecurringPaymentFieldsFragment = {
   id: string;
   name: string;
   amount: number;
-  category: Types.RecurringPaymentCategory;
+  category: Types.PaymentCategory;
   frequency: Types.PaymentFrequency;
   type: Types.PaymentType;
   firstPaymentDate: string;
@@ -1442,7 +1442,7 @@ export type UpdateOneOffPaymentMutation = {
       amount: number;
       dueDate: string;
       type: Types.PaymentType;
-      category: Types.OneOffPaymentCategory;
+      category: Types.PaymentCategory;
       paidAt: string | null;
       account: string | null;
       dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
@@ -1463,7 +1463,7 @@ export type UpdateRecurringPaymentMutation = {
       id: string;
       name: string;
       amount: number;
-      category: Types.RecurringPaymentCategory;
+      category: Types.PaymentCategory;
       frequency: Types.PaymentFrequency;
       type: Types.PaymentType;
       firstPaymentDate: string;

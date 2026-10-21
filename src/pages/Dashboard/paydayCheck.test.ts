@@ -23,7 +23,7 @@ const recurring = (
   __typename: 'RecurringPayment',
   id: overrides.name.toLowerCase(),
   amount: 20,
-  category: 'SUBSCRIPTION',
+  category: 'SUBSCRIPTIONS',
   frequency: 'MONTHLY',
   type: 'EXPENSE',
   firstPaymentDate: apiDate('2026-01-26'),
@@ -56,7 +56,7 @@ const payments = toPayments(
       recurring({
         name: 'Card',
         amount: 150,
-        category: 'CREDIT_CARD',
+        category: 'FINANCES',
         firstPaymentDate: apiDate('2026-01-27'),
         nextDueDate: apiDate('2026-10-27'),
         debt: {

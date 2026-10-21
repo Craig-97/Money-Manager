@@ -22,7 +22,7 @@ const carFinance: FakeRecurringPayment = {
   id: 'car-finance',
   name: 'Car finance',
   amount: 245,
-  category: 'LOAN',
+  category: 'FINANCES',
   frequency: 'MONTHLY',
   type: 'EXPENSE',
   firstPaymentDate: apiDate('2026-01-15'),
@@ -39,6 +39,50 @@ const budget = (): FakeBudget => ({
 });
 
 const renderAt = (route: string) => renderApp({ route, api: createFakeApi({ budget: budget() }) });
+
+describe('choosing a category', () => {
+  const openAdd = async () => {
+    const view = renderAt('/recurring');
+    await view.user.click(await screen.findByRole('button', { name: 'Recurring payment' }));
+    return {
+      ...view,
+      dialog: await screen.findByRole('dialog', { name: 'Add recurring payment' })
+    };
+  };
+
+  const offered = async (user: ReturnType<typeof renderAt>['user'], dialog: HTMLElement) => {
+    await user.click(within(dialog).getByRole('combobox', { name: 'Category' }));
+    const names = (await screen.findAllByRole('option')).map(option => option.textContent);
+    await user.keyboard('{Escape}');
+    return names;
+  };
+
+  it('offers the categories for money out, without Income', async () => {
+    const { user, dialog } = await openAdd();
+
+    expect(within(dialog).getByRole('combobox', { name: 'Category' })).toHaveTextContent(
+      'Subscriptions'
+    );
+    const names = await offered(user, dialog);
+    expect(names).toContain('Eating out');
+    expect(names).toContain('Groceries');
+    expect(names).not.toContain('Income');
+  });
+
+  it('offers only the categories for money in, moving to Income', async () => {
+    const { user, dialog } = await openAdd();
+    await user.click(within(dialog).getByRole('button', { name: 'Income' }));
+
+    expect(within(dialog).getByRole('combobox', { name: 'Category' })).toHaveTextContent('Income');
+    expect(await offered(user, dialog)).toEqual([
+      'Expenses',
+      'General',
+      'Gifts',
+      'Income',
+      'Transfers'
+    ]);
+  });
+});
 
 describe('adding a recurring payment as a debt', () => {
   it('turns the form into a debt with the switch', async () => {
@@ -58,7 +102,9 @@ describe('adding a recurring payment as a debt', () => {
     expect(within(dialog).queryByRole('group', { name: 'Type' })).not.toBeInTheDocument();
     expect(within(dialog).queryByRole('radio', { name: 'Renews' })).not.toBeInTheDocument();
     expect(within(dialog).getByText('When it’s paid off')).toBeInTheDocument();
-    expect(within(dialog).getByRole('combobox', { name: 'Category' })).toHaveTextContent('Loan');
+    expect(within(dialog).getByRole('combobox', { name: 'Category' })).toHaveTextContent(
+      'Finances'
+    );
     expect(within(dialog).getByRole('status')).toHaveTextContent(
       'Paid offShown once you add the balance'
     );
@@ -80,7 +126,7 @@ describe('adding a recurring payment as a debt', () => {
           name: 'Personal loan',
           amount: 100,
           type: 'EXPENSE',
-          category: 'LOAN',
+          category: 'FINANCES',
           lastPaymentDate: null,
           renewalDate: null,
           debt: { balance: 1200, apr: 0, startingBalance: null }
@@ -304,7 +350,7 @@ describe('adding a debt from Debts', () => {
     expect(within(dialog).queryByRole('switch')).not.toBeInTheDocument();
     expect(within(dialog).queryByRole('group', { name: 'Type' })).not.toBeInTheDocument();
     expect(within(dialog).getByRole('combobox', { name: 'Category' })).toHaveTextContent(
-      'Credit card'
+      'Finances'
     );
     expect(within(dialog).getByLabelText('Name')).toHaveAttribute(
       'placeholder',
@@ -331,7 +377,7 @@ describe('adding a debt from Debts', () => {
 
     expect(await screen.findByText('Added Store card')).toBeInTheDocument();
     expect(api.callsTo('CreateRecurringPayment')[0].input).toMatchObject({
-      category: 'CREDIT_CARD',
+      category: 'FINANCES',
       debt: { balance: 600, apr: 29.9, startingBalance: 900 }
     });
     expect(

@@ -1,12 +1,6 @@
 import { SegmentedOption } from '~/components/ui/SegmentedControl';
-import { PaymentType } from '~/graphql/generated';
-import {
-  categoryLabel,
-  FREQUENCIES,
-  FREQUENCY_LABELS,
-  ONE_OFF_CATEGORIES,
-  RECURRING_CATEGORIES
-} from '~/lib/payments';
+import { PaymentCategory, PaymentType } from '~/graphql/generated';
+import { categoriesFor, categoryLabel, FREQUENCIES, FREQUENCY_LABELS } from '~/lib/payments';
 import { Ends } from './usePaymentForm';
 
 // The choices the payment form offers
@@ -16,15 +10,17 @@ export const FREQUENCY_OPTIONS = FREQUENCIES.map(value => ({
   label: FREQUENCY_LABELS[value]
 }));
 
-export const RECURRING_OPTIONS = RECURRING_CATEGORIES.map(value => ({
-  value,
-  label: categoryLabel(value)
-}));
-
-export const ONE_OFF_OPTIONS = ONE_OFF_CATEGORIES.map(value => ({
-  value,
-  label: categoryLabel(value)
-}));
+/*
+ * The categories for money in or out. One a payment already has stays on offer, even if it
+ * doesn't suit the type, so editing the payment doesn't lose it.
+ */
+export const categoryOptions = (type: PaymentType, current: PaymentCategory) => {
+  const categories = categoriesFor(type);
+  return (categories.includes(current) ? categories : [current, ...categories]).map(value => ({
+    value,
+    label: categoryLabel(value)
+  }));
+};
 
 export const ENDS_OPTIONS: SegmentedOption<Ends>[] = [
   { value: 'keep', label: 'Keeps going' },

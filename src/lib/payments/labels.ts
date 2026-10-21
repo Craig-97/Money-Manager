@@ -1,8 +1,4 @@
-import {
-  OneOffPaymentCategory,
-  PaymentFrequency,
-  RecurringPaymentCategory
-} from '~/graphql/generated';
+import { PaymentCategory, PaymentFrequency, PaymentType } from '~/graphql/generated';
 import { formatDayMonth, formatShortDay } from '~/lib/dates';
 
 /* "HOME_MAINTENANCE" -> "Home maintenance" */
@@ -22,53 +18,42 @@ export const FREQUENCY_LABELS: Record<PaymentFrequency, string> = {
 
 export const FREQUENCIES = Object.keys(FREQUENCY_LABELS) as PaymentFrequency[];
 
-// In the order the design lists them
-export const RECURRING_CATEGORIES: RecurringPaymentCategory[] = [
-  'MORTGAGE',
-  'RENT',
-  'UTILITIES',
-  'HOME_MAINTENANCE',
-  'TAX',
-  'VEHICLE',
-  'TRANSPORT',
-  'LOAN',
-  'CREDIT_CARD',
-  'SAVINGS',
-  'INVESTMENT',
-  'INSURANCE',
-  'HEALTHCARE',
-  'CHILDCARE',
-  'EDUCATION',
-  'SUBSCRIPTION',
-  'MEMBERSHIP',
-  'FOOD',
+// One list for one-off and recurring payments, A–Z as Monzo lists them
+export const PAYMENT_CATEGORIES: PaymentCategory[] = [
+  'BILLS',
   'CHARITY',
-  'BUSINESS',
-  'OTHER'
+  'EATING_OUT',
+  'ENTERTAINMENT',
+  'EXPENSES',
+  'FAMILY',
+  'FINANCES',
+  'GENERAL',
+  'GIFTS',
+  'GROCERIES',
+  'HOLIDAYS',
+  'INCOME',
+  'PERSONAL_CARE',
+  'SAVINGS',
+  'SHOPPING',
+  'SUBSCRIPTIONS',
+  'TRANSFERS',
+  'TRANSPORT'
 ];
 
-export const ONE_OFF_CATEGORIES: OneOffPaymentCategory[] = [
-  'TRANSFER',
-  'INVESTMENT',
-  'FEES',
-  'TAXES',
-  'HOME',
-  'UTILITIES',
-  'VEHICLE',
-  'TRAVEL',
-  'TRANSPORT',
-  'FOOD',
-  'SHOPPING',
-  'ENTERTAINMENT',
-  'HEALTHCARE',
-  'EDUCATION',
-  'GIFT',
-  'PETS',
-  'SALARY',
-  'BUSINESS',
-  'CHARITY',
-  'OTHER'
+// Money coming in is pay, a transfer, a gift, expenses paid back, or something else
+const INCOME_CATEGORIES: PaymentCategory[] = [
+  'INCOME',
+  'TRANSFERS',
+  'GIFTS',
+  'EXPENSES',
+  'GENERAL'
 ];
+
+/* The categories that make sense for money in or money out */
+export const categoriesFor = (type: PaymentType) =>
+  type === 'INCOME'
+    ? PAYMENT_CATEGORIES.filter(category => INCOME_CATEGORIES.includes(category))
+    : PAYMENT_CATEGORIES.filter(category => category !== 'INCOME');
 
 const weekdayName = new Intl.DateTimeFormat('en-GB', { weekday: 'long' });
 

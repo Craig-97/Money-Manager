@@ -134,7 +134,7 @@ export type CreateOneOffPaymentInput = {
   account?: InputMaybe<Scalars['ID']['input']>;
   amount: Scalars['Float']['input'];
   budgetId: Scalars['ID']['input'];
-  category: OneOffPaymentCategory;
+  category: PaymentCategory;
   dueDate: Scalars['String']['input'];
   dueReminder?: InputMaybe<ReminderTimingInput>;
   name: Scalars['String']['input'];
@@ -145,7 +145,7 @@ export type CreateRecurringPaymentInput = {
   account?: InputMaybe<Scalars['ID']['input']>;
   amount: Scalars['Float']['input'];
   budgetId: Scalars['ID']['input'];
-  category: RecurringPaymentCategory;
+  category: PaymentCategory;
   debt?: InputMaybe<DebtInput>;
   dueReminder?: InputMaybe<ReminderTimingInput>;
   firstPaymentDate: Scalars['String']['input'];
@@ -430,7 +430,7 @@ export type OneOffPayment = {
   account: Maybe<Scalars['ID']['output']>;
   amount: Scalars['Float']['output'];
   budget: Scalars['ID']['output'];
-  category: OneOffPaymentCategory;
+  category: PaymentCategory;
   dueDate: Scalars['String']['output'];
   dueReminder: ReminderTiming;
   id: Scalars['ID']['output'];
@@ -439,32 +439,10 @@ export type OneOffPayment = {
   type: PaymentType;
 };
 
-export type OneOffPaymentCategory =
-  | 'BUSINESS'
-  | 'CHARITY'
-  | 'EDUCATION'
-  | 'ENTERTAINMENT'
-  | 'FEES'
-  | 'FOOD'
-  | 'GIFT'
-  | 'HEALTHCARE'
-  | 'HOME'
-  | 'INVESTMENT'
-  | 'OTHER'
-  | 'PETS'
-  | 'SALARY'
-  | 'SHOPPING'
-  | 'TAXES'
-  | 'TRANSFER'
-  | 'TRANSPORT'
-  | 'TRAVEL'
-  | 'UTILITIES'
-  | 'VEHICLE';
-
 export type OneOffPaymentInput = {
   account?: InputMaybe<Scalars['ID']['input']>;
   amount: Scalars['Float']['input'];
-  category: OneOffPaymentCategory;
+  category: PaymentCategory;
   dueDate: Scalars['String']['input'];
   dueReminder?: InputMaybe<ReminderTimingInput>;
   name: Scalars['String']['input'];
@@ -527,6 +505,26 @@ export type PaymentAccountInput = {
   recurringPaymentId: Scalars['ID']['input'];
 };
 
+export type PaymentCategory =
+  | 'BILLS'
+  | 'CHARITY'
+  | 'EATING_OUT'
+  | 'ENTERTAINMENT'
+  | 'EXPENSES'
+  | 'FAMILY'
+  | 'FINANCES'
+  | 'GENERAL'
+  | 'GIFTS'
+  | 'GROCERIES'
+  | 'HOLIDAYS'
+  | 'INCOME'
+  | 'PERSONAL_CARE'
+  | 'SAVINGS'
+  | 'SHOPPING'
+  | 'SUBSCRIPTIONS'
+  | 'TRANSFERS'
+  | 'TRANSPORT';
+
 export type PaymentFrequency =
   'ANNUALLY' | 'BIANNUALLY' | 'BIWEEKLY' | 'MONTHLY' | 'QUARTERLY' | 'WEEKLY';
 
@@ -584,7 +582,7 @@ export type RecurringPayment = {
   account: Maybe<Scalars['ID']['output']>;
   amount: Scalars['Float']['output'];
   budget: Scalars['ID']['output'];
-  category: RecurringPaymentCategory;
+  category: PaymentCategory;
   debt: Maybe<Debt>;
   dueReminder: ReminderTiming;
   firstPaymentDate: Scalars['String']['output'];
@@ -605,33 +603,10 @@ export type RecurringPaymentHistoryArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
 };
 
-export type RecurringPaymentCategory =
-  | 'BUSINESS'
-  | 'CHARITY'
-  | 'CHILDCARE'
-  | 'CREDIT_CARD'
-  | 'EDUCATION'
-  | 'FOOD'
-  | 'HEALTHCARE'
-  | 'HOME_MAINTENANCE'
-  | 'INSURANCE'
-  | 'INVESTMENT'
-  | 'LOAN'
-  | 'MEMBERSHIP'
-  | 'MORTGAGE'
-  | 'OTHER'
-  | 'RENT'
-  | 'SAVINGS'
-  | 'SUBSCRIPTION'
-  | 'TAX'
-  | 'TRANSPORT'
-  | 'UTILITIES'
-  | 'VEHICLE';
-
 export type RecurringPaymentInput = {
   account?: InputMaybe<Scalars['ID']['input']>;
   amount: Scalars['Float']['input'];
-  category: RecurringPaymentCategory;
+  category: PaymentCategory;
   debt?: InputMaybe<DebtInput>;
   dueReminder?: InputMaybe<ReminderTimingInput>;
   firstPaymentDate: Scalars['String']['input'];
@@ -760,7 +735,7 @@ export type UpdateNoteInput = {
 export type UpdateOneOffPaymentInput = {
   account?: InputMaybe<Scalars['ID']['input']>;
   amount?: InputMaybe<Scalars['Float']['input']>;
-  category?: InputMaybe<OneOffPaymentCategory>;
+  category?: InputMaybe<PaymentCategory>;
   dueDate?: InputMaybe<Scalars['String']['input']>;
   dueReminder?: InputMaybe<ReminderTimingInput>;
   name?: InputMaybe<Scalars['String']['input']>;
@@ -770,7 +745,7 @@ export type UpdateOneOffPaymentInput = {
 export type UpdateRecurringPaymentInput = {
   account?: InputMaybe<Scalars['ID']['input']>;
   amount?: InputMaybe<Scalars['Float']['input']>;
-  category?: InputMaybe<RecurringPaymentCategory>;
+  category?: InputMaybe<PaymentCategory>;
   debt?: InputMaybe<DebtInput>;
   dueReminder?: InputMaybe<ReminderTimingInput>;
   firstPaymentDate?: InputMaybe<Scalars['String']['input']>;

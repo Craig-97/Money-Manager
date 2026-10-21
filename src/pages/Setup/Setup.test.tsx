@@ -169,7 +169,7 @@ describe('setup', () => {
           name: 'Netflix',
           amount: 20,
           frequency: 'MONTHLY',
-          category: 'SUBSCRIPTION',
+          category: 'SUBSCRIPTIONS',
           type: 'EXPENSE'
         }
       ],

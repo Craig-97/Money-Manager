@@ -5,7 +5,7 @@ import { Label } from '~/components/form/Label';
 import { Select } from '~/components/form/Select';
 import { TextInput } from '~/components/form/TextInput';
 import { Payment } from '~/lib/payments';
-import { FREQUENCY_OPTIONS, ONE_OFF_OPTIONS, RECURRING_OPTIONS } from '../../paymentOptions';
+import { categoryOptions, FREQUENCY_OPTIONS } from '../../paymentOptions';
 import { PaymentForm } from '../../usePaymentForm';
 import { DebtEnding } from '../DebtEnding';
 import { FromAccount } from '../FromAccount';
@@ -69,7 +69,7 @@ export const FormBody = ({ form, kind }: { form: PaymentForm; kind: Payment['kin
         id="payment-category"
         value={values.category}
         onValueChange={category => set('category', category)}
-        options={kind === 'recurring' ? RECURRING_OPTIONS : ONE_OFF_OPTIONS}
+        options={categoryOptions(values.type, values.category)}
       />
     </div>
   );

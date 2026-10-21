@@ -237,7 +237,7 @@ describe('several accounts to spend from', () => {
         id: 'energy',
         name: 'Energy',
         amount: 120,
-        category: 'UTILITIES',
+        category: 'BILLS',
         frequency: 'MONTHLY',
         type: 'EXPENSE',
         firstPaymentDate: apiDate('2026-01-09'),
@@ -255,7 +255,7 @@ describe('several accounts to spend from', () => {
         amount: 220,
         dueDate: apiDate('2026-10-23'),
         type: 'EXPENSE',
-        category: 'TRAVEL',
+        category: 'HOLIDAYS',
         account: 'holiday'
       }
     ]

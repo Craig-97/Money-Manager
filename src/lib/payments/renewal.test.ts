@@ -28,7 +28,7 @@ const payment = (overrides: Partial<RecurringPayment> = {}): RecurringPayment =>
   amount: 21,
   signedAmount: -21,
   type: 'EXPENSE',
-  category: 'INSURANCE',
+  category: 'FINANCES',
   frequency: 'MONTHLY',
   firstPaymentDate: day('2025-02-20'),
   lastPaymentDate: null,

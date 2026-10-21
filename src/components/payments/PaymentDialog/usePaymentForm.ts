@@ -4,11 +4,10 @@ import { addOneOffPayment, addRecurringPayment } from '~/graphql/cache';
 import {
   CreateOneOffPaymentDocument,
   CreateRecurringPaymentDocument,
-  OneOffPaymentCategory,
   OneOffPaymentInput,
+  PaymentCategory,
   PaymentFrequency,
   PaymentType,
-  RecurringPaymentCategory,
   RecurringPaymentInput,
   UpdateOneOffPaymentDocument,
   UpdateRecurringPaymentDocument
@@ -18,6 +17,7 @@ import { getApiErrorMessage, getErrorCode } from '~/lib/errors';
 import { formatMoneyInput, parseMoney } from '~/lib/format';
 import {
   addYear,
+  categoriesFor,
   daysBeforeText,
   formatShortDate,
   fromTimingChoice,
@@ -57,7 +57,7 @@ interface PaymentFormValues {
   // When the reminders before each payment and before it renews go off
   dueReminder: TimingChoice;
   reminder: TimingChoice;
-  category: RecurringPaymentCategory | OneOffPaymentCategory;
+  category: PaymentCategory;
   // Recurring payments tracked as a debt: what's owed now, its APR, and what was borrowed
   tracked: boolean;
   // The account it goes out of, or an income lands in; '' for the one pay lands in
@@ -103,7 +103,7 @@ const initialValues = ({
     renewal: '',
     dueReminder: 'usual',
     reminder: 'usual',
-    category: asDebt ? 'CREDIT_CARD' : kind === 'recurring' ? 'SUBSCRIPTION' : 'OTHER',
+    category: asDebt ? 'FINANCES' : kind === 'recurring' ? 'SUBSCRIPTIONS' : 'GENERAL',
     tracked: asDebt,
     account: '',
     paysInto: '',
@@ -345,7 +345,7 @@ interface Options {
   // message when its name is already used
   draft?: (payment: DraftPayment) => string | undefined;
   // A new payment's name, category and type to start with, e.g. from a suggestion
-  start?: { name: string; category: RecurringPaymentCategory; type?: PaymentType };
+  start?: { name: string; category: PaymentCategory; type?: PaymentType };
 }
 
 /* A payment as setup keeps it until the budget is made */
@@ -406,10 +406,14 @@ export const usePaymentForm = ({
       if (key === 'ends' && value === 'renew' && !current.renewal) {
         next.renewal = iso(addYear(today));
       }
-      // A debt is always money out. A new one still on the default category is likely a loan.
+      // A debt is always money out. A new one still on the default category belongs in Finances.
       if (key === 'tracked' && value) {
         next.type = 'EXPENSE';
-        if (!payment && current.category === 'SUBSCRIPTION') next.category = 'LOAN';
+        if (!payment && current.category === 'SUBSCRIPTIONS') next.category = 'FINANCES';
+      }
+      // Money in and out have their own categories, so one that doesn't suit the new type moves
+      if (key === 'type' && !categoriesFor(next.type).includes(next.category)) {
+        next.category = next.type === 'INCOME' ? 'INCOME' : 'GENERAL';
       }
       return next;
     });
@@ -508,7 +512,7 @@ export const usePaymentForm = ({
                 frequency: values.frequency,
                 firstPaymentDate: values.first,
                 ...endingFields(values),
-                category: values.category as RecurringPaymentCategory,
+                category: values.category,
                 ...(account ? { account } : {}),
                 ...(paysInto ? { paysInto } : {}),
                 ...(values.tracked ? { debt: debtFields(values) } : {})
@@ -519,7 +523,7 @@ export const usePaymentForm = ({
               input: {
                 ...common,
                 dueDate: values.date,
-                category: values.category as OneOffPaymentCategory,
+                category: values.category,
                 dueReminder: fromTimingChoice(values.dueReminder),
                 ...(account ? { account } : {})
               }
@@ -533,7 +537,7 @@ export const usePaymentForm = ({
     try {
       if (kind === 'recurring') {
         const schedule = { frequency: values.frequency, firstPaymentDate: values.first };
-        const category = values.category as RecurringPaymentCategory;
+        const category = values.category;
         if (payment && before) {
           // Only send the schedule if it changed: a new schedule starts the payment unpaid again.
           // The ending can always go, as a new last payment keeps what's been paid.
@@ -588,7 +592,7 @@ export const usePaymentForm = ({
         const fields = {
           ...common,
           dueDate: values.date,
-          category: values.category as OneOffPaymentCategory,
+          category: values.category,
           dueReminder: fromTimingChoice(values.dueReminder)
         };
         if (payment) {

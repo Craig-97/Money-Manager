@@ -271,27 +271,25 @@ enum PaymentType {
   EXPENSE
 }
 
-enum OneOffPaymentCategory {
-  TRANSFER
-  INVESTMENT
-  FEES
-  TAXES
-  HOME
-  UTILITIES
-  VEHICLE
-  TRAVEL
-  TRANSPORT
-  FOOD
-  SHOPPING
-  ENTERTAINMENT
-  HEALTHCARE
-  EDUCATION
-  GIFT
-  PETS
-  SALARY
-  BUSINESS
+enum PaymentCategory {
+  BILLS
   CHARITY
-  OTHER
+  EATING_OUT
+  ENTERTAINMENT
+  EXPENSES
+  FAMILY
+  FINANCES
+  GENERAL
+  GIFTS
+  GROCERIES
+  HOLIDAYS
+  INCOME
+  PERSONAL_CARE
+  SAVINGS
+  SHOPPING
+  SUBSCRIPTIONS
+  TRANSFERS
+  TRANSPORT
 }
 
 type OneOffPayment {
@@ -301,7 +299,7 @@ type OneOffPayment {
   amount: Float!
   dueDate: String!
   type: PaymentType!
-  category: OneOffPaymentCategory!
+  category: PaymentCategory!
   paidAt: String
   dueReminder: ReminderTiming!
   account: ID
@@ -313,7 +311,7 @@ input CreateOneOffPaymentInput {
   amount: Float!
   dueDate: String!
   type: PaymentType!
-  category: OneOffPaymentCategory!
+  category: PaymentCategory!
   dueReminder: ReminderTimingInput
   account: ID
 }
@@ -323,7 +321,7 @@ input OneOffPaymentInput {
   amount: Float!
   dueDate: String!
   type: PaymentType!
-  category: OneOffPaymentCategory!
+  category: PaymentCategory!
   dueReminder: ReminderTimingInput
   account: ID
 }
@@ -333,7 +331,7 @@ input UpdateOneOffPaymentInput {
   amount: Float
   dueDate: String
   type: PaymentType
-  category: OneOffPaymentCategory
+  category: PaymentCategory
   dueReminder: ReminderTimingInput
   account: ID
 }
@@ -341,30 +339,6 @@ input UpdateOneOffPaymentInput {
 type OneOffPaymentResponse {
   oneOffPayment: OneOffPayment
   success: Boolean!
-}
-
-enum RecurringPaymentCategory {
-  MORTGAGE
-  RENT
-  UTILITIES
-  HOME_MAINTENANCE
-  TAX
-  VEHICLE
-  TRANSPORT
-  LOAN
-  CREDIT_CARD
-  SAVINGS
-  INVESTMENT
-  INSURANCE
-  HEALTHCARE
-  CHILDCARE
-  EDUCATION
-  SUBSCRIPTION
-  MEMBERSHIP
-  FOOD
-  CHARITY
-  BUSINESS
-  OTHER
 }
 
 enum PaymentFrequency {
@@ -388,7 +362,7 @@ type RecurringPayment {
   budget: ID!
   name: String!
   amount: Float!
-  category: RecurringPaymentCategory!
+  category: PaymentCategory!
   frequency: PaymentFrequency!
   type: PaymentType!
   firstPaymentDate: String!
@@ -444,7 +418,7 @@ input CreateRecurringPaymentInput {
   budgetId: ID!
   name: String!
   amount: Float!
-  category: RecurringPaymentCategory!
+  category: PaymentCategory!
   frequency: PaymentFrequency!
   type: PaymentType!
   firstPaymentDate: String!
@@ -460,7 +434,7 @@ input CreateRecurringPaymentInput {
 input RecurringPaymentInput {
   name: String!
   amount: Float!
-  category: RecurringPaymentCategory!
+  category: PaymentCategory!
   frequency: PaymentFrequency!
   type: PaymentType!
   firstPaymentDate: String!
@@ -476,7 +450,7 @@ input RecurringPaymentInput {
 input UpdateRecurringPaymentInput {
   name: String
   amount: Float
-  category: RecurringPaymentCategory
+  category: PaymentCategory
   frequency: PaymentFrequency
   type: PaymentType
   firstPaymentDate: String

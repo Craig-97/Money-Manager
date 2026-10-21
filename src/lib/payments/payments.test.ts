@@ -30,7 +30,7 @@ const recurring = (
   __typename: 'RecurringPayment',
   id: overrides.name.toLowerCase(),
   amount: 10,
-  category: 'SUBSCRIPTION',
+  category: 'SUBSCRIPTIONS',
   frequency: 'MONTHLY',
   type: 'EXPENSE',
   firstPaymentDate: apiDate('2026-01-02'),
@@ -54,7 +54,7 @@ const oneOff = (
   amount: 10,
   dueDate: apiDate('2026-10-09'),
   type: 'EXPENSE',
-  category: 'OTHER',
+  category: 'GENERAL',
   paidAt: null,
   dueReminder: { __typename: 'ReminderTiming', off: false, days: null },
   account: null,
@@ -77,7 +77,7 @@ const designPayments = toPayments(
       recurring({
         name: 'Mortgage',
         amount: 750,
-        category: 'MORTGAGE',
+        category: 'BILLS',
         firstPaymentDate: apiDate('2026-01-28'),
         nextDueDate: apiDate('2026-10-28')
       }),
@@ -91,7 +91,7 @@ const designPayments = toPayments(
     ],
     oneOffPayments: [
       oneOff({ name: 'Shopping', amount: 10, type: 'INCOME' }),
-      oneOff({ name: 'Birthday', amount: 75, category: 'GIFT', dueDate: apiDate('2026-10-20') })
+      oneOff({ name: 'Birthday', amount: 75, category: 'GIFTS', dueDate: apiDate('2026-10-20') })
     ]
   },
   today

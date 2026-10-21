@@ -12,7 +12,7 @@ const payment = (
   amount,
   signedAmount: -amount,
   type: 'EXPENSE',
-  category: 'OTHER',
+  category: 'GENERAL',
   paidAt: null,
   dueDate: due ? new Date(`${due}T00:00:00`) : null,
   dueReminder: { off: false, days: null },

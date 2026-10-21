@@ -23,7 +23,7 @@ const budget = (overrides: Partial<FakeBudget> = {}): FakeBudget => ({
       id: 'netflix',
       name: 'Netflix',
       amount: 20,
-      category: 'SUBSCRIPTION',
+      category: 'SUBSCRIPTIONS',
       frequency: 'MONTHLY',
       type: 'EXPENSE',
       // Starting today, so today is one of its dates whatever day the tests run
@@ -41,7 +41,7 @@ const budget = (overrides: Partial<FakeBudget> = {}): FakeBudget => ({
       amount: 50,
       dueDate: apiDateFromToday(0),
       type: 'INCOME',
-      category: 'OTHER'
+      category: 'GENERAL'
     }
   ],
   ...overrides
@@ -149,7 +149,7 @@ describe('dashboard', () => {
           name: 'Concert',
           amount: 45,
           type: 'EXPENSE',
-          category: 'OTHER'
+          category: 'GENERAL'
         })
       }
     ]);
@@ -301,7 +301,7 @@ describe('a payment due more than once before payday', () => {
           id: 'cleaner',
           name: 'Cleaner',
           amount: 50,
-          category: 'OTHER',
+          category: 'GENERAL',
           frequency: 'WEEKLY',
           type: 'EXPENSE',
           firstPaymentDate: apiDate('2026-10-07'),
@@ -408,7 +408,7 @@ describe('payday prompt', () => {
           id: 'netflix',
           name: 'Netflix',
           amount: 20,
-          category: 'SUBSCRIPTION',
+          category: 'SUBSCRIPTIONS',
           frequency: 'MONTHLY',
           type: 'EXPENSE',
           firstPaymentDate: apiDateFromToday(-31),
@@ -793,7 +793,7 @@ describe('alerts', () => {
       id: 'breakdown',
       name: 'Breakdown cover',
       amount: 7.5,
-      category: 'VEHICLE',
+      category: 'TRANSPORT',
       firstPaymentDate: apiDate('2025-09-28'),
       nextDueDate: apiDate('2026-10-28'),
       renewalDate: apiDate('2026-09-28'),
@@ -871,7 +871,7 @@ describe('alerts', () => {
       id: 'car',
       name: 'Car insurance',
       amount: 612,
-      category: 'INSURANCE',
+      category: 'FINANCES',
       frequency: 'ANNUALLY',
       firstPaymentDate: apiDate('2023-10-24'),
       nextDueDate: apiDate('2026-10-24'),

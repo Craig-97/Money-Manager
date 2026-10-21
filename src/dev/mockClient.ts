@@ -63,7 +63,7 @@ const jointBill = (
   id,
   name,
   amount,
-  category: 'UTILITIES',
+  category: 'BILLS',
   frequency: 'MONTHLY',
   type: 'EXPENSE',
   firstPaymentDate: fromToday(due),
@@ -97,7 +97,7 @@ const demoHolidayPayments = (): FakeOneOffPayment[] => [
     amount: 220,
     dueDate: fromToday(9),
     type: 'EXPENSE',
-    category: 'TRAVEL',
+    category: 'HOLIDAYS',
     account: 'holiday'
   }
 ];
@@ -164,7 +164,7 @@ const demoBudget = (scenario: string | null): FakeBudget => {
         id: 'netflix',
         name: 'Netflix',
         amount: 20,
-        category: 'SUBSCRIPTION',
+        category: 'SUBSCRIPTIONS',
         frequency: 'MONTHLY',
         type: 'EXPENSE',
         firstPaymentDate: fromToday(-273),
@@ -177,7 +177,7 @@ const demoBudget = (scenario: string | null): FakeBudget => {
         id: 'mortgage',
         name: 'Mortgage',
         amount: scenario === 'overdrawn' ? 1250 : 750,
-        category: 'MORTGAGE',
+        category: 'BILLS',
         frequency: 'MONTHLY',
         type: 'EXPENSE',
         firstPaymentDate: fromToday(-247),
@@ -191,7 +191,7 @@ const demoBudget = (scenario: string | null): FakeBudget => {
         id: 'prime',
         name: 'Amazon Prime',
         amount: 95,
-        category: 'SUBSCRIPTION',
+        category: 'SUBSCRIPTIONS',
         frequency: 'ANNUALLY',
         type: 'EXPENSE',
         firstPaymentDate: fromToday(-93),
@@ -222,7 +222,7 @@ const demoBudget = (scenario: string | null): FakeBudget => {
         amount: 10,
         dueDate: fromToday(7),
         type: 'INCOME',
-        category: 'OTHER'
+        category: 'GENERAL'
       },
       {
         id: 'birthday',
@@ -230,7 +230,7 @@ const demoBudget = (scenario: string | null): FakeBudget => {
         amount: 75,
         dueDate: fromToday(scenario === 'payday' ? -10 : 18),
         type: 'EXPENSE',
-        category: 'GIFT'
+        category: 'GIFTS'
       }
     ],
     notes: [
@@ -324,15 +324,15 @@ const demoReminderPayments = () => [
     id: 'spotify',
     name: 'Spotify',
     amount: 20,
-    category: 'SUBSCRIPTION',
+    category: 'SUBSCRIPTIONS',
     dueInDays: -1
   }),
-  demoPayment({ id: 'energy', name: 'Energy', amount: 120, category: 'UTILITIES', dueInDays: 1 }),
+  demoPayment({ id: 'energy', name: 'Energy', amount: 120, category: 'BILLS', dueInDays: 1 }),
   demoPayment({
     id: 'car-insurance',
     name: 'Car insurance',
     amount: 612,
-    category: 'INSURANCE',
+    category: 'FINANCES',
     frequency: 'ANNUALLY',
     dueInDays: 36
   }),
@@ -340,7 +340,7 @@ const demoReminderPayments = () => [
     id: 'prescription',
     name: 'Prescription',
     amount: 114.5,
-    category: 'HEALTHCARE',
+    category: 'PERSONAL_CARE',
     frequency: 'BIANNUALLY',
     dueInDays: 25
   }),
@@ -348,7 +348,7 @@ const demoReminderPayments = () => [
     id: 'phone',
     name: 'Phone contract',
     amount: 32,
-    category: 'UTILITIES',
+    category: 'BILLS',
     dueInDays: 12,
     renewInDays: 109
   })
@@ -453,7 +453,7 @@ const demoDebts = () => [
   demoDebt({
     id: 'credit-card',
     name: 'Credit card',
-    category: 'CREDIT_CARD',
+    category: 'FINANCES',
     amount: 150,
     dueInDays: 13,
     debt: {
@@ -466,7 +466,7 @@ const demoDebts = () => [
   demoDebt({
     id: 'car-finance',
     name: 'Car finance',
-    category: 'LOAN',
+    category: 'FINANCES',
     amount: 245,
     dueInDays: 24,
     debt: {
@@ -478,7 +478,7 @@ const demoDebts = () => [
   demoDebt({
     id: 'family-loan',
     name: 'Family loan',
-    category: 'LOAN',
+    category: 'FINANCES',
     amount: 100,
     dueInDays: 30,
     debt: {

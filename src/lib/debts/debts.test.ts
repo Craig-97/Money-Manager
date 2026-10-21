@@ -36,7 +36,7 @@ const debt = (
   amount,
   signedAmount: -amount,
   type: 'EXPENSE',
-  category: 'LOAN',
+  category: 'FINANCES',
   frequency,
   firstPaymentDate: new Date(2026, 0, 15),
   lastPaymentDate: null,
