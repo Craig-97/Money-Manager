@@ -1,4 +1,4 @@
-import { ArrowUp, Ellipsis, History, PenLine, RefreshCw, Trash } from 'lucide-react';
+import { ArrowUp, Ellipsis, History, PenLine, RefreshCw, Timer, Trash } from 'lucide-react';
 import { useShallow } from 'zustand/react/shallow';
 import { IconButton } from '~/components/ui/IconButton';
 import { Menu, MenuContent, MenuItem, MenuSeparator, MenuTrigger } from '~/components/ui/Menu';
@@ -11,11 +11,18 @@ interface DebtMenuProps {
   onDelete: () => void;
 }
 
-/* Edit, update the balance, overpay, see payments and delete, from the row's more button */
+/*
+ * Edit, update the balance, overpay, pay off sooner, see payments and delete, from the row's more
+ * button
+ */
 export const DebtMenu = ({ debt, onDelete }: DebtMenuProps) => {
   const openEdit = usePaymentDialogStore(s => s.openEdit);
-  const { openOverpayment, openPayments } = useDebtDialogStore(
-    useShallow(s => ({ openOverpayment: s.openOverpayment, openPayments: s.openPayments }))
+  const { openOverpayment, openPaySooner, openPayments } = useDebtDialogStore(
+    useShallow(s => ({
+      openOverpayment: s.openOverpayment,
+      openPaySooner: s.openPaySooner,
+      openPayments: s.openPayments
+    }))
   );
 
   return (
@@ -40,6 +47,9 @@ export const DebtMenu = ({ debt, onDelete }: DebtMenuProps) => {
         </MenuItem>
         <MenuItem icon={<ArrowUp size={16} />} onSelect={() => openOverpayment(debt.id)}>
           Log an overpayment
+        </MenuItem>
+        <MenuItem icon={<Timer size={16} />} onSelect={() => openPaySooner(debt.id)}>
+          Pay sooner
         </MenuItem>
         <MenuItem icon={<History size={16} />} onSelect={() => openPayments(debt.id)}>
           See payments

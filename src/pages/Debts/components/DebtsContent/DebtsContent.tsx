@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { OverpaymentDialog, PaymentsDialog } from '~/components/debts';
+import { OverpaymentDialog, PaymentsDialog, PaySoonerDialog } from '~/components/debts';
 import { SegmentedControl } from '~/components/ui/SegmentedControl';
 import { Tile } from '~/components/ui/Tile';
 import { MEDIA } from '~/constants';
@@ -58,6 +58,7 @@ export const DebtsContent = ({ budget }: { budget: Budget }) => {
         today={debts.today}
         onUndoOverpayment={(id, name) => void debts.actions.undoOverpayment(id, name)}
       />
+      <PaySoonerDialog debts={debts.debts} today={debts.today} onPayMore={debts.actions.payMore} />
     </>
   );
 

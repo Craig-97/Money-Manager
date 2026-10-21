@@ -215,6 +215,51 @@ describe('debts on desktop', () => {
     expect(rows[2]).toHaveTextContent('Tue 15 SepPaid£150.00£2,340');
   });
 
+  it('shows how paying more each month clears a debt sooner, and applies it', async () => {
+    const { user, api } = renderDebts();
+
+    await user.click(await screen.findByRole('button', { name: 'More actions for Credit card' }));
+    await user.click(screen.getByRole('menuitem', { name: 'Pay sooner' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Pay Credit card sooner' });
+    expect(within(dialog).getByRole('button', { name: 'Pay more' })).toBeDisabled();
+
+    fireEvent.change(within(dialog).getByRole('slider', { name: 'Pay extra each month' }), {
+      target: { value: '50' }
+    });
+    expect(dialog).toHaveTextContent('6 months sooner');
+    expect(dialog).toHaveTextContent('£148 less');
+
+    await user.click(within(dialog).getByRole('button', { name: 'Pay £200 a month from October' }));
+
+    expect(await screen.findByText('Credit card is now £200.00 a month')).toBeInTheDocument();
+    expect(api.callsTo('UpdateRecurringPayment')).toEqual([
+      { id: 'credit-card', input: { amount: 200 } }
+    ]);
+    await waitFor(() =>
+      expect(
+        screen.queryByRole('dialog', { name: 'Pay Credit card sooner' })
+      ).not.toBeInTheDocument()
+    );
+  });
+
+  it('starts Pay sooner from no extra each time it opens', async () => {
+    const { user } = renderDebts();
+
+    await user.click(await screen.findByRole('button', { name: 'More actions for Credit card' }));
+    await user.click(screen.getByRole('menuitem', { name: 'Pay sooner' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Pay Credit card sooner' });
+    fireEvent.change(within(dialog).getByRole('slider', { name: 'Pay extra each month' }), {
+      target: { value: '50' }
+    });
+    await user.click(within(dialog).getByRole('button', { name: 'Cancel' }));
+    await waitFor(() => expect(dialog).not.toBeInTheDocument());
+
+    await user.click(screen.getByRole('button', { name: 'More actions for Credit card' }));
+    await user.click(screen.getByRole('menuitem', { name: 'Pay sooner' }));
+    const reopened = await screen.findByRole('dialog', { name: 'Pay Credit card sooner' });
+    expect(within(reopened).getByRole('slider', { name: 'Pay extra each month' })).toHaveValue('0');
+  });
+
   it('shows the latest payments by month, and older ones when asked', async () => {
     const { user } = renderDebts('/debts', [longPaidCard(30), car(), family()]);
 

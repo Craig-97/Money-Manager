@@ -3,6 +3,8 @@ export * from './DebtProgress';
 export * from './DebtsCard';
 export * from './OverpaymentDialog';
 export * from './PaymentsDialog';
+export * from './PaySoonerCard';
+export * from './PaySoonerDialog';
 export * from './PayoffChart';
 export * from './ProgressRing';
 export * from './ShowOlderPayments';
