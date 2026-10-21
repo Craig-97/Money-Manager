@@ -372,6 +372,13 @@ describe('debts on desktop', () => {
 
     expect(await screen.findByRole('dialog', { name: 'Add a debt' })).toBeInTheDocument();
   });
+
+  it("goes back to the list from a debt's own page, which is mobile only", async () => {
+    renderDebts('/debts/credit-card');
+
+    expect(await screen.findByRole('table', { name: 'Debts' })).toBeInTheDocument();
+    expect(screen.queryByRole('slider', { name: 'Pay extra each month' })).not.toBeInTheDocument();
+  });
 });
 
 describe('debts on mobile', () => {

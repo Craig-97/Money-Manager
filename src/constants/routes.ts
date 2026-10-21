@@ -5,7 +5,7 @@ export const ROUTES = {
   forecast: '/forecast',
   accounts: '/accounts',
   debts: '/debts',
-  // One debt on mobile: how to pay it sooner, its payments and details
+  // One debt, mobile only: how to pay it sooner, its payments and details
   debt: '/debts/:id',
   notes: '/notes',
   // What's gone off (New) and what's ahead (?tab=up)

@@ -2,7 +2,7 @@ import { Navigate, RouteObject } from 'react-router';
 import { FullPageLoader } from '~/components/feedback/FullPageLoader';
 import { AppShell } from '~/components/layout/AppShell';
 import { ROUTES } from '~/constants';
-import { PublicOnly, RequireBudget, RequireAuth, RequireNoBudget } from '../guards';
+import { MobileOnly, PublicOnly, RequireBudget, RequireAuth, RequireNoBudget } from '../guards';
 import { RootLayout } from '../RootLayout';
 import { RouteError } from '../RouteError';
 import { pageModules } from './pageModules';
@@ -81,8 +81,14 @@ export const routes: RouteObject[] = [
                     lazy: async () => ({ Component: (await pageModules.debts()).Debts })
                   },
                   {
-                    path: ROUTES.debt,
-                    lazy: async () => ({ Component: (await pageModules.debt()).DebtDetail })
+                    // Desktop does this from the Debts page's ⋯ menus
+                    element: <MobileOnly fallback={ROUTES.debts} />,
+                    children: [
+                      {
+                        path: ROUTES.debt,
+                        lazy: async () => ({ Component: (await pageModules.debt()).DebtDetail })
+                      }
+                    ]
                   },
                   {
                     path: ROUTES.notes,
