@@ -155,7 +155,7 @@ describe('profile', () => {
     const payday = () => within(balances).getByText('Payday balance').nextElementSibling;
     const before = payday()?.textContent;
 
-    const save = within(balances).getByRole('button', { name: 'Save income' });
+    const save = within(balances).getByRole('button', { name: 'Save changes' });
     expect(save).toBeDisabled();
 
     const income = within(balances).getByLabelText('Monthly income');

@@ -40,7 +40,7 @@ export const BalancesSection = ({ budget }: { budget: Budget }) => {
             loading={balances.saving}
             loadingText="Saving…"
             className="font-bold">
-            Save income
+            Save changes
           </Button>
         </>
       }>
