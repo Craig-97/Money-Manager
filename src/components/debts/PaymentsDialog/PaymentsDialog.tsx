@@ -58,13 +58,10 @@ export const PaymentsDialog = ({ debts, today, onUndoOverpayment }: PaymentsDial
       title={`${debt.name} payments`}
       footer={
         <>
-          <Button onClick={() => openOverpayment(debt.id)}>
+          <span className="flex-1" />
+          <Button variant="accent" onClick={() => openOverpayment(debt.id)}>
             <ArrowUp size={16} aria-hidden="true" />
             Log an overpayment
-          </Button>
-          <span className="flex-1" />
-          <Button variant="accent" onClick={close}>
-            Done
           </Button>
         </>
       }>
