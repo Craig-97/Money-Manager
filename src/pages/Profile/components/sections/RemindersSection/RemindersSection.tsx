@@ -1,4 +1,5 @@
-import { Bell, CalendarDays, Copy, Info, Mail, RotateCcw } from 'lucide-react';
+import { Bell, CalendarDays, Copy, Mail, RotateCcw } from 'lucide-react';
+import { InfoNote } from '~/components/feedback/InfoNote';
 import { Checkbox } from '~/components/form/Checkbox';
 import { ReminderWay, WayTag } from '~/components/reminders';
 import { Button } from '~/components/ui/Button';
@@ -105,14 +106,10 @@ export const RemindersSection = ({ budget }: { budget: Budget }) => {
               </div>
             </fieldset>
 
-            <p className="flex items-start gap-2.5 rounded-2xl border border-border bg-surface-2 px-3.5 py-3 text-[13px] leading-[1.45] font-semibold text-muted">
-              <Info size={16} aria-hidden="true" className="mt-px shrink-0 text-accent-text" />
-              <span>
-                Events show names and dates, and amounts only if you tick them.{' '}
-                <b className="font-bold text-text">Anyone with the link can see them</b>, so reset
-                it if you share it by mistake.
-              </span>
-            </p>
+            <InfoNote>
+              Events show names and dates, and amounts only if you tick them.{' '}
+              <b>Anyone with the link can see them</b>, so reset it if you share it by mistake.
+            </InfoNote>
 
             <div className="flex flex-wrap items-center justify-between gap-2">
               <label className="flex min-h-11 cursor-pointer items-center gap-3 text-sm font-semibold">

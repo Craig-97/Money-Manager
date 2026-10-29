@@ -1,4 +1,4 @@
-import { Info } from 'lucide-react';
+import { InfoNote } from '~/components/feedback/InfoNote';
 import { Tile } from '~/components/ui/Tile';
 import { formatBalance } from '~/lib/format';
 import { Accounts } from '../../hooks';
@@ -56,10 +56,9 @@ export const CountedTile = ({
         This is the <b className="text-text">Bank balance</b> on your dashboard: {made}, plus any
         savings you switch on below.
       </p>
-      <p className="mt-auto flex items-start gap-2.5 rounded-2xl border border-border bg-surface-2 px-3.5 py-3 text-[13px] leading-[1.45] font-semibold text-muted">
-        <Info size={16} className="mt-px shrink-0 text-accent-text" aria-hidden="true" />
+      <InfoNote className="mt-auto">
         Savings stay out unless you switch them on. Money you’ve put aside isn’t money to spend.
-      </p>
+      </InfoNote>
     </Tile>
   );
 };

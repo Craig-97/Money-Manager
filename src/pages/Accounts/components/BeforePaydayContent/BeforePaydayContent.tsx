@@ -1,4 +1,4 @@
-import { Info } from 'lucide-react';
+import { InfoNote } from '~/components/feedback/InfoNote';
 import { Tile } from '~/components/ui/Tile';
 import { accountLetter } from '~/lib/accounts';
 import { formatBalance, formatMoney } from '~/lib/format';
@@ -167,15 +167,11 @@ export const BeforePaydayContent = ({
         </>
       ) : null}
 
-      <p className="flex items-start gap-2.5 rounded-2xl border border-border bg-surface-2 px-3.5 py-3 text-[13px] leading-[1.45] font-semibold text-muted">
-        <Info size={16} className="mt-px shrink-0" aria-hidden="true" />
-        <span>
-          <b className="text-text">Moving money between your accounts.</b> When both accounts count
-          in free to spend, a transfer doesn’t change free to spend and is left out of your monthly
-          totals.
-          {isDesktop ? ' Money paid into savings that don’t count comes off like any payment.' : ''}
-        </span>
-      </p>
+      <InfoNote>
+        <b>Moving money between your accounts.</b> When both accounts count in free to spend, a
+        transfer doesn’t change free to spend and is left out of your monthly totals.
+        {isDesktop ? ' Money paid into savings that don’t count comes off like any payment.' : ''}
+      </InfoNote>
     </>
   );
 };

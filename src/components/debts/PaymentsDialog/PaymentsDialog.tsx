@@ -1,5 +1,6 @@
-import { ArrowUp, Info } from 'lucide-react';
+import { ArrowUp } from 'lucide-react';
 import { useShallow } from 'zustand/react/shallow';
+import { InfoNote } from '~/components/feedback/InfoNote';
 import { accentTagClasses, greenTagClasses, tagClasses } from '~/components/payments/PaymentParts';
 import { Button } from '~/components/ui/Button';
 import { DateBox } from '~/components/ui/DateBox';
@@ -148,13 +149,10 @@ export const PaymentsDialog = ({ debts, today, onUndoOverpayment }: PaymentsDial
       {history.hasMore ? (
         <ShowOlderPayments onClick={history.showMore} loading={history.loadingMore} />
       ) : null}
-      <p className="flex items-start gap-3 rounded-2xl border border-border bg-surface-2 px-4 py-3.5 text-[13px] leading-normal text-muted">
-        <Info size={16} className="mt-0.5 shrink-0" aria-hidden="true" />
-        <span>
-          Balances after each payment are worked out from your APR.{' '}
-          <b className="text-text">Update balance</b> from a statement whenever you want them exact.
-        </span>
-      </p>
+      <InfoNote>
+        Balances after each payment are worked out from your APR. <b>Update balance</b> from a
+        statement whenever you want them exact.
+      </InfoNote>
     </Modal>
   );
 };

@@ -1,4 +1,5 @@
 import { Plus, RotateCcw } from 'lucide-react';
+import { InfoNote } from '~/components/feedback/InfoNote';
 import { AmountInput } from '~/components/form/AmountInput';
 import { FieldError } from '~/components/form/FieldError';
 import { TextInput } from '~/components/form/TextInput';
@@ -99,13 +100,10 @@ export const AccountsStep = ({ setup, errors }: { setup: SetupState; errors: Acc
           </p>
         </div>
         {isDesktop ? (
-          <div className="flex items-start gap-3 rounded-[20px] border border-border bg-surface-2 px-4 py-3.5">
-            <RotateCcw size={18} className="mt-px shrink-0 text-accent-text" aria-hidden="true" />
-            <p className="text-[13px] leading-normal text-muted">
-              This is where you get paid for now. You can change where you get paid later on
-              Accounts. Every payday we'll ask you to confirm its balance.
-            </p>
-          </div>
+          <InfoNote icon={RotateCcw}>
+            This is where you get paid for now. You can change where you get paid later on Accounts.
+            Every payday we'll ask you to confirm its balance.
+          </InfoNote>
         ) : null}
       </div>
 

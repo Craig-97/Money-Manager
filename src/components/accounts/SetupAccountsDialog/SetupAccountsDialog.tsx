@@ -1,4 +1,5 @@
 import { ArrowRight, X } from 'lucide-react';
+import { InfoNote } from '~/components/feedback/InfoNote';
 import { Checkbox, CheckboxHitArea } from '~/components/form/Checkbox';
 import { Radio } from '~/components/form/Radio';
 import { Select } from '~/components/form/Select';
@@ -206,19 +207,10 @@ export const SetupAccountsDialog = () => {
             })}
           </div>
           {moving ? (
-            <p
-              aria-live="polite"
-              className="flex items-start gap-2.5 rounded-2xl border border-border bg-surface-2 px-3.5 py-3 text-[13px] leading-[1.45] font-semibold text-muted">
-              <ArrowRight
-                size={16}
-                className="mt-px shrink-0 text-accent-text"
-                aria-hidden="true"
-              />
-              <span>
-                Your pay goes into {paidName} from {formatShortDate(cycle.end, today)}.{' '}
-                {paidNowName} stops being where you get paid.
-              </span>
-            </p>
+            <InfoNote icon={ArrowRight} live>
+              Your pay goes into {paidName} from {formatShortDate(cycle.end, today)}. {paidNowName}{' '}
+              stops being where you get paid.
+            </InfoNote>
           ) : null}
         </section>
 
