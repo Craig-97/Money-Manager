@@ -3,6 +3,7 @@ import { DebtLeft } from '~/components/debts';
 import { Checkbox, CheckboxHitArea } from '~/components/form/Checkbox';
 import {
   DueCell,
+  NoteChip,
   PaymentLetter,
   PaymentMenu,
   RenewalTag,
@@ -25,6 +26,7 @@ export const RecurringRow = ({
   recurring: Recurring;
 }) => {
   const { tab, today, cycle, selection, actions, intoText } = recurring;
+  const notes = recurring.notesFor(payment.id);
   const openEdit = usePaymentDialogStore(s => s.openEdit);
   // Before payday is about what's left to pay, so it shows where each payment stands this cycle.
   // Renewals have their own tab.
@@ -58,6 +60,7 @@ export const RecurringRow = ({
               {payment.name}
             </button>
             {beforePayday ? <TimesDue payment={payment} cycle={cycle} today={today} /> : null}
+            <NoteChip payment={payment} notes={notes} />
           </div>
           <div className="mt-0.5 flex items-center gap-2 text-xs font-medium text-muted">
             {isDebt(payment) ? (
@@ -102,7 +105,13 @@ export const RecurringRow = ({
         {formatPayment(payment.signedAmount)}
       </span>
       <span role="cell" className="flex justify-end">
-        <PaymentMenu payment={payment} cycle={cycle} today={today} actions={actions} />
+        <PaymentMenu
+          payment={payment}
+          cycle={cycle}
+          today={today}
+          actions={actions}
+          noteCount={notes.length}
+        />
       </span>
     </div>
   );

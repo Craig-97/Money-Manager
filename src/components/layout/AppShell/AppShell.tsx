@@ -1,8 +1,9 @@
 import { CSSProperties } from 'react';
 import { Outlet } from 'react-router';
 import { AccountDialog, SetupAccountsDialog } from '~/components/accounts';
-import { NoteDialog } from '~/components/notes';
+import { NoteDialog, PaymentNotesDialog } from '~/components/notes';
 import { PaymentDialog } from '~/components/payments/PaymentDialog';
+import { PaymentSheet } from '~/components/payments/PaymentSheet';
 import { Toaster } from '~/components/ui/Toaster';
 import { useScrollTopOnNavigate } from '~/hooks/useScrollTopOnNavigate';
 import { useSidebarMode } from '~/hooks/useSidebarMode';
@@ -38,6 +39,8 @@ export const AppShell = () => {
       <BottomNav className="md:hidden" />
       {/* Opened from any page, e.g. the mobile nav's add button or a reminder */}
       <PaymentDialog />
+      <PaymentSheet />
+      <PaymentNotesDialog />
       <NoteDialog />
       <AccountDialog />
       <SetupAccountsDialog />

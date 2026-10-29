@@ -7,6 +7,7 @@ import {
   DEFAULT_USER,
   FakeAccount,
   FakeBudget,
+  FakeNote,
   FakeOneOffPayment,
   fakeRecord,
   FakeRecurringPayment
@@ -201,6 +202,20 @@ const demoBudget = (scenario: string | null): FakeBudget => {
         renewalDate: null
       },
       {
+        // Weekly, so it's due more than once before payday: the ×2 tag and its dates
+        id: 'cleaner',
+        name: 'Cleaner',
+        amount: 50,
+        category: 'BILLS',
+        frequency: 'WEEKLY',
+        type: 'EXPENSE',
+        firstPaymentDate: fromToday(-27),
+        lastPaymentDate: null,
+        nextDueDate: fromToday(1),
+        thisCycle: [],
+        renewalDate: null
+      },
+      {
         id: 'isa-top-up',
         name: 'ISA top-up',
         amount: 250,
@@ -239,16 +254,28 @@ const demoBudget = (scenario: string | null): FakeBudget => {
       ['Test Note\n\nDo Da Dee', 'AMBER', 2],
       ['New Note', 'VIOLET', 3],
       ['I am a long note\nI am a long note\nI am a long note\nI am a long note', 'ROSE', 4]
-    ].map(([body, color, age], index) => {
-      const at = String(Date.now() - Number(age) * 3_600_000);
-      return {
-        id: `note-${index + 1}`,
-        body: String(body),
-        color: String(color),
-        createdAt: at,
-        updatedAt: at
-      };
-    })
+    ]
+      .map(([body, color, age], index): FakeNote => {
+        const at = String(Date.now() - Number(age) * 3_600_000);
+        return {
+          id: `note-${index + 1}`,
+          body: String(body),
+          color: String(color),
+          createdAt: at,
+          updatedAt: at
+        };
+      })
+      .concat([
+        {
+          // On the cleaner, so a weekly payment shows its note chip as well
+          id: 'note-cleaner',
+          body: 'Sarah. Cash or a bank transfer. Skip the weeks we are away in December.',
+          color: 'AMBER',
+          createdAt: String(Date.now() - 86_400_000),
+          updatedAt: String(Date.now() - 86_400_000),
+          payment: 'cleaner'
+        }
+      ])
   };
 
   if (scenario === 'empty') {

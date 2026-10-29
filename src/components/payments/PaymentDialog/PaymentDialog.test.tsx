@@ -449,14 +449,23 @@ describe('closing the payment dialog', () => {
     holdExitAnimations();
     const { user } = renderAt('/recurring');
 
-    await user.click(await screen.findByRole('button', { name: 'Edit Car finance' }));
+    // On mobile a payment opens its sheet first, with Edit payment for the full form
+    await user.click(await screen.findByRole('button', { name: 'Car finance' }));
+    await user.click(
+      within(await screen.findByRole('dialog', { name: 'Car finance' })).getByRole('button', {
+        name: 'Edit payment'
+      })
+    );
     const sheet = await screen.findByRole('dialog', { name: 'Edit recurring payment' });
     await user.click(within(sheet).getByRole('button', { name: 'Cancel' }));
 
     // Still on screen while it animates away, as the payment it was, not a new one or the chooser
-    const closing = await screen.findByRole('dialog', { hidden: true });
+    // (the payment's own sheet is closing too, behind it)
+    const closing = await screen.findByRole('dialog', {
+      hidden: true,
+      name: 'Edit recurring payment'
+    });
     expect(closing).toHaveAttribute('data-state', 'closed');
-    expect(closing).toHaveAccessibleName('Edit recurring payment');
     expect(within(closing).getByLabelText('Name')).toHaveValue('Car finance');
     expect(within(closing).queryByText('What are you adding?')).not.toBeInTheDocument();
   });

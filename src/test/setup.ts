@@ -7,6 +7,8 @@ import { useAccountDialogStore } from '~/state/accountDialog';
 import { useDebtDialogStore } from '~/state/debtDialog';
 import { useNoteDialogStore } from '~/state/noteDialog';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
+import { usePaymentNotesStore } from '~/state/paymentNotes';
+import { usePaymentSheetStore } from '~/state/paymentSheet';
 import { DEFAULT_ACCENT, usePrefsStore } from '~/state/prefs';
 import { useReminderChooserStore } from '~/state/reminderChooser';
 import { useSetupAccountsStore } from '~/state/setupAccounts';
@@ -56,6 +58,8 @@ afterEach(() => {
   useAccountDialogStore.setState(useAccountDialogStore.getInitialState(), true);
   useSetupAccountsStore.setState(useSetupAccountsStore.getInitialState(), true);
   usePaymentDialogStore.setState(usePaymentDialogStore.getInitialState(), true);
+  usePaymentNotesStore.setState(usePaymentNotesStore.getInitialState(), true);
+  usePaymentSheetStore.setState(usePaymentSheetStore.getInitialState(), true);
   useDebtDialogStore.setState(useDebtDialogStore.getInitialState(), true);
   useReminderChooserStore.setState(useReminderChooserStore.getInitialState(), true);
   resetViewport();

@@ -20,13 +20,17 @@ export const useNoteDialog = ({
     useShallow(s => ({ dialog: s.dialog, open: s.open, opened: s.opened, close: s.close }))
   );
   const note = dialog.view === 'edit' ? notes.find(item => item.id === dialog.noteId) : undefined;
-  const draft = useNoteDraft(note ? toDraft(note) : BLANK_DRAFT);
+  // A new note opened from a payment starts linked to it
+  const start = note
+    ? toDraft(note)
+    : { ...BLANK_DRAFT, paymentId: (dialog.view === 'new' && dialog.paymentId) || '' };
+  const draft = useNoteDraft(start);
 
   // A new opening: start from its note, or blank (React's "reset state on a prop change" pattern)
   const [currentOpening, setCurrentOpening] = useState(opened);
   if (opened !== currentOpening) {
     setCurrentOpening(opened);
-    draft.reset(note ? toDraft(note) : BLANK_DRAFT);
+    draft.reset(start);
   }
 
   const save = async () => {

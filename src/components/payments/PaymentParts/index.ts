@@ -3,6 +3,7 @@ export * from './ApproximatelyEqual';
 export * from './DueCell';
 export * from './KindTag';
 export * from './ListTotal';
+export * from './NoteChip';
 export * from './PaymentLetter';
 export * from './PaymentMenu';
 export * from './RenewalTag';

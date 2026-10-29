@@ -4,6 +4,7 @@ import { usePayCycle } from '~/hooks/usePayCycle';
 import { usePaymentActions } from '~/hooks/usePaymentActions';
 import { usePaymentSelection } from '~/hooks/usePaymentSelection';
 import { isDebt } from '~/lib/debts';
+import { notesByPayment, toNotes } from '~/lib/notes';
 import { canPay, DEFAULT_SORT, PaymentSort, RecurringPayment, toPayments } from '~/lib/payments';
 import {
   ALL_CATEGORIES,
@@ -31,6 +32,7 @@ export const useRecurring = (budget: Budget) => {
   const [sort, setSort] = useState<PaymentSort>(DEFAULT_SORT);
 
   const payments = recurringOnly(toPayments(budget, today));
+  const paymentNotes = notesByPayment(toNotes(budget.notes));
   const listed = filterPayments(payments, { tab, query, category, cycle, today, sort });
   const selection = usePaymentSelection(listed);
   const accountNames = new Map(budget.accounts.map(account => [account.id, account.name]));
@@ -44,6 +46,8 @@ export const useRecurring = (budget: Budget) => {
     };
 
   return {
+    // Each payment's notes, for the note chip by its name and its menu
+    notesFor: (paymentId: string) => paymentNotes.get(paymentId) ?? [],
     today,
     cycle,
     actions,

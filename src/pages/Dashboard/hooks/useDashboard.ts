@@ -7,6 +7,7 @@ import { usePaymentActions } from '~/hooks/usePaymentActions';
 import { usePaymentSelection } from '~/hooks/usePaymentSelection';
 import { forFreeToSpend, paidIntoAccountOf, toAccounts } from '~/lib/accounts';
 import { getApiErrorMessage } from '~/lib/errors';
+import { notesByPayment, toNotes } from '~/lib/notes';
 import {
   canPay,
   cycleDays,
@@ -34,6 +35,7 @@ export const useDashboard = (budget: Budget) => {
   const [sort, setSort] = useState<PaymentSort>(DEFAULT_SORT);
 
   const payments = toPayments(budget, today);
+  const paymentNotes = notesByPayment(toNotes(budget.notes));
   const accounts = toAccounts(budget.accounts, today);
   const counted = accounts.filter(account => account.counts);
   const current = paidIntoAccountOf(accounts);
@@ -73,6 +75,8 @@ export const useDashboard = (budget: Budget) => {
   );
 
   return {
+    // Each payment's notes, for the note chip by its name and its menu
+    notesFor: (paymentId: string) => paymentNotes.get(paymentId) ?? [],
     bankBalance: budget.bankBalance,
     monthlyIncome: budget.monthlyIncome,
     payday: budget.payday,

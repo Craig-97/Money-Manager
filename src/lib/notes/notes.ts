@@ -1,5 +1,5 @@
 import { NoteColor, NoteFieldsFragment, NoteRepeat, PaymentFrequency } from '~/graphql/generated';
-import { addDays, fromApiDate, parseIsoDate, toIsoDate } from '~/lib/dates';
+import { addDays, formatShortDay, fromApiDate, parseIsoDate, toIsoDate } from '~/lib/dates';
 import { nextOccurrence, Payment } from '~/lib/payments';
 
 // The days before a note's date it can remind: on the day, the day before, a week, two weeks, a month
@@ -257,4 +257,29 @@ export const reminderHint = (
   if (!dates.length) return repeats ? '' : 'Its reminders have gone by.';
   const plural = dates.length === 1 ? 'a reminder' : 'reminders';
   return `You’ll get ${plural} on ${joinDates(dates.map(format))}${THEN[repeat]}.`;
+};
+
+/* Each recurring payment's notes, the most recently changed first */
+export const notesByPayment = (notes: readonly Note[]) => {
+  const byPayment = new Map<string, Note[]>();
+  for (const note of notes) {
+    if (!note.paymentId) continue;
+    byPayment.set(note.paymentId, [...(byPayment.get(note.paymentId) ?? []), note]);
+  }
+  for (const list of byPayment.values()) list.sort((a, b) => b.updated - a.updated);
+  return byPayment;
+};
+
+/*
+ * The line under a note listed on its payment, where "Linked to" would only repeat the payment:
+ * "Each payment · Reminds you 1 week before", "Tue 1 Dec · No reminder" or "No date"
+ */
+export const paymentNoteFoot = (note: Note, today: Date) => {
+  const date = nextNoteDate(note, today);
+  if (!date) return 'No date';
+  if (date < today) return 'Its date has gone by';
+  const when = note.repeat === 'WITH_PAYMENT' ? 'Each payment' : formatShortDay(date);
+  return note.remind.length
+    ? `${when} · Reminds you ${remindText(note.remind).toLowerCase()}`
+    : `${when} · No reminder`;
 };

@@ -4,6 +4,7 @@ import {
   DueCell,
   greenTagClasses,
   KindTag,
+  NoteChip,
   PaymentLetter,
   PaymentMenu,
   redTagClasses,
@@ -24,6 +25,7 @@ interface RowProps {
 
 export const PaymentRow = ({ payment, dashboard }: RowProps) => {
   const { tab, today, cycle, selection, actions } = dashboard;
+  const notes = dashboard.notesFor(payment.id);
   const openEdit = usePaymentDialogStore(s => s.openEdit);
   const due = dueInfo(payment, { today, cycle });
   const isSelected = selection.selected.has(payment.id);
@@ -56,6 +58,7 @@ export const PaymentRow = ({ payment, dashboard }: RowProps) => {
               {payment.name}
             </button>
             {tab === 'upcoming' ? <TimesDue payment={payment} cycle={cycle} today={today} /> : null}
+            <NoteChip payment={payment} notes={notes} />
           </div>
           <p className="mt-0.5 text-xs font-medium text-muted">
             {tab === 'oneOff' ? 'One-off' : renewal ? `${category} · ${renewal}` : category}
@@ -117,7 +120,13 @@ export const PaymentRow = ({ payment, dashboard }: RowProps) => {
         {formatPayment(payment.signedAmount)}
       </span>
       <span role="cell" className="flex justify-end">
-        <PaymentMenu payment={payment} cycle={cycle} today={today} actions={actions} />
+        <PaymentMenu
+          payment={payment}
+          cycle={cycle}
+          today={today}
+          actions={actions}
+          noteCount={notes.length}
+        />
       </span>
     </div>
   );

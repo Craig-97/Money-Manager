@@ -1,7 +1,7 @@
 import { Repeat } from 'lucide-react';
 import { DebtLeft } from '~/components/debts';
 import { Checkbox, CheckboxHitArea } from '~/components/form/Checkbox';
-import { PaymentLetter, TimesDue } from '~/components/payments/PaymentParts';
+import { NoteChip, PaymentLetter, TimesDue } from '~/components/payments/PaymentParts';
 import { cn } from '~/lib/cn';
 import { isDebt } from '~/lib/debts';
 import { formatPayment } from '~/lib/format';
@@ -15,7 +15,7 @@ import {
   renewalOf,
   renewalTag
 } from '~/lib/payments';
-import { usePaymentDialogStore } from '~/state/paymentDialog';
+import { usePaymentSheetStore } from '~/state/paymentSheet';
 import { Recurring } from '../../hooks';
 import { RecurringTab } from '../../recurringModel';
 
@@ -53,7 +53,8 @@ export const MobileRecurringRow = ({
 }) => {
   const { tab, today, cycle, selection, intoText } = recurring;
   const { selecting, toggle } = selection;
-  const openEdit = usePaymentDialogStore(s => s.openEdit);
+  const openSheet = usePaymentSheetStore(s => s.openFor);
+  const notes = recurring.notesFor(payment.id);
   const due = dueInfo(payment, { today, cycle });
   const isSelected = selecting && selection.selected.has(payment.id);
   const urgent = due.state === 'today' || due.state === 'overdue';
@@ -80,12 +81,10 @@ export const MobileRecurringRow = ({
         aria-label={
           selecting
             ? `${isSelected ? 'Deselect' : 'Select'} ${payment.name}`
-            : `Edit ${payment.name}`
+            : `${payment.name}${notes.length ? `, ${notes.length} ${notes.length === 1 ? 'note' : 'notes'}` : ''}`
         }
         aria-haspopup={selecting ? undefined : 'dialog'}
-        onClick={() =>
-          selecting ? toggle(payment.id) : openEdit('recurring', { paymentId: payment.id })
-        }
+        onClick={() => (selecting ? toggle(payment.id) : openSheet(payment.id))}
         className="flex min-h-[68px] min-w-0 flex-1 cursor-pointer items-center gap-3 rounded-[14px] text-left">
         <PaymentLetter payment={payment} className="size-10 rounded-[13px] text-[15px]" />
         <span className="min-w-0 grow">
@@ -94,6 +93,7 @@ export const MobileRecurringRow = ({
             {tab === 'cycle' ? (
               <TimesDue payment={payment} cycle={cycle} today={today} hint={false} />
             ) : null}
+            <NoteChip payment={payment} notes={notes} hint={false} />
           </span>
           {isDebt(payment) && tab !== 'cycle' ? (
             <DebtLeft debt={payment} className="mt-[5px] text-xs font-medium text-muted" />

@@ -343,8 +343,7 @@ describe('recurring page on mobile', () => {
   it('says how often each payment goes, then its renewal or, before payday, where it stands', async () => {
     const { user } = renderRecurring();
 
-    const row = async (name: string) =>
-      (await screen.findByRole('button', { name: `Edit ${name}` })).textContent;
+    const row = async (name: string) => (await screen.findByRole('button', { name })).textContent;
     expect(await row('Home insurance')).toContain('Monthly · Renews 2 Feb 2027');
     expect(await row('Car insurance')).toContain('Annually · Renews in 22 days');
     expect(await row('Breakdown cover')).toContain('Monthly · Needs renewing');
@@ -361,7 +360,7 @@ describe('recurring page on mobile', () => {
   it('says which savings account a payment goes into', async () => {
     renderRecurring(withSavings());
 
-    expect(await screen.findByRole('button', { name: 'Edit ISA top-up' })).toHaveTextContent(
+    expect(await screen.findByRole('button', { name: 'ISA top-up' })).toHaveTextContent(
       'Monthly · Into Cash ISA'
     );
   });
