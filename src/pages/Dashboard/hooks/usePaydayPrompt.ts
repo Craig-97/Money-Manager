@@ -69,7 +69,10 @@ const spendingSub = ({ out, added, updated }: { out: number; added: number; upda
 export const usePaydayPrompt = ({ budget, cycle, today, payments, markPaid }: Options) => {
   const [startCycle, { loading: starting }] = useMutation(StartPaydayCycleDocument);
   const due = needsNewCycle(cycle, budget.cycleStartedOn);
-  const [view, setView] = useState<'open' | 'closed' | 'done'>(due ? 'open' : 'closed');
+  const [open, setOpen] = useState(due);
+  // The steps, or the summary once the cycle has started. Kept as it is while the dialog closes, so
+  // it slides away showing what it showed, not the steps again.
+  const [stage, setStage] = useState<'steps' | 'done'>('steps');
   const [outcomes, setOutcomes] = useState<Record<string, LeftOverOutcome>>({});
   const [ticked, setTicked] = useState<ReadonlySet<string>>(new Set());
   // What the user typed over the suggestion, if anything
@@ -245,24 +248,30 @@ export const usePaydayPrompt = ({ budget, cycle, today, payments, markPaid }: Op
         .filter(Boolean)
         .join(' ');
       setResult({ balance: paidIntoBalance, text });
-      setView('done');
+      setStage('done');
     } catch (error) {
       showToast({ message: getApiErrorMessage(error, "Couldn't start the new cycle. Try again.") });
     }
   };
 
   const skip = () => {
-    setView('closed');
+    setOpen(false);
     showToast({
       message: 'Payday prompt skipped',
-      action: { label: 'Show again', onClick: () => setView('open') }
+      action: {
+        label: 'Show again',
+        onClick: () => {
+          setStage('steps');
+          setOpen(true);
+        }
+      }
     });
   };
 
   return {
-    open: view !== 'closed',
-    done: view === 'done',
-    close: () => setView('closed'),
+    open,
+    done: stage === 'done',
+    close: () => setOpen(false),
     skip,
     payday: cycle.start,
     // Days since payday, when the prompt is catching up on one that's been and gone

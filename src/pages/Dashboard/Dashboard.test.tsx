@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { screen, waitFor, within } from '@testing-library/react';
+import { holdExitAnimations } from '~/test/exitAnimation';
 import {
   apiDate,
   apiDateFromToday,
@@ -423,6 +424,21 @@ describe('payday prompt', () => {
 
   const outcomeOf = (dialog: HTMLElement, name: string) =>
     within(within(dialog).getByRole('radiogroup', { name: `What happened to ${name}` }));
+
+  it('keeps the summary on screen while it closes, not the payday steps', async () => {
+    holdExitAnimations();
+    const { user } = renderDashboard(paydayBudget());
+
+    const dialog = await screen.findByRole('dialog', { name: 'It’s payday' });
+    await user.click(within(dialog).getByRole('button', { name: 'Start new cycle' }));
+    await user.click(await within(dialog).findByRole('button', { name: 'Back to dashboard' }));
+
+    // Still on screen while it animates away, showing the summary it closed from
+    const closing = await screen.findByRole('dialog', { hidden: true });
+    expect(closing).toHaveAttribute('data-state', 'closed');
+    expect(closing).toHaveAccessibleName('New cycle started');
+    expect(within(closing).queryByText('From last cycle')).not.toBeInTheDocument();
+  });
 
   it('takes last cycle’s left-over payments as paid, and starts the new cycle', async () => {
     const { user, api } = renderDashboard(paydayBudget());
