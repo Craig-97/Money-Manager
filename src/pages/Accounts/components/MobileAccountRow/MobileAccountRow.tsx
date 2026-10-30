@@ -62,7 +62,12 @@ export const MobileAccountRow = ({ account, today, several }: MobileAccountRowPr
           )}
         </span>
       </span>
-      <span className="shrink-0 num text-[15px] font-extrabold whitespace-nowrap">
+      <span
+        className={cn(
+          'shrink-0 num text-[15px] font-extrabold whitespace-nowrap',
+          // Below £0 is red, as it is before payday
+          account.balance < 0 && 'text-expense'
+        )}>
         {formatBalance(account.balance)}
       </span>
       <ChevronRight size={16} className="shrink-0 text-faint" aria-hidden="true" />

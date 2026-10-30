@@ -27,8 +27,8 @@ import {
 
 const fromToday = (days: number) => apiDate(toIsoDate(addDays(startOfToday(), days)));
 
-// The accounts scenario's other spending accounts: a joint one for bills, and a holiday one that
-// would go below £0 before payday
+// The accounts scenario's other spending accounts: a joint one for bills, a holiday one that
+// would go below £0 before payday, and a spare card that's already below it
 const demoSpendingAccounts = (): FakeAccount[] => [
   {
     id: 'joint',
@@ -49,6 +49,17 @@ const demoSpendingAccounts = (): FakeAccount[] => [
     interestRate: null,
     purpose: null,
     balanceUpdatedAt: fromToday(0)
+  },
+  {
+    // Already below £0, with nothing going out of it before payday
+    id: 'spare',
+    name: 'Spare card',
+    kind: 'SPENDING',
+    balance: -40,
+    counts: true,
+    interestRate: null,
+    purpose: null,
+    balanceUpdatedAt: fromToday(-1)
   }
 ];
 

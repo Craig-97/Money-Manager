@@ -58,7 +58,12 @@ export const AccountRow = ({ account, today, several, onCounts }: AccountRowProp
         </div>
       </div>
       <div className="hidden wide:block">{updated}</div>
-      <span className="text-right num text-[17px] font-extrabold whitespace-nowrap">
+      <span
+        className={cn(
+          'text-right num text-[17px] font-extrabold whitespace-nowrap',
+          // Below £0 is red, as it is before payday
+          account.balance < 0 && 'text-expense'
+        )}>
         {formatBalance(account.balance)}
       </span>
       <span className="flex items-center justify-end gap-2.5">
