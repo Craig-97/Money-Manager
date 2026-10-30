@@ -78,6 +78,13 @@ export const NextPaydayTile = ({ dashboard }: { dashboard: Dashboard }) => {
               <span aria-hidden="true" className="size-2 rounded-full bg-income" />
               In
             </span>
+            {/* Only when money moves between accounts that count before payday */}
+            {days.some(day => day.kind === 'move') ? (
+              <span className="inline-flex items-center gap-1.5">
+                <span aria-hidden="true" className="size-2 rounded-full bg-muted" />
+                Moved
+              </span>
+            ) : null}
           </span>
           {override.moved ? (
             <span className="inline-flex gap-2">

@@ -30,14 +30,16 @@ export const SummaryStats = ({ recurring }: { recurring: Recurring }) => {
           {signedTotal(totals.monthly)}
           <span className="text-sm font-semibold tracking-normal text-muted"> /mo</span>
         </p>
+        {/* The count first, then quarterly and yearly payments as a yearly figure */}
         <p className="text-[13px] font-medium text-muted">
+          {plural(totals.count, 'recurring payment')}
           {totals.annual > 0 ? (
             <>
-              + <span className="num font-bold text-text">{formatMoney(totals.annual)}</span>/yr
-              annual ·{' '}
+              {' '}
+              · + <span className="num font-bold text-text">{formatMoney(totals.annual)}</span>/yr
+              annual
             </>
           ) : null}
-          {plural(totals.count, 'recurring payment')}
         </p>
       </div>
 

@@ -90,14 +90,11 @@ describe('accounts', () => {
 
   it('leaves payments into savings that count out of free to spend', () => {
     const payments = [
-      { kind: 'recurring', id: 'into-isa', paysInto: 'isa' },
-      { kind: 'recurring', id: 'into-easy', paysInto: 'easy' },
-      { kind: 'oneOff', id: 'gift' }
+      { kind: 'recurring', id: 'into-isa', into: { counts: false } },
+      { kind: 'recurring', id: 'into-easy', into: { counts: true } },
+      { kind: 'oneOff', id: 'gift', into: null }
     ];
-    expect(forFreeToSpend(payments, [current, isa, easy]).map(payment => payment.id)).toEqual([
-      'into-isa',
-      'gift'
-    ]);
+    expect(forFreeToSpend(payments).map(payment => payment.id)).toEqual(['into-isa', 'gift']);
   });
 });
 

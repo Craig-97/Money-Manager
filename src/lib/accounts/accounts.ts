@@ -154,15 +154,9 @@ export const accountLetter = (account: Pick<Account, 'name'>) =>
  * The payments that come off free to spend: a payment into an account that counts only moves money
  * between the accounts making up the bank balance, so it's left out
  */
-export const forFreeToSpend = <T extends { kind: string; paysInto?: string | null }>(
-  payments: readonly T[],
-  accounts: readonly Pick<Account, 'id' | 'counts'>[]
-) => {
-  const counted = new Set(accounts.filter(account => account.counts).map(account => account.id));
-  return payments.filter(
-    payment => !(payment.kind === 'recurring' && payment.paysInto && counted.has(payment.paysInto))
-  );
-};
+export const forFreeToSpend = <T extends { kind: string; into?: { counts: boolean } | null }>(
+  payments: readonly T[]
+) => payments.filter(payment => !(payment.kind === 'recurring' && payment.into?.counts));
 
 /* Names in a sentence: "Netflix", "Netflix and Gym", "Netflix, Gym and Phone" */
 export const joinNames = (names: readonly string[]) =>

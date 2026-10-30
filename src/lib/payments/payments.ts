@@ -1,4 +1,5 @@
 import {
+  AccountFieldsFragment,
   OneOffPaymentFieldsFragment,
   PaymentCategory,
   PaymentFrequency,
@@ -81,6 +82,9 @@ export interface RecurringPayment extends BasePayment {
   debt: Debt | null;
   // Another account it moves money into, like a standing order
   paysInto: string | null;
+  // That account's name, and whether it counts towards the bank balance too. When it does, the
+  // money only moves within the bank balance, so it isn't spent and the totals leave it out.
+  into: { name: string; counts: boolean } | null;
 }
 
 export interface OneOffPayment extends BasePayment {
@@ -96,10 +100,21 @@ const signed = (amount: number, type: PaymentType) => (type === 'INCOME' ? amoun
 
 const CYCLE_KINDS = { PAID: 'paid', SKIPPED: 'skipped' } as const;
 
+type IntoAccount = Pick<AccountFieldsFragment, 'id' | 'name' | 'counts'>;
+
+interface RecurringOptions {
+  today: Date;
+  settings: ReminderSettings;
+  accounts: readonly IntoAccount[];
+}
+
 const toRecurringPayment = (
   payment: RecurringPaymentFieldsFragment,
-  { today, settings }: { today: Date; settings: ReminderSettings }
+  { today, settings, accounts }: RecurringOptions
 ): RecurringPayment => {
+  const into = payment.paysInto
+    ? accounts.find(account => account.id === payment.paysInto)
+    : undefined;
   const firstPaymentDate = fromApiDate(payment.firstPaymentDate) ?? today;
   const lastPaymentDate = fromApiDate(payment.lastPaymentDate);
   // Payments saved before the API tracked due dates don't have one, so work it out
@@ -141,7 +156,8 @@ const toRecurringPayment = (
         }
       : null,
     account: payment.account ?? null,
-    paysInto: payment.paysInto ?? null
+    paysInto: payment.paysInto ?? null,
+    into: into ? { name: into.name, counts: into.counts } : null
   };
 };
 
@@ -168,17 +184,35 @@ interface BudgetPayments {
   oneOffPayments?: (OneOffPaymentFieldsFragment | null)[] | null;
   // The usual reminder timing, for payments that follow it
   reminderSettings?: ReminderSettings | null;
+  // For the account a payment pays into
+  accounts?: readonly (IntoAccount | null)[] | null;
 }
 
 /* Both kinds of payment on the budget as one list */
 export const toPayments = (budget: BudgetPayments, today: Date): Payment[] => {
   const settings = budget.reminderSettings ?? DEFAULT_REMINDER_SETTINGS;
+  const accounts = (budget.accounts ?? []).filter(account => account !== null);
   return [
     ...(budget.recurringPayments ?? [])
       .filter(payment => payment !== null)
-      .map(payment => toRecurringPayment(payment, { today, settings })),
+      .map(payment => toRecurringPayment(payment, { today, settings, accounts })),
     ...(budget.oneOffPayments ?? [])
       .filter(payment => payment !== null)
       .map(payment => toOneOffPayment(payment, settings))
   ];
 };
+
+/*
+ * The account a payment moves money into when that counts too, so it isn't spent and the totals
+ * leave it out: "Joint bills". Null for anything else.
+ */
+export const movesTo = (payment: Payment) =>
+  payment.kind === 'recurring' && payment.into?.counts ? payment.into.name : null;
+
+/* "Into Cash ISA" for a payment into one of the accounts, shown in place of its category */
+export const intoText = (payment: Payment) =>
+  payment.kind === 'recurring' && payment.into ? `Into ${payment.into.name}` : null;
+
+/* Recurring payments still running, moves between accounts included */
+export const activeRecurringCount = (payments: readonly Payment[]) =>
+  payments.filter(payment => payment.kind === 'recurring' && payment.dueDate).length;

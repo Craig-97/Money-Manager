@@ -6,14 +6,21 @@ import {
   KindTag,
   NoteChip,
   PaymentLetter,
+  PaymentAmount,
   PaymentMenu,
   redTagClasses,
   StatusTag,
   TimesDue
 } from '~/components/payments/PaymentParts';
 import { cn } from '~/lib/cn';
-import { formatPayment } from '~/lib/format';
-import { categoryLabel, dueInfo, Payment, renewalNote, scheduleText } from '~/lib/payments';
+import {
+  categoryLabel,
+  dueInfo,
+  intoText,
+  Payment,
+  renewalNote,
+  scheduleText
+} from '~/lib/payments';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
 import { Dashboard } from '../../../hooks';
 import { rowClasses } from '../rowClasses';
@@ -31,6 +38,8 @@ export const PaymentRow = ({ payment, dashboard }: RowProps) => {
   const isSelected = selection.selected.has(payment.id);
   const checkboxId = `payment-${tab}-${payment.id}`;
   const category = categoryLabel(payment.category);
+  // "Into Joint bills" says where it goes, in place of the category under the name
+  const detail = intoText(payment) ?? category;
   // A renewal coming up shows by the category: "Insurance · Renews in 22 days"
   const renewal = renewalNote(payment, today);
 
@@ -61,7 +70,7 @@ export const PaymentRow = ({ payment, dashboard }: RowProps) => {
             <NoteChip payment={payment} notes={notes} />
           </div>
           <p className="mt-0.5 text-xs font-medium text-muted">
-            {tab === 'oneOff' ? 'One-off' : renewal ? `${category} · ${renewal}` : category}
+            {tab === 'oneOff' ? 'One-off' : renewal ? `${detail} · ${renewal}` : detail}
           </p>
         </div>
       </div>
@@ -111,13 +120,8 @@ export const PaymentRow = ({ payment, dashboard }: RowProps) => {
         </>
       ) : null}
 
-      <span
-        role="cell"
-        className={cn(
-          'text-right num text-[15px] font-extrabold',
-          payment.signedAmount < 0 ? 'text-expense' : 'text-income'
-        )}>
-        {formatPayment(payment.signedAmount)}
+      <span role="cell" className="text-right">
+        <PaymentAmount payment={payment} className="text-[15px]" />
       </span>
       <span role="cell" className="flex justify-end">
         <PaymentMenu

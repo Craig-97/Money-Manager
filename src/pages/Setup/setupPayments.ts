@@ -64,7 +64,9 @@ export const regularAsPayment = (
         }
       : null,
     account: input.account ?? null,
-    paysInto: input.paysInto ?? null
+    paysInto: input.paysInto ?? null,
+    // Setup works out moves between accounts itself, from the accounts being set up
+    into: null
   };
 };
 

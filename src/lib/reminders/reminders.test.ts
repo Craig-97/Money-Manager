@@ -32,6 +32,7 @@ const CYCLE = {
 const payment = (overrides: Partial<RecurringPayment> & { id: string }): RecurringPayment => ({
   kind: 'recurring',
   account: null,
+  into: null,
   paysInto: null,
   name: overrides.id,
   amount: 20,

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { hintCardClasses } from '~/components/ui/popoverClasses';
 import { cn } from '~/lib/cn';
 import { formatPayment } from '~/lib/format';
-import { CycleDay, CycleDayKind } from '~/lib/payments';
+import { CycleDay, CycleDayKind, movesTo } from '~/lib/payments';
 import { dayTitle } from '../../../dashboardModel';
 
 // default: the next payday tile; hero: white ticks on the accent card on mobile
@@ -15,6 +15,7 @@ const SEGMENTS: Record<Tone, Record<CycleDayKind, string>> = {
     future: 'h-2.5 rounded-full bg-track',
     expense: 'h-2.5 rounded-full bg-expense',
     income: 'h-2.5 rounded-full bg-income',
+    move: 'h-2.5 rounded-full bg-muted',
     payday: 'h-2.5 rounded-full bg-accent',
     ghost: 'h-2.5 rounded-full border-[1.5px] border-dashed border-border-strong',
     ghostPayday: 'h-2.5 rounded-full border-[1.5px] border-dashed border-accent-text'
@@ -25,6 +26,7 @@ const SEGMENTS: Record<Tone, Record<CycleDayKind, string>> = {
     future: 'h-2 rounded-[3px] bg-white/14',
     expense: 'h-2 rounded-[3px] bg-[#FF9C96]',
     income: 'h-2 rounded-[3px] bg-[#86EFAC]',
+    move: 'h-2 rounded-[3px] bg-white/60',
     payday: 'h-2 rounded-[3px] bg-[#86EFAC]',
     ghost: 'h-2 rounded-[3px] border border-dashed border-white/40',
     ghostPayday: 'h-2 rounded-[3px] border border-dashed border-white/80'
@@ -103,7 +105,11 @@ export const CycleBar = ({ days, tone = 'default', className }: CycleBarProps) =
                     key={payment.id}
                     className={cn(
                       'num font-bold',
-                      payment.signedAmount < 0 ? 'text-expense' : 'text-income'
+                      movesTo(payment)
+                        ? 'text-muted'
+                        : payment.signedAmount < 0
+                          ? 'text-expense'
+                          : 'text-income'
                     )}>
                     {payment.name} {formatPayment(payment.signedAmount)}
                   </span>

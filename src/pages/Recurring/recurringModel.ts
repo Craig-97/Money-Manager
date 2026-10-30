@@ -1,8 +1,11 @@
+import { forFreeToSpend } from '~/lib/accounts';
 import { formatMoney } from '~/lib/format';
 import { PayCycle } from '~/lib/payday';
 import {
+  activeRecurringCount,
   categoryLabel,
   isInCycle,
+  movesTo,
   PaymentSort,
   PER_MONTH,
   RecurringPayment,
@@ -83,20 +86,27 @@ export const categoriesUsed = (payments: RecurringPayment[]) =>
 /*
  * Totals for a list, the way the dashboard counts them: a monthly figure from weekly to monthly
  * payments, "≈" when some count at their average, quarterly and yearly payments as a yearly
- * figure, and what's still to pay before payday counting every date. Negative is money out.
+ * figure, and what's still to pay before payday counting every date. Negative is money out. Money
+ * moving between two accounts that count isn't spent, so it's left out, though it's counted.
  */
 export const listTotals = (
   payments: RecurringPayment[],
   { cycle, today }: { cycle: PayCycle; today: Date }
 ) => {
-  const summary = summarise({ payments, bankBalance: 0, monthlyIncome: 0, cycle, today });
+  const summary = summarise({
+    payments: forFreeToSpend(payments),
+    bankBalance: 0,
+    monthlyIncome: 0,
+    cycle,
+    today
+  });
   return {
     monthly: -summary.monthlyRecurring,
     annual: summary.annualRecurring,
     averaged: summary.averagedRecurring,
     stillToPay: summary.upcomingNet,
     inCycle: summary.inCycle.length,
-    count: summary.recurringCount
+    count: activeRecurringCount(payments)
   };
 };
 
@@ -121,8 +131,9 @@ export interface CategoryShare {
 export const categoryBreakdown = (payments: RecurringPayment[]) => {
   const byCategory = new Map<string, number>();
   for (const payment of payments) {
-    // Ended payments no longer cost anything
-    if (!payment.dueDate) continue;
+    // Ended payments no longer cost anything, and money moving between accounts that count isn't
+    // spent
+    if (!payment.dueDate || movesTo(payment)) continue;
     const yearly = payment.signedAmount * PER_MONTH[payment.frequency] * 12;
     byCategory.set(payment.category, (byCategory.get(payment.category) ?? 0) + yearly);
   }

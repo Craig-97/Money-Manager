@@ -26,7 +26,7 @@ export const useBalanceSettings = (budget: Budget) => {
   const accounts = toAccounts(budget.accounts, today);
   const monthlyIncome = parseMoney(income);
   const summary = summarise({
-    payments: forFreeToSpend(toPayments(budget, today), accounts),
+    payments: forFreeToSpend(toPayments(budget, today)),
     bankBalance: budget.bankBalance,
     monthlyIncome: monthlyIncome ?? budget.monthlyIncome,
     cycle,

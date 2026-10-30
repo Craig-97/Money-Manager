@@ -21,6 +21,7 @@ const perMonth = <span className="text-sm font-semibold tracking-normal text-mut
 /* Desktop: monthly income, recurring payments and what's left, side by side */
 export const MonthlyStats = ({ dashboard }: { dashboard: Dashboard }) => {
   const { summary, isEmpty, incomeEditor: editor, monthlyIncome, payday } = dashboard;
+  const { recurringCount } = dashboard;
   const openAdd = usePaymentDialogStore(s => s.openAdd);
   const overspent = summary.discretionary < 0;
   const averaged = summary.averagedRecurring;
@@ -91,8 +92,7 @@ export const MonthlyStats = ({ dashboard }: { dashboard: Dashboard }) => {
           </>
         ) : (
           <p className="text-[13px] font-medium text-muted">
-            {summary.recurringCount}{' '}
-            {summary.recurringCount === 1 ? 'recurring payment' : 'recurring payments'}
+            {recurringCount} {recurringCount === 1 ? 'recurring payment' : 'recurring payments'}
           </p>
         )}
       </div>

@@ -9,6 +9,7 @@ import { forFreeToSpend, paidIntoAccountOf, toAccounts } from '~/lib/accounts';
 import { getApiErrorMessage } from '~/lib/errors';
 import { notesByPayment, toNotes } from '~/lib/notes';
 import {
+  activeRecurringCount,
   canPay,
   cycleDays,
   DEFAULT_SORT,
@@ -40,7 +41,7 @@ export const useDashboard = (budget: Budget) => {
   const counted = accounts.filter(account => account.counts);
   const current = paidIntoAccountOf(accounts);
   const summary = summarise({
-    payments: forFreeToSpend(payments, accounts),
+    payments: forFreeToSpend(payments),
     bankBalance: budget.bankBalance,
     monthlyIncome: budget.monthlyIncome,
     cycle,
@@ -84,6 +85,8 @@ export const useDashboard = (budget: Budget) => {
     cycle,
     payments,
     summary,
+    // Every recurring payment, moves included, so the count doesn't look one short
+    recurringCount: activeRecurringCount(payments),
     paydayOverride,
     days: cycleDays(cycle, { today, payments }),
     isEmpty: payments.length === 0,

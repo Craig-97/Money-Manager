@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Budget } from '~/hooks/useBudget';
 import { usePayCycle } from '~/hooks/usePayCycle';
-import { forFreeToSpend, toAccounts } from '~/lib/accounts';
+import { forFreeToSpend } from '~/lib/accounts';
 import { daysBetween } from '~/lib/dates';
 import { summarise, toPayments } from '~/lib/payments';
 import { defaultSpend, monthRows, project, spendLimit } from '../forecastModel';
@@ -14,7 +14,7 @@ export const useForecast = (budget: Budget) => {
   const { today, cycle, holidays } = usePayCycle(budget.payday);
   const summary = summarise({
     // A payment into savings that count only moves money within the bank balance
-    payments: forFreeToSpend(toPayments(budget, today), toAccounts(budget.accounts, today)),
+    payments: forFreeToSpend(toPayments(budget, today)),
     bankBalance: budget.bankBalance,
     monthlyIncome: budget.monthlyIncome,
     cycle,

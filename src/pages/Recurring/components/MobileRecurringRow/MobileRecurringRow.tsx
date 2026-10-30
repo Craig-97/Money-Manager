@@ -1,16 +1,22 @@
 import { Repeat } from 'lucide-react';
 import { DebtLeft } from '~/components/debts';
 import { Checkbox, CheckboxHitArea } from '~/components/form/Checkbox';
-import { NoteChip, PaymentLetter, TimesDue } from '~/components/payments/PaymentParts';
+import {
+  NoteChip,
+  PaymentAmount,
+  PaymentLetter,
+  TimesDue
+} from '~/components/payments/PaymentParts';
 import { cn } from '~/lib/cn';
 import { isDebt } from '~/lib/debts';
-import { formatPayment } from '~/lib/format';
 import { PayCycle } from '~/lib/payday';
 import {
   categoryLabel,
   cycleStatus,
   dueInfo,
   FREQUENCY_LABELS,
+  intoText,
+  movesTo,
   RecurringPayment,
   renewalOf,
   renewalTag
@@ -22,22 +28,22 @@ import { RecurringTab } from '../../recurringModel';
 /*
  * The line under the name, as the dashboard's mobile rows have it: how often, then before payday
  * where it stands this cycle ("Weekly · 1 of 4 paid"), otherwise its renewal ("Monthly · Renews
- * 2 Feb 2027"), otherwise the savings it pays into ("Monthly · Into Cash ISA"), or its category
+ * 2 Feb 2027"), otherwise the account it pays into ("Monthly · Into Cash ISA"), or its category.
+ * Money moving between two accounts that count ends "· Not in totals", with no hover card to say so.
  */
 const subtitle = (
   payment: RecurringPayment,
-  {
-    tab,
-    cycle,
-    today,
-    into
-  }: { tab: RecurringTab; cycle: PayCycle; today: Date; into: string | null }
+  { tab, cycle, today }: { tab: RecurringTab; cycle: PayCycle; today: Date }
 ) => {
   const frequency = FREQUENCY_LABELS[payment.frequency];
-  if (tab === 'cycle') return `${frequency} · ${cycleStatus(payment, cycle).label}`;
-  const renewal = renewalOf(payment, today);
-  const detail = renewal ? renewalTag(renewal, today) : (into ?? categoryLabel(payment.category));
-  return `${frequency} · ${detail}`;
+  const renewal = tab === 'cycle' ? null : renewalOf(payment, today);
+  const detail =
+    tab === 'cycle'
+      ? cycleStatus(payment, cycle).label
+      : renewal
+        ? renewalTag(renewal, today)
+        : (intoText(payment) ?? categoryLabel(payment.category));
+  return `${frequency} · ${detail}${movesTo(payment) ? ' · Not in totals' : ''}`;
 };
 
 /*
@@ -51,7 +57,7 @@ export const MobileRecurringRow = ({
   payment: RecurringPayment;
   recurring: Recurring;
 }) => {
-  const { tab, today, cycle, selection, intoText } = recurring;
+  const { tab, today, cycle, selection } = recurring;
   const { selecting, toggle } = selection;
   const openSheet = usePaymentSheetStore(s => s.openFor);
   const notes = recurring.notesFor(payment.id);
@@ -100,18 +106,12 @@ export const MobileRecurringRow = ({
           ) : (
             <span className="mt-[3px] flex min-w-0 items-center gap-[5px] text-xs font-medium text-muted">
               <Repeat size={12} strokeWidth={2.25} className="shrink-0" aria-hidden="true" />
-              <span>{subtitle(payment, { tab, cycle, today, into: intoText(payment) })}</span>
+              <span>{subtitle(payment, { tab, cycle, today })}</span>
             </span>
           )}
         </span>
         <span className="shrink-0 text-right">
-          <span
-            className={cn(
-              'block num text-[15px] font-extrabold',
-              payment.signedAmount < 0 ? 'text-expense' : 'text-income'
-            )}>
-            {formatPayment(payment.signedAmount)}
-          </span>
+          <PaymentAmount payment={payment} hint={false} className="block text-[15px]" />
           <span
             className={cn(
               'mt-[3px] block text-xs',

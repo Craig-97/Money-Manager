@@ -3,7 +3,13 @@ import { Modal } from '~/components/ui/Modal';
 import { cn } from '~/lib/cn';
 import { formatMoney, formatPayment } from '~/lib/format';
 import { noteColor } from '~/lib/notes';
-import { categoryLabel, FREQUENCY_LABELS, formatShortDate } from '~/lib/payments';
+import {
+  categoryLabel,
+  FREQUENCY_LABELS,
+  formatShortDate,
+  intoText,
+  movesTo
+} from '~/lib/payments';
 import { PaymentLetter } from '../PaymentParts';
 import { SheetTile } from './components';
 import { usePaymentSheet } from './usePaymentSheet';
@@ -43,7 +49,8 @@ export const PaymentSheet = () => {
           </p>
           <p className="mt-0.5 text-xs font-semibold text-muted">
             {recurring ? `${FREQUENCY_LABELS[recurring.frequency]} · ` : 'One-off · '}
-            {categoryLabel(payment.category)}
+            {intoText(payment) ?? categoryLabel(payment.category)}
+            {movesTo(payment) ? ' · Not in totals' : null}
           </p>
         </div>
         {dates.length ? (

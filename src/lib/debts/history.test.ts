@@ -34,7 +34,8 @@ const card: DebtPayment = {
     paidOffThisCycle: 0
   },
   account: null,
-  paysInto: null
+  paysInto: null,
+  into: null
 };
 
 const record = (

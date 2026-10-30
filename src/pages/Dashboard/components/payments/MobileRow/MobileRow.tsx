@@ -1,14 +1,20 @@
 import { Repeat } from 'lucide-react';
 import { Checkbox, CheckboxHitArea } from '~/components/form/Checkbox';
-import { NoteChip, PaymentLetter, TimesDue } from '~/components/payments/PaymentParts';
+import {
+  NoteChip,
+  PaymentAmount,
+  PaymentLetter,
+  TimesDue
+} from '~/components/payments/PaymentParts';
 import { cn } from '~/lib/cn';
-import { formatPayment } from '~/lib/format';
 import { PayCycle } from '~/lib/payday';
 import {
   categoryLabel,
   cycleStatus,
   dueInfo,
   FREQUENCY_LABELS,
+  intoText,
+  movesTo,
   Payment,
   renewalNote
 } from '~/lib/payments';
@@ -16,17 +22,27 @@ import { usePaymentSheetStore } from '~/state/paymentSheet';
 import { PaymentTab } from '../../../dashboardModel';
 import { Dashboard } from '../../../hooks';
 
-const metaFor = (
-  payment: Payment,
-  { tab, cycle, today }: { tab: PaymentTab; cycle: PayCycle; today: Date }
-) => {
+interface MetaOptions {
+  tab: PaymentTab;
+  cycle: PayCycle;
+  today: Date;
+}
+
+/*
+ * The line under the name. "Into Joint bills" takes the category's place, and money moving between
+ * two accounts that count ends "· Not in totals", with no hover card on a phone to say so.
+ */
+const metaFor = (payment: Payment, { tab, cycle, today }: MetaOptions) => {
+  const into = intoText(payment);
   const renewal = renewalNote(payment, today);
-  const category = categoryLabel(payment.category) + (renewal ? ` · ${renewal}` : '');
-  if (tab === 'recurring' && payment.kind === 'recurring') {
-    return `${FREQUENCY_LABELS[payment.frequency]} · ${cycleStatus(payment, cycle).label}`;
-  }
-  if (tab === 'oneOff') return `${payment.type === 'INCOME' ? 'Income' : 'Expense'} · ${category}`;
-  return `${payment.kind === 'recurring' ? 'Recurring' : 'One-off'} · ${category}`;
+  const category = (into ?? categoryLabel(payment.category)) + (renewal ? ` · ${renewal}` : '');
+  const meta =
+    tab === 'recurring' && payment.kind === 'recurring'
+      ? `${FREQUENCY_LABELS[payment.frequency]} · ${cycleStatus(payment, cycle).label}`
+      : tab === 'oneOff'
+        ? `${payment.type === 'INCOME' ? 'Income' : 'Expense'} · ${category}`
+        : `${payment.kind === 'recurring' ? 'Recurring' : 'One-off'} · ${category}`;
+  return movesTo(payment) ? `${meta} · Not in totals` : meta;
 };
 
 export const MobileRow = ({ payment, dashboard }: { payment: Payment; dashboard: Dashboard }) => {
@@ -82,13 +98,7 @@ export const MobileRow = ({ payment, dashboard }: { payment: Payment; dashboard:
           </span>
         </span>
         <span className="shrink-0 text-right">
-          <span
-            className={cn(
-              'block num text-[15px] font-extrabold',
-              payment.signedAmount < 0 ? 'text-expense' : 'text-income'
-            )}>
-            {formatPayment(payment.signedAmount)}
-          </span>
+          <PaymentAmount payment={payment} hint={false} className="block text-[15px]" />
           <span
             className={cn(
               'mt-[3px] block text-xs',

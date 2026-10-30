@@ -106,6 +106,37 @@ const withSavings = (): FakeBudget => {
   };
 };
 
+// A top-up into a joint account that counts too, so the money stays in the bank balance
+const withJoint = (): FakeBudget => {
+  const data = budget();
+  return {
+    ...data,
+    accounts: [
+      {
+        id: 'joint',
+        name: 'Joint bills',
+        kind: 'SPENDING',
+        balance: 2105,
+        counts: true,
+        interestRate: null,
+        purpose: null,
+        balanceUpdatedAt: apiDate('2026-09-30')
+      }
+    ],
+    recurringPayments: [
+      ...data.recurringPayments,
+      recurring({
+        id: 'joint-top-up',
+        name: 'Joint bills top-up',
+        amount: 600,
+        category: 'BILLS',
+        firstPaymentDate: apiDate('2026-01-04'),
+        paysInto: 'joint'
+      })
+    ]
+  };
+};
+
 const renderRecurring = (data = budget()) => {
   const api = createFakeApi({ budget: data });
   return { ...renderApp({ route: '/recurring', api }), api };
@@ -118,7 +149,7 @@ describe('recurring page', () => {
     const summary = await screen.findByRole('region', { name: 'Summary' });
     // £20 + £21 + £7.50 a month, and £50 a week at its monthly average
     expect(summary).toHaveTextContent('About £265.17 /mo');
-    expect(summary).toHaveTextContent('+ £612.00/yr annual · 5 recurring payments');
+    expect(summary).toHaveTextContent('5 recurring payments · + £612.00/yr annual');
     // Netflix today, the cleaner four times, home insurance, car insurance and breakdown cover
     expect(summary).toHaveTextContent('£860.505 payments by Fri 30 Oct');
     expect(summary).toHaveTextContent('Next: Car insurance, Sat 24 Oct');
@@ -227,6 +258,48 @@ describe('recurring page', () => {
     )!;
     expect(row).toHaveTextContent('Into Cash ISA');
     expect(row).not.toHaveTextContent('Subscription');
+  });
+
+  it('leaves money moved between accounts that count out of the totals, as the dashboard does', async () => {
+    const { user } = renderRecurring(withJoint());
+
+    const summary = await screen.findByRole('region', { name: 'Summary' });
+    // The same as without the top-up, which is still counted as a payment
+    expect(summary).toHaveTextContent('About £265.17 /mo');
+    expect(summary).toHaveTextContent('6 recurring payments · + £612.00/yr annual');
+    expect(summary).toHaveTextContent('£860.505 payments by Fri 30 Oct');
+    // Nor is it spending by category: Bills is just the cleaner, £50 a week
+    const categories = screen.getByRole('region', { name: 'By category' });
+    expect(categories).toHaveTextContent('£2,600.00');
+    expect(categories).not.toHaveTextContent('£9,800.00');
+
+    const row = (await screen.findByRole('button', { name: 'Edit Joint bills top-up' })).closest(
+      '[role=row]'
+    ) as HTMLElement;
+    expect(row).toHaveTextContent('Into Joint bills');
+    const amount = within(row).getByText('£600.00');
+    expect(amount).toHaveClass('text-muted');
+    await user.hover(amount);
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(
+      "Moves to Joint billsBoth accounts count, so it isn't in the totals"
+    );
+  });
+
+  it('shows the same monthly figure as the dashboard', async () => {
+    const api = createFakeApi({ budget: withJoint() });
+    const { unmount } = renderApp({ route: '/recurring', api });
+    const summary = await screen.findByRole('region', { name: 'Summary' });
+    expect(summary).toHaveTextContent('About £265.17 /mo');
+    unmount();
+
+    renderApp({ route: '/dashboard', api });
+    const monthly = await screen.findByRole('region', { name: 'Monthly money' });
+    expect(monthly).toHaveTextContent('About £265.17 /mo');
+    expect(monthly).toHaveTextContent('6 recurring payments');
+    // Its day on the cycle bar is grey, as it neither goes out nor comes in
+    const day = screen.getAllByRole('button', { name: /Joint bills top-up/ })[0];
+    expect(day.firstElementChild).toHaveClass('bg-muted');
+    expect(screen.getByText('Moved')).toBeInTheDocument();
   });
 
   it('sets a renewal on a payment', async () => {
@@ -363,6 +436,21 @@ describe('recurring page on mobile', () => {
     expect(await screen.findByRole('button', { name: 'ISA top-up' })).toHaveTextContent(
       'Monthly · Into Cash ISA'
     );
+  });
+
+  it('says money moved between accounts that count is not in the totals', async () => {
+    const { user } = renderRecurring(withJoint());
+
+    const row = await screen.findByRole('button', { name: 'Joint bills top-up' });
+    expect(row).toHaveTextContent('Monthly · Into Joint bills · Not in totals');
+    expect(within(row).getByText('£600.00')).toHaveClass('text-muted');
+    expect(within(row).getByText('J')).toHaveClass('text-muted');
+
+    // Its quick sheet reads the same payment, so it's grey there too
+    await user.click(row);
+    const sheet = await screen.findByRole('dialog', { name: 'Joint bills top-up' });
+    expect(within(sheet).getByText('J')).toHaveClass('text-muted');
+    expect(sheet).toHaveTextContent('Monthly · Into Joint bills · Not in totals');
   });
 
   it('steps the sort through date, amount and name', async () => {

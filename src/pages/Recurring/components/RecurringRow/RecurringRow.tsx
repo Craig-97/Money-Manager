@@ -4,6 +4,7 @@ import { Checkbox, CheckboxHitArea } from '~/components/form/Checkbox';
 import {
   DueCell,
   NoteChip,
+  PaymentAmount,
   PaymentLetter,
   PaymentMenu,
   RenewalTag,
@@ -12,8 +13,14 @@ import {
 } from '~/components/payments/PaymentParts';
 import { cn } from '~/lib/cn';
 import { isDebt } from '~/lib/debts';
-import { formatPayment } from '~/lib/format';
-import { categoryLabel, dueInfo, RecurringPayment, renewalOf, scheduleText } from '~/lib/payments';
+import {
+  categoryLabel,
+  dueInfo,
+  intoText,
+  RecurringPayment,
+  renewalOf,
+  scheduleText
+} from '~/lib/payments';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
 import { rowClasses } from './rowClasses';
 import { Recurring } from '../../hooks';
@@ -25,7 +32,7 @@ export const RecurringRow = ({
   payment: RecurringPayment;
   recurring: Recurring;
 }) => {
-  const { tab, today, cycle, selection, actions, intoText } = recurring;
+  const { tab, today, cycle, selection, actions } = recurring;
   const notes = recurring.notesFor(payment.id);
   const openEdit = usePaymentDialogStore(s => s.openEdit);
   // Before payday is about what's left to pay, so it shows where each payment stands this cycle.
@@ -96,13 +103,8 @@ export const RecurringRow = ({
           <span className="text-sm text-faint">—</span>
         )}
       </span>
-      <span
-        role="cell"
-        className={cn(
-          'text-right num text-[15px] font-extrabold',
-          payment.signedAmount < 0 ? 'text-expense' : 'text-income'
-        )}>
-        {formatPayment(payment.signedAmount)}
+      <span role="cell" className="text-right">
+        <PaymentAmount payment={payment} className="text-[15px]" />
       </span>
       <span role="cell" className="flex justify-end">
         <PaymentMenu

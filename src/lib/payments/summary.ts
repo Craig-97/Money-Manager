@@ -1,7 +1,7 @@
 import { addDays, daysBetween, isSameDay, toIsoDate } from '~/lib/dates';
 import { PayCycle } from '~/lib/payday';
 import { datesDue, isInCycle } from './cycle';
-import { Payment } from './payments';
+import { movesTo, Payment } from './payments';
 import { PER_MONTH } from './recurrence';
 
 const roundPence = (amount: number) => Math.round(amount * 100) / 100;
@@ -78,7 +78,16 @@ export type Summary = ReturnType<typeof summarise>;
 
 // 'ghost' days run on from a payday the user brought forward to the date it usually falls
 export type CycleDayKind =
-  'past' | 'today' | 'income' | 'expense' | 'payday' | 'future' | 'ghost' | 'ghostPayday';
+  | 'past'
+  | 'today'
+  | 'income'
+  | 'expense'
+  // Only money moving between accounts that count, which isn't spent
+  | 'move'
+  | 'payday'
+  | 'future'
+  | 'ghost'
+  | 'ghostPayday';
 
 export interface CycleDay {
   date: Date;
@@ -114,10 +123,14 @@ export const cycleDays = (
       return { date, kind, payments: [], isLastPayday: false };
     }
     const dayPayments = due.get(toIsoDate(date)) ?? [];
-    const net = dayPayments.reduce((sum, p) => sum + p.signedAmount, 0);
+    // Money moving between accounts that count goes neither out nor in, so it doesn't colour the day
+    const counted = dayPayments.filter(p => !movesTo(p));
+    const net = counted.reduce((sum, p) => sum + p.signedAmount, 0);
 
     let kind: CycleDayKind = date < today ? 'past' : isSameDay(date, today) ? 'today' : 'future';
-    if (date > today && dayPayments.length) kind = net < 0 ? 'expense' : 'income';
+    if (date > today && dayPayments.length) {
+      kind = !counted.length ? 'move' : net < 0 ? 'expense' : 'income';
+    }
     if (index === total) kind = 'payday';
 
     return { date, kind, payments: dayPayments, isLastPayday: index === 0 };
