@@ -1,5 +1,7 @@
 import { InfoNote } from '~/components/feedback/InfoNote';
 import { Tile } from '~/components/ui/Tile';
+import { MEDIA } from '~/constants';
+import { useMediaQuery } from '~/hooks/useMediaQuery';
 import { accountLetter } from '~/lib/accounts';
 import { formatBalance, formatMoney } from '~/lib/format';
 import { formatShortDate } from '~/lib/payments';
@@ -21,6 +23,8 @@ export const BeforePaydayContent = ({
   isDesktop: boolean;
 }) => {
   const { beforePayday, today, several } = model;
+  // Below the wide breakpoint the sum's three columns would squeeze the name to a letter a line
+  const wide = useMediaQuery(MEDIA.wide);
   const savings = beforePayday.savings;
   const savingsAtPayday = savings.reduce((total, row) => total + row.left, 0);
 
@@ -49,6 +53,7 @@ export const BeforePaydayContent = ({
                 today={today}
                 several={several}
                 isDesktop
+                across={wide}
               />
             ))}
           </div>
@@ -71,6 +76,7 @@ export const BeforePaydayContent = ({
                 today={today}
                 several={several}
                 isDesktop={false}
+                across={false}
               />
             ))}
           </section>

@@ -300,6 +300,59 @@ describe('several accounts to spend from', () => {
     );
   });
 
+  it('leaves an account with nothing going out as a plain row, with nothing to open', async () => {
+    // The hotel deposit's gone, so nothing comes out of the holiday account before payday
+    const { user } = renderAccounts({ ...several(), oneOffPayments: [] });
+
+    await user.click(await screen.findByRole('radio', { name: 'Before payday' }));
+
+    const list = await screen.findByRole('region', { name: /Spending accounts/ });
+    expect(within(list).getByText('Holiday spending')).toBeInTheDocument();
+    expect(within(list).getByText('Nothing goes out before payday')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Holiday spending/ })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('region', { name: 'Holiday spending before payday' })
+    ).not.toBeInTheDocument();
+    // An account with payments still opens
+    expect(screen.getByRole('button', { name: /Joint bills/ })).toHaveAttribute(
+      'aria-expanded',
+      'false'
+    );
+  });
+
+  it('says an account is already below £0, with nothing going out', async () => {
+    const data = { ...several(), oneOffPayments: [] };
+    data.accounts = data.accounts!.map(account =>
+      account.id === 'holiday' ? { ...account, balance: -40 } : account
+    );
+    const { user } = renderAccounts(data);
+
+    await user.click(await screen.findByRole('radio', { name: 'Before payday' }));
+
+    const list = await screen.findByRole('region', { name: /Spending accounts/ });
+    expect(within(list).getByText('Already below £0 (−£40.00)')).toBeInTheDocument();
+    expect(within(list).queryByText('Nothing goes out before payday')).not.toBeInTheDocument();
+  });
+
+  it('warns when an account is already below £0 and more goes out', async () => {
+    const data = several();
+    data.accounts = data.accounts!.map(account =>
+      account.id === 'holiday' ? { ...account, balance: -40 } : account
+    );
+    const { user } = renderAccounts(data);
+
+    await user.click(await screen.findByRole('radio', { name: 'Before payday' }));
+
+    const holiday = await screen.findByRole('button', { name: /Holiday spending/ });
+    expect(holiday).toHaveTextContent('Already below £0, down to −£260.00 on Fri 23 Oct');
+    expect(holiday).toHaveAttribute('aria-expanded', 'true');
+    expect(
+      screen.getByRole('region', { name: 'Holiday spending before payday' })
+    ).toHaveTextContent(
+      'Already below £0 (−£40.00). Move money in to cover it before Fri 23 Oct, when it goes down to −£260.00.'
+    );
+  });
+
   it('keeps a spending account out of free to spend, but not where you get paid', async () => {
     const { user, api } = renderAccounts(several());
 
