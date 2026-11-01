@@ -529,7 +529,7 @@ describe('debts on the recurring page', () => {
   it('shows each debt with what is left, and on mobile a card for them all', async () => {
     renderDebts('/recurring');
 
-    const row = (await screen.findByRole('button', { name: 'Edit Credit card' })).closest(
+    const row = (await screen.findByRole('button', { name: 'Credit card' })).closest(
       '[role="row"]'
     )!;
     expect(row).toHaveTextContent('£2,340 left');

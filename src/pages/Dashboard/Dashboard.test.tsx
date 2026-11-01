@@ -9,6 +9,7 @@ import {
   FakeBudget,
   fakeRecord
 } from '~/test/fakeApi';
+import { editFromRow } from '~/test/paymentRow';
 import { renderApp } from '~/test/renderApp';
 import { resetViewport, setViewportWidth } from '~/test/viewport';
 
@@ -95,7 +96,7 @@ describe('dashboard', () => {
     // It comes off the balance and out of what's still due, so free to spend stays the same
     expect(within(freeToSpend()).getByText('£980.00')).toBeInTheDocument();
     expect(within(freeToSpend()).getByText('£1,030.00')).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Edit Netflix' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Netflix' })).not.toBeInTheDocument();
   });
 
   it('settles a one-off payment, keeping it marked paid on the one-off tab until payday', async () => {
@@ -114,7 +115,7 @@ describe('dashboard', () => {
     expect(within(freeToSpend()).getByText('£1,050.00')).toBeInTheDocument();
     // Nothing left to pay, so it's gone from upcoming
     await waitFor(() =>
-      expect(screen.queryByRole('button', { name: 'Edit Refund' })).not.toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'Refund' })).not.toBeInTheDocument()
     );
 
     await user.click(screen.getByRole('radio', { name: /One-off/ }));
@@ -155,13 +156,13 @@ describe('dashboard', () => {
       }
     ]);
     await user.click(screen.getByRole('radio', { name: /One-off/ }));
-    expect(screen.getByRole('button', { name: 'Edit Concert' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Concert' })).toBeInTheDocument();
   });
 
   it('closes an edit without sending anything when nothing changed', async () => {
     const { user, api } = renderDashboard();
 
-    await user.click(await screen.findByRole('button', { name: 'Edit Netflix' }));
+    await editFromRow(user, 'Netflix');
     const dialog = await screen.findByRole('dialog', { name: 'Edit recurring payment' });
     await user.click(within(dialog).getByRole('button', { name: 'Save changes' }));
 
@@ -176,7 +177,7 @@ describe('dashboard', () => {
   it('skips a recurring payment for this cycle without touching the balance', async () => {
     const { user, api } = renderDashboard();
 
-    await user.click(await screen.findByRole('button', { name: 'Edit Netflix' }));
+    await editFromRow(user, 'Netflix');
     const dialog = await screen.findByRole('dialog', { name: 'Edit recurring payment' });
     await user.click(within(dialog).getByRole('button', { name: 'Skip this cycle' }));
 
@@ -367,7 +368,7 @@ describe('a payment due more than once before payday', () => {
       { input: { budgetId: 'budget-1', recurringPaymentIds: ['cleaner'], until: '2026-10-30' } }
     ]);
     await waitFor(() =>
-      expect(screen.queryByRole('button', { name: 'Edit Cleaner' })).not.toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'Cleaner' })).not.toBeInTheDocument()
     );
     expect(api.db.budget?.bankBalance).toBe(1000);
   });

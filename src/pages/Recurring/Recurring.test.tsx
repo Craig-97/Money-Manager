@@ -7,6 +7,7 @@ import {
   FakeBudget,
   FakeRecurringPayment
 } from '~/test/fakeApi';
+import { editFromRow } from '~/test/paymentRow';
 import { renderApp } from '~/test/renderApp';
 import { resetViewport, setViewportWidth } from '~/test/viewport';
 
@@ -177,7 +178,7 @@ describe('recurring page', () => {
 
     expect(screen.getByRole('radio', { name: /Renewals/ })).toBeChecked();
     const table = screen.getByRole('table', { name: 'Recurring payments' });
-    expect(within(table).queryByRole('button', { name: 'Edit Netflix' })).not.toBeInTheDocument();
+    expect(within(table).queryByRole('button', { name: 'Netflix' })).not.toBeInTheDocument();
     // Under its column heading without "Renews", and in full under the name for narrower screens
     expect(within(table).getAllByText('In 22 days')).not.toHaveLength(0);
     expect(within(table).getAllByText('Renews in 22 days')).not.toHaveLength(0);
@@ -202,9 +203,9 @@ describe('recurring page', () => {
     await user.type(await screen.findByRole('searchbox', { name: 'Search payments' }), 'insur');
 
     const table = screen.getByRole('table', { name: 'Recurring payments' });
-    expect(within(table).getByRole('button', { name: 'Edit Home insurance' })).toBeInTheDocument();
-    expect(within(table).getByRole('button', { name: 'Edit Car insurance' })).toBeInTheDocument();
-    expect(within(table).queryByRole('button', { name: 'Edit Netflix' })).not.toBeInTheDocument();
+    expect(within(table).getByRole('button', { name: 'Home insurance' })).toBeInTheDocument();
+    expect(within(table).getByRole('button', { name: 'Car insurance' })).toBeInTheDocument();
+    expect(within(table).queryByRole('button', { name: 'Netflix' })).not.toBeInTheDocument();
 
     await user.type(screen.getByRole('searchbox', { name: 'Search payments' }), 'x');
     expect(within(table).getByText('No payments match')).toBeInTheDocument();
@@ -216,9 +217,11 @@ describe('recurring page', () => {
     await user.click(await screen.findByRole('button', { name: 'Sort: Date ↑' }));
     await user.click(await screen.findByRole('menuitemradio', { name: 'Amount' }));
 
+    // Each row's first button is its name
     const names = within(screen.getByRole('table', { name: 'Recurring payments' }))
-      .getAllByRole('button', { name: /^Edit / })
-      .map(button => button.textContent);
+      .getAllByRole('row')
+      .slice(1)
+      .map(row => within(row).getAllByRole('button')[0].textContent);
     expect(names).toEqual([
       'Car insurance',
       'Cleaner',
@@ -253,9 +256,7 @@ describe('recurring page', () => {
   it('says which savings account a payment goes into, in place of its category', async () => {
     renderRecurring(withSavings());
 
-    const row = (await screen.findByRole('button', { name: 'Edit ISA top-up' })).closest(
-      '[role=row]'
-    )!;
+    const row = (await screen.findByRole('button', { name: 'ISA top-up' })).closest('[role=row]')!;
     expect(row).toHaveTextContent('Into Cash ISA');
     expect(row).not.toHaveTextContent('Subscription');
   });
@@ -273,7 +274,7 @@ describe('recurring page', () => {
     expect(categories).toHaveTextContent('£2,600.00');
     expect(categories).not.toHaveTextContent('£9,800.00');
 
-    const row = (await screen.findByRole('button', { name: 'Edit Joint bills top-up' })).closest(
+    const row = (await screen.findByRole('button', { name: 'Joint bills top-up' })).closest(
       '[role=row]'
     ) as HTMLElement;
     expect(row).toHaveTextContent('Into Joint bills');
@@ -305,7 +306,7 @@ describe('recurring page', () => {
   it('sets a renewal on a payment', async () => {
     const { user, api } = renderRecurring();
 
-    await user.click(await screen.findByRole('button', { name: 'Edit Netflix' }));
+    await editFromRow(user, 'Netflix');
     const dialog = await screen.findByRole('dialog', { name: 'Edit recurring payment' });
     await user.click(within(dialog).getByRole('radio', { name: 'Renews' }));
 
@@ -334,7 +335,7 @@ describe('recurring page', () => {
   it('asks about a renewal that has gone by, and moves it on a year', async () => {
     const { user, api } = renderRecurring();
 
-    await user.click(await screen.findByRole('button', { name: 'Edit Breakdown cover' }));
+    await editFromRow(user, 'Breakdown cover');
     const dialog = await screen.findByRole('dialog', { name: 'Edit recurring payment' });
     expect(
       within(dialog).getByText(
@@ -358,7 +359,7 @@ describe('recurring page', () => {
   it('stops a payment that no longer renews after its last payment before the renewal', async () => {
     const { user, api } = renderRecurring();
 
-    await user.click(await screen.findByRole('button', { name: 'Edit Breakdown cover' }));
+    await editFromRow(user, 'Breakdown cover');
     const dialog = await screen.findByRole('dialog', { name: 'Edit recurring payment' });
     await user.click(within(dialog).getByRole('button', { name: 'No longer renews' }));
     await user.click(within(dialog).getByRole('button', { name: 'Save changes' }));
@@ -373,7 +374,7 @@ describe('recurring page', () => {
   it('only offers keeping going or stopping for a yearly payment', async () => {
     const { user } = renderRecurring();
 
-    await user.click(await screen.findByRole('button', { name: 'Edit Car insurance' }));
+    await editFromRow(user, 'Car insurance');
     const dialog = await screen.findByRole('dialog', { name: 'Edit recurring payment' });
 
     expect(within(dialog).queryByRole('radio', { name: 'Renews' })).not.toBeInTheDocument();

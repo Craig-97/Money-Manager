@@ -21,7 +21,7 @@ import {
   renewalOf,
   scheduleText
 } from '~/lib/payments';
-import { usePaymentDialogStore } from '~/state/paymentDialog';
+import { usePaymentSheetStore } from '~/state/paymentSheet';
 import { rowClasses } from './rowClasses';
 import { Recurring } from '../../hooks';
 
@@ -34,7 +34,7 @@ export const RecurringRow = ({
 }) => {
   const { tab, today, cycle, selection, actions } = recurring;
   const notes = recurring.notesFor(payment.id);
-  const openEdit = usePaymentDialogStore(s => s.openEdit);
+  const openSheet = usePaymentSheetStore(s => s.openFor);
   // Before payday is about what's left to pay, so it shows where each payment stands this cycle.
   // Renewals have their own tab.
   const beforePayday = tab === 'cycle';
@@ -61,8 +61,9 @@ export const RecurringRow = ({
           <div className="flex items-center gap-2 text-[15px] font-bold">
             <button
               type="button"
-              aria-label={`Edit ${payment.name}`}
-              onClick={() => openEdit('recurring', { paymentId: payment.id })}
+              // Opens the payment: when it's due, its notes and quick actions, with Edit payment
+              aria-haspopup="dialog"
+              onClick={() => openSheet(payment.id)}
               className="-my-[11px] min-w-0 cursor-pointer truncate rounded-lg py-[11px] text-left leading-[22px] hover:text-accent-text hover:underline hover:underline-offset-3">
               {payment.name}
             </button>

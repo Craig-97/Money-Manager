@@ -8,6 +8,7 @@ import {
   FakeBudget,
   FakeRecurringPayment
 } from '~/test/fakeApi';
+import { editFromRow } from '~/test/paymentRow';
 import { renderApp } from '~/test/renderApp';
 import { setViewportWidth } from '~/test/viewport';
 
@@ -390,7 +391,7 @@ describe('editing a debt', () => {
   it("starts with the debt's figures and sends a new balance", async () => {
     const { user, api } = renderAt('/recurring');
 
-    await user.click(await screen.findByRole('button', { name: 'Edit Car finance' }));
+    await editFromRow(user, 'Car finance');
     const dialog = await screen.findByRole('dialog', { name: 'Edit recurring payment' });
 
     expect(within(dialog).getByRole('switch', { name: 'Track as a debt' })).toBeChecked();
@@ -416,7 +417,7 @@ describe('editing a debt', () => {
   it('stops tracking it when the switch is turned off', async () => {
     const { user, api } = renderAt('/recurring');
 
-    await user.click(await screen.findByRole('button', { name: 'Edit Car finance' }));
+    await editFromRow(user, 'Car finance');
     const dialog = await screen.findByRole('dialog', { name: 'Edit recurring payment' });
     await user.click(within(dialog).getByRole('switch', { name: 'Track as a debt' }));
 
@@ -432,7 +433,7 @@ describe('editing a debt', () => {
   it("doesn't send anything for a payment that was never a debt", async () => {
     const { user, api } = renderAt('/recurring');
 
-    await user.click(await screen.findByRole('button', { name: 'Edit Mortgage' }));
+    await editFromRow(user, 'Mortgage');
     const dialog = await screen.findByRole('dialog', { name: 'Edit recurring payment' });
     await user.clear(within(dialog).getByLabelText('Amount'));
     await user.type(within(dialog).getByLabelText('Amount'), '800');
@@ -473,13 +474,13 @@ describe('closing the payment dialog', () => {
   it('starts afresh each time it opens', async () => {
     const { user } = renderAt('/recurring');
 
-    await user.click(await screen.findByRole('button', { name: 'Edit Car finance' }));
+    await editFromRow(user, 'Car finance');
     const dialog = await screen.findByRole('dialog', { name: 'Edit recurring payment' });
     await user.clear(within(dialog).getByLabelText('Name'));
     await user.type(within(dialog).getByLabelText('Name'), 'Not saved');
     await user.click(within(dialog).getByRole('button', { name: 'Cancel' }));
 
-    await user.click(await screen.findByRole('button', { name: 'Edit Car finance' }));
+    await editFromRow(user, 'Car finance');
     expect(
       within(await screen.findByRole('dialog', { name: 'Edit recurring payment' })).getByLabelText(
         'Name'

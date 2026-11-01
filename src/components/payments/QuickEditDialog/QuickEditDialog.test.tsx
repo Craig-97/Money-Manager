@@ -172,6 +172,22 @@ describe('quick edits on desktop', () => {
   });
 });
 
+describe('a payment opened from its row on desktop', () => {
+  it('shows the same quick view as mobile, which quick edits go back to', async () => {
+    const { user } = renderDashboard();
+
+    await user.click(await screen.findByRole('button', { name: 'Car loan' }));
+    const view = await screen.findByRole('dialog', { name: 'Car loan' });
+    expect(view).toHaveTextContent('£245.00 · Mon 26 Oct');
+    expect(within(view).getByRole('button', { name: 'Edit payment' })).toBeInTheDocument();
+    await user.click(within(view).getByRole('button', { name: 'Change date' }));
+
+    const dialog = await screen.findByRole('dialog', { name: 'Change date' });
+    await user.click(within(dialog).getByRole('button', { name: 'Back to Car loan' }));
+    expect(await screen.findByRole('dialog', { name: 'Car loan' })).toBeInTheDocument();
+  });
+});
+
 describe('quick edits on mobile', () => {
   beforeEach(() => setViewportWidth(390));
 

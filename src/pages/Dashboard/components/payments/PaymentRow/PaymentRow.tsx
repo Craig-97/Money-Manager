@@ -21,7 +21,7 @@ import {
   renewalNote,
   scheduleText
 } from '~/lib/payments';
-import { usePaymentDialogStore } from '~/state/paymentDialog';
+import { usePaymentSheetStore } from '~/state/paymentSheet';
 import { Dashboard } from '../../../hooks';
 import { rowClasses } from '../rowClasses';
 
@@ -33,7 +33,7 @@ interface RowProps {
 export const PaymentRow = ({ payment, dashboard }: RowProps) => {
   const { tab, today, cycle, selection, actions } = dashboard;
   const notes = dashboard.notesFor(payment.id);
-  const openEdit = usePaymentDialogStore(s => s.openEdit);
+  const openSheet = usePaymentSheetStore(s => s.openFor);
   const due = dueInfo(payment, { today, cycle });
   const isSelected = selection.selected.has(payment.id);
   const checkboxId = `payment-${tab}-${payment.id}`;
@@ -61,8 +61,9 @@ export const PaymentRow = ({ payment, dashboard }: RowProps) => {
           <div className="flex items-center gap-2 text-[15px] font-bold">
             <button
               type="button"
-              aria-label={`Edit ${payment.name}`}
-              onClick={() => openEdit(payment.kind, { paymentId: payment.id })}
+              // Opens the payment: when it's due, its notes and quick actions, with Edit payment
+              aria-haspopup="dialog"
+              onClick={() => openSheet(payment.id)}
               className="-my-[11px] min-w-0 cursor-pointer truncate rounded-lg py-[11px] text-left leading-[22px] hover:text-accent-text hover:underline hover:underline-offset-3">
               {payment.name}
             </button>

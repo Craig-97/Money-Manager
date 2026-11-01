@@ -20,7 +20,7 @@ export const SheetTile = ({ icon, label, detail, onClick }: SheetTileProps) => (
       detail ? `${label}, ${detail.charAt(0).toLowerCase()}${detail.slice(1)}` : undefined
     }
     onClick={onClick}
-    className="flex min-h-[76px] cursor-pointer flex-col items-start justify-center gap-2 rounded-[20px] border border-border bg-surface-2 px-3.5 py-3 text-left text-sm font-extrabold transition-colors odd:last:col-span-2 hover:border-border-strong">
+    className="flex min-h-[76px] cursor-pointer flex-col items-start justify-start gap-2 rounded-[20px] border border-border bg-surface-2 px-3.5 py-3 text-left text-sm font-extrabold transition-colors odd:last:col-span-2 hover:border-border-strong">
     <span aria-hidden="true" className="text-accent-text">
       {icon}
     </span>
