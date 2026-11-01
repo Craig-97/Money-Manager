@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { OverpaymentDialog, PaymentsDialog, PaySoonerDialog } from '~/components/debts';
 import { SegmentedControl } from '~/components/ui/SegmentedControl';
 import { Tile } from '~/components/ui/Tile';
 import { MEDIA } from '~/constants';
@@ -50,18 +49,6 @@ export const DebtsContent = ({ budget }: { budget: Budget }) => {
       className={isDesktop ? undefined : '[&>button]:h-11'}
     />
   );
-  const dialogs = (
-    <>
-      <OverpaymentDialog debts={debts.debts} onOverpay={debts.actions.overpay} />
-      <PaymentsDialog
-        debts={debts.debts}
-        today={debts.today}
-        onUndoOverpayment={(id, name) => void debts.actions.undoOverpayment(id, name)}
-      />
-      <PaySoonerDialog debts={debts.debts} today={debts.today} onPayMore={debts.actions.payMore} />
-    </>
-  );
-
   return isDesktop ? (
     <section aria-label="Debts" className="flex flex-col gap-4">
       <div className="grid items-stretch gap-4 min-[68.75rem]:grid-cols-[minmax(0,1.65fr)_minmax(0,1fr)]">
@@ -82,7 +69,6 @@ export const DebtsContent = ({ budget }: { budget: Budget }) => {
       ) : (
         <PayoffPlanTile debts={debts} plan={plan} />
       )}
-      {dialogs}
     </section>
   ) : (
     <section aria-label="Debts" className="flex flex-col gap-3.5">
@@ -94,7 +80,6 @@ export const DebtsContent = ({ budget }: { budget: Budget }) => {
       ) : (
         <MobilePayoffPlan debts={debts} plan={plan} />
       )}
-      {dialogs}
     </section>
   );
 };

@@ -1,6 +1,7 @@
 import { useShallow } from 'zustand/react/shallow';
 import { Button } from '~/components/ui/Button';
 import { Modal } from '~/components/ui/Modal';
+import { useBackToDebt } from '~/hooks/useBackToDebt';
 import { usePaySooner } from '~/hooks/usePaySooner';
 import { DebtPayment } from '~/lib/debts';
 import { useDebtDialogStore } from '~/state/debtDialog';
@@ -13,8 +14,8 @@ interface PaySoonerDialogProps {
 }
 
 /*
- * Desktop: some extra a month on one debt, and what it does to when it clears and the interest on
- * it. Nothing changes until the new payment is applied.
+ * Some extra a month on one debt, and what it does to when it clears and the interest on it. A
+ * dialog on desktop, a sheet on a phone. Nothing changes until the new payment is applied.
  */
 export const PaySoonerDialog = ({ debts, today, onPayMore }: PaySoonerDialogProps) => {
   const { open, debtId, opened, close } = useDebtDialogStore(
@@ -36,6 +37,7 @@ export const PaySoonerDialog = ({ debts, today, onPayMore }: PaySoonerDialogProp
     formKey: String(opened)
   });
 
+  const back = useBackToDebt(debtId);
   if (!sooner) return null;
 
   return (
@@ -43,6 +45,8 @@ export const PaySoonerDialog = ({ debts, today, onPayMore }: PaySoonerDialogProp
       open={open}
       onOpenChange={next => (next ? undefined : close())}
       title={`Pay ${sooner.debt.name} sooner`}
+      onBack={back}
+      backLabel={`Back to ${sooner.debt.name}`}
       footer={
         <>
           <span className="flex-1" />

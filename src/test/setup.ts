@@ -5,6 +5,7 @@ import { afterEach, vi } from 'vitest';
 import { cleanup, configure } from '@testing-library/react';
 import { useAccountDialogStore } from '~/state/accountDialog';
 import { useDebtDialogStore } from '~/state/debtDialog';
+import { useDebtViewStore } from '~/state/debtView';
 import { useNoteDialogStore } from '~/state/noteDialog';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
 import { usePaymentNotesStore } from '~/state/paymentNotes';
@@ -63,6 +64,7 @@ afterEach(() => {
   usePaymentSheetStore.setState(usePaymentSheetStore.getInitialState(), true);
   useQuickEditStore.setState(useQuickEditStore.getInitialState(), true);
   useDebtDialogStore.setState(useDebtDialogStore.getInitialState(), true);
+  useDebtViewStore.setState(useDebtViewStore.getInitialState(), true);
   useReminderChooserStore.setState(useReminderChooserStore.getInitialState(), true);
   resetViewport();
   delete document.documentElement.dataset.theme;

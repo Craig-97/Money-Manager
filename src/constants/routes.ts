@@ -6,7 +6,6 @@ export const ROUTES = {
   accounts: '/accounts',
   debts: '/debts',
   // One debt, mobile only: how to pay it sooner, its payments and details
-  debt: '/debts/:id',
   notes: '/notes',
   // What's gone off (New) and what's ahead (?tab=up)
   reminders: '/reminders',
@@ -20,4 +19,3 @@ export const ROUTES = {
 } as const;
 
 /* The page for one debt */
-export const debtPath = (id: string) => ROUTES.debt.replace(':id', encodeURIComponent(id));

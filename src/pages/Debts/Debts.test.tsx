@@ -158,9 +158,11 @@ describe('debts on desktop', () => {
     const table = await screen.findByRole('table', { name: 'Debts' });
     const rows = within(table).getAllByRole('row').slice(1);
     // Highest rate first
-    expect(
-      rows.map(row => within(row).getByRole('button', { name: /^Edit / }).textContent)
-    ).toEqual(['Credit card', 'Car finance', 'Family loan']);
+    expect(rows.map(row => within(row).getAllByRole('button')[0].textContent)).toEqual([
+      'Credit card',
+      'Car finance',
+      'Family loan'
+    ]);
     expect(rows[0]).toHaveTextContent('Recurring · on the 15th');
     expect(rows[2]).toHaveTextContent('Recurring · on the 1st · no interest');
     expect(rows[0]).toHaveTextContent('£150 a month · clears Jun 2028');
@@ -176,8 +178,9 @@ describe('debts on desktop', () => {
     await user.click(screen.getByRole('menuitemradio', { name: 'Least left' }));
 
     const names = within(screen.getByRole('table', { name: 'Debts' }))
-      .getAllByRole('button', { name: /^Edit / })
-      .map(button => button.textContent);
+      .getAllByRole('row')
+      .slice(1)
+      .map(row => within(row).getAllByRole('button')[0].textContent);
     expect(names).toEqual(['Family loan', 'Credit card', 'Car finance']);
   });
 
@@ -336,16 +339,70 @@ describe('debts on desktop', () => {
     expect(screen.queryByText(/paid off since payday/)).not.toBeInTheDocument();
   });
 
-  it('opens the edit form ready to type a new balance', async () => {
+  it('opens a debt from its name: what is left, and its small dialogs with a way back', async () => {
     const { user } = renderDebts();
+
+    const table = await screen.findByRole('table', { name: 'Debts' });
+    await user.click(within(table).getByRole('button', { name: 'Credit card' }));
+    const view = await screen.findByRole('dialog', { name: 'Credit card' });
+    // When it clears at its own payment, as the table and Pay sooner have it
+    expect(view).toHaveTextContent('£2,340.00 left');
+    expect(view).toHaveTextContent('24.9% · £150 a month · clears Jun 2028');
+    expect(view).toHaveTextContent('33% paid off');
+
+    await user.click(within(view).getByRole('button', { name: 'Pay sooner' }));
+    const sooner = await screen.findByRole('dialog', { name: 'Pay Credit card sooner' });
+    await user.click(within(sooner).getByRole('button', { name: 'Back to Credit card' }));
+
+    const again = await screen.findByRole('dialog', { name: 'Credit card' });
+    await user.click(within(again).getByRole('button', { name: 'See payments' }));
+    const payments = await screen.findByRole('dialog', { name: 'Credit card payments' });
+    expect(
+      within(payments).getByRole('button', { name: 'Back to Credit card' })
+    ).toBeInTheDocument();
+    await user.click(within(payments).getByRole('button', { name: 'Back to Credit card' }));
+
+    await user.click(
+      within(await screen.findByRole('dialog', { name: 'Credit card' })).getByRole('button', {
+        name: 'Edit debt'
+      })
+    );
+    const form = await screen.findByRole('dialog', { name: 'Edit debt' });
+    // From Debts it's always a debt
+    expect(within(form).queryByRole('switch')).not.toBeInTheDocument();
+  });
+
+  it('updates a balance from a statement, showing when it now clears', async () => {
+    const { user, api } = renderDebts();
 
     await user.click(await screen.findByRole('button', { name: 'More actions for Car finance' }));
     await user.click(screen.getByRole('menuitem', { name: 'Update balance' }));
 
-    const dialog = await screen.findByRole('dialog', { name: 'Edit debt' });
-    await waitFor(() => expect(within(dialog).getByLabelText('Balance left')).toHaveFocus());
-    // From Debts it's always a debt
-    expect(within(dialog).queryByRole('switch')).not.toBeInTheDocument();
+    const dialog = await screen.findByRole('dialog', { name: 'Update balance' });
+    const field = within(dialog).getByLabelText('Balance now');
+    expect(field).toHaveValue('6,860.00');
+    await waitFor(() => expect(field).toHaveFocus());
+    // From the menu, so there's nothing to go back to
+    expect(
+      within(dialog).queryByRole('button', { name: 'Back to Car finance' })
+    ).not.toBeInTheDocument();
+    expect(within(dialog).getByRole('button', { name: 'Save' })).toBeDisabled();
+
+    await user.clear(field);
+    await user.type(field, '6000');
+    expect(within(dialog).getByRole('status')).toHaveTextContent(
+      /^Cleared\w{3} \d{4} → \w{3} \d{4}$/
+    );
+    await user.click(within(dialog).getByRole('button', { name: 'Save' }));
+
+    expect(await screen.findByText('Car finance has £6,000.00 left')).toBeInTheDocument();
+    // The rate and what it started at stay as they are
+    expect(api.callsTo('UpdateRecurringPayment')).toEqual([
+      {
+        id: 'car-finance',
+        input: { debt: { balance: 6000, apr: 6.9, startingBalance: 12000 } }
+      }
+    ]);
   });
 
   it('deletes a debt', async () => {
@@ -355,7 +412,7 @@ describe('debts on desktop', () => {
     await user.click(screen.getByRole('menuitem', { name: 'Delete' }));
 
     expect(await screen.findByText('Deleted Family loan')).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Edit Family loan' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Family loan' })).not.toBeInTheDocument();
   });
 
   it('offers to add one when there are none', async () => {
@@ -372,30 +429,28 @@ describe('debts on desktop', () => {
 
     expect(await screen.findByRole('dialog', { name: 'Add a debt' })).toBeInTheDocument();
   });
-
-  it("goes back to the list from a debt's own page, which is mobile only", async () => {
-    renderDebts('/debts/credit-card');
-
-    expect(await screen.findByRole('table', { name: 'Debts' })).toBeInTheDocument();
-    expect(screen.queryByRole('slider', { name: 'Pay extra each month' })).not.toBeInTheDocument();
-  });
 });
 
 describe('debts on mobile', () => {
   beforeEach(() => setViewportWidth(390));
 
-  it('lists the debts, each opening its own page', async () => {
+  const openDebt = async (user: ReturnType<typeof renderDebts>['user'], name: string) => {
+    const list = await screen.findByRole('region', { name: 'Your debts · 3' });
+    await user.click(within(list).getByRole('button', { name: new RegExp(`^${name}`) }));
+    return screen.findByRole('dialog', { name });
+  };
+
+  it('lists the debts, each opening its view as a sheet, as a payment does', async () => {
     const { user } = renderDebts();
 
     const list = await screen.findByRole('region', { name: 'Your debts · 3' });
-    const links = within(list).getAllByRole('link');
-    expect(links[0]).toHaveTextContent('Credit card£2,34024.9% · £150 on the 15th');
+    expect(within(list).getByRole('button', { name: /^Credit card/ })).toHaveTextContent(
+      'Credit card£2,34024.9% · £150 on the 15th'
+    );
 
-    await user.click(links[0]);
-
-    expect(
-      await screen.findByRole('heading', { level: 1, name: 'Credit card' })
-    ).toBeInTheDocument();
+    const view = await openDebt(user, 'Credit card');
+    expect(view).toHaveTextContent('£2,340.00 left');
+    expect(within(view).getByRole('button', { name: 'Update balance' })).toBeInTheDocument();
   });
 
   it('shows how much is paid off, overall and since payday', async () => {
@@ -407,15 +462,11 @@ describe('debts on mobile', () => {
     expect(within(paidOff).queryByText(/since payday/)).not.toBeInTheDocument();
 
     // An overpayment counts towards it
-    await user.click(
-      within(screen.getByRole('region', { name: 'Your debts · 3' })).getAllByRole('link')[0]
-    );
-    await user.click(await screen.findByRole('radio', { name: 'Payments' }));
-    await user.click(screen.getByRole('button', { name: 'Log an overpayment' }));
+    const view = await openDebt(user, 'Credit card');
+    await user.click(within(view).getByRole('button', { name: 'Log an overpayment' }));
     const dialog = await screen.findByRole('dialog', { name: 'Log an overpayment' });
     await user.type(within(dialog).getByLabelText('Amount'), '100');
     await user.click(within(dialog).getByRole('button', { name: 'Log overpayment' }));
-    await user.click(await screen.findByRole('link', { name: 'Back to debts' }));
 
     expect(await screen.findByText('£100 paid off since payday')).toBeInTheDocument();
   });
@@ -430,16 +481,18 @@ describe('debts on mobile', () => {
   });
 
   it('shows how paying more each month clears a debt sooner, and applies it', async () => {
-    const { user, api } = renderDebts('/debts/credit-card');
+    const { user, api } = renderDebts();
 
-    const slider = await screen.findByRole('slider', { name: 'Pay extra each month' });
-    fireEvent.change(slider, { target: { value: '50' } });
+    const view = await openDebt(user, 'Credit card');
+    await user.click(within(view).getByRole('button', { name: 'Pay sooner' }));
+    const sheet = await screen.findByRole('dialog', { name: 'Pay Credit card sooner' });
+    fireEvent.change(within(sheet).getByRole('slider', { name: 'Pay extra each month' }), {
+      target: { value: '50' }
+    });
+    expect(sheet).toHaveTextContent('6 months sooner');
+    expect(sheet).toHaveTextContent('£148 less');
 
-    const section = screen.getByRole('region', { name: 'Pay sooner' });
-    expect(section).toHaveTextContent('6 months sooner');
-    expect(section).toHaveTextContent('£148 less');
-
-    await user.click(screen.getByRole('button', { name: 'Pay £200 a month from October' }));
+    await user.click(within(sheet).getByRole('button', { name: 'Pay £200 a month from October' }));
 
     expect(await screen.findByText('Credit card is now £200.00 a month')).toBeInTheDocument();
     expect(api.callsTo('UpdateRecurringPayment')).toEqual([
@@ -447,49 +500,44 @@ describe('debts on mobile', () => {
     ]);
   });
 
-  it("shows a debt's payments and details", async () => {
-    const { user } = renderDebts('/debts/credit-card');
+  it("shows a debt's payments as rows, with a way back to the debt", async () => {
+    const { user } = renderDebts();
 
-    await user.click(await screen.findByRole('radio', { name: 'Payments' }));
-    const payments = screen.getByRole('region', { name: 'Payments' });
-    expect(await within(payments).findByText('Due in 13 days')).toBeInTheDocument();
-    expect(within(payments).getByText('About £49 was interest')).toBeInTheDocument();
+    const view = await openDebt(user, 'Credit card');
+    await user.click(within(view).getByRole('button', { name: 'See payments' }));
+    const sheet = await screen.findByRole('dialog', { name: 'Credit card payments' });
+    expect(await within(sheet).findByText('Due in 13 days')).toBeInTheDocument();
+    expect(within(sheet).getByText('About £49 was interest')).toBeInTheDocument();
+    // Rows, not the desktop's columns
+    expect(within(sheet).queryByRole('table')).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole('radio', { name: 'Details' }));
-    const details = screen.getByRole('region', { name: 'Details' });
-    expect(details).toHaveTextContent('APR24.9%');
-    expect(details).toHaveTextContent('Started at£3,500.00');
-    expect(details).toHaveTextContent('Balance checked15 Sep');
+    await user.click(within(sheet).getByRole('button', { name: 'Back to Credit card' }));
+    expect(await screen.findByRole('dialog', { name: 'Credit card' })).toBeInTheDocument();
   });
 
   it("shows a debt's latest payments by month, and older ones when asked", async () => {
-    const { user } = renderDebts('/debts/credit-card', [longPaidCard(14), car(), family()]);
+    const { user } = renderApp({
+      route: '/debts',
+      api: createFakeApi({ budget: budget([longPaidCard(14), car(), family()]) })
+    });
 
-    await user.click(await screen.findByRole('radio', { name: 'Payments' }));
-    const payments = screen.getByRole('region', { name: 'Payments' });
+    const view = await openDebt(user, 'Credit card');
+    await user.click(within(view).getByRole('button', { name: 'See payments' }));
+    const sheet = await screen.findByRole('dialog', { name: 'Credit card payments' });
     expect(
-      await within(payments).findByRole('region', { name: 'September 2026' })
+      await within(sheet).findByRole('region', { name: 'September 2026' })
     ).toBeInTheDocument();
-    expect(within(payments).getAllByRole('listitem')).toHaveLength(1 + 12);
+    expect(within(sheet).getAllByRole('listitem')).toHaveLength(1 + 12);
 
-    await user.click(within(payments).getByRole('button', { name: 'Show older payments' }));
+    await user.click(within(sheet).getByRole('button', { name: 'Show older payments' }));
 
-    await waitFor(() => expect(within(payments).getAllByRole('listitem')).toHaveLength(1 + 14));
-    expect(within(payments).getByRole('region', { name: 'August 2025' })).toBeInTheDocument();
-    // Log an overpayment stays under the list
-    expect(
-      within(payments).getByRole('button', { name: 'Log an overpayment' })
-    ).toBeInTheDocument();
+    await waitFor(() => expect(within(sheet).getAllByRole('listitem')).toHaveLength(1 + 14));
+    expect(within(sheet).getByRole('region', { name: 'August 2025' })).toBeInTheDocument();
+    expect(within(sheet).getByRole('button', { name: 'Log an overpayment' })).toBeInTheDocument();
   });
 
-  it("goes back to the list for a debt that isn't there", async () => {
-    renderDebts('/debts/nope');
-
-    expect(await screen.findByRole('heading', { level: 1, name: 'Debts' })).toBeInTheDocument();
-  });
-
-  it('adds a debt from the nav on a debt’s page, and marks More as current', async () => {
-    const { user } = renderDebts('/debts/credit-card');
+  it('adds a debt from the nav on Debts, and marks More as current', async () => {
+    const { user } = renderDebts();
 
     const nav = (await screen.findAllByRole('navigation', { name: 'Main' })).find(element =>
       within(element).queryByRole('button', { name: 'More' })
@@ -525,6 +573,24 @@ describe('a debt paid off', () => {
   });
 });
 
+describe('debts on the dashboard', () => {
+  it('says what is left under a debt, as Recurring does, on desktop and mobile', async () => {
+    renderDebts('/dashboard');
+
+    const row = (await screen.findByRole('button', { name: 'Credit card' })).closest(
+      '[role="row"]'
+    )!;
+    expect(row).toHaveTextContent('£2,340 left');
+
+    setViewportWidth(390);
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'Credit card' })).toHaveTextContent(
+        'Credit card£2,340 left'
+      )
+    );
+  });
+});
+
 describe('debts on the recurring page', () => {
   it('shows each debt with what is left, and on mobile a card for them all', async () => {
     renderDebts('/recurring');
@@ -533,6 +599,15 @@ describe('debts on the recurring page', () => {
       '[role="row"]'
     )!;
     expect(row).toHaveTextContent('£2,340 left');
+
+    // Its quick view offers the debt's own view
+    const { user } = { user: (await import('@testing-library/user-event')).default.setup() };
+    await user.click(screen.getByRole('button', { name: 'Credit card' }));
+    const quick = await screen.findByRole('dialog', { name: 'Credit card' });
+    expect(quick).toHaveTextContent('Monthly · Debt · £2,340.00 left');
+    await user.click(within(quick).getByRole('button', { name: 'View debt' }));
+    expect(await screen.findByRole('button', { name: 'Update balance' })).toBeInTheDocument();
+    await user.keyboard('{Escape}');
 
     setViewportWidth(390);
     const card = await screen.findByRole('link', { name: /£10,000 left/ });

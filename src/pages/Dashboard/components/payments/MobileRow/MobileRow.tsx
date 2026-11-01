@@ -1,4 +1,5 @@
 import { Repeat } from 'lucide-react';
+import { DebtLeft } from '~/components/debts';
 import { Checkbox, CheckboxHitArea } from '~/components/form/Checkbox';
 import {
   NoteChip,
@@ -7,6 +8,7 @@ import {
   TimesDue
 } from '~/components/payments/PaymentParts';
 import { cn } from '~/lib/cn';
+import { isDebt } from '~/lib/debts';
 import { PayCycle } from '~/lib/payday';
 import {
   categoryLabel,
@@ -90,12 +92,17 @@ export const MobileRow = ({ payment, dashboard }: { payment: Payment; dashboard:
             ) : null}
             <NoteChip payment={payment} notes={notes} hint={false} />
           </span>
-          <span className="mt-[3px] flex items-center gap-[5px] text-xs font-medium text-muted">
-            {payment.kind === 'recurring' ? (
-              <Repeat size={12} strokeWidth={2.25} className="shrink-0" aria-hidden="true" />
-            ) : null}
-            {metaFor(payment, { tab, cycle, today })}
-          </span>
+          {/* A debt says what's left, as on Recurring; its status still shows on the recurring tab */}
+          {payment.kind === 'recurring' && isDebt(payment) && tab !== 'recurring' ? (
+            <DebtLeft debt={payment} className="mt-[5px] text-xs font-medium text-muted" />
+          ) : (
+            <span className="mt-[3px] flex items-center gap-[5px] text-xs font-medium text-muted">
+              {payment.kind === 'recurring' ? (
+                <Repeat size={12} strokeWidth={2.25} className="shrink-0" aria-hidden="true" />
+              ) : null}
+              {metaFor(payment, { tab, cycle, today })}
+            </span>
+          )}
         </span>
         <span className="shrink-0 text-right">
           <PaymentAmount payment={payment} hint={false} className="block text-[15px]" />

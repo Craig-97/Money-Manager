@@ -6,6 +6,7 @@ import { Label } from '~/components/form/Label';
 import { Select } from '~/components/form/Select';
 import { Button } from '~/components/ui/Button';
 import { Modal } from '~/components/ui/Modal';
+import { useBackToDebt } from '~/hooks/useBackToDebt';
 import { DebtPayment } from '~/lib/debts';
 import { formatMoney } from '~/lib/format';
 import { useDebtDialogStore } from '~/state/debtDialog';
@@ -38,12 +39,15 @@ export const OverpaymentDialog = ({ debts, onOverpay }: OverpaymentDialogProps) 
     onDone: close
   });
   const { debt } = form;
+  const back = useBackToDebt(debtId);
 
   return (
     <Modal
       open={open && !!debt}
       onOpenChange={next => (next ? undefined : close())}
       title="Log an overpayment"
+      onBack={back}
+      backLabel={debt ? `Back to ${debt.name}` : undefined}
       footer={
         <>
           <span className="flex-1" />

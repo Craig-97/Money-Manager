@@ -3,14 +3,14 @@ import { PaymentLetter } from '~/components/payments/PaymentParts';
 import { DebtPayment, monthlyPayment, paidOffShare } from '~/lib/debts';
 import { aprText, clearedText, whenPaid } from '~/lib/debts';
 import { formatMoney } from '~/lib/format';
-import { usePaymentDialogStore } from '~/state/paymentDialog';
+import { useDebtViewStore } from '~/state/debtView';
 import { Debts } from '../../hooks';
 import { DebtMenu } from '../DebtMenu';
 import { debtRowClasses } from './debtRowClasses';
 
 /* One debt: its rate, what it costs a month, how much is paid off, what's left and when it clears */
 export const DebtRow = ({ debt, debts }: { debt: DebtPayment; debts: Debts }) => {
-  const openEdit = usePaymentDialogStore(s => s.openEdit);
+  const openView = useDebtViewStore(s => s.openFor);
   const share = paidOffShare(debt);
   const monthly = monthlyPayment(debt);
 
@@ -21,8 +21,9 @@ export const DebtRow = ({ debt, debts }: { debt: DebtPayment; debts: Debts }) =>
         <div className="min-w-0">
           <button
             type="button"
-            aria-label={`Edit ${debt.name}`}
-            onClick={() => openEdit('recurring', { paymentId: debt.id, asDebt: true })}
+            // Opens the debt: what's left, then its small dialogs, with Edit debt
+            aria-haspopup="dialog"
+            onClick={() => openView(debt.id)}
             className="-my-[11px] block max-w-full min-w-0 cursor-pointer truncate rounded-lg py-[11px] text-left text-[15px] leading-[22px] font-bold hover:text-accent-text hover:underline hover:underline-offset-3">
             {debt.name}
           </button>

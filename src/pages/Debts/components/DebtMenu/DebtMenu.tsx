@@ -17,8 +17,9 @@ interface DebtMenuProps {
  */
 export const DebtMenu = ({ debt, onDelete }: DebtMenuProps) => {
   const openEdit = usePaymentDialogStore(s => s.openEdit);
-  const { openOverpayment, openPaySooner, openPayments } = useDebtDialogStore(
+  const { openBalance, openOverpayment, openPaySooner, openPayments } = useDebtDialogStore(
     useShallow(s => ({
+      openBalance: s.openBalance,
       openOverpayment: s.openOverpayment,
       openPaySooner: s.openPaySooner,
       openPayments: s.openPayments
@@ -38,11 +39,7 @@ export const DebtMenu = ({ debt, onDelete }: DebtMenuProps) => {
           onSelect={() => openEdit('recurring', { paymentId: debt.id, asDebt: true })}>
           Edit
         </MenuItem>
-        <MenuItem
-          icon={<RefreshCw size={16} />}
-          onSelect={() =>
-            openEdit('recurring', { paymentId: debt.id, asDebt: true, focusBalance: true })
-          }>
+        <MenuItem icon={<RefreshCw size={16} />} onSelect={() => openBalance(debt.id)}>
           Update balance
         </MenuItem>
         <MenuItem icon={<ArrowUp size={16} />} onSelect={() => openOverpayment(debt.id)}>

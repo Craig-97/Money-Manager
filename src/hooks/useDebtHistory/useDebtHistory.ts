@@ -40,3 +40,5 @@ export const useDebtHistory = (debt: DebtPayment | null | undefined, today: Date
     retry: () => void refetch()
   };
 };
+
+export type DebtHistory = ReturnType<typeof useDebtHistory>;

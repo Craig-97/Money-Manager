@@ -3,9 +3,10 @@ import { DatePicker } from '~/components/form/DatePicker';
 import { FieldError } from '~/components/form/FieldError';
 import { Label } from '~/components/form/Label';
 import { Button } from '~/components/ui/Button';
+import { ChangePreview } from '~/components/ui/ChangePreview';
 import { Modal } from '~/components/ui/Modal';
+import { formatBalance } from '~/lib/format';
 import { PaymentSummary } from '../PaymentParts';
-import { SpendChange } from './components';
 import { useQuickEditDialog } from './useQuickEditDialog';
 
 const hintClasses = 'mt-2 ml-1 text-xs leading-[1.4] font-semibold text-muted';
@@ -80,7 +81,13 @@ export const QuickEditDialog = () => {
         </div>
       )}
 
-      {edit.spend ? <SpendChange before={edit.spend.before} after={edit.spend.after} /> : null}
+      {edit.spend ? (
+        <ChangePreview
+          label="Free to spend"
+          before={formatBalance(edit.spend.before)}
+          after={formatBalance(edit.spend.after)}
+        />
+      ) : null}
     </Modal>
   );
 };

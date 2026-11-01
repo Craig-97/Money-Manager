@@ -1,4 +1,5 @@
 import { Repeat } from 'lucide-react';
+import { DebtLeft } from '~/components/debts';
 import { Checkbox, CheckboxHitArea } from '~/components/form/Checkbox';
 import {
   DueCell,
@@ -13,6 +14,7 @@ import {
   TimesDue
 } from '~/components/payments/PaymentParts';
 import { cn } from '~/lib/cn';
+import { isDebt } from '~/lib/debts';
 import {
   categoryLabel,
   dueInfo,
@@ -70,9 +72,14 @@ export const PaymentRow = ({ payment, dashboard }: RowProps) => {
             {tab === 'upcoming' ? <TimesDue payment={payment} cycle={cycle} today={today} /> : null}
             <NoteChip payment={payment} notes={notes} />
           </div>
-          <p className="mt-0.5 text-xs font-medium text-muted">
-            {tab === 'oneOff' ? 'One-off' : renewal ? `${detail} · ${renewal}` : detail}
-          </p>
+          {/* A debt says what's left, as on Recurring */}
+          {payment.kind === 'recurring' && isDebt(payment) ? (
+            <DebtLeft debt={payment} className="mt-[5px] text-xs font-medium text-muted" />
+          ) : (
+            <p className="mt-0.5 text-xs font-medium text-muted">
+              {tab === 'oneOff' ? 'One-off' : renewal ? `${detail} · ${renewal}` : detail}
+            </p>
+          )}
         </div>
       </div>
 

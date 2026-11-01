@@ -1,6 +1,7 @@
 import { CSSProperties } from 'react';
 import { Outlet } from 'react-router';
 import { AccountDialog, SetupAccountsDialog } from '~/components/accounts';
+import { DebtDialogs } from '~/components/debts';
 import { NoteDialog, PaymentNotesDialog } from '~/components/notes';
 import { PaymentDialog } from '~/components/payments/PaymentDialog';
 import { PaymentSheet } from '~/components/payments/PaymentSheet';
@@ -43,6 +44,7 @@ export const AppShell = () => {
       <PaymentSheet />
       <PaymentNotesDialog />
       <QuickEditDialog />
+      <DebtDialogs />
       <NoteDialog />
       <AccountDialog />
       <SetupAccountsDialog />

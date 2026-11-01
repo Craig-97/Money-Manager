@@ -8,17 +8,18 @@ import {
   SkipForward,
   Undo2
 } from 'lucide-react';
+import { DebtsIcon } from '~/components/icons';
+import { ActionRow } from '~/components/ui/ActionRow';
+import { ActionRows } from '~/components/ui/ActionRows';
+import { ActionTile } from '~/components/ui/ActionTile';
+import { ActionTiles } from '~/components/ui/ActionTiles';
 import { Modal } from '~/components/ui/Modal';
 import { cn } from '~/lib/cn';
 import { formatMoney } from '~/lib/format';
 import { noteColor } from '~/lib/notes';
 import { formatShortDate } from '~/lib/payments';
 import { PaymentSummary } from '../PaymentParts';
-import { SheetTile } from './components';
 import { usePaymentSheet } from './usePaymentSheet';
-
-const rowClasses =
-  'flex min-h-14 w-full cursor-pointer items-center gap-3 rounded-2xl px-3 text-left text-[15px] font-bold transition-colors hover:bg-hover';
 
 /*
  * What a payment's row opens on mobile: when it's due, its dates before payday when there's more
@@ -79,9 +80,9 @@ export const PaymentSheet = () => {
       edits.amount ||
       edits.date ||
       (recurring && choices.skipNext) ? (
-        <div className="grid grid-cols-2 gap-2">
+        <ActionTiles>
           {choices.pay ? (
-            <SheetTile
+            <ActionTile
               icon={<Check size={20} strokeWidth={2.25} />}
               label={sheet.payLabel ?? choices.pay}
               detail={sheet.payDetail}
@@ -89,45 +90,47 @@ export const PaymentSheet = () => {
             />
           ) : null}
           {edits.amount ? (
-            <SheetTile
+            <ActionTile
               icon={<PoundSterling size={20} />}
               label="Change amount"
               onClick={sheet.changeAmount}
             />
           ) : null}
           {edits.date ? (
-            <SheetTile
+            <ActionTile
               icon={<CalendarDays size={20} />}
               label="Change date"
               onClick={sheet.changeDate}
             />
           ) : null}
           {recurring && choices.skipNext ? (
-            <SheetTile
+            <ActionTile
               icon={<SkipForward size={20} />}
               label={choices.skipNext}
               onClick={sheet.skip}
             />
           ) : null}
           {choices.undo ? (
-            <SheetTile icon={<Undo2 size={20} />} label={choices.undo} onClick={sheet.undo} />
+            <ActionTile icon={<Undo2 size={20} />} label={choices.undo} onClick={sheet.undo} />
           ) : null}
-        </div>
+        </ActionTiles>
       ) : null}
 
-      <div className="-mx-1 flex flex-col">
+      <ActionRows>
         {recurring ? (
-          <button type="button" onClick={sheet.addNote} className={rowClasses}>
-            <FileText size={18} className="text-muted" aria-hidden="true" />
-            <span className="flex-1">Add a note</span>
-          </button>
+          <ActionRow icon={<FileText size={18} />} onClick={sheet.addNote}>
+            Add a note
+          </ActionRow>
         ) : null}
-        <button type="button" onClick={sheet.edit} className={rowClasses}>
-          <PenLine size={18} className="text-muted" aria-hidden="true" />
-          <span className="flex-1">Edit payment</span>
-          <ChevronRight size={16} className="text-muted" aria-hidden="true" />
-        </button>
-      </div>
+        {sheet.viewDebt ? (
+          <ActionRow icon={<DebtsIcon size={18} />} onClick={sheet.viewDebt} chevron>
+            View debt
+          </ActionRow>
+        ) : null}
+        <ActionRow icon={<PenLine size={18} />} onClick={sheet.edit} chevron>
+          Edit payment
+        </ActionRow>
+      </ActionRows>
     </Modal>
   );
 };

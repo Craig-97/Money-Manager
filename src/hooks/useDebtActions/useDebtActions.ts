@@ -85,5 +85,24 @@ export const useDebtActions = (budgetId: string) => {
     }
   };
 
-  return { overpay, undoOverpayment, payMore, remove };
+  /* A new balance from a statement; the rate and what it started at stay as they are */
+  const updateBalance = async (debt: DebtPayment, balance: number) => {
+    try {
+      await updateRecurring({
+        variables: {
+          id: debt.id,
+          input: {
+            debt: { balance, apr: debt.debt.apr, startingBalance: debt.debt.startingBalance }
+          }
+        }
+      });
+      showToast({ message: `${debt.name} has ${formatMoney(balance)} left` });
+      return true;
+    } catch (error) {
+      showError(error);
+      return false;
+    }
+  };
+
+  return { overpay, undoOverpayment, payMore, updateBalance, remove };
 };

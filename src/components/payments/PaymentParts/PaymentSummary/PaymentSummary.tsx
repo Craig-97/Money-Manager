@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
 import { cn } from '~/lib/cn';
-import { formatPayment } from '~/lib/format';
+import { isDebt } from '~/lib/debts';
+import { formatMoney, formatPayment } from '~/lib/format';
 import {
   categoryLabel,
   DueInfo,
@@ -10,6 +11,7 @@ import {
   Payment
 } from '~/lib/payments';
 import { PaymentLetter } from '../PaymentLetter';
+import { summaryCardClasses } from './summaryCardClasses';
 
 interface PaymentSummaryProps {
   payment: Payment;
@@ -27,7 +29,7 @@ interface PaymentSummaryProps {
 export const PaymentSummary = ({ payment, due, named = false, children }: PaymentSummaryProps) => {
   const urgent = due.state === 'today' || due.state === 'overdue';
   return (
-    <div className="flex flex-wrap items-center gap-3 rounded-[20px] border border-border bg-surface-2 px-3.5 py-3">
+    <div className={summaryCardClasses}>
       <PaymentLetter payment={payment} className="size-[38px] rounded-xl text-sm" />
       <div className="min-w-0 flex-1">
         {named ? <p className="text-[15px] font-extrabold">{payment.name}</p> : null}
@@ -45,7 +47,9 @@ export const PaymentSummary = ({ payment, due, named = false, children }: Paymen
           {payment.kind === 'recurring'
             ? `${FREQUENCY_LABELS[payment.frequency]} · `
             : 'One-off · '}
-          {intoText(payment) ?? categoryLabel(payment.category)}
+          {payment.kind === 'recurring' && isDebt(payment)
+            ? `Debt · ${formatMoney(payment.debt.balance)} left`
+            : (intoText(payment) ?? categoryLabel(payment.category))}
           {movesTo(payment) ? ' · Not in totals' : null}
         </p>
       </div>
