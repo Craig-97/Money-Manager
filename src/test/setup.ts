@@ -10,6 +10,7 @@ import { usePaymentDialogStore } from '~/state/paymentDialog';
 import { usePaymentNotesStore } from '~/state/paymentNotes';
 import { usePaymentSheetStore } from '~/state/paymentSheet';
 import { DEFAULT_ACCENT, usePrefsStore } from '~/state/prefs';
+import { useQuickEditStore } from '~/state/quickEdit';
 import { useReminderChooserStore } from '~/state/reminderChooser';
 import { useSetupAccountsStore } from '~/state/setupAccounts';
 import { installMatchMedia, resetViewport } from './viewport';
@@ -60,6 +61,7 @@ afterEach(() => {
   usePaymentDialogStore.setState(usePaymentDialogStore.getInitialState(), true);
   usePaymentNotesStore.setState(usePaymentNotesStore.getInitialState(), true);
   usePaymentSheetStore.setState(usePaymentSheetStore.getInitialState(), true);
+  useQuickEditStore.setState(useQuickEditStore.getInitialState(), true);
   useDebtDialogStore.setState(useDebtDialogStore.getInitialState(), true);
   useReminderChooserStore.setState(useReminderChooserStore.getInitialState(), true);
   resetViewport();

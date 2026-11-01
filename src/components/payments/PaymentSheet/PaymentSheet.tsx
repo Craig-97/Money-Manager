@@ -1,16 +1,19 @@
-import { Check, ChevronRight, FileText, PenLine, SkipForward, Undo2 } from 'lucide-react';
+import {
+  CalendarDays,
+  Check,
+  ChevronRight,
+  FileText,
+  PenLine,
+  PoundSterling,
+  SkipForward,
+  Undo2
+} from 'lucide-react';
 import { Modal } from '~/components/ui/Modal';
 import { cn } from '~/lib/cn';
-import { formatMoney, formatPayment } from '~/lib/format';
+import { formatMoney } from '~/lib/format';
 import { noteColor } from '~/lib/notes';
-import {
-  categoryLabel,
-  FREQUENCY_LABELS,
-  formatShortDate,
-  intoText,
-  movesTo
-} from '~/lib/payments';
-import { PaymentLetter } from '../PaymentParts';
+import { formatShortDate } from '~/lib/payments';
+import { PaymentSummary } from '../PaymentParts';
 import { SheetTile } from './components';
 import { usePaymentSheet } from './usePaymentSheet';
 
@@ -24,8 +27,7 @@ const rowClasses =
 export const PaymentSheet = () => {
   const sheet = usePaymentSheet();
   if (!sheet.payment) return null;
-  const { payment, recurring, due, choices, notes, dates } = sheet;
-  const urgent = due.state === 'today' || due.state === 'overdue';
+  const { payment, recurring, due, choices, edits, notes, dates } = sheet;
   const firstNote = notes[0];
 
   return (
@@ -34,25 +36,7 @@ export const PaymentSheet = () => {
       onOpenChange={next => (next ? undefined : sheet.close())}
       title={payment.name}>
       {/* As the boards have it: the payment in a grey card, with its dates when there are several */}
-      <div className="flex flex-wrap items-center gap-3 rounded-[20px] border border-border bg-surface-2 px-3.5 py-3">
-        <PaymentLetter payment={payment} className="size-[38px] rounded-xl text-sm" />
-        <div className="min-w-0 flex-1">
-          <p className="text-base font-extrabold">
-            <span className="num">{formatPayment(payment.signedAmount)}</span> ·{' '}
-            <span className={cn(urgent && 'text-expense')}>
-              {due.state === 'today'
-                ? 'Due today'
-                : due.state === 'overdue'
-                  ? `Overdue · ${due.label}`
-                  : due.label}
-            </span>
-          </p>
-          <p className="mt-0.5 text-xs font-semibold text-muted">
-            {recurring ? `${FREQUENCY_LABELS[recurring.frequency]} · ` : 'One-off · '}
-            {intoText(payment) ?? categoryLabel(payment.category)}
-            {movesTo(payment) ? ' · Not in totals' : null}
-          </p>
-        </div>
+      <PaymentSummary payment={payment} due={due}>
         {dates.length ? (
           <div className="mt-0.5 flex basis-full flex-col gap-1.5 border-t border-border pt-2.5">
             <span className="text-xs font-extrabold text-muted">
@@ -66,7 +50,7 @@ export const PaymentSheet = () => {
             ))}
           </div>
         ) : null}
-      </div>
+      </PaymentSummary>
 
       {firstNote ? (
         <button
@@ -90,7 +74,11 @@ export const PaymentSheet = () => {
         </button>
       ) : null}
 
-      {choices.pay || choices.undo || (recurring && choices.skipNext) ? (
+      {choices.pay ||
+      choices.undo ||
+      edits.amount ||
+      edits.date ||
+      (recurring && choices.skipNext) ? (
         <div className="grid grid-cols-2 gap-2">
           {choices.pay ? (
             <SheetTile
@@ -98,6 +86,20 @@ export const PaymentSheet = () => {
               label={sheet.payLabel ?? choices.pay}
               detail={sheet.payDetail}
               onClick={sheet.pay}
+            />
+          ) : null}
+          {edits.amount ? (
+            <SheetTile
+              icon={<PoundSterling size={20} />}
+              label="Change amount"
+              onClick={sheet.changeAmount}
+            />
+          ) : null}
+          {edits.date ? (
+            <SheetTile
+              icon={<CalendarDays size={20} />}
+              label="Change date"
+              onClick={sheet.changeDate}
             />
           ) : null}
           {recurring && choices.skipNext ? (

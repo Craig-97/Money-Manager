@@ -7,6 +7,7 @@ export * from './NoteChip';
 export * from './PaymentAmount';
 export * from './PaymentLetter';
 export * from './PaymentMenu';
+export * from './PaymentSummary';
 export * from './RenewalTag';
 export * from './StatusTag';
 export * from './TimesDue';

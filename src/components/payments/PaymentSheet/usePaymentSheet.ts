@@ -3,11 +3,19 @@ import { useBudget } from '~/hooks/useBudget';
 import { usePayCycle } from '~/hooks/usePayCycle';
 import { usePaymentActions } from '~/hooks/usePaymentActions';
 import { notesByPayment, toNotes } from '~/lib/notes';
-import { datesDue, dueInfo, formatShortDate, paymentChoices, toPayments } from '~/lib/payments';
+import {
+  datesDue,
+  dueInfo,
+  formatShortDate,
+  paymentChoices,
+  quickEdits,
+  toPayments
+} from '~/lib/payments';
 import { useNoteDialogStore } from '~/state/noteDialog';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
 import { usePaymentNotesStore } from '~/state/paymentNotes';
 import { usePaymentSheetStore } from '~/state/paymentSheet';
+import { useQuickEditStore } from '~/state/quickEdit';
 
 /*
  * The payment a row opened on mobile, what can be done with it now, and its notes. Each action
@@ -23,6 +31,7 @@ export const usePaymentSheet = () => {
   const openEdit = usePaymentDialogStore(s => s.openEdit);
   const openNotes = usePaymentNotesStore(s => s.openFor);
   const openNewNote = useNoteDialogStore(s => s.openNewFor);
+  const openQuickEdit = useQuickEditStore(s => s.openFor);
 
   const payment = budget
     ? toPayments(budget, today).find(item => item.id === paymentId)
@@ -51,6 +60,7 @@ export const usePaymentSheet = () => {
     due: dueInfo(payment, { today, cycle }),
     dates: dates.length > 1 ? dates : [],
     choices,
+    edits: quickEdits(payment),
     payLabel: next ? 'Mark as paid' : choices.pay,
     payDetail: next ? `Ticks off ${formatShortDate(next, today)}` : null,
     notes,
@@ -61,6 +71,9 @@ export const usePaymentSheet = () => {
       if (recurring) void actions.skip(recurring);
     }),
     edit: then(() => openEdit(payment.kind, { paymentId: payment.id })),
+    // Change amount and Change date come back here with their back arrow
+    changeAmount: then(() => openQuickEdit(payment.id, { mode: 'amount', fromSheet: true })),
+    changeDate: then(() => openQuickEdit(payment.id, { mode: 'date', fromSheet: true })),
     showNotes: then(() => {
       if (recurring) openNotes(recurring.id, { fromSheet: true });
     }),

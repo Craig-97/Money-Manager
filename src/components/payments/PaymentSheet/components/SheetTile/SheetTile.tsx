@@ -9,8 +9,8 @@ interface SheetTileProps {
 }
 
 /*
- * One of the payment sheet's big buttons: an accent icon over its label. On its own it takes the
- * full width, rather than half with a gap beside it.
+ * One of the payment sheet's big buttons: an accent icon over its label. Left on its own in the
+ * last row it takes the full width, rather than half with a gap beside it.
  */
 export const SheetTile = ({ icon, label, detail, onClick }: SheetTileProps) => (
   <button
@@ -20,7 +20,7 @@ export const SheetTile = ({ icon, label, detail, onClick }: SheetTileProps) => (
       detail ? `${label}, ${detail.charAt(0).toLowerCase()}${detail.slice(1)}` : undefined
     }
     onClick={onClick}
-    className="flex min-h-[76px] cursor-pointer flex-col items-start justify-center gap-2 rounded-[20px] border border-border bg-surface-2 px-3.5 py-3 text-left text-sm font-extrabold transition-colors only:col-span-2 hover:border-border-strong">
+    className="flex min-h-[76px] cursor-pointer flex-col items-start justify-center gap-2 rounded-[20px] border border-border bg-surface-2 px-3.5 py-3 text-left text-sm font-extrabold transition-colors odd:last:col-span-2 hover:border-border-strong">
     <span aria-hidden="true" className="text-accent-text">
       {icon}
     </span>

@@ -1,9 +1,11 @@
 import {
+  CalendarDays,
   Check,
   Ellipsis,
   FastForward,
   FileText,
   PenLine,
+  PoundSterling,
   SkipForward,
   Trash,
   Undo2
@@ -12,10 +14,11 @@ import { IconButton } from '~/components/ui/IconButton';
 import { Menu, MenuContent, MenuItem, MenuSeparator, MenuTrigger } from '~/components/ui/Menu';
 import { PaymentActions } from '~/hooks/usePaymentActions';
 import { PayCycle } from '~/lib/payday';
-import { Payment, paymentChoices } from '~/lib/payments';
+import { Payment, paymentChoices, quickEdits } from '~/lib/payments';
 import { useNoteDialogStore } from '~/state/noteDialog';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
 import { usePaymentNotesStore } from '~/state/paymentNotes';
+import { useQuickEditStore } from '~/state/quickEdit';
 
 interface PaymentMenuProps {
   payment: Payment;
@@ -26,7 +29,10 @@ interface PaymentMenuProps {
   noteCount?: number;
 }
 
-/* Edit, pay, undo, skip, its notes and delete, from the row's more button */
+/*
+ * Edit, pay, undo, skip, change its amount or date, its notes and delete, from the row's more
+ * button
+ */
 export const PaymentMenu = ({
   payment,
   cycle,
@@ -37,9 +43,11 @@ export const PaymentMenu = ({
   const openEdit = usePaymentDialogStore(s => s.openEdit);
   const openNotes = usePaymentNotesStore(s => s.openFor);
   const openNewNote = useNoteDialogStore(s => s.openNewFor);
+  const openQuickEdit = useQuickEditStore(s => s.openFor);
   const { pay, undo, skip, remove } = actions;
   const choices = paymentChoices(payment, { cycle, today });
   const recurring = payment.kind === 'recurring' ? payment : null;
+  const edits = quickEdits(payment);
 
   return (
     <Menu>
@@ -76,6 +84,20 @@ export const PaymentMenu = ({
             icon={<FastForward size={16} />}
             onSelect={() => void skip(recurring, cycle.end)}>
             {choices.skipRest}
+          </MenuItem>
+        ) : null}
+        {edits.amount ? (
+          <MenuItem
+            icon={<PoundSterling size={16} />}
+            onSelect={() => openQuickEdit(payment.id, { mode: 'amount' })}>
+            Change amount
+          </MenuItem>
+        ) : null}
+        {edits.date ? (
+          <MenuItem
+            icon={<CalendarDays size={16} />}
+            onSelect={() => openQuickEdit(payment.id, { mode: 'date' })}>
+            Change date
           </MenuItem>
         ) : null}
         {recurring ? (

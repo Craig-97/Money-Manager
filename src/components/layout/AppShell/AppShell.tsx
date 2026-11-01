@@ -4,6 +4,7 @@ import { AccountDialog, SetupAccountsDialog } from '~/components/accounts';
 import { NoteDialog, PaymentNotesDialog } from '~/components/notes';
 import { PaymentDialog } from '~/components/payments/PaymentDialog';
 import { PaymentSheet } from '~/components/payments/PaymentSheet';
+import { QuickEditDialog } from '~/components/payments/QuickEditDialog';
 import { Toaster } from '~/components/ui/Toaster';
 import { useScrollTopOnNavigate } from '~/hooks/useScrollTopOnNavigate';
 import { useSidebarMode } from '~/hooks/useSidebarMode';
@@ -41,6 +42,7 @@ export const AppShell = () => {
       <PaymentDialog />
       <PaymentSheet />
       <PaymentNotesDialog />
+      <QuickEditDialog />
       <NoteDialog />
       <AccountDialog />
       <SetupAccountsDialog />
