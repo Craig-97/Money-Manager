@@ -1,8 +1,9 @@
-import { Check, Ellipsis, Landmark, PenLine, Trash } from 'lucide-react';
+import { Check, Ellipsis, Landmark, PenLine, RefreshCw, Trash } from 'lucide-react';
 import { IconButton } from '~/components/ui/IconButton';
 import { Menu, MenuContent, MenuItem, MenuSeparator, MenuTrigger } from '~/components/ui/Menu';
 import { Account, isSpending } from '~/lib/accounts';
 import { useAccountDialogStore } from '~/state/accountDialog';
+import { useAccountQuickStore } from '~/state/accountQuick';
 
 interface AccountMenuProps {
   account: Account;
@@ -12,13 +13,14 @@ interface AccountMenuProps {
 }
 
 /*
- * Edit, make another spending account where you get paid, count in or keep out of free to spend,
- * and delete, from the row's more button. Where pay lands always counts and stays, so it only has
- * Edit.
+ * From the row's more button, in the order a debt's menu uses: Edit, Update balance, make another
+ * spending account where you get paid, count in or keep out of free to spend, and delete. Where pay
+ * lands always counts and stays, so it has no more than Edit and Update balance.
  */
 export const AccountMenu = ({ account, several, onCounts }: AccountMenuProps) => {
   const openEdit = useAccountDialogStore(s => s.openEdit);
   const openDelete = useAccountDialogStore(s => s.openDelete);
+  const openQuick = useAccountQuickStore(s => s.openFor);
   const fixed = account.paidInto;
 
   return (
@@ -32,12 +34,17 @@ export const AccountMenu = ({ account, several, onCounts }: AccountMenuProps) =>
         <MenuItem icon={<PenLine size={16} />} onSelect={() => openEdit(account.id)}>
           Edit
         </MenuItem>
+        <MenuItem
+          icon={<RefreshCw size={16} />}
+          onSelect={() => openQuick('balance', { accountId: account.id })}>
+          Update balance
+        </MenuItem>
         {fixed ? null : (
           <>
             {isSpending(account) && several ? (
               <MenuItem
                 icon={<Landmark size={16} />}
-                onSelect={() => openEdit(account.id, { paidInto: true })}>
+                onSelect={() => openQuick('paidInto', { accountId: account.id })}>
                 Make where you get paid
               </MenuItem>
             ) : null}

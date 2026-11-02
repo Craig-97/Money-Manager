@@ -4,6 +4,8 @@ import '@testing-library/jest-dom/vitest';
 import { afterEach, vi } from 'vitest';
 import { cleanup, configure } from '@testing-library/react';
 import { useAccountDialogStore } from '~/state/accountDialog';
+import { useAccountQuickStore } from '~/state/accountQuick';
+import { useAccountViewStore } from '~/state/accountView';
 import { useDebtDialogStore } from '~/state/debtDialog';
 import { useDebtViewStore } from '~/state/debtView';
 import { useNoteDialogStore } from '~/state/noteDialog';
@@ -58,6 +60,8 @@ afterEach(() => {
   usePrefsStore.setState({ theme: 'dark', accent: DEFAULT_ACCENT });
   useNoteDialogStore.setState(useNoteDialogStore.getInitialState(), true);
   useAccountDialogStore.setState(useAccountDialogStore.getInitialState(), true);
+  useAccountViewStore.setState(useAccountViewStore.getInitialState(), true);
+  useAccountQuickStore.setState(useAccountQuickStore.getInitialState(), true);
   useSetupAccountsStore.setState(useSetupAccountsStore.getInitialState(), true);
   usePaymentDialogStore.setState(usePaymentDialogStore.getInitialState(), true);
   usePaymentNotesStore.setState(usePaymentNotesStore.getInitialState(), true);

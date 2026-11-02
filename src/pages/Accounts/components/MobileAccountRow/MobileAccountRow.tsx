@@ -2,7 +2,7 @@ import { ChevronRight } from 'lucide-react';
 import { Account, accountLetter, accountMeta, isStale, updatedText } from '~/lib/accounts';
 import { cn } from '~/lib/cn';
 import { formatBalance } from '~/lib/format';
-import { useAccountDialogStore } from '~/state/accountDialog';
+import { useAccountViewStore } from '~/state/accountView';
 
 const tagClasses =
   'inline-flex h-5 items-center rounded-full border px-2 text-[10px] font-bold whitespace-nowrap';
@@ -15,19 +15,18 @@ interface MobileAccountRowProps {
 }
 
 /*
- * Mobile: one account, tapped to edit in a sheet. Its kind and what it's for show under the name
+ * Mobile: one account, tapped to open its view in a sheet. Its kind and what it's for show under the name
  * and wrap, so a long one never pushes the balance off, however big that is. Tags say where pay
  * lands, how old the balance is and whether it counts in free to spend.
  */
 export const MobileAccountRow = ({ account, today, several }: MobileAccountRowProps) => {
-  const openEdit = useAccountDialogStore(s => s.openEdit);
+  const openView = useAccountViewStore(s => s.openFor);
   const stale = isStale(account, today);
 
   return (
     <button
       type="button"
-      onClick={() => openEdit(account.id)}
-      aria-label={`Edit ${account.name}`}
+      onClick={() => openView(account.id)}
       aria-haspopup="dialog"
       className="flex min-h-[72px] w-full cursor-pointer items-center gap-3 rounded-[18px] px-2.5 py-2 text-left transition-colors hover:bg-hover">
       <span

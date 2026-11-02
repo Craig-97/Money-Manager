@@ -1,9 +1,7 @@
-import { useMutation } from '@apollo/client/react';
-import { UpdateAccountDocument } from '~/graphql/generated';
+import { useAccountActions } from '~/hooks/useAccountActions';
 import { Budget } from '~/hooks/useBudget';
 import { usePayCycle } from '~/hooks/usePayCycle';
 import {
-  Account,
   accountTotals,
   beforePaydayByAccount,
   hasSeveralSpending,
@@ -15,16 +13,14 @@ import {
   unchosenOf
 } from '~/lib/accounts';
 import { debtTotals, isDebt } from '~/lib/debts';
-import { getApiErrorMessage } from '~/lib/errors';
 import { RecurringPayment, toPayments } from '~/lib/payments';
-import { showToast } from '~/state/toast';
 
 const roundPence = (amount: number) => Math.round(amount * 100) / 100;
 
 /* Everything the Accounts page shows and does, worked out from the budget */
 export const useAccounts = (budget: Budget) => {
   const { today, cycle } = usePayCycle(budget.payday);
-  const [updateAccount] = useMutation(UpdateAccountDocument);
+  const { setCounts } = useAccountActions(budget);
 
   const accounts = toAccounts(budget.accounts, today);
   const payments = toPayments(budget, today);
@@ -43,49 +39,6 @@ export const useAccounts = (budget: Budget) => {
   const now = roundPence(countedRows.reduce((sum, row) => sum + row.account.balance, 0));
   const left = roundPence(countedRows.reduce((sum, row) => sum + row.left, 0));
   const paidInto = paidIntoAccountOf(accounts);
-
-  // Switching an account in or out of free to spend, straight from its row
-  const setCounts = async (account: Account, counts: boolean) => {
-    try {
-      await updateAccount({
-        variables: { id: account.id, input: { counts } },
-        optimisticResponse: {
-          updateAccount: {
-            __typename: 'AccountResponse',
-            account: {
-              __typename: 'Account',
-              id: account.id,
-              name: account.name,
-              kind: account.kind,
-              balance: account.balance,
-              counts,
-              paidInto: account.paidInto,
-              interestRate: account.interestRate,
-              purpose: account.purpose,
-              balanceUpdatedAt: String(account.balanceUpdatedAt.getTime())
-            },
-            budget: {
-              __typename: 'Budget',
-              id: budget.id,
-              bankBalance: budget.bankBalance + (counts ? account.balance : -account.balance),
-              accounts: budget.accounts.map(item =>
-                item.id === account.id ? { ...item, counts } : item
-              ),
-              recurringPayments: budget.recurringPayments ?? [],
-              oneOffPayments: budget.oneOffPayments ?? []
-            }
-          }
-        }
-      });
-      showToast({
-        message: counts
-          ? `${account.name} now counts in free to spend`
-          : `${account.name} is kept out of free to spend`
-      });
-    } catch (error) {
-      showToast({ message: getApiErrorMessage(error, "Couldn't change that. Try again.") });
-    }
-  };
 
   return {
     today,
@@ -115,7 +68,8 @@ export const useAccounts = (budget: Budget) => {
           .map(item => ({ ...item, account: row.account }))
       )
     },
-    setCounts: (account: Account, counts: boolean) => void setCounts(account, counts)
+    // Switching an account in or out of free to spend, straight from its row
+    setCounts
   };
 };
 

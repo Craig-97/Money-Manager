@@ -1,11 +1,9 @@
 import { CSSProperties } from 'react';
 import { Outlet } from 'react-router';
-import { AccountDialog, SetupAccountsDialog } from '~/components/accounts';
+import { AccountDialogs } from '~/components/accounts';
 import { DebtDialogs } from '~/components/debts';
-import { NoteDialog, PaymentNotesDialog } from '~/components/notes';
-import { PaymentDialog } from '~/components/payments/PaymentDialog';
-import { PaymentSheet } from '~/components/payments/PaymentSheet';
-import { QuickEditDialog } from '~/components/payments/QuickEditDialog';
+import { NoteDialogs } from '~/components/notes';
+import { PaymentDialogs } from '~/components/payments/PaymentDialogs';
 import { Toaster } from '~/components/ui/Toaster';
 import { useScrollTopOnNavigate } from '~/hooks/useScrollTopOnNavigate';
 import { useSidebarMode } from '~/hooks/useSidebarMode';
@@ -40,14 +38,10 @@ export const AppShell = () => {
       </main>
       <BottomNav className="md:hidden" />
       {/* Opened from any page, e.g. the mobile nav's add button or a reminder */}
-      <PaymentDialog />
-      <PaymentSheet />
-      <PaymentNotesDialog />
-      <QuickEditDialog />
+      <PaymentDialogs />
       <DebtDialogs />
-      <NoteDialog />
-      <AccountDialog />
-      <SetupAccountsDialog />
+      <AccountDialogs />
+      <NoteDialogs />
       {/* Above the mobile nav; on desktop, centred in the space beside the sidebar */}
       <Toaster className="bottom-[calc(104px+env(safe-area-inset-bottom))] md:bottom-[calc(24px+env(safe-area-inset-bottom))] md:left-[calc(var(--sidebar-w)+(100%-var(--sidebar-w))/2)]" />
     </div>

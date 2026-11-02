@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router';
 import { ROUTES } from '~/constants';
 import { usePaymentActions } from '~/hooks/usePaymentActions';
 import { Reminder } from '~/lib/reminders';
-import { useAccountDialogStore } from '~/state/accountDialog';
+import { useAccountQuickStore } from '~/state/accountQuick';
 import { useNoteDialogStore } from '~/state/noteDialog';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
 
@@ -22,7 +22,7 @@ export const useReminderOpen = (budgetId: string) => {
   const navigate = useNavigate();
   const openPayment = usePaymentDialogStore(s => s.openEdit);
   const openNote = useNoteDialogStore(s => s.openEdit);
-  const openAccount = useAccountDialogStore(s => s.openEdit);
+  const openBalance = useAccountQuickStore(s => s.openFor);
   const { pay } = usePaymentActions(budgetId);
 
   return (reminder: Reminder): ReminderOpen | null => {
@@ -52,7 +52,12 @@ export const useReminderOpen = (budgetId: string) => {
           : null;
       case 'balance': {
         const { account } = reminder;
-        return account ? { label: 'Update', run: () => openAccount(account.id) } : null;
+        return account
+          ? {
+              label: 'Update balance',
+              run: () => openBalance('balance', { accountId: account.id })
+            }
+          : null;
       }
     }
   };

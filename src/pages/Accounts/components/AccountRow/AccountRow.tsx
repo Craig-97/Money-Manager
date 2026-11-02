@@ -2,7 +2,7 @@ import { Switch } from '~/components/ui/Switch';
 import { Account, accountLetter, accountMeta, isStale, updatedText } from '~/lib/accounts';
 import { cn } from '~/lib/cn';
 import { formatBalance } from '~/lib/format';
-import { useAccountDialogStore } from '~/state/accountDialog';
+import { useAccountViewStore } from '~/state/accountView';
 import { AccountMenu } from '../AccountMenu';
 import { PaidIntoTag } from '../PaidIntoTag';
 
@@ -15,11 +15,11 @@ interface AccountRowProps {
 }
 
 /*
- * Desktop: one account. Its name opens it to edit; the switch counts it in free to spend, which
+ * Desktop: one account. Its name opens its view; the switch counts it in free to spend, which
  * where pay lands always is. How old the balance is sits under the name below 1101px.
  */
 export const AccountRow = ({ account, today, several, onCounts }: AccountRowProps) => {
-  const openEdit = useAccountDialogStore(s => s.openEdit);
+  const openView = useAccountViewStore(s => s.openFor);
   const stale = isStale(account, today);
   const updated = (
     <span
@@ -43,9 +43,8 @@ export const AccountRow = ({ account, today, several, onCounts }: AccountRowProp
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <button
               type="button"
-              aria-label={`Edit ${account.name}`}
               aria-haspopup="dialog"
-              onClick={() => openEdit(account.id)}
+              onClick={() => openView(account.id)}
               className="-my-[11px] block max-w-full cursor-pointer rounded-lg py-[11px] text-left text-[15px] leading-[22px] font-bold [overflow-wrap:anywhere] hover:text-accent-text hover:underline hover:underline-offset-3">
               {account.name}
             </button>

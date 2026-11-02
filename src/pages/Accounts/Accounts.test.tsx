@@ -84,7 +84,10 @@ describe('accounts', () => {
   it('edits an account in a dialog, its balance first', async () => {
     const { user, api } = renderAccounts();
 
-    await user.click(await screen.findByRole('button', { name: 'Edit Cash ISA' }));
+    // Its name opens its view; Edit account opens the full form
+    await user.click(await screen.findByRole('button', { name: 'Cash ISA' }));
+    const view = await screen.findByRole('dialog', { name: 'Cash ISA' });
+    await user.click(within(view).getByRole('button', { name: 'Edit account' }));
     const dialog = await screen.findByRole('dialog', { name: 'Edit Cash ISA' });
     const balance = within(dialog).getByLabelText('Balance now');
     expect(balance).toHaveFocus();
@@ -117,7 +120,9 @@ describe('accounts', () => {
   it('only edits the current account’s name and balance, and never deletes it', async () => {
     const { user } = renderAccounts();
 
-    await user.click(await screen.findByRole('button', { name: 'Edit Current account' }));
+    await user.click(await screen.findByRole('button', { name: 'Current account' }));
+    const view = await screen.findByRole('dialog', { name: 'Current account' });
+    await user.click(within(view).getByRole('button', { name: 'Edit account' }));
     const dialog = await screen.findByRole('dialog', { name: 'Edit Current account' });
     expect(within(dialog).queryByLabelText('Interest rate (optional)')).not.toBeInTheDocument();
     expect(within(dialog).queryByRole('switch')).not.toBeInTheDocument();
@@ -159,7 +164,7 @@ describe('accounts', () => {
         }
       }
     ]);
-    expect(await screen.findByRole('button', { name: 'Edit Easy access' })).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: 'Easy access' })).toBeInTheDocument();
   });
 
   it('asks before deleting a savings account', async () => {
@@ -175,7 +180,7 @@ describe('accounts', () => {
     expect(await screen.findByText('Bills pot deleted')).toBeInTheDocument();
     expect(api.callsTo('DeleteAccount')).toEqual([{ id: 'pot' }]);
     await waitFor(() =>
-      expect(screen.queryByRole('button', { name: 'Edit Bills pot' })).not.toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'Bills pot' })).not.toBeInTheDocument()
     );
   });
 
@@ -200,22 +205,26 @@ describe('accounts on mobile', () => {
 
     const counted = await screen.findByRole('region', { name: 'Counted in free to spend' });
     expect(counted).toHaveTextContent('£1,000.00');
-    const isa = screen.getByRole('button', { name: 'Edit Cash ISA' });
+    const isa = screen.getByRole('button', { name: /^Cash ISA/ });
     expect(isa).toHaveTextContent('Savings · 4.5%');
     expect(isa).toHaveTextContent('Updated 5 weeks ago');
     expect(isa).toHaveTextContent('Kept out');
     await user.click(isa);
 
-    const sheet = await screen.findByRole('dialog', { name: 'Edit Cash ISA' });
-    expect(within(sheet).getByLabelText('Balance now')).toHaveValue('8,650.00');
+    // Its view, then Update balance
+    const sheet = await screen.findByRole('dialog', { name: 'Cash ISA' });
+    expect(sheet).toHaveTextContent('£8,650.00');
+    await user.click(within(sheet).getByRole('button', { name: /Update balance/ }));
+    const update = await screen.findByRole('dialog', { name: 'Update balance' });
+    expect(within(update).getByLabelText('Balance now')).toHaveValue('8,650.00');
   });
 
   it('shows what each savings account is for under its name', async () => {
     renderAccounts();
 
-    const row = await screen.findByRole('button', { name: 'Edit Bills pot' });
+    const row = await screen.findByRole('button', { name: /^Bills pot/ });
     expect(row).toHaveTextContent('For yearly bills');
-    expect(screen.getByRole('button', { name: `Edit Current account` })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^Current account/ })).toBeInTheDocument();
     expect(CURRENT_ACCOUNT_ID).toBe('account-current');
   });
 });
@@ -393,15 +402,15 @@ describe('several accounts to spend from', () => {
 
     await user.click(await screen.findByRole('button', { name: 'More actions for Joint bills' }));
     await user.click(await screen.findByRole('menuitem', { name: 'Make where you get paid' }));
-    const dialog = await screen.findByRole('dialog', { name: 'Edit Joint bills' });
+    const dialog = await screen.findByRole('dialog', { name: 'Where you get paid' });
     expect(dialog).toHaveTextContent(
-      /Your pay goes into Joint bills from \w{3} \d{1,2} \w{3}\. Current account stops being where you get paid\./
+      /Your pay goes into Joint bills from \w{3} \d{1,2} \w{3}\. Current account stops being where you get paid/
     );
-    // Where pay lands always counts, so there's no count switch while it moves
-    expect(within(dialog).getAllByRole('switch')).toHaveLength(1);
-    await user.click(within(dialog).getByRole('button', { name: 'Save' }));
+    // Opened from the menu, so there's no way back to a view
+    expect(within(dialog).queryByRole('button', { name: /^Back to/ })).not.toBeInTheDocument();
+    await user.click(within(dialog).getByRole('button', { name: 'Move my pay here' }));
 
-    expect(await screen.findByText('Joint bills saved')).toBeInTheDocument();
+    expect(await screen.findByText('Your pay goes into Joint bills now')).toBeInTheDocument();
     expect(api.callsTo('UpdateAccount')).toEqual([
       {
         id: 'joint',
@@ -517,5 +526,57 @@ describe('several accounts to spend from', () => {
         })
       }
     ]);
+  });
+});
+
+describe("an account's view", () => {
+  it('updates the balance from the view, then goes back to it', async () => {
+    const { user, api } = renderAccounts();
+
+    await user.click(await screen.findByRole('button', { name: 'Cash ISA' }));
+    const view = await screen.findByRole('dialog', { name: 'Cash ISA' });
+    expect(view).toHaveTextContent('Savings · Updated 5 weeks ago');
+    expect(within(view).getByRole('switch', { name: 'Count in free to spend' })).not.toBeChecked();
+    await user.click(within(view).getByRole('button', { name: /Update balance/ }));
+
+    const dialog = await screen.findByRole('dialog', { name: 'Update balance' });
+    // Kept out of free to spend, so the bank balance doesn't move
+    expect(dialog).toHaveTextContent('Cash ISA is kept out of free to spend');
+    await user.click(within(dialog).getByRole('button', { name: 'Back to Cash ISA' }));
+    await user.click(
+      within(await screen.findByRole('dialog', { name: 'Cash ISA' })).getByRole('button', {
+        name: /Update balance/
+      })
+    );
+    const again = await screen.findByRole('dialog', { name: 'Update balance' });
+    await user.clear(within(again).getByLabelText('Balance now'));
+    await user.type(within(again).getByLabelText('Balance now'), '8,700');
+    await user.click(within(again).getByRole('button', { name: 'Save balance' }));
+
+    expect(await screen.findByText('Cash ISA updated')).toBeInTheDocument();
+    expect(api.callsTo('UpdateAccountBalances')).toEqual([
+      { input: { budgetId: 'budget-1', balances: [{ accountId: 'isa', balance: 8700 }] } }
+    ]);
+  });
+
+  it('starts a payment moving money into the account', async () => {
+    const { user } = renderAccounts();
+
+    await user.click(await screen.findByRole('button', { name: 'Cash ISA' }));
+    const view = await screen.findByRole('dialog', { name: 'Cash ISA' });
+    await user.click(within(view).getByRole('button', { name: 'Move money into Cash ISA' }));
+
+    const dialog = await screen.findByRole('dialog', { name: 'Add recurring payment' });
+    expect(within(dialog).getByRole('radio', { name: 'Move money' })).toBeChecked();
+    expect(within(dialog).getByRole('combobox', { name: 'Into' })).toHaveTextContent('Cash ISA');
+  });
+
+  it("doesn't offer moving money into where you get paid", async () => {
+    const { user } = renderAccounts();
+
+    await user.click(await screen.findByRole('button', { name: 'Current account' }));
+    const view = await screen.findByRole('dialog', { name: 'Current account' });
+    expect(view).toHaveTextContent('Where you get paid, so it always counts');
+    expect(within(view).queryByRole('button', { name: /Move money into/ })).not.toBeInTheDocument();
   });
 });
