@@ -13,6 +13,7 @@ import { ACCOUNTS_VIEWS, AccountsViewState, useAccounts } from '../../hooks';
 import { AccountRow } from '../AccountRow';
 import { BeforePaydayContent } from '../BeforePaydayContent';
 import { CountedTile } from '../CountedTile';
+import { InterestBanner } from '../InterestBanner';
 import { MobileAccountRow } from '../MobileAccountRow';
 import { NetWorthHero } from '../NetWorthHero';
 import { UnchosenBanner } from '../UnchosenBanner';
@@ -53,6 +54,7 @@ export const AccountsContent = ({
           fullWidth
         />
       ) : null}
+      <InterestBanner compact={!isDesktop} />
       {unchosen.length && paidInto ? (
         <UnchosenBanner
           names={unchosen.map(payment => payment.name)}

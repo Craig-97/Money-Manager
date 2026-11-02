@@ -28,7 +28,7 @@ const account = (fields: Partial<Account> & { id: string }): Account => ({
   balance: 1000,
   counts: false,
   paidInto: false,
-  interestRate: null,
+  interest: null,
   purpose: null,
   balanceUpdatedAt: TODAY,
   ...fields
@@ -50,7 +50,12 @@ const joint = account({
   counts: true,
   purpose: 'Shared household bills'
 });
-const isa = account({ id: 'isa', name: 'Cash ISA', balance: 8650, interestRate: 4.5 });
+const isa = account({
+  id: 'isa',
+  name: 'Cash ISA',
+  balance: 8650,
+  interest: { rate: 4.5, frequency: null, day: null, nextDate: null }
+});
 const easy = account({ id: 'easy', name: 'Easy access', balance: 4200, counts: true });
 
 describe('accounts', () => {

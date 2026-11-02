@@ -2,7 +2,15 @@ import { useShallow } from 'zustand/react/shallow';
 import { useAccountActions } from '~/hooks/useAccountActions';
 import { useBudget } from '~/hooks/useBudget';
 import { usePayCycle } from '~/hooks/usePayCycle';
-import { isSpending, toAccounts } from '~/lib/accounts';
+import {
+  hasMatured,
+  interestPerPayment,
+  interestScheduleText,
+  isInterestDue,
+  isSpending,
+  toAccounts
+} from '~/lib/accounts';
+import { formatMoney } from '~/lib/format';
 import { useAccountDialogStore } from '~/state/accountDialog';
 import { useAccountQuickStore } from '~/state/accountQuick';
 import { useAccountViewStore } from '~/state/accountView';
@@ -21,7 +29,7 @@ export const useAccountSheet = () => {
   const openQuick = useAccountQuickStore(s => s.openFor);
   const openEdit = useAccountDialogStore(s => s.openEdit);
   const openMoveInto = usePaymentDialogStore(s => s.openMoveInto);
-  const { setCounts } = useAccountActions(budget);
+  const { setCounts, saveInterest } = useAccountActions(budget);
 
   const accounts = toAccounts(budget?.accounts, today);
   const account = accounts.find(item => item.id === accountId);
@@ -32,6 +40,8 @@ export const useAccountSheet = () => {
     run();
   };
   const options = { accountId: account.id, fromView: true };
+  const { interest } = account;
+  const savings = !isSpending(account);
 
   return {
     open,
@@ -42,6 +52,28 @@ export const useAccountSheet = () => {
     countsLocked: account.paidInto,
     setCounts: (counts: boolean) => setCounts(account, counts),
     updateBalance: then(() => openQuick('balance', options)),
+    // A payment of interest waiting to be checked comes first, with its estimate
+    checkInterest:
+      interest?.frequency && isInterestDue(interest, today)
+        ? {
+            detail: `About ${formatMoney(interestPerPayment(account.balance, { rate: interest.rate, frequency: interest.frequency }))}`,
+            open: then(() => openQuick('check', options))
+          }
+        : null,
+    // Savings only: its rate and when it's paid
+    interest: savings
+      ? {
+          detail: interest ? interestScheduleText(interest, today) : 'Not set up',
+          open: then(() => openQuick('interest', options))
+        }
+      : null,
+    // A fixed term that has paid out: a new term, or done
+    matured: hasMatured(interest)
+      ? {
+          newTerm: then(() => openQuick('interest', options)),
+          stop: () => void saveInterest(account, { rate: interest!.rate, frequency: null })
+        }
+      : null,
     // Another spending account can take over where pay lands
     canBePaidInto: isSpending(account) && !account.paidInto,
     makePaidInto: then(() => openQuick('paidInto', options)),

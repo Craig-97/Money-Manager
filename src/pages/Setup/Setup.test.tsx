@@ -90,7 +90,7 @@ describe('setup', () => {
     const accountDialog = await screen.findByRole('dialog', { name: 'Add savings account' });
     await user.type(within(accountDialog).getByLabelText('Balance now'), '8650');
     await user.type(within(accountDialog).getByLabelText('Name'), 'Cash ISA');
-    await user.type(within(accountDialog).getByLabelText('Interest rate (optional)'), '4.5');
+    await user.type(within(accountDialog).getByLabelText('Rate (AER)'), '4.5');
     await user.click(within(accountDialog).getByRole('button', { name: 'Add account' }));
     expect(await screen.findByRole('button', { name: 'Edit Cash ISA' })).toHaveTextContent(
       'Savings · 4.5%'
@@ -129,7 +129,7 @@ describe('setup', () => {
           name: 'Cash ISA',
           balance: 8650,
           counts: false,
-          interestRate: 4.5
+          interest: { rate: 4.5, frequency: null }
         }
       ],
       recurringPayments: [expect.objectContaining({ name: 'ISA top-up', amount: 250 })]

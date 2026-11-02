@@ -22,7 +22,7 @@ const savings = (fields: Partial<FakeAccount> & { id: string; name: string }): F
   kind: 'SAVINGS',
   balance: 1000,
   counts: false,
-  interestRate: null,
+  interest: null,
   purpose: null,
   balanceUpdatedAt: apiDate('2026-09-30'),
   ...fields
@@ -37,7 +37,7 @@ const budget = (): FakeBudget => ({
       id: 'isa',
       name: 'Cash ISA',
       balance: 8650,
-      interestRate: 4.5,
+      interest: { rate: 4.5, frequency: null, day: null, nextDate: null },
       balanceUpdatedAt: apiDate('2026-08-28')
     }),
     savings({ id: 'pot', name: 'Bills pot', balance: 1240, purpose: 'For yearly bills' })
@@ -110,7 +110,6 @@ describe('accounts', () => {
           name: 'Cash ISA',
           balance: 8900,
           counts: false,
-          interestRate: 4.5,
           purpose: 'Rainy day'
         }
       }
@@ -124,7 +123,7 @@ describe('accounts', () => {
     const view = await screen.findByRole('dialog', { name: 'Current account' });
     await user.click(within(view).getByRole('button', { name: 'Edit account' }));
     const dialog = await screen.findByRole('dialog', { name: 'Edit Current account' });
-    expect(within(dialog).queryByLabelText('Interest rate (optional)')).not.toBeInTheDocument();
+    expect(within(dialog).queryByLabelText('Rate (AER)')).not.toBeInTheDocument();
     expect(within(dialog).queryByRole('switch')).not.toBeInTheDocument();
     expect(within(dialog).queryByRole('button', { name: 'Delete' })).not.toBeInTheDocument();
   });
@@ -147,7 +146,7 @@ describe('accounts', () => {
 
     await user.type(within(dialog).getByLabelText('Balance now'), '4200');
     await user.type(within(dialog).getByLabelText('Name'), 'Easy access');
-    await user.type(within(dialog).getByLabelText('Interest rate (optional)'), '4.1');
+    await user.type(within(dialog).getByLabelText('Rate (AER)'), '4.1');
     await user.click(within(dialog).getByRole('button', { name: 'Add account' }));
 
     expect(await screen.findByText('Easy access added')).toBeInTheDocument();
@@ -159,7 +158,7 @@ describe('accounts', () => {
           name: 'Easy access',
           balance: 4200,
           counts: false,
-          interestRate: 4.1,
+          interest: { rate: 4.1, frequency: null },
           purpose: null
         }
       }
@@ -206,7 +205,9 @@ describe('accounts on mobile', () => {
     const counted = await screen.findByRole('region', { name: 'Counted in free to spend' });
     expect(counted).toHaveTextContent('£1,000.00');
     const isa = screen.getByRole('button', { name: /^Cash ISA/ });
-    expect(isa).toHaveTextContent('Savings · 4.5%');
+    // The Savings heading says what it is, so its subtitle starts with the rate
+    expect(isa).toHaveTextContent('4.5%');
+    expect(isa).not.toHaveTextContent('Savings ·');
     expect(isa).toHaveTextContent('Updated 5 weeks ago');
     expect(isa).toHaveTextContent('Kept out');
     await user.click(isa);
@@ -471,7 +472,7 @@ describe('several accounts to spend from', () => {
     );
     await user.click(within(dialog).getByRole('button', { name: /More options/ }));
     expect(within(dialog).getByRole('switch', { name: 'Count in free to spend' })).toBeChecked();
-    expect(within(dialog).queryByLabelText('Interest rate (optional)')).not.toBeInTheDocument();
+    expect(within(dialog).queryByLabelText('Rate (AER)')).not.toBeInTheDocument();
     await user.click(within(dialog).getByRole('button', { name: 'Add account' }));
 
     expect(await screen.findByRole('dialog', { name: 'Set up your accounts' })).toBeInTheDocument();
@@ -578,5 +579,113 @@ describe("an account's view", () => {
     const view = await screen.findByRole('dialog', { name: 'Current account' });
     expect(view).toHaveTextContent('Where you get paid, so it always counts');
     expect(within(view).queryByRole('button', { name: /Move money into/ })).not.toBeInTheDocument();
+  });
+});
+
+describe('savings interest', () => {
+  // Easy access pays monthly on the 1st, so yesterday's is waiting to be checked; the ISA pays on
+  // the 3rd, tomorrow
+  const withInterest = (): FakeBudget => ({
+    ...budget(),
+    accounts: [
+      savings({
+        id: 'isa',
+        name: 'Cash ISA',
+        balance: 8650,
+        interest: { rate: 4.5, frequency: 'MONTHLY', day: 3, nextDate: apiDate('2026-10-03') },
+        balanceUpdatedAt: apiDate('2026-08-28')
+      }),
+      savings({
+        id: 'easy',
+        name: 'Easy access',
+        balance: 4200,
+        counts: true,
+        interest: { rate: 4.1, frequency: 'MONTHLY', day: 1, nextDate: apiDate('2026-10-01') }
+      })
+    ]
+  });
+
+  it('says what’s built up, and checks a payment that’s waiting before adding it', async () => {
+    const { user, api } = renderAccounts(withInterest());
+
+    expect(
+      await screen.findByText('About £30.25 interest so far · paid tomorrow')
+    ).toBeInTheDocument();
+    const banner = screen.getByRole('region', { name: 'Interest to check' });
+    expect(banner).toHaveTextContent('Easy access interest was paid Thu 1 Oct');
+    expect(banner).toHaveTextContent('About £14.09');
+    await user.click(within(banner).getByRole('button', { name: 'Check interest' }));
+
+    const dialog = await screen.findByRole('dialog', { name: 'Check interest' });
+    expect(within(dialog).getByLabelText('Interest paid in')).toHaveValue('14.09');
+    expect(dialog).toHaveTextContent('Our estimate is £14.09');
+    // It counts, so the dashboard's bank balance moves too
+    expect(dialog).toHaveTextContent('Bank balance on your dashboard');
+    await user.clear(within(dialog).getByLabelText('Interest paid in'));
+    await user.type(within(dialog).getByLabelText('Interest paid in'), '14.12');
+    await user.click(within(dialog).getByRole('button', { name: 'Add £14.12' }));
+
+    expect(await screen.findByText('Added £14.12 to Easy access')).toBeInTheDocument();
+    expect(api.callsTo('ConfirmInterest')).toEqual([
+      { input: { accountId: 'easy', amount: 14.12 } }
+    ]);
+    await waitFor(() =>
+      expect(screen.queryByRole('region', { name: 'Interest to check' })).not.toBeInTheDocument()
+    );
+  });
+
+  it('skips a month with no interest, without adding anything', async () => {
+    const { user, api } = renderAccounts(withInterest());
+
+    await user.click(await screen.findByRole('button', { name: 'Easy access' }));
+    const view = await screen.findByRole('dialog', { name: 'Easy access' });
+    await user.click(within(view).getByRole('button', { name: /^Check interest/ }));
+    const dialog = await screen.findByRole('dialog', { name: 'Check interest' });
+    expect(within(dialog).getByRole('button', { name: 'Back to Easy access' })).toBeInTheDocument();
+    await user.click(within(dialog).getByRole('button', { name: 'Skip Oct' }));
+
+    expect(await screen.findByText('Skipped Easy access interest this time')).toBeInTheDocument();
+    expect(api.callsTo('ConfirmInterest')).toEqual([
+      { input: { accountId: 'easy', amount: null } }
+    ]);
+  });
+
+  it('asks again tomorrow with Later', async () => {
+    const { user, api } = renderAccounts(withInterest());
+
+    await user.click(
+      within(await screen.findByRole('region', { name: 'Interest to check' })).getByRole('button', {
+        name: 'Check interest'
+      })
+    );
+    const dialog = await screen.findByRole('dialog', { name: 'Check interest' });
+    await user.click(within(dialog).getByRole('button', { name: 'Later' }));
+
+    expect(await screen.findByText('It’ll be back tomorrow')).toBeInTheDocument();
+    expect(api.callsTo('ConfirmInterest')).toEqual([]);
+    await waitFor(() =>
+      expect(screen.queryByRole('region', { name: 'Interest to check' })).not.toBeInTheDocument()
+    );
+  });
+
+  it('says when interest is paid from its own small dialog', async () => {
+    const { user, api } = renderAccounts();
+
+    await user.click(await screen.findByRole('button', { name: 'Cash ISA' }));
+    const view = await screen.findByRole('dialog', { name: 'Cash ISA' });
+    await user.click(within(view).getByRole('button', { name: /^Interest/ }));
+    const dialog = await screen.findByRole('dialog', { name: 'Interest' });
+    expect(within(dialog).getByLabelText('Rate (AER)')).toHaveValue('4.5');
+
+    await user.click(within(dialog).getByRole('combobox', { name: 'Paid' }));
+    await user.click(await screen.findByRole('option', { name: 'Monthly' }));
+    await user.type(within(dialog).getByLabelText('Day of the month'), '3');
+    expect(dialog).toHaveTextContent('About £31.79 on Sat 3 Oct, then each month.');
+    await user.click(within(dialog).getByRole('button', { name: 'Save interest' }));
+
+    expect(await screen.findByText('Cash ISA saved')).toBeInTheDocument();
+    expect(api.callsTo('UpdateAccount')).toEqual([
+      { id: 'isa', input: { interest: { rate: 4.5, frequency: 'MONTHLY', day: 3 } } }
+    ]);
   });
 });

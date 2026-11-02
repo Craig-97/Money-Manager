@@ -1,5 +1,6 @@
 import { AccountFieldsFragment, AccountKind } from '~/graphql/generated';
 import { daysBetween, fromApiDate } from '~/lib/dates';
+import { AccountInterest } from './interest';
 
 /*
  * A budget's bank accounts: ones to spend from, one of them where pay lands, and any savings.
@@ -15,7 +16,8 @@ export interface Account {
   counts: boolean;
   // Where pay lands, and where payments that don't name an account go out of
   paidInto: boolean;
-  interestRate: number | null;
+  // Savings only: its rate, and when it's paid once that's been said
+  interest: AccountInterest | null;
   purpose: string | null;
   // The day the balance was last typed in
   balanceUpdatedAt: Date;
@@ -37,7 +39,14 @@ export const toAccounts = (
     balance: account.balance,
     counts: account.counts,
     paidInto: account.paidInto,
-    interestRate: account.interestRate ?? null,
+    interest: account.interest
+      ? {
+          rate: account.interest.rate,
+          frequency: account.interest.frequency ?? null,
+          day: account.interest.day ?? null,
+          nextDate: fromApiDate(account.interest.nextDate)
+        }
+      : null,
     purpose: account.purpose ?? null,
     balanceUpdatedAt: fromApiDate(account.balanceUpdatedAt) ?? today
   }));
@@ -137,13 +146,25 @@ export const accountMeta = (account: Account, { several }: { several: boolean })
     if (account.paidInto && !several) return 'Where you get paid';
     return ['Spending', account.purpose].filter(Boolean).join(' · ');
   }
-  return [
-    'Savings',
-    account.interestRate !== null ? `${account.interestRate}%` : null,
-    account.purpose
-  ]
+  return ['Savings', account.interest ? `${account.interest.rate}%` : null, account.purpose]
     .filter(Boolean)
     .join(' · ');
+};
+
+/*
+ * A phone's subtitle: savings drop "Savings", as their heading says it, and the rate once interest
+ * is paid on a schedule, as the strip under the row has it. "Rainy day fund", "4.1%".
+ */
+export const mobileAccountMeta = (account: Account, { several }: { several: boolean }) => {
+  if (isSpending(account)) return accountMeta(account, { several });
+  return (
+    [
+      account.interest && !account.interest.frequency ? `${account.interest.rate}%` : null,
+      account.purpose
+    ]
+      .filter(Boolean)
+      .join(' · ') || 'Savings'
+  );
 };
 
 /* The first letter, for an account's badge */

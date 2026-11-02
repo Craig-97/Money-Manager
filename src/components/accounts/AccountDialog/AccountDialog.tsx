@@ -22,7 +22,7 @@ export const AccountDialog = () => {
   const { budget } = useBudget();
   const { today, cycle } = usePayCycle(budget?.payday);
   const accounts = toAccounts(budget?.accounts, today);
-  const dialog = useAccountDialog({ budgetId: budget?.id ?? '', accounts });
+  const dialog = useAccountDialog({ budgetId: budget?.id ?? '', accounts, today });
   const openPayment = usePaymentDialogStore(s => s.openEdit);
   const { account, draft, errors } = dialog;
 
@@ -120,6 +120,7 @@ export const AccountDialog = () => {
         <AccountFields
           key={dialog.opened}
           draft={draft}
+          today={today}
           set={dialog.set}
           errors={errors}
           // A new account's type was chosen first; an existing one's can change under More options

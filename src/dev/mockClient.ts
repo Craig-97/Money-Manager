@@ -36,7 +36,7 @@ const demoSpendingAccounts = (): FakeAccount[] => [
     kind: 'SPENDING',
     balance: 2105,
     counts: true,
-    interestRate: null,
+    interest: null,
     purpose: 'Shared household bills',
     balanceUpdatedAt: fromToday(-3)
   },
@@ -46,7 +46,7 @@ const demoSpendingAccounts = (): FakeAccount[] => [
     kind: 'SPENDING',
     balance: 180,
     counts: true,
-    interestRate: null,
+    interest: null,
     purpose: null,
     balanceUpdatedAt: fromToday(0)
   },
@@ -57,7 +57,7 @@ const demoSpendingAccounts = (): FakeAccount[] => [
     kind: 'SPENDING',
     balance: -40,
     counts: true,
-    interestRate: null,
+    interest: null,
     purpose: null,
     balanceUpdatedAt: fromToday(-1)
   }
@@ -135,7 +135,13 @@ const demoBudget = (scenario: string | null): FakeBudget => {
         balance: 4200,
         // Counted in the accounts scenario, so the bank balance opens as a dialog
         counts: scenario === 'accounts',
-        interestRate: 4.1,
+        // Paid yesterday, so it's waiting to be checked
+        interest: {
+          rate: 4.1,
+          frequency: 'MONTHLY',
+          day: addDays(startOfToday(), -1).getDate(),
+          nextDate: fromToday(-1)
+        },
         purpose: null,
         balanceUpdatedAt: fromToday(-9)
       },
@@ -145,7 +151,12 @@ const demoBudget = (scenario: string | null): FakeBudget => {
         kind: 'SAVINGS',
         balance: 8650,
         counts: false,
-        interestRate: 4.5,
+        interest: {
+          rate: 4.5,
+          frequency: 'MONTHLY',
+          day: addDays(startOfToday(), 10).getDate(),
+          nextDate: fromToday(10)
+        },
         purpose: null,
         balanceUpdatedAt: fromToday(-36)
       },
@@ -155,7 +166,7 @@ const demoBudget = (scenario: string | null): FakeBudget => {
         kind: 'SAVINGS',
         balance: 1240,
         counts: false,
-        interestRate: null,
+        interest: null,
         purpose: 'For yearly bills',
         balanceUpdatedAt: fromToday(0)
       }

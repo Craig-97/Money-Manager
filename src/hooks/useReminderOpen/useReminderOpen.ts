@@ -22,7 +22,7 @@ export const useReminderOpen = (budgetId: string) => {
   const navigate = useNavigate();
   const openPayment = usePaymentDialogStore(s => s.openEdit);
   const openNote = useNoteDialogStore(s => s.openEdit);
-  const openBalance = useAccountQuickStore(s => s.openFor);
+  const openQuick = useAccountQuickStore(s => s.openFor);
   const { pay } = usePaymentActions(budgetId);
 
   return (reminder: Reminder): ReminderOpen | null => {
@@ -50,12 +50,18 @@ export const useReminderOpen = (budgetId: string) => {
         return reminder.awaitingStart
           ? { label: 'Open dashboard', run: () => void navigate(ROUTES.dashboard) }
           : null;
+      case 'interest': {
+        const { account } = reminder;
+        return account
+          ? { label: 'Check interest', run: () => openQuick('check', { accountId: account.id }) }
+          : null;
+      }
       case 'balance': {
         const { account } = reminder;
         return account
           ? {
               label: 'Update balance',
-              run: () => openBalance('balance', { accountId: account.id })
+              run: () => openQuick('balance', { accountId: account.id })
             }
           : null;
       }

@@ -15,7 +15,7 @@ export type Account = {
   balanceUpdatedAt: Scalars['String']['output'];
   counts: Scalars['Boolean']['output'];
   id: Scalars['ID']['output'];
-  interestRate: Maybe<Scalars['Float']['output']>;
+  interest: Maybe<AccountInterest>;
   kind: AccountKind;
   name: Scalars['String']['output'];
   paidInto: Scalars['Boolean']['output'];
@@ -25,6 +25,21 @@ export type Account = {
 export type AccountBalanceInput = {
   accountId: Scalars['ID']['input'];
   balance: Scalars['Float']['input'];
+};
+
+export type AccountInterest = {
+  __typename: 'AccountInterest';
+  day: Maybe<Scalars['Int']['output']>;
+  frequency: Maybe<InterestFrequency>;
+  nextDate: Maybe<Scalars['String']['output']>;
+  rate: Scalars['Float']['output'];
+};
+
+export type AccountInterestInput = {
+  day?: InputMaybe<Scalars['Int']['input']>;
+  frequency?: InputMaybe<InterestFrequency>;
+  nextDate?: InputMaybe<Scalars['String']['input']>;
+  rate: Scalars['Float']['input'];
 };
 
 export type AccountKind = 'SAVINGS' | 'SPENDING';
@@ -75,7 +90,7 @@ export type Budget = {
 export type BudgetAccountInput = {
   balance: Scalars['Float']['input'];
   counts?: InputMaybe<Scalars['Boolean']['input']>;
-  interestRate?: InputMaybe<Scalars['Float']['input']>;
+  interest?: InputMaybe<AccountInterestInput>;
   key: Scalars['String']['input'];
   kind?: InputMaybe<AccountKind>;
   name: Scalars['String']['input'];
@@ -99,11 +114,16 @@ export type CalendarFeed = {
   token: Maybe<Scalars['String']['output']>;
 };
 
+export type ConfirmInterestInput = {
+  accountId: Scalars['ID']['input'];
+  amount?: InputMaybe<Scalars['Float']['input']>;
+};
+
 export type CreateAccountInput = {
   balance: Scalars['Float']['input'];
   budgetId: Scalars['ID']['input'];
   counts?: InputMaybe<Scalars['Boolean']['input']>;
-  interestRate?: InputMaybe<Scalars['Float']['input']>;
+  interest?: InputMaybe<AccountInterestInput>;
   kind?: InputMaybe<AccountKind>;
   name: Scalars['String']['input'];
   paidInto?: InputMaybe<Scalars['Boolean']['input']>;
@@ -180,6 +200,8 @@ export type DeleteResponse = {
   success: Scalars['Boolean']['output'];
 };
 
+export type InterestFrequency = 'MATURITY' | 'MONTHLY' | 'QUARTERLY' | 'YEARLY';
+
 export type LeftOverOutcome = 'DUE' | 'PAID' | 'SKIPPED';
 
 export type LeftOverPaymentInput = {
@@ -211,6 +233,7 @@ export type Mutation = {
   batchDeleteOneOffPayments: DeleteResponse;
   batchDeleteRecurringPayments: DeleteResponse;
   changePassword: UserResponse;
+  confirmInterest: AccountResponse;
   createAccount: AccountResponse;
   createBudget: BudgetResponse;
   createNote: NoteResponse;
@@ -263,6 +286,10 @@ export type MutationBatchDeleteRecurringPaymentsArgs = {
 export type MutationChangePasswordArgs = {
   currentPassword: Scalars['String']['input'];
   newPassword: Scalars['String']['input'];
+};
+
+export type MutationConfirmInterestArgs = {
+  input: ConfirmInterestInput;
 };
 
 export type MutationCreateAccountArgs = {
@@ -701,7 +728,7 @@ export type UpdateAccountBalancesInput = {
 export type UpdateAccountInput = {
   balance?: InputMaybe<Scalars['Float']['input']>;
   counts?: InputMaybe<Scalars['Boolean']['input']>;
-  interestRate?: InputMaybe<Scalars['Float']['input']>;
+  interest?: InputMaybe<AccountInterestInput>;
   kind?: InputMaybe<AccountKind>;
   name?: InputMaybe<Scalars['String']['input']>;
   paidInto?: InputMaybe<Scalars['Boolean']['input']>;

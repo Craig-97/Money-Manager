@@ -8,7 +8,9 @@ import { SegmentedControl } from '~/components/ui/SegmentedControl';
 import { Switch } from '~/components/ui/Switch';
 import { AccountKind } from '~/graphql/generated';
 import { cn } from '~/lib/cn';
+import { parseMoney } from '~/lib/format';
 import { AccountDraft, AccountDraftErrors } from '../accountDraft';
+import { InterestFields } from '../InterestFields';
 
 export const helpClasses = 'mt-2 ml-1 text-xs font-semibold text-muted';
 export const panelClasses =
@@ -33,6 +35,7 @@ interface AccountFieldsProps {
   draft: AccountDraft;
   set: (fields: Partial<AccountDraft>) => void;
   errors: AccountDraftErrors;
+  today: Date;
   // Changing an existing account's type, under More options. A new one's type was chosen first.
   canChangeKind: boolean;
   // An existing account: More options starts open when something in it isn't the default
@@ -47,13 +50,14 @@ interface AccountFieldsProps {
 
 /*
  * An account's fields, the same wherever one is added or changed: the balance first, then its
- * name and, for savings, its rate. What most people leave alone, what it's for, whether it counts
+ * name and, for savings, its interest. What most people leave alone, what it's for, whether it counts
  * in free to spend and its type, is under More options.
  */
 export const AccountFields = ({
   draft,
   set,
   errors,
+  today,
   canChangeKind,
   editing = false,
   afterKind,
@@ -115,25 +119,20 @@ export const AccountFields = ({
       </div>
 
       {savings ? (
-        <div>
-          <Label tone="muted" htmlFor="account-rate">
-            Interest rate (optional)
-          </Label>
-          <TextInput
-            id="account-rate"
-            inputMode="decimal"
-            value={draft.interestRate}
-            onChange={event => set({ interestRate: event.target.value })}
-            placeholder="0.0"
-            autoComplete="off"
-            suffix={<span className="pr-1 font-bold text-muted">%</span>}
-            invalid={!!errors.interestRate}
-            aria-describedby={errors.interestRate ? 'account-rate-error' : undefined}
+        <section
+          aria-labelledby="account-interest"
+          className="flex flex-col gap-3.5 border-t border-border pt-[18px]">
+          <h3 id="account-interest" className="text-[15px] font-extrabold">
+            Interest
+          </h3>
+          <InterestFields
+            draft={draft.interest}
+            set={fields => set({ interest: { ...draft.interest, ...fields } })}
+            errors={errors}
+            balance={parseMoney(draft.balance)}
+            today={today}
           />
-          {errors.interestRate ? (
-            <FieldError id="account-rate-error">{errors.interestRate}</FieldError>
-          ) : null}
-        </div>
+        </section>
       ) : null}
 
       {afterKind}

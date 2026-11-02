@@ -7,7 +7,13 @@ fragment AccountFields on Account {
   counts
   # Where pay lands
   paidInto
-  interestRate
+  # Savings only: its rate, and when it's paid when that's been said
+  interest {
+    rate
+    frequency
+    day
+    nextDate
+  }
   purpose
   balanceUpdatedAt
 }

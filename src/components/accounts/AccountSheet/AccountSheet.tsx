@@ -1,4 +1,4 @@
-import { ArrowLeftRight, Landmark, PenLine, RefreshCw } from 'lucide-react';
+import { ArrowLeftRight, Landmark, PenLine, Percent, RefreshCw } from 'lucide-react';
 import { ActionRow } from '~/components/ui/ActionRow';
 import { ActionRows } from '~/components/ui/ActionRows';
 import { ActionTile } from '~/components/ui/ActionTile';
@@ -7,12 +7,14 @@ import { Modal } from '~/components/ui/Modal';
 import { Switch } from '~/components/ui/Switch';
 import { updatedText } from '~/lib/accounts';
 import { AccountSummary } from '../AccountSummary';
+import { InterestStrip } from '../InterestStrip';
+import { MaturedPrompt } from '../MaturedPrompt';
 import { useAccountSheet } from './useAccountSheet';
 
 /*
- * An account's view, as a debt's is: its balance and whether it counts in free to spend, then its
- * small dialogs as tiles, and Edit account for the full form. A dialog on desktop, a sheet on a
- * phone, from its name on Accounts.
+ * An account's view, as a debt's is: its balance, its interest and whether it counts in free to
+ * spend, then its small dialogs as tiles, and Edit account for the full form. A dialog on desktop,
+ * a sheet on a phone, from its name on Accounts.
  */
 export const AccountSheet = () => {
   const sheet = useAccountSheet();
@@ -25,6 +27,14 @@ export const AccountSheet = () => {
       onOpenChange={next => (next ? undefined : sheet.close())}
       title={account.name}>
       <AccountSummary account={account} today={sheet.today}>
+        <InterestStrip account={account} today={sheet.today} />
+        {sheet.matured ? (
+          <MaturedPrompt
+            name={account.name}
+            onNewTerm={sheet.matured.newTerm}
+            onStop={sheet.matured.stop}
+          />
+        ) : null}
         <div className="flex items-center gap-3 border-t border-border pt-3">
           <span className="flex min-w-0 grow flex-col gap-0.5">
             <span id="account-view-counts" className="text-sm font-bold">
@@ -48,12 +58,28 @@ export const AccountSheet = () => {
         </div>
       </AccountSummary>
       <ActionTiles>
+        {sheet.checkInterest ? (
+          <ActionTile
+            icon={<Percent size={20} />}
+            label="Check interest"
+            detail={sheet.checkInterest.detail}
+            onClick={sheet.checkInterest.open}
+          />
+        ) : null}
         <ActionTile
           icon={<RefreshCw size={20} />}
           label="Update balance"
           detail={updatedText(account, sheet.today)}
           onClick={sheet.updateBalance}
         />
+        {sheet.interest ? (
+          <ActionTile
+            icon={<Percent size={20} />}
+            label="Interest"
+            detail={sheet.interest.detail}
+            onClick={sheet.interest.open}
+          />
+        ) : null}
         {sheet.canBePaidInto ? (
           <ActionTile
             icon={<Landmark size={20} />}

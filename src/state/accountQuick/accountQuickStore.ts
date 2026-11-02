@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-export type AccountQuickDialog = 'balance' | 'paidInto';
+export type AccountQuickDialog = 'balance' | 'paidInto' | 'interest' | 'check';
 
 interface OpenOptions {
   accountId: string;
@@ -22,7 +22,8 @@ interface AccountQuickState {
 }
 
 /*
- * An account's small dialogs: a new balance, and making it where you get paid. They live in the
+ * An account's small dialogs: a new balance, making it where you get paid, when its interest is
+ * paid, and checking a payment of it. They live in the
  * app shell, so the account's view and its menu can open them.
  */
 export const useAccountQuickStore = create<AccountQuickState>()(set => ({

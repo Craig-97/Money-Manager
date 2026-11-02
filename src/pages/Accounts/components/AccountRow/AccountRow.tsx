@@ -1,5 +1,12 @@
 import { Switch } from '~/components/ui/Switch';
-import { Account, accountLetter, accountMeta, isStale, updatedText } from '~/lib/accounts';
+import {
+  Account,
+  accountLetter,
+  accountMeta,
+  interestLine,
+  isStale,
+  updatedText
+} from '~/lib/accounts';
 import { cn } from '~/lib/cn';
 import { formatBalance } from '~/lib/format';
 import { useAccountViewStore } from '~/state/accountView';
@@ -21,6 +28,7 @@ interface AccountRowProps {
 export const AccountRow = ({ account, today, several, onCounts }: AccountRowProps) => {
   const openView = useAccountViewStore(s => s.openFor);
   const stale = isStale(account, today);
+  const interest = interestLine(account, today);
   const updated = (
     <span
       className={cn(
@@ -53,6 +61,15 @@ export const AccountRow = ({ account, today, several, onCounts }: AccountRowProp
           <p className="mt-0.5 text-xs font-semibold text-muted">
             {accountMeta(account, { several })}
           </p>
+          {interest ? (
+            <p
+              className={cn(
+                'mt-0.5 text-xs font-bold',
+                interest.tone === 'earning' ? 'text-income' : 'text-warn'
+              )}>
+              {interest.text}
+            </p>
+          ) : null}
           <div className="mt-1.5 wide:hidden">{updated}</div>
         </div>
       </div>
@@ -82,7 +99,7 @@ export const AccountRow = ({ account, today, several, onCounts }: AccountRowProp
         )}
       </span>
       <span className="flex justify-end">
-        <AccountMenu account={account} several={several} onCounts={onCounts} />
+        <AccountMenu account={account} several={several} today={today} onCounts={onCounts} />
       </span>
     </div>
   );

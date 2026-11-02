@@ -286,7 +286,7 @@ describe('old balances', () => {
     balance: 8650,
     counts: false,
     paidInto: false,
-    interestRate: 4.5,
+    interest: { rate: 4.5, frequency: null, day: null, nextDate: null },
     purpose: null,
     balanceUpdatedAt: day(updated)
   });
@@ -313,6 +313,41 @@ describe('old balances', () => {
     );
     expect(kinds(upcomingReminders(sources({ accounts: [isa('2026-09-25')] })))).not.toContain(
       'balance'
+    );
+  });
+});
+
+describe('savings interest', () => {
+  const easy = (next: string) => ({
+    id: 'easy',
+    name: 'Easy access',
+    kind: 'SAVINGS' as const,
+    balance: 4200,
+    counts: true,
+    paidInto: false,
+    interest: { rate: 4.1, frequency: 'MONTHLY' as const, day: 1, nextDate: day(next) },
+    purpose: null,
+    balanceUpdatedAt: TODAY
+  });
+
+  it('reminds on the day it’s paid, with the estimate, until it’s checked', () => {
+    const reminder = newReminders(sources({ accounts: [easy('2026-10-01')] })).find(
+      item => item.kind === 'interest'
+    )!;
+    expect(reminder).toMatchObject({
+      key: 'interest:easy:2026-10-01',
+      title: 'Easy access interest was paid Thu 1 Oct',
+      body: 'About £14.09 · check it and add it to the balance',
+      amount: 14.09
+    });
+    expect(kindText(reminder)).toBe('Interest');
+    expect(laterUntil(reminder, TODAY)).toEqual(day('2026-10-03'));
+
+    // Next month's is ahead, in Coming up
+    const ahead = sources({ accounts: [easy('2026-11-01')] });
+    expect(newReminders(ahead).map(item => item.kind)).not.toContain('interest');
+    expect(upcomingReminders(ahead).find(item => item.kind === 'interest')?.name).toBe(
+      'Easy access interest'
     );
   });
 });

@@ -10,6 +10,7 @@ import {
 } from '~/components/accounts';
 import { Button } from '~/components/ui/Button';
 import { Modal } from '~/components/ui/Modal';
+import { startOfToday } from '~/lib/dates';
 import { SetupState } from '../../../hooks';
 
 /*
@@ -33,7 +34,8 @@ export const SetupAccountDialog = ({ setup }: { setup: SetupState }) => {
     setSubmitted(false);
   }
 
-  const { errors, fields } = checkAccountDraft(draft, { submitted });
+  const today = startOfToday();
+  const { errors, fields } = checkAccountDraft(draft, { submitted, today });
   const save = () => {
     setSubmitted(true);
     if (fields) dialog.save(draft);
@@ -87,6 +89,7 @@ export const SetupAccountDialog = ({ setup }: { setup: SetupState }) => {
         <AccountFields
           key={dialog.opened}
           draft={draft}
+          today={today}
           set={changes => setDraft(current => ({ ...current, ...changes }))}
           errors={errors}
           canChangeKind={!!editing}

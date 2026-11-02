@@ -10,7 +10,7 @@ import {
   RecurringPaymentInput,
   Weekday
 } from '~/graphql/generated';
-import { addDays, parseIsoDate, PaydayConfig } from '~/lib/dates';
+import { addDays, parseIsoDate, PaydayConfig, startOfToday } from '~/lib/dates';
 import { parseMoney } from '~/lib/format';
 import { BankHolidays, getPayCycle, usesWeekday } from '~/lib/payday';
 import { occurrencesBetween, PER_MONTH } from '~/lib/payments';
@@ -282,8 +282,8 @@ export const setupAccounts = (values: SetupValues): SetupAccountView[] => [
 export const accountDetails = (account: SetupAccountView) =>
   [
     account.kind === 'SPENDING' ? 'Spending' : 'Savings',
-    account.kind === 'SAVINGS' && account.draft?.interestRate.trim()
-      ? `${account.draft.interestRate.replace(/[%\s]/g, '')}%`
+    account.kind === 'SAVINGS' && account.draft?.interest.rate.trim()
+      ? `${account.draft.interest.rate.replace(/[%\s]/g, '')}%`
       : null,
     account.draft?.purpose.trim() || null,
     account.kind === 'SAVINGS' && account.counts ? 'Counts in free to spend' : null
@@ -400,7 +400,7 @@ export const toCreateBudgetInput = (values: SetupValues): CreateBudgetInput => {
     bankBalance: parseMoney(values.balance) ?? 0,
     paidIntoName: values.paidIntoName.trim() || 'Current account',
     accounts: values.accounts.flatMap(({ key, draft }) => {
-      const { fields } = checkAccountDraft(draft, { submitted: true });
+      const { fields } = checkAccountDraft(draft, { submitted: true, today: startOfToday() });
       return fields ? [{ key, kind: draft.kind, ...fields }] : [];
     }),
     monthlyIncome: parseMoney(values.income) ?? 0,

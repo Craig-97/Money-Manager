@@ -95,7 +95,7 @@ const withSavings = (): FakeBudget => {
         kind: 'SAVINGS',
         balance: 8650,
         counts: false,
-        interestRate: 4.5,
+        interest: { rate: 4.5, frequency: null, day: null, nextDate: null },
         purpose: null,
         balanceUpdatedAt: apiDate('2026-09-30')
       }
@@ -119,7 +119,7 @@ const withJoint = (): FakeBudget => {
         kind: 'SPENDING',
         balance: 2105,
         counts: true,
-        interestRate: null,
+        interest: null,
         purpose: null,
         balanceUpdatedAt: apiDate('2026-09-30')
       }

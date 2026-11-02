@@ -1,4 +1,4 @@
-import { Account, balanceAge, STALE_DAYS } from '~/lib/accounts';
+import { Account, balanceAge, interestPerPayment, STALE_DAYS } from '~/lib/accounts';
 import { addDays, daysBetween, fromApiDate, toIsoDate } from '~/lib/dates';
 import { formatMoney } from '~/lib/format';
 import { Note, noteDateFrom, noteHeading, remindText, repeatText } from '~/lib/notes';
@@ -24,7 +24,7 @@ import {
  */
 
 export type ReminderKind =
-  'due' | 'overdue' | 'renewal' | 'renewed' | 'note' | 'payday' | 'balance';
+  'due' | 'overdue' | 'renewal' | 'renewed' | 'note' | 'payday' | 'balance' | 'interest';
 
 // The Coming up filters; paydays count as payments
 export type ReminderFilter = 'all' | 'payments' | 'renewals' | 'notes';
@@ -111,7 +111,8 @@ const LATER_DAYS: Record<ReminderKind, number> = {
   renewed: 3,
   note: 3,
   payday: 1,
-  balance: 3
+  balance: 3,
+  interest: 1
 };
 
 const keyOf = (kind: string, ...parts: (string | Date)[]) =>
@@ -346,6 +347,46 @@ const balanceEvents = ({ accounts = [], today }: ReminderSources): Omit<Reminder
     ];
   });
 
+/* The reminder for a savings account's next interest payment. Its date is in the key, so checking
+   or skipping a payment clears it, and the next one is a new reminder. */
+export const interestReminderKey = (account: Pick<Account, 'id' | 'interest'>) =>
+  account.interest?.nextDate ? keyOf('interest', account.id, account.interest.nextDate) : null;
+
+/*
+ * A savings account's interest on the day it's paid: what it should be, to check against the bank
+ * and add. A fixed-term account's is the day it matures.
+ */
+const interestEvents = ({ accounts = [], today }: ReminderSources): Omit<Reminder, 'read'>[] =>
+  accounts.flatMap(account => {
+    const { interest } = account;
+    const key = interestReminderKey(account);
+    if (!interest?.frequency || !interest.nextDate || !key) return [];
+    const estimate = interestPerPayment(account.balance, {
+      rate: interest.rate,
+      frequency: interest.frequency
+    });
+    const matures = interest.frequency === 'MATURITY';
+    return [
+      {
+        key,
+        kind: 'interest',
+        date: interest.nextDate,
+        firesOn: interest.nextDate,
+        timing: 'On the day',
+        title: matures
+          ? `${account.name} has matured`
+          : `${account.name} interest was paid ${formatShortDate(interest.nextDate, today)}`,
+        name: matures ? `${account.name} matures` : `${account.name} interest`,
+        body: `About ${formatMoney(estimate)} · check it and add it to the balance`,
+        amount: estimate,
+        payment: null,
+        note: null,
+        paymentNote: null,
+        account
+      }
+    ];
+  });
+
 const isPutAway = (state: ReminderState | undefined, today: Date) =>
   !!state?.snoozedUntil && state.snoozedUntil > today;
 
@@ -376,7 +417,8 @@ export const allReminders = (sources: ReminderSources): Reminder[] =>
     ...renewalEvents(sources),
     ...noteEvents(sources),
     ...paydayEvents(sources),
-    ...balanceEvents(sources)
+    ...balanceEvents(sources),
+    ...interestEvents(sources)
   ].map(reminder => ({ ...reminder, read: sources.states.get(reminder.key)?.read ?? false }));
 
 /* New: the ones that have gone off, overdue payments first, then the latest first */
@@ -411,7 +453,7 @@ export const upcomingReminders = (sources: ReminderSources) =>
     .sort((a, b) => byTime(a.date, b.date) || a.name.localeCompare(b.name));
 
 const FILTER_KINDS: Record<Exclude<ReminderFilter, 'all'>, ReminderKind[]> = {
-  payments: ['due', 'overdue', 'payday'],
+  payments: ['due', 'overdue', 'payday', 'interest'],
   renewals: ['renewal', 'renewed'],
   notes: ['note']
 };
@@ -452,5 +494,9 @@ export const kindText = (reminder: Reminder) => {
       return 'Payday';
     case 'balance':
       return 'Balance';
+    case 'interest':
+      return reminder.account?.interest?.frequency === 'MATURITY'
+        ? 'Interest · matures'
+        : 'Interest';
   }
 };

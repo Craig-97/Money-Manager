@@ -234,7 +234,7 @@ describe('dashboard', () => {
             kind: 'SAVINGS',
             balance: 4200,
             counts: true,
-            interestRate: 4.1,
+            interest: { rate: 4.1, frequency: null, day: null, nextDate: null },
             purpose: null,
             balanceUpdatedAt: String(Date.now())
           }
@@ -484,7 +484,7 @@ describe('payday prompt', () => {
         kind: 'SPENDING',
         balance: 2105,
         counts: true,
-        interestRate: null,
+        interest: null,
         purpose: null,
         balanceUpdatedAt: apiDateFromToday(0)
       }
@@ -586,7 +586,7 @@ describe('payday prompt', () => {
         kind: 'SAVINGS',
         balance: 8650,
         counts: false,
-        interestRate: 4.5,
+        interest: { rate: 4.5, frequency: null, day: null, nextDate: null },
         purpose: null,
         balanceUpdatedAt: String(Date.now() - 40 * 86_400_000)
       }
@@ -627,7 +627,7 @@ describe('payday prompt', () => {
         kind: 'SPENDING',
         balance: 2105,
         counts: true,
-        interestRate: null,
+        interest: null,
         purpose: null,
         balanceUpdatedAt: apiDateFromToday(0)
       }

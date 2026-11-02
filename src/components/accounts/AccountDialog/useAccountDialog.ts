@@ -13,7 +13,7 @@ import { formatMoneyInput } from '~/lib/format';
 import { useAccountDialogStore } from '~/state/accountDialog';
 import { useSetupAccountsStore } from '~/state/setupAccounts';
 import { showToast } from '~/state/toast';
-import { AccountDraft, blankDraft, checkAccountDraft } from '../accountDraft';
+import { AccountDraft, blankDraft, checkAccountDraft, interestDraftOf } from '../accountDraft';
 
 const draftOf = (
   account: Account | undefined,
@@ -24,7 +24,7 @@ const draftOf = (
         name: account.name,
         kind: account.kind,
         balance: formatMoneyInput(account.balance),
-        interestRate: account.interestRate === null ? '' : String(account.interestRate),
+        interest: interestDraftOf(account.interest),
         purpose: account.purpose ?? '',
         counts: account.counts,
         paidInto: account.paidInto || !!paidInto
@@ -39,10 +39,12 @@ const draftOf = (
  */
 export const useAccountDialog = ({
   budgetId,
-  accounts
+  accounts,
+  today
 }: {
   budgetId: string;
   accounts: readonly Account[];
+  today: Date;
 }) => {
   const { dialog, open, opened, close, chooseKind, backToChooser } = useAccountDialogStore(
     useShallow(s => ({
@@ -83,7 +85,12 @@ export const useAccountDialog = ({
     setDraft(currentDraft => ({ ...currentDraft, ...fields }));
 
   const name = draft.name.trim();
-  const { errors, fields } = checkAccountDraft(draft, { submitted });
+  const { errors, fields } = checkAccountDraft(draft, {
+    submitted,
+    today,
+    // Editing, interest only goes when it changed
+    before: account ? interestDraftOf(account.interest) : undefined
+  });
 
   // Where pay lands stays put until another account takes it over
   const isPaidInto = !!account?.paidInto;

@@ -171,7 +171,7 @@ describe('paying into savings', () => {
         kind: 'SAVINGS',
         balance: 8650,
         counts: false,
-        interestRate: 4.5,
+        interest: { rate: 4.5, frequency: null, day: null, nextDate: null },
         purpose: null,
         balanceUpdatedAt: String(Date.now())
       },
@@ -181,7 +181,7 @@ describe('paying into savings', () => {
         kind: 'SAVINGS',
         balance: 4200,
         counts: true,
-        interestRate: null,
+        interest: null,
         purpose: null,
         balanceUpdatedAt: String(Date.now())
       }
@@ -250,7 +250,7 @@ describe('several accounts to spend from', () => {
         kind: 'SPENDING',
         balance: 2105,
         counts: true,
-        interestRate: null,
+        interest: null,
         purpose: null,
         balanceUpdatedAt: String(Date.now())
       },
@@ -260,7 +260,7 @@ describe('several accounts to spend from', () => {
         kind: 'SAVINGS',
         balance: 8650,
         counts: false,
-        interestRate: 4.5,
+        interest: { rate: 4.5, frequency: null, day: null, nextDate: null },
         purpose: null,
         balanceUpdatedAt: String(Date.now())
       }

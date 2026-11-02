@@ -139,9 +139,17 @@ export interface FakeAccount {
   counts: boolean;
   // Where pay lands, in place of the first account
   paidInto?: boolean;
-  interestRate: number | null;
+  interest?: FakeInterest | null;
   purpose: string | null;
   balanceUpdatedAt: string;
+}
+
+// As the API sends it: nextDate in milliseconds
+export interface FakeInterest {
+  rate: number;
+  frequency: 'MONTHLY' | 'QUARTERLY' | 'YEARLY' | 'MATURITY' | null;
+  day: number | null;
+  nextDate: string | null;
 }
 
 export interface FakeBudget {
@@ -243,7 +251,7 @@ const accountsOf = (budget: FakeBudget) =>
       balance: budget.bankBalance,
       counts: true,
       paidInto: !(budget.accounts ?? []).some(account => account.paidInto),
-      interestRate: null,
+      interest: null,
       purpose: budget.currentAccount?.purpose ?? null,
       balanceUpdatedAt: budget.currentAccount?.balanceUpdatedAt ?? String(Date.now())
     },
@@ -501,6 +509,39 @@ type Args = Record<string, any>; // eslint-disable-line @typescript-eslint/no-ex
 
 // An in-memory GraphQL API behind an ApolloLink. It executes operations with the real graphql
 // engine so selection sets, variables and __typename behave like the real server.
+
+/* The given day in a month, or its last day when it's shorter, as milliseconds at UTC midnight */
+const utcDayInMonth = ({ year, month, day }: { year: number; month: number; day: number }) => {
+  const last = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
+  return Date.UTC(year, month, Math.min(day, last));
+};
+
+/* Interest as the API keeps it: a monthly payment's next date from its day, the others' as given */
+const fakeInterestOf = (
+  input:
+    | { rate: number; frequency?: string | null; day?: number | null; nextDate?: string | null }
+    | null
+    | undefined,
+  spending: boolean
+): FakeInterest | null => {
+  if (!input || spending) return null;
+  const frequency = (input.frequency ?? null) as FakeInterest['frequency'];
+  if (!frequency) return { rate: input.rate, frequency: null, day: null, nextDate: null };
+  if (frequency === 'MONTHLY') {
+    const now = new Date();
+    const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+    const day = input.day!;
+    const thisMonth = utcDayInMonth({ year: now.getFullYear(), month: now.getMonth(), day: day });
+    const next =
+      thisMonth > today
+        ? thisMonth
+        : utcDayInMonth({ year: now.getFullYear(), month: now.getMonth() + 1, day: day });
+    return { rate: input.rate, frequency, day, nextDate: String(next) };
+  }
+  const next = Date.parse(`${input.nextDate!.slice(0, 10)}T00:00:00Z`);
+  return { rate: input.rate, frequency, day: new Date(next).getUTCDate(), nextDate: String(next) };
+};
+
 export const createFakeApi = ({
   user = DEFAULT_USER,
   password = DEFAULT_PASSWORD,
@@ -822,7 +863,7 @@ export const createFakeApi = ({
           balance: account.balance,
           counts: account.counts ?? spending,
           paidInto: false,
-          interestRate: account.interestRate ?? null,
+          interest: fakeInterestOf(account.interest, spending),
           purpose: account.purpose ?? null,
           balanceUpdatedAt: String(Date.now())
         };
@@ -864,7 +905,7 @@ export const createFakeApi = ({
         balance: input.balance,
         counts: paidInto || (input.counts ?? spending),
         paidInto,
-        interestRate: input.interestRate ?? null,
+        interest: fakeInterestOf(input.interest, spending),
         purpose: input.purpose?.trim() || null,
         balanceUpdatedAt: String(Date.now())
       };
@@ -910,7 +951,9 @@ export const createFakeApi = ({
       else if (input.counts !== undefined) account.counts = input.counts;
       else if (becameSavings) account.counts = false;
       else if (becameSpending) account.counts = true;
-      if (input.interestRate !== undefined) account.interestRate = input.interestRate;
+      if (input.interest !== undefined)
+        account.interest = fakeInterestOf(input.interest, kind === 'SPENDING');
+      else if (becameSpending) account.interest = null;
       if (input.purpose !== undefined) account.purpose = input.purpose?.trim() || null;
       if (becameSavings) {
         for (const payment of [...current.recurringPayments, ...current.oneOffPayments]) {
@@ -945,6 +988,38 @@ export const createFakeApi = ({
         payment.account = accountId ?? null;
       }
       return { budget: current, success: true };
+    },
+    // As the API: what the bank paid goes on the balance, dated now; it moves on to the next one
+    confirmInterest: ({ input }: Args) => {
+      const current = requireBudget();
+      if (!accountById(input.accountId)) {
+        throw apiError('ACCOUNT_NOT_FOUND', { message: `No account '${input.accountId}'` });
+      }
+      // Savings only, so it's one of the budget's own accounts, changed in place
+      const account = findSavings(input.accountId);
+      const interest = account.interest;
+      if (!interest?.frequency || !interest.nextDate) {
+        throw apiError('INTEREST_NOT_SCHEDULED', {
+          message: 'Say when this account’s interest is paid first'
+        });
+      }
+      if (input.amount)
+        setBalanceOf(account.id, Math.round((account.balance + input.amount) * 100) / 100);
+      const months = { MONTHLY: 1, QUARTERLY: 3, YEARLY: 12, MATURITY: 0 }[interest.frequency];
+      const next = new Date(Number(interest.nextDate));
+      account.interest = {
+        ...interest,
+        nextDate: months
+          ? String(
+              utcDayInMonth({
+                year: next.getUTCFullYear(),
+                month: next.getUTCMonth() + months,
+                day: interest.day ?? next.getUTCDate()
+              })
+            )
+          : null
+      };
+      return { account: accountById(account.id), budget: current, success: true };
     },
     updateAccountBalances: ({ input }: Args) => {
       const current = requireBudget();
