@@ -66,8 +66,6 @@ export const AccountFields = ({
         </Label>
         <AmountInput
           id="account-balance"
-          size="hero"
-          boxClassName="rounded-full"
           value={draft.balance}
           onChange={event => set({ balance: event.target.value })}
           placeholder="0.00"

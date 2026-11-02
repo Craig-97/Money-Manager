@@ -1,6 +1,7 @@
 import { Fragment } from 'react';
 import { ArrowRight, Check, Clock, X } from 'lucide-react';
 import * as Dialog from '@radix-ui/react-dialog';
+import { AmountInput } from '~/components/form/AmountInput';
 import { PaydayIcon } from '~/components/icons';
 import { Button } from '~/components/ui/Button';
 import { IconButton } from '~/components/ui/IconButton';
@@ -131,24 +132,19 @@ export const PaydayPrompt = ({ prompt }: { prompt: Prompt }) => {
                   title={`Confirm ${prompt.paidIntoName === 'Current account' ? 'your current account' : prompt.paidIntoName}`}
                   subtitle="Where you get paid"
                   titleFor="payday-balance">
-                  <div className="mt-3 flex h-[60px] items-center gap-1.5 rounded-[18px] border-[1.5px] border-border-strong bg-surface-2 px-[18px] transition-[border-color,box-shadow] focus-within:border-accent focus-within:shadow-[0_0_0_4px_var(--accent-soft)]">
-                    <span
-                      aria-hidden="true"
-                      className="num text-2xl font-extrabold text-muted md:text-[26px]">
-                      £
-                    </span>
-                    <input
-                      id="payday-balance"
-                      inputMode="decimal"
-                      value={prompt.balance}
-                      onChange={event => prompt.setBalance(event.target.value)}
-                      aria-describedby="payday-balance-help"
-                      className="w-full min-w-0 flex-1 border-0 bg-transparent p-0 num text-2xl leading-none font-extrabold tracking-[-0.03em] text-text outline-none md:text-[26px]"
-                    />
-                    <span className="rounded-full border border-border bg-surface px-2.5 py-1.5 text-[11px] font-bold whitespace-nowrap text-muted md:text-xs">
-                      {prompt.edited ? 'Edited' : 'Projected'}
-                    </span>
-                  </div>
+                  <AmountInput
+                    id="payday-balance"
+                    size="hero"
+                    boxClassName="mt-3"
+                    value={prompt.balance}
+                    onChange={event => prompt.setBalance(event.target.value)}
+                    aria-describedby="payday-balance-help"
+                    suffix={
+                      <span className="rounded-full border border-border bg-surface px-2.5 py-1.5 text-[11px] font-bold whitespace-nowrap text-muted md:text-xs">
+                        {prompt.edited ? 'Edited' : 'Projected'}
+                      </span>
+                    }
+                  />
                   <p
                     id="payday-balance-help"
                     className="mt-2 text-xs leading-normal font-medium text-muted md:mt-2.5 md:text-[13px]">
