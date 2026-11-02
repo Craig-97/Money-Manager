@@ -398,6 +398,18 @@ describe('several accounts to spend from', () => {
     );
   });
 
+  it('says where pay goes now on the tile to move it', async () => {
+    const { user } = renderAccounts(several());
+
+    await user.click(await screen.findByRole('button', { name: 'Joint bills' }));
+    const view = await screen.findByRole('dialog', { name: 'Joint bills' });
+    expect(
+      within(view).getByRole('button', {
+        name: 'Make where you get paid, currently Current account'
+      })
+    ).toBeInTheDocument();
+  });
+
   it('moves where you get paid from an account’s menu', async () => {
     const { user, api } = renderAccounts(several());
 

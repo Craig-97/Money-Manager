@@ -8,6 +8,7 @@ import {
   interestScheduleText,
   isInterestDue,
   isSpending,
+  paidIntoAccountOf,
   toAccounts
 } from '~/lib/accounts';
 import { formatMoney } from '~/lib/format';
@@ -42,6 +43,7 @@ export const useAccountSheet = () => {
   const options = { accountId: account.id, fromView: true };
   const { interest } = account;
   const savings = !isSpending(account);
+  const paidIntoNow = paidIntoAccountOf(accounts);
 
   return {
     open,
@@ -74,9 +76,14 @@ export const useAccountSheet = () => {
           stop: () => void saveInterest(account, { rate: interest!.rate, frequency: null })
         }
       : null,
-    // Another spending account can take over where pay lands
-    canBePaidInto: isSpending(account) && !account.paidInto,
-    makePaidInto: then(() => openQuick('paidInto', options)),
+    // Another spending account can take over where pay lands, naming where it lands now
+    paidInto:
+      isSpending(account) && !account.paidInto
+        ? {
+            detail: paidIntoNow ? `Currently ${paidIntoNow.name}` : undefined,
+            open: then(() => openQuick('paidInto', options))
+          }
+        : null,
     // A standing order into it needs another account to come from
     canMoveInto: !account.paidInto && accounts.length > 1,
     moveInto: then(() => openMoveInto(account.id)),

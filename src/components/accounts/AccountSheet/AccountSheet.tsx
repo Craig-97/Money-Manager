@@ -80,11 +80,12 @@ export const AccountSheet = () => {
             onClick={sheet.interest.open}
           />
         ) : null}
-        {sheet.canBePaidInto ? (
+        {sheet.paidInto ? (
           <ActionTile
             icon={<Landmark size={20} />}
             label="Make where you get paid"
-            onClick={sheet.makePaidInto}
+            detail={sheet.paidInto.detail}
+            onClick={sheet.paidInto.open}
           />
         ) : null}
       </ActionTiles>
