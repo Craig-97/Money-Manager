@@ -42,6 +42,10 @@ import { accountChoices, FormAccount } from './paymentAccounts';
 // after a last payment. One choice, so a renewal and a last payment can't both be set.
 export type Ends = 'keep' | 'renew' | 'stop';
 
+// What a recurring expense is: paid to someone else, paying off a debt, or moving money into
+// another of the budget's accounts. Only one at a time.
+export type PaymentRole = 'payment' | 'debt' | 'move';
+
 interface PaymentFormValues {
   type: PaymentType;
   name: string;
@@ -308,23 +312,44 @@ const withPaidOff = (
       }
     : summary;
 
-/* A payment moving money into another account says which, last */
-const withInto = (summary: ReturnType<typeof scheduleSummary>, into: string | null) =>
-  into && !summary.message ? { rows: [...summary.rows, { label: 'Into', value: into }] } : summary;
-
-/* What the chosen ending means, under the Ends choice */
+/*
+ * The line under the Ends choice, only when it says something the choice doesn't: a yearly payment
+ * that keeps going renews with each payment
+ */
 export const endsHint = (values: PaymentFormValues, today: Date) => {
   const { yearly, ends } = recurringEnding(values);
-  if (ends === 'renew') return 'A policy or contract renews on a date. The payments carry on.';
-  if (ends === 'stop') {
-    return 'For loans, finance or anything that finishes. Nothing is due after the last payment.';
-  }
+  if (!yearly || ends !== 'keep') return null;
   const first = parseIsoDate(values.first);
   const next =
     first && nextOccurrence({ firstPaymentDate: first, frequency: values.frequency }, today);
-  return yearly && next
+  return next
     ? `Renews with each payment · next on ${formatShortDay(next, { withYear: true })}`
-    : 'Carries on until you change or delete it';
+    : null;
+};
+
+/* The schedule summary as one line: "Next due Sat 24 Oct · renews 24 Oct 2027". Repeats is in its
+   own field and the reminder is under More options, so they're left out. */
+const summaryLine = (summary: { rows: SummaryRow[]; message?: string }) =>
+  summary.message ??
+  summary.rows
+    .filter(row => row.label !== 'Repeats' && row.label !== 'Reminder')
+    .map((row, index) => {
+      if (row.value === 'No payments left') return row.value;
+      // Mid-sentence, so lower case, except a date: "paid off about May 2028", "renews Sat 24 Oct"
+      const value =
+        /^(Mon|Tue|Wed|Thu|Fri|Sat|Sun|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\b/.test(
+          row.value
+        )
+          ? row.value
+          : row.value[0].toLowerCase() + row.value.slice(1);
+      return `${index === 0 ? row.label : row.label.toLowerCase()} ${value}`;
+    })
+    .join(' · ');
+
+/* A reminder's timing in the More options line: "remind 1 day before", "no reminder" */
+const reminderText = (choice: TimingChoice, usual: number) => {
+  const days = reminderDays(fromTimingChoice(choice), usual);
+  return days === null ? 'no reminder' : `remind ${daysBeforeText(days).toLowerCase()}`;
 };
 
 interface Options {
@@ -346,6 +371,8 @@ interface Options {
   draft?: (payment: DraftPayment) => string | undefined;
   // A new payment's name, category and type to start with, e.g. from a suggestion
   start?: { name: string; category: PaymentCategory; type?: PaymentType };
+  // A new recurring payment that moves money into this account, from the account's view
+  into?: string;
 }
 
 /* A payment as setup keeps it until the budget is made */
@@ -365,13 +392,36 @@ export const usePaymentForm = ({
   onSaved,
   formKey,
   draft,
-  start
+  start,
+  into
 }: Options) => {
-  const startValues = () => ({
-    ...initialValues({ kind, payment, today, asDebt }),
-    ...(payment || !start ? {} : start)
-  });
+  const startValues = () => {
+    const values = {
+      ...initialValues({ kind, payment, today, asDebt }),
+      ...(payment || !start ? {} : start)
+    };
+    if (payment || !into || kind !== 'recurring') return values;
+    const target = accounts.find(account => account.id === into);
+    return {
+      ...values,
+      paysInto: into,
+      category: target?.kind === 'SAVINGS' ? 'SAVINGS' : values.category
+    };
+  };
+  // Editing, More options starts open when something in it isn't the default, so a value that's
+  // been set is never folded away
+  const moreStartsOpen = (start: PaymentFormValues) => {
+    if (!payment) return false;
+    const { several, paidInto } = accountChoices(start, accounts);
+    const ending = recurringEnding(start);
+    return (
+      (several && !!start.account && start.account !== paidInto?.id) ||
+      start.dueReminder !== 'usual' ||
+      (kind === 'recurring' && ending.reminds && start.reminder !== 'usual')
+    );
+  };
   const [values, setValues] = useState(startValues);
+  const [moreOpen, setMoreOpen] = useState(() => moreStartsOpen(values));
   const [touched, setTouched] = useState(UNTOUCHED);
   const [nameTaken, setNameTaken] = useState<string>();
   const [saving, setSaving] = useState(false);
@@ -380,8 +430,10 @@ export const usePaymentForm = ({
   // change" pattern, without an effect)
   const [currentKey, setCurrentKey] = useState(formKey);
   if (formKey !== currentKey) {
+    const fresh = startValues();
     setCurrentKey(formKey);
-    setValues(startValues());
+    setValues(fresh);
+    setMoreOpen(moreStartsOpen(fresh));
     setTouched(UNTOUCHED);
     setNameTaken(undefined);
   }
@@ -420,6 +472,14 @@ export const usePaymentForm = ({
   };
 
   const choices = accountChoices(values, accounts);
+  const role: PaymentRole = values.tracked ? 'debt' : choices.into ? 'move' : 'payment';
+
+  // Picking what it is sets the debt and money-moving fields together, so only one is on
+  const setRole = (next: PaymentRole) => {
+    set('tracked', next === 'debt');
+    set('paysInto', next === 'move' ? (choices.into?.id ?? choices.targets[0]?.id ?? '') : '');
+  };
+
   const amount = parseMoney(values.amount);
   const first = parseIsoDate(values.first);
   const end = parseIsoDate(values.end);
@@ -626,21 +686,40 @@ export const usePaymentForm = ({
     }
   };
 
+  // What's under More options, in one line: where it goes out of or into, then the reminders
+  const reminds = kind === 'recurring' && ending.reminds && !renewalPassed;
+  const renewalDays = reminderDays(fromTimingChoice(values.reminder), settings.renewalDays);
+  const moreSummary = [
+    choices.several && choices.from
+      ? `${values.type === 'INCOME' ? 'Into' : 'From'} ${choices.from.name}`
+      : null,
+    reminderText(values.dueReminder, settings.paymentDays),
+    reminds
+      ? renewalDays === null
+        ? 'no renewal reminder'
+        : `${daysBeforeText(renewalDays).toLowerCase()} it renews`
+      : null
+  ]
+    .filter(Boolean)
+    .join(' · ');
+
   return {
     values,
     set,
+    role,
+    setRole,
     touch: (field: TouchedField) => setTouched(current => ({ ...current, [field]: true })),
     errors,
     canSave: nameOk && amountOk && datesOk && debtOk && !nameTaken,
     saving,
     save: () => void save(),
-    summary: withInto(
-      withPaidOff(scheduleSummary(values, { today, settings, renewalPassed }), { values, today }),
-      // Adding, it also says where the money moves to; editing, the status strip covers it
-      payment ? null : (choices.into?.name ?? null)
+    // The schedule in one line; where money moves to is in its own field above it
+    summary: summaryLine(
+      withPaidOff(scheduleSummary(values, { today, settings, renewalPassed }), { values, today })
     ),
-    // Editing, the status strip already says when it's next due, so the summary only shows once the
-    // schedule changes. A debt's always shows, for when it'd be paid off.
+    more: { open: moreOpen, setOpen: setMoreOpen, summary: moreSummary, reminds },
+    // Editing, the title's status line already says when it's next due, so the summary only shows
+    // once the schedule changes. A debt's always shows, for when it'd be paid off.
     showSummary:
       !payment ||
       values.tracked ||

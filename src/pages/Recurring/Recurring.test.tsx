@@ -314,7 +314,10 @@ describe('recurring page', () => {
     expect(within(dialog).getByRole('button', { name: /Renews on/ })).toHaveTextContent(
       'Sat 2 Oct 2027'
     );
-    expect(within(dialog).getByText('Thu 2 Sep 2027 · 1 month before')).toBeInTheDocument();
+    expect(within(dialog).getByRole('status')).toHaveTextContent('renews Sat 2 Oct 2027');
+    const more = within(dialog).getByRole('button', { name: /More options/ });
+    expect(more).toHaveTextContent('1 month before it renews');
+    await user.click(more);
     await user.click(within(dialog).getByRole('combobox', { name: 'Remind me before it renews' }));
     await user.click(await screen.findByRole('option', { name: '2 weeks before' }));
     await user.click(within(dialog).getByRole('button', { name: 'Save changes' }));

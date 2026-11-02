@@ -1,8 +1,9 @@
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
 import { AmountInput } from '~/components/form/AmountInput';
 import { FieldError } from '~/components/form/FieldError';
 import { Label } from '~/components/form/Label';
 import { TextInput } from '~/components/form/TextInput';
+import { MoreOptions } from '~/components/ui/MoreOptions';
 import { SegmentedControl } from '~/components/ui/SegmentedControl';
 import { Switch } from '~/components/ui/Switch';
 import { AccountKind } from '~/graphql/generated';
@@ -32,31 +33,46 @@ interface AccountFieldsProps {
   draft: AccountDraft;
   set: (fields: Partial<AccountDraft>) => void;
   errors: AccountDraftErrors;
+  // Changing an existing account's type, under More options. A new one's type was chosen first.
   canChangeKind: boolean;
-  // Shown after the type, e.g. the "Where you get paid" switch
+  // An existing account: More options starts open when something in it isn't the default
+  editing?: boolean;
+  // Shown after the name, e.g. the "Where you get paid" switch
   afterKind?: ReactNode;
-  // Shown before the count switch for savings, e.g. the payments that pay in
+  // Shown after that for savings, e.g. the payments that pay in
   beforeCounts?: ReactNode;
   // The count switch, hidden where pay lands as that always counts
   showCounts?: boolean;
 }
 
 /*
- * An account's fields, the same wherever one is added or changed: the balance first, its name and
- * what it's for, its type beside a savings rate, and whether it counts in free to spend.
- * Changing the type starts the count switch where that type usually is.
+ * An account's fields, the same wherever one is added or changed: the balance first, then its
+ * name and, for savings, its rate. What most people leave alone, what it's for, whether it counts
+ * in free to spend and its type, is under More options.
  */
 export const AccountFields = ({
   draft,
   set,
   errors,
   canChangeKind,
+  editing = false,
   afterKind,
   beforeCounts,
   showCounts = true
 }: AccountFieldsProps) => {
   const placeholders = PLACEHOLDERS[draft.kind];
   const savings = draft.kind === 'SAVINGS';
+  const usualCounts = draft.kind === 'SPENDING';
+  const [moreOpen, setMoreOpen] = useState(
+    () => editing && (!!draft.purpose.trim() || (showCounts && draft.counts !== usualCounts))
+  );
+  const moreSummary = [
+    draft.purpose.trim() || 'What it’s for',
+    canChangeKind ? draft.kind.toLowerCase() : null,
+    showCounts ? (draft.counts ? 'counts in free to spend' : 'kept out of free to spend') : null
+  ]
+    .filter(Boolean)
+    .join(' · ');
 
   return (
     <>
@@ -81,88 +97,41 @@ export const AccountFields = ({
         )}
       </div>
 
-      <div className="grid gap-[18px] md:grid-cols-2 md:gap-3.5">
-        <div>
-          <Label tone="muted" htmlFor="account-name">
-            Name
-          </Label>
-          <TextInput
-            id="account-name"
-            value={draft.name}
-            onChange={event => set({ name: event.target.value })}
-            placeholder={placeholders.name}
-            maxLength={50}
-            autoComplete="off"
-            invalid={!!errors.name}
-            aria-describedby={errors.name ? 'account-name-error' : undefined}
-          />
-          {errors.name ? <FieldError id="account-name-error">{errors.name}</FieldError> : null}
-        </div>
-        <div>
-          <Label tone="muted" htmlFor="account-purpose">
-            What it’s for (optional)
-          </Label>
-          <TextInput
-            id="account-purpose"
-            value={draft.purpose}
-            onChange={event => set({ purpose: event.target.value })}
-            placeholder={placeholders.purpose}
-            maxLength={60}
-            autoComplete="off"
-            invalid={!!errors.purpose}
-            aria-describedby={errors.purpose ? 'account-purpose-error' : undefined}
-          />
-          {errors.purpose ? (
-            <FieldError id="account-purpose-error">{errors.purpose}</FieldError>
-          ) : null}
-        </div>
+      <div>
+        <Label tone="muted" htmlFor="account-name">
+          Name
+        </Label>
+        <TextInput
+          id="account-name"
+          value={draft.name}
+          onChange={event => set({ name: event.target.value })}
+          placeholder={placeholders.name}
+          maxLength={50}
+          autoComplete="off"
+          invalid={!!errors.name}
+          aria-describedby={errors.name ? 'account-name-error' : undefined}
+        />
+        {errors.name ? <FieldError id="account-name-error">{errors.name}</FieldError> : null}
       </div>
 
-      {canChangeKind || savings ? (
+      {savings ? (
         <div>
-          {/* Type and the rate side by side on desktop; a spending account's type has the row */}
-          <div className={cn('grid gap-[18px]', savings && 'md:grid-cols-2 md:gap-3.5')}>
-            {canChangeKind ? (
-              <div>
-                <p id="account-kind" className="mb-2 text-[13px] font-bold text-muted">
-                  Type
-                </p>
-                <SegmentedControl
-                  aria-labelledby="account-kind"
-                  value={draft.kind}
-                  onValueChange={kind => set({ kind, counts: kind === 'SPENDING' })}
-                  options={KINDS}
-                  size="lg"
-                  fullWidth
-                />
-                {/* Under the type on a phone, under the whole row on desktop */}
-                <p className={cn(helpClasses, savings && 'md:hidden')}>{KIND_HINTS[draft.kind]}</p>
-              </div>
-            ) : null}
-            {savings ? (
-              <div>
-                <Label tone="muted" htmlFor="account-rate">
-                  Interest rate (optional)
-                </Label>
-                <TextInput
-                  id="account-rate"
-                  inputMode="decimal"
-                  value={draft.interestRate}
-                  onChange={event => set({ interestRate: event.target.value })}
-                  placeholder="0.0"
-                  autoComplete="off"
-                  suffix={<span className="pr-1 font-bold text-muted">%</span>}
-                  invalid={!!errors.interestRate}
-                  aria-describedby={errors.interestRate ? 'account-rate-error' : undefined}
-                />
-                {errors.interestRate ? (
-                  <FieldError id="account-rate-error">{errors.interestRate}</FieldError>
-                ) : null}
-              </div>
-            ) : null}
-          </div>
-          {canChangeKind && savings ? (
-            <p className={cn(helpClasses, 'hidden md:block')}>{KIND_HINTS[draft.kind]}</p>
+          <Label tone="muted" htmlFor="account-rate">
+            Interest rate (optional)
+          </Label>
+          <TextInput
+            id="account-rate"
+            inputMode="decimal"
+            value={draft.interestRate}
+            onChange={event => set({ interestRate: event.target.value })}
+            placeholder="0.0"
+            autoComplete="off"
+            suffix={<span className="pr-1 font-bold text-muted">%</span>}
+            invalid={!!errors.interestRate}
+            aria-describedby={errors.interestRate ? 'account-rate-error' : undefined}
+          />
+          {errors.interestRate ? (
+            <FieldError id="account-rate-error">{errors.interestRate}</FieldError>
           ) : null}
         </div>
       ) : null}
@@ -171,25 +140,65 @@ export const AccountFields = ({
 
       {savings ? beforeCounts : null}
 
-      {showCounts ? (
-        <div className={panelClasses}>
-          <span className="flex min-w-0 grow flex-col gap-0.5">
-            <span id="account-counts" className="text-sm font-bold">
-              Count in free to spend
-            </span>
-            <span className="text-xs font-semibold text-muted">
-              {draft.counts
-                ? 'Adds to the bank balance on your dashboard'
-                : 'Kept out of free to spend'}
-            </span>
-          </span>
-          <Switch
-            checked={draft.counts}
-            onCheckedChange={counts => set({ counts })}
-            aria-labelledby="account-counts"
+      <MoreOptions summary={moreSummary} open={moreOpen} onOpenChange={setMoreOpen}>
+        <div>
+          <Label tone="muted" htmlFor="account-purpose">
+            What it’s for
+          </Label>
+          <TextInput
+            id="account-purpose"
+            value={draft.purpose}
+            onChange={event => set({ purpose: event.target.value })}
+            placeholder={placeholders.purpose}
+            maxLength={60}
+            autoComplete="off"
+            boxClassName="bg-surface"
+            invalid={!!errors.purpose}
+            aria-describedby={errors.purpose ? 'account-purpose-error' : undefined}
           />
+          {errors.purpose ? (
+            <FieldError id="account-purpose-error">{errors.purpose}</FieldError>
+          ) : null}
         </div>
-      ) : null}
+
+        {canChangeKind ? (
+          <div>
+            <p id="account-kind" className="mb-2 text-[13px] font-bold text-muted">
+              Type
+            </p>
+            <SegmentedControl
+              aria-labelledby="account-kind"
+              value={draft.kind}
+              onValueChange={kind => set({ kind, counts: kind === 'SPENDING' })}
+              options={KINDS}
+              size="lg"
+              fullWidth
+              className="bg-surface"
+            />
+            <p className={helpClasses}>{KIND_HINTS[draft.kind]}</p>
+          </div>
+        ) : null}
+
+        {showCounts ? (
+          <div className={cn(panelClasses, 'bg-surface')}>
+            <span className="flex min-w-0 grow flex-col gap-0.5">
+              <span id="account-counts" className="text-sm font-bold">
+                Count in free to spend
+              </span>
+              <span className="text-xs font-semibold text-muted">
+                {draft.counts
+                  ? 'Adds to the bank balance on your dashboard'
+                  : 'Kept out of free to spend'}
+              </span>
+            </span>
+            <Switch
+              checked={draft.counts}
+              onCheckedChange={counts => set({ counts })}
+              aria-labelledby="account-counts"
+            />
+          </div>
+        ) : null}
+      </MoreOptions>
     </>
   );
 };

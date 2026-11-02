@@ -4,19 +4,19 @@ import { accountDescription } from '../../paymentAccounts';
 import { PaymentForm } from '../../usePaymentForm';
 
 /*
- * Which account a payment goes out of, or an income lands in. Only offered once there's more than
- * one account to spend from; until then everything uses the one pay lands in.
+ * Which account a payment goes out of, or an income lands in, under More options. Only offered
+ * once there's more than one account to spend from; until then everything uses the one pay lands
+ * in. Each choice says what the account is, so there's no hint under it.
  */
 export const FromAccount = ({ form }: { form: PaymentForm }) => {
   const { values, set, choices } = form;
-  const income = values.type === 'INCOME';
   const { from } = choices;
   if (!from) return null;
 
   return (
     <div>
       <Label tone="muted" htmlFor="payment-account">
-        {income ? 'Into' : 'From'}
+        {values.type === 'INCOME' ? 'Into' : 'From'}
       </Label>
       <Select
         id="payment-account"
@@ -27,13 +27,8 @@ export const FromAccount = ({ form }: { form: PaymentForm }) => {
           label: account.name,
           description: accountDescription(account)
         }))}
-        aria-describedby="payment-account-hint"
+        className="bg-surface"
       />
-      <p id="payment-account-hint" className="mt-2 ml-1 text-xs font-semibold text-muted">
-        {income
-          ? `Goes into ${from.name} when it’s marked paid`
-          : `Comes off ${from.name} when it’s marked paid`}
-      </p>
     </div>
   );
 };

@@ -9,12 +9,13 @@ import { cn } from '~/lib/cn';
 import { formatMoney } from '~/lib/format';
 import { formatShortDate, PER_PERIOD, toPayments } from '~/lib/payments';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
+import { AccountChooser } from '../AccountChooser';
 import { AccountFields, panelClasses } from '../AccountFields';
 import { useAccountDialog } from './useAccountDialog';
 
 /*
- * Adding an account or changing one: a dialog on desktop, a bottom sheet on mobile. The balance is
- * first and focused, with how old it is under the title. The account pay lands in always counts in
+ * Adding an account or changing one: a dialog on desktop, a bottom sheet on mobile. Adding starts
+ * with Spending or Savings. The balance is first and focused, with how old it is under the title. The account pay lands in always counts in
  * free to spend and can't be deleted; another spending account takes that over with its own switch.
  */
 export const AccountDialog = () => {
@@ -36,13 +37,17 @@ export const AccountDialog = () => {
     ? `Delete ${account?.name ?? 'account'}?`
     : account
       ? `Edit ${account.name}`
-      : 'Add account';
+      : dialog.choosing
+        ? 'Add account'
+        : `Add ${draft.kind === 'SPENDING' ? 'spending' : 'savings'} account`;
 
   return (
     <Modal
       open={dialog.open}
       onOpenChange={next => (next ? undefined : dialog.close())}
       title={title}
+      onBack={!account && !dialog.choosing ? dialog.backToChooser : undefined}
+      backLabel="Back to account types"
       leading={
         account && !dialog.confirming ? (
           <span
@@ -63,9 +68,9 @@ export const AccountDialog = () => {
           </span>
         ) : undefined
       }
-      initialFocusId={dialog.confirming ? undefined : 'account-balance'}
+      initialFocusId={dialog.confirming || dialog.choosing ? undefined : 'account-balance'}
       footer={
-        dialog.confirming ? (
+        dialog.choosing ? undefined : dialog.confirming ? (
           <>
             <span className="flex-1" />
             <Button variant="ghost" onClick={dialog.keep} className="max-md:h-[52px]">
@@ -100,7 +105,9 @@ export const AccountDialog = () => {
           </>
         )
       }>
-      {dialog.confirming && account ? (
+      {dialog.choosing ? (
+        <AccountChooser onChoose={dialog.chooseKind} />
+      ) : dialog.confirming && account ? (
         <p className="text-sm leading-relaxed font-medium text-muted">
           Its <span className="num font-bold text-text">{formatMoney(account.balance)}</span> comes
           off everything you have.
@@ -111,10 +118,13 @@ export const AccountDialog = () => {
         </p>
       ) : (
         <AccountFields
+          key={dialog.opened}
           draft={draft}
           set={dialog.set}
           errors={errors}
-          canChangeKind={dialog.canChangeKind}
+          // A new account's type was chosen first; an existing one's can change under More options
+          canChangeKind={!!account && dialog.canChangeKind}
+          editing={!!account}
           showCounts={dialog.showCounts}
           afterKind={
             dialog.showPaidInto ? (

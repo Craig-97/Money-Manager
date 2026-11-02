@@ -82,7 +82,12 @@ describe('setup', () => {
     await user.type(screen.getByLabelText('Account name'), 'Everyday');
     await user.type(screen.getByLabelText('Balance now'), '7895');
     await user.click(screen.getByRole('button', { name: 'Add an account' }));
-    const accountDialog = await screen.findByRole('dialog', { name: 'Add account' });
+    await user.click(
+      within(await screen.findByRole('dialog', { name: 'Add account' })).getByRole('button', {
+        name: /Savings account/
+      })
+    );
+    const accountDialog = await screen.findByRole('dialog', { name: 'Add savings account' });
     await user.type(within(accountDialog).getByLabelText('Balance now'), '8650');
     await user.type(within(accountDialog).getByLabelText('Name'), 'Cash ISA');
     await user.type(within(accountDialog).getByLabelText('Interest rate (optional)'), '4.5');
@@ -101,7 +106,7 @@ describe('setup', () => {
     const dialog = await screen.findByRole('dialog', { name: 'Add recurring payment' });
     await user.type(within(dialog).getByLabelText('Name'), 'ISA top-up');
     await user.type(within(dialog).getByLabelText('Amount'), '250');
-    await user.click(within(dialog).getByRole('switch', { name: 'Pays into savings' }));
+    await user.click(within(dialog).getByRole('radio', { name: 'Move money' }));
     await user.click(within(dialog).getByRole('button', { name: 'Add payment' }));
     expect(await screen.findByRole('button', { name: 'Edit ISA top-up' })).toHaveTextContent(
       'Into Cash ISA'

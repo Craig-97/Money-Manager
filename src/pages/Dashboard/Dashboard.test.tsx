@@ -177,9 +177,10 @@ describe('dashboard', () => {
   it('skips a recurring payment for this cycle without touching the balance', async () => {
     const { user, api } = renderDashboard();
 
-    await editFromRow(user, 'Netflix');
-    const dialog = await screen.findByRole('dialog', { name: 'Edit recurring payment' });
-    await user.click(within(dialog).getByRole('button', { name: 'Skip this cycle' }));
+    // From its quick view, which has paying and skipping
+    await user.click(await screen.findByRole('button', { name: 'Netflix' }));
+    const sheet = await screen.findByRole('dialog', { name: 'Netflix' });
+    await user.click(within(sheet).getByRole('button', { name: 'Skip this cycle' }));
 
     expect(await screen.findByText('Netflix skipped this cycle')).toBeInTheDocument();
     expect(api.callsTo('SkipRecurringPayments')).toEqual([
@@ -190,7 +191,6 @@ describe('dashboard', () => {
       expect.objectContaining({ kind: 'SKIPPED', dates: [apiDateFromToday(0)] })
     ]);
     expect(api.db.budget?.bankBalance).toBe(1000);
-    expect(await within(dialog).findByText(/^Skipped · next due/)).toBeInTheDocument();
   });
 
   it('checks a payment has a name and amount', async () => {

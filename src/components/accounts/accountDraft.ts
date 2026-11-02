@@ -26,6 +26,13 @@ export const EMPTY_ACCOUNT_DRAFT: AccountDraft = {
   paidInto: false
 };
 
+/* A new account of the kind chosen: a spending account counts in free to spend, savings don't */
+export const blankDraft = (kind: AccountKind): AccountDraft => ({
+  ...EMPTY_ACCOUNT_DRAFT,
+  kind,
+  counts: kind === 'SPENDING'
+});
+
 /* A rate as typed: blank for none, otherwise a percentage from 0 to 100 */
 const parseRate = (value: string) => {
   const cleaned = value.replace(/[%\s]/g, '');

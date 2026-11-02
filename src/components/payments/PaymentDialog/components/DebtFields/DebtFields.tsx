@@ -4,11 +4,8 @@ import { Label } from '~/components/form/Label';
 import { TextInput } from '~/components/form/TextInput';
 import { PaymentForm } from '../../usePaymentForm';
 
-// The debt's inputs sit on the surface colour, inside the tinted debt card
-const boxClasses = 'bg-surface';
-
 /*
- * What's owed, its rate and what was borrowed, inside the debt card: the balance across the top,
+ * What's owed, its rate and what was borrowed, under the Debt choice: the balance across the top,
  * the other two side by side under it. The payoff date is worked out from them.
  */
 export const DebtFields = ({ form }: { form: PaymentForm }) => {
@@ -26,7 +23,6 @@ export const DebtFields = ({ form }: { form: PaymentForm }) => {
           onChange={event => set('balance', event.target.value)}
           onBlur={() => touch('balance')}
           placeholder="0.00"
-          boxClassName={boxClasses}
           invalid={!!errors.balance}
           aria-describedby={errors.balance ? 'payment-balance-error' : undefined}
         />
@@ -49,7 +45,6 @@ export const DebtFields = ({ form }: { form: PaymentForm }) => {
               inputMode="decimal"
               autoComplete="off"
               placeholder="0.0"
-              boxClassName={boxClasses}
               className='[font-feature-settings:"tnum"] font-extrabold'
               suffix={
                 <span aria-hidden="true" className="font-extrabold text-muted">
@@ -71,7 +66,6 @@ export const DebtFields = ({ form }: { form: PaymentForm }) => {
               onChange={event => set('started', event.target.value)}
               onBlur={() => touch('started')}
               placeholder="Optional"
-              boxClassName={boxClasses}
               invalid={!!errors.started}
               aria-describedby={
                 errors.started

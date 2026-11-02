@@ -5,13 +5,17 @@ import { Label } from '~/components/form/Label';
 import { PasswordInput } from '~/components/form/PasswordInput';
 import { SearchInput } from '~/components/form/SearchInput';
 import { TextInput } from '~/components/form/TextInput';
+import { MoreOptions } from '~/components/ui/MoreOptions';
 import { KitExample, KitSection } from './KitSection';
 
 export const FieldsSection = () => {
   const [search, setSearch] = useState('mortgage');
+  const [moreOpen, setMoreOpen] = useState(false);
 
   return (
-    <KitSection title="Fields" source="Payment dialog, sign in, setup, notes search">
+    <KitSection
+      title="Fields"
+      source="Payment dialog, account dialog, sign in, setup, notes search">
       <div className="grid gap-6 md:grid-cols-2">
         <KitExample label="Form field (48px) with muted label">
           <div className="w-full">
@@ -79,6 +83,25 @@ export const FieldsSection = () => {
         </KitExample>
         <KitExample label="Disabled">
           <TextInput aria-label="Disabled" disabled defaultValue="Can't change this" />
+        </KitExample>
+        <KitExample label="More options: folded, saying what's set">
+          <div className="w-full">
+            <MoreOptions
+              summary="From Everyday · remind 1 day before"
+              open={moreOpen}
+              onOpenChange={setMoreOpen}>
+              <div>
+                <Label tone="muted" htmlFor="kit-more-for">
+                  What it’s for
+                </Label>
+                <TextInput
+                  id="kit-more-for"
+                  boxClassName="bg-surface"
+                  placeholder="e.g. Holiday fund"
+                />
+              </div>
+            </MoreOptions>
+          </div>
         </KitExample>
       </div>
     </KitSection>

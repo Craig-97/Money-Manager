@@ -15,11 +15,14 @@ type PaymentDialogView =
       fromChooser?: boolean;
       // Opened from Debts: a recurring payment that's always a debt, with no switch to stop it
       asDebt?: boolean;
+      // Opened from an account's view: a recurring payment moving money into this account
+      into?: string;
     };
 
 interface FormOptions {
   fromChooser?: boolean;
   asDebt?: boolean;
+  into?: string;
 }
 
 interface EditOptions {
@@ -39,6 +42,8 @@ interface PaymentDialogState {
   openEdit: (kind: PaymentKind, options: EditOptions) => void;
   // Adding a debt: a recurring payment that's paying one off
   openAddDebt: () => void;
+  // Adding a recurring payment that moves money into this account
+  openMoveInto: (accountId: string) => void;
   close: () => void;
 }
 
@@ -57,6 +62,7 @@ export const usePaymentDialogStore = create<PaymentDialogState>()(set => {
     openAdd: (kind, options = {}) => show({ view: 'form', kind, ...options }),
     openEdit: (kind, options) => show({ view: 'form', kind, ...options }),
     openAddDebt: () => show({ view: 'form', kind: 'recurring', asDebt: true }),
+    openMoveInto: accountId => show({ view: 'form', kind: 'recurring', into: accountId }),
     close: () => set({ open: false })
   };
 });

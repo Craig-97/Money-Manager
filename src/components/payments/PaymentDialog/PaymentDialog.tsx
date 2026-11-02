@@ -10,7 +10,7 @@ import { usePaymentActions } from '~/hooks/usePaymentActions';
 import { toAccounts } from '~/lib/accounts';
 import { DEFAULT_REMINDER_SETTINGS, toPayments } from '~/lib/payments';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
-import { Chooser, FormBody, StatusStrip } from './components';
+import { Chooser, FormBody, StatusLine } from './components';
 import { usePaymentForm } from './usePaymentForm';
 
 /*
@@ -47,6 +47,7 @@ export const PaymentDialog = () => {
     today,
     settings: budget?.reminderSettings ?? DEFAULT_REMINDER_SETTINGS,
     accounts: toAccounts(budget?.accounts, today),
+    into: target?.into,
     onSaved: close,
     // Each opening starts afresh. Closing keeps the form as it was while the dialog animates away.
     formKey: String(opened)
@@ -72,6 +73,7 @@ export const PaymentDialog = () => {
       open={open && !(target?.paymentId && !payment)}
       onOpenChange={open => (open ? undefined : close())}
       title={title}
+      subtitle={payment ? <StatusLine payment={payment} today={today} cycle={cycle} /> : undefined}
       onBack={target?.fromChooser ? openChooser : undefined}
       backLabel="Back to payment types"
       footer={
@@ -104,16 +106,7 @@ export const PaymentDialog = () => {
           </>
         ) : undefined
       }>
-      {target ? (
-        <>
-          {payment ? (
-            <StatusStrip payment={payment} today={today} cycle={cycle} budgetId={budget.id} />
-          ) : null}
-          <FormBody form={form} kind={kind} />
-        </>
-      ) : (
-        <Chooser />
-      )}
+      {target ? <FormBody form={form} kind={kind} /> : <Chooser />}
     </Modal>
   );
 };

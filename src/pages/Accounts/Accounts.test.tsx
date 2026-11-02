@@ -92,7 +92,11 @@ describe('accounts', () => {
 
     await user.clear(balance);
     await user.type(balance, '8,900');
-    await user.type(within(dialog).getByLabelText('What it’s for (optional)'), 'Rainy day');
+    // What it's for is under More options, which says it's not set yet
+    const more = within(dialog).getByRole('button', { name: /More options/ });
+    expect(more).toHaveTextContent('What it’s for · savings · kept out of free to spend');
+    await user.click(more);
+    await user.type(within(dialog).getByLabelText('What it’s for'), 'Rainy day');
     await user.click(within(dialog).getByRole('button', { name: 'Save' }));
 
     expect(await screen.findByText('Cash ISA saved')).toBeInTheDocument();
@@ -124,7 +128,14 @@ describe('accounts', () => {
     const { user, api } = renderAccounts();
 
     await user.click(await screen.findByRole('button', { name: 'Add account' }));
-    const dialog = await screen.findByRole('dialog', { name: 'Add account' });
+    // First, what kind of account it is
+    await user.click(
+      within(await screen.findByRole('dialog', { name: 'Add account' })).getByRole('button', {
+        name: /Savings account/
+      })
+    );
+    const dialog = await screen.findByRole('dialog', { name: 'Add savings account' });
+    expect(within(dialog).queryByRole('radio', { name: 'Spending' })).not.toBeInTheDocument();
     // Asks for what's missing rather than sending it
     await user.click(within(dialog).getByRole('button', { name: 'Add account' }));
     expect(within(dialog).getByText('Give it a name')).toBeInTheDocument();
@@ -437,11 +448,19 @@ describe('several accounts to spend from', () => {
     const { user, api } = renderAccounts();
 
     await user.click(await screen.findByRole('button', { name: 'Add account' }));
-    const dialog = await screen.findByRole('dialog', { name: 'Add account' });
+    await user.click(
+      within(await screen.findByRole('dialog', { name: 'Add account' })).getByRole('button', {
+        name: /Spending account/
+      })
+    );
+    const dialog = await screen.findByRole('dialog', { name: 'Add spending account' });
     await user.type(within(dialog).getByLabelText('Balance now'), '2105');
     await user.type(within(dialog).getByLabelText('Name'), 'Joint bills');
-    await user.click(within(dialog).getByRole('radio', { name: 'Spending' }));
     // Spending accounts count unless switched out, and have no rate
+    expect(within(dialog).getByRole('button', { name: /More options/ })).toHaveTextContent(
+      'counts in free to spend'
+    );
+    await user.click(within(dialog).getByRole('button', { name: /More options/ }));
     expect(within(dialog).getByRole('switch', { name: 'Count in free to spend' })).toBeChecked();
     expect(within(dialog).queryByLabelText('Interest rate (optional)')).not.toBeInTheDocument();
     await user.click(within(dialog).getByRole('button', { name: 'Add account' }));
@@ -465,12 +484,20 @@ describe('several accounts to spend from', () => {
     const { user, api } = renderAccounts();
 
     await user.click(await screen.findByRole('button', { name: 'Add account' }));
-    const dialog = await screen.findByRole('dialog', { name: 'Add account' });
+    const chooser = await screen.findByRole('dialog', { name: 'Add account' });
     // Only an account to spend from can be where you get paid
-    expect(within(dialog).queryByRole('switch', { name: 'Where you get paid' })).toBeNull();
+    await user.click(within(chooser).getByRole('button', { name: /Savings account/ }));
+    const savings = await screen.findByRole('dialog', { name: 'Add savings account' });
+    expect(within(savings).queryByRole('switch', { name: 'Where you get paid' })).toBeNull();
+    await user.click(within(savings).getByRole('button', { name: 'Back to account types' }));
+    await user.click(
+      within(await screen.findByRole('dialog', { name: 'Add account' })).getByRole('button', {
+        name: /Spending account/
+      })
+    );
+    const dialog = await screen.findByRole('dialog', { name: 'Add spending account' });
     await user.type(within(dialog).getByLabelText('Balance now'), '400');
     await user.type(within(dialog).getByLabelText('Name'), 'New current');
-    await user.click(within(dialog).getByRole('radio', { name: 'Spending' }));
     await user.click(within(dialog).getByRole('switch', { name: 'Where you get paid' }));
     expect(dialog).toHaveTextContent(
       /Your pay goes into New current from \w{3} \d{1,2} \w{3}\. Current account stops being where you get paid\./

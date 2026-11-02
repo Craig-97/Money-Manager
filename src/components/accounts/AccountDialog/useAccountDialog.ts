@@ -6,17 +6,18 @@ import {
   DeleteAccountDocument,
   UpdateAccountDocument
 } from '~/graphql/generated';
+import { AccountKind } from '~/graphql/generated';
 import { Account, paidIntoAccountOf, spendingOf } from '~/lib/accounts';
 import { getApiErrorMessage } from '~/lib/errors';
 import { formatMoneyInput } from '~/lib/format';
 import { useAccountDialogStore } from '~/state/accountDialog';
 import { useSetupAccountsStore } from '~/state/setupAccounts';
 import { showToast } from '~/state/toast';
-import { AccountDraft, checkAccountDraft, EMPTY_ACCOUNT_DRAFT } from '../accountDraft';
+import { AccountDraft, blankDraft, checkAccountDraft } from '../accountDraft';
 
 const draftOf = (
   account: Account | undefined,
-  { paidInto }: { paidInto?: boolean }
+  { paidInto, kind }: { paidInto?: boolean; kind: AccountKind }
 ): AccountDraft =>
   account
     ? {
@@ -28,7 +29,7 @@ const draftOf = (
         counts: account.counts,
         paidInto: account.paidInto || !!paidInto
       }
-    : EMPTY_ACCOUNT_DRAFT;
+    : blankDraft(kind);
 
 /*
  * The account dialog's form: a new account, or one being changed. The balance comes first and is
@@ -43,13 +44,23 @@ export const useAccountDialog = ({
   budgetId: string;
   accounts: readonly Account[];
 }) => {
-  const { dialog, open, opened, close } = useAccountDialogStore(
-    useShallow(s => ({ dialog: s.dialog, open: s.open, opened: s.opened, close: s.close }))
+  const { dialog, open, opened, close, chooseKind, backToChooser } = useAccountDialogStore(
+    useShallow(s => ({
+      dialog: s.dialog,
+      open: s.open,
+      opened: s.opened,
+      close: s.close,
+      chooseKind: s.chooseKind,
+      backToChooser: s.backToChooser
+    }))
   );
   const openSetup = useSetupAccountsStore(s => s.openSetup);
   const account =
     dialog.view === 'edit' ? accounts.find(item => item.id === dialog.accountId) : undefined;
-  const asked = { paidInto: dialog.view === 'edit' && dialog.paidInto };
+  const asked = {
+    paidInto: dialog.view === 'edit' && dialog.paidInto,
+    kind: dialog.view === 'add' ? dialog.kind : ('SAVINGS' as const)
+  };
 
   const [draft, setDraft] = useState(() => draftOf(account, asked));
   const [submitted, setSubmitted] = useState(false);
@@ -135,7 +146,13 @@ export const useAccountDialog = ({
 
   return {
     open,
+    // Changes with each opening and each kind chosen, so the fields start afresh
+    opened,
     close,
+    // Adding: what kind of account it is, first
+    choosing: dialog.view === 'chooser',
+    chooseKind,
+    backToChooser,
     account,
     isPaidInto,
     spending,

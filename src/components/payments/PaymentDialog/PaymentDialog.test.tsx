@@ -86,36 +86,35 @@ describe('choosing a category', () => {
 });
 
 describe('adding a recurring payment as a debt', () => {
-  it('turns the form into a debt with the switch', async () => {
+  it('turns the form into a debt from What is it?', async () => {
     const { user, api } = renderAt('/recurring');
 
     await user.click(await screen.findByRole('button', { name: 'Recurring payment' }));
     const dialog = await screen.findByRole('dialog', { name: 'Add recurring payment' });
-    const track = within(dialog).getByRole('switch', { name: 'Track as a debt' });
-    expect(track).not.toBeChecked();
+    expect(within(dialog).getByRole('radio', { name: 'Payment' })).toBeChecked();
+    expect(dialog).toHaveTextContent('A bill, subscription or money to someone else.');
     expect(within(dialog).queryByLabelText('Balance left')).not.toBeInTheDocument();
 
     await user.type(within(dialog).getByLabelText('Name'), 'Personal loan');
     await user.type(within(dialog).getByLabelText('Amount'), '100');
-    await user.click(track);
+    await user.click(within(dialog).getByRole('radio', { name: 'Debt' }));
 
     // Always money out, ending when it's paid off
     expect(within(dialog).queryByRole('group', { name: 'Type' })).not.toBeInTheDocument();
     expect(within(dialog).queryByRole('radio', { name: 'Renews' })).not.toBeInTheDocument();
-    expect(within(dialog).getByText('When it’s paid off')).toBeInTheDocument();
+    expect(dialog).toHaveTextContent('A loan or card. Shows on Debts with a payoff date.');
     expect(within(dialog).getByRole('combobox', { name: 'Category' })).toHaveTextContent(
       'Finances'
     );
     expect(within(dialog).getByRole('status')).toHaveTextContent(
-      'Paid offShown once you add the balance'
+      'paid off shown once you add the balance'
     );
 
-    // The debt's figures are in the switch's card
-    const details = within(dialog).getByRole('group', { name: 'Track as a debt' });
-    await user.type(within(details).getByLabelText('Balance left'), '1200');
-    await user.type(within(details).getByLabelText('Interest (APR)'), '0');
+    // The debt's figures are straight under the choice
+    await user.type(within(dialog).getByLabelText('Balance left'), '1200');
+    await user.type(within(dialog).getByLabelText('Interest (APR)'), '0');
     expect(within(dialog).getByRole('status')).toHaveTextContent(
-      'Paid offAbout Oct 2027 at £100 a month'
+      'paid off about Oct 2027 at £100 a month'
     );
 
     await user.click(within(dialog).getByRole('button', { name: 'Add payment' }));
@@ -136,16 +135,14 @@ describe('adding a recurring payment as a debt', () => {
     ]);
   });
 
-  it('only offers the switch for money going out', async () => {
+  it('only asks what it is for money going out', async () => {
     const { user } = renderAt('/recurring');
 
     await user.click(await screen.findByRole('button', { name: 'Recurring payment' }));
     const dialog = await screen.findByRole('dialog', { name: 'Add recurring payment' });
     await user.click(within(dialog).getByRole('button', { name: 'Income' }));
 
-    expect(
-      within(dialog).queryByRole('switch', { name: 'Track as a debt' })
-    ).not.toBeInTheDocument();
+    expect(within(dialog).queryByRole('radio', { name: 'Debt' })).not.toBeInTheDocument();
   });
 
   it('says when a payment would never clear the debt', async () => {
@@ -154,12 +151,12 @@ describe('adding a recurring payment as a debt', () => {
     await user.click(await screen.findByRole('button', { name: 'Recurring payment' }));
     const dialog = await screen.findByRole('dialog', { name: 'Add recurring payment' });
     await user.type(within(dialog).getByLabelText('Amount'), '5');
-    await user.click(within(dialog).getByRole('switch', { name: 'Track as a debt' }));
+    await user.click(within(dialog).getByRole('radio', { name: 'Debt' }));
     await user.type(within(dialog).getByLabelText('Balance left'), '1200');
     await user.type(within(dialog).getByLabelText('Interest (APR)'), '12');
 
     expect(within(dialog).getByRole('status')).toHaveTextContent(
-      "Not at £5 a month: it doesn't cover the interest"
+      "paid off not at £5 a month: it doesn't cover the interest"
     );
   });
 });
@@ -201,12 +198,10 @@ describe('paying into savings', () => {
     const dialog = await screen.findByRole('dialog', { name: 'Add recurring payment' });
     await user.type(within(dialog).getByLabelText('Name'), 'ISA top-up');
     await user.type(within(dialog).getByLabelText('Amount'), '250');
-    await user.click(within(dialog).getByRole('switch', { name: 'Pays into savings' }));
+    await user.click(within(dialog).getByRole('radio', { name: 'Move money' }));
 
     // Not a debt as well
-    expect(
-      within(dialog).queryByRole('switch', { name: 'Track as a debt' })
-    ).not.toBeInTheDocument();
+    expect(within(dialog).queryByLabelText('Balance left')).not.toBeInTheDocument();
     expect(within(dialog).getByRole('combobox', { name: 'Into' })).toHaveTextContent('Cash ISA');
     expect(dialog).toHaveTextContent('When it’s marked paid, £250.00 is added to Cash ISA.');
 
@@ -226,7 +221,7 @@ describe('paying into savings', () => {
 
     await user.click(await screen.findByRole('button', { name: 'Recurring payment' }));
     const dialog = await screen.findByRole('dialog', { name: 'Add recurring payment' });
-    await user.click(within(dialog).getByRole('switch', { name: 'Pays into savings' }));
+    await user.click(within(dialog).getByRole('radio', { name: 'Move money' }));
     await user.click(within(dialog).getByRole('combobox', { name: 'Into' }));
     await user.click(await screen.findByRole('option', { name: 'Easy access' }));
 
@@ -240,9 +235,8 @@ describe('paying into savings', () => {
 
     await user.click(await screen.findByRole('button', { name: 'Recurring payment' }));
     const dialog = await screen.findByRole('dialog', { name: 'Add recurring payment' });
-    expect(
-      within(dialog).queryByRole('switch', { name: 'Pays into savings' })
-    ).not.toBeInTheDocument();
+    expect(within(dialog).getByRole('radio', { name: 'Payment' })).toBeInTheDocument();
+    expect(within(dialog).queryByRole('radio', { name: 'Move money' })).not.toBeInTheDocument();
   });
 });
 
@@ -286,6 +280,10 @@ describe('several accounts to spend from', () => {
     const { user, api, dialog } = await openAdd();
     await user.type(within(dialog).getByLabelText('Name'), 'Energy');
     await user.type(within(dialog).getByLabelText('Amount'), '120');
+    const more = within(dialog).getByRole('button', { name: /More options/ });
+    expect(more).toHaveTextContent('From Current account · remind 1 day before');
+    expect(within(dialog).queryByRole('combobox', { name: 'From' })).not.toBeInTheDocument();
+    await user.click(more);
     expect(within(dialog).getByRole('combobox', { name: 'From' })).toHaveTextContent(
       'Current account'
     );
@@ -301,7 +299,7 @@ describe('several accounts to spend from', () => {
       /Where you get paid · £/
     );
     await user.click(screen.getByRole('option', { name: 'Joint bills' }));
-    expect(dialog).toHaveTextContent('Comes off Joint bills when it’s marked paid');
+    expect(more).toHaveTextContent('From Joint bills');
     await user.click(within(dialog).getByRole('button', { name: 'Add payment' }));
 
     expect(await screen.findByText('Added Energy')).toBeInTheDocument();
@@ -312,17 +310,13 @@ describe('several accounts to spend from', () => {
 
   it('moves money into another account to spend from, keeping its category', async () => {
     const { user, dialog } = await openAdd();
-    await user.click(
-      within(dialog).getByRole('switch', { name: 'Moves money to another account' })
-    );
+    await user.click(within(dialog).getByRole('radio', { name: 'Move money' }));
 
     expect(within(dialog).getByRole('combobox', { name: 'Into' })).toHaveTextContent('Joint bills');
     expect(dialog).toHaveTextContent(
       'Joint bills counts in free to spend, so this only moves money between your accounts. It’s left out of your monthly totals.'
     );
     expect(within(dialog).getByLabelText('Category')).toBeInTheDocument();
-    // The summary says where it goes
-    expect(within(dialog).getByRole('status')).toHaveTextContent('IntoJoint bills');
 
     await user.click(within(dialog).getByRole('combobox', { name: 'Into' }));
     expect(await screen.findByRole('option', { name: 'Cash ISA' })).toHaveTextContent(
@@ -333,22 +327,25 @@ describe('several accounts to spend from', () => {
   it('lands an income in an account', async () => {
     const { user, dialog } = await openAdd();
     await user.click(within(dialog).getByRole('button', { name: 'Income' }));
+    await user.click(within(dialog).getByRole('button', { name: /More options/ }));
 
     await user.click(within(dialog).getByRole('combobox', { name: 'Into' }));
     // Income can land in savings
     await user.click(await screen.findByRole('option', { name: 'Cash ISA' }));
-    expect(dialog).toHaveTextContent('Goes into Cash ISA when it’s marked paid');
+    expect(within(dialog).getByRole('button', { name: /More options/ })).toHaveTextContent(
+      'Into Cash ISA'
+    );
   });
 });
 
 describe('adding a debt from Debts', () => {
-  it('is always a debt, with no switch', async () => {
+  it('is always a debt, with nothing to choose', async () => {
     const { user, api } = renderAt('/debts');
 
     await user.click(await screen.findByRole('button', { name: 'Add a debt' }));
     const dialog = await screen.findByRole('dialog', { name: 'Add a debt' });
 
-    expect(within(dialog).queryByRole('switch')).not.toBeInTheDocument();
+    expect(within(dialog).queryByRole('radio', { name: 'Payment' })).not.toBeInTheDocument();
     expect(within(dialog).queryByRole('group', { name: 'Type' })).not.toBeInTheDocument();
     expect(within(dialog).getByRole('combobox', { name: 'Category' })).toHaveTextContent(
       'Finances'
@@ -394,7 +391,7 @@ describe('editing a debt', () => {
     await editFromRow(user, 'Car finance');
     const dialog = await screen.findByRole('dialog', { name: 'Edit recurring payment' });
 
-    expect(within(dialog).getByRole('switch', { name: 'Track as a debt' })).toBeChecked();
+    expect(within(dialog).getByRole('radio', { name: 'Debt' })).toBeChecked();
     expect(within(dialog).getByLabelText('Balance left')).toHaveValue('6,860.00');
     expect(within(dialog).getByLabelText('Interest (APR)')).toHaveValue('6.9');
     expect(within(dialog).getByLabelText('Starting balance')).toHaveValue('12,000.00');
@@ -414,12 +411,12 @@ describe('editing a debt', () => {
     ]);
   });
 
-  it('stops tracking it when the switch is turned off', async () => {
+  it('stops tracking it when it becomes a payment', async () => {
     const { user, api } = renderAt('/recurring');
 
     await editFromRow(user, 'Car finance');
     const dialog = await screen.findByRole('dialog', { name: 'Edit recurring payment' });
-    await user.click(within(dialog).getByRole('switch', { name: 'Track as a debt' }));
+    await user.click(within(dialog).getByRole('radio', { name: 'Payment' }));
 
     expect(within(dialog).getByRole('group', { name: 'Type' })).toBeInTheDocument();
     expect(within(dialog).getByRole('radio', { name: 'Stops' })).toBeInTheDocument();
@@ -486,5 +483,30 @@ describe('closing the payment dialog', () => {
         'Name'
       )
     ).toHaveValue('Car finance');
+  });
+});
+
+describe('more options', () => {
+  it('folds the reminders away, saying what they are', async () => {
+    const { user } = renderAt('/recurring');
+
+    await user.click(await screen.findByRole('button', { name: 'Recurring payment' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Add recurring payment' });
+    const more = within(dialog).getByRole('button', { name: /More options/ });
+    expect(more).toHaveAttribute('aria-expanded', 'false');
+    expect(more).toHaveTextContent('remind 1 day before');
+    expect(within(dialog).queryByLabelText('Remind me before it’s due')).not.toBeInTheDocument();
+
+    await user.click(more);
+    expect(within(dialog).getByLabelText('Remind me before it’s due')).toBeInTheDocument();
+  });
+
+  it('says where an edited payment stands under the title', async () => {
+    const { user } = renderAt('/recurring');
+
+    await editFromRow(user, 'Car finance');
+    const dialog = await screen.findByRole('dialog', { name: 'Edit recurring payment' });
+    expect(dialog).toHaveTextContent(/(Unpaid|Paid|Skipped|Ended) · /);
+    expect(within(dialog).queryByRole('button', { name: /Mark .*paid/ })).not.toBeInTheDocument();
   });
 });
