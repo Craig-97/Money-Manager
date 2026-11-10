@@ -7,6 +7,7 @@ import { usePayCycle } from '~/hooks/usePayCycle';
 import { cn } from '~/lib/cn';
 import { formatMoney } from '~/lib/format';
 import { NOTE_MAX_LENGTH, noteColor, toNotes } from '~/lib/notes';
+import { BankHolidays } from '~/lib/payday';
 import { PER_PERIOD, toPayments } from '~/lib/payments';
 import { ColorSwatches, NotePaymentAndReminder, NotePaymentOption } from './components';
 import { useNoteDialog } from './useNoteDialog';
@@ -15,8 +16,11 @@ import { useNoteDialog } from './useNoteDialog';
  * The recurring payments a note can be about, by name: "Car insurance · £612.00 a year", with
  * each one's next date and how often, for a note that follows it
  */
-const paymentOptions = (budget: Budget, today: Date): NotePaymentOption[] =>
-  toPayments(budget, today)
+const paymentOptions = (
+  budget: Budget,
+  dates: { today: Date; holidays: BankHolidays }
+): NotePaymentOption[] =>
+  toPayments(budget, dates)
     .flatMap(payment => (payment.kind === 'recurring' ? [payment] : []))
     .toSorted((a, b) => a.name.localeCompare(b.name))
     .map(payment => ({
@@ -34,7 +38,7 @@ const paymentOptions = (budget: Budget, today: Date): NotePaymentOption[] =>
  */
 export const NoteDialog = () => {
   const { budget } = useBudget();
-  const { today } = usePayCycle(budget?.payday);
+  const { today, holidays } = usePayCycle(budget?.payday);
   const actions = useNoteActions(budget?.id ?? '');
   const dialog = useNoteDialog({ notes: toNotes(budget?.notes), actions });
   const { draft, editing } = dialog;
@@ -117,7 +121,7 @@ export const NoteDialog = () => {
       </div>
       <NotePaymentAndReminder
         draft={draft}
-        payments={paymentOptions(budget, today)}
+        payments={paymentOptions(budget, { today, holidays })}
         today={today}
       />
     </Modal>

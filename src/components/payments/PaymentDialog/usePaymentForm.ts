@@ -4,6 +4,7 @@ import { addOneOffPayment, addRecurringPayment } from '~/graphql/cache';
 import {
   CreateOneOffPaymentDocument,
   CreateRecurringPaymentDocument,
+  NonWorkingDay,
   OneOffPaymentInput,
   PaymentCategory,
   PaymentFrequency,
@@ -18,10 +19,16 @@ import { formatMoneyInput, parseMoney } from '~/lib/format';
 import {
   addYear,
   categoriesFor,
+  DateMove,
   daysBeforeText,
   formatShortDate,
   fromTimingChoice,
+  goesOutOn,
+  movedHow,
+  NON_WORKING_DAY_LABELS,
+  NON_WORKING_DAYS,
   nextOccurrence,
+  nonWorkingReason,
   occurrencesBetween,
   Payment,
   PAYMENT_REMINDER_DAYS,
@@ -68,6 +75,8 @@ interface PaymentFormValues {
   account: string;
   // Another account a recurring expense moves money into, like a standing order; '' for none
   paysInto: string;
+  // When a recurring payment's date on a weekend or bank holiday goes out; 'usual' for the budget's
+  nonWorkingDay: NonWorkingDay | 'usual';
   balance: string;
   apr: string;
   started: string;
@@ -111,6 +120,7 @@ const initialValues = ({
     tracked: asDebt,
     account: '',
     paysInto: '',
+    nonWorkingDay: 'usual',
     balance: '',
     apr: '',
     started: ''
@@ -137,6 +147,7 @@ const initialValues = ({
         reminder: toTimingChoice(payment.renewalReminder),
         tracked: payment.debt !== null,
         paysInto: payment.paysInto ?? '',
+        nonWorkingDay: payment.nonWorkingDay ?? 'usual',
         balance: payment.debt ? formatMoneyInput(payment.debt.balance) : '',
         apr: payment.debt ? String(payment.debt.apr) : '',
         started:
@@ -212,6 +223,7 @@ const isUnchanged = (
   values.category === before.category &&
   values.date === before.date &&
   values.dueReminder === before.dueReminder &&
+  values.nonWorkingDay === before.nonWorkingDay &&
   values.frequency === before.frequency &&
   values.first === before.first &&
   sameEnding(values, before) &&
@@ -237,8 +249,9 @@ const scheduleSummary = (
   {
     today,
     settings,
+    move,
     renewalPassed = false
-  }: { today: Date; settings: ReminderSettings; renewalPassed?: boolean }
+  }: { today: Date; settings: ReminderSettings; move?: DateMove; renewalPassed?: boolean }
 ): { rows: SummaryRow[]; message?: string } => {
   const first = parseIsoDate(values.first);
   const { yearly, ends, reminds } = recurringEnding(values);
@@ -250,7 +263,10 @@ const scheduleSummary = (
     return { rows: [], message: 'The last payment must be on or after the first' };
   }
 
-  const next = nextOccurrence({ firstPaymentDate: first, frequency: values.frequency }, today);
+  const next = nextOccurrence(
+    { firstPaymentDate: first, frequency: values.frequency, move },
+    today
+  );
   const noneLeft = !next || (!!end && end < next);
   const rows: SummaryRow[] = [
     { label: 'Repeats', value: scheduleText(first, { frequency: values.frequency }) },
@@ -352,6 +368,42 @@ const reminderText = (choice: TimingChoice, usual: number) => {
   return days === null ? 'no reminder' : `remind ${daysBeforeText(days).toLowerCase()}`;
 };
 
+// What More options' line says for a payment with its own choice for weekends and bank holidays
+const NON_WORKING_DAY_SUMMARY: Record<NonWorkingDay, string> = {
+  NEXT: 'weekends move to the next working day',
+  BEFORE: 'weekends move to the working day before',
+  ON_DAY: 'goes out at weekends'
+};
+
+// Far enough ahead to find a weekend for any schedule but a yearly one that keeps missing them
+const LOOK_AHEAD = 24;
+
+/*
+ * Under the weekends field: what the next date on a weekend or bank holiday does with the choice,
+ * "Sat 24 Oct is a Saturday, so it goes out the next working day, Mon 26 Oct."
+ */
+const nonWorkingDayHint = (
+  values: PaymentFormValues,
+  { today, move }: { today: Date; move: DateMove }
+) => {
+  const first = parseIsoDate(values.first);
+  if (!first) return 'Choose a first payment date to see which dates move';
+  const { ends } = recurringEnding(values);
+  const end = ends === 'stop' ? parseIsoDate(values.end) : null;
+  const schedule = { firstPaymentDate: first, frequency: values.frequency, lastPaymentDate: end };
+  let date = nextOccurrence(schedule, today);
+  for (let i = 0; date && i < LOOK_AHEAD; i++) {
+    if (goesOutOn(date, { ...move, rule: 'NEXT' }).getTime() !== date.getTime()) {
+      const reason = `${formatShortDate(date, today)} is ${nonWorkingReason(date, move.holidays)}`;
+      return move.rule === 'ON_DAY'
+        ? `${reason}. It still goes out that day.`
+        : `${reason}, so it goes out ${movedHow(move.rule)}, ${formatShortDate(goesOutOn(date, move), today)}.`;
+    }
+    date = nextOccurrence(schedule, addDays(date, 1));
+  }
+  return 'None of its next dates fall on a weekend or bank holiday.';
+};
+
 interface Options {
   kind: PaymentKind;
   // Opened from Debts, so it's always a debt
@@ -373,6 +425,9 @@ interface Options {
   start?: { name: string; category: PaymentCategory; type?: PaymentType };
   // A new recurring payment that moves money into this account, from the account's view
   into?: string;
+  // The budget's choice for dates on a weekend or bank holiday, and the holidays. Left out (in
+  // setup) there's no choice to make.
+  usualMove?: DateMove;
 }
 
 /* A payment as setup keeps it until the budget is made */
@@ -393,7 +448,8 @@ export const usePaymentForm = ({
   formKey,
   draft,
   start,
-  into
+  into,
+  usualMove
 }: Options) => {
   const startValues = () => {
     const values = {
@@ -417,6 +473,7 @@ export const usePaymentForm = ({
     return (
       (several && !!start.account && start.account !== paidInto?.id) ||
       start.dueReminder !== 'usual' ||
+      (kind === 'recurring' && start.nonWorkingDay !== 'usual') ||
       (kind === 'recurring' && ending.reminds && start.reminder !== 'usual')
     );
   };
@@ -561,6 +618,11 @@ export const usePaymentForm = ({
     const accountField = (saved: string | null) =>
       account && account !== saved ? { account } : {};
     const common = { name, amount: amount!, type: values.type };
+    // Sent when it changes; null goes back to the budget's choice
+    const nonWorkingDayField = (saved: NonWorkingDay | null) => {
+      const chosen = values.nonWorkingDay === 'usual' ? null : values.nonWorkingDay;
+      return chosen !== saved ? { nonWorkingDay: chosen } : {};
+    };
     if (draft) {
       const paysInto = paysIntoOf(values, accounts);
       const taken = draft(
@@ -575,6 +637,7 @@ export const usePaymentForm = ({
                 category: values.category,
                 ...(account ? { account } : {}),
                 ...(paysInto ? { paysInto } : {}),
+                ...nonWorkingDayField(null),
                 ...(values.tracked ? { debt: debtFields(values) } : {})
               }
             }
@@ -616,6 +679,7 @@ export const usePaymentForm = ({
                 ...(paysIntoOf(values, accounts) !== paysIntoOf(before, accounts)
                   ? { paysInto: paysIntoOf(values, accounts) }
                   : {}),
+                ...nonWorkingDayField(payment.kind === 'recurring' ? payment.nonWorkingDay : null),
                 // Sent when it's a debt, and as null to stop tracking one
                 ...(values.tracked
                   ? { debt: debtFields(values) }
@@ -636,6 +700,7 @@ export const usePaymentForm = ({
                 budgetId,
                 ...accountField(null),
                 ...(paysIntoOf(values, accounts) ? { paysInto: paysIntoOf(values, accounts) } : {}),
+                ...nonWorkingDayField(null),
                 ...(values.tracked ? { debt: debtFields(values) } : {})
               }
             },
@@ -686,6 +751,15 @@ export const usePaymentForm = ({
     }
   };
 
+  // When its weekend dates go out, with the choice made here
+  const move =
+    kind === 'recurring' && usualMove
+      ? {
+          ...usualMove,
+          rule: values.nonWorkingDay === 'usual' ? usualMove.rule : values.nonWorkingDay
+        }
+      : undefined;
+
   // What's under More options, in one line: where it goes out of or into, then the reminders
   const reminds = kind === 'recurring' && ending.reminds && !renewalPassed;
   const renewalDays = reminderDays(fromTimingChoice(values.reminder), settings.renewalDays);
@@ -698,7 +772,8 @@ export const usePaymentForm = ({
       ? renewalDays === null
         ? 'no renewal reminder'
         : `${daysBeforeText(renewalDays).toLowerCase()} it renews`
-      : null
+      : null,
+    move && values.nonWorkingDay !== 'usual' ? NON_WORKING_DAY_SUMMARY[values.nonWorkingDay] : null
   ]
     .filter(Boolean)
     .join(' · ');
@@ -715,7 +790,10 @@ export const usePaymentForm = ({
     save: () => void save(),
     // The schedule in one line; where money moves to is in its own field above it
     summary: summaryLine(
-      withPaidOff(scheduleSummary(values, { today, settings, renewalPassed }), { values, today })
+      withPaidOff(scheduleSummary(values, { today, settings, move, renewalPassed }), {
+        values,
+        today
+      })
     ),
     more: { open: moreOpen, setOpen: setMoreOpen, summary: moreSummary, reminds },
     // Editing, the title's status line already says when it's next due, so the summary only shows
@@ -724,6 +802,24 @@ export const usePaymentForm = ({
       !payment ||
       values.tracked ||
       !sameSchedule(values, initialValues({ kind, payment, today, asDebt })),
+    // When a date on a weekend or bank holiday goes out: offered for recurring payments, saying
+    // what the budget's choice is, and what it does to the next such date
+    nonWorkingDay:
+      move && usualMove
+        ? {
+            options: [
+              {
+                value: 'usual' as const,
+                label: `Usual · ${NON_WORKING_DAY_LABELS[usualMove.rule].toLowerCase()}`
+              },
+              ...NON_WORKING_DAYS.map(rule => ({
+                value: rule,
+                label: NON_WORKING_DAY_LABELS[rule]
+              }))
+            ],
+            hint: nonWorkingDayHint(values, { today, move })
+          }
+        : null,
     // The choices for each reminder, saying what the usual timing is
     reminderOptions: {
       due: timingOptions({ days: PAYMENT_REMINDER_DAYS, usual: settings.paymentDays }),

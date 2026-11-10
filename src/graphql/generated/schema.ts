@@ -78,6 +78,7 @@ export type Budget = {
   cycleStartedOn: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   monthlyIncome: Scalars['Float']['output'];
+  nonWorkingDay: NonWorkingDay;
   notes: Maybe<Array<Maybe<Note>>>;
   oneOffPayments: Maybe<Array<Maybe<OneOffPayment>>>;
   payday: Maybe<Payday>;
@@ -172,6 +173,7 @@ export type CreateRecurringPaymentInput = {
   frequency: PaymentFrequency;
   lastPaymentDate?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
+  nonWorkingDay?: InputMaybe<NonWorkingDay>;
   paysInto?: InputMaybe<Scalars['ID']['input']>;
   renewalDate?: InputMaybe<Scalars['String']['input']>;
   renewalReminder?: InputMaybe<ReminderTimingInput>;
@@ -427,6 +429,8 @@ export type MutationUpdateRemindersArgs = {
   input: UpdateRemindersInput;
 };
 
+export type NonWorkingDay = 'BEFORE' | 'NEXT' | 'ON_DAY';
+
 export type Note = {
   __typename: 'Note';
   body: Scalars['String']['output'];
@@ -619,6 +623,7 @@ export type RecurringPayment = {
   lastPaymentDate: Maybe<Scalars['String']['output']>;
   name: Scalars['String']['output'];
   nextDueDate: Maybe<Scalars['String']['output']>;
+  nonWorkingDay: Maybe<NonWorkingDay>;
   paysInto: Maybe<Scalars['ID']['output']>;
   renewalDate: Maybe<Scalars['String']['output']>;
   renewalReminder: ReminderTiming;
@@ -640,6 +645,7 @@ export type RecurringPaymentInput = {
   frequency: PaymentFrequency;
   lastPaymentDate?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
+  nonWorkingDay?: InputMaybe<NonWorkingDay>;
   paysInto?: InputMaybe<Scalars['ID']['input']>;
   renewalDate?: InputMaybe<Scalars['String']['input']>;
   renewalReminder?: InputMaybe<ReminderTimingInput>;
@@ -737,6 +743,7 @@ export type UpdateAccountInput = {
 
 export type UpdateBudgetInput = {
   monthlyIncome?: InputMaybe<Scalars['Float']['input']>;
+  nonWorkingDay?: InputMaybe<NonWorkingDay>;
 };
 
 export type UpdateCalendarFeedInput = {
@@ -779,6 +786,7 @@ export type UpdateRecurringPaymentInput = {
   frequency?: InputMaybe<PaymentFrequency>;
   lastPaymentDate?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
+  nonWorkingDay?: InputMaybe<NonWorkingDay>;
   paysInto?: InputMaybe<Scalars['ID']['input']>;
   renewalDate?: InputMaybe<Scalars['String']['input']>;
   renewalReminder?: InputMaybe<ReminderTimingInput>;

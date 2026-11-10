@@ -9,6 +9,8 @@ fragment BudgetFields on Budget {
   }
   monthlyIncome
   cycleStartedOn
+  # When a payment on a weekend or bank holiday goes out, unless it has its own choice
+  nonWorkingDay
   payday {
     ...PaydayFields
   }

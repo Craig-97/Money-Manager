@@ -25,7 +25,7 @@ import { useQuickEditStore } from '~/state/quickEdit';
  */
 export const usePaymentSheet = () => {
   const { budget } = useBudget();
-  const { today, cycle } = usePayCycle(budget?.payday);
+  const { today, holidays, cycle } = usePayCycle(budget?.payday);
   const actions = usePaymentActions(budget?.id ?? '');
   const { paymentId, open, close } = usePaymentSheetStore(
     useShallow(s => ({ paymentId: s.paymentId, open: s.open, close: s.close }))
@@ -37,7 +37,7 @@ export const usePaymentSheet = () => {
   const openDebt = useDebtViewStore(s => s.openFor);
 
   const payment = budget
-    ? toPayments(budget, today).find(item => item.id === paymentId)
+    ? toPayments(budget, { today, holidays }).find(item => item.id === paymentId)
     : undefined;
   if (!payment) return { open: false, payment: null } as const;
 

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { Budget } from '~/hooks/useBudget';
 import { useNoteActions } from '~/hooks/useNoteActions';
-import { startOfToday } from '~/lib/dates';
+import { usePayCycle } from '~/hooks/usePayCycle';
 import { formatMoney } from '~/lib/format';
 import { followPayments } from '~/lib/notes';
 import { PER_PERIOD, toPayments } from '~/lib/payments';
@@ -19,10 +19,10 @@ export const useNotes = (budget: Budget) => {
     useShallow(s => ({ openNew: s.openNew, openEdit: s.openEdit }))
   );
   const actions = useNoteActions(budget.id);
-  const today = startOfToday();
+  const { today, holidays } = usePayCycle(budget.payday);
 
   // Notes that follow a payment take its next date
-  const all = followPayments(toNotes(budget.notes), toPayments(budget, today));
+  const all = followPayments(toNotes(budget.notes), toPayments(budget, { today, holidays }));
   const notes = findNotes(all, { query, sort, today });
   const searching = query.trim().length > 0;
 

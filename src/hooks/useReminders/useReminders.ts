@@ -17,11 +17,11 @@ import {
  */
 export const useReminders = () => {
   const { budget } = useBudget();
-  const { today, cycle } = usePayCycle(budget?.payday);
+  const { today, holidays, cycle } = usePayCycle(budget?.payday);
   const settings = budget?.reminderSettings ?? DEFAULT_REMINDER_SETTINGS;
   const states = toReminderStates(budget?.reminderStates);
 
-  const payments = budget ? toPayments(budget, today) : [];
+  const payments = budget ? toPayments(budget, { today, holidays }) : [];
   const sources: ReminderSources | null = budget
     ? {
         payments,

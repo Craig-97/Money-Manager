@@ -18,13 +18,21 @@ import {
 } from '~/lib/payday';
 
 export type SectionId =
-  'personal' | 'password' | 'payday' | 'balances' | 'reminders' | 'appearance' | 'account';
+  | 'personal'
+  | 'password'
+  | 'payday'
+  | 'payments'
+  | 'balances'
+  | 'reminders'
+  | 'appearance'
+  | 'account';
 
 // The settings sections, in page order. `short` is the mobile jump chip.
 export const SECTIONS: { id: SectionId; label: string; short: string }[] = [
   { id: 'personal', label: 'Personal details', short: 'Details' },
   { id: 'password', label: 'Password', short: 'Password' },
   { id: 'payday', label: 'Payday', short: 'Payday' },
+  { id: 'payments', label: 'Payments', short: 'Payments' },
   { id: 'balances', label: 'Balances', short: 'Balances' },
   { id: 'reminders', label: 'Reminders', short: 'Reminders' },
   { id: 'appearance', label: 'Appearance', short: 'Appearance' },

@@ -510,3 +510,87 @@ describe('more options', () => {
     expect(within(dialog).queryByRole('button', { name: /Mark .*paid/ })).not.toBeInTheDocument();
   });
 });
+
+// Saturday 24 October: the budget moves weekend dates to the next working day
+describe('a payment on a weekend', () => {
+  const insurance: FakeRecurringPayment = {
+    id: 'insurance',
+    name: 'Van insurance',
+    amount: 52,
+    category: 'FINANCES',
+    frequency: 'MONTHLY',
+    type: 'EXPENSE',
+    firstPaymentDate: apiDate('2026-01-24'),
+    lastPaymentDate: null,
+    nextDueDate: null,
+    thisCycle: [],
+    renewalDate: null
+  };
+  const renderWith = (payment: FakeRecurringPayment) =>
+    renderApp({
+      route: '/recurring',
+      api: createFakeApi({
+        budget: { ...budget(), nonWorkingDay: 'NEXT', recurringPayments: [payment] }
+      })
+    });
+
+  it('says on its row when it goes out instead, and why', async () => {
+    const { user } = renderWith(insurance);
+
+    const moved = await screen.findByText('Moved from Sat 24 Oct');
+    expect(screen.getByText('Mon 26 Oct')).toBeInTheDocument();
+    await user.hover(moved);
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(
+      'Sat 24 Oct is a SaturdaySo it goes out the next working day, Mon 26 Oct'
+    );
+  });
+
+  it('can have its own choice, under More options', async () => {
+    const { user, api } = renderWith(insurance);
+
+    await editFromRow(user, 'Van insurance');
+    const dialog = await screen.findByRole('dialog', { name: 'Edit recurring payment' });
+    const more = within(dialog).getByRole('button', { name: /More options/ });
+    // Following the usual choice, there's nothing to show
+    expect(more).toHaveAttribute('aria-expanded', 'false');
+    await user.click(more);
+
+    const field = within(dialog).getByRole('combobox', { name: 'On a weekend or bank holiday' });
+    expect(field).toHaveTextContent('Usual · next working day');
+    expect(dialog).toHaveTextContent(
+      'Sat 24 Oct is a Saturday, so it goes out the next working day, Mon 26 Oct.'
+    );
+
+    await user.click(field);
+    await user.click(await screen.findByRole('option', { name: 'Working day before' }));
+    expect(dialog).toHaveTextContent(
+      'Sat 24 Oct is a Saturday, so it goes out the working day before, Fri 23 Oct.'
+    );
+    expect(more).toHaveTextContent('weekends move to the working day before');
+
+    await user.click(within(dialog).getByRole('button', { name: 'Save changes' }));
+    expect(await screen.findByText('Saved Van insurance')).toBeInTheDocument();
+    expect(api.callsTo('UpdateRecurringPayment')[0].input).toMatchObject({
+      nonWorkingDay: 'BEFORE'
+    });
+    expect(await screen.findByText('Fri 23 Oct')).toBeInTheDocument();
+  });
+
+  it('opens More options by itself when the payment has its own choice', async () => {
+    const { user } = renderWith({ ...insurance, nonWorkingDay: 'ON_DAY' });
+
+    // Going out on the day, so nothing moves
+    expect(await screen.findByText('Sat 24 Oct')).toBeInTheDocument();
+    expect(screen.queryByText(/Moved from/)).not.toBeInTheDocument();
+
+    await editFromRow(user, 'Van insurance');
+    const dialog = await screen.findByRole('dialog', { name: 'Edit recurring payment' });
+    expect(within(dialog).getByRole('button', { name: /More options/ })).toHaveAttribute(
+      'aria-expanded',
+      'true'
+    );
+    expect(
+      within(dialog).getByRole('combobox', { name: 'On a weekend or bank holiday' })
+    ).toHaveTextContent('On the day');
+  });
+});

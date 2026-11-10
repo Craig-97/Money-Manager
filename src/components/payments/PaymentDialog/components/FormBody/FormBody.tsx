@@ -10,6 +10,7 @@ import { categoryOptions, FREQUENCY_OPTIONS } from '../../paymentOptions';
 import { PaymentForm } from '../../usePaymentForm';
 import { DebtFields } from '../DebtFields';
 import { FromAccount } from '../FromAccount';
+import { NonWorkingDayField } from '../NonWorkingDayField';
 import { PaymentTypeToggle } from '../PaymentTypeToggle';
 import { RecurringEnding } from '../RecurringEnding';
 import { ReminderFields } from '../ReminderFields';
@@ -142,6 +143,7 @@ export const FormBody = ({ form, kind }: { form: PaymentForm; kind: Payment['kin
         open={form.more.open}
         onOpenChange={form.more.setOpen}>
         {form.choices.several ? <FromAccount form={form} /> : null}
+        <NonWorkingDayField form={form} />
         <ReminderFields form={form} />
       </MoreOptions>
     </>

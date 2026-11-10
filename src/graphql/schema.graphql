@@ -121,6 +121,7 @@ type Budget {
   notes: [Note]
   payday: Payday
   cycleStartedOn: String
+  nonWorkingDay: NonWorkingDay!
   reminderSettings: ReminderSettings!
   reminderStates: [ReminderState!]!
   calendarFeed: CalendarFeed!
@@ -148,6 +149,7 @@ input CreateBudgetInput {
 
 input UpdateBudgetInput {
   monthlyIncome: Float
+  nonWorkingDay: NonWorkingDay
 }
 
 input MarkPaymentsPaidInput {
@@ -384,6 +386,12 @@ enum PaymentRecordKind {
   BALANCE_SET
 }
 
+enum NonWorkingDay {
+  NEXT
+  BEFORE
+  ON_DAY
+}
+
 type RecurringPayment {
   id: ID!
   budget: ID!
@@ -403,6 +411,7 @@ type RecurringPayment {
   debt: Debt
   account: ID
   paysInto: ID
+  nonWorkingDay: NonWorkingDay
 }
 
 type Debt {
@@ -456,6 +465,7 @@ input CreateRecurringPaymentInput {
   debt: DebtInput
   account: ID
   paysInto: ID
+  nonWorkingDay: NonWorkingDay
 }
 
 input RecurringPaymentInput {
@@ -472,6 +482,7 @@ input RecurringPaymentInput {
   debt: DebtInput
   account: ID
   paysInto: ID
+  nonWorkingDay: NonWorkingDay
 }
 
 input UpdateRecurringPaymentInput {
@@ -488,6 +499,7 @@ input UpdateRecurringPaymentInput {
   debt: DebtInput
   account: ID
   paysInto: ID
+  nonWorkingDay: NonWorkingDay
 }
 
 type RecurringPaymentResponse {

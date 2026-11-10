@@ -14,7 +14,7 @@ export const useForecast = (budget: Budget) => {
   const { today, cycle, holidays } = usePayCycle(budget.payday);
   const summary = summarise({
     // A payment into savings that count only moves money within the bank balance
-    payments: forFreeToSpend(toPayments(budget, today)),
+    payments: forFreeToSpend(toPayments(budget, { today, holidays })),
     bankBalance: budget.bankBalance,
     monthlyIncome: budget.monthlyIncome,
     cycle,

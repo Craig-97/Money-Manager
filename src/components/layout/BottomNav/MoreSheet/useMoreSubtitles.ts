@@ -15,10 +15,10 @@ import { RecurringPayment, toPayments } from '~/lib/payments';
 export const useMoreSubtitles = (): Partial<Record<PageName, string>> => {
   const { budget } = useBudget();
   const { user } = useCurrentUser();
-  const { today } = usePayCycle(budget?.payday);
+  const { today, holidays } = usePayCycle(budget?.payday);
 
   const debts = budget
-    ? toPayments(budget, today)
+    ? toPayments(budget, { today, holidays })
         .filter((payment): payment is RecurringPayment => payment.kind === 'recurring')
         .filter(isDebt)
     : [];

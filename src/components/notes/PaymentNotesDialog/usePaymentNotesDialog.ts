@@ -13,7 +13,7 @@ import { usePaymentSheetStore } from '~/state/paymentSheet';
  */
 export const usePaymentNotesDialog = () => {
   const { budget } = useBudget();
-  const { today } = usePayCycle(budget?.payday);
+  const { today, holidays } = usePayCycle(budget?.payday);
   const { paymentId, fromSheet, open, close } = usePaymentNotesStore(
     useShallow(s => ({
       paymentId: s.paymentId,
@@ -27,7 +27,7 @@ export const usePaymentNotesDialog = () => {
   );
   const openSheet = usePaymentSheetStore(s => s.openFor);
 
-  const payments = budget ? toPayments(budget, today) : [];
+  const payments = budget ? toPayments(budget, { today, holidays }) : [];
   const payment = payments.find(item => item.id === paymentId && item.kind === 'recurring');
   // Notes that follow the payment take its next date, so their reminder reads right
   const notes = payment

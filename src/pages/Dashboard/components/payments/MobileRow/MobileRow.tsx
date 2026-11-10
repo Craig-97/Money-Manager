@@ -119,6 +119,11 @@ export const MobileRow = ({ payment, dashboard }: { payment: Payment; dashboard:
               ? `${due.detail} · ${due.label}`
               : due.label}
           </span>
+          {due.moved ? (
+            <span className="mt-0.5 block text-[11px] font-bold text-accent-text">
+              {due.moved.short}
+            </span>
+          ) : null}
         </span>
       </button>
     </div>

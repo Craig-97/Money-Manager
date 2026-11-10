@@ -35,7 +35,10 @@ const card: DebtPayment = {
   },
   account: null,
   paysInto: null,
-  into: null
+  into: null,
+  nonWorkingDay: null,
+  move: { rule: 'ON_DAY', holidays: new Set() },
+  movedFrom: null
 };
 
 const record = (

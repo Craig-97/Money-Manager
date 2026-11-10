@@ -16,7 +16,7 @@ const AMOUNT_ERROR = 'Enter an amount, like 1,250.00';
  * made of the accounts, changed on the Accounts page, so it's only shown here.
  */
 export const useBalanceSettings = (budget: Budget) => {
-  const { today, cycle } = usePayCycle(budget.payday);
+  const { today, holidays, cycle } = usePayCycle(budget.payday);
   const [updateBudget, { loading: saving }] = useMutation(UpdateBudgetDocument);
   const [income, setIncome] = useState(() => formatMoneyInput(budget.monthlyIncome));
   const [submitted, setSubmitted] = useState(false);
@@ -26,7 +26,7 @@ export const useBalanceSettings = (budget: Budget) => {
   const accounts = toAccounts(budget.accounts, today);
   const monthlyIncome = parseMoney(income);
   const summary = summarise({
-    payments: forFreeToSpend(toPayments(budget, today)),
+    payments: forFreeToSpend(toPayments(budget, { today, holidays })),
     bankBalance: budget.bankBalance,
     monthlyIncome: monthlyIncome ?? budget.monthlyIncome,
     cycle,

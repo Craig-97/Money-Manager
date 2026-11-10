@@ -85,6 +85,33 @@ describe('profile', () => {
     ]);
   });
 
+  it('sets when payments on a weekend or bank holiday go out, with an example', async () => {
+    const { user, api } = renderProfile();
+    const payments = await section('Payments');
+
+    const field = within(payments).getByRole('combobox', { name: 'On a weekend or bank holiday' });
+    // The fake budget keeps payments on their dates
+    expect(field).toHaveTextContent('On the day');
+    const example = within(payments).getByText(/^Due Sat /).parentElement!;
+    // On the day, it goes out the Saturday it's due
+    expect(example.textContent).toMatch(/^Due (Sat .+)\1$/);
+
+    await user.click(field);
+    await user.click(await screen.findByRole('option', { name: 'Next working day' }));
+    expect(payments).toHaveTextContent('go out the next working day, as most direct debits do');
+    // The Saturday now goes out on the Monday
+    expect(example).toHaveTextContent(/^Due Sat .+Mon /);
+    await user.click(within(payments).getByRole('button', { name: 'Save changes' }));
+
+    expect(
+      await screen.findByText('Weekend payments now go out the next working day')
+    ).toBeInTheDocument();
+    expect(api.callsTo('UpdateBudget')).toEqual([
+      { id: DEFAULT_BUDGET.id, input: { nonWorkingDay: 'NEXT' } }
+    ]);
+    expect(within(payments).getByRole('button', { name: 'Save changes' })).toBeDisabled();
+  });
+
   it('saves pay on the last Thursday of the month', async () => {
     const { user, api } = renderProfile();
     const payday = await section('Payday');

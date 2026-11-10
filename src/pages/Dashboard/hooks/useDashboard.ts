@@ -35,7 +35,7 @@ export const useDashboard = (budget: Budget) => {
   const [tab, setTab] = useState<PaymentTab>('upcoming');
   const [sort, setSort] = useState<PaymentSort>(DEFAULT_SORT);
 
-  const payments = toPayments(budget, today);
+  const payments = toPayments(budget, { today, holidays });
   const paymentNotes = notesByPayment(toNotes(budget.notes));
   const accounts = toAccounts(budget.accounts, today);
   const counted = accounts.filter(account => account.counts);

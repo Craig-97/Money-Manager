@@ -28,11 +28,11 @@ const hintClasses = 'mt-1 text-xs leading-[1.4] font-semibold text-muted md:text
  */
 export const SetupAccountsDialog = () => {
   const { budget } = useBudget();
-  const { today, cycle } = usePayCycle(budget?.payday);
+  const { today, holidays, cycle } = usePayCycle(budget?.payday);
   const isDesktop = useMediaQuery(MEDIA.desktop);
   const accounts = toAccounts(budget?.accounts, today);
   const payments = budget
-    ? toPayments(budget, today).filter(
+    ? toPayments(budget, { today, holidays }).filter(
         (payment): payment is RecurringPayment =>
           payment.kind === 'recurring' && payment.type === 'EXPENSE'
       )

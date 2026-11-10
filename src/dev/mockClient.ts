@@ -27,6 +27,14 @@ import {
 
 const fromToday = (days: number) => apiDate(toIsoDate(addDays(startOfToday(), days)));
 
+// The next Saturday after today
+const comingSaturday = () => {
+  const today = startOfToday();
+  return addDays(today, (6 - today.getDay() + 7) % 7 || 7);
+};
+const addMonths = (date: Date, months: number) =>
+  new Date(date.getFullYear(), date.getMonth() + months, date.getDate());
+
 // The accounts scenario's other spending accounts: a joint one for bills, a holiday one that
 // would go below £0 before payday, and a spare card that's already below it
 const demoSpendingAccounts = (): FakeAccount[] => [
@@ -126,6 +134,8 @@ const demoBudget = (scenario: string | null): FakeBudget => {
     id: 'budget-1',
     bankBalance: scenario === 'overdrawn' ? 420 : 10000,
     monthlyIncome: 3600,
+    // As the API starts a budget: weekend and bank holiday dates go out the next working day
+    nonWorkingDay: 'NEXT',
     // The design's savings: a Cash ISA last updated five weeks ago, so its reminder shows
     accounts: [
       {
@@ -234,6 +244,20 @@ const demoBudget = (scenario: string | null): FakeBudget => {
         firstPaymentDate: fromToday(-27),
         lastPaymentDate: null,
         nextDueDate: fromToday(1),
+        thisCycle: [],
+        renewalDate: null
+      },
+      {
+        // Due on the coming Saturday, so it goes out the Monday after: the Moved from tag
+        id: 'car-insurance',
+        name: 'Car insurance',
+        amount: 52,
+        category: 'BILLS',
+        frequency: 'MONTHLY',
+        type: 'EXPENSE',
+        firstPaymentDate: apiDate(toIsoDate(addMonths(comingSaturday(), -6))),
+        lastPaymentDate: null,
+        nextDueDate: apiDate(toIsoDate(comingSaturday())),
         thisCycle: [],
         renewalDate: null
       },

@@ -15,6 +15,7 @@ import {
   DetailsSection,
   PasswordSection,
   PaydaySection,
+  PaymentsSection,
   RemindersSection
 } from '../sections';
 
@@ -45,6 +46,7 @@ export const ProfileContent = ({ user, budget }: { user: User; budget: Budget })
       <DetailsSection user={user} />
       <PasswordSection />
       <PaydaySection budget={budget} />
+      <PaymentsSection budget={budget} />
       <BalancesSection budget={budget} />
       <RemindersSection budget={budget} />
       <AppearanceSection />

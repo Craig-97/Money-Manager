@@ -11,6 +11,7 @@ import {
   suggestedBalance
 } from './paydayCheck';
 
+const NO_HOLIDAYS = new Set<string>();
 const day = (iso: string) => {
   const [year, month, date] = iso.split('-').map(Number);
   return new Date(year, month - 1, date);
@@ -36,6 +37,8 @@ const recurring = (
   debt: null,
   account: null,
   paysInto: null,
+  // On its own dates, unless a test is about moving them off weekends
+  nonWorkingDay: 'ON_DAY',
   ...overrides
 });
 
@@ -78,7 +81,7 @@ const payments = toPayments(
     ],
     oneOffPayments: []
   },
-  today
+  { today, holidays: NO_HOLIDAYS }
 );
 
 describe('the payday check', () => {

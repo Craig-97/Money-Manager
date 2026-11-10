@@ -8,9 +8,15 @@ import {
   GraphQLObjectType,
   parse
 } from 'graphql';
-import { NoteRepeat, ThemePreference } from '~/graphql/generated';
+import { NonWorkingDay, NoteRepeat, ThemePreference } from '~/graphql/generated';
 import { addDays, fromApiDate, startOfToday, toIsoDate } from '~/lib/dates';
-import { nextOccurrence, occurrencesBetween, Schedule } from '~/lib/payments';
+import {
+  goesOutOn,
+  MAX_MOVE_DAYS,
+  nextOccurrence,
+  occurrencesBetween,
+  Schedule
+} from '~/lib/payments';
 import { typeDefs } from './schema';
 
 // Shapes as the API returns them: dates are epoch milliseconds in a string
@@ -62,6 +68,8 @@ export interface FakeRecurringPayment {
   account?: string | null;
   // Another account it moves money into
   paysInto?: string | null;
+  // Its own choice for dates on a weekend or bank holiday; left out, the budget's
+  nonWorkingDay?: NonWorkingDay | null;
 }
 
 export interface FakeTiming {
@@ -173,6 +181,9 @@ export interface FakeBudget {
   payday: FakePayday | null;
   // Left out, the API's defaults
   reminderSettings?: FakeReminderSettings;
+  // Left out, payments go out on their own dates: tests' dates are days from today, so they'd
+  // move whenever one fell on a weekend. The API starts budgets on NEXT.
+  nonWorkingDay?: NonWorkingDay;
   reminderStates?: FakeReminderState[];
   calendarFeed?: FakeCalendarFeed;
 }
@@ -273,6 +284,7 @@ const FIELD_DEFAULTS: Record<string, Record<string, (value: Loose) => unknown>> 
   RecurringPayment: {
     account: p => p.account ?? null,
     paysInto: p => p.paysInto ?? null,
+    nonWorkingDay: p => p.nonWorkingDay ?? null,
     dueReminder: p => p.dueReminder ?? USUAL_TIMING,
     renewalReminder: p => p.renewalReminder ?? USUAL_TIMING
   },
@@ -286,6 +298,7 @@ const FIELD_DEFAULTS: Record<string, Record<string, (value: Loose) => unknown>> 
     accounts: b => accountsOf(b as unknown as FakeBudget),
     bankBalance: b => countedOf(b as unknown as FakeBudget),
     reminderSettings: a => a.reminderSettings ?? DEFAULT_REMINDER_SETTINGS,
+    nonWorkingDay: b => b.nonWorkingDay ?? 'ON_DAY',
     reminderStates: a => a.reminderStates ?? [],
     calendarFeed: a => a.calendarFeed ?? DEFAULT_CALENDAR_FEED
   }
@@ -566,6 +579,24 @@ export const createFakeApi = ({
     }
   };
 
+  /*
+   * As the API: a payment's dates from `from` that go out before `until`, moved off weekends by
+   * its own choice or the budget's. The fake has no bank holidays.
+   */
+  const datesOutBefore = (
+    payment: FakeRecurringPayment,
+    { from, until }: { from: Date; until: Date }
+  ) => {
+    const move = {
+      rule: payment.nonWorkingDay ?? db.budget?.nonWorkingDay ?? 'ON_DAY',
+      holidays: new Set<string>()
+    };
+    return occurrencesBetween(scheduleOf(payment), {
+      from,
+      to: addDays(until, MAX_MOVE_DAYS)
+    }).filter(date => goesOutOn(date, move) < until);
+  };
+
   const requireBudget = () => {
     if (!db.budget) throw apiError('BUDGET_NOT_LINKED', { message: 'Budget not linked' });
     return db.budget;
@@ -612,7 +643,8 @@ export const createFakeApi = ({
       renewalReminder: input.renewalReminder ?? USUAL_TIMING,
       debt: input.debt ? debtFrom(input.debt) : null,
       account: input.account ?? null,
-      paysInto: input.paysInto ?? null
+      paysInto: input.paysInto ?? null,
+      nonWorkingDay: input.nonWorkingDay ?? null
     };
     const created = { ...payment, nextDueDate: dueDateFor(payment) };
     if (created.debt) balanceSet(created, null);
@@ -884,6 +916,7 @@ export const createFakeApi = ({
     updateBudget: ({ input }: Args) => {
       const current = requireBudget();
       if (input.monthlyIncome !== undefined) current.monthlyIncome = input.monthlyIncome;
+      if (input.nonWorkingDay) current.nonWorkingDay = input.nonWorkingDay;
       return { budget: current, success: true };
     },
     // As the API: one made where pay lands takes that over from the other, and always counts
@@ -1066,11 +1099,11 @@ export const createFakeApi = ({
       for (const payment of current.recurringPayments) {
         const outcome = leftOver.find(item => item.recurringPaymentId === payment.id)?.outcome;
         const due = fromApiDate(payment.nextDueDate);
-        if (due && due < cycleStart && (outcome === 'PAID' || outcome === 'SKIPPED')) {
-          const dates = occurrencesBetween(scheduleOf(payment), {
-            from: due,
-            to: addDays(cycleStart, -1)
-          });
+        const dates = due ? datesOutBefore(payment, { from: due, until: cycleStart }) : [];
+        if (
+          dates[0]?.getTime() === due?.getTime() &&
+          (outcome === 'PAID' || outcome === 'SKIPPED')
+        ) {
           if (outcome === 'PAID') paidWithoutChange(payment, dates);
           else handle(payment, { kind: 'SKIPPED', dates });
         }
@@ -1085,10 +1118,11 @@ export const createFakeApi = ({
         for (const record of payment.history ?? []) if (!inNewCycle(record)) record.open = false;
         payment.thisCycle = payment.thisCycle.filter(inNewCycle);
         const due = fromApiDate(payment.nextDueDate);
-        if (goneOut.includes(payment.id) && due && due >= cycleStart) {
+        const lastCycle = due ? datesOutBefore(payment, { from: due, until: cycleStart }) : [];
+        if (goneOut.includes(payment.id) && due && !lastCycle.length) {
           paidWithoutChange(
             payment,
-            occurrencesBetween(scheduleOf(payment), { from: due, to: today })
+            datesOutBefore(payment, { from: due, until: addDays(today, 1) })
           );
         }
       }
@@ -1232,10 +1266,7 @@ export const createFakeApi = ({
         const next = fromApiDate(payment.nextDueDate);
         if (!next) continue;
         const dates = input.until
-          ? occurrencesBetween(scheduleOf(payment), {
-              from: next,
-              to: addDays(fromApiDate(fromInput(input.until))!, -1)
-            })
+          ? datesOutBefore(payment, { from: next, until: fromApiDate(fromInput(input.until))! })
           : [next];
         handle(payment, { kind: 'SKIPPED', dates });
       }

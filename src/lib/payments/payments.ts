@@ -1,5 +1,6 @@
 import {
   AccountFieldsFragment,
+  NonWorkingDay,
   OneOffPaymentFieldsFragment,
   PaymentCategory,
   PaymentFrequency,
@@ -7,6 +8,8 @@ import {
   RecurringPaymentFieldsFragment
 } from '~/graphql/generated';
 import { fromApiDate } from '~/lib/dates';
+import { BankHolidays } from '~/lib/payday';
+import { DateMove, DEFAULT_NON_WORKING_DAY, goesOutOn } from './nonWorkingDay';
 import { nextOccurrence } from './recurrence';
 import {
   DEFAULT_REMINDER_SETTINGS,
@@ -85,6 +88,13 @@ export interface RecurringPayment extends BasePayment {
   // That account's name, and whether it counts towards the bank balance too. When it does, the
   // money only moves within the bank balance, so it isn't spent and the totals leave it out.
   into: { name: string; counts: boolean } | null;
+  // Its own choice for dates on a weekend or bank holiday; null follows the budget's
+  nonWorkingDay: NonWorkingDay | null;
+  // How its dates move, its own choice or the budget's. dueDate, thisCycle and the schedule maths
+  // all give the days it goes out.
+  move: DateMove;
+  // The date its schedule gives for dueDate, when that's moved off a weekend or bank holiday
+  movedFrom: Date | null;
 }
 
 export interface OneOffPayment extends BasePayment {
@@ -106,21 +116,25 @@ interface RecurringOptions {
   today: Date;
   settings: ReminderSettings;
   accounts: readonly IntoAccount[];
+  // The budget's choice for dates on a weekend or bank holiday, and the holidays
+  usualMove: DateMove;
 }
 
 const toRecurringPayment = (
   payment: RecurringPaymentFieldsFragment,
-  { today, settings, accounts }: RecurringOptions
+  { today, settings, accounts, usualMove }: RecurringOptions
 ): RecurringPayment => {
   const into = payment.paysInto
     ? accounts.find(account => account.id === payment.paysInto)
     : undefined;
   const firstPaymentDate = fromApiDate(payment.firstPaymentDate) ?? today;
   const lastPaymentDate = fromApiDate(payment.lastPaymentDate);
+  const move = { ...usualMove, rule: payment.nonWorkingDay ?? usualMove.rule };
   // Payments saved before the API tracked due dates don't have one, so work it out
-  const dueDate =
+  const scheduled =
     fromApiDate(payment.nextDueDate) ??
     nextOccurrence({ firstPaymentDate, frequency: payment.frequency, lastPaymentDate }, today);
+  const dueDate = scheduled && goesOutOn(scheduled, move);
 
   return {
     kind: 'recurring',
@@ -138,7 +152,7 @@ const toRecurringPayment = (
       id: record.id,
       // Only pays and skips count towards the cycle
       kind: CYCLE_KINDS[record.kind as keyof typeof CYCLE_KINDS],
-      dates: record.dates.map(date => fromApiDate(date)!),
+      dates: record.dates.map(date => goesOutOn(fromApiDate(date)!, move)),
       balanceChange: record.balanceChange
     })),
     renewalDate: fromApiDate(payment.renewalDate),
@@ -157,7 +171,10 @@ const toRecurringPayment = (
       : null,
     account: payment.account ?? null,
     paysInto: payment.paysInto ?? null,
-    into: into ? { name: into.name, counts: into.counts } : null
+    into: into ? { name: into.name, counts: into.counts } : null,
+    nonWorkingDay: payment.nonWorkingDay ?? null,
+    move,
+    movedFrom: scheduled && dueDate && dueDate.getTime() !== scheduled.getTime() ? scheduled : null
   };
 };
 
@@ -186,16 +203,25 @@ interface BudgetPayments {
   reminderSettings?: ReminderSettings | null;
   // For the account a payment pays into
   accounts?: readonly (IntoAccount | null)[] | null;
+  // When a payment on a weekend or bank holiday goes out, unless it has its own choice
+  nonWorkingDay?: NonWorkingDay | null;
 }
 
-/* Both kinds of payment on the budget as one list */
-export const toPayments = (budget: BudgetPayments, today: Date): Payment[] => {
+/*
+ * Both kinds of payment on the budget as one list. Recurring payments' dates are the days they go
+ * out, moved off weekends and the payday region's bank holidays.
+ */
+export const toPayments = (
+  budget: BudgetPayments,
+  { today, holidays }: { today: Date; holidays: BankHolidays }
+): Payment[] => {
   const settings = budget.reminderSettings ?? DEFAULT_REMINDER_SETTINGS;
   const accounts = (budget.accounts ?? []).filter(account => account !== null);
+  const usualMove = { rule: budget.nonWorkingDay ?? DEFAULT_NON_WORKING_DAY, holidays };
   return [
     ...(budget.recurringPayments ?? [])
       .filter(payment => payment !== null)
-      .map(payment => toRecurringPayment(payment, { today, settings, accounts })),
+      .map(payment => toRecurringPayment(payment, { today, settings, accounts, usualMove })),
     ...(budget.oneOffPayments ?? [])
       .filter(payment => payment !== null)
       .map(payment => toOneOffPayment(payment, settings))

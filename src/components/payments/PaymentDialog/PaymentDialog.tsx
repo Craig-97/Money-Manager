@@ -8,7 +8,7 @@ import { useMediaQuery } from '~/hooks/useMediaQuery';
 import { usePayCycle } from '~/hooks/usePayCycle';
 import { usePaymentActions } from '~/hooks/usePaymentActions';
 import { toAccounts } from '~/lib/accounts';
-import { DEFAULT_REMINDER_SETTINGS, toPayments } from '~/lib/payments';
+import { DEFAULT_NON_WORKING_DAY, DEFAULT_REMINDER_SETTINGS, toPayments } from '~/lib/payments';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
 import { Chooser, FormBody, StatusLine } from './components';
 import { usePaymentForm } from './usePaymentForm';
@@ -29,7 +29,7 @@ export const PaymentDialog = () => {
   );
   const isDesktop = useMediaQuery(MEDIA.desktop);
   const { budget } = useBudget();
-  const { today, cycle } = usePayCycle(budget?.payday);
+  const { today, holidays, cycle } = usePayCycle(budget?.payday);
   const { remove } = usePaymentActions(budget?.id ?? '');
 
   const target = dialog.view === 'form' ? dialog : null;
@@ -37,7 +37,9 @@ export const PaymentDialog = () => {
   const asDebt = target?.asDebt ?? false;
   const payment =
     budget && target?.paymentId
-      ? toPayments(budget, today).find(p => p.id === target.paymentId && p.kind === kind)
+      ? toPayments(budget, { today, holidays }).find(
+          p => p.id === target.paymentId && p.kind === kind
+        )
       : undefined;
   const form = usePaymentForm({
     kind,
@@ -48,6 +50,10 @@ export const PaymentDialog = () => {
     settings: budget?.reminderSettings ?? DEFAULT_REMINDER_SETTINGS,
     accounts: toAccounts(budget?.accounts, today),
     into: target?.into,
+    usualMove: {
+      rule: budget?.nonWorkingDay ?? DEFAULT_NON_WORKING_DAY,
+      holidays
+    },
     onSaved: close,
     // Each opening starts afresh. Closing keeps the form as it was while the dialog animates away.
     formKey: String(opened)

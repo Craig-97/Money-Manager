@@ -23,7 +23,7 @@ export const PAYMENTS_HEADING_ID = 'recurring-payments-title';
 
 /* Everything the recurring page shows and does, worked out from the budget */
 export const useRecurring = (budget: Budget) => {
-  const { today, cycle } = usePayCycle(budget.payday);
+  const { today, holidays, cycle } = usePayCycle(budget.payday);
   const actions = usePaymentActions(budget.id);
 
   const [tab, setTab] = useState<RecurringTab>('all');
@@ -31,7 +31,7 @@ export const useRecurring = (budget: Budget) => {
   const [category, setCategory] = useState<string>(ALL_CATEGORIES);
   const [sort, setSort] = useState<PaymentSort>(DEFAULT_SORT);
 
-  const payments = recurringOnly(toPayments(budget, today));
+  const payments = recurringOnly(toPayments(budget, { today, holidays }));
   const paymentNotes = notesByPayment(toNotes(budget.notes));
   const listed = filterPayments(payments, { tab, query, category, cycle, today, sort });
   const selection = usePaymentSelection(listed);

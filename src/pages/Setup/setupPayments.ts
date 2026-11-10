@@ -66,7 +66,11 @@ export const regularAsPayment = (
     account: input.account ?? null,
     paysInto: input.paysInto ?? null,
     // Setup works out moves between accounts itself, from the accounts being set up
-    into: null
+    into: null,
+    nonWorkingDay: input.nonWorkingDay ?? null,
+    // Setup lists the dates the schedule gives; weekends move them once the budget is made
+    move: { rule: 'ON_DAY', holidays: new Set() },
+    movedFrom: null
   };
 };
 

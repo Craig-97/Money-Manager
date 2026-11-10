@@ -8,11 +8,11 @@ import { DebtSort, sortDebts } from '../../debtsModel';
 
 /* The budget's debts, what they add up to, and when they'd be paid off as things are */
 export const useDebts = (budget: Budget) => {
-  const { today, cycle } = usePayCycle(budget.payday);
+  const { today, holidays, cycle } = usePayCycle(budget.payday);
   const actions = useDebtActions(budget.id);
   const [sort, setSort] = useState<DebtSort>('rate');
 
-  const debts = toPayments(budget, today)
+  const debts = toPayments(budget, { today, holidays })
     .filter((payment): payment is RecurringPayment => payment.kind === 'recurring')
     .filter(isDebt);
   // As things are: each debt keeps its own payment, with nothing extra

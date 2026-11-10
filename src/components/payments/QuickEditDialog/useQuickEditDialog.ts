@@ -30,7 +30,7 @@ import { showToast } from '~/state/toast';
  */
 export const useQuickEditDialog = () => {
   const { budget } = useBudget();
-  const { today, cycle } = usePayCycle(budget?.payday);
+  const { today, holidays, cycle } = usePayCycle(budget?.payday);
   const { paymentId, mode, fromSheet, open, opened, close } = useQuickEditStore(
     useShallow(s => ({
       paymentId: s.paymentId,
@@ -46,7 +46,7 @@ export const useQuickEditDialog = () => {
   const [updateOneOff] = useMutation(UpdateOneOffPaymentDocument);
   const [saving, setSaving] = useState(false);
 
-  const payments = budget ? toPayments(budget, today) : [];
+  const payments = budget ? toPayments(budget, { today, holidays }) : [];
   const payment = payments.find(item => item.id === paymentId);
   const earliest = payment ? earliestNewDate(payment, today) : today;
   // Its next date, or the first it can move to when that's already been dealt with

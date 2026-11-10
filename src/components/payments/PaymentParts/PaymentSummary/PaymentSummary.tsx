@@ -24,7 +24,8 @@ interface PaymentSummaryProps {
 
 /*
  * A payment in a grey card, as the quick sheet and quick edits show it: its letter, the amount and
- * when it's due, red when that's today or overdue, then how often and what it's for.
+ * when it's due, red when that's today or overdue, then how often and what it's for, and whether
+ * its date was moved off a weekend or bank holiday.
  */
 export const PaymentSummary = ({ payment, due, named = false, children }: PaymentSummaryProps) => {
   const urgent = due.state === 'today' || due.state === 'overdue';
@@ -52,6 +53,9 @@ export const PaymentSummary = ({ payment, due, named = false, children }: Paymen
             : (intoText(payment) ?? categoryLabel(payment.category))}
           {movesTo(payment) ? ' · Not in totals' : null}
         </p>
+        {due.moved ? (
+          <p className="mt-0.5 text-xs font-bold text-accent-text">{due.moved.label}</p>
+        ) : null}
       </div>
       {children}
     </div>

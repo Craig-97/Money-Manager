@@ -37,7 +37,7 @@ const WEEKDAY_NUMBER: Record<Weekday, number> = {
   FRIDAY: 5
 };
 
-const isWorkingDay = (date: Date, holidays: BankHolidays) =>
+export const isWorkingDay = (date: Date, holidays: BankHolidays) =>
   date.getDay() !== 0 && date.getDay() !== 6 && !holidays.has(toIsoDate(date));
 
 /* Pay that would land on a weekend or bank holiday arrives the working day before */

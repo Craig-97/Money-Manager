@@ -1,5 +1,6 @@
 import { PaymentFrequency } from '~/graphql/generated';
 import { addDays } from '~/lib/dates';
+import { DateMove, goesOutOn, MAX_MOVE_DAYS } from './nonWorkingDay';
 
 // The same schedule maths as the API (utils/dates/recurrence.ts), on local dates
 
@@ -22,6 +23,8 @@ export interface Schedule {
   firstPaymentDate: Date;
   frequency: PaymentFrequency;
   lastPaymentDate?: Date | null;
+  // Moves dates off weekends and bank holidays, so they're the days the payment goes out
+  move?: DateMove | null;
 }
 
 /*
@@ -40,28 +43,32 @@ export const occurrence = (
   return new Date(first.getFullYear(), month, Math.min(first.getDate(), lastDay));
 };
 
-/* Every date the payment falls on from `from` to `to`, inclusive */
+/* Every date the payment goes out on from `from` to `to`, inclusive */
 export const occurrencesBetween = (
-  { firstPaymentDate, frequency, lastPaymentDate }: Schedule,
+  { firstPaymentDate, frequency, lastPaymentDate, move }: Schedule,
   { from, to }: { from: Date; to: Date }
 ) => {
   const dates: Date[] = [];
+  // A date moved back off a weekend can come from just after `to`
+  const last = move ? addDays(to, MAX_MOVE_DAYS) : to;
   for (let k = 0; k < MAX_OCCURRENCES; k++) {
-    const date = occurrence({ firstPaymentDate, frequency }, k);
-    if (date > to || (lastPaymentDate && date > lastPaymentDate)) break;
-    if (date >= from) dates.push(date);
+    const scheduled = occurrence({ firstPaymentDate, frequency }, k);
+    if (scheduled > last || (lastPaymentDate && scheduled > lastPaymentDate)) break;
+    const date = goesOutOn(scheduled, move);
+    if (date >= from && date <= to) dates.push(date);
   }
   return dates;
 };
 
-/* The first date the payment falls on that is on or after `from`, or null once it has ended */
+/* The first date the payment goes out on that is on or after `from`, or null once it has ended */
 export const nextOccurrence = (schedule: Schedule, from: Date) => {
   for (let k = 0; k < MAX_OCCURRENCES; k++) {
-    const date = occurrence(
+    const scheduled = occurrence(
       { firstPaymentDate: schedule.firstPaymentDate, frequency: schedule.frequency },
       k
     );
-    if (schedule.lastPaymentDate && date > schedule.lastPaymentDate) return null;
+    if (schedule.lastPaymentDate && scheduled > schedule.lastPaymentDate) return null;
+    const date = goesOutOn(scheduled, schedule.move);
     if (date >= from) return date;
   }
   return null;

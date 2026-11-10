@@ -2,11 +2,13 @@ import { describe, expect, it } from 'vitest';
 import { OneOffPaymentFieldsFragment, RecurringPaymentFieldsFragment } from '~/graphql/generated';
 import { toIsoDate } from '~/lib/dates';
 import { cycleStatus, datesDue, paymentChoices } from './cycle';
+import { dueInfo } from './due';
 import { scheduleText } from './labels';
 import { RecurringPayment, toPayments } from './payments';
-import { nextOccurrence, occurrence } from './recurrence';
+import { nextOccurrence, occurrence, occurrencesBetween } from './recurrence';
 import { cycleDays, summarise } from './summary';
 
+const NO_HOLIDAYS = new Set<string>();
 const day = (iso: string) => {
   const [year, month, date] = iso.split('-').map(Number);
   return new Date(year, month - 1, date);
@@ -43,6 +45,8 @@ const recurring = (
   debt: null,
   account: null,
   paysInto: null,
+  // On its own dates, unless a test is about moving them off weekends
+  nonWorkingDay: 'ON_DAY',
   ...overrides
 });
 
@@ -94,7 +98,7 @@ const designPayments = toPayments(
       oneOff({ name: 'Birthday', amount: 75, category: 'GIFTS', dueDate: apiDate('2026-10-20') })
     ]
   },
-  today
+  { today, holidays: NO_HOLIDAYS }
 );
 
 describe('recurrence', () => {
@@ -118,9 +122,81 @@ describe('recurrence', () => {
   it('works out the due date when the API has none', () => {
     const [netflix] = toPayments(
       { recurringPayments: [recurring({ name: 'Netflix', nextDueDate: null })] },
-      day('2026-10-03')
+      { today: day('2026-10-03'), holidays: NO_HOLIDAYS }
     );
     expect(toIsoDate(netflix.dueDate!)).toBe('2026-11-02');
+  });
+});
+
+// 2026-10-24 and 2026-11-14 are Saturdays; 2026-12-25 is Christmas Day, a Friday
+describe('dates on a weekend or bank holiday', () => {
+  const christmas = new Set(['2026-12-25', '2026-12-28']);
+  const insurance = (overrides: Partial<RecurringPaymentFieldsFragment> = {}) =>
+    recurring({
+      name: 'Insurance',
+      firstPaymentDate: apiDate('2026-01-24'),
+      nextDueDate: apiDate('2026-10-24'),
+      nonWorkingDay: null,
+      ...overrides
+    });
+
+  it('go out the next working day unless the budget says otherwise', () => {
+    const [moved] = toPayments(
+      { recurringPayments: [insurance()] },
+      { today: day('2026-10-02'), holidays: NO_HOLIDAYS }
+    );
+    expect(toIsoDate(moved.dueDate!)).toBe('2026-10-26');
+    expect(moved.kind === 'recurring' && toIsoDate(moved.movedFrom!)).toBe('2026-10-24');
+
+    const [before] = toPayments(
+      { recurringPayments: [insurance()], nonWorkingDay: 'BEFORE' },
+      { today: day('2026-10-02'), holidays: NO_HOLIDAYS }
+    );
+    expect(toIsoDate(before.dueDate!)).toBe('2026-10-23');
+  });
+
+  it("follow the payment's own choice over the budget's", () => {
+    const [onDay] = toPayments(
+      { recurringPayments: [insurance({ nonWorkingDay: 'ON_DAY' })], nonWorkingDay: 'BEFORE' },
+      { today: day('2026-10-02'), holidays: NO_HOLIDAYS }
+    );
+    expect(toIsoDate(onDay.dueDate!)).toBe('2026-10-24');
+    expect(onDay.kind === 'recurring' && onDay.movedFrom).toBeNull();
+  });
+
+  it('skip bank holidays too, with the reason under the date', () => {
+    const [moved] = toPayments(
+      {
+        recurringPayments: [
+          insurance({ firstPaymentDate: apiDate('2026-01-25'), nextDueDate: apiDate('2026-12-25') })
+        ]
+      },
+      { today: day('2026-12-01'), holidays: christmas }
+    );
+    // Christmas, the weekend, then the Boxing Day holiday on Monday
+    expect(toIsoDate(moved.dueDate!)).toBe('2026-12-29');
+    const due = dueInfo(moved, { today: day('2026-12-01'), cycle });
+    expect(due.moved).toEqual({
+      label: 'Moved from Fri 25 Dec',
+      short: 'Moved from Fri 25',
+      reason: 'Fri 25 Dec is a bank holiday',
+      outcome: 'So it goes out the next working day, Tue 29 Dec'
+    });
+  });
+
+  it('count in the cycle they go out in, even when moved back from after it', () => {
+    // A weekly payment on Saturdays, going out the Friday before
+    const schedule = {
+      firstPaymentDate: day('2026-10-03'),
+      frequency: 'WEEKLY' as const,
+      move: { rule: 'BEFORE' as const, holidays: NO_HOLIDAYS }
+    };
+    expect(
+      occurrencesBetween(schedule, { from: day('2026-10-05'), to: day('2026-10-16') }).map(
+        toIsoDate
+      )
+    ).toEqual(['2026-10-09', '2026-10-16']);
+    expect(toIsoDate(nextOccurrence(schedule, day('2026-10-10'))!)).toBe('2026-10-16');
   });
 });
 
@@ -163,7 +239,7 @@ describe('summarise', () => {
               })
             ]
           },
-          today
+          { today, holidays: NO_HOLIDAYS }
         )
       ],
       bankBalance: 10000,
@@ -192,7 +268,7 @@ describe('summarise', () => {
               })
             ]
           },
-          today
+          { today, holidays: NO_HOLIDAYS }
         )
       ],
       bankBalance: 10000,
@@ -232,7 +308,7 @@ describe('summarise', () => {
         ],
         oneOffPayments: [oneOff({ name: 'Overdue', dueDate: apiDate('2026-09-01') })]
       },
-      today
+      { today, holidays: NO_HOLIDAYS }
     );
     const result = summarise({ payments, bankBalance: 1000, monthlyIncome: 0, cycle, today });
 
@@ -295,7 +371,7 @@ describe('a weekly payment through the cycle', () => {
           })
         ]
       },
-      today
+      { today, holidays: NO_HOLIDAYS }
     )[0] as RecurringPayment;
 
   it('is due on every date left before payday', () => {
@@ -353,7 +429,7 @@ describe('a monthly payment through the cycle', () => {
           recurring({ name: 'Netflix', nextDueDate: apiDate(nextDueDate), thisCycle })
         ]
       },
-      today
+      { today, holidays: NO_HOLIDAYS }
     )[0];
 
   it('keeps the labels it always had', () => {
@@ -377,7 +453,7 @@ describe('a payment added partway through a cycle', () => {
   const added = (fields: Partial<RecurringPaymentFieldsFragment>) =>
     toPayments(
       { recurringPayments: [recurring({ name: 'Added', ...fields })] },
-      today
+      { today, holidays: NO_HOLIDAYS }
     )[0] as RecurringPayment;
 
   it('counts a date this cycle from before it was added as paid, with nothing to undo', () => {

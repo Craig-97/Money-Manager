@@ -19,11 +19,11 @@ const roundPence = (amount: number) => Math.round(amount * 100) / 100;
 
 /* Everything the Accounts page shows and does, worked out from the budget */
 export const useAccounts = (budget: Budget) => {
-  const { today, cycle } = usePayCycle(budget.payday);
+  const { today, holidays, cycle } = usePayCycle(budget.payday);
   const { setCounts } = useAccountActions(budget);
 
   const accounts = toAccounts(budget.accounts, today);
-  const payments = toPayments(budget, today);
+  const payments = toPayments(budget, { today, holidays });
   const debts = payments
     .filter((payment): payment is RecurringPayment => payment.kind === 'recurring')
     .filter(isDebt)

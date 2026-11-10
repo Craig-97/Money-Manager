@@ -3,6 +3,7 @@ export * from './AppearanceSection';
 export * from './BalancesSection';
 export * from './DetailsSection';
 export * from './PasswordSection';
+export * from './PaymentsSection';
 export * from './PaydaySection';
 export * from './RemindersSection';
 export * from './SettingsTile';

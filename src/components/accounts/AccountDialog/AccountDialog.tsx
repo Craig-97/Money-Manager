@@ -20,7 +20,7 @@ import { useAccountDialog } from './useAccountDialog';
  */
 export const AccountDialog = () => {
   const { budget } = useBudget();
-  const { today, cycle } = usePayCycle(budget?.payday);
+  const { today, holidays, cycle } = usePayCycle(budget?.payday);
   const accounts = toAccounts(budget?.accounts, today);
   const dialog = useAccountDialog({ budgetId: budget?.id ?? '', accounts, today });
   const openPayment = usePaymentDialogStore(s => s.openEdit);
@@ -29,7 +29,7 @@ export const AccountDialog = () => {
   if (!budget) return null;
 
   const paidIn = account
-    ? toPayments(budget, today).flatMap(payment =>
+    ? toPayments(budget, { today, holidays }).flatMap(payment =>
         payment.kind === 'recurring' && payment.paysInto === account.id ? [payment] : []
       )
     : [];

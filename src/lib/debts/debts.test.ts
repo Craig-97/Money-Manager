@@ -50,7 +50,10 @@ const debt = (
   debt: { balance, startingBalance, apr, balanceUpdatedAt: null, paidOffThisCycle: 0 },
   account: null,
   paysInto: null,
-  into: null
+  into: null,
+  nonWorkingDay: null,
+  move: { rule: 'ON_DAY', holidays: new Set() },
+  movedFrom: null
 });
 
 // The Debts design's three: a card, car finance and a loan from family

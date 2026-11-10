@@ -15,10 +15,10 @@ import { UpdateBalanceDialog } from '../UpdateBalanceDialog';
  */
 export const DebtDialogs = () => {
   const { budget } = useBudget();
-  const { today } = usePayCycle(budget?.payday);
+  const { today, holidays } = usePayCycle(budget?.payday);
   const actions = useDebtActions(budget?.id ?? '');
   const debts = budget
-    ? toPayments(budget, today)
+    ? toPayments(budget, { today, holidays })
         .filter((payment): payment is RecurringPayment => payment.kind === 'recurring')
         .filter(isDebt)
     : [];

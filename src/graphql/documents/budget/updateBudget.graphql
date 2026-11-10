@@ -1,10 +1,11 @@
-# The income; balances are set on the accounts
+# The income, or when weekend and bank holiday payments go out; balances are set on the accounts
 mutation UpdateBudget($id: ID!, $input: UpdateBudgetInput!) {
   updateBudget(id: $id, input: $input) {
     budget {
       id
       bankBalance
       monthlyIncome
+      nonWorkingDay
     }
   }
 }

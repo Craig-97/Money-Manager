@@ -29,6 +29,8 @@ fragment RecurringPaymentFields on RecurringPayment {
   account
   # Another account it moves money into, like a standing order
   paysInto
+  # When a date on a weekend or bank holiday goes out; null follows the budget's choice
+  nonWorkingDay
   debt {
     balance
     startingBalance

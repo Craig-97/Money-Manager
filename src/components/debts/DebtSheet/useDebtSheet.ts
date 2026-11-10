@@ -13,7 +13,7 @@ import { usePaymentDialogStore } from '~/state/paymentDialog';
  */
 export const useDebtSheet = () => {
   const { budget } = useBudget();
-  const { today } = usePayCycle(budget?.payday);
+  const { today, holidays } = usePayCycle(budget?.payday);
   const { debtId, open, close } = useDebtViewStore(
     useShallow(s => ({ debtId: s.debtId, open: s.open, close: s.close }))
   );
@@ -28,7 +28,7 @@ export const useDebtSheet = () => {
   const openEdit = usePaymentDialogStore(s => s.openEdit);
 
   const debt = budget
-    ? toPayments(budget, today)
+    ? toPayments(budget, { today, holidays })
         .filter((payment): payment is RecurringPayment => payment.kind === 'recurring')
         .filter(isDebt)
         .find(payment => payment.id === debtId)
