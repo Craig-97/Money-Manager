@@ -37,16 +37,14 @@ export const AccountDialog = () => {
   if (!budget) return null;
 
   const payments = account ? toPayments(budget, { today, holidays }) : [];
-  // Deleting: payments that go out of or into it move to where you get paid, and ones that moved
-  // money into it carry on as plain expenses
-  const moving = payments.filter(payment => payment.account === account?.id);
+  // Payments that move money into it, under its switch when editing
   const paidIn = payments.flatMap(payment =>
     payment.kind === 'recurring' && payment.paysInto === account?.id ? [payment] : []
   );
-  const deleteText = account
+  // Deleting: payments that go out of or into it move to where you get paid
+  const movesText = account
     ? deleteTextOf({
-        moving,
-        paidIn: paidIn.length,
+        moving: payments.filter(payment => payment.account === account.id),
         paidIntoName: dialog.paidIntoName ?? 'where you get paid',
         // With two or more left to spend from, they can still be moved to another
         canMove: spendingOf(accounts).filter(item => item.id !== account.id).length > 1
@@ -134,8 +132,7 @@ export const AccountDialog = () => {
             no longer counts towards{' '}
             {account.counts ? 'what you have or free to spend' : 'what you have'}.
           </p>
-          {deleteText?.moves ? <p>{deleteText.moves}</p> : null}
-          {deleteText?.paidIn ? <p>{deleteText.paidIn}</p> : null}
+          {movesText ? <p>{movesText}</p> : null}
           <p>This can’t be undone.</p>
         </div>
       ) : (

@@ -408,7 +408,7 @@ const demoPayment = (fields: {
   renewalDate: fields.renewInDays === undefined ? null : fromToday(fields.renewInDays)
 });
 
-// Spotify went by unpaid yesterday; car insurance renews in five weeks with a note about it
+// Spotify went by unpaid yesterday; home insurance renews in five weeks with a note about it
 const demoReminderPayments = () => [
   demoPayment({
     id: 'spotify',
@@ -419,8 +419,8 @@ const demoReminderPayments = () => [
   }),
   demoPayment({ id: 'energy', name: 'Energy', amount: 120, category: 'BILLS', dueInDays: 1 }),
   demoPayment({
-    id: 'car-insurance',
-    name: 'Car insurance',
+    id: 'home-insurance',
+    name: 'Home insurance',
     amount: 612,
     category: 'FINANCES',
     frequency: 'ANNUALLY',
@@ -448,12 +448,12 @@ const demoDatedNotes = () =>
   [
     {
       id: 'note-quotes',
-      body: 'Car insurance quotes. Get three quotes before renewing.',
+      body: 'Home insurance quotes. Get three quotes before renewing.',
       color: 'AMBER',
       date: fromToday(36),
       remind: [30, 7],
       repeat: 'YEARLY' as const,
-      payment: 'car-insurance'
+      payment: 'home-insurance'
     },
     {
       id: 'note-prescription',
