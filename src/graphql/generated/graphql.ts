@@ -170,6 +170,39 @@ export type CreateAccountMutation = {
           nextDate: string | null;
         } | null;
       }>;
+      recurringPayments: Array<{
+        __typename: 'RecurringPayment';
+        id: string;
+        name: string;
+        amount: number;
+        category: Types.PaymentCategory;
+        frequency: Types.PaymentFrequency;
+        type: Types.PaymentType;
+        firstPaymentDate: string;
+        lastPaymentDate: string | null;
+        nextDueDate: string | null;
+        renewalDate: string | null;
+        account: string | null;
+        paysInto: string | null;
+        nonWorkingDay: Types.NonWorkingDay | null;
+        dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
+        renewalReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
+        thisCycle: Array<{
+          __typename: 'PaymentRecord';
+          id: string;
+          kind: Types.PaymentRecordKind;
+          dates: Array<string>;
+          balanceChange: number;
+        }>;
+        debt: {
+          __typename: 'Debt';
+          balance: number;
+          startingBalance: number | null;
+          apr: number;
+          balanceUpdatedAt: string | null;
+          paidOffThisCycle: number;
+        } | null;
+      } | null> | null;
     } | null;
   };
 };
@@ -2797,6 +2830,19 @@ export const CreateAccountDocument = {
                             }
                           ]
                         }
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'recurringPayments' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'FragmentSpread',
+                              name: { kind: 'Name', value: 'RecurringPaymentFields' }
+                            }
+                          ]
+                        }
                       }
                     ]
                   }
@@ -2835,6 +2881,78 @@ export const CreateAccountDocument = {
           },
           { kind: 'Field', name: { kind: 'Name', value: 'purpose' } },
           { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } }
+        ]
+      }
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'RecurringPaymentFields' },
+      typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'RecurringPayment' } },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'amount' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'category' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'frequency' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'type' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'firstPaymentDate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'lastPaymentDate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'nextDueDate' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'renewalDate' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'dueReminder' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'off' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'days' } }
+              ]
+            }
+          },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'renewalReminder' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'off' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'days' } }
+              ]
+            }
+          },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'thisCycle' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'kind' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'dates' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'balanceChange' } }
+              ]
+            }
+          },
+          { kind: 'Field', name: { kind: 'Name', value: 'account' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'paysInto' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'nonWorkingDay' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'debt' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'balance' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'startingBalance' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'apr' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'paidOffThisCycle' } }
+              ]
+            }
+          }
         ]
       }
     }

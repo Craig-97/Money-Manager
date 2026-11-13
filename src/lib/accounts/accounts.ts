@@ -75,23 +75,6 @@ export const accountOf = (
 ): Account | null =>
   accounts.find(account => account.id === payment.account) ?? paidIntoAccountOf(accounts);
 
-/*
- * Recurring expenses that don't say which account they go out of, once there's a choice. Until
- * they do, they come out of where pay lands.
- */
-export const unchosenOf = <T extends { kind: string; type: string; account: string | null }>(
-  payments: readonly T[],
-  accounts: readonly Account[]
-) =>
-  hasSeveralSpending(accounts)
-    ? payments.filter(
-        payment =>
-          payment.kind === 'recurring' &&
-          payment.type === 'EXPENSE' &&
-          !accounts.some(account => account.id === payment.account)
-      )
-    : [];
-
 const total = (accounts: readonly Account[]) =>
   roundPence(accounts.reduce((sum, account) => sum + account.balance, 0));
 

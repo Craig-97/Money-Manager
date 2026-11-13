@@ -31,13 +31,6 @@ const detailsOf = (item: Item) =>
     .filter(Boolean)
     .join(' · ');
 
-// A recurring expense that doesn't say which account it goes out of yet
-const unchosen = (item: Item) =>
-  item.payment.kind === 'recurring' &&
-  item.payment.type === 'EXPENSE' &&
-  item.amount < 0 &&
-  !item.payment.account;
-
 /*
  * One account to spend from, before payday: its balance, what goes out and what's left, then its
  * payments when opened. One that would go below £0 opens with a warning, so it's never missed. On
@@ -232,19 +225,12 @@ export const AccountBeforeRow = ({
                     )}>
                     <DateBox date={item.date} top="weekday" size={across ? 'md' : 'sm'} />
                     <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                      <span className="flex flex-wrap items-center gap-2">
-                        <span
-                          className={cn(
-                            'font-bold [overflow-wrap:anywhere]',
-                            across ? 'text-[15px]' : 'text-sm'
-                          )}>
-                          {item.payment.name}
-                        </span>
-                        {several && unchosen(item) ? (
-                          <span className="inline-flex h-5 items-center rounded-full bg-warn-bg px-2 text-[10px] font-bold whitespace-nowrap text-warn md:h-[22px] md:text-[11px]">
-                            Account not chosen
-                          </span>
-                        ) : null}
+                      <span
+                        className={cn(
+                          'font-bold [overflow-wrap:anywhere]',
+                          across ? 'text-[15px]' : 'text-sm'
+                        )}>
+                        {item.payment.name}
                       </span>
                       <span className="text-xs leading-[1.35] font-semibold text-muted">
                         {detailsOf(item)}

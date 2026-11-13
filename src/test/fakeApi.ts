@@ -735,6 +735,28 @@ export const createFakeApi = ({
   const paidIntoId = () => accountsOf(requireBudget()).find(item => item.paidInto)!.id;
   // As the API: the account a payment names while it's still there, else where pay lands
   const accountFor = (id: string | null | undefined) => (id && accountById(id) ? id : paidIntoId());
+  // As the API: once there's more than one account to spend from, an expense that names none is
+  // recorded on where pay lands
+  const expenseAccount = () =>
+    accountsOf(requireBudget()).filter(item => item.kind === 'SPENDING').length > 1
+      ? paidIntoId()
+      : null;
+  const recordPaymentAccounts = () => {
+    const account = expenseAccount();
+    if (!account) return;
+    for (const payment of requireBudget().recurringPayments) {
+      if (payment.type === 'EXPENSE' && !payment.account) payment.account = account;
+    }
+  };
+  // As the API: payments off an account that's going, or expenses off one that's become savings,
+  // move to where pay lands, by name while there's still more than one to spend from
+  const moveOffAccount = (id: string, { expenses }: { expenses: boolean }) => {
+    const current = requireBudget();
+    const to = expenseAccount();
+    for (const payment of [...current.recurringPayments, ...current.oneOffPayments]) {
+      if (payment.account === id && (!expenses || payment.type === 'EXPENSE')) payment.account = to;
+    }
+  };
   const paidIntoFixed = (what: string) =>
     apiError('PAID_INTO_ACCOUNT_FIXED', {
       message: `The account you're paid into can't be ${what}`
@@ -911,6 +933,7 @@ export const createFakeApi = ({
       db.budget.oneOffPayments = (input.oneOffPayments ?? []).map((payment: Args) =>
         newOneOff({ ...payment, account: idOf(payment.account) })
       );
+      recordPaymentAccounts();
       return { budget: db.budget, success: true };
     },
     updateBudget: ({ input }: Args) => {
@@ -943,10 +966,11 @@ export const createFakeApi = ({
         balanceUpdatedAt: String(Date.now())
       };
       current.accounts = [...(current.accounts ?? []), account];
+      recordPaymentAccounts();
       return { account, budget: current, success: true };
     },
     // As the API: where pay lands always counts; making one where pay lands moves it from the
-    // other; one made savings sends its expenses back to where pay lands
+    // other; one made savings sends its expenses to where pay lands
     updateAccount: ({ id, input }: Args) => {
       const current = requireBudget();
       const before = accountById(id);
@@ -988,11 +1012,8 @@ export const createFakeApi = ({
         account.interest = fakeInterestOf(input.interest, kind === 'SPENDING');
       else if (becameSpending) account.interest = null;
       if (input.purpose !== undefined) account.purpose = input.purpose?.trim() || null;
-      if (becameSavings) {
-        for (const payment of [...current.recurringPayments, ...current.oneOffPayments]) {
-          if (payment.account === id && payment.type === 'EXPENSE') payment.account = null;
-        }
-      }
+      if (becameSavings) moveOffAccount(id, { expenses: true });
+      if (becameSpending) recordPaymentAccounts();
       return { account: accountById(id), budget: current, success: true };
     },
     deleteAccount: ({ id }: Args) => {
@@ -1003,11 +1024,8 @@ export const createFakeApi = ({
       current.accounts = (current.accounts ?? []).filter(account => account.id !== id);
       for (const payment of current.recurringPayments) {
         if (payment.paysInto === id) payment.paysInto = null;
-        if (payment.account === id) payment.account = null;
       }
-      for (const payment of current.oneOffPayments) {
-        if (payment.account === id) payment.account = null;
-      }
+      moveOffAccount(id, { expenses: false });
       return { account: null, budget: current, success: true };
     },
     // As the API: which account each of several payments uses; null goes back to where pay lands
@@ -1295,13 +1313,17 @@ export const createFakeApi = ({
     createRecurringPayment: ({ input }: Args) => {
       checkUniqueName(input.name);
       const payment = newRecurring(input);
+      // As the API: an expense with no account is recorded on where pay lands, with several
+      if (payment.type === 'EXPENSE' && !payment.account) payment.account = expenseAccount();
       requireBudget().recurringPayments.push(payment);
       return { recurringPayment: payment, success: true };
     },
-    updateRecurringPayment: ({ id, input }: Args) => ({
-      recurringPayment: updateRecurring(findRecurring(id), input),
-      success: true
-    }),
+    updateRecurringPayment: ({ id, input }: Args) => {
+      const payment = updateRecurring(findRecurring(id), input);
+      // As the API: an expense left with no account is recorded on where pay lands, with several
+      if (payment.type === 'EXPENSE' && !payment.account) payment.account = expenseAccount();
+      return { recurringPayment: payment, success: true };
+    },
     batchDeleteRecurringPayments: ({ ids }: Args) => {
       const current = requireBudget();
       ids.forEach(findRecurring);

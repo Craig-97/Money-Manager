@@ -11,7 +11,6 @@ import {
   hasSeveralSpending,
   isStale,
   staleText,
-  unchosenOf,
   updatedText
 } from './accounts';
 import { beforePaydayByAccount, goesBelowZero } from './beforePayday';
@@ -114,17 +113,6 @@ describe('several spending accounts', () => {
     expect(accountOf({ account: null }, [current, joint])).toBe(current);
     // An account deleted since
     expect(accountOf({ account: 'gone' }, [current, joint])).toBe(current);
-  });
-
-  it('finds recurring expenses that don’t say which account they go out of', () => {
-    const payments = [
-      { kind: 'recurring', type: 'EXPENSE', id: 'water', account: null },
-      { kind: 'recurring', type: 'EXPENSE', id: 'energy', account: 'joint' },
-      { kind: 'recurring', type: 'INCOME', id: 'benefit', account: null },
-      { kind: 'oneOff', type: 'EXPENSE', id: 'hotel', account: null }
-    ];
-    expect(unchosenOf(payments, [current, joint]).map(payment => payment.id)).toEqual(['water']);
-    expect(unchosenOf(payments, [current, isa])).toEqual([]);
   });
 });
 

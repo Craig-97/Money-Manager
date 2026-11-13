@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { screen, waitFor, within } from '@testing-library/react';
+import { act, screen, waitFor, within } from '@testing-library/react';
+import { useSetupAccountsStore } from '~/state/setupAccounts';
 import {
   apiDate,
   CURRENT_ACCOUNT_ID,
@@ -172,7 +173,12 @@ describe('accounts', () => {
     await user.click(await screen.findByRole('button', { name: 'More actions for Bills pot' }));
     await user.click(await screen.findByRole('menuitem', { name: 'Delete' }));
     const dialog = await screen.findByRole('dialog', { name: 'Delete Bills pot?' });
-    expect(dialog).toHaveTextContent('Its £1,240.00 comes off everything you have.');
+    expect(dialog).toHaveTextContent(
+      'The app stops tracking its £1,240.00, so it no longer counts towards what you have.'
+    );
+    expect(dialog).toHaveTextContent('This can’t be undone.');
+    // Nothing goes out of or into it
+    expect(dialog).not.toHaveTextContent('where you get paid');
 
     await user.click(within(dialog).getByRole('button', { name: 'Delete account' }));
 
@@ -239,7 +245,8 @@ describe('several accounts to spend from', () => {
   });
 
   // Joint bills alongside the current account, with energy going out of it and the mortgage not
-  // saying which account it uses. A holiday account would go below £0 before payday.
+  // saying which account it uses, as saved before payments always said. A holiday account would go
+  // below £0 before payday.
   const several = (): FakeBudget => ({
     ...budget(),
     accounts: [
@@ -282,23 +289,18 @@ describe('several accounts to spend from', () => {
     ]
   });
 
-  it('tags where you get paid, and asks about payments that don’t say', async () => {
-    const { user } = renderAccounts(several());
+  it('tags where you get paid', async () => {
+    renderAccounts(several());
 
     const spendingGroup = await screen.findByRole('region', { name: 'Spending' });
     expect(within(spendingGroup).getByText('Where you get paid')).toBeInTheDocument();
     expect(
       within(spendingGroup).getByText('Spending · Shared household bills')
     ).toBeInTheDocument();
-    // The mortgage doesn't say which account it comes out of
-    const banner = screen.getByRole('region', { name: 'Payments without an account' });
-    expect(banner).toHaveTextContent('1 payment doesn’t say which account it comes from');
-    expect(banner).toHaveTextContent(
-      'Mortgage comes out of Current account, where you get paid, until you choose.'
-    );
-
-    await user.click(within(banner).getByRole('button', { name: 'Choose accounts' }));
-    expect(await screen.findByRole('dialog', { name: 'Set up your accounts' })).toBeInTheDocument();
+    // Payments always say their account now, so nothing asks about ones that don't
+    expect(
+      screen.queryByRole('region', { name: 'Payments without an account' })
+    ).not.toBeInTheDocument();
   });
 
   it('shows what each account has left by payday, opening one that would go below £0', async () => {
@@ -435,7 +437,8 @@ describe('several accounts to spend from', () => {
   it('says which account each payment comes out of, moving several at once', async () => {
     const { user, api } = renderAccounts(several());
 
-    await user.click(await screen.findByRole('button', { name: 'Choose accounts' }));
+    await screen.findByRole('region', { name: 'Spending' });
+    act(() => useSetupAccountsStore.getState().openSetup());
     const dialog = await screen.findByRole('dialog', { name: 'Set up your accounts' });
     expect(within(dialog).getByRole('radio', { name: /Current account/ })).toBeChecked();
     await user.click(within(dialog).getByRole('checkbox', { name: 'Select Mortgage' }));
@@ -462,8 +465,27 @@ describe('several accounts to spend from', () => {
         }
       }
     ]);
-    // Nothing left unchosen
-    expect(screen.queryByRole('button', { name: 'Choose accounts' })).not.toBeInTheDocument();
+  });
+
+  it('moves a deleted account’s payments to where you get paid, and says so', async () => {
+    const { user, api } = renderAccounts(several());
+
+    await user.click(await screen.findByRole('button', { name: 'More actions for Joint bills' }));
+    await user.click(await screen.findByRole('menuitem', { name: 'Delete' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Delete Joint bills?' });
+    expect(dialog).toHaveTextContent(
+      'The app stops tracking its £2,105.00, so it no longer counts towards what you have or free to spend.'
+    );
+    // A count, not every name, as an account can have lots
+    expect(dialog).toHaveTextContent(
+      'Its payment will come out of Current account instead, where you get paid. You can move it on Recurring.'
+    );
+    await user.click(within(dialog).getByRole('button', { name: 'Delete account' }));
+
+    expect(await screen.findByText('Joint bills deleted')).toBeInTheDocument();
+    expect(api.db.budget?.recurringPayments.find(payment => payment.id === 'energy')?.account).toBe(
+      CURRENT_ACCOUNT_ID
+    );
   });
 
   it('asks to set up accounts once a second one to spend from is added', async () => {
@@ -487,7 +509,20 @@ describe('several accounts to spend from', () => {
     expect(within(dialog).queryByLabelText('Rate (AER)')).not.toBeInTheDocument();
     await user.click(within(dialog).getByRole('button', { name: 'Add account' }));
 
-    expect(await screen.findByRole('dialog', { name: 'Set up your accounts' })).toBeInTheDocument();
+    const setup = await screen.findByRole('dialog', { name: 'Set up your accounts' });
+    // Every payment's already on where you get paid, so keeping them there needs nothing saved
+    expect(setup).toHaveTextContent(
+      'They all stay on Current account unless you move them. Tick a few to move them together.'
+    );
+    await user.click(within(setup).getByRole('button', { name: 'Keep as is' }));
+    await waitFor(() =>
+      expect(screen.queryByRole('dialog', { name: 'Set up your accounts' })).not.toBeInTheDocument()
+    );
+    expect(api.callsTo('AssignPaymentAccounts')).toEqual([]);
+    expect(api.db.budget?.recurringPayments[0].account).toBe(CURRENT_ACCOUNT_ID);
+    expect(
+      screen.queryByRole('region', { name: 'Payments without an account' })
+    ).not.toBeInTheDocument();
     expect(api.callsTo('CreateAccount')).toEqual([
       {
         input: {

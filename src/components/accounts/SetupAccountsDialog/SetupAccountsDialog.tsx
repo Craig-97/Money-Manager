@@ -90,7 +90,7 @@ export const SetupAccountsDialog = () => {
     </div>
   );
 
-  // Mobile: over Later and Save while payments are ticked
+  // Mobile: over Keep as is and Save while payments are ticked
   const mobileBulkBar = (
     <div className="flex flex-col gap-1.5 rounded-[26px] bg-accent-soft p-1">
       <div className="flex items-center gap-1.5">
@@ -140,7 +140,7 @@ export const SetupAccountsDialog = () => {
             ) : null}
             <span className="flex-1" />
             <Button variant="ghost" onClick={setup.close}>
-              Later
+              Keep as is
             </Button>
             <Button variant="accent" onClick={setup.save} loading={setup.saving}>
               Save
@@ -151,7 +151,7 @@ export const SetupAccountsDialog = () => {
             {count ? mobileBulkBar : null}
             <div className="grid grid-cols-2 gap-2.5">
               <Button variant="ghost" onClick={setup.close} className="h-[52px]">
-                Later
+                Keep as is
               </Button>
               <Button
                 variant="accent"
@@ -222,8 +222,8 @@ export const SetupAccountsDialog = () => {
                   Which account does each payment come from?
                 </h3>
                 <p className={hintClasses}>
-                  {setup.allOnPaidInto ? `They all start on ${paidName}. ` : ''}Tick a few to move
-                  them together.
+                  {setup.allOnPaidInto ? `They all stay on ${paidName} unless you move them. ` : ''}
+                  Tick a few to move them together.
                 </p>
               </div>
               {isDesktop ? null : (

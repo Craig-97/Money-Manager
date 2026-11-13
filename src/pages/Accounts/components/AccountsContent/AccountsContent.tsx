@@ -16,7 +16,6 @@ import { CountedTile } from '../CountedTile';
 import { InterestBanner } from '../InterestBanner';
 import { MobileAccountRow } from '../MobileAccountRow';
 import { NetWorthHero } from '../NetWorthHero';
-import { UnchosenBanner } from '../UnchosenBanner';
 
 const groupHeadClasses = 'flex min-h-11 items-center justify-between gap-3 px-1';
 const groupTitleClasses = 'text-[17px] font-extrabold tracking-[-0.02em]';
@@ -39,7 +38,7 @@ export const AccountsContent = ({
   const model = useAccounts(budget);
   const isDesktop = useMediaQuery(MEDIA.desktop);
   const openAdd = useAccountDialogStore(s => s.openAdd);
-  const { today, spending, savings, debts, totals, several, unchosen, paidInto } = model;
+  const { today, spending, savings, debts, totals, several } = model;
   const debtNames = debts.map(debt => debt.name).join(', ');
 
   // Shown above either view, once there's more than one account to spend from
@@ -55,13 +54,6 @@ export const AccountsContent = ({
         />
       ) : null}
       <InterestBanner compact={!isDesktop} />
-      {unchosen.length && paidInto ? (
-        <UnchosenBanner
-          names={unchosen.map(payment => payment.name)}
-          paidIntoName={paidInto.name}
-          compact={!isDesktop}
-        />
-      ) : null}
     </>
   );
 

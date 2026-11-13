@@ -1,5 +1,5 @@
-# Never the account pay lands in. Payments that used it go back to that one, and ones that moved
-# money into it carry on as plain expenses.
+# Never the account pay lands in. Payments that used it move to that one, and ones that moved money
+# into it carry on as plain expenses.
 mutation DeleteAccount($id: ID!) {
   deleteAccount(id: $id) {
     budget {

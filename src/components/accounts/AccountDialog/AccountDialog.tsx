@@ -4,13 +4,21 @@ import { Modal } from '~/components/ui/Modal';
 import { Switch } from '~/components/ui/Switch';
 import { useBudget } from '~/hooks/useBudget';
 import { usePayCycle } from '~/hooks/usePayCycle';
-import { accountLetter, accountOf, isStale, toAccounts, updatedText } from '~/lib/accounts';
+import {
+  accountLetter,
+  accountOf,
+  isStale,
+  spendingOf,
+  toAccounts,
+  updatedText
+} from '~/lib/accounts';
 import { cn } from '~/lib/cn';
 import { formatMoney } from '~/lib/format';
 import { formatShortDate, PER_PERIOD, toPayments } from '~/lib/payments';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
 import { AccountChooser } from '../AccountChooser';
 import { AccountFields, panelClasses } from '../AccountFields';
+import { deleteTextOf } from './deleteText';
 import { useAccountDialog } from './useAccountDialog';
 
 /*
@@ -28,11 +36,22 @@ export const AccountDialog = () => {
 
   if (!budget) return null;
 
-  const paidIn = account
-    ? toPayments(budget, { today, holidays }).flatMap(payment =>
-        payment.kind === 'recurring' && payment.paysInto === account.id ? [payment] : []
-      )
-    : [];
+  const payments = account ? toPayments(budget, { today, holidays }) : [];
+  // Deleting: payments that go out of or into it move to where you get paid, and ones that moved
+  // money into it carry on as plain expenses
+  const moving = payments.filter(payment => payment.account === account?.id);
+  const paidIn = payments.flatMap(payment =>
+    payment.kind === 'recurring' && payment.paysInto === account?.id ? [payment] : []
+  );
+  const deleteText = account
+    ? deleteTextOf({
+        moving,
+        paidIn: paidIn.length,
+        paidIntoName: dialog.paidIntoName ?? 'where you get paid',
+        // With two or more left to spend from, they can still be moved to another
+        canMove: spendingOf(accounts).filter(item => item.id !== account.id).length > 1
+      })
+    : null;
   const title = dialog.confirming
     ? `Delete ${account?.name ?? 'account'}?`
     : account
@@ -108,14 +127,17 @@ export const AccountDialog = () => {
       {dialog.choosing ? (
         <AccountChooser onChoose={dialog.chooseKind} />
       ) : dialog.confirming && account ? (
-        <p className="text-sm leading-relaxed font-medium text-muted">
-          Its <span className="num font-bold text-text">{formatMoney(account.balance)}</span> comes
-          off everything you have.
-          {paidIn.length
-            ? ` ${paidIn.map(payment => payment.name).join(' and ')} will carry on as ${paidIn.length === 1 ? 'a plain expense' : 'plain expenses'}.`
-            : ''}{' '}
-          This can’t be undone.
-        </p>
+        <div className="flex flex-col gap-2.5 text-sm leading-relaxed font-medium text-muted">
+          <p>
+            The app stops tracking its{' '}
+            <span className="num font-bold text-text">{formatMoney(account.balance)}</span>, so it
+            no longer counts towards{' '}
+            {account.counts ? 'what you have or free to spend' : 'what you have'}.
+          </p>
+          {deleteText?.moves ? <p>{deleteText.moves}</p> : null}
+          {deleteText?.paidIn ? <p>{deleteText.paidIn}</p> : null}
+          <p>This can’t be undone.</p>
+        </div>
       ) : (
         <AccountFields
           key={dialog.opened}

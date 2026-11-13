@@ -9,8 +9,7 @@ import {
   paidIntoAccountOf,
   savingsOf,
   spendingOf,
-  toAccounts,
-  unchosenOf
+  toAccounts
 } from '~/lib/accounts';
 import { debtTotals, isDebt } from '~/lib/debts';
 import { RecurringPayment, toPayments } from '~/lib/payments';
@@ -50,8 +49,6 @@ export const useAccounts = (budget: Budget) => {
     paidInto,
     debts,
     totals,
-    // Recurring expenses that don't say which account they go out of, once there's a choice
-    unchosen: unchosenOf(payments, accounts),
     beforePayday: {
       spending: spendingRows,
       // The accounts the hero's figures are across
