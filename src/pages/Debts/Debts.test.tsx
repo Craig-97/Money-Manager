@@ -551,6 +551,54 @@ describe('debts on mobile', () => {
 });
 
 describe('a debt paid off', () => {
+  // Car finance due on 26 October, with £41.40 of interest counted up to then
+  const carDue = () => {
+    const due = car();
+    return {
+      ...due,
+      nextDueDate: apiDate('2026-10-26'),
+      debt: { ...due.debt!, accrued: 41.4, accruedTo: apiDate('2026-10-26') }
+    };
+  };
+
+  it('says what’s built up on a debt in its view, which goes on before the payment comes off', async () => {
+    const { user } = renderDebts('/debts', [carDue()]);
+
+    const table = await screen.findByRole('table', { name: 'Debts' });
+    await user.click(within(table).getByRole('button', { name: 'Car finance' }));
+    const view = await screen.findByRole('dialog', { name: 'Car finance' });
+    expect(view).toHaveTextContent('Pending interest £41.40Added Mon 26 Oct');
+    expect(view).toHaveTextContent(
+      'An estimate worked out on each day’s balance since Sat 26 Sep. The payment comes off after it.'
+    );
+  });
+
+  it('says what paying a debt took off what’s owed, after its interest', async () => {
+    const { user } = renderDebts('/recurring', [carDue()]);
+
+    await user.click(await screen.findByRole('button', { name: 'More actions for Car finance' }));
+    await user.click(screen.getByRole('menuitem', { name: 'Mark as paid' }));
+
+    expect(
+      await screen.findByText(
+        'Car finance marked as paid · £245.00 off your balance · £203.60 off what you owe, after £41.40 interest'
+      )
+    ).toBeInTheDocument();
+  });
+
+  it('says a skipped debt payment’s interest still builds up', async () => {
+    const { user } = renderDebts('/recurring', [carDue()]);
+
+    await user.click(await screen.findByRole('button', { name: 'More actions for Car finance' }));
+    await user.click(screen.getByRole('menuitem', { name: 'Skip this cycle' }));
+
+    expect(
+      await screen.findByText(
+        'Car finance skipped this cycle · its interest still builds up until the next payment'
+      )
+    ).toBeInTheDocument();
+  });
+
   it('offers to delete it once its last payment is marked paid', async () => {
     const last = debt({
       id: 'loan',

@@ -289,7 +289,15 @@ describe('old balances', () => {
     balance: 8650,
     counts: false,
     paidInto: false,
-    interest: { rate: 4.5, frequency: null, day: null, nextDate: null },
+    interest: {
+      rate: 4.5,
+      frequency: null,
+      day: null,
+      nextDate: null,
+      accrued: 0,
+      accruedTo: null,
+      added: []
+    },
     purpose: null,
     balanceUpdatedAt: day(updated)
   });
@@ -321,37 +329,65 @@ describe('old balances', () => {
 });
 
 describe('savings interest', () => {
-  const easy = (next: string) => ({
+  type Added = { date: Date; amount: number; balanceAfter: number }[];
+  const easy = (next: string, added: Added = []) => ({
     id: 'easy',
     name: 'Easy access',
     kind: 'SAVINGS' as const,
     balance: 4200,
     counts: true,
     paidInto: false,
-    interest: { rate: 4.1, frequency: 'MONTHLY' as const, day: 1, nextDate: day(next) },
+    interest: {
+      rate: 4.1,
+      frequency: 'MONTHLY' as const,
+      day: 1,
+      nextDate: day(next),
+      accrued: 0,
+      accruedTo: null,
+      added
+    },
     purpose: null,
     balanceUpdatedAt: TODAY
   });
 
-  it('reminds on the day it’s paid, with the estimate, until it’s checked', () => {
-    const reminder = newReminders(sources({ accounts: [easy('2026-10-01')] })).find(
-      item => item.kind === 'interest'
+  it('says what the app added, to check against the bank, putting it away for a few days', () => {
+    const added = [{ date: day('2026-10-01'), amount: 11.45, balanceAfter: 4211.45 }];
+    const reminder = newReminders(sources({ accounts: [easy('2026-11-01', added)] })).find(
+      item => item.kind === 'interestAdded'
     )!;
     expect(reminder).toMatchObject({
-      key: 'interest:easy:2026-10-01',
-      title: 'Easy access interest was paid Thu 1 Oct',
-      body: 'About £14.09 · check it and add it to the balance',
-      amount: 14.09
+      key: 'interest-added:easy:2026-10-01',
+      title: '£11.45 interest added to Easy access',
+      body: 'Thu 1 Oct · balance now £4,211.45 · check it against your bank'
     });
     expect(kindText(reminder)).toBe('Interest');
-    expect(laterUntil(reminder, TODAY)).toEqual(day('2026-10-03'));
+    expect(canClear(reminder)).toBe(true);
+    expect(laterUntil(reminder, TODAY)).toEqual(day('2026-10-05'));
+  });
 
-    // Next month's is ahead, in Coming up
+  it('makes several payments added while away one reminder', () => {
+    const added = [
+      { date: day('2026-08-01'), amount: 11, balanceAfter: 4111 },
+      { date: day('2026-09-01'), amount: 11.1, balanceAfter: 4122.1 },
+      { date: day('2026-10-01'), amount: 11.09, balanceAfter: 4133.19 }
+    ];
+    const reminders = newReminders(sources({ accounts: [easy('2026-11-01', added)] })).filter(
+      item => item.kind === 'interestAdded'
+    );
+    expect(reminders.map(item => item.title)).toEqual([
+      '£33.19 interest added to Easy access over 3 months'
+    ]);
+  });
+
+  it('shows the next payment in Coming up, never in New: it’s added on the day', () => {
     const ahead = sources({ accounts: [easy('2026-11-01')] });
     expect(newReminders(ahead).map(item => item.kind)).not.toContain('interest');
-    expect(upcomingReminders(ahead).find(item => item.kind === 'interest')?.name).toBe(
-      'Easy access interest'
-    );
+    expect(upcomingReminders(ahead).find(item => item.kind === 'interest')).toMatchObject({
+      name: 'Easy access interest',
+      body: 'About £14.09 · added on Sun 1 Nov'
+    });
+    const today = sources({ accounts: [easy('2026-10-02')] });
+    expect(newReminders(today).map(item => item.kind)).not.toContain('interest');
   });
 });
 

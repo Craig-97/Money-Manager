@@ -1,4 +1,7 @@
-import { PER_MONTH, RecurringPayment } from '~/lib/payments';
+import { daysBetween } from '~/lib/dates';
+import { addDays } from '~/lib/dates';
+import { roundPence } from '~/lib/format';
+import { Debt, occurrencesBetween, PER_MONTH, RecurringPayment } from '~/lib/payments';
 
 /*
  * Payoff estimates for the Debts page. Everything works month by month: each month a debt gets its
@@ -53,8 +56,6 @@ export interface Payoff {
   // The total left at the start and after each month, for a chart
   series: number[];
 }
-
-const roundPence = (amount: number) => Math.round(amount * 100) / 100;
 
 /*
  * Pays the debts off month by month. `extra` is paid on top each month, to the first debt in the
@@ -175,3 +176,32 @@ export const paidOffThisCycle = (debts: readonly DebtPayment[]) =>
  */
 export const extraPerPayment = (debt: Pick<DebtPayment, 'frequency'>, extraPerMonth: number) =>
   roundPence(extraPerMonth / PER_MONTH[debt.frequency]);
+
+/*
+ * Interest built up on a debt since its last payment, rounded, as the API works it out: what it has
+ * counted, then each day since at the APR spread over the year. Today isn't over, so it doesn't count
+ * yet. It's added when the next payment is marked paid.
+ */
+export const pendingDebtInterest = (
+  debt: Pick<Debt, 'balance' | 'apr' | 'accrued' | 'accruedTo'>,
+  today: Date
+) => {
+  const days = debt.accruedTo ? Math.max(0, daysBetween(debt.accruedTo, today)) : 0;
+  return roundPence(debt.accrued + ((Math.max(0, debt.balance) * debt.apr) / 100 / 365) * days);
+};
+
+/*
+ * The day a debt's interest has built up from, as the API counts it: its last scheduled payment,
+ * or when its balance was typed in from a statement since then
+ */
+export const debtInterestSince = (debt: DebtPayment) => {
+  const { dueDate, debt: owed } = debt;
+  const previous = dueDate
+    ? (occurrencesBetween(debt, { from: addDays(dueDate, -366), to: addDays(dueDate, -1) }).at(
+        -1
+      ) ?? null)
+    : null;
+  const set = owed.balanceUpdatedAt;
+  if (set && (!previous || set > previous)) return set;
+  return previous;
+};

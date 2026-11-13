@@ -4,7 +4,6 @@ import { usePayCycle } from '~/hooks/usePayCycle';
 import { toAccounts } from '~/lib/accounts';
 import { AccountDialog } from '../AccountDialog';
 import { AccountSheet } from '../AccountSheet';
-import { CheckInterestDialog } from '../CheckInterestDialog';
 import { InterestDialog } from '../InterestDialog';
 import { PaidIntoDialog } from '../PaidIntoDialog';
 import { SetupAccountsDialog } from '../SetupAccountsDialog';
@@ -36,7 +35,6 @@ export const AccountDialogs = () => {
         onConfirm={actions.makePaidInto}
       />
       <InterestDialog accounts={accounts} today={today} onSave={actions.saveInterest} />
-      <CheckInterestDialog accounts={accounts} today={today} onConfirm={actions.confirmInterest} />
       <SetupAccountsDialog />
     </>
   );

@@ -47,5 +47,8 @@ const MONEY_INPUT = /^\d+(\.\d{0,2})?$|^\.\d{1,2}$/;
 export const parseMoney = (value: string) => {
   const cleaned = value.replace(/[£,\s]/g, '');
   if (!MONEY_INPUT.test(cleaned)) return null;
-  return Math.round(Number(cleaned) * 100) / 100;
+  return roundPence(Number(cleaned));
 };
+
+// Money is kept in pounds, so sums are rounded back to whole pence
+export const roundPence = (amount: number) => Math.round(amount * 100) / 100;

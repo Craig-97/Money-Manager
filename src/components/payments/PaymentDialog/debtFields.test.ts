@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { paidOffText, parseApr } from './debtFields';
+import { paidOffRow, parseApr } from './debtFields';
 
 const today = new Date(2026, 9, 2);
 
@@ -19,7 +19,8 @@ describe('parseApr', () => {
   });
 });
 
-describe('paidOffText', () => {
+describe('paidOffRow', () => {
+  const paidOffText = (...args: Parameters<typeof paidOffRow>) => paidOffRow(...args).value;
   const figures = { balance: 800, apr: 0, amount: 100, frequency: 'MONTHLY' as const };
 
   it('gives the month it would be paid off, and at what', () => {

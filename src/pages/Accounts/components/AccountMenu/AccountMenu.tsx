@@ -1,7 +1,7 @@
 import { Check, Ellipsis, Landmark, PenLine, Percent, RefreshCw, Trash } from 'lucide-react';
 import { IconButton } from '~/components/ui/IconButton';
 import { Menu, MenuContent, MenuItem, MenuSeparator, MenuTrigger } from '~/components/ui/Menu';
-import { Account, isInterestDue, isSpending } from '~/lib/accounts';
+import { Account, isSpending } from '~/lib/accounts';
 import { useAccountDialogStore } from '~/state/accountDialog';
 import { useAccountQuickStore } from '~/state/accountQuick';
 
@@ -9,17 +9,15 @@ interface AccountMenuProps {
   account: Account;
   // More than one account to spend from, so pay can move to another
   several: boolean;
-  today: Date;
   onCounts: (counts: boolean) => void;
 }
 
 /*
  * From the row's more button, in the order a debt's menu uses: Edit, Update balance, a savings
- * account's interest (or checking a payment that's waiting), make another spending account where
- * you get paid, count in or keep out of free to spend, and delete. Where pay
+ * account's interest, make another spending account where you get paid, count in or keep out of free to spend, and delete. Where pay
  * lands always counts and stays, so it has no more than Edit and Update balance.
  */
-export const AccountMenu = ({ account, several, today, onCounts }: AccountMenuProps) => {
+export const AccountMenu = ({ account, several, onCounts }: AccountMenuProps) => {
   const openEdit = useAccountDialogStore(s => s.openEdit);
   const openDelete = useAccountDialogStore(s => s.openDelete);
   const openQuick = useAccountQuickStore(s => s.openFor);
@@ -44,12 +42,8 @@ export const AccountMenu = ({ account, several, today, onCounts }: AccountMenuPr
         {isSpending(account) ? null : (
           <MenuItem
             icon={<Percent size={16} />}
-            onSelect={() =>
-              openQuick(isInterestDue(account.interest, today) ? 'check' : 'interest', {
-                accountId: account.id
-              })
-            }>
-            {isInterestDue(account.interest, today) ? 'Check interest' : 'Interest'}
+            onSelect={() => openQuick('interest', { accountId: account.id })}>
+            Interest
           </MenuItem>
         )}
         {fixed ? null : (

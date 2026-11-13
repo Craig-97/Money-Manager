@@ -10,10 +10,10 @@ import { useMediaQuery } from '~/hooks/useMediaQuery';
 import { formatBalance, formatMoney } from '~/lib/format';
 import { useAccountDialogStore } from '~/state/accountDialog';
 import { ACCOUNTS_VIEWS, AccountsViewState, useAccounts } from '../../hooks';
+import { AccountAlerts } from '../AccountAlerts';
 import { AccountRow } from '../AccountRow';
 import { BeforePaydayContent } from '../BeforePaydayContent';
 import { CountedTile } from '../CountedTile';
-import { InterestBanner } from '../InterestBanner';
 import { MobileAccountRow } from '../MobileAccountRow';
 import { NetWorthHero } from '../NetWorthHero';
 
@@ -53,7 +53,7 @@ export const AccountsContent = ({
           fullWidth
         />
       ) : null}
-      <InterestBanner compact={!isDesktop} />
+      <AccountAlerts />
     </>
   );
 

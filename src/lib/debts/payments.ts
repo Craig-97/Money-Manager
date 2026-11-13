@@ -1,4 +1,5 @@
 import { PaymentFrequency } from '~/graphql/generated';
+import { roundPence } from '~/lib/format';
 
 const PAYMENTS_PER_YEAR: Record<PaymentFrequency, number> = {
   WEEKLY: 52,
@@ -8,8 +9,6 @@ const PAYMENTS_PER_YEAR: Record<PaymentFrequency, number> = {
   BIANNUALLY: 2,
   ANNUALLY: 1
 };
-
-const roundPence = (amount: number) => Math.round(amount * 100) / 100;
 
 interface PaidOff {
   interest: number;

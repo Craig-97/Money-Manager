@@ -10,7 +10,7 @@ import {
   PayoffStrategy,
   simulatePayoff
 } from '~/lib/debts';
-import { formatMoney } from '~/lib/format';
+import { formatMoney, roundPence } from '~/lib/format';
 
 /* The payoff plan's choices: what happens to a cleared debt's payment */
 export const STRATEGIES: Record<PayoffStrategy, { short: string; label: string; blurb: string }> = {
@@ -145,7 +145,7 @@ const MONTH_NAME = new Intl.DateTimeFormat('en-GB', { month: 'long' });
 
 /* What applying the extra does: the target debt's payment goes up from its next one */
 export const applyChange = (target: DebtPayment, extra: number) => {
-  const amount = Math.round((target.amount + extraPerPayment(target, extra)) * 100) / 100;
+  const amount = roundPence(target.amount + extraPerPayment(target, extra));
   const from = target.dueDate ? MONTH_NAME.format(target.dueDate) : 'now';
   return { amount, from };
 };

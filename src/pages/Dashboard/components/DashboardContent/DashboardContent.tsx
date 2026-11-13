@@ -2,7 +2,7 @@ import { MEDIA } from '~/constants';
 import { Budget } from '~/hooks/useBudget';
 import { useMediaQuery } from '~/hooks/useMediaQuery';
 import { useDashboard, usePaydayPrompt } from '../../hooks';
-import { AlertStack } from '../alerts';
+import { DashboardAlerts } from '../alerts';
 import {
   BankBalanceDialog,
   FreeToSpendTile,
@@ -32,7 +32,7 @@ export const DashboardContent = ({ budget }: { budget: Budget }) => {
     <>
       <PaydayPrompt prompt={prompt} />
       <BankBalanceDialog dialog={dashboard.bankBalanceDialog} today={dashboard.today} />
-      <AlertStack dashboard={dashboard} />
+      <DashboardAlerts dashboard={dashboard} />
       {isDesktop ? (
         <section
           aria-label="Overview"

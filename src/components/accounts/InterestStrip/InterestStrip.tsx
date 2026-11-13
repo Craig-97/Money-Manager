@@ -1,22 +1,28 @@
 import { Percent } from 'lucide-react';
-import { Account, interestLine } from '~/lib/accounts';
 import { cn } from '~/lib/cn';
 
+export interface InterestStripLine {
+  tone: 'earning' | 'matured';
+  // "Pending interest £0.46"
+  short: string;
+  // "Added Sun 1 Nov"
+  when: string;
+}
+
 interface InterestStripProps {
-  account: Account;
-  today: Date;
-  // Tapping it opens the account, or checking a payment that's waiting
+  line: InterestStripLine;
+  // What it's about, for a strip that's a button: "Easy access"
+  name?: string;
+  // Tapping it opens the account
   onClick?: () => void;
   className?: string;
 }
 
 /*
- * A savings account's interest in one line, full width so a phone's row keeps its room: what's built
- * up and when it's paid, or a payment waiting to be checked. Nothing without a schedule.
+ * Interest in one line, full width so a phone's row keeps its room: what's built up and when it's
+ * added, or that a fixed term has matured. A savings account's or a debt's.
  */
-export const InterestStrip = ({ account, today, onClick, className }: InterestStripProps) => {
-  const line = interestLine(account, today);
-  if (!line) return null;
+export const InterestStrip = ({ line, name, onClick, className }: InterestStripProps) => {
   const classes = cn(
     'flex min-h-9 w-full items-center gap-2 rounded-[14px] px-3 py-2 text-left text-xs leading-[1.35] font-bold',
     line.tone === 'earning' ? 'bg-income-bg text-income' : 'bg-warn-bg text-warn',
@@ -35,7 +41,7 @@ export const InterestStrip = ({ account, today, onClick, className }: InterestSt
     <button
       type="button"
       onClick={onClick}
-      aria-label={`${account.name} interest: ${line.text}`}
+      aria-label={`${name ? `${name}: ` : ''}${line.short} · ${line.when}`}
       className={classes}>
       {content}
     </button>

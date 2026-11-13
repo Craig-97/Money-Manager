@@ -9,7 +9,7 @@ import {
   parse
 } from 'graphql';
 import { NonWorkingDay, NoteRepeat, ThemePreference } from '~/graphql/generated';
-import { addDays, fromApiDate, startOfToday, toIsoDate } from '~/lib/dates';
+import { addDays, daysBetween, fromApiDate, startOfToday, toIsoDate } from '~/lib/dates';
 import {
   goesOutOn,
   MAX_MOVE_DAYS,
@@ -43,6 +43,9 @@ export interface FakeDebt {
   startingBalance: number | null;
   apr: number;
   balanceUpdatedAt: string | null;
+  // Interest built up since the last payment; left out, a period's worth goes on when it's paid
+  accrued?: number;
+  accruedTo?: string | null;
 }
 
 export interface FakeRecurringPayment {
@@ -158,6 +161,10 @@ export interface FakeInterest {
   frequency: 'MONTHLY' | 'QUARTERLY' | 'YEARLY' | 'MATURITY' | null;
   day: number | null;
   nextDate: string | null;
+  // Left out, nothing built up yet, and none added to check
+  accrued?: number;
+  accruedTo?: string | null;
+  added?: { date: string; amount: number; balanceAfter: number }[];
 }
 
 export interface FakeBudget {
@@ -294,6 +301,15 @@ const FIELD_DEFAULTS: Record<string, Record<string, (value: Loose) => unknown>> 
     repeat: n => n.repeat ?? 'NONE',
     payment: n => n.payment ?? null
   },
+  AccountInterest: {
+    accrued: i => i.accrued ?? 0,
+    accruedTo: i => i.accruedTo ?? null,
+    added: i => i.added ?? []
+  },
+  Debt: {
+    accrued: d => d.accrued ?? 0,
+    accruedTo: d => d.accruedTo ?? null
+  },
   Budget: {
     accounts: b => accountsOf(b as unknown as FakeBudget),
     bankBalance: b => countedOf(b as unknown as FakeBudget),
@@ -420,12 +436,23 @@ const handle = (
   payment.nextDueDate = toApi(nextOccurrence(scheduleOf(payment), addDays(dates.at(-1)!, 1)));
 };
 
-// As the API: the period's interest goes on, then the payment comes off, never below nothing
+// As the API: the interest built up to the payment's date goes on, then the payment comes off,
+// never below nothing. A debt that doesn't say what's built up has a period's worth.
 const payTowardsDebt = (
   debt: FakeDebt,
-  { amount, frequency }: { amount: number; frequency: string }
+  { amount, frequency, on }: { amount: number; frequency: string; on: Date }
 ) => {
-  const interest = roundPence((debt.balance * debt.apr) / 100 / PAYMENTS_PER_YEAR[frequency]);
+  const from = fromApiDate(debt.accruedTo);
+  const days = from ? Math.max(0, daysBetween(from, on)) : 0;
+  const interest = roundPence(
+    debt.accrued === undefined
+      ? (debt.balance * debt.apr) / 100 / PAYMENTS_PER_YEAR[frequency]
+      : debt.accrued + ((debt.balance * debt.apr) / 100 / 365) * days
+  );
+  if (debt.accrued !== undefined) {
+    debt.accrued = 0;
+    debt.accruedTo = toApi(on);
+  }
   const balance = Math.max(0, roundPence(debt.balance + interest - amount));
   return { interest, reduction: roundPence(debt.balance - balance), balanceAfter: balance };
 };
@@ -781,6 +808,8 @@ export const createFakeApi = ({
     const account = findSavings(id);
     account.balance = balance;
     account.balanceUpdatedAt = String(Date.now());
+    // Checked against the bank, so interest added to check has been too
+    if (account.interest) account.interest.added = [];
   };
   // As the API: a payment into savings adds its amount there for each date paid
   const payInto = (payment: FakeRecurringPayment, times: number) => {
@@ -1040,37 +1069,39 @@ export const createFakeApi = ({
       }
       return { budget: current, success: true };
     },
-    // As the API: what the bank paid goes on the balance, dated now; it moves on to the next one
-    confirmInterest: ({ input }: Args) => {
+    // As the API: each interest payment that's come is added on its own date, kept to check, and
+    // the next date moves on. Each is a payment's share of the AER on the balance, near enough.
+    catchUpInterest: () => {
       const current = requireBudget();
-      if (!accountById(input.accountId)) {
-        throw apiError('ACCOUNT_NOT_FOUND', { message: `No account '${input.accountId}'` });
+      const today = Date.parse(`${toIsoDate(startOfToday())}T00:00:00Z`);
+      for (const account of current.accounts ?? []) {
+        const interest = account.interest;
+        while (interest?.frequency && interest.nextDate && Number(interest.nextDate) <= today) {
+          const perYear = { MONTHLY: 12, QUARTERLY: 4, YEARLY: 1, MATURITY: 1 }[interest.frequency];
+          const amount = roundPence(
+            account.balance * ((1 + interest.rate / 100) ** (1 / perYear) - 1)
+          );
+          account.balance = roundPence(account.balance + amount);
+          interest.added = [
+            ...(interest.added ?? []),
+            { date: interest.nextDate, amount, balanceAfter: account.balance }
+          ];
+          interest.accrued = 0;
+          interest.accruedTo = interest.nextDate;
+          const months = { MONTHLY: 1, QUARTERLY: 3, YEARLY: 12, MATURITY: 0 }[interest.frequency];
+          const next = new Date(Number(interest.nextDate));
+          interest.nextDate = months
+            ? String(
+                utcDayInMonth({
+                  year: next.getUTCFullYear(),
+                  month: next.getUTCMonth() + months,
+                  day: interest.day ?? next.getUTCDate()
+                })
+              )
+            : null;
+        }
       }
-      // Savings only, so it's one of the budget's own accounts, changed in place
-      const account = findSavings(input.accountId);
-      const interest = account.interest;
-      if (!interest?.frequency || !interest.nextDate) {
-        throw apiError('INTEREST_NOT_SCHEDULED', {
-          message: 'Say when this account’s interest is paid first'
-        });
-      }
-      if (input.amount)
-        setBalanceOf(account.id, Math.round((account.balance + input.amount) * 100) / 100);
-      const months = { MONTHLY: 1, QUARTERLY: 3, YEARLY: 12, MATURITY: 0 }[interest.frequency];
-      const next = new Date(Number(interest.nextDate));
-      account.interest = {
-        ...interest,
-        nextDate: months
-          ? String(
-              utcDayInMonth({
-                year: next.getUTCFullYear(),
-                month: next.getUTCMonth() + months,
-                day: interest.day ?? next.getUTCDate()
-              })
-            )
-          : null
-      };
-      return { account: accountById(account.id), budget: current, success: true };
+      return { budget: current, success: true };
     },
     updateAccountBalances: ({ input }: Args) => {
       const current = requireBudget();
@@ -1096,10 +1127,11 @@ export const createFakeApi = ({
         if (payment.debt && dates.length) {
           let interest = 0;
           let reduction = 0;
-          for (const _ of dates) {
+          for (const on of dates) {
             const paidOff = payTowardsDebt(payment.debt, {
               amount: payment.amount,
-              frequency: payment.frequency
+              frequency: payment.frequency,
+              on
             });
             interest += paidOff.interest;
             reduction += paidOff.reduction;
@@ -1168,7 +1200,8 @@ export const createFakeApi = ({
         if (payment.debt) {
           debt = payTowardsDebt(payment.debt, {
             amount: payment.amount,
-            frequency: payment.frequency
+            frequency: payment.frequency,
+            on: fromApiDate(payment.nextDueDate)!
           });
           payment.debt.balance = debt.balanceAfter;
         }

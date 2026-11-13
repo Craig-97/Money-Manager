@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { formatMonthYear } from '~/lib/dates';
 import { DebtPayment, extraPerPayment, monthFromNow, simulatePayoff } from '~/lib/debts';
-import { formatMoney } from '~/lib/format';
+import { formatMoney, roundPence } from '~/lib/format';
 
 interface Options {
   debt: DebtPayment | undefined;
@@ -40,7 +40,7 @@ export const usePaySooner = ({ debt, today, onPayMore, formKey }: Options) => {
     months === null ? 'Never' : formatMonthYear(monthFromNow(today, months));
   const sooner = base.months !== null && plan.months !== null ? base.months - plan.months : 0;
   const saved = Math.round(base.interest - plan.interest);
-  const newAmount = Math.round((debt.amount + extraPerPayment(debt, extra)) * 100) / 100;
+  const newAmount = roundPence(debt.amount + extraPerPayment(debt, extra));
 
   const apply = async () => {
     setApplying(true);

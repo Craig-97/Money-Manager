@@ -1,6 +1,6 @@
 import { DebtHistoryQuery } from '~/graphql/generated';
 import { daysBetween, fromApiDate } from '~/lib/dates';
-import { formatMoney } from '~/lib/format';
+import { formatMoney, roundPence } from '~/lib/format';
 import { PER_MONTH } from '~/lib/payments';
 import { DebtPayment } from './debts';
 
@@ -38,8 +38,6 @@ const KINDS: Record<HistoryRecord['kind'], HistoryKind> = {
   OVERPAYMENT: 'overpayment',
   BALANCE_SET: 'balance'
 };
-
-const roundPence = (amount: number) => Math.round(amount * 100) / 100;
 
 const interestText = (interest: number) =>
   interest > 0 ? `About ${formatMoney(interest, { whole: true })} was interest` : 'No interest';

@@ -1,10 +1,9 @@
 import { addDays, daysBetween, isSameDay, toIsoDate } from '~/lib/dates';
+import { roundPence } from '~/lib/format';
 import { PayCycle } from '~/lib/payday';
 import { datesDue, isInCycle } from './cycle';
 import { movesTo, Payment } from './payments';
 import { PER_MONTH } from './recurrence';
-
-const roundPence = (amount: number) => Math.round(amount * 100) / 100;
 
 interface SummaryInput {
   payments: Payment[];

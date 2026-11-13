@@ -50,12 +50,9 @@ export const useReminderOpen = (budgetId: string) => {
         return reminder.awaitingStart
           ? { label: 'Open dashboard', run: () => void navigate(ROUTES.dashboard) }
           : null;
-      case 'interest': {
-        const { account } = reminder;
-        return account
-          ? { label: 'Check interest', run: () => openQuick('check', { accountId: account.id }) }
-          : null;
-      }
+      case 'interest':
+        return null;
+      case 'interestAdded':
       case 'balance': {
         const { account } = reminder;
         return account

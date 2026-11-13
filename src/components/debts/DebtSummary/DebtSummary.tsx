@@ -1,7 +1,16 @@
+import { InterestStrip } from '~/components/accounts/InterestStrip';
 import { PaymentLetter, summaryCardClasses } from '~/components/payments/PaymentParts';
-import { aprText, clearedText, DebtPayment, paidOffShare, simulatePayoff } from '~/lib/debts';
+import {
+  aprText,
+  clearedText,
+  DebtPayment,
+  debtInterestSince,
+  paidOffShare,
+  pendingDebtInterest,
+  simulatePayoff
+} from '~/lib/debts';
 import { formatMoney } from '~/lib/format';
-import { PER_PERIOD } from '~/lib/payments';
+import { formatShortDate, PER_PERIOD } from '~/lib/payments';
 import { DebtProgress } from '../DebtProgress';
 
 interface DebtSummaryProps {
@@ -13,11 +22,13 @@ interface DebtSummaryProps {
 
 /*
  * A debt in the grey card its view and small dialogs lead with: what's left, its rate, payment and
- * when it clears at that payment (as Pay sooner works it out), and how far it's paid off
+ * when it clears at that payment (as Pay sooner works it out), and how far it's paid off. In its
+ * view, the interest built up since the last payment, which goes on before the next one comes off.
  */
 export const DebtSummary = ({ debt, today, named = false }: DebtSummaryProps) => {
   const share = paidOffShare(debt);
   const cleared = clearedText(simulatePayoff([debt]).months, today);
+  const since = debtInterestSince(debt);
 
   return (
     <div className={summaryCardClasses}>
@@ -43,6 +54,22 @@ export const DebtSummary = ({ debt, today, named = false }: DebtSummaryProps) =>
           </span>
         </div>
       )}
+      {!named && debt.debt.apr > 0 && debt.dueDate ? (
+        <div className="flex basis-full flex-col gap-2">
+          <InterestStrip
+            line={{
+              tone: 'earning',
+              short: `Pending interest ${formatMoney(pendingDebtInterest(debt.debt, today))}`,
+              when: `Added ${formatShortDate(debt.dueDate, today)}`
+            }}
+          />
+          <p className="text-xs leading-[1.45] font-semibold text-muted">
+            An estimate worked out on each day’s balance
+            {since ? ` since ${formatShortDate(since, today)}` : ''}. The payment comes off after
+            it.
+          </p>
+        </div>
+      ) : null}
     </div>
   );
 };

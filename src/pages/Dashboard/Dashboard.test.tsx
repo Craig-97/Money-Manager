@@ -846,6 +846,32 @@ describe('alerts', () => {
     ).toBeInTheDocument();
   });
 
+  it('clears due today with ×, as its reminder’s × does', async () => {
+    const { user, api } = renderDashboard(renewedBudget());
+
+    const alerts = await screen.findByRole('region', { name: 'Alerts' });
+    await user.click(within(alerts).getByRole('button', { name: 'Clear: Netflix is due today' }));
+
+    expect(await screen.findByText('Reminder cleared')).toBeInTheDocument();
+    expect(api.callsTo('UpdateReminders')).toEqual([
+      { input: { budgetId: 'budget-1', keys: ['due:netflix:2026-10-08'], action: 'CLEAR' } }
+    ]);
+    expect(within(alerts).queryByRole('region', { name: 'Due today' })).not.toBeInTheDocument();
+  });
+
+  it('can’t clear an overdue payment: it stays until it’s paid or skipped', async () => {
+    const data = budget();
+    data.recurringPayments[0] = {
+      ...data.recurringPayments[0],
+      nextDueDate: apiDate('2026-10-05')
+    };
+    renderDashboard(data);
+
+    const alerts = await screen.findByRole('region', { name: 'Alerts' });
+    expect(within(alerts).getByRole('region', { name: 'Netflix is overdue' })).toBeInTheDocument();
+    expect(within(alerts).queryByRole('button', { name: /^Clear/ })).not.toBeInTheDocument();
+  });
+
   // Put away with Later until a day, as the API keeps it
   const putAway = (data: ReturnType<typeof renewedBudget>, until: string) => ({
     ...data,

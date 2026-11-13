@@ -630,8 +630,8 @@ describe("an account's view", () => {
 });
 
 describe('savings interest', () => {
-  // Easy access pays monthly on the 1st, so yesterday's is waiting to be checked; the ISA pays on
-  // the 3rd, tomorrow
+  // Easy access pays monthly on the 1st, so yesterday's hasn't been added yet; the ISA pays on the
+  // 3rd, tomorrow, and has been building up since the 3rd of last month
   const withInterest = (): FakeBudget => ({
     ...budget(),
     accounts: [
@@ -639,7 +639,14 @@ describe('savings interest', () => {
         id: 'isa',
         name: 'Cash ISA',
         balance: 8650,
-        interest: { rate: 4.5, frequency: 'MONTHLY', day: 3, nextDate: apiDate('2026-10-03') },
+        interest: {
+          rate: 4.5,
+          frequency: 'MONTHLY',
+          day: 3,
+          nextDate: apiDate('2026-10-03'),
+          accrued: 0,
+          accruedTo: apiDate('2026-09-03')
+        },
         balanceUpdatedAt: apiDate('2026-08-28')
       }),
       savings({
@@ -652,67 +659,55 @@ describe('savings interest', () => {
     ]
   });
 
-  it('says what’s built up, and checks a payment that’s waiting before adding it', async () => {
+  it('adds a payment that’s come, and asks to check it against the bank', async () => {
     const { user, api } = renderAccounts(withInterest());
 
-    expect(
-      await screen.findByText('About £30.25 interest so far · paid tomorrow')
-    ).toBeInTheDocument();
-    const banner = screen.getByRole('region', { name: 'Interest to check' });
-    expect(banner).toHaveTextContent('Easy access interest was paid Thu 1 Oct');
-    expect(banner).toHaveTextContent('About £14.09');
-    await user.click(within(banner).getByRole('button', { name: 'Check interest' }));
+    // Added for the user as the app opens, with a payment's share of 4.1%
+    const alerts = await screen.findByRole('region', { name: 'Alerts' });
+    await waitFor(() => expect(alerts).toHaveTextContent('£14.09 interest added to Easy access'));
+    expect(api.callsTo('CatchUpInterest')).toEqual([{ budgetId: 'budget-1' }]);
+    expect(alerts).toHaveTextContent(
+      'Thu 1 Oct · balance now £4,214.09 · check it against your bank'
+    );
+    // The ISA's balance is old too, so there are two
+    expect(alerts).toHaveTextContent('1 of 2');
 
-    const dialog = await screen.findByRole('dialog', { name: 'Check interest' });
-    expect(within(dialog).getByLabelText('Interest paid in')).toHaveValue('14.09');
-    expect(dialog).toHaveTextContent('Our estimate is £14.09');
-    // It counts, so the dashboard's bank balance moves too
-    expect(dialog).toHaveTextContent('Bank balance on your dashboard');
-    await user.clear(within(dialog).getByLabelText('Interest paid in'));
-    await user.type(within(dialog).getByLabelText('Interest paid in'), '14.12');
-    await user.click(within(dialog).getByRole('button', { name: 'Add £14.12' }));
+    await user.click(within(alerts).getByRole('button', { name: 'Update balance' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Update balance' });
+    await user.clear(within(dialog).getByLabelText('Balance now'));
+    await user.type(within(dialog).getByLabelText('Balance now'), '4214.12');
+    await user.click(within(dialog).getByRole('button', { name: 'Save balance' }));
 
-    expect(await screen.findByText('Added £14.12 to Easy access')).toBeInTheDocument();
-    expect(api.callsTo('ConfirmInterest')).toEqual([
-      { input: { accountId: 'easy', amount: 14.12 } }
-    ]);
+    // Checked, so only the old balance is left
     await waitFor(() =>
-      expect(screen.queryByRole('region', { name: 'Interest to check' })).not.toBeInTheDocument()
+      expect(screen.getByRole('region', { name: 'Alerts' })).not.toHaveTextContent('interest added')
     );
   });
 
-  it('skips a month with no interest, without adding anything', async () => {
-    const { user, api } = renderAccounts(withInterest());
+  it('puts the alert away with Later, and clears it with ×, as in Reminders', async () => {
+    const { user } = renderAccounts(withInterest());
 
-    await user.click(await screen.findByRole('button', { name: 'Easy access' }));
-    const view = await screen.findByRole('dialog', { name: 'Easy access' });
-    await user.click(within(view).getByRole('button', { name: /^Check interest/ }));
-    const dialog = await screen.findByRole('dialog', { name: 'Check interest' });
-    expect(within(dialog).getByRole('button', { name: 'Back to Easy access' })).toBeInTheDocument();
-    await user.click(within(dialog).getByRole('button', { name: 'Skip Oct' }));
+    const alerts = await screen.findByRole('region', { name: 'Alerts' });
+    await waitFor(() => expect(alerts).toHaveTextContent('interest added to Easy access'));
+    await user.click(within(alerts).getAllByRole('button', { name: 'Later' })[0]);
+    expect(await screen.findByText('It’ll be back Mon 5 Oct')).toBeInTheDocument();
+    await waitFor(() => expect(alerts).not.toHaveTextContent('interest added'));
 
-    expect(await screen.findByText('Skipped Easy access interest this time')).toBeInTheDocument();
-    expect(api.callsTo('ConfirmInterest')).toEqual([
-      { input: { accountId: 'easy', amount: null } }
-    ]);
-  });
-
-  it('asks again tomorrow with Later', async () => {
-    const { user, api } = renderAccounts(withInterest());
-
+    // The old balance is left; × clears it
     await user.click(
-      within(await screen.findByRole('region', { name: 'Interest to check' })).getByRole('button', {
-        name: 'Check interest'
-      })
+      within(alerts).getByRole('button', { name: 'Clear: Cash ISA balance is 5 weeks old' })
     );
-    const dialog = await screen.findByRole('dialog', { name: 'Check interest' });
-    await user.click(within(dialog).getByRole('button', { name: 'Later' }));
-
-    expect(await screen.findByText('It’ll be back tomorrow')).toBeInTheDocument();
-    expect(api.callsTo('ConfirmInterest')).toEqual([]);
+    expect(await screen.findByText('Reminder cleared')).toBeInTheDocument();
     await waitFor(() =>
-      expect(screen.queryByRole('region', { name: 'Interest to check' })).not.toBeInTheDocument()
+      expect(screen.queryByRole('region', { name: 'Alerts' })).not.toBeInTheDocument()
     );
+  });
+
+  it('says what’s built up on each account, and when it’s added', async () => {
+    renderAccounts(withInterest());
+
+    // 29 days of a monthly payment's share of 4.5% on £8,650
+    expect(await screen.findByText('Pending interest £30.31')).toBeInTheDocument();
   });
 
   it('says when interest is paid from its own small dialog', async () => {

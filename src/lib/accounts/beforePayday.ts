@@ -1,4 +1,5 @@
 import { isSameDay } from '~/lib/dates';
+import { roundPence } from '~/lib/format';
 import { PayCycle } from '~/lib/payday';
 import { datesDue, Payment } from '~/lib/payments';
 import { Account, accountOf } from './accounts';
@@ -8,8 +9,6 @@ import { Account, accountOf } from './accounts';
  * payday view. A payment that moves money between accounts goes out of one and into the other, so
  * the total across them doesn't change.
  */
-
-const roundPence = (amount: number) => Math.round(amount * 100) / 100;
 
 export interface Movement {
   // The payment and date, so each date of a weekly payment has its own row

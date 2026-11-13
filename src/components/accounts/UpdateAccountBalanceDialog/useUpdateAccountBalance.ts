@@ -1,10 +1,8 @@
 import { useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { Account } from '~/lib/accounts';
-import { formatBalance, formatMoneyInput, parseMoney } from '~/lib/format';
+import { formatBalance, formatMoneyInput, parseMoney, roundPence } from '~/lib/format';
 import { useAccountQuickStore } from '~/state/accountQuick';
-
-const roundPence = (amount: number) => Math.round(amount * 100) / 100;
 
 interface Options {
   accounts: readonly Account[];

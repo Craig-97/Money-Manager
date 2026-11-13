@@ -68,7 +68,9 @@ const payments = toPayments(
           startingBalance: 3500,
           apr: 24.9,
           balanceUpdatedAt: null,
-          paidOffThisCycle: 0
+          paidOffThisCycle: 0,
+          accrued: 0,
+          accruedTo: null
         }
       }),
       // Due on payday

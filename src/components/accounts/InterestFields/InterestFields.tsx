@@ -38,9 +38,13 @@ interface InterestFieldsProps {
   today: Date;
 }
 
+// The one sentence wherever interest is set up
+const HOW_IT_WORKS =
+  'Worked out on each day’s balance and added on the day it’s paid. If your bank pays a different amount, update the balance.';
+
 /*
  * A savings account's interest: its rate (AER), how often it's paid, then the day of the month or
- * the next date. With those, what the next payment should be, worked out each day on the balance.
+ * the next date. With those, what the next payment should be, worked out on each day's balance.
  * Three across on desktop; on a phone the day or date goes under the other two.
  */
 export const InterestFields = ({ draft, set, errors, balance, today }: InterestFieldsProps) => {
@@ -132,13 +136,12 @@ export const InterestFields = ({ draft, set, errors, balance, today }: InterestF
       <p className="ml-1 text-xs leading-[1.4] font-semibold text-muted">
         {estimate ? (
           <>
-            <span className="font-bold text-text">{estimate}</span> Worked out each day on the
-            balance. You check it before it’s added.
+            <span className="font-bold text-text">{estimate}</span> {HOW_IT_WORKS}
           </>
         ) : frequency ? (
           'Say when it’s paid to see what it should be.'
         ) : (
-          'Optional. Say when it’s paid and it’s worked out each day, then you check each payment.'
+          `Optional. Say when it’s paid. ${HOW_IT_WORKS}`
         )}
       </p>
     </div>

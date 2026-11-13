@@ -1,3 +1,4 @@
+import { PendingInterestTag } from '~/components/accounts';
 import { Switch } from '~/components/ui/Switch';
 import {
   Account,
@@ -61,14 +62,17 @@ export const AccountRow = ({ account, today, several, onCounts }: AccountRowProp
           <p className="mt-0.5 text-xs font-semibold text-muted">
             {accountMeta(account, { several })}
           </p>
-          {interest ? (
-            <p
-              className={cn(
-                'mt-0.5 text-xs font-bold',
-                interest.tone === 'earning' ? 'text-income' : 'text-warn'
-              )}>
-              {interest.text}
-            </p>
+          {interest?.tone === 'earning' ? (
+            <div className="mt-1">
+              <PendingInterestTag
+                text={interest.short}
+                since={interest.since}
+                added={interest.added}
+                today={today}
+              />
+            </div>
+          ) : interest ? (
+            <p className="mt-0.5 text-xs font-bold text-warn">{interest.short}</p>
           ) : null}
           <div className="mt-1.5 wide:hidden">{updated}</div>
         </div>
@@ -99,7 +103,7 @@ export const AccountRow = ({ account, today, several, onCounts }: AccountRowProp
         )}
       </span>
       <span className="flex justify-end">
-        <AccountMenu account={account} several={several} today={today} onCounts={onCounts} />
+        <AccountMenu account={account} several={several} onCounts={onCounts} />
       </span>
     </div>
   );

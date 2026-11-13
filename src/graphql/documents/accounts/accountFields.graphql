@@ -13,6 +13,15 @@ fragment AccountFields on Account {
     frequency
     day
     nextDate
+    # What's built up since it was last paid, counted to the start of accruedTo
+    accrued
+    accruedTo
+    # Payments the app added, to check against the bank
+    added {
+      date
+      amount
+      balanceAfter
+    }
   }
   purpose
   balanceUpdatedAt

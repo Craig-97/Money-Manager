@@ -9,7 +9,7 @@ import {
 } from '~/graphql/generated';
 import { toApiDate } from '~/lib/dates';
 import { getApiErrorMessage } from '~/lib/errors';
-import { formatMoney } from '~/lib/format';
+import { formatMoney, roundPence } from '~/lib/format';
 import { formatShortDate, Payment, RecurringPayment, repeatsInCycle } from '~/lib/payments';
 import { showToast } from '~/state/toast';
 
@@ -26,6 +26,18 @@ const balanceNote = (payments: readonly Payment[], paid: boolean) => {
   const [payment] = payments;
   const off = paid === (payment.type === 'EXPENSE');
   return ` · ${formatMoney(payment.amount)} ${off ? 'off' : 'added to'} your balance`;
+};
+
+/*
+ * "· £203.60 off what you owe, after £41.40 interest": what paying a debt did to it, from its
+ * balance before and after. Interest built up since the last payment goes on first.
+ */
+const debtNote = (payment: Payment, balanceAfter: number | undefined) => {
+  if (payment.kind !== 'recurring' || !payment.debt || balanceAfter === undefined) return '';
+  const change = roundPence(payment.debt.balance - balanceAfter);
+  const interest = roundPence(payment.amount - change);
+  const moved = `${formatMoney(Math.abs(change))} ${change >= 0 ? 'off' : 'added to'} what you owe`;
+  return ` · ${moved}${interest > 0 ? `, after ${formatMoney(interest)} interest` : ''}`;
 };
 
 const showError = (error: unknown) =>
@@ -66,10 +78,15 @@ export const usePaymentActions = (budgetId: string) => {
           after.find(updated => updated?.id === payment.id)?.debt?.balance === 0
       );
       if (cleared.length === 1) showPaidOff(cleared[0]);
-      else
+      else {
+        const single = payments.length === 1 ? payments[0] : null;
+        const debt = single
+          ? debtNote(single, after.find(updated => updated?.id === single.id)?.debt?.balance)
+          : '';
         showToast({
-          message: `${describe(payments)} marked as paid${balanceNote(payments, true)}`
+          message: `${describe(payments)} marked as paid${balanceNote(payments, true)}${debt}`
         });
+      }
     } catch (error) {
       showError(error);
     }
@@ -125,7 +142,10 @@ export const usePaymentActions = (budgetId: string) => {
         : repeatsInCycle(payment) && payment.dueDate
           ? `for ${formatShortDate(payment.dueDate)}`
           : 'this cycle';
-      showToast({ message: `${payment.name} skipped ${skipped}` });
+      // A debt's interest doesn't stop for a skipped payment
+      showToast({
+        message: `${payment.name} skipped ${skipped}${payment.debt ? ' · its interest still builds up until the next payment' : ''}`
+      });
     } catch (error) {
       showError(error);
     }

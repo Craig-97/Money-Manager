@@ -53,7 +53,15 @@ const isa = account({
   id: 'isa',
   name: 'Cash ISA',
   balance: 8650,
-  interest: { rate: 4.5, frequency: null, day: null, nextDate: null }
+  interest: {
+    rate: 4.5,
+    frequency: null,
+    day: null,
+    nextDate: null,
+    accrued: 0,
+    accruedTo: null,
+    added: []
+  }
 });
 const easy = account({ id: 'easy', name: 'Easy access', balance: 4200, counts: true });
 

@@ -3,14 +3,13 @@ import { InterestStrip } from '~/components/accounts';
 import {
   Account,
   accountLetter,
-  isInterestDue,
+  interestLine,
   isStale,
   mobileAccountMeta,
   updatedText
 } from '~/lib/accounts';
 import { cn } from '~/lib/cn';
 import { formatBalance } from '~/lib/format';
-import { useAccountQuickStore } from '~/state/accountQuick';
 import { useAccountViewStore } from '~/state/accountView';
 
 const tagClasses =
@@ -27,12 +26,12 @@ interface MobileAccountRowProps {
  * Mobile: one account, tapped to open its view in a sheet. What it's for shows under the name and
  * wraps, so a long one never pushes the balance off, however big that is. Tags say where pay lands,
  * how old the balance is and whether it counts in free to spend. A savings account's interest is a
- * full-width strip under the row, which opens checking a payment that's waiting.
+ * full-width strip under the row, which opens its view too.
  */
 export const MobileAccountRow = ({ account, today, several }: MobileAccountRowProps) => {
   const openView = useAccountViewStore(s => s.openFor);
-  const openQuick = useAccountQuickStore(s => s.openFor);
   const stale = isStale(account, today);
+  const interest = interestLine(account, today);
 
   return (
     <div className="flex flex-col">
@@ -84,16 +83,14 @@ export const MobileAccountRow = ({ account, today, several }: MobileAccountRowPr
         </span>
         <ChevronRight size={16} className="shrink-0 text-faint" aria-hidden="true" />
       </button>
-      <InterestStrip
-        account={account}
-        today={today}
-        onClick={() =>
-          isInterestDue(account.interest, today)
-            ? openQuick('check', { accountId: account.id })
-            : openView(account.id)
-        }
-        className="mx-2.5 mb-2 w-auto"
-      />
+      {interest ? (
+        <InterestStrip
+          line={interest}
+          name={account.name}
+          onClick={() => openView(account.id)}
+          className="mx-2.5 mb-2 w-auto"
+        />
+      ) : null}
     </div>
   );
 };

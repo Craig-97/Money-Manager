@@ -13,9 +13,9 @@ import {
 } from '~/lib/accounts';
 import { daysBetween, fromApiDate, toApiDate } from '~/lib/dates';
 import { getApiErrorMessage } from '~/lib/errors';
-import { formatMoney, formatMoneyInput, parseMoney } from '~/lib/format';
+import { formatMoney, formatMoneyInput, parseMoney, roundPence } from '~/lib/format';
 import { BankHolidays, countPaydays, PayCycle } from '~/lib/payday';
-import { Payment } from '~/lib/payments';
+import { formatShortDate, Payment } from '~/lib/payments';
 import { showToast } from '~/state/toast';
 import {
   balanceParts,
@@ -49,8 +49,6 @@ const needsNewCycle = (cycle: PayCycle, cycleStartedOn: string | null | undefine
 
 // What a left-over payment starts as: most are direct debits that went out on their own
 const DEFAULT_OUTCOME: LeftOverOutcome = 'PAID';
-
-const roundPence = (amount: number) => Math.round(amount * 100) / 100;
 
 /*
  * The line under another account to spend from in step 3: "After £440.02 of bills, with the
@@ -185,11 +183,17 @@ export const usePaydayPrompt = ({
     const value = savingsTyped[account.id] ?? formatMoneyInput(expected);
     const amount = parseMoney(value);
     const updated = updatedText(account, today);
+    // Interest the app added since the balance was typed in, to check here
+    const interest = account.interest?.added ?? [];
+    const interestText = interest.length
+      ? `Includes ${formatMoney(roundPence(interest.reduce((sum, item) => sum + item.amount, 0)))} interest added ${formatShortDate(interest.at(-1)!.date, today)}`
+      : null;
     // A spending account says what bills have come off and any top-up; savings what's paid in
     const sub = isSpending(account)
       ? spendingSub({ out, added, updated })
       : [
           added ? `Includes ${formatMoney(added)} paid in` : null,
+          interestText,
           out ? `${formatMoney(out)} gone out` : null
         ]
           .filter(Boolean)
@@ -198,8 +202,12 @@ export const usePaydayPrompt = ({
       account,
       value,
       expected,
-      // Sent only when it isn't what the API would leave it at
-      changed: amount !== null && Math.abs(amount - afterApi) > 0.004 ? amount : null,
+      // Sent only when it isn't what the API would leave it at, or interest was added: then it's
+      // been checked, which clears the alert asking to
+      changed:
+        amount !== null && (Math.abs(amount - afterApi) > 0.004 || interest.length > 0)
+          ? amount
+          : null,
       sub: sub || updated,
       // Amber only while the line is just how long ago it was updated
       stale: (!sub || sub === updated) && isStale(account, today),

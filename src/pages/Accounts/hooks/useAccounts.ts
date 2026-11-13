@@ -12,9 +12,8 @@ import {
   toAccounts
 } from '~/lib/accounts';
 import { debtTotals, isDebt } from '~/lib/debts';
+import { roundPence } from '~/lib/format';
 import { RecurringPayment, toPayments } from '~/lib/payments';
-
-const roundPence = (amount: number) => Math.round(amount * 100) / 100;
 
 /* Everything the Accounts page shows and does, worked out from the budget */
 export const useAccounts = (budget: Budget) => {

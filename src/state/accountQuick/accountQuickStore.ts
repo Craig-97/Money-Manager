@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-export type AccountQuickDialog = 'balance' | 'paidInto' | 'interest' | 'check';
+export type AccountQuickDialog = 'balance' | 'paidInto' | 'interest';
 
 interface OpenOptions {
   accountId: string;

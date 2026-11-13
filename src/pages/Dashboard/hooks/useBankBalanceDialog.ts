@@ -3,10 +3,8 @@ import { useMutation } from '@apollo/client/react';
 import { UpdateAccountBalancesDocument } from '~/graphql/generated';
 import { Account } from '~/lib/accounts';
 import { getApiErrorMessage } from '~/lib/errors';
-import { formatMoneyInput, parseMoney } from '~/lib/format';
+import { formatMoneyInput, parseMoney, roundPence } from '~/lib/format';
 import { showToast } from '~/state/toast';
-
-const roundPence = (amount: number) => Math.round(amount * 100) / 100;
 
 /*
  * The dashboard's bank balance once more than one account counts: each counted account's balance

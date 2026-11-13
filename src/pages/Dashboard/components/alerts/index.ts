@@ -1,1 +1,1 @@
-export * from './AlertStack';
+export * from './DashboardAlerts';

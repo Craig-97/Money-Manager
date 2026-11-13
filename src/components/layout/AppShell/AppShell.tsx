@@ -5,6 +5,7 @@ import { DebtDialogs } from '~/components/debts';
 import { NoteDialogs } from '~/components/notes';
 import { PaymentDialogs } from '~/components/payments/PaymentDialogs';
 import { Toaster } from '~/components/ui/Toaster';
+import { useCatchUpInterest } from '~/hooks/useCatchUpInterest';
 import { useScrollTopOnNavigate } from '~/hooks/useScrollTopOnNavigate';
 import { useSidebarMode } from '~/hooks/useSidebarMode';
 import { BottomNav } from '../BottomNav';
@@ -17,6 +18,8 @@ export const AppShell = () => {
   const sidebarWidth = expanded && !isOverlay ? 300 : 88;
   // The pages scroll in here, so a new page starts at its top
   const mainRef = useScrollTopOnNavigate<HTMLElement>();
+  // Interest paid since the last visit goes on the balances
+  useCatchUpInterest();
 
   return (
     <div

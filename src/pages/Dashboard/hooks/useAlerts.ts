@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useReminderActions } from '~/hooks/useReminderActions';
 import { Payment, RecurringPayment, Renewal, renewalOf } from '~/lib/payments';
-import { overdueKey, renewalKey, ReminderStates } from '~/lib/reminders';
+import { dueKey, overdueKey, renewalKey, ReminderStates } from '~/lib/reminders';
 
 type DashboardAlert =
   | { kind: 'overdue'; payment: Payment; due: Date }
@@ -22,7 +22,8 @@ interface AlertsInput {
  * today, then renewals, both coming up within their reminder and gone by without the next one being
  * set. "Later" hides due today for this visit. For an overdue payment or a renewal it's the same as
  * its reminder's Later: put away on the budget, so it stays away on other devices and under
- * Reminders too.
+ * Reminders too. × clears due today or a renewal, as its reminder's × does; an overdue payment stays
+ * until it's paid or skipped.
  */
 export const useAlerts = ({ budgetId, payments, today, dueToday, states }: AlertsInput) => {
   const [dueDismissed, setDueDismissed] = useState(false);
@@ -62,7 +63,9 @@ export const useAlerts = ({ budgetId, payments, today, dueToday, states }: Alert
 
   const alerts: DashboardAlert[] = [
     ...overdue,
-    ...(dueToday && !dueDismissed ? [{ kind: 'due' as const, payment: dueToday }] : []),
+    ...(dueToday && !dueDismissed && !isAway(dueKey(dueToday, dueToday.dueDate ?? today))
+      ? [{ kind: 'due' as const, payment: dueToday }]
+      : []),
     ...renewals
   ];
   // Dealing with the last one moves back to the one before
@@ -80,6 +83,19 @@ export const useAlerts = ({ budgetId, payments, today, dueToday, states }: Alert
         void actions.later({ key: overdueKey(alert.payment, alert.due), kind: 'overdue' });
       } else {
         void actions.later({
+          key: renewalKey(alert.payment, alert.renewal),
+          kind: alert.renewal.passed ? 'renewed' : 'renewal'
+        });
+      }
+    },
+    clear: (alert: DashboardAlert) => {
+      if (alert.kind === 'due')
+        void actions.clear({
+          key: dueKey(alert.payment, alert.payment.dueDate ?? today),
+          kind: 'due'
+        });
+      else if (alert.kind === 'renewal') {
+        void actions.clear({
           key: renewalKey(alert.payment, alert.renewal),
           kind: alert.renewal.passed ? 'renewed' : 'renewal'
         });

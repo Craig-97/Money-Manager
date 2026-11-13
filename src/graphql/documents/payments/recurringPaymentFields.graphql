@@ -37,5 +37,8 @@ fragment RecurringPaymentFields on RecurringPayment {
     apr
     balanceUpdatedAt
     paidOffThisCycle
+    # Interest built up since the last payment, counted to the start of accruedTo
+    accrued
+    accruedTo
   }
 }

@@ -60,7 +60,9 @@ export const regularAsPayment = (
           startingBalance: input.debt.startingBalance ?? null,
           apr: input.debt.apr,
           balanceUpdatedAt: null,
-          paidOffThisCycle: 0
+          paidOffThisCycle: 0,
+          accrued: 0,
+          accruedTo: null
         }
       : null,
     account: input.account ?? null,

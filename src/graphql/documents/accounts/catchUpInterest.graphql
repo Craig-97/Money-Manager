@@ -1,0 +1,13 @@
+# Adds savings interest that's come since the app was last opened, each on its own date. Safe to
+# call again: what's been added isn't added twice.
+mutation CatchUpInterest($budgetId: ID!) {
+  catchUpInterest(budgetId: $budgetId) {
+    budget {
+      id
+      bankBalance
+      accounts {
+        ...AccountFields
+      }
+    }
+  }
+}

@@ -1,5 +1,6 @@
 import { AccountFieldsFragment, AccountKind } from '~/graphql/generated';
 import { daysBetween, fromApiDate } from '~/lib/dates';
+import { roundPence } from '~/lib/format';
 import { AccountInterest } from './interest';
 
 /*
@@ -26,8 +27,6 @@ export interface Account {
 // A balance not typed in for this long may well be out of date, so it's flagged and reminded about
 export const STALE_DAYS = 28;
 
-const roundPence = (amount: number) => Math.round(amount * 100) / 100;
-
 export const toAccounts = (
   accounts: readonly AccountFieldsFragment[] | null | undefined,
   today: Date
@@ -44,7 +43,14 @@ export const toAccounts = (
           rate: account.interest.rate,
           frequency: account.interest.frequency ?? null,
           day: account.interest.day ?? null,
-          nextDate: fromApiDate(account.interest.nextDate)
+          nextDate: fromApiDate(account.interest.nextDate),
+          accrued: account.interest.accrued,
+          accruedTo: fromApiDate(account.interest.accruedTo),
+          added: account.interest.added.map(added => ({
+            date: fromApiDate(added.date) ?? today,
+            amount: added.amount,
+            balanceAfter: added.balanceAfter
+          }))
         }
       : null,
     purpose: account.purpose ?? null,

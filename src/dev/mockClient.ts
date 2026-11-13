@@ -1,5 +1,6 @@
 import { createApolloClient } from '~/graphql/client/createApolloClient';
 import { addDays, startOfToday, toIsoDate } from '~/lib/dates';
+import { roundPence } from '~/lib/format';
 import { useAuthStore } from '~/state/auth';
 import {
   apiDate,
@@ -24,6 +25,7 @@ import {
  *   overdrawn - more going out before payday than is in the bank
  *   debts    - the design's three debts: a credit card, car finance and a loan from family
  *   reminders - the design's reminders: Spotify overdue, renewals, dated notes
+ *   interest - away for three months: three interest payments added at once, and the debts
  */
 
 const fromToday = (days: number) => apiDate(toIsoDate(addDays(startOfToday(), days)));
@@ -146,12 +148,18 @@ const demoBudget = (scenario: string | null): FakeBudget => {
         balance: 4200,
         // Counted in the accounts scenario, so the bank balance opens as a dialog
         counts: scenario === 'accounts',
-        // Paid yesterday, so it's waiting to be checked
+        // Paid yesterday, so the app adds it as it opens and asks to check it. Away for three
+        // months in the interest scenario, so it adds three.
         interest: {
           rate: 4.1,
           frequency: 'MONTHLY',
           day: addDays(startOfToday(), -1).getDate(),
-          nextDate: fromToday(-1)
+          nextDate:
+            scenario === 'interest'
+              ? apiDate(toIsoDate(addMonths(addDays(startOfToday(), -1), -2)))
+              : fromToday(-1),
+          accrued: 0,
+          accruedTo: fromToday(-31)
         },
         purpose: null,
         balanceUpdatedAt: fromToday(-9)
@@ -166,7 +174,10 @@ const demoBudget = (scenario: string | null): FakeBudget => {
           rate: 4.5,
           frequency: 'MONTHLY',
           day: addDays(startOfToday(), 10).getDate(),
-          nextDate: fromToday(10)
+          nextDate: fromToday(10),
+          // Building up since its last payment
+          accrued: 0,
+          accruedTo: fromToday(-20)
         },
         purpose: null,
         balanceUpdatedAt: fromToday(-36)
@@ -333,7 +344,7 @@ const demoBudget = (scenario: string | null): FakeBudget => {
   if (scenario === 'empty') {
     return { ...budget, recurringPayments: [], oneOffPayments: [], notes: [] };
   }
-  if (scenario === 'debts') {
+  if (scenario === 'debts' || scenario === 'interest') {
     return { ...budget, recurringPayments: [...budget.recurringPayments, ...demoDebts()] };
   }
   if (scenario === 'accounts') {
@@ -489,7 +500,13 @@ const demoDebt = ({ id, name, category, amount, dueInDays, debt, paid = 3 }: Dem
   thisCycle: [],
   history: pastPayments({ amount, dueInDays, debt, count: paid }),
   renewalDate: null,
-  debt: { ...debt, balanceUpdatedAt: fromToday(-21) }
+  // Interest has built up since its last payment, a month before the next
+  debt: {
+    ...debt,
+    balanceUpdatedAt: fromToday(-21),
+    accrued: 0,
+    accruedTo: fromToday(dueInDays - 30)
+  }
 });
 
 /*
@@ -510,15 +527,15 @@ const pastPayments = ({
   let after = balance;
   return Array.from({ length: count }, (_, i) => i + 1).map(monthsAgo => {
     const before = (after + amount) / (1 + apr / 100 / 12);
-    const interest = Math.round(before * (apr / 100 / 12) * 100) / 100;
+    const interest = roundPence(before * (apr / 100 / 12));
     const record = {
       ...fakeRecord('PAID', {
         dates: [fromToday(dueInDays - monthsAgo * 30)],
         balanceChange: -amount,
         debt: {
           interest,
-          reduction: Math.round((amount - interest) * 100) / 100,
-          balanceAfter: Math.round(after * 100) / 100
+          reduction: roundPence(amount - interest),
+          balanceAfter: roundPence(after)
         }
       }),
       open: false

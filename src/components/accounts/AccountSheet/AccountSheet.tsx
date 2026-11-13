@@ -27,7 +27,12 @@ export const AccountSheet = () => {
       onOpenChange={next => (next ? undefined : sheet.close())}
       title={account.name}>
       <AccountSummary account={account} today={sheet.today}>
-        <InterestStrip account={account} today={sheet.today} />
+        {sheet.interestLine ? <InterestStrip line={sheet.interestLine} /> : null}
+        {sheet.interestNote ? (
+          <p className="-mt-1 text-xs leading-[1.45] font-semibold text-muted">
+            {sheet.interestNote}
+          </p>
+        ) : null}
         {sheet.matured ? (
           <MaturedPrompt
             name={account.name}
@@ -58,14 +63,6 @@ export const AccountSheet = () => {
         </div>
       </AccountSummary>
       <ActionTiles>
-        {sheet.checkInterest ? (
-          <ActionTile
-            icon={<Percent size={20} />}
-            label="Check interest"
-            detail={sheet.checkInterest.detail}
-            onClick={sheet.checkInterest.open}
-          />
-        ) : null}
         <ActionTile
           icon={<RefreshCw size={20} />}
           label="Update balance"

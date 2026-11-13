@@ -1,15 +1,12 @@
 import { useMutation } from '@apollo/client/react';
 import {
   AccountInterestInput,
-  ConfirmInterestDocument,
   UpdateAccountBalancesDocument,
   UpdateAccountDocument
 } from '~/graphql/generated';
 import { Budget } from '~/hooks/useBudget';
 import { Account } from '~/lib/accounts';
-import { toApiDate } from '~/lib/dates';
 import { getApiErrorMessage } from '~/lib/errors';
-import { formatMoney } from '~/lib/format';
 import { showToast } from '~/state/toast';
 
 const showError = (error: unknown) =>
@@ -17,44 +14,23 @@ const showError = (error: unknown) =>
 
 /*
  * What an account's row, menu and view can do without its full form: count it in or out of free to
- * spend, type in its balance, make it where you get paid, say when its interest is paid, and add a
- * payment of interest once it's checked
+ * spend, type in its balance, make it where you get paid, and say when its interest is paid
  */
 export const useAccountActions = (budget: Budget | null | undefined) => {
   const [updateAccount] = useMutation(UpdateAccountDocument);
   const [updateBalances] = useMutation(UpdateAccountBalancesDocument);
-  const [confirm] = useMutation(ConfirmInterestDocument);
 
   const setCounts = async (account: Account, counts: boolean) => {
-    if (!budget) return;
+    const stored = budget?.accounts.find(item => item.id === account.id);
+    if (!budget || !stored) return;
     try {
       await updateAccount({
         variables: { id: account.id, input: { counts } },
         optimisticResponse: {
           updateAccount: {
             __typename: 'AccountResponse',
-            account: {
-              __typename: 'Account',
-              id: account.id,
-              name: account.name,
-              kind: account.kind,
-              balance: account.balance,
-              counts,
-              paidInto: account.paidInto,
-              interest: account.interest
-                ? {
-                    __typename: 'AccountInterest',
-                    rate: account.interest.rate,
-                    frequency: account.interest.frequency,
-                    day: account.interest.day,
-                    nextDate: account.interest.nextDate
-                      ? toApiDate(account.interest.nextDate)
-                      : null
-                  }
-                : null,
-              purpose: account.purpose,
-              balanceUpdatedAt: String(account.balanceUpdatedAt.getTime())
-            },
+            // As the budget has it, with the switch changed
+            account: { ...stored, counts },
             budget: {
               __typename: 'Budget',
               id: budget.id,
@@ -121,27 +97,10 @@ export const useAccountActions = (budget: Budget | null | undefined) => {
     }
   };
 
-  // A payment of interest, checked: added to the balance. Null means none was paid this time.
-  const confirmInterest = async (account: Account, amount: number | null) => {
-    try {
-      await confirm({ variables: { input: { accountId: account.id, amount } } });
-      showToast({
-        message: amount
-          ? `Added ${formatMoney(amount)} to ${account.name}`
-          : `Skipped ${account.name} interest this time`
-      });
-      return true;
-    } catch (error) {
-      showError(error);
-      return false;
-    }
-  };
-
   return {
     setCounts: (account: Account, counts: boolean) => void setCounts(account, counts),
     updateBalance,
     makePaidInto,
-    saveInterest,
-    confirmInterest
+    saveInterest
   };
 };

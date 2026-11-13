@@ -2,12 +2,11 @@ import { describe, expect, it } from 'vitest';
 import { checkInterestDraft, EMPTY_INTEREST_DRAFT } from '~/components/accounts/accountDraft';
 import {
   hasMatured,
-  interestForDays,
   interestLine,
   interestPerPayment,
   interestScheduleText,
-  isInterestDue,
   nextMonthlyInterest,
+  pendingInterest,
   previousInterestDate
 } from './interest';
 
@@ -18,11 +17,15 @@ const day = (iso: string) => {
 // The boards' today: a Friday, so the 3rd is tomorrow
 const TODAY = day('2026-10-02');
 
-const monthly = (date: number, next: string) => ({
+// Counted up to the last payment, with nothing built up since
+const monthly = (date: number, { next, since }: { next: string; since?: string }) => ({
   rate: 4.5,
   frequency: 'MONTHLY' as const,
   day: date,
-  nextDate: day(next)
+  nextDate: day(next),
+  accrued: 0,
+  accruedTo: since ? day(since) : null,
+  added: []
 });
 
 describe('savings interest', () => {
@@ -33,9 +36,23 @@ describe('savings interest', () => {
     expect(interestPerPayment(1000, { rate: 5, frequency: 'YEARLY' })).toBe(50);
   });
 
-  it('works out what days earn at the daily rate', () => {
-    expect(interestForDays(8650, { rate: 4.5, days: 29 })).toBe(30.25);
-    expect(interestForDays(8650, { rate: 4.5, days: -3 })).toBe(0);
+  it('adds the days since it was counted to what’s built up, at a monthly payment’s share a day', () => {
+    // 29 days of a monthly payment's share of 4.5%, spread over the year's days
+    const isa = {
+      balance: 8650,
+      interest: monthly(3, { next: '2026-10-03', since: '2026-09-03' })
+    };
+    expect(pendingInterest(isa, TODAY)).toBe(30.31);
+    expect(pendingInterest({ ...isa, interest: { ...isa.interest, accrued: 10 } }, TODAY)).toBe(
+      40.31
+    );
+    // Counted to today: only what's built up
+    expect(
+      pendingInterest(
+        { ...isa, interest: { ...isa.interest, accruedTo: TODAY, accrued: 5 } },
+        TODAY
+      )
+    ).toBe(5);
   });
 
   it('finds a monthly payment’s next date after today, keeping a 31st in short months', () => {
@@ -45,50 +62,86 @@ describe('savings interest', () => {
   });
 
   it('counts interest so far from the payment before', () => {
-    expect(previousInterestDate(monthly(3, '2026-10-03'))).toEqual(day('2026-09-03'));
-    expect(previousInterestDate(monthly(31, '2026-10-31'))).toEqual(day('2026-09-30'));
+    expect(previousInterestDate(monthly(3, { next: '2026-10-03' }))).toEqual(day('2026-09-03'));
+    expect(previousInterestDate(monthly(31, { next: '2026-10-31' }))).toEqual(day('2026-09-30'));
     expect(
-      previousInterestDate({ rate: 5, frequency: 'MATURITY', day: 3, nextDate: day('2027-09-03') })
+      previousInterestDate({
+        rate: 5,
+        frequency: 'MATURITY',
+        day: 3,
+        nextDate: day('2027-09-03'),
+        accrued: 0,
+        accruedTo: null,
+        added: []
+      })
     ).toBeNull();
   });
 
-  it('says what’s built up, what’s waiting to be checked, and when a fixed term has matured', () => {
-    expect(interestLine({ balance: 8650, interest: monthly(3, '2026-10-03') }, TODAY)).toEqual({
+  it('says what’s built up and when it’s added, or when a fixed term has matured', () => {
+    expect(
+      interestLine(
+        { balance: 8650, interest: monthly(3, { next: '2026-10-03', since: '2026-09-03' }) },
+        TODAY
+      )
+    ).toEqual({
       tone: 'earning',
-      text: 'About £30.25 interest so far · paid tomorrow',
-      short: 'About £30.25 so far',
-      when: 'Paid tomorrow'
+      short: 'Pending interest £30.31',
+      when: 'Added tomorrow',
+      since: day('2026-09-03'),
+      added: 'tomorrow'
     });
-    const easy = { ...monthly(1, '2026-10-01'), rate: 4.1 };
-    expect(interestLine({ balance: 4200, interest: easy }, TODAY)).toEqual({
-      tone: 'due',
-      text: 'Interest paid Thu 1 Oct · about £14.09 to check',
-      short: 'About £14.09 paid Thu 1 Oct',
-      when: 'Check'
-    });
-    const matured = { rate: 5, frequency: 'MATURITY' as const, day: 3, nextDate: null };
+    expect(
+      interestLine(
+        { balance: 4200, interest: monthly(1, { next: '2026-11-01', since: '2026-10-01' }) },
+        TODAY
+      )?.when
+    ).toBe('Added Sun 1 Nov');
+    const matured = {
+      rate: 5,
+      frequency: 'MATURITY' as const,
+      day: 3,
+      nextDate: null,
+      accrued: 0,
+      accruedTo: null,
+      added: []
+    };
     expect(hasMatured(matured)).toBe(true);
     expect(interestLine({ balance: 1000, interest: matured }, TODAY)?.tone).toBe('matured');
     // A rate on its own is shown only
     expect(
       interestLine(
-        { balance: 1000, interest: { rate: 4, frequency: null, day: null, nextDate: null } },
+        {
+          balance: 1000,
+          interest: {
+            rate: 4,
+            frequency: null,
+            day: null,
+            nextDate: null,
+            accrued: 0,
+            accruedTo: null,
+            added: []
+          }
+        },
         TODAY
       )
     ).toBeNull();
   });
 
-  it('is due on its date and after, until it’s checked', () => {
-    expect(isInterestDue(monthly(2, '2026-10-02'), TODAY)).toBe(true);
-    expect(isInterestDue(monthly(3, '2026-10-03'), TODAY)).toBe(false);
-    expect(isInterestDue(null, TODAY)).toBe(false);
-  });
-
   it('says how often it’s paid', () => {
-    expect(interestScheduleText(monthly(3, '2026-10-03'), TODAY)).toBe('Monthly on the 3rd');
+    expect(interestScheduleText(monthly(3, { next: '2026-10-03' }), TODAY)).toBe(
+      'Monthly on the 3rd'
+    );
     expect(
       interestScheduleText(
-        { rate: 4, frequency: 'QUARTERLY', day: 1, nextDate: day('2026-12-01') },
+        {
+          rate: 4,
+          frequency: 'QUARTERLY',
+          day: 1,
+          nextDate: day('2026-12-01'),
+          accrued: 0,
+          accruedTo: null,
+          added: []
+        },
         TODAY
       )
     ).toBe('Every 3 months · next Tue 1 Dec');

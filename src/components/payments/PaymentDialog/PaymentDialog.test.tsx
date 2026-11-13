@@ -156,7 +156,7 @@ describe('adding a recurring payment as a debt', () => {
     await user.type(within(dialog).getByLabelText('Interest (APR)'), '12');
 
     expect(within(dialog).getByRole('status')).toHaveTextContent(
-      "paid off not at £5 a month: it doesn't cover the interest"
+      '£5 doesn’t cover the £12 interest, so it will grow'
     );
   });
 });

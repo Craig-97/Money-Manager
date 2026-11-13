@@ -1,11 +1,18 @@
 import { InterestFrequency } from '~/graphql/generated';
 import { daysBetween } from '~/lib/dates';
-import { formatMoney } from '~/lib/format';
+import { formatMoney, roundPence } from '~/lib/format';
 import { formatShortDate } from '~/lib/payments';
 
+// A payment the app added on its own, to check against the bank
+export interface InterestAdded {
+  date: Date;
+  amount: number;
+  balanceAfter: number;
+}
+
 /*
- * A savings account's interest. With a frequency it's worked out each day on the balance and each
- * payment is checked before it's added; without one the rate is shown only.
+ * A savings account's interest. With a frequency it's worked out on each day's closing balance and
+ * added on the day it's paid; without one the rate is shown only.
  */
 export interface AccountInterest {
   // AER, as a percentage
@@ -15,6 +22,11 @@ export interface AccountInterest {
   day: number | null;
   // When it's next paid. None once a fixed-term account has matured.
   nextDate: Date | null;
+  // Built up since it was last paid, unrounded, counted up to the start of accruedTo
+  accrued: number;
+  accruedTo: Date | null;
+  // Payments added since the balance was last typed in, oldest first
+  added: InterestAdded[];
 }
 
 // Payments a year, to spread the AER over
@@ -41,17 +53,41 @@ export const FREQUENCY_NAMES: Record<InterestFrequency, string> = {
   MATURITY: 'At maturity'
 };
 
-const roundPence = (amount: number) => Math.round(amount * 100) / 100;
-
 /* One payment: the AER spread over the year, compounding, so it's within pennies of the bank's */
 export const interestPerPayment = (
   balance: number,
   { rate, frequency }: { rate: number; frequency: InterestFrequency }
 ) => roundPence(balance * ((1 + rate / 100) ** (1 / PER_YEAR[frequency]) - 1));
 
-/* What a number of days earns, at the daily rate the AER gives */
-export const interestForDays = (balance: number, { rate, days }: { rate: number; days: number }) =>
-  roundPence(balance * ((1 + rate / 100) ** (1 / 365) - 1) * Math.max(0, days));
+/*
+ * A day's interest, as the API works it out: each payment's share of the AER, compounding, spread
+ * evenly over the days it covers
+ */
+const dailyInterest = (
+  balance: number,
+  { rate, frequency }: { rate: number; frequency: InterestFrequency }
+) =>
+  (Math.max(0, balance) *
+    PER_YEAR[frequency] *
+    ((1 + rate / 100) ** (1 / PER_YEAR[frequency]) - 1)) /
+  365;
+
+/*
+ * What's built up since the last payment, rounded: what the API has counted, then each day since at
+ * today's balance. Today isn't over, so it doesn't count yet. None without a schedule.
+ */
+export const pendingInterest = (
+  account: { balance: number; interest: AccountInterest | null },
+  today: Date
+) => {
+  const { interest } = account;
+  if (!interest?.frequency || !interest.nextDate) return null;
+  const days = interest.accruedTo ? Math.max(0, daysBetween(interest.accruedTo, today)) : 0;
+  return roundPence(
+    interest.accrued +
+      dailyInterest(account.balance, { rate: interest.rate, frequency: interest.frequency }) * days
+  );
+};
 
 /* The given day in a month, or its last day when it's shorter: the 31st falls on 30 Sep */
 const dayInMonth = ({ year, month, day }: { year: number; month: number; day: number }) =>
@@ -77,10 +113,6 @@ export const previousInterestDate = (interest: AccountInterest) => {
   });
 };
 
-/* A payment's date has come, so it's waiting to be checked */
-export const isInterestDue = (interest: AccountInterest | null, today: Date) =>
-  !!interest?.frequency && !!interest.nextDate && interest.nextDate <= today;
-
 /* A fixed-term account that has paid out: time to set a new term or say it's done */
 export const hasMatured = (interest: AccountInterest | null) =>
   interest?.frequency === 'MATURITY' && !interest.nextDate;
@@ -98,61 +130,44 @@ export const interestScheduleText = (interest: AccountInterest, today: Date) => 
 export const ordinal = (n: number) =>
   `${n}${n % 100 >= 11 && n % 100 <= 13 ? 'th' : (({ 1: 'st', 2: 'nd', 3: 'rd' } as Record<number, string>)[n % 10] ?? 'th')}`;
 
-export type InterestTone = 'earning' | 'due' | 'matured';
+export type InterestTone = 'earning' | 'matured';
 
 /*
- * What an account's row and view say about its interest: what's waiting to be checked, what's
- * built up so far and when it's paid, or that a fixed term has matured. Null without a schedule.
- * `short` and `when` are the two ends of the mobile strip; `text` is the desktop line.
+ * What an account's row and view say about its interest: what's built up and when it's added, or
+ * that a fixed term has matured. Null without a schedule. `short` and `when` are the two ends of
+ * the phone's strip; the desktop row's tag says `short`, with `since` and `added` in its tooltip.
  */
 export const interestLine = (
   account: { balance: number; interest: AccountInterest | null },
   today: Date
-): { tone: InterestTone; text: string; short: string; when: string } | null => {
+): {
+  tone: InterestTone;
+  short: string;
+  when: string;
+  // The last payment, which what's built up counts from; none for a fixed term
+  since: Date | null;
+  // "tomorrow", "Sun 1 Nov"
+  added: string;
+} | null => {
   const { interest } = account;
   if (!interest?.frequency) return null;
-  if (hasMatured(interest)) {
+  if (hasMatured(interest) || !interest.nextDate) {
     return {
       tone: 'matured',
-      text: 'Matured · set a new term or say it no longer earns interest',
-      short: 'Matured',
-      when: 'Choose'
+      short: 'Matured · set a new term or say it no longer earns interest',
+      when: 'Choose',
+      since: null,
+      added: ''
     };
   }
-  const nextDate = interest.nextDate!;
-  const each = formatMoney(
-    interestPerPayment(account.balance, { rate: interest.rate, frequency: interest.frequency })
-  );
-  if (isInterestDue(interest, today)) {
-    const paid = formatShortDate(nextDate, today);
-    return {
-      tone: 'due',
-      text: `Interest paid ${paid} · about ${each} to check`,
-      short: `About ${each} paid ${paid}`,
-      when: 'Check'
-    };
-  }
-  const days = daysBetween(today, nextDate);
-  const when = days === 1 ? 'tomorrow' : formatShortDate(nextDate, today);
-  if (interest.frequency === 'MATURITY') {
-    return {
-      tone: 'earning',
-      text: `About ${each} a year · paid when it matures, ${when}`,
-      short: `About ${each} a year`,
-      when: `Matures ${when}`
-    };
-  }
-  const since = previousInterestDate(interest);
-  const soFar = formatMoney(
-    interestForDays(account.balance, {
-      rate: interest.rate,
-      days: since ? daysBetween(since, today) : 0
-    })
-  );
+  const days = daysBetween(today, interest.nextDate);
+  const added =
+    days <= 0 ? 'today' : days === 1 ? 'tomorrow' : formatShortDate(interest.nextDate, today);
   return {
     tone: 'earning',
-    text: `About ${soFar} interest so far · paid ${when}`,
-    short: `About ${soFar} so far`,
-    when: `Paid ${when}`
+    short: `Pending interest ${formatMoney(pendingInterest(account, today) ?? 0)}`,
+    when: `Added ${added}`,
+    since: previousInterestDate(interest),
+    added
   };
 };

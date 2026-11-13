@@ -44,6 +44,9 @@ export interface Debt {
   balanceUpdatedAt: Date | null;
   // How much less it owes since payday, from payments and overpayments
   paidOffThisCycle: number;
+  // Interest built up since the last payment, unrounded, counted up to the start of accruedTo
+  accrued: number;
+  accruedTo: Date | null;
 }
 
 interface BasePayment {
@@ -166,7 +169,9 @@ const toRecurringPayment = (
           startingBalance: payment.debt.startingBalance ?? null,
           apr: payment.debt.apr,
           balanceUpdatedAt: fromApiDate(payment.debt.balanceUpdatedAt),
-          paidOffThisCycle: payment.debt.paidOffThisCycle
+          paidOffThisCycle: payment.debt.paidOffThisCycle,
+          accrued: payment.debt.accrued,
+          accruedTo: fromApiDate(payment.debt.accruedTo)
         }
       : null,
     account: payment.account ?? null,

@@ -18,7 +18,8 @@ const ICONS: Record<ReminderKind, typeof Clock> = {
   note: FileText,
   payday: CalendarDays,
   balance: Landmark,
-  interest: Percent
+  interest: Percent,
+  interestAdded: Percent
 };
 
 interface ReminderIconProps {

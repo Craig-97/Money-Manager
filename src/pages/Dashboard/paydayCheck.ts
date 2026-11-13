@@ -1,7 +1,7 @@
 import { LeftOverOutcome } from '~/graphql/generated';
 import { addDays } from '~/lib/dates';
 import { payTowardsDebt } from '~/lib/debts';
-import { formatMoney } from '~/lib/format';
+import { formatMoney, roundPence } from '~/lib/format';
 import { PayCycle } from '~/lib/payday';
 import {
   formatShortDate,
@@ -18,8 +18,6 @@ import {
  * recurring payments left over from last cycle, each with what happened to it, and payments due
  * from payday to today, ticked if they've already gone out.
  */
-
-const roundPence = (amount: number) => Math.round(amount * 100) / 100;
 
 // A recurring payment's dates from last cycle that were never paid or skipped
 export interface LeftOver {

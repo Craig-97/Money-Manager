@@ -4,14 +4,13 @@ import { useBudget } from '~/hooks/useBudget';
 import { usePayCycle } from '~/hooks/usePayCycle';
 import {
   hasMatured,
-  interestPerPayment,
+  interestLine,
   interestScheduleText,
-  isInterestDue,
   isSpending,
   paidIntoAccountOf,
   toAccounts
 } from '~/lib/accounts';
-import { formatMoney } from '~/lib/format';
+import { formatShortDate } from '~/lib/payments';
 import { useAccountDialogStore } from '~/state/accountDialog';
 import { useAccountQuickStore } from '~/state/accountQuick';
 import { useAccountViewStore } from '~/state/accountView';
@@ -44,6 +43,7 @@ export const useAccountSheet = () => {
   const { interest } = account;
   const savings = !isSpending(account);
   const paidIntoNow = paidIntoAccountOf(accounts);
+  const line = interestLine(account, today);
 
   return {
     open,
@@ -54,13 +54,11 @@ export const useAccountSheet = () => {
     countsLocked: account.paidInto,
     setCounts: (counts: boolean) => setCounts(account, counts),
     updateBalance: then(() => openQuick('balance', options)),
-    // A payment of interest waiting to be checked comes first, with its estimate
-    checkInterest:
-      interest?.frequency && isInterestDue(interest, today)
-        ? {
-            detail: `About ${formatMoney(interestPerPayment(account.balance, { rate: interest.rate, frequency: interest.frequency }))}`,
-            open: then(() => openQuick('check', options))
-          }
+    interestLine: line,
+    // Under what's built up: how it's worked out
+    interestNote:
+      line?.tone === 'earning'
+        ? `An estimate worked out on each day’s balance${line.since ? ` since ${formatShortDate(line.since, today)}` : ''}.`
         : null,
     // Savings only: its rate and when it's paid
     interest: savings

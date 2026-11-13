@@ -29,6 +29,9 @@ export type AccountBalanceInput = {
 
 export type AccountInterest = {
   __typename: 'AccountInterest';
+  accrued: Scalars['Float']['output'];
+  accruedTo: Maybe<Scalars['String']['output']>;
+  added: Array<InterestAdded>;
   day: Maybe<Scalars['Int']['output']>;
   frequency: Maybe<InterestFrequency>;
   nextDate: Maybe<Scalars['String']['output']>;
@@ -115,11 +118,6 @@ export type CalendarFeed = {
   token: Maybe<Scalars['String']['output']>;
 };
 
-export type ConfirmInterestInput = {
-  accountId: Scalars['ID']['input'];
-  amount?: InputMaybe<Scalars['Float']['input']>;
-};
-
 export type CreateAccountInput = {
   balance: Scalars['Float']['input'];
   budgetId: Scalars['ID']['input'];
@@ -182,6 +180,8 @@ export type CreateRecurringPaymentInput = {
 
 export type Debt = {
   __typename: 'Debt';
+  accrued: Scalars['Float']['output'];
+  accruedTo: Maybe<Scalars['String']['output']>;
   apr: Scalars['Float']['output'];
   balance: Scalars['Float']['output'];
   balanceUpdatedAt: Maybe<Scalars['String']['output']>;
@@ -200,6 +200,13 @@ export type DeleteResponse = {
   deletedCount: Scalars['Int']['output'];
   ids: Array<Scalars['ID']['output']>;
   success: Scalars['Boolean']['output'];
+};
+
+export type InterestAdded = {
+  __typename: 'InterestAdded';
+  amount: Scalars['Float']['output'];
+  balanceAfter: Scalars['Float']['output'];
+  date: Scalars['String']['output'];
 };
 
 export type InterestFrequency = 'MATURITY' | 'MONTHLY' | 'QUARTERLY' | 'YEARLY';
@@ -234,8 +241,8 @@ export type Mutation = {
   assignPaymentAccounts: BudgetResponse;
   batchDeleteOneOffPayments: DeleteResponse;
   batchDeleteRecurringPayments: DeleteResponse;
+  catchUpInterest: BudgetResponse;
   changePassword: UserResponse;
-  confirmInterest: AccountResponse;
   createAccount: AccountResponse;
   createBudget: BudgetResponse;
   createNote: NoteResponse;
@@ -285,13 +292,13 @@ export type MutationBatchDeleteRecurringPaymentsArgs = {
   ids: Array<Scalars['ID']['input']>;
 };
 
+export type MutationCatchUpInterestArgs = {
+  budgetId: Scalars['ID']['input'];
+};
+
 export type MutationChangePasswordArgs = {
   currentPassword: Scalars['String']['input'];
   newPassword: Scalars['String']['input'];
-};
-
-export type MutationConfirmInterestArgs = {
-  input: ConfirmInterestInput;
 };
 
 export type MutationCreateAccountArgs = {

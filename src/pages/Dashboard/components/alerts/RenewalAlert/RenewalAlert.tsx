@@ -1,5 +1,5 @@
 import { PenLine, RefreshCw } from 'lucide-react';
-import { Button } from '~/components/ui/Button';
+import { Alert } from '~/components/alerts';
 import { formatMoney } from '~/lib/format';
 import {
   formatShortDate,
@@ -8,12 +8,6 @@ import {
   Renewal,
   renewalHeading
 } from '~/lib/payments';
-import {
-  alertSublineClasses,
-  alertTextClasses,
-  alertTitleClasses,
-  laterClasses
-} from '../alertClasses';
 
 interface RenewalAlertProps {
   payment: RecurringPayment;
@@ -21,18 +15,26 @@ interface RenewalAlertProps {
   today: Date;
   onLater: () => void;
   onUpdate: () => void;
+  onClear: () => void;
 }
 
 /* A renewal coming up, or gone by: check the price, and set the next date once it's renewed */
-export const RenewalAlert = ({ payment, renewal, today, onLater, onUpdate }: RenewalAlertProps) => (
-  <>
-    <div className="flex min-w-0 grow items-center gap-3 md:min-w-[200px] md:gap-4">
-      <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-accent-soft text-accent-text md:size-11">
-        <RefreshCw size={20} className="size-[18px] md:size-5" aria-hidden="true" />
-      </span>
-      <div className={alertTextClasses}>
-        <p className={alertTitleClasses}>{renewalHeading(payment, { renewal, today })}</p>
-        <p className={alertSublineClasses}>
+export const RenewalAlert = ({
+  payment,
+  renewal,
+  today,
+  onLater,
+  onUpdate,
+  onClear
+}: RenewalAlertProps) => {
+  const heading = renewalHeading(payment, { renewal, today });
+  return (
+    <Alert
+      icon={RefreshCw}
+      tone="accent"
+      title={heading}
+      subline={
+        <>
           {formatShortDate(renewal.date, today)} ·{' '}
           <span className="num">{formatMoney(payment.amount)}</span> {PER_PERIOD[payment.frequency]}{' '}
           ·{' '}
@@ -43,17 +45,12 @@ export const RenewalAlert = ({ payment, renewal, today, onLater, onUpdate }: Ren
               check the price<span className="hidden md:inline"> before it renews</span>
             </>
           )}
-        </p>
-      </div>
-    </div>
-    <div className="grid grid-cols-2 gap-2 md:flex md:gap-1.5">
-      <Button onClick={onLater} className={laterClasses}>
-        Later
-      </Button>
-      <Button variant="solid" onClick={onUpdate}>
-        <PenLine size={16} aria-hidden="true" />
-        Update
-      </Button>
-    </div>
-  </>
-);
+        </>
+      }
+      onLater={onLater}
+      action={{ label: 'Update', icon: PenLine, onClick: onUpdate, opensDialog: true }}
+      onClear={onClear}
+      clearLabel={heading}
+    />
+  );
+};

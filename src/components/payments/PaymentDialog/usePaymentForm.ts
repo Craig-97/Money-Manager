@@ -42,7 +42,7 @@ import {
   toTimingChoice
 } from '~/lib/payments';
 import { showToast } from '~/state/toast';
-import { paidOffText, parseApr } from './debtFields';
+import { paidOffRow, parseApr } from './debtFields';
 import { accountChoices, FormAccount } from './paymentAccounts';
 
 // How a recurring payment ends: it carries on, renews on a date (the payments carry on), or stops
@@ -312,18 +312,15 @@ const withPaidOff = (
     ? {
         rows: [
           ...summary.rows,
-          {
-            label: 'Paid off',
-            value: paidOffText(
-              {
-                balance: parseMoney(values.balance),
-                apr: parseApr(values.apr),
-                amount: parseMoney(values.amount),
-                frequency: values.frequency
-              },
-              today
-            )
-          }
+          paidOffRow(
+            {
+              balance: parseMoney(values.balance),
+              apr: parseApr(values.apr),
+              amount: parseMoney(values.amount),
+              frequency: values.frequency
+            },
+            today
+          )
         ]
       }
     : summary;
@@ -358,6 +355,8 @@ const summaryLine = (summary: { rows: SummaryRow[]; message?: string }) =>
         )
           ? row.value
           : row.value[0].toLowerCase() + row.value.slice(1);
+      // A row that says it all has no label
+      if (!row.label) return value;
       return `${index === 0 ? row.label : row.label.toLowerCase()} ${value}`;
     })
     .join(' · ');
