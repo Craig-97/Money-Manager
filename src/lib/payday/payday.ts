@@ -181,3 +181,17 @@ export const getNextPaydayDates = (
 /* The next few paydays from a date, e.g. for setup's "Next payday ... then ..." */
 export const getNextPaydays = (config: PaydayConfig, next: NextPaydays) =>
   getNextPaydayDates(config, next).map(payday => payday.date);
+
+/*
+ * How many paydays fell after one date, up to and including another: the pay the bank has had
+ * since a cycle was last started, when the app wasn't opened for a while
+ */
+export const countPaydays = (
+  config: PaydayConfig,
+  { holidays, after, upTo }: { holidays: BankHolidays; after: Date; upTo: Date }
+) =>
+  upTo <= after
+    ? 0
+    : getPaydays(config, { holidays, from: after, to: upTo }).filter(
+        payday => payday > after && payday <= upTo
+      ).length;

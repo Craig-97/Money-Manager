@@ -22,6 +22,7 @@ export const DashboardContent = ({ budget }: { budget: Budget }) => {
   const prompt = usePaydayPrompt({
     budget,
     cycle: dashboard.cycle,
+    holidays: dashboard.holidays,
     today: dashboard.today,
     payments: dashboard.payments,
     markPaid: dashboard.actions.pay

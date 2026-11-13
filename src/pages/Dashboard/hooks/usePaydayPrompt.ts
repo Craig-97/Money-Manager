@@ -14,7 +14,7 @@ import {
 import { daysBetween, fromApiDate, toApiDate } from '~/lib/dates';
 import { getApiErrorMessage } from '~/lib/errors';
 import { formatMoney, formatMoneyInput, parseMoney } from '~/lib/format';
-import { PayCycle } from '~/lib/payday';
+import { BankHolidays, countPaydays, PayCycle } from '~/lib/payday';
 import { Payment } from '~/lib/payments';
 import { showToast } from '~/state/toast';
 import {
@@ -31,6 +31,7 @@ import {
 interface Options {
   budget: Budget;
   cycle: PayCycle;
+  holidays: BankHolidays;
   today: Date;
   payments: Payment[];
   markPaid: (payments: Payment[]) => Promise<void>;
@@ -66,9 +67,24 @@ const spendingSub = ({ out, added, updated }: { out: number; added: number; upda
  * The payday prompt: check what's gone out, confirm the account pay lands in, update the other
  * accounts if wanted, and start the next cycle, catching up on overdue one-offs
  */
-export const usePaydayPrompt = ({ budget, cycle, today, payments, markPaid }: Options) => {
+export const usePaydayPrompt = ({
+  budget,
+  cycle,
+  holidays,
+  today,
+  payments,
+  markPaid
+}: Options) => {
   const [startCycle, { loading: starting }] = useMutation(StartPaydayCycleDocument);
   const due = needsNewCycle(cycle, budget.cycleStartedOn);
+  // Every payday since the last cycle was started, not just this one, when the app wasn't opened
+  // for a while: the pay from each is in the bank
+  const started = fromApiDate(budget.cycleStartedOn);
+  const paydays =
+    started && budget.payday
+      ? Math.max(1, countPaydays(budget.payday, { holidays, after: started, upTo: cycle.start }))
+      : 1;
+  const income = roundPence(budget.monthlyIncome * paydays);
   const [open, setOpen] = useState(due);
   // The steps, or the summary once the cycle has started. Kept as it is while the dialog closes, so
   // it slides away showing what it showed, not the steps again.
@@ -123,7 +139,7 @@ export const usePaydayPrompt = ({ budget, cycle, today, payments, markPaid }: Op
   };
   const projected = suggestedBalance({
     bankBalance: lastBalance,
-    income: budget.monthlyIncome,
+    income,
     outcomes,
     ...fromCurrent
   });
@@ -276,7 +292,9 @@ export const usePaydayPrompt = ({ budget, cycle, today, payments, markPaid }: Op
     payday: cycle.start,
     // Days since payday, when the prompt is catching up on one that's been and gone
     daysLate: Math.max(0, daysBetween(cycle.start, today)),
-    income: budget.monthlyIncome,
+    income,
+    // How many paydays that pay is from: more than one when paydays were missed
+    paydays,
     lastBalance,
     // The account pay lands in, which step 2 confirms
     paidIntoName: current?.name ?? 'Current account',

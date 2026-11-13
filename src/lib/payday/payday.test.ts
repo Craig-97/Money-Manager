@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { PaydayConfig, toIsoDate } from '~/lib/dates';
-import { BankHolidays, getNextPaydayDates, getNextPaydays, getPayCycle } from './payday';
+import {
+  BankHolidays,
+  countPaydays,
+  getNextPaydayDates,
+  getNextPaydays,
+  getPayCycle
+} from './payday';
 
 const day = (iso: string) => {
   const [year, month, date] = iso.split('-').map(Number);
@@ -146,6 +152,33 @@ describe('getPayCycle', () => {
       firstPayDate: String(Date.UTC(2026, 0, 2))
     };
     expect(cycle(weekly, { today: '2026-10-07' }).start).toBe('2026-10-02');
+  });
+});
+
+describe('countPaydays', () => {
+  const monthly = { frequency: 'MONTHLY', type: 'LAST_DAY' } as const;
+  const count = (
+    { after, upTo }: { after: string; upTo: string },
+    config: PaydayConfig = monthly
+  ) => countPaydays(config, { holidays: NO_HOLIDAYS, after: day(after), upTo: day(upTo) });
+
+  it('counts the paydays after a date, up to and including another', () => {
+    expect(count({ after: '2026-07-31', upTo: '2026-09-30' })).toBe(2);
+    expect(count({ after: '2026-09-30', upTo: '2026-09-30' })).toBe(0);
+  });
+
+  it('counts from part way through a cycle, as setup starts one', () => {
+    expect(count({ after: '2026-07-12', upTo: '2026-09-30' })).toBe(3);
+  });
+
+  it('counts weekly pay across a long gap', () => {
+    const weekly: PaydayConfig = {
+      frequency: 'WEEKLY',
+      type: 'SET_WEEKDAY',
+      weekday: 'FRIDAY',
+      firstPayDate: '2026-01-02'
+    };
+    expect(count({ after: '2026-09-04', upTo: '2026-10-02' }, weekly)).toBe(4);
   });
 });
 

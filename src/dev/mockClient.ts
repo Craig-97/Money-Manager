@@ -19,6 +19,7 @@ import {
  * database. Data resets on every page load. Add ?mock=<scenario> to the URL for other states:
  *   setup    - no budget yet, so setup shows
  *   payday   - today is payday, so the payday prompt shows
+ *   away     - payday too, but the app wasn't opened for the last three, so it adds three pays
  *   empty    - a budget with no payments or notes
  *   overdrawn - more going out before payday than is in the bank
  *   debts    - the design's three debts: a credit card, car finance and a loan from family
@@ -126,7 +127,7 @@ const demoHolidayPayments = (): FakeOneOffPayment[] => [
 const demoBudget = (scenario: string | null): FakeBudget => {
   const today = startOfToday();
   const payday =
-    scenario === 'payday'
+    scenario === 'payday' || scenario === 'away'
       ? { type: 'SET_DAY', dayOfMonth: today.getDate() }
       : { type: 'LAST_WEEKDAY', weekday: 'FRIDAY', dayOfMonth: null };
 
@@ -182,7 +183,12 @@ const demoBudget = (scenario: string | null): FakeBudget => {
       }
     ],
     // The payday scenario hasn't started this cycle yet, so the prompt shows
-    cycleStartedOn: scenario === 'payday' ? null : fromToday(0),
+    cycleStartedOn:
+      scenario === 'payday'
+        ? null
+        : scenario === 'away'
+          ? apiDate(toIsoDate(addMonths(today, -3)))
+          : fromToday(0),
     payday: {
       id: 'payday-1',
       frequency: 'MONTHLY',

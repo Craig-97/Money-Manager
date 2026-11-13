@@ -82,6 +82,7 @@ export const useDashboard = (budget: Budget) => {
     monthlyIncome: budget.monthlyIncome,
     payday: budget.payday,
     today,
+    holidays,
     cycle,
     payments,
     summary,

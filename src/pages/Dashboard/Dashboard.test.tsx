@@ -551,6 +551,16 @@ describe('payday prompt', () => {
     expect(within(dialog).getByLabelText(/Confirm your current account/)).toHaveValue('3,500.00');
   });
 
+  it('adds the pay from every payday since the last cycle was started', async () => {
+    // Last started on July's payday, so August's and September's pay are both in the bank
+    renderDashboard({ ...paydayBudget(), cycleStartedOn: apiDate('2026-07-31') });
+
+    const dialog = await screen.findByRole('dialog', { name: 'It’s payday' });
+    expect(within(dialog).getByLabelText(/Confirm your current account/)).toHaveValue('5,980.00');
+    expect(dialog).toHaveTextContent('£5,000.00 income · 2 paydays');
+    expect(dialog).toHaveTextContent('Projected: £980.00 + £5,000.00 pay from 2 paydays');
+  });
+
   it('takes off a payment due today once it’s ticked as gone out', async () => {
     const { user, api } = renderDashboard(paydayBudget());
 

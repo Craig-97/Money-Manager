@@ -108,6 +108,7 @@ export const PaydayPrompt = ({ prompt }: { prompt: Prompt }) => {
                     <span className="num font-bold text-income">
                       {formatPayment(prompt.income)}
                       <span className="hidden md:inline"> income</span>
+                      {prompt.paydays > 1 ? ` · ${prompt.paydays} paydays` : null}
                     </span>
                   </p>
                 </div>
@@ -153,7 +154,7 @@ export const PaydayPrompt = ({ prompt }: { prompt: Prompt }) => {
                       {formatBalance(prompt.parts.start)}
                     </span>{' '}
                     + <span className="num font-bold text-text">{formatMoney(prompt.income)}</span>{' '}
-                    pay
+                    {prompt.paydays > 1 ? `pay from ${prompt.paydays} paydays` : 'pay'}
                     {prompt.parts.changes.map(change => (
                       <Fragment key={change.label}>
                         {' '}
