@@ -131,10 +131,6 @@ export const repeatText = (repeat: NoteRepeat, paymentName?: string) => {
   return REPEAT_LABELS[repeat].toLowerCase();
 };
 
-/* The note's next date, today included */
-export const nextNoteDate = (note: Pick<Note, 'date' | 'repeat'>, today: Date) =>
-  noteDateFrom(note, today);
-
 /* "1 month and 1 week before", "On the day", "2 weeks before and on the day" */
 export const remindText = (remind: readonly number[]) => {
   const before = [...remind].filter(days => days > 0).sort((a, b) => b - a);
@@ -263,7 +259,7 @@ export const notesByPayment = (notes: readonly Note[]) => {
  * "Each payment · Reminds you 1 week before", "Tue 1 Dec · No reminder" or "No date"
  */
 export const paymentNoteFoot = (note: Note, today: Date) => {
-  const date = nextNoteDate(note, today);
+  const date = noteDateFrom(note, today);
   if (!date) return 'No date';
   if (date < today) return 'Its date has gone by';
   const when = note.repeat === 'WITH_PAYMENT' ? 'Each payment' : formatShortDay(date);

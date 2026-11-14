@@ -1,6 +1,6 @@
 import { AccountInterestInput, AccountKind, InterestFrequency } from '~/graphql/generated';
 import { AccountInterest } from '~/lib/accounts';
-import { parseIsoDate, toApiDate } from '~/lib/dates';
+import { parseIsoDate, toIsoDate } from '~/lib/dates';
 import { parseMoney } from '~/lib/format';
 
 /* An account's fields as typed, shared by the account dialog and setup */
@@ -72,7 +72,7 @@ export const interestDraftOf = (interest: AccountInterest | null): InterestDraft
         frequency: interest.frequency ?? '',
         day: interest.day && interest.frequency === 'MONTHLY' ? String(interest.day) : '',
         nextDate:
-          interest.nextDate && interest.frequency !== 'MONTHLY' ? toApiDate(interest.nextDate) : ''
+          interest.nextDate && interest.frequency !== 'MONTHLY' ? toIsoDate(interest.nextDate) : ''
       }
     : EMPTY_INTEREST_DRAFT;
 

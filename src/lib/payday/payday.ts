@@ -1,4 +1,3 @@
-import { PAY_FREQUENCY, PAYDAY_TYPE } from '~/constants';
 import { PayFrequency, Weekday } from '~/graphql/generated';
 import {
   addDays,
@@ -26,16 +25,16 @@ export interface PayCycle {
 }
 
 const MONTHS_BETWEEN: Partial<Record<PayFrequency, number>> = {
-  [PAY_FREQUENCY.MONTHLY]: 1,
-  [PAY_FREQUENCY.QUARTERLY]: 3,
-  [PAY_FREQUENCY.BIANNUAL]: 6,
-  [PAY_FREQUENCY.ANNUAL]: 12
+  MONTHLY: 1,
+  QUARTERLY: 3,
+  BIANNUAL: 6,
+  ANNUAL: 12
 };
 
 const DAYS_BETWEEN: Partial<Record<PayFrequency, number>> = {
-  [PAY_FREQUENCY.WEEKLY]: 7,
-  [PAY_FREQUENCY.FORTNIGHTLY]: 14,
-  [PAY_FREQUENCY.FOUR_WEEKLY]: 28
+  WEEKLY: 7,
+  FORTNIGHTLY: 14,
+  FOUR_WEEKLY: 28
 };
 
 const WEEKDAY_NUMBER: Record<Weekday, number> = {
@@ -68,9 +67,9 @@ const paydayInMonth = (config: PaydayConfig, { year, month }: { year: number; mo
   const lastDay = new Date(year, month + 1, 0);
 
   switch (config.type) {
-    case PAYDAY_TYPE.LAST_WEEKDAY:
+    case 'LAST_WEEKDAY':
       return lastWeekdayOf(lastDay, WEEKDAY_NUMBER[config.weekday ?? 'FRIDAY']);
-    case PAYDAY_TYPE.SET_DAY:
+    case 'SET_DAY':
       return dayInMonth({ year, month, day: config.dayOfMonth ?? 1 });
     default:
       return lastDay;
@@ -108,7 +107,7 @@ const monthlyPaydays = (config: PaydayConfig, { holidays, from, to }: PaydayRang
 const weeklyPaydays = (config: PaydayConfig, { holidays, from, to }: PaydayRange) => {
   const step = DAYS_BETWEEN[config.frequency] ?? 7;
   let anchor = fromApiDate(config.firstPayDate) ?? from;
-  if (config.type === PAYDAY_TYPE.SET_WEEKDAY && config.weekday) {
+  if (config.type === 'SET_WEEKDAY' && config.weekday) {
     const target = WEEKDAY_NUMBER[config.weekday];
     anchor = addDays(anchor, (target - anchor.getDay() + 7) % 7);
   }

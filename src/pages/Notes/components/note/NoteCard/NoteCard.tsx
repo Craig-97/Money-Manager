@@ -1,8 +1,8 @@
 import { Bell, Pencil, Trash2 } from 'lucide-react';
 import { cn } from '~/lib/cn';
-import { noteHeading } from '~/lib/notes';
+import { Note, noteColor, noteHeading } from '~/lib/notes';
 import { NotesBoard } from '../../../hooks';
-import { Note, noteColor, noteDateText, noteFoot } from '../../../notesModel';
+import { noteDateText, noteFoot } from '../../../notesModel';
 
 const noteButton =
   'inline-flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full text-muted transition-colors hover:bg-surface hover:text-text';

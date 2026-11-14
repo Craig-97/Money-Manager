@@ -123,19 +123,6 @@ export const LAST_STEP = STEPS.length - 1;
 export const COMING_UP_STEP = 3;
 export const MAX_ONE_OFFS = 10;
 
-// The payday choices are shared with Profile
-export {
-  allowedRules,
-  MAIN_FREQUENCIES,
-  MORE_FREQUENCIES,
-  PAY_FREQUENCY_LABELS,
-  REGIONS,
-  ruleDescription,
-  RULES,
-  usesWeekday,
-  WEEKDAYS
-} from '~/lib/payday';
-
 // The suggestions on the regular payments step. Each starts the payment form as money out or in.
 interface Preset {
   key: string;

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { charactersLeft, findNotes, Note, noteMeta, toNotes } from './notesModel';
+import { charactersLeft, Note, toNotes } from '~/lib/notes';
+import { findNotes, noteMeta } from './notesModel';
 
 const at = (iso: string) => Date.parse(iso);
 const TODAY = new Date(2026, 9, 2);

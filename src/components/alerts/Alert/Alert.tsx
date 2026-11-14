@@ -3,12 +3,6 @@ import { LucideIcon, X } from 'lucide-react';
 import { Button } from '~/components/ui/Button';
 import { IconButton } from '~/components/ui/IconButton';
 import { cn } from '~/lib/cn';
-import {
-  alertSublineClasses,
-  alertTextClasses,
-  alertTitleClasses,
-  laterClasses
-} from '../alertClasses';
 
 const TONES = {
   expense: 'bg-expense-bg text-expense',
@@ -62,13 +56,19 @@ export const Alert = ({
           )}>
           <Icon size={20} className="size-[18px] md:size-5" aria-hidden="true" />
         </span>
-        <div className={alertTextClasses}>
-          <p className={alertTitleClasses}>{title}</p>
-          <p className={alertSublineClasses}>{subline}</p>
+        {/* The text wraps rather than cutting anything short */}
+        <div className="min-w-0">
+          <p className="text-[15px] leading-[1.4] font-bold">{title}</p>
+          <p className="mt-0.5 text-xs leading-[1.45] font-medium text-muted md:text-[13px]">
+            {subline}
+          </p>
         </div>
       </div>
       <div className="grid grid-cols-2 gap-2 md:flex md:items-center md:gap-1.5">
-        <Button onClick={onLater} className={laterClasses}>
+        {/* Quiet on desktop, a full button on a phone */}
+        <Button
+          onClick={onLater}
+          className="border-border bg-surface-2 md:border-transparent md:bg-transparent md:text-muted">
           Later
         </Button>
         <Button

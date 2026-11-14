@@ -5,7 +5,7 @@ import { Select } from '~/components/form/Select';
 import { TextInput } from '~/components/form/TextInput';
 import { InterestFrequency } from '~/graphql/generated';
 import { FREQUENCY_NAMES, interestPerPayment, nextMonthlyInterest } from '~/lib/accounts';
-import { addDays, formatShortDate, parseIsoDate, toApiDate } from '~/lib/dates';
+import { addDays, formatShortDate, parseIsoDate, toIsoDate } from '~/lib/dates';
 import { formatMoney } from '~/lib/format';
 import { InterestDraft, InterestDraftErrors } from '../accountDraft';
 
@@ -88,7 +88,7 @@ export const InterestFields = ({ draft, set, errors, balance, today }: InterestF
           id="account-interest-date"
           value={draft.nextDate}
           onChange={nextDate => set({ nextDate })}
-          min={toApiDate(addDays(today, 1))}
+          min={toIsoDate(addDays(today, 1))}
           invalid={!!errors.nextDate}
           aria-describedby={errors.nextDate ? 'account-interest-date-error' : undefined}
         />

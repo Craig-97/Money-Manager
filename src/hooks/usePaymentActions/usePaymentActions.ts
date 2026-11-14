@@ -7,7 +7,7 @@ import {
   MarkPaymentsUnpaidDocument,
   SkipRecurringPaymentsDocument
 } from '~/graphql/generated';
-import { formatShortDate, startOfToday, toApiDate } from '~/lib/dates';
+import { formatShortDate, startOfToday, toIsoDate } from '~/lib/dates';
 import { formatMoney, roundPence } from '~/lib/format';
 import { Payment, RecurringPayment, repeatsInCycle } from '~/lib/payments';
 import { showErrorToast, showToast } from '~/state/toast';
@@ -129,7 +129,7 @@ export const usePaymentActions = (budgetId: string) => {
           input: {
             budgetId,
             recurringPaymentIds: [payment.id],
-            until: until ? toApiDate(until) : undefined
+            until: until ? toIsoDate(until) : undefined
           }
         }
       });

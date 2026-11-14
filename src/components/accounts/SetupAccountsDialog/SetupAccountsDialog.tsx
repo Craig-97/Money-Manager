@@ -132,7 +132,7 @@ export const SetupAccountsDialog = () => {
           each payment comes from{isDesktop ? ', so each balance stays right.' : '.'}
         </p>
       }
-      extraWide
+      size="widest"
       footer={
         isDesktop ? (
           <>

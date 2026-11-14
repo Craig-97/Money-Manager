@@ -13,9 +13,6 @@ export const fromApiDate = (value: string | null | undefined) => {
   return new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
 };
 
-/* A local Date -> 'YYYY-MM-DD', which the API reads as that calendar day */
-export const toApiDate = (date: Date) => toIsoDate(date);
-
 /* Today as a local Date at midnight */
 export const startOfToday = (now = new Date()) =>
   new Date(now.getFullYear(), now.getMonth(), now.getDate());

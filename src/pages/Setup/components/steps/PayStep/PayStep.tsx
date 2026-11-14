@@ -12,19 +12,19 @@ import { optionClasses, popoverClasses } from '~/components/ui/popoverClasses';
 import { PayFrequency } from '~/graphql/generated';
 import { cn } from '~/lib/cn';
 import { formatLongDate } from '~/lib/dates';
-import { SetupState } from '../../../hooks';
 import {
   allowedRules,
   MAIN_FREQUENCIES,
   MORE_FREQUENCIES,
   PAY_FREQUENCY_LABELS,
-  PayErrors,
   REGIONS,
   ruleDescription,
   RULES,
   usesWeekday,
   WEEKDAYS
-} from '../../../setupModel';
+} from '~/lib/payday';
+import { SetupState } from '../../../hooks';
+import { PayErrors } from '../../../setupModel';
 import {
   choiceClasses,
   fieldLabelClasses,

@@ -2,8 +2,8 @@ import { BudgetError } from '~/components/feedback/BudgetError';
 import { PageHeader } from '~/components/layout/PageHeader';
 import { useBudget } from '~/hooks/useBudget';
 import { plural } from '~/lib/format';
+import { toNotes } from '~/lib/notes';
 import { NotesContent, NotesSkeleton } from './components';
-import { toNotes } from './notesModel';
 
 export const Notes = () => {
   const { budget, loading, retry } = useBudget();

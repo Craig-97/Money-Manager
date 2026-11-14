@@ -62,7 +62,7 @@ export const PaymentsDialog = ({ debts, today, onUndoOverpayment }: PaymentsDial
   return (
     <Modal
       open={open}
-      wide
+      size="wide"
       onOpenChange={next => (next ? undefined : close())}
       title={`${debt.name} payments`}
       onBack={back}

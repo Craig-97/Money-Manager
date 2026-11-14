@@ -7,14 +7,14 @@ import {
   UpdateReminderSettingsDocument,
   UpdateRemindersDocument
 } from '~/graphql/generated';
-import { addDays, formatShortDay, toApiDate } from '~/lib/dates';
+import { addDays, formatShortDay, toIsoDate } from '~/lib/dates';
 import { plural } from '~/lib/format';
 import { Payment, ReminderSettings, ReminderTiming } from '~/lib/payments';
 import { canClear, laterUntil, Reminder, ReminderStates } from '~/lib/reminders';
 import { showErrorToast, showToast } from '~/state/toast';
 
 // A day as the API sends it back: midnight UTC in epoch milliseconds
-const apiDay = (date: Date) => String(Date.parse(`${toApiDate(date)}T00:00:00Z`));
+const apiDay = (date: Date) => String(Date.parse(`${toIsoDate(date)}T00:00:00Z`));
 
 interface Options {
   budgetId: string | null;
@@ -58,7 +58,7 @@ export const useReminderActions = ({ budgetId, states, today }: Options) => {
     try {
       await updateReminders({
         variables: {
-          input: { budgetId, keys, action, until: until ? toApiDate(until) : undefined }
+          input: { budgetId, keys, action, until: until ? toIsoDate(until) : undefined }
         },
         optimisticResponse: {
           updateReminders: { __typename: 'ReminderStatesResponse', states: optimistic }

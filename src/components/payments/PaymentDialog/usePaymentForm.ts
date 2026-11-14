@@ -13,7 +13,7 @@ import {
   UpdateOneOffPaymentDocument,
   UpdateRecurringPaymentDocument
 } from '~/graphql/generated';
-import { addDays, formatShortDate, formatShortDay, parseIsoDate, toApiDate } from '~/lib/dates';
+import { addDays, formatShortDate, formatShortDay, parseIsoDate, toIsoDate } from '~/lib/dates';
 import { getErrorCode } from '~/lib/errors';
 import { formatMoneyInput, parseMoney } from '~/lib/format';
 import {
@@ -90,7 +90,7 @@ const UNTOUCHED: Record<TouchedField, boolean> = {
   started: false
 };
 
-const iso = (date: Date | null) => (date ? toApiDate(date) : '');
+const iso = (date: Date | null) => (date ? toIsoDate(date) : '');
 
 const initialValues = ({
   kind,
