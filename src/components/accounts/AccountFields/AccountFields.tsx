@@ -12,7 +12,7 @@ import { parseMoney } from '~/lib/format';
 import { AccountDraft, AccountDraftErrors } from '../accountDraft';
 import { InterestFields } from '../InterestFields';
 
-export const helpClasses = 'mt-2 ml-1 text-xs font-semibold text-muted';
+const helpClasses = 'mt-2 ml-1 text-xs font-semibold text-muted';
 export const panelClasses =
   'flex items-center gap-3 rounded-[18px] border border-border bg-surface-2 px-4 py-3.5';
 

@@ -1,7 +1,7 @@
 import { cn } from '~/lib/cn';
-import { daysBetween } from '~/lib/dates';
+import { daysBetween, formatShortDate } from '~/lib/dates';
 import { PayCycle } from '~/lib/payday';
-import { cycleStatus, formatShortDate, Payment } from '~/lib/payments';
+import { cycleStatus, Payment } from '~/lib/payments';
 
 interface StatusLineProps {
   payment: Payment;

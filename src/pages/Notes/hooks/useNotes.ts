@@ -35,8 +35,6 @@ export const useNotes = (budget: Budget) => {
   };
 
   return {
-    all,
-    total: all.length,
     notes,
     today,
     paymentLabel,

@@ -2,16 +2,10 @@ import { useShallow } from 'zustand/react/shallow';
 import { useBudget } from '~/hooks/useBudget';
 import { usePayCycle } from '~/hooks/usePayCycle';
 import { usePaymentActions } from '~/hooks/usePaymentActions';
+import { formatShortDate } from '~/lib/dates';
 import { isDebt } from '~/lib/debts';
 import { notesByPayment, toNotes } from '~/lib/notes';
-import {
-  datesDue,
-  dueInfo,
-  formatShortDate,
-  paymentChoices,
-  quickEdits,
-  toPayments
-} from '~/lib/payments';
+import { datesDue, dueInfo, paymentChoices, quickEdits, toPayments } from '~/lib/payments';
 import { useDebtViewStore } from '~/state/debtView';
 import { useNoteDialogStore } from '~/state/noteDialog';
 import { usePaymentDialogStore } from '~/state/paymentDialog';

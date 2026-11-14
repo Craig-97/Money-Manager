@@ -6,8 +6,9 @@ import { SegmentedControl } from '~/components/ui/SegmentedControl';
 import { Tile } from '~/components/ui/Tile';
 import { MEDIA } from '~/constants';
 import { useMediaQuery } from '~/hooks/useMediaQuery';
+import { plural } from '~/lib/format';
 import { RemindersPage } from '../../hooks';
-import { countText, FILTERS, RemindersTab } from '../../remindersModel';
+import { FILTERS, RemindersTab } from '../../remindersModel';
 import { AddChooser } from '../AddChooser';
 import { CalendarPromo } from '../CalendarPromo';
 import { HowYoullHear } from '../HowYoullHear';
@@ -96,7 +97,7 @@ export const RemindersContent = ({ page }: { page: RemindersPage }) => {
         {page.tab === 'new' && page.fresh.length ? (
           <div className="-mb-1 flex items-center justify-between px-1">
             <p className="text-xs font-extrabold tracking-[0.08em] text-muted uppercase">
-              {countText(page.fresh.length)}
+              {plural(page.fresh.length, 'reminder')}
             </p>
             <span className="-mr-3">{newTools}</span>
           </div>

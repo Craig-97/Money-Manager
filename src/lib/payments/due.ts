@@ -1,6 +1,6 @@
-import { daysBetween } from '~/lib/dates';
+import { daysBetween, formatShortDate, formatShortWeekday, inDays } from '~/lib/dates';
+import { capitalise } from '~/lib/format';
 import { PayCycle } from '~/lib/payday';
-import { formatShortDate } from './labels';
 import { movedHow, nonWorkingReason } from './nonWorkingDay';
 import { Payment } from './payments';
 
@@ -33,7 +33,7 @@ export interface MovedDate {
 const movedDate = (payment: Payment, today: Date): MovedDate | null => {
   if (payment.kind !== 'recurring' || !payment.movedFrom || !payment.dueDate) return null;
   const from = formatShortDate(payment.movedFrom, today);
-  const weekday = payment.movedFrom.toLocaleDateString('en-GB', { weekday: 'short' });
+  const weekday = formatShortWeekday(payment.movedFrom);
   return {
     label: `Moved from ${from}`,
     short: `Moved from ${weekday} ${payment.movedFrom.getDate()}`,
@@ -56,7 +56,6 @@ export const dueInfo = (
     return { state: 'paid', days, label, detail: 'Paid', moved };
   if (days === 0) return { state: 'today', days, label, detail: 'Today', moved };
   if (days < 0) return { state: 'overdue', days, label, detail: 'Overdue', moved };
-  const detail =
-    payment.dueDate >= cycle.end ? 'After payday' : days === 1 ? 'Tomorrow' : `In ${days} days`;
+  const detail = payment.dueDate >= cycle.end ? 'After payday' : capitalise(inDays(days));
   return { state: 'later', days, label, detail, moved };
 };

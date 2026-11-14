@@ -22,7 +22,7 @@ export interface NavItem {
   section: 'main' | 'more';
 }
 
-export const MAIN_NAV: NavItem[] = [
+const MAIN_NAV: NavItem[] = [
   {
     to: ROUTES.dashboard,
     label: 'Dashboard',

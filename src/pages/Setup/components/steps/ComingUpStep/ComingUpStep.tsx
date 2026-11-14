@@ -1,9 +1,8 @@
 import { Plus } from 'lucide-react';
 import { Button } from '~/components/ui/Button';
 import { cn } from '~/lib/cn';
-import { formatMoney, MINUS } from '~/lib/format';
 import { SetupState, useSetupDesktop } from '../../../hooks';
-import { MAX_ONE_OFFS, setupAccounts } from '../../../setupModel';
+import { MAX_ONE_OFFS, setupAccounts, setupAmount } from '../../../setupModel';
 import { oneOffDetails } from '../../../setupPayments';
 import { stepCardClasses } from '../setupClasses';
 import { SetupRow } from '../SetupRow';
@@ -44,10 +43,7 @@ export const ComingUpStep = ({ setup, today }: { setup: SetupState; today: Date 
               key={oneOff.id}
               name={oneOff.input.name}
               details={oneOffDetails(oneOff, { accounts, today })}
-              amount={
-                (oneOff.input.type === 'INCOME' ? '+' : isDesktop ? '' : MINUS) +
-                formatMoney(oneOff.input.amount)
-              }
+              amount={setupAmount(oneOff.input, { desktop: isDesktop })}
               tone={oneOff.input.type === 'INCOME' ? 'income' : 'expense'}
               onOpen={() => setup.openPayment({ kind: 'oneOff', id: oneOff.id })}
               onRemove={() => setup.payment.remove(oneOff.id)}

@@ -1,6 +1,6 @@
 import { cn } from '~/lib/cn';
+import { formatShortDate } from '~/lib/dates';
 import { formatBalance, formatMoney, MINUS } from '~/lib/format';
-import { formatShortDate } from '~/lib/payments';
 import { FirstCycle } from '../../../setupModel';
 
 interface FirstCycleSummaryProps {
@@ -16,6 +16,7 @@ const rowClasses =
 export const FirstCycleSummary = ({ firstCycle, paidIntoName }: FirstCycleSummaryProps) => {
   const {
     cycleEnd,
+    today,
     balance,
     countedCount,
     keptOut,
@@ -38,7 +39,7 @@ export const FirstCycleSummary = ({ firstCycle, paidIntoName }: FirstCycleSummar
         />
         <p className="relative text-[13px] font-bold text-hero-muted">Your first cycle</p>
         <p className="relative mb-2.5 text-[15px] font-extrabold">
-          Today to {formatShortDate(cycleEnd)}
+          Today to {formatShortDate(cycleEnd, today)}
         </p>
         <div className={rowClasses}>
           <span className="text-hero-muted">

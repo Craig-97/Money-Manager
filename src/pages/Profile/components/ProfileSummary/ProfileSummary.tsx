@@ -1,17 +1,15 @@
 import { CalendarDays } from 'lucide-react';
 import { tileLift } from '~/components/ui/Tile';
-import { CurrentUserQuery } from '~/graphql/generated';
+import { UserFieldsFragment } from '~/graphql/generated';
 import { Budget } from '~/hooks/useBudget';
 import { usePayCycle } from '~/hooks/usePayCycle';
 import { cn } from '~/lib/cn';
 import { formatShortDay } from '~/lib/dates';
 import { getInitials } from '~/lib/format';
-import { paydayPlan } from '../../profileModel';
-
-type User = NonNullable<CurrentUserQuery['tokenFindUser']>;
+import { paidText } from '~/lib/payday';
 
 interface ProfileSummaryProps {
-  user: User;
+  user: UserFieldsFragment;
   budget: Budget;
   compact: boolean;
 }
@@ -21,7 +19,7 @@ export const ProfileSummary = ({ user, budget, compact }: ProfileSummaryProps) =
   const { cycle } = usePayCycle(budget.payday);
   const initials = getInitials(user.firstName, user.surname);
   const name = `${user.firstName} ${user.surname}`;
-  const plan = paydayPlan(budget.payday);
+  const plan = paidText(budget.payday);
   const next = formatShortDay(cycle.end);
 
   if (compact) {

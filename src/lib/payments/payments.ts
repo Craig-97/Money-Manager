@@ -24,7 +24,7 @@ export type CycleRecordKind = 'paid' | 'skipped';
 
 // One time a recurring payment was paid or skipped this cycle: one date, or the rest of a cycle at
 // once. It's a payment record on the API; undoing it deletes the record.
-export interface CycleRecord {
+interface CycleRecord {
   id: string;
   kind: CycleRecordKind;
   dates: Date[];
@@ -237,6 +237,10 @@ export const toPayments = (
  * The account a payment moves money into when that counts too, so it isn't spent and the totals
  * leave it out: "Joint bills". Null for anything else.
  */
+/* A payment that repeats, rather than a one-off */
+export const isRecurring = (payment: Payment): payment is RecurringPayment =>
+  payment.kind === 'recurring';
+
 export const movesTo = (payment: Payment) =>
   payment.kind === 'recurring' && payment.into?.counts ? payment.into.name : null;
 

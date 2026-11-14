@@ -9,6 +9,7 @@ import {
 } from '~/components/payments/PaymentParts';
 import { cn } from '~/lib/cn';
 import { isDebt } from '~/lib/debts';
+import { plural } from '~/lib/format';
 import { PayCycle } from '~/lib/payday';
 import {
   categoryLabel,
@@ -78,7 +79,7 @@ export const MobileRow = ({ payment, dashboard }: { payment: Payment; dashboard:
         aria-label={
           selecting
             ? `${isSelected ? 'Deselect' : 'Select'} ${payment.name}`
-            : `${payment.name}${notes.length ? `, ${notes.length} ${notes.length === 1 ? 'note' : 'notes'}` : ''}`
+            : `${payment.name}${notes.length ? `, ${plural(notes.length, 'note')}` : ''}`
         }
         aria-haspopup={selecting ? undefined : 'dialog'}
         onClick={() => (selecting ? toggle(payment.id) : openSheet(payment.id))}
@@ -93,7 +94,7 @@ export const MobileRow = ({ payment, dashboard }: { payment: Payment; dashboard:
             <NoteChip payment={payment} notes={notes} hint={false} />
           </span>
           {/* A debt says what's left, as on Recurring; its status still shows on the recurring tab */}
-          {payment.kind === 'recurring' && isDebt(payment) && tab !== 'recurring' ? (
+          {isDebt(payment) && tab !== 'recurring' ? (
             <DebtLeft debt={payment} className="mt-[5px] text-xs font-medium text-muted" />
           ) : (
             <span className="mt-[3px] flex items-center gap-[5px] text-xs font-medium text-muted">

@@ -8,6 +8,7 @@ import { AuthField, authErrorId } from '~/components/auth/AuthField';
 import { AuthHeading } from '~/components/auth/AuthHeading';
 import { AuthLayout } from '~/components/auth/AuthLayout';
 import { PasswordRules } from '~/components/auth/PasswordRules';
+import { describedBy } from '~/components/form/describedBy';
 import { FieldError } from '~/components/form/FieldError';
 import { PasswordInput } from '~/components/form/PasswordInput';
 import { TextInput } from '~/components/form/TextInput';
@@ -17,8 +18,6 @@ import { PageLink } from '~/components/ui/PageLink';
 import { ROUTES } from '~/constants';
 import { AccountCreated, RegisterPanel, RegisterProgress } from './components';
 import { useRegisterForm } from './hooks';
-
-const describedBy = (...ids: (string | false)[]) => ids.filter(Boolean).join(' ') || undefined;
 
 export const Register = () => {
   const { register, control, onSubmit, created, errors, isSubmitting } = useRegisterForm();

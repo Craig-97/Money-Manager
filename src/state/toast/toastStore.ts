@@ -1,5 +1,6 @@
 import { ReactNode } from 'react';
 import { create } from 'zustand';
+import { getApiErrorMessage } from '~/lib/errors';
 
 interface ToastAction {
   label: string;
@@ -30,3 +31,9 @@ export const useToastStore = create<ToastState>()(set => ({
 
 /* Shows a short message at the bottom of the screen, from anywhere */
 export const showToast = (toast: Omit<Toast, 'id'>) => useToastStore.getState().show(toast);
+
+/* What went wrong saving, from the API, or the fallback when it doesn't say */
+export const showErrorToast = (
+  error: unknown,
+  { fallback = "Couldn't save that. Try again." } = {}
+) => showToast({ message: getApiErrorMessage(error, fallback) });

@@ -6,7 +6,6 @@ import { usePayCycle } from '~/hooks/usePayCycle';
 import { usePaymentActions } from '~/hooks/usePaymentActions';
 import { usePaymentSelection } from '~/hooks/usePaymentSelection';
 import { forFreeToSpend, paidIntoAccountOf, toAccounts } from '~/lib/accounts';
-import { getApiErrorMessage } from '~/lib/errors';
 import { notesByPayment, toNotes } from '~/lib/notes';
 import {
   activeRecurringCount,
@@ -18,7 +17,7 @@ import {
   toPayments
 } from '~/lib/payments';
 import { toReminderStates } from '~/lib/reminders';
-import { showToast } from '~/state/toast';
+import { showErrorToast } from '~/state/toast';
 import { PaymentTab, paymentsForTab } from '../dashboardModel';
 import { useAlerts } from './useAlerts';
 import { useBankBalanceDialog } from './useBankBalanceDialog';
@@ -40,14 +39,22 @@ export const useDashboard = (budget: Budget) => {
   const accounts = toAccounts(budget.accounts, today);
   const counted = accounts.filter(account => account.counts);
   const current = paidIntoAccountOf(accounts);
+  // Moves between counted accounts don't change what's free to spend
+  const spendable = forFreeToSpend(payments);
   const summary = summarise({
-    payments: forFreeToSpend(payments),
+    payments: spendable,
     bankBalance: budget.bankBalance,
     monthlyIncome: budget.monthlyIncome,
     cycle,
     today
   });
-  const paydayOverride = usePaydayOverride({ budget, cycle, today, holidays, payments });
+  const paydayOverride = usePaydayOverride({
+    budget,
+    cycle,
+    today,
+    holidays,
+    payments: spendable
+  });
   const alerts = useAlerts({
     budgetId: budget.id,
     payments,
@@ -58,21 +65,18 @@ export const useDashboard = (budget: Budget) => {
   const listed = paymentsForTab(payments, { tab, cycle, sort });
   const selection = usePaymentSelection(listed);
 
-  const failed = (error: unknown) =>
-    showToast({ message: getApiErrorMessage(error, "Couldn't save that. Try again.") });
-
   // With only the account pay lands in counting, the bank balance is its balance, edited in place.
   // Once more count, the pencil opens each one's balance instead.
   const bankBalanceDialog = useBankBalanceDialog({ budgetId: budget.id, accounts: counted });
   const inPlace = useMoneyEditor(budget.bankBalance, balance =>
     current
-      ? updateAccount({ variables: { id: current.id, input: { balance } } }).catch(failed)
+      ? updateAccount({ variables: { id: current.id, input: { balance } } }).catch(showErrorToast)
       : Promise.resolve()
   );
   const balanceEditor =
     counted.length > 1 ? { ...inPlace, editing: false, start: bankBalanceDialog.start } : inPlace;
   const incomeEditor = useMoneyEditor(budget.monthlyIncome, monthlyIncome =>
-    updateBudget({ variables: { id: budget.id, input: { monthlyIncome } } }).catch(failed)
+    updateBudget({ variables: { id: budget.id, input: { monthlyIncome } } }).catch(showErrorToast)
   );
 
   return {

@@ -16,6 +16,7 @@ import { DebtPayment, HistoryEntry, paidOffShare, startedAt } from '~/lib/debts'
 import { formatMoney } from '~/lib/format';
 import { useDebtDialogStore } from '~/state/debtDialog';
 import { PaymentsList } from '../PaymentsList';
+import { PaymentsLoadError } from '../PaymentsLoadError';
 import { ShowOlderPayments } from '../ShowOlderPayments';
 
 interface PaymentsDialogProps {
@@ -82,7 +83,9 @@ export const PaymentsDialog = ({ debts, today, onUndoOverpayment }: PaymentsDial
         left · {formatMoney(paid, { whole: true })} paid off ·{' '}
         {Math.round(paidOffShare(debt) * 100)}%
       </p>
-      {isDesktop ? (
+      {isDesktop && history.error ? (
+        <PaymentsLoadError onRetry={history.retry} />
+      ) : isDesktop ? (
         <>
           <div role="table" aria-label="Payments" className="flex flex-col">
             <div

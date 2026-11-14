@@ -1,21 +1,6 @@
-import {
-  BankHolidayRegion,
-  PayFrequency,
-  PaydayFieldsFragment,
-  PaydayInput,
-  PaydayType,
-  Weekday
-} from '~/graphql/generated';
-import { daysBetween, fromApiDate, PaydayConfig, toIsoDate } from '~/lib/dates';
-import {
-  allowedRules,
-  BankHolidays,
-  getNextPaydayDates,
-  getNextPaydays,
-  PAY_FREQUENCY_LABELS,
-  usesWeekday,
-  WEEKDAYS
-} from '~/lib/payday';
+import { daysBetween, PaydayConfig } from '~/lib/dates';
+import { BankHolidays, getNextPaydayDates, getNextPaydays } from '~/lib/payday';
+import { PASSWORD_RULES } from '~/lib/validation';
 
 export type SectionId =
   | 'personal'
@@ -50,8 +35,7 @@ const STRENGTH_LABELS = ['', 'Weak', 'Fair', 'Good', 'Strong'] as const;
 export const passwordStrength = (password: string) => {
   if (!password) return { score: 0, label: '' };
   const score = [
-    password.length >= 8,
-    /[0-9]/.test(password),
+    ...PASSWORD_RULES.map(rule => rule.test(password)),
     /[a-z]/.test(password) && /[A-Z]/.test(password),
     /[^A-Za-z0-9]/.test(password) || password.length >= 12
   ].filter(Boolean).length;
@@ -59,79 +43,6 @@ export const passwordStrength = (password: string) => {
 };
 
 // ---- payday ----
-
-// The payday form, with the day kept as typed
-export interface PaydayValues {
-  frequency: PayFrequency;
-  rule: PaydayType;
-  dayOfMonth: string;
-  weekday: Weekday;
-  // 'YYYY-MM-DD', or '' when not set
-  firstPayDate: string;
-  region: BankHolidayRegion;
-}
-
-export const toPaydayValues = (payday: PaydayFieldsFragment | null | undefined): PaydayValues => {
-  const firstPayDate = fromApiDate(payday?.firstPayDate);
-  return {
-    frequency: payday?.frequency ?? 'MONTHLY',
-    rule: payday?.type ?? 'LAST_DAY',
-    dayOfMonth: payday?.dayOfMonth ? String(payday.dayOfMonth) : '',
-    weekday: payday?.weekday ?? 'FRIDAY',
-    firstPayDate: firstPayDate ? toIsoDate(firstPayDate) : '',
-    region: payday?.bankHolidayRegion ?? 'ENGLAND_AND_WALES'
-  };
-};
-
-/* Changing how often you're paid keeps the rule if it still applies, else picks the first that does */
-export const withFrequency = (values: PaydayValues, frequency: PayFrequency): PaydayValues => {
-  const rules = allowedRules(frequency);
-  return { ...values, frequency, rule: rules.includes(values.rule) ? values.rule : rules[0] };
-};
-
-export const toPaydayConfig = (
-  values: PaydayValues,
-  overrides: PaydayConfig['overrides'] = []
-): PaydayConfig => ({
-  frequency: values.frequency,
-  type: values.rule,
-  dayOfMonth: values.rule === 'SET_DAY' ? Number(values.dayOfMonth) : null,
-  weekday: usesWeekday(values.rule) ? values.weekday : null,
-  firstPayDate: values.frequency === 'MONTHLY' ? null : values.firstPayDate || null,
-  bankHolidayRegion: values.region,
-  overrides
-});
-
-export const toPaydayInput = (values: PaydayValues): PaydayInput => {
-  const config = toPaydayConfig(values);
-  return {
-    frequency: config.frequency,
-    type: config.type,
-    dayOfMonth: config.dayOfMonth,
-    weekday: config.weekday,
-    firstPayDate: config.firstPayDate,
-    bankHolidayRegion: values.region
-  };
-};
-
-interface PaydayErrors {
-  dayOfMonth?: string;
-  firstPayDate?: string;
-}
-
-export const paydayErrors = (values: PaydayValues): PaydayErrors => {
-  const day = Number(values.dayOfMonth);
-  return {
-    dayOfMonth:
-      values.rule === 'SET_DAY' && !(Number.isInteger(day) && day >= 1 && day <= 31)
-        ? 'Choose a day between 1 and 31'
-        : undefined,
-    firstPayDate:
-      values.frequency !== 'MONTHLY' && !values.firstPayDate
-        ? 'Add the date of your next pay'
-        : undefined
-  };
-};
 
 const PREVIEW_COUNT = 3;
 const NO_HOLIDAYS: BankHolidays = new Set();
@@ -164,24 +75,4 @@ export const paydayPreview = (
       return { date, usual: usual ?? date, moved: !!usual, movedFrom: heldBack };
     }
   );
-};
-
-const ordinal = (day: number) => {
-  const tens = day % 100;
-  if (tens >= 11 && tens <= 13) return `${day}th`;
-  return `${day}${['th', 'st', 'nd', 'rd'][day % 10] ?? 'th'}`;
-};
-
-/* "Paid monthly · last Friday", for the summary at the top */
-export const paydayPlan = (payday: PaydayFieldsFragment | null | undefined) => {
-  const values = toPaydayValues(payday);
-  const often = PAY_FREQUENCY_LABELS[values.frequency].toLowerCase();
-  const weekday = WEEKDAYS.find(day => day.value === values.weekday)?.long ?? 'Friday';
-  const day: Record<PaydayType, string> = {
-    LAST_DAY: 'last working day',
-    LAST_WEEKDAY: `last ${weekday}`,
-    SET_DAY: `the ${ordinal(Number(values.dayOfMonth) || 1)}`,
-    SET_WEEKDAY: `${weekday}s`
-  };
-  return `Paid ${often} · ${day[values.rule]}`;
 };

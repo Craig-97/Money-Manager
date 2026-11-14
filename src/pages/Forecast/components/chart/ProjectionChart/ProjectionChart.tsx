@@ -1,25 +1,11 @@
 import { ArrowUp } from 'lucide-react';
 import { tileLift } from '~/components/ui/Tile';
 import { cn } from '~/lib/cn';
+import { formatShortMonth } from '~/lib/dates';
 import { formatBalance, formatMoney } from '~/lib/format';
 import { axisLabel, chartScale, impactText, PROJECTION_MONTHS } from '../../../forecastModel';
 import { Forecast } from '../../../hooks';
 import { Legend } from '../Legend';
-
-const SHORT_MONTHS = [
-  'Jan',
-  'Feb',
-  'Mar',
-  'Apr',
-  'May',
-  'Jun',
-  'Jul',
-  'Aug',
-  'Sep',
-  'Oct',
-  'Nov',
-  'Dec'
-];
 
 /* Months along the bottom: every month on desktop, every third on mobile */
 const monthLabels = (today: Date, every: number) =>
@@ -29,8 +15,8 @@ const monthLabels = (today: Date, every: number) =>
       const date = new Date(today.getFullYear(), today.getMonth() + i, 1);
       const label =
         i === PROJECTION_MONTHS
-          ? `${SHORT_MONTHS[date.getMonth()]} ’${String(date.getFullYear()).slice(2)}`
-          : SHORT_MONTHS[date.getMonth()];
+          ? `${formatShortMonth(date)} ’${String(date.getFullYear()).slice(2)}`
+          : formatShortMonth(date);
       return { label, left: (i / PROJECTION_MONTHS) * 100 };
     });
 

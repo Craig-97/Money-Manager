@@ -8,13 +8,10 @@ import {
   UpdateRemindersDocument
 } from '~/graphql/generated';
 import { addDays, formatShortDay, toApiDate } from '~/lib/dates';
-import { getApiErrorMessage } from '~/lib/errors';
+import { plural } from '~/lib/format';
 import { Payment, ReminderSettings, ReminderTiming } from '~/lib/payments';
 import { canClear, laterUntil, Reminder, ReminderStates } from '~/lib/reminders';
-import { showToast } from '~/state/toast';
-
-const showError = (error: unknown) =>
-  showToast({ message: getApiErrorMessage(error, "Couldn't save that. Try again.") });
+import { showErrorToast, showToast } from '~/state/toast';
 
 // A day as the API sends it back: midnight UTC in epoch milliseconds
 const apiDay = (date: Date) => String(Date.parse(`${toApiDate(date)}T00:00:00Z`));
@@ -73,7 +70,7 @@ export const useReminderActions = ({ budgetId, states, today }: Options) => {
       });
       return true;
     } catch (error) {
-      showError(error);
+      showErrorToast(error);
       return false;
     }
   };
@@ -114,7 +111,7 @@ export const useReminderActions = ({ budgetId, states, today }: Options) => {
       const keys = reminders.filter(canClear).map(reminder => reminder.key);
       if (keys.length && (await update(keys, { action: 'CLEAR' }))) {
         showToast({
-          message: `${keys.length} ${keys.length === 1 ? 'reminder' : 'reminders'} cleared`,
+          message: `${plural(keys.length, 'reminder')} cleared`,
           action: { label: 'Undo', onClick: () => restore(keys) }
         });
       }
@@ -138,7 +135,7 @@ export const useReminderActions = ({ budgetId, states, today }: Options) => {
           }
         });
       } catch (error) {
-        showError(error);
+        showErrorToast(error);
       }
     },
 
@@ -155,11 +152,9 @@ export const useReminderActions = ({ budgetId, states, today }: Options) => {
         }
         return true;
       } catch (error) {
-        showError(error);
+        showErrorToast(error);
         return false;
       }
     }
   };
 };
-
-export type ReminderActions = ReturnType<typeof useReminderActions>;

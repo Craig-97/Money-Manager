@@ -62,9 +62,7 @@ describe('reset password', () => {
     await user.type(screen.getByLabelText('New password'), 'nonumbers');
     await user.click(screen.getByRole('button', { name: 'Update password' }));
 
-    expect(
-      await screen.findByText('Use at least 8 characters including a number')
-    ).toBeInTheDocument();
+    expect(await screen.findByText('Password must contain a number')).toBeInTheDocument();
     expect(api.callsTo('ResetPassword')).toHaveLength(0);
   });
 });

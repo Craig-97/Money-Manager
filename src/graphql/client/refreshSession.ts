@@ -1,5 +1,6 @@
 import { addTypenameToDocument } from '@apollo/client/utilities';
 import { print } from 'graphql';
+import { ERRORS } from '~/constants';
 import { AuthSessionFragment, RefreshSessionDocument } from '~/graphql/generated';
 import { apiUrl } from './apiUrl';
 
@@ -27,7 +28,7 @@ const request = async (): Promise<RefreshResult> => {
   };
 
   if (body.data?.refreshSession) return body.data.refreshSession;
-  if (body.errors?.some(e => e.extensions?.code === 'UNAUTHENTICATED')) return null;
+  if (body.errors?.some(e => e.extensions?.code === ERRORS.UNAUTHENTICATED)) return null;
   // Anything else, such as the API being down, isn't an answer about the session
   throw new Error('Could not refresh the session');
 };

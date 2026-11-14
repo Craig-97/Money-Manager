@@ -51,5 +51,3 @@ export const useReminders = () => {
     unread: fresh.filter(reminder => !reminder.read).length
   };
 };
-
-export type RemindersData = ReturnType<typeof useReminders>;

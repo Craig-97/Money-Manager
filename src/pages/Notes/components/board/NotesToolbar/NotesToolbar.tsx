@@ -2,8 +2,9 @@ import { ArrowDownWideNarrow, Plus } from 'lucide-react';
 import { SearchInput } from '~/components/form/SearchInput';
 import { Select } from '~/components/form/Select';
 import { Button } from '~/components/ui/Button';
+import { plural } from '~/lib/format';
 import { NotesBoard } from '../../../hooks';
-import { countNotes, NOTE_SORTS } from '../../../notesModel';
+import { NOTE_SORTS } from '../../../notesModel';
 
 /* Search, sort and Add note. On mobile the search takes its own row. */
 export const NotesToolbar = ({ board }: { board: NotesBoard }) => (
@@ -46,8 +47,8 @@ export const NotesToolbar = ({ board }: { board: NotesBoard }) => (
       <p
         aria-live="polite"
         className="-mt-1 px-1 text-[13px] font-medium text-muted md:-mt-3 md:px-0 md:text-sm">
-        <span className="num font-bold text-text">{countNotes(board.notes.length)}</span> matching “
-        {board.query.trim()}”
+        <span className="num font-bold text-text">{plural(board.notes.length, 'note')}</span>{' '}
+        matching “{board.query.trim()}”
       </p>
     ) : null}
   </>

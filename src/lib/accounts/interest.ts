@@ -1,10 +1,9 @@
 import { InterestFrequency } from '~/graphql/generated';
-import { daysBetween } from '~/lib/dates';
-import { formatMoney, roundPence } from '~/lib/format';
-import { formatShortDate } from '~/lib/payments';
+import { dayInMonth, daysBetween, formatShortDate } from '~/lib/dates';
+import { formatMoney, ordinal, roundPence } from '~/lib/format';
 
 // A payment the app added on its own, to check against the bank
-export interface InterestAdded {
+interface InterestAdded {
   date: Date;
   amount: number;
   balanceAfter: number;
@@ -89,10 +88,6 @@ export const pendingInterest = (
   );
 };
 
-/* The given day in a month, or its last day when it's shorter: the 31st falls on 30 Sep */
-const dayInMonth = ({ year, month, day }: { year: number; month: number; day: number }) =>
-  new Date(year, month, Math.min(day, new Date(year, month + 1, 0).getDate()));
-
 /* A monthly payment's next date after today, on its day, as the API works it out */
 export const nextMonthlyInterest = (day: number, today: Date) => {
   const thisMonth = dayInMonth({ year: today.getFullYear(), month: today.getMonth(), day });
@@ -113,6 +108,10 @@ export const previousInterestDate = (interest: AccountInterest) => {
   });
 };
 
+/* "An estimate worked out on each day’s balance since Sat 26 Sep." */
+export const estimateText = (since: Date | null | undefined, today: Date) =>
+  `An estimate worked out on each day’s balance${since ? ` since ${formatShortDate(since, today)}` : ''}.`;
+
 /* A fixed-term account that has paid out: time to set a new term or say it's done */
 export const hasMatured = (interest: AccountInterest | null) =>
   interest?.frequency === 'MATURITY' && !interest.nextDate;
@@ -127,10 +126,7 @@ export const interestScheduleText = (interest: AccountInterest, today: Date) => 
   return `${FREQUENCY_NAMES[interest.frequency]} · ${interest.frequency === 'MATURITY' ? '' : 'next '}${formatShortDate(interest.nextDate, today)}`;
 };
 
-export const ordinal = (n: number) =>
-  `${n}${n % 100 >= 11 && n % 100 <= 13 ? 'th' : (({ 1: 'st', 2: 'nd', 3: 'rd' } as Record<number, string>)[n % 10] ?? 'th')}`;
-
-export type InterestTone = 'earning' | 'matured';
+type InterestTone = 'earning' | 'matured';
 
 /*
  * What an account's row and view say about its interest: what's built up and when it's added, or
@@ -151,7 +147,7 @@ export const interestLine = (
 } | null => {
   const { interest } = account;
   if (!interest?.frequency) return null;
-  if (hasMatured(interest) || !interest.nextDate) {
+  if (!interest.nextDate) {
     return {
       tone: 'matured',
       short: 'Matured · set a new term or say it no longer earns interest',

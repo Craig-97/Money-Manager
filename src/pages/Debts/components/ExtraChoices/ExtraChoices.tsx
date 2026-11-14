@@ -4,12 +4,11 @@ import { EXTRA_CHOICES, extraLabel } from '../../debtsModel';
 interface ExtraChoicesProps {
   extra: number;
   onChange: (extra: number) => void;
-  className?: string;
 }
 
 /* "Pay extra each month": nothing, or £50, £100 or £200 on top */
-export const ExtraChoices = ({ extra, onChange, className }: ExtraChoicesProps) => (
-  <div className={className}>
+export const ExtraChoices = ({ extra, onChange }: ExtraChoicesProps) => (
+  <div>
     <p id="plan-extra" className="mb-2 text-[13px] font-bold text-muted">
       Pay extra each month
     </p>

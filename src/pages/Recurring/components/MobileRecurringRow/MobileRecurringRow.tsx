@@ -9,6 +9,7 @@ import {
 } from '~/components/payments/PaymentParts';
 import { cn } from '~/lib/cn';
 import { isDebt } from '~/lib/debts';
+import { plural } from '~/lib/format';
 import { PayCycle } from '~/lib/payday';
 import {
   categoryLabel,
@@ -87,7 +88,7 @@ export const MobileRecurringRow = ({
         aria-label={
           selecting
             ? `${isSelected ? 'Deselect' : 'Select'} ${payment.name}`
-            : `${payment.name}${notes.length ? `, ${notes.length} ${notes.length === 1 ? 'note' : 'notes'}` : ''}`
+            : `${payment.name}${notes.length ? `, ${plural(notes.length, 'note')}` : ''}`
         }
         aria-haspopup={selecting ? undefined : 'dialog'}
         onClick={() => (selecting ? toggle(payment.id) : openSheet(payment.id))}

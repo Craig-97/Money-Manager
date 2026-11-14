@@ -36,15 +36,16 @@ export const UpdateBalanceDialog = ({ debts, today, onUpdate }: UpdateBalanceDia
       footer={
         <>
           <span className="flex-1" />
-          <Button variant="ghost" onClick={form.close}>
+          <Button variant="ghost" onClick={form.close} className="max-md:h-[52px]">
             Cancel
           </Button>
           <Button
             variant="accent"
             onClick={form.save}
             disabled={!form.canSave}
-            loading={form.saving}>
-            Save
+            loading={form.saving}
+            className="max-md:h-[52px]">
+            Save balance
           </Button>
         </>
       }>

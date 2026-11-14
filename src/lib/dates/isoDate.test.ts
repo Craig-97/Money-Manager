@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { formatPickerDate, parseIsoDate, toIsoDate } from './isoDate';
+import { formatShortDate } from './format';
+import { parseIsoDate, toIsoDate } from './isoDate';
 
 describe('ISO dates', () => {
   it('reads a YYYY-MM-DD string as that day in local time', () => {
@@ -23,7 +24,7 @@ describe('ISO dates', () => {
   });
 
   it('formats like the design date fields', () => {
-    expect(formatPickerDate(new Date(2026, 9, 2), new Date(2026, 0, 1))).toBe('Fri 2 Oct');
-    expect(formatPickerDate(new Date(2027, 1, 2), new Date(2026, 0, 1))).toBe('Tue 2 Feb 2027');
+    expect(formatShortDate(new Date(2026, 9, 2), new Date(2026, 0, 1))).toBe('Fri 2 Oct');
+    expect(formatShortDate(new Date(2027, 1, 2), new Date(2026, 0, 1))).toBe('Tue 2 Feb 2027');
   });
 });

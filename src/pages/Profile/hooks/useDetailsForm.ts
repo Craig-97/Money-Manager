@@ -3,23 +3,21 @@ import { z } from 'zod';
 import { useMutation } from '@apollo/client/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ERRORS } from '~/constants';
-import { CurrentUserQuery, UpdateCurrentUserDocument } from '~/graphql/generated';
+import { UpdateCurrentUserDocument, UserFieldsFragment } from '~/graphql/generated';
 import { getApiErrorMessage, getErrorCode } from '~/lib/errors';
-import { emailSchema } from '~/lib/validation';
+import { emailSchema, firstNameSchema, surnameSchema } from '~/lib/validation';
 import { showToast } from '~/state/toast';
 
 const schema = z.object({
-  firstName: z.string().trim().min(1, 'Enter your first name'),
-  surname: z.string().trim().min(1, 'Enter your surname'),
+  firstName: firstNameSchema,
+  surname: surnameSchema,
   email: emailSchema
 });
 
 type DetailsValues = z.infer<typeof schema>;
 
-type User = NonNullable<CurrentUserQuery['tokenFindUser']>;
-
 /* Name and email. The saved user comes back from the API, so the header and sidebar update too. */
-export const useDetailsForm = (user: User) => {
+export const useDetailsForm = (user: UserFieldsFragment) => {
   const [updateCurrentUser] = useMutation(UpdateCurrentUserDocument);
   const form = useForm<DetailsValues>({
     resolver: zodResolver(schema),

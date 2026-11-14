@@ -1,17 +1,17 @@
 import { MobileSortButton } from '~/components/payments/PaymentControls';
 import { SegmentedControl } from '~/components/ui/SegmentedControl';
-import { formatShortDate } from '~/lib/payments';
+import { formatShortDate } from '~/lib/dates';
+import { tabOptions } from '../../../dashboardModel';
 import { Dashboard } from '../../../hooks';
 import { EmptyPayments } from '../EmptyPayments';
 import { MobileRow } from '../MobileRow';
 import { footLabel } from '../paymentText';
-import { tabOptions } from '../tabOptions';
 import { TabTotal } from '../TabTotal';
 import { useAddForTab } from '../useAddForTab';
 
 /* Mobile: the payments as a list; Select turns on ticking several at once */
 export const MobilePayments = ({ dashboard }: { dashboard: Dashboard }) => {
-  const { tab, setTab, listed, sort, setSort, cycle, selection } = dashboard;
+  const { tab, setTab, listed, sort, setSort, cycle, today, selection } = dashboard;
   const add = useAddForTab(tab);
 
   return (
@@ -38,7 +38,7 @@ export const MobilePayments = ({ dashboard }: { dashboard: Dashboard }) => {
         aria-label="Payment lists"
         value={tab}
         onValueChange={setTab}
-        options={tabOptions(dashboard)}
+        options={tabOptions(dashboard.payments, { cycle: dashboard.cycle })}
         fullWidth
         className="[&>button]:h-11 [&>button]:px-1.5"
       />
@@ -51,7 +51,7 @@ export const MobilePayments = ({ dashboard }: { dashboard: Dashboard }) => {
           </div>
           <div className="mt-1 flex items-center justify-between border-t border-border px-2.5 pt-3.5 pb-1.5">
             <span className="text-[13px] font-semibold text-muted">
-              {footLabel(listed.length, { tab, payday: formatShortDate(cycle.end) })}
+              {footLabel(listed.length, { tab, payday: formatShortDate(cycle.end, today) })}
             </span>
             <TabTotal dashboard={dashboard} compact />
           </div>

@@ -11,12 +11,18 @@ import {
   toAccounts,
   updatedText
 } from '~/lib/accounts';
-import { daysBetween, fromApiDate, toApiDate } from '~/lib/dates';
-import { getApiErrorMessage } from '~/lib/errors';
-import { formatMoney, formatMoneyInput, parseMoney, roundPence } from '~/lib/format';
+import { daysBetween, formatShortDate, fromApiDate, toApiDate } from '~/lib/dates';
+import {
+  formatMoney,
+  formatMoneyInput,
+  joinNames,
+  parseMoney,
+  plural,
+  roundPence
+} from '~/lib/format';
 import { BankHolidays, countPaydays, PayCycle } from '~/lib/payday';
-import { formatShortDate, Payment } from '~/lib/payments';
-import { showToast } from '~/state/toast';
+import { Payment } from '~/lib/payments';
+import { showErrorToast, showToast } from '~/state/toast';
 import {
   balanceParts,
   dueSinceDetail,
@@ -24,7 +30,6 @@ import {
   leftOverDetail,
   leftOverNote,
   leftOverOf,
-  listNames,
   suggestedBalance
 } from '../paydayCheck';
 
@@ -259,14 +264,14 @@ export const usePaydayPrompt = ({
         );
       const text = [
         paid.length
-          ? `${listNames(paid)} ${paid.length === 1 ? 'was' : 'were'} recorded as paid.`
+          ? `${joinNames(paid)} ${paid.length === 1 ? 'was' : 'were'} recorded as paid.`
           : '',
         skipped.length
-          ? `${listNames(skipped)} ${skipped.length === 1 ? 'was' : 'were'} recorded as skipped.`
+          ? `${joinNames(skipped)} ${skipped.length === 1 ? 'was' : 'were'} recorded as skipped.`
           : '',
         ...added,
         updated.length
-          ? `${listNames(updated.map(row => row.account.name))} ${updated.length === 1 ? 'was' : 'were'} updated.`
+          ? `${joinNames(updated.map(row => row.account.name))} ${updated.length === 1 ? 'was' : 'were'} updated.`
           : ''
       ]
         .filter(Boolean)
@@ -274,7 +279,7 @@ export const usePaydayPrompt = ({
       setResult({ balance: paidIntoBalance, text });
       setStage('done');
     } catch (error) {
-      showToast({ message: getApiErrorMessage(error, "Couldn't start the new cycle. Try again.") });
+      showErrorToast(error, { fallback: "Couldn't start the new cycle. Try again." });
     }
   };
 
@@ -348,7 +353,7 @@ export const usePaydayPrompt = ({
       open: savingsOpen,
       toggle: () => setSavingsOpen(open => !open),
       // "3 accounts", then "Cash ISA updated 5 weeks ago" in amber when one is old
-      count: `${others.length} ${others.length === 1 ? 'account' : 'accounts'}`,
+      count: plural(others.length, 'account'),
       staleText: staleSavings[0]
         ? `${staleSavings[0].name} ${updatedText(staleSavings[0], today).toLowerCase()}`
         : null

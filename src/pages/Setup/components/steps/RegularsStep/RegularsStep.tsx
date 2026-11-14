@@ -1,9 +1,9 @@
 import { Check, Plus } from 'lucide-react';
 import { Button } from '~/components/ui/Button';
 import { cn } from '~/lib/cn';
-import { formatMoney, MINUS } from '~/lib/format';
+import { formatMoney } from '~/lib/format';
 import { SetupState, useSetupDesktop } from '../../../hooks';
-import { PRESETS, setupAccounts } from '../../../setupModel';
+import { PRESETS, setupAccounts, setupAmount } from '../../../setupModel';
 import { regularDetails, regularNext } from '../../../setupPayments';
 import { questionClasses, stepCardClasses } from '../setupClasses';
 import { SetupRow } from '../SetupRow';
@@ -114,10 +114,7 @@ export const RegularsStep = ({ setup, monthlyTotal, yearlyTotal, today }: Regula
                   key={regular.id}
                   name={regular.input.name}
                   details={regularDetails(regular, { accounts, today })}
-                  // Desktop leaves money out unsigned, in red; mobile's board signs it
-                  amount={
-                    (income ? '+' : isDesktop ? '' : MINUS) + formatMoney(regular.input.amount)
-                  }
+                  amount={setupAmount(regular.input, { desktop: isDesktop })}
                   next={regularNext(regular, { today })}
                   tone={income ? 'income' : 'expense'}
                   onOpen={() => setup.openPayment({ kind: 'recurring', id: regular.id })}

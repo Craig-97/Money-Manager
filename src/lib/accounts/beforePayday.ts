@@ -10,7 +10,7 @@ import { Account, accountOf } from './accounts';
  * the total across them doesn't change.
  */
 
-export interface Movement {
+interface Movement {
   // The payment and date, so each date of a weekly payment has its own row
   key: string;
   payment: Payment;

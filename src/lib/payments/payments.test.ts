@@ -250,7 +250,6 @@ describe('summarise', () => {
     expect(withIncome.monthlyRecurring).toBe(470);
     expect(withIncome.afterRecurring).toBe(12295);
     expect(withIncome.discretionary).toBe(3130);
-    expect(withIncome.recurringCount).toBe(4);
   });
 
   it('keeps quarterly payments with the yearly ones, at four a year', () => {

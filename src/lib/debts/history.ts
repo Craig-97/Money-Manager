@@ -1,12 +1,12 @@
 import { DebtHistoryQuery } from '~/graphql/generated';
-import { daysBetween, fromApiDate } from '~/lib/dates';
+import { daysBetween, formatLongMonthYear, fromApiDate, inDays } from '~/lib/dates';
 import { formatMoney, roundPence } from '~/lib/format';
-import { PER_MONTH } from '~/lib/payments';
+import { PER_YEAR } from '~/lib/payments';
 import { DebtPayment } from './debts';
 
 type HistoryRecord = NonNullable<DebtHistoryQuery['recurringPayment']>['history'][number];
 
-export type HistoryKind = 'due' | 'paid' | 'skipped' | 'overpayment' | 'balance';
+type HistoryKind = 'due' | 'paid' | 'skipped' | 'overpayment' | 'balance';
 
 export interface HistoryEntry {
   id: string;
@@ -65,13 +65,11 @@ const recordEntry = (record: HistoryRecord): HistoryEntry => {
   };
 };
 
-const MONTH = new Intl.DateTimeFormat('en-GB', { month: 'long', year: 'numeric' });
-
 /* Entries under a heading for each month, newest first: "October 2026" */
 export const byMonth = (entries: readonly HistoryEntry[]) => {
   const months: { label: string; entries: HistoryEntry[] }[] = [];
   for (const entry of entries) {
-    const label = MONTH.format(entry.date);
+    const label = formatLongMonthYear(entry.date);
     const last = months.at(-1);
     if (last?.label === label) last.entries.push(entry);
     else months.push({ label, entries: [entry] });
@@ -83,7 +81,7 @@ export const byMonth = (entries: readonly HistoryEntry[]) => {
 export const dueInText = (date: Date, today: Date) => {
   const days = daysBetween(today, date);
   if (days <= 0) return days === 0 ? 'Due today' : 'Overdue';
-  return days === 1 ? 'Due tomorrow' : `Due in ${days} days`;
+  return `Due ${inDays(days)}`;
 };
 
 /*
@@ -97,8 +95,7 @@ export const debtHistory = (
   const entries = records.map(recordEntry);
   if (!debt.dueDate || debt.debt.balance <= 0) return entries;
 
-  const periodsPerYear = 12 * PER_MONTH[debt.frequency];
-  const interest = roundPence((debt.debt.balance * debt.debt.apr) / 100 / periodsPerYear);
+  const interest = roundPence((debt.debt.balance * debt.debt.apr) / 100 / PER_YEAR[debt.frequency]);
   const next: HistoryEntry = {
     id: 'next',
     kind: 'due',

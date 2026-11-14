@@ -5,13 +5,11 @@ import { UpdateOneOffPaymentDocument, UpdateRecurringPaymentDocument } from '~/g
 import { useBudget } from '~/hooks/useBudget';
 import { usePayCycle } from '~/hooks/usePayCycle';
 import { forFreeToSpend } from '~/lib/accounts';
-import { parseIsoDate, toIsoDate } from '~/lib/dates';
-import { getApiErrorMessage } from '~/lib/errors';
+import { formatShortDate, parseIsoDate, toIsoDate } from '~/lib/dates';
 import { formatMoney, formatMoneyInput, parseMoney } from '~/lib/format';
 import {
   dueInfo,
   earliestNewDate,
-  formatShortDate,
   Payment,
   repeatsFrom,
   summarise,
@@ -21,7 +19,7 @@ import {
 } from '~/lib/payments';
 import { usePaymentSheetStore } from '~/state/paymentSheet';
 import { useQuickEditStore } from '~/state/quickEdit';
-import { showToast } from '~/state/toast';
+import { showErrorToast, showToast } from '~/state/toast';
 
 /*
  * Change amount or Change date for one payment. Either changes this payment and every one after:
@@ -122,7 +120,7 @@ export const useQuickEditDialog = () => {
       });
     } catch (error) {
       // e.g. a new date after its renewal: the API says why
-      showToast({ message: getApiErrorMessage(error, "Couldn't save that. Try again.") });
+      showErrorToast(error);
     } finally {
       setSaving(false);
     }

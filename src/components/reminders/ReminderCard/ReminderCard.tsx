@@ -55,7 +55,9 @@ export const ReminderCard = ({
     </div>
   );
   const title = (
-    <h3 title={reminder.title} className="min-w-0 truncate text-[15px] leading-[1.35] font-bold">
+    <h3
+      title={reminder.title}
+      className="min-w-0 text-[15px] leading-[1.35] font-bold [overflow-wrap:anywhere] md:truncate">
       {reminder.title}
       {reminder.read ? null : <span className="sr-only"> (new)</span>}
     </h3>
@@ -85,7 +87,7 @@ export const ReminderCard = ({
         )}
         <p
           title={reminder.body}
-          className="mt-0.5 truncate text-sm leading-[1.45] font-medium text-muted">
+          className="mt-0.5 text-sm leading-[1.45] font-medium [overflow-wrap:anywhere] text-muted md:truncate">
           {reminder.body}
         </p>
         {actions}

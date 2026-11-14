@@ -17,7 +17,7 @@ export const DebtsCard = ({ debts, today }: { debts: readonly DebtPayment[]; tod
       <ProgressRing share={totals.paidOffShare} size={52} />
       <span className="flex min-w-0 flex-1 flex-col gap-0.5">
         <span className="text-base font-extrabold">Debts</span>
-        <span className="truncate text-[13px] font-medium text-muted">
+        <span className="text-[13px] font-medium [overflow-wrap:anywhere] text-muted md:truncate">
           {formatMoney(totals.left, { whole: true })} left
           {months === null ? '' : ` · debt-free ${clearedText(months, today)}`}
         </span>

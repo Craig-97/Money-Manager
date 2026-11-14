@@ -230,7 +230,7 @@ describe('debts on desktop', () => {
       target: { value: '50' }
     });
     expect(dialog).toHaveTextContent('6 months sooner');
-    expect(dialog).toHaveTextContent('£148 less');
+    expect(dialog).toHaveTextContent('£148 less than now');
 
     await user.click(within(dialog).getByRole('button', { name: 'Pay £200 a month from October' }));
 
@@ -386,14 +386,14 @@ describe('debts on desktop', () => {
     expect(
       within(dialog).queryByRole('button', { name: 'Back to Car finance' })
     ).not.toBeInTheDocument();
-    expect(within(dialog).getByRole('button', { name: 'Save' })).toBeDisabled();
+    expect(within(dialog).getByRole('button', { name: 'Save balance' })).toBeDisabled();
 
     await user.clear(field);
     await user.type(field, '6000');
     expect(within(dialog).getByRole('status')).toHaveTextContent(
       /^Cleared\w{3} \d{4} → \w{3} \d{4}$/
     );
-    await user.click(within(dialog).getByRole('button', { name: 'Save' }));
+    await user.click(within(dialog).getByRole('button', { name: 'Save balance' }));
 
     expect(await screen.findByText('Car finance has £6,000.00 left')).toBeInTheDocument();
     // The rate and what it started at stay as they are
@@ -490,7 +490,7 @@ describe('debts on mobile', () => {
       target: { value: '50' }
     });
     expect(sheet).toHaveTextContent('6 months sooner');
-    expect(sheet).toHaveTextContent('£148 less');
+    expect(sheet).toHaveTextContent('£148 less than now');
 
     await user.click(within(sheet).getByRole('button', { name: 'Pay £200 a month from October' }));
 

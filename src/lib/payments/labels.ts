@@ -1,10 +1,10 @@
 import { PaymentCategory, PaymentFrequency, PaymentType } from '~/graphql/generated';
-import { formatDayMonth, formatShortDay } from '~/lib/dates';
+import { formatDayMonth, formatLongWeekday } from '~/lib/dates';
+import { capitalise, ordinal } from '~/lib/format';
 
 /* "HOME_MAINTENANCE" -> "Home maintenance" */
 export const categoryLabel = (category: string) => {
-  const words = category.toLowerCase().replace(/_/g, ' ');
-  return words.charAt(0).toUpperCase() + words.slice(1);
+  return capitalise(category.toLowerCase().replace(/_/g, ' '));
 };
 
 export const FREQUENCY_LABELS: Record<PaymentFrequency, string> = {
@@ -19,7 +19,7 @@ export const FREQUENCY_LABELS: Record<PaymentFrequency, string> = {
 export const FREQUENCIES = Object.keys(FREQUENCY_LABELS) as PaymentFrequency[];
 
 // One list for one-off and recurring payments, A–Z as Monzo lists them
-export const PAYMENT_CATEGORIES: PaymentCategory[] = [
+const PAYMENT_CATEGORIES: PaymentCategory[] = [
   'BILLS',
   'CHARITY',
   'EATING_OUT',
@@ -55,15 +55,7 @@ export const categoriesFor = (type: PaymentType) =>
     ? PAYMENT_CATEGORIES.filter(category => INCOME_CATEGORIES.includes(category))
     : PAYMENT_CATEGORIES.filter(category => category !== 'INCOME');
 
-const weekdayName = new Intl.DateTimeFormat('en-GB', { weekday: 'long' });
-
 /* 1 -> "1st", 22 -> "22nd" */
-export const ordinal = (n: number) => {
-  const teen = n % 100 >= 11 && n % 100 <= 13;
-  const suffix = teen ? 'th' : (['th', 'st', 'nd', 'rd'][n % 10] ?? 'th');
-  return `${n}${suffix}`;
-};
-
 /*
  * How a recurring payment repeats: "Monthly on the 2nd", "Every other Friday". The lower-case
  * form reads inside a sentence: "Repeats monthly on the 2nd".
@@ -72,7 +64,7 @@ export const scheduleText = (
   first: Date,
   { frequency, lower = false }: { frequency: PaymentFrequency; lower?: boolean }
 ) => {
-  const weekday = weekdayName.format(first);
+  const weekday = formatLongWeekday(first);
   const day = ordinal(first.getDate());
   const text = {
     WEEKLY: lower ? `every ${weekday}` : `Weekly on ${weekday}s`,
@@ -86,7 +78,3 @@ export const scheduleText = (
   };
   return text[frequency];
 };
-
-/* "Fri 9 Oct", with the year when it isn't this year: "Thu 1 Jul 2027" */
-export const formatShortDate = (date: Date, today = new Date()) =>
-  formatShortDay(date, { withYear: date.getFullYear() !== today.getFullYear() });

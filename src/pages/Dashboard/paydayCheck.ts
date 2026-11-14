@@ -1,10 +1,9 @@
 import { LeftOverOutcome } from '~/graphql/generated';
-import { addDays } from '~/lib/dates';
+import { addDays, formatShortDate } from '~/lib/dates';
 import { payTowardsDebt } from '~/lib/debts';
 import { formatMoney, roundPence } from '~/lib/format';
 import { PayCycle } from '~/lib/payday';
 import {
-  formatShortDate,
   FREQUENCY_LABELS,
   nextOccurrence,
   occurrencesBetween,
@@ -20,13 +19,13 @@ import {
  */
 
 // A recurring payment's dates from last cycle that were never paid or skipped
-export interface LeftOver {
+interface LeftOver {
   payment: RecurringPayment;
   dates: Date[];
 }
 
 // A payment due from payday to today: a recurring one's dates in that time, or a one-off
-export interface DueSince {
+interface DueSince {
   key: string;
   payment: RecurringPayment | OneOffPayment;
   dates: Date[];
@@ -215,7 +214,3 @@ export const balanceParts = ({
   }
   return { start, changes: changes.filter(change => change.amount !== 0) };
 };
-
-/* "Netflix", "Netflix and Gym", "Netflix, Gym and Rent" */
-export const listNames = (names: readonly string[]) =>
-  new Intl.ListFormat('en-GB', { style: 'long', type: 'conjunction' }).format(names);

@@ -1,7 +1,7 @@
 import { cn } from '~/lib/cn';
 import { useSetupDesktop } from '../../../hooks';
 
-export interface ReviewLine {
+interface ReviewLine {
   key: string;
   name: string;
   details: string;

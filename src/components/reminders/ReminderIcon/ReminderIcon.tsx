@@ -24,11 +24,10 @@ const ICONS: Record<ReminderKind, typeof Clock> = {
 
 interface ReminderIconProps {
   reminder: Pick<Reminder, 'kind' | 'read'>;
-  className?: string;
 }
 
 /* What a reminder is about, in a round badge: red while a payment is overdue, accent while unread */
-export const ReminderIcon = ({ reminder, className }: ReminderIconProps) => {
+export const ReminderIcon = ({ reminder }: ReminderIconProps) => {
   const Icon = ICONS[reminder.kind];
   return (
     <span
@@ -39,8 +38,7 @@ export const ReminderIcon = ({ reminder, className }: ReminderIconProps) => {
           ? 'bg-expense-bg text-expense'
           : reminder.read
             ? 'border border-border bg-surface-2 text-muted'
-            : 'bg-accent-soft text-accent-text',
-        className
+            : 'bg-accent-soft text-accent-text'
       )}>
       <Icon size={18} strokeWidth={2.25} />
     </span>

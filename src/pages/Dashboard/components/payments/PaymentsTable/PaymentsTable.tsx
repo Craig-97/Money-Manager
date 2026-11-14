@@ -5,14 +5,13 @@ import { Button } from '~/components/ui/Button';
 import { SegmentedControl } from '~/components/ui/SegmentedControl';
 import { tileLift } from '~/components/ui/Tile';
 import { cn } from '~/lib/cn';
-import { formatShortDate } from '~/lib/payments';
-import { PaymentTab } from '../../../dashboardModel';
+import { formatShortDate } from '~/lib/dates';
+import { PaymentTab, tabOptions } from '../../../dashboardModel';
 import { Dashboard } from '../../../hooks';
 import { EmptyPayments } from '../EmptyPayments';
 import { PaymentRow } from '../PaymentRow';
 import { footLabel } from '../paymentText';
 import { rowClasses } from '../rowClasses';
-import { tabOptions } from '../tabOptions';
 import { TabTotal } from '../TabTotal';
 import { useAddForTab } from '../useAddForTab';
 
@@ -24,7 +23,7 @@ const HEADINGS: Record<PaymentTab, [string, string, string]> = {
 
 /* Desktop: the payments in a table, with tabs, sorting and bulk actions */
 export const PaymentsTable = ({ dashboard }: { dashboard: Dashboard }) => {
-  const { tab, setTab, listed, selection, sort, setSort, cycle, actions } = dashboard;
+  const { tab, setTab, listed, selection, sort, setSort, cycle, today, actions } = dashboard;
   const { selectedPayments, allSelected } = selection;
   const add = useAddForTab(tab);
   const [typeHeading, middleHeading, lastHeading] = HEADINGS[tab];
@@ -57,7 +56,7 @@ export const PaymentsTable = ({ dashboard }: { dashboard: Dashboard }) => {
             aria-label="Payment lists"
             value={tab}
             onValueChange={setTab}
-            options={tabOptions(dashboard)}
+            options={tabOptions(dashboard.payments, { cycle: dashboard.cycle })}
           />
         </div>
         <div className="flex items-center gap-2">
@@ -114,7 +113,7 @@ export const PaymentsTable = ({ dashboard }: { dashboard: Dashboard }) => {
             </div>
             <div className="mt-2.5 flex items-center justify-between gap-3 border-t border-border px-4 pt-4 pb-1 pl-5">
               <p className="text-[13px] font-semibold text-muted">
-                {footLabel(listed.length, { tab, payday: formatShortDate(cycle.end) })}
+                {footLabel(listed.length, { tab, payday: formatShortDate(cycle.end, today) })}
               </p>
               <TabTotal dashboard={dashboard} />
             </div>

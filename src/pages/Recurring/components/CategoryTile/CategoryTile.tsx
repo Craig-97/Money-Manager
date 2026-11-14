@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { tileLift } from '~/components/ui/Tile';
 import { cn } from '~/lib/cn';
-import { formatMoney } from '~/lib/format';
-import { CategoryBreakdown, pageOf } from '../../recurringModel';
+import { CategoryBreakdown, pageOf, signedTotal } from '../../recurringModel';
 import { CategoryBar } from '../CategoryBar';
 import { CategoryLegend } from '../CategoryLegend';
 import { LegendPager } from '../LegendPager';
@@ -39,8 +38,7 @@ export const CategoryTile = ({ breakdown, narrow, compact = false }: CategoryTil
         </h2>
         <span className="text-xs font-semibold text-muted">
           <span className={cn('num font-bold', breakdown.net >= 0 ? 'text-income' : 'text-text')}>
-            {breakdown.net > 0 ? '+' : ''}
-            {formatMoney(breakdown.net)}
+            {signedTotal(breakdown.net)}
           </span>{' '}
           a year
         </span>

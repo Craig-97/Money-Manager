@@ -13,11 +13,7 @@ import { passwordStrength } from '../profileModel';
 const schema = z
   .object({
     currentPassword: z.string().min(1, 'Enter your current password'),
-    newPassword: newPasswordSchema({
-      required: 'Create a new password',
-      tooShort: 'Password must be at least 8 characters',
-      noNumber: 'Password must contain a number'
-    }),
+    newPassword: newPasswordSchema('Create a new password'),
     confirmPassword: z.string().min(1, 'Type your new password again')
   })
   .refine(values => values.newPassword === values.confirmPassword, {

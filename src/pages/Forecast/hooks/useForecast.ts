@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Budget } from '~/hooks/useBudget';
 import { usePayCycle } from '~/hooks/usePayCycle';
 import { forFreeToSpend } from '~/lib/accounts';
-import { daysBetween } from '~/lib/dates';
+import { daysBetween, formatLongMonthYear } from '~/lib/dates';
 import { summarise, toPayments } from '~/lib/payments';
 import { defaultSpend, monthRows, project, spendLimit } from '../forecastModel';
 
@@ -53,7 +53,7 @@ export const useForecast = (budget: Budget) => {
     cycle,
     bankBalance: budget.bankBalance,
     // "October 2027", the month the 12-month projection reaches
-    yearLabel: inAYear.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }),
+    yearLabel: formatLongMonthYear(inAYear),
     summary,
     payday: budget.payday,
     income,

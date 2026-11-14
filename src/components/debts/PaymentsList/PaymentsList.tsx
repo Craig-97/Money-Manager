@@ -1,10 +1,10 @@
-import { Button } from '~/components/ui/Button';
 import { DateBox } from '~/components/ui/DateBox';
 import { Skeleton } from '~/components/ui/Skeleton';
 import { DebtHistory } from '~/hooks/useDebtHistory';
 import { cn } from '~/lib/cn';
 import { DebtPayment } from '~/lib/debts';
 import { formatMoney } from '~/lib/format';
+import { PaymentsLoadError } from '../PaymentsLoadError';
 import { ShowOlderPayments } from '../ShowOlderPayments';
 
 interface PaymentsListProps {
@@ -33,14 +33,7 @@ export const PaymentsList = ({ debt, history, onUndoOverpayment }: PaymentsListP
       </div>
     );
   }
-  if (history.error) {
-    return (
-      <div className="flex flex-col items-center gap-3 px-3 py-6 text-center">
-        <p className="text-sm font-semibold">Couldn’t load the payments</p>
-        <Button onClick={history.retry}>Try again</Button>
-      </div>
-    );
-  }
+  if (history.error) return <PaymentsLoadError onRetry={history.retry} />;
 
   return (
     <div className="flex flex-col">

@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { formatMonthYear } from '~/lib/dates';
-import { DebtPayment, extraPerPayment, monthFromNow, simulatePayoff } from '~/lib/debts';
-import { formatMoney, roundPence } from '~/lib/format';
+import { applyChange, clearedText, comparedToNow, DebtPayment, simulatePayoff } from '~/lib/debts';
+import { formatMoney } from '~/lib/format';
 
 interface Options {
   debt: DebtPayment | undefined;
@@ -10,10 +9,6 @@ interface Options {
   // Changing it starts again from no extra, as each opening of the dialog does
   formKey?: string;
 }
-
-const MONTH_NAME = new Intl.DateTimeFormat('en-GB', { month: 'long' });
-
-const monthsText = (months: number) => `${months} ${months === 1 ? 'month' : 'months'}`;
 
 /* The largest extra the slider offers: twice the payment, at least £200, in steps of £10 */
 const maxExtra = (debt: DebtPayment) => Math.max(200, Math.ceil((debt.amount * 2) / 10) * 10);
@@ -36,15 +31,11 @@ export const usePaySooner = ({ debt, today, onPayMore, formKey }: Options) => {
 
   const base = simulatePayoff([debt]);
   const plan = simulatePayoff([debt], { extra, strategy: 'avalanche' });
-  const cleared = (months: number | null) =>
-    months === null ? 'Never' : formatMonthYear(monthFromNow(today, months));
-  const sooner = base.months !== null && plan.months !== null ? base.months - plan.months : 0;
-  const saved = Math.round(base.interest - plan.interest);
-  const newAmount = roundPence(debt.amount + extraPerPayment(debt, extra));
+  const change = applyChange(debt, extra);
 
   const apply = async () => {
     setApplying(true);
-    await onPayMore(debt, newAmount);
+    await onPayMore(debt, change.amount);
     setApplying(false);
     setExtra(0);
   };
@@ -56,18 +47,12 @@ export const usePaySooner = ({ debt, today, onPayMore, formKey }: Options) => {
     maxExtra: maxExtra(debt),
     base,
     plan,
-    clearBy: cleared(plan.months),
-    sooner:
-      base.months === null && plan.months !== null
-        ? 'Cleared at last'
-        : sooner > 0
-          ? `${monthsText(sooner)} sooner`
-          : 'As now',
-    saved: saved > 0 ? `${formatMoney(saved, { whole: true })} less` : 'Same as now',
+    clearBy: clearedText(plan.months, today),
+    ...comparedToNow(base, plan),
     // "Pay £200 a month from November", once there's extra to apply
     applyLabel:
       extra > 0 && debt.dueDate
-        ? `Pay ${formatMoney(newAmount, { whole: Number.isInteger(newAmount) })} ${debt.frequency === 'MONTHLY' ? 'a month' : 'each time'} from ${MONTH_NAME.format(debt.dueDate)}`
+        ? `Pay ${formatMoney(change.amount, { whole: Number.isInteger(change.amount) })} ${debt.frequency === 'MONTHLY' ? 'a month' : 'each time'} from ${change.from}`
         : null,
     apply: () => void apply(),
     applying

@@ -10,7 +10,7 @@ import {
   timingOptions,
   toTimingChoice
 } from '~/lib/payments';
-import { Reminder } from '~/lib/reminders';
+import { Reminder, timingOf } from '~/lib/reminders';
 import { RemindersPage } from '../../hooks';
 
 /*
@@ -27,16 +27,8 @@ export const TimingDialog = ({ page }: { page: RemindersPage }) => {
   // A new opening starts from the payment's timing (React's "reset state on a prop change" pattern)
   if (changing && changing !== shown) {
     setShown(changing);
-    const payment = changing.payment;
-    if (payment) {
-      setChoice(
-        toTimingChoice(
-          changing.kind === 'renewal' && payment.kind === 'recurring'
-            ? payment.renewalReminder
-            : payment.dueReminder
-        )
-      );
-    }
+    const timing = timingOf(changing);
+    if (timing) setChoice(toTimingChoice(timing));
   }
 
   const reminder = changing ?? shown;

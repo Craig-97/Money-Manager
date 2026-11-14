@@ -13,13 +13,15 @@ import {
   updatedText
 } from '~/lib/accounts';
 import { cn } from '~/lib/cn';
+import { formatShortDate } from '~/lib/dates';
 import { formatMoney } from '~/lib/format';
-import { formatShortDate, PER_PERIOD, toPayments } from '~/lib/payments';
+import { PER_PERIOD, toPayments } from '~/lib/payments';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
 import { AccountChooser } from '../AccountChooser';
 import { AccountFields, panelClasses } from '../AccountFields';
 import { deleteTextOf } from './deleteText';
 import { useAccountDialog } from './useAccountDialog';
+import { accountDialogTitle } from '../accountDraft';
 
 /*
  * Adding an account or changing one: a dialog on desktop, a bottom sheet on mobile. Adding starts
@@ -52,11 +54,7 @@ export const AccountDialog = () => {
     : null;
   const title = dialog.confirming
     ? `Delete ${account?.name ?? 'account'}?`
-    : account
-      ? `Edit ${account.name}`
-      : dialog.choosing
-        ? 'Add account'
-        : `Add ${draft.kind === 'SPENDING' ? 'spending' : 'savings'} account`;
+    : accountDialogTitle(draft.kind, { editing: account?.name, choosing: dialog.choosing });
 
   return (
     <Modal

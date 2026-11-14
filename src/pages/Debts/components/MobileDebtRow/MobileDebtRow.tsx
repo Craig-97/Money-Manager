@@ -27,14 +27,16 @@ export const MobileDebtRow = ({ debt, clearedIn, today }: MobileDebtRowProps) =>
       <PaymentLetter payment={debt} className="size-10 rounded-[13px] text-[15px]" />
       <span className="flex min-w-0 grow flex-col gap-1.5">
         <span className="flex items-baseline justify-between gap-2">
-          <span className="truncate text-[15px] font-bold">{debt.name}</span>
+          <span className="min-w-0 text-[15px] font-bold [overflow-wrap:anywhere]">
+            {debt.name}
+          </span>
           <span className="num text-[15px] font-extrabold">
             {formatMoney(debt.debt.balance, { whole: true })}
           </span>
         </span>
         <DebtProgress share={paidOffShare(debt)} />
         <span className="flex items-center justify-between gap-2 text-xs font-medium text-muted">
-          <span className="truncate">
+          <span className="min-w-0 [overflow-wrap:anywhere]">
             {debt.debt.apr ? aprText(debt.debt.apr) : 'No interest'} · {paymentText(debt)}
           </span>
           <span className="shrink-0 font-semibold">{clearedText(clearedIn, today)}</span>

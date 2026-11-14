@@ -1,19 +1,25 @@
 import { AccountDraft, checkAccountDraft } from '~/components/accounts';
 import {
-  BankHolidayRegion,
   CreateBudgetInput,
   OneOffPaymentInput,
-  PayFrequency,
-  PaydayType,
   PaymentType,
   PaymentCategory,
-  RecurringPaymentInput,
-  Weekday
+  RecurringPaymentInput
 } from '~/graphql/generated';
-import { addDays, parseIsoDate, PaydayConfig, startOfToday } from '~/lib/dates';
-import { parseMoney } from '~/lib/format';
-import { BankHolidays, getPayCycle, usesWeekday } from '~/lib/payday';
-import { occurrencesBetween, PER_MONTH } from '~/lib/payments';
+import { addDays, parseIsoDate, startOfToday } from '~/lib/dates';
+import { formatMoney, MINUS, parseMoney } from '~/lib/format';
+import {
+  BankHolidays,
+  getPayCycle,
+  PAY_FREQUENCY_LABELS,
+  paydayErrors,
+  PaydayErrors,
+  PaydayValues,
+  RULES,
+  toPaydayConfig,
+  toPaydayInput
+} from '~/lib/payday';
+import { isYearly, occurrencesBetween, PER_MONTH, PER_YEAR } from '~/lib/payments';
 
 // Setup's answers. The pay and the first account are kept as typed until they're saved; other
 // accounts as their dialog's draft, and payments as the API will take them.
@@ -21,7 +27,7 @@ import { occurrencesBetween, PER_MONTH } from '~/lib/payments';
 // The key payments use for the account pay lands in, as the API's createBudget takes it
 export const PAID_INTO_KEY = 'paid-into';
 
-export interface SetupAccount {
+interface SetupAccount {
   // How payments set up alongside it name it
   key: string;
   draft: AccountDraft;
@@ -39,13 +45,8 @@ export interface SetupOneOff {
   input: OneOffPaymentInput;
 }
 
-export interface SetupValues {
-  frequency: PayFrequency;
-  rule: PaydayType;
-  dayOfMonth: string;
-  weekday: Weekday;
-  firstPayDate: string;
-  region: BankHolidayRegion;
+// The payday answers, as Profile asks them, then the rest of setup
+export interface SetupValues extends PaydayValues {
   income: string;
   // The account pay lands in
   paidIntoName: string;
@@ -136,7 +137,7 @@ export {
 } from '~/lib/payday';
 
 // The suggestions on the regular payments step. Each starts the payment form as money out or in.
-export interface Preset {
+interface Preset {
   key: string;
   name: string;
   category: PaymentCategory;
@@ -173,34 +174,25 @@ export const PRESETS: Preset[] = [
 
 const isPositive = (value: string) => (parseMoney(value) ?? 0) > 0;
 
-export const paydayConfig = (values: SetupValues): PaydayConfig => ({
-  frequency: values.frequency,
-  type: values.rule,
-  dayOfMonth: values.rule === 'SET_DAY' ? Number(values.dayOfMonth) : null,
-  weekday: usesWeekday(values.rule) ? values.weekday : null,
-  firstPayDate: values.frequency === 'MONTHLY' ? null : values.firstPayDate || null,
-  bankHolidayRegion: values.region
-});
+/* "Monthly · last working day": how often and the rule, as the steps sum it up */
+export const payRuleText = ({ frequency, rule }: Pick<SetupValues, 'frequency' | 'rule'>) =>
+  `${PAY_FREQUENCY_LABELS[frequency]} · ${RULES[rule].title.toLowerCase()}`;
+
+/* "+£20.00" for money in; money out is signed on a phone, as its board has it, and red alone on desktop */
+export const setupAmount = (
+  input: { amount: number; type: string },
+  { desktop }: { desktop: boolean }
+) => (input.type === 'INCOME' ? '+' : desktop ? '' : MINUS) + formatMoney(input.amount);
 
 // ---- validation: each returns the messages to show, keyed by field ----
 
-export interface PayErrors {
-  dayOfMonth?: string;
-  firstPayDate?: string;
+export interface PayErrors extends PaydayErrors {
   income?: string;
 }
 
 export const payErrors = (values: SetupValues): PayErrors => {
-  const day = Number(values.dayOfMonth);
   return {
-    dayOfMonth:
-      values.rule === 'SET_DAY' && !(Number.isInteger(day) && day >= 1 && day <= 31)
-        ? 'Choose a day between 1 and 31'
-        : undefined,
-    firstPayDate:
-      values.frequency !== 'MONTHLY' && !values.firstPayDate
-        ? 'Add the date of your next pay'
-        : undefined,
+    ...paydayErrors(values),
     income: isPositive(values.income)
       ? undefined
       : 'Enter your take-home pay. It must be more than £0.'
@@ -292,15 +284,13 @@ export const accountDetails = (account: SetupAccountView) =>
     .join(' · ');
 
 // Paid every three months or less often: kept apart from the monthly figure, never averaged in
-const YEARLY_FREQUENCIES = ['QUARTERLY', 'BIANNUALLY', 'ANNUALLY'];
-
 // ---- the first cycle, as the summary beside the form shows it ----
 
 export const summariseFirstCycle = (
   values: SetupValues,
   { holidays, today }: { holidays: BankHolidays; today: Date }
 ) => {
-  const { end: cycleEnd } = getPayCycle(paydayConfig(values), { holidays, today });
+  const { end: cycleEnd } = getPayCycle(toPaydayConfig(values), { holidays, today });
   const lastDayOfCycle = addDays(cycleEnd, -1);
   const accounts = setupAccounts(values);
   const counted = accounts.filter(account => account.counts);
@@ -331,8 +321,8 @@ export const summariseFirstCycle = (
     // Money moving between accounts that both count isn't spending
     const moving = !!input.paysInto && counts(input.paysInto);
     if (input.type === 'EXPENSE' && !moving) {
-      if (YEARLY_FREQUENCIES.includes(input.frequency)) {
-        yearly += input.amount * PER_MONTH[input.frequency] * 12;
+      if (isYearly(input.frequency)) {
+        yearly += input.amount * PER_YEAR[input.frequency];
       } else {
         monthly += input.amount * PER_MONTH[input.frequency];
       }
@@ -370,6 +360,7 @@ export const summariseFirstCycle = (
 
   return {
     cycleEnd,
+    today,
     balance,
     // How many accounts make the balance
     countedCount: counted.length,
@@ -395,7 +386,6 @@ export type FirstCycle = ReturnType<typeof summariseFirstCycle>;
 
 /* The answers as the API's createBudget input */
 export const toCreateBudgetInput = (values: SetupValues): CreateBudgetInput => {
-  const payday = paydayConfig(values);
   return {
     bankBalance: parseMoney(values.balance) ?? 0,
     paidIntoName: values.paidIntoName.trim() || 'Current account',
@@ -404,14 +394,7 @@ export const toCreateBudgetInput = (values: SetupValues): CreateBudgetInput => {
       return fields ? [{ key, kind: draft.kind, ...fields }] : [];
     }),
     monthlyIncome: parseMoney(values.income) ?? 0,
-    payday: {
-      frequency: payday.frequency,
-      type: payday.type,
-      dayOfMonth: payday.dayOfMonth,
-      weekday: payday.weekday,
-      firstPayDate: payday.firstPayDate,
-      bankHolidayRegion: values.region
-    },
+    payday: toPaydayInput(values),
     recurringPayments: values.regulars.map(regular => regular.input),
     oneOffPayments: values.oneOffs.map(oneOff => oneOff.input)
   };

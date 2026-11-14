@@ -4,10 +4,9 @@ import { UpdateBudgetDocument } from '~/graphql/generated';
 import { Budget } from '~/hooks/useBudget';
 import { usePayCycle } from '~/hooks/usePayCycle';
 import { forFreeToSpend, isStale, savingsOf, toAccounts } from '~/lib/accounts';
-import { getApiErrorMessage } from '~/lib/errors';
-import { formatMoneyInput, parseMoney } from '~/lib/format';
+import { formatMoneyInput, parseMoney, plural } from '~/lib/format';
 import { summarise, toPayments } from '~/lib/payments';
-import { showToast } from '~/state/toast';
+import { showErrorToast, showToast } from '~/state/toast';
 
 const AMOUNT_ERROR = 'Enter an amount, like 1,250.00';
 
@@ -43,14 +42,14 @@ export const useBalanceSettings = (budget: Budget) => {
       setSaved(income);
       showToast({ message: 'Income saved' });
     } catch (error) {
-      showToast({ message: getApiErrorMessage(error, "Couldn't save your income. Try again.") });
+      showErrorToast(error, { fallback: "Couldn't save your income. Try again." });
     }
   };
 
   return {
     bankBalance: budget.bankBalance,
     // "From 1 of your 4 accounts"
-    accountsText: `From ${accounts.filter(account => account.counts).length} of your ${accounts.length} ${accounts.length === 1 ? 'account' : 'accounts'}`,
+    accountsText: `From ${accounts.filter(account => account.counts).length} of your ${plural(accounts.length, 'account')}`,
     staleText: stale ? `${stale.name} needs updating` : null,
     income,
     setIncome,

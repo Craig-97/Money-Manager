@@ -1,13 +1,13 @@
 import { cn } from '~/lib/cn';
+import { formatShortDate } from '~/lib/dates';
 import { formatBalance, formatMoney } from '~/lib/format';
-import { formatShortDate } from '~/lib/payments';
 import { signedMoney, signedPercent } from '../../../forecastModel';
 import { Forecast } from '../../../hooks';
 import { growthClass } from '../keyFigureClasses';
 
 /* Mobile: the same four figures as a 2 by 2 grid */
 export const MobileKeyFigures = ({ forecast }: { forecast: Forecast }) => {
-  const { summary, cycle, projection } = forecast;
+  const { summary, cycle, today, projection } = forecast;
   const tile = 'flex flex-col gap-2.5 rounded-3xl border border-border bg-surface p-5';
   const number = 'num text-2xl leading-[1.1] font-extrabold';
 
@@ -27,7 +27,7 @@ export const MobileKeyFigures = ({ forecast }: { forecast: Forecast }) => {
         <p className="text-[13px] font-semibold text-muted">Payday balance</p>
         <p className={number}>{formatBalance(summary.onPayday, { whole: true })}</p>
         <p className="text-xs font-medium text-muted">
-          {formatShortDate(cycle.end)} · {summary.daysToPayday} days
+          {formatShortDate(cycle.end, today)} · {summary.daysToPayday} days
         </p>
       </div>
       <div className={tile}>

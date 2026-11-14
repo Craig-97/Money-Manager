@@ -1,7 +1,5 @@
-import { joinNames } from '~/lib/accounts';
-import { daysBetween } from '~/lib/dates';
-import { formatBalance, formatMoney, splitPence } from '~/lib/format';
-import { formatShortDate } from '~/lib/payments';
+import { daysBetween, formatShortDate } from '~/lib/dates';
+import { formatBalance, formatMoney, joinNames, plural, splitPence } from '~/lib/format';
 import { Accounts } from '../../hooks';
 
 const chipClasses = 'flex min-w-0 flex-col gap-1 rounded-[18px] bg-hero-chip px-3.5 py-3';
@@ -47,7 +45,7 @@ export const BeforePaydayHero = ({
           Left at payday
         </h2>
         <span className="inline-flex items-center rounded-full bg-hero-chip px-3 py-1.5 text-xs font-bold md:px-3.5 md:py-2 md:text-[13px]">
-          Until {formatShortDate(cycle.end, today)} · {days} {days === 1 ? 'day' : 'days'}
+          Until {formatShortDate(cycle.end, today)} · {plural(days, 'day')}
         </span>
       </div>
 

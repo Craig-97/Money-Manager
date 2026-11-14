@@ -1,8 +1,8 @@
 import { CalendarDays, CreditCard, TrendingUp } from 'lucide-react';
 import { Tile } from '~/components/ui/Tile';
 import { cn } from '~/lib/cn';
+import { formatShortDate } from '~/lib/dates';
 import { formatBalance, formatMoney } from '~/lib/format';
-import { formatShortDate } from '~/lib/payments';
 import { signedMoney, signedPercent } from '../../../forecastModel';
 import { Forecast } from '../../../hooks';
 import { Badge } from '../Badge';
@@ -12,7 +12,7 @@ const bigNumber = 'num text-4xl leading-none font-extrabold';
 
 /* Desktop: free to spend, payday balance, monthly growth and where it'll be in a year */
 export const KeyFigures = ({ forecast }: { forecast: Forecast }) => {
-  const { summary, cycle, projection, cycleProgress } = forecast;
+  const { summary, cycle, today, projection, cycleProgress } = forecast;
   const { growthPercent, yearPercent, net, inAYear } = projection;
 
   return (
@@ -50,7 +50,7 @@ export const KeyFigures = ({ forecast }: { forecast: Forecast }) => {
         <p className={bigNumber}>{formatBalance(summary.onPayday, { whole: true })}</p>
         <div className="mt-auto flex flex-col gap-2">
           <div className="flex justify-between text-xs font-semibold text-muted">
-            <span>{formatShortDate(cycle.end)}</span>
+            <span>{formatShortDate(cycle.end, today)}</span>
             <span>in {summary.daysToPayday} days</span>
           </div>
           <div aria-hidden="true" className="h-1.5 overflow-hidden rounded-full bg-track">

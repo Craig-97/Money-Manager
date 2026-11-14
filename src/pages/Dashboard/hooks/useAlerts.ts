@@ -1,7 +1,15 @@
 import { useState } from 'react';
+import { useAlertIndex } from '~/hooks/useAlertIndex';
 import { useReminderActions } from '~/hooks/useReminderActions';
-import { Payment, RecurringPayment, Renewal, renewalOf } from '~/lib/payments';
-import { dueKey, overdueKey, renewalKey, ReminderStates } from '~/lib/reminders';
+import { isRenewalDue, Payment, RecurringPayment, Renewal, renewalOf } from '~/lib/payments';
+import {
+  dueKey,
+  isAway,
+  isStillDue,
+  overdueKey,
+  ReminderStates,
+  renewalKey
+} from '~/lib/reminders';
 
 type DashboardAlert =
   | { kind: 'overdue'; payment: Payment; due: Date }
@@ -27,14 +35,10 @@ interface AlertsInput {
  */
 export const useAlerts = ({ budgetId, payments, today, dueToday, states }: AlertsInput) => {
   const [dueDismissed, setDueDismissed] = useState(false);
-  const [index, setIndex] = useState(0);
   const actions = useReminderActions({ budgetId, states, today });
 
   // Put away with Later, or cleared under Reminders
-  const isAway = (key: string) => {
-    const state = states.get(key);
-    return !!state && (state.cleared || (!!state.snoozedUntil && state.snoozedUntil > today));
-  };
+  const away = (key: string) => isAway(states.get(key), today);
 
   // Renewals inside their reminder, and ones that have gone by without the next date being set.
   // By date, so the ones that have gone by come first.
@@ -42,7 +46,7 @@ export const useAlerts = ({ budgetId, payments, today, dueToday, states }: Alert
     .flatMap(payment => {
       if (payment.kind !== 'recurring') return [];
       const renewal = renewalOf(payment, today);
-      return renewal && (renewal.passed || renewal.soon) && !isAway(renewalKey(payment, renewal))
+      return renewal && isRenewalDue(renewal) && !away(renewalKey(payment, renewal))
         ? [{ kind: 'renewal' as const, payment, renewal }]
         : [];
     })
@@ -54,8 +58,8 @@ export const useAlerts = ({ budgetId, payments, today, dueToday, states }: Alert
     .flatMap(payment =>
       payment.dueDate &&
       payment.dueDate < today &&
-      (payment.kind === 'recurring' || !payment.paidAt) &&
-      !isAway(overdueKey(payment, payment.dueDate))
+      isStillDue(payment) &&
+      !away(overdueKey(payment, payment.dueDate))
         ? [{ kind: 'overdue' as const, payment, due: payment.dueDate }]
         : []
     )
@@ -63,19 +67,17 @@ export const useAlerts = ({ budgetId, payments, today, dueToday, states }: Alert
 
   const alerts: DashboardAlert[] = [
     ...overdue,
-    ...(dueToday && !dueDismissed && !isAway(dueKey(dueToday, dueToday.dueDate ?? today))
+    ...(dueToday && !dueDismissed && !away(dueKey(dueToday, dueToday.dueDate ?? today))
       ? [{ kind: 'due' as const, payment: dueToday }]
       : []),
     ...renewals
   ];
-  // Dealing with the last one moves back to the one before
-  const current = Math.min(index, Math.max(0, alerts.length - 1));
-  const go = (next: number) => setIndex(Math.max(0, Math.min(alerts.length - 1, next)));
+  const { index, go } = useAlertIndex(alerts.length);
 
   return {
     alerts,
-    index: current,
-    alert: alerts[current] as DashboardAlert | undefined,
+    index,
+    alert: alerts[index] as DashboardAlert | undefined,
     go,
     later: (alert: DashboardAlert) => {
       if (alert.kind === 'due') setDueDismissed(true);
@@ -103,5 +105,3 @@ export const useAlerts = ({ budgetId, payments, today, dueToday, states }: Alert
     }
   };
 };
-
-export type Alerts = ReturnType<typeof useAlerts>;

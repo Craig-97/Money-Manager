@@ -73,7 +73,7 @@ export const PaymentRow = ({ payment, dashboard }: RowProps) => {
             <NoteChip payment={payment} notes={notes} />
           </div>
           {/* A debt says what's left, as on Recurring */}
-          {payment.kind === 'recurring' && isDebt(payment) ? (
+          {isDebt(payment) ? (
             <DebtLeft debt={payment} className="mt-[5px] text-xs font-medium text-muted" />
           ) : (
             <p className="mt-0.5 text-xs font-medium text-muted">

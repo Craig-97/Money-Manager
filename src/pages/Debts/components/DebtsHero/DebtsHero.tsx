@@ -1,6 +1,6 @@
 import { Calendar } from 'lucide-react';
 import { clearedText } from '~/lib/debts';
-import { formatBalance, formatMoney, splitPence } from '~/lib/format';
+import { formatBalance, formatMoney, plural, splitPence } from '~/lib/format';
 import { Debts } from '../../hooks';
 
 const chipClasses = 'flex min-w-0 flex-col gap-1 rounded-[18px] bg-hero-chip px-3.5 py-3';
@@ -9,7 +9,7 @@ const chipClasses = 'flex min-w-0 flex-col gap-1 rounded-[18px] bg-hero-chip px-
 export const DebtsHero = ({ debts: model }: { debts: Debts }) => {
   const { debts, totals, base, interest, today } = model;
   const [whole, pence] = splitPence(totals.left);
-  const count = `${debts.length} ${debts.length === 1 ? 'debt' : 'debts'}`;
+  const count = plural(debts.length, 'debt');
 
   return (
     <article

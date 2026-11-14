@@ -1,6 +1,15 @@
 import { PAY_FREQUENCY, PAYDAY_TYPE } from '~/constants';
 import { PayFrequency, Weekday } from '~/graphql/generated';
-import { addDays, fromApiDate, parseIsoDate, PaydayConfig, toIsoDate } from '~/lib/dates';
+import {
+  addDays,
+  dayInMonth,
+  daysBetween,
+  fromApiDate,
+  isSameDay,
+  parseIsoDate,
+  PaydayConfig,
+  toIsoDate
+} from '~/lib/dates';
 
 // Bank holidays as 'YYYY-MM-DD', for the region the user picked
 export type BankHolidays = ReadonlySet<string>;
@@ -40,10 +49,13 @@ const WEEKDAY_NUMBER: Record<Weekday, number> = {
 export const isWorkingDay = (date: Date, holidays: BankHolidays) =>
   date.getDay() !== 0 && date.getDay() !== 6 && !holidays.has(toIsoDate(date));
 
-/* Pay that would land on a weekend or bank holiday arrives the working day before */
-const toWorkingDay = (date: Date, holidays: BankHolidays) => {
+/* The nearest working day to a date: the one before, as pay arrives, or `later` the one after */
+export const toWorkingDay = (
+  date: Date,
+  { holidays, later = false }: { holidays: BankHolidays; later?: boolean }
+) => {
   let day = date;
-  while (!isWorkingDay(day, holidays)) day = addDays(day, -1);
+  while (!isWorkingDay(day, holidays)) day = addDays(day, later ? 1 : -1);
   return day;
 };
 
@@ -59,7 +71,7 @@ const paydayInMonth = (config: PaydayConfig, { year, month }: { year: number; mo
     case PAYDAY_TYPE.LAST_WEEKDAY:
       return lastWeekdayOf(lastDay, WEEKDAY_NUMBER[config.weekday ?? 'FRIDAY']);
     case PAYDAY_TYPE.SET_DAY:
-      return new Date(year, month, Math.min(config.dayOfMonth ?? 1, lastDay.getDate()));
+      return dayInMonth({ year, month, day: config.dayOfMonth ?? 1 });
     default:
       return lastDay;
   }
@@ -84,10 +96,9 @@ const monthlyPaydays = (config: PaydayConfig, { holidays, from, to }: PaydayRang
   const first = anchorIndex + Math.floor((fromIndex - anchorIndex) / step) * step;
   for (let index = first; index <= toIndex; index += step) {
     paydays.push(
-      toWorkingDay(
-        paydayInMonth(config, { year: Math.floor(index / 12), month: index % 12 }),
+      toWorkingDay(paydayInMonth(config, { year: Math.floor(index / 12), month: index % 12 }), {
         holidays
-      )
+      })
     );
   }
   return paydays;
@@ -102,12 +113,12 @@ const weeklyPaydays = (config: PaydayConfig, { holidays, from, to }: PaydayRange
     anchor = addDays(anchor, (target - anchor.getDay() + 7) % 7);
   }
 
-  const daysFromAnchor = Math.floor((from.getTime() - anchor.getTime()) / 86_400_000);
+  const daysFromAnchor = daysBetween(anchor, from);
   const paydays: Date[] = [];
   for (let k = Math.floor(daysFromAnchor / step) - 1; ; k++) {
     const payday = addDays(anchor, k * step);
     if (payday > addDays(to, step)) break;
-    paydays.push(toWorkingDay(payday, holidays));
+    paydays.push(toWorkingDay(payday, { holidays }));
   }
   return paydays;
 };
@@ -157,7 +168,7 @@ export const getPayCycle = (
     start,
     end,
     endUsual: next?.usual ?? end,
-    isPayday: toIsoDate(start) === toIsoDate(today)
+    isPayday: isSameDay(start, today)
   };
 };
 

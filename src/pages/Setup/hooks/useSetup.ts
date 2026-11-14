@@ -11,14 +11,13 @@ import {
   PayFrequency
 } from '~/graphql/generated';
 import { hasErrorCode } from '~/lib/errors';
+import { withFrequency } from '~/lib/payday';
 import { useAuthStore } from '~/state/auth';
 import {
-  allowedRules,
   COMING_UP_STEP,
   INITIAL_VALUES,
   isStepValid,
   LAST_STEP,
-  PAID_INTO_KEY,
   paymentProblem,
   PRESETS,
   SetupValues,
@@ -29,7 +28,7 @@ let nextDraftId = 1;
 const draftId = (prefix: string) => `${prefix}-${nextDraftId++}`;
 
 // The payment dialog: adding one (from a suggestion, or blank) or changing one in the list
-export type SetupPaymentTarget =
+type SetupPaymentTarget =
   { kind: 'recurring'; id?: string; preset?: string } | { kind: 'oneOff'; id?: string };
 
 /* Setup's answers, which step is showing, and saving it all as the budget at the end */
@@ -59,14 +58,7 @@ export const useSetup = () => {
     setValues(current => ({ ...current, [key]: value }));
 
   const setFrequency = (frequency: PayFrequency) =>
-    setValues(current => {
-      const rules = allowedRules(frequency);
-      return {
-        ...current,
-        frequency,
-        rule: rules.includes(current.rule) ? current.rule : rules[0]
-      };
-    });
+    setValues(current => withFrequency(current, frequency));
 
   const presetKey = paymentTarget.kind === 'recurring' ? paymentTarget.preset : undefined;
 
@@ -248,7 +240,6 @@ export const useSetup = () => {
       remove: removeAccount
     },
     openAccount,
-    paidIntoKey: PAID_INTO_KEY,
     step,
     maxStep,
     showErrors,

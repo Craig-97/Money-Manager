@@ -2,8 +2,9 @@ import { Checkbox, CheckboxHitArea } from '~/components/form/Checkbox';
 import { Select } from '~/components/form/Select';
 import { Account, accountLetter } from '~/lib/accounts';
 import { cn } from '~/lib/cn';
+import { formatShortDate } from '~/lib/dates';
 import { formatMoney } from '~/lib/format';
-import { categoryLabel, formatShortDate, FREQUENCY_LABELS, RecurringPayment } from '~/lib/payments';
+import { categoryLabel, FREQUENCY_LABELS, RecurringPayment } from '~/lib/payments';
 
 interface SetupPaymentRowProps {
   payment: RecurringPayment;

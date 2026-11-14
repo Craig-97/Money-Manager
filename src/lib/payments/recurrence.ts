@@ -1,5 +1,5 @@
 import { PaymentFrequency } from '~/graphql/generated';
-import { addDays } from '~/lib/dates';
+import { addDays, dayInMonth } from '~/lib/dates';
 import { DateMove, goesOutOn, MAX_MOVE_DAYS } from './nonWorkingDay';
 
 // The same schedule maths as the API (utils/dates/recurrence.ts), on local dates
@@ -38,9 +38,11 @@ export const occurrence = (
   const days = DAYS_BETWEEN[frequency];
   if (days) return addDays(first, days * k);
 
-  const month = first.getMonth() + (MONTHS_BETWEEN[frequency] ?? 1) * k;
-  const lastDay = new Date(first.getFullYear(), month + 1, 0).getDate();
-  return new Date(first.getFullYear(), month, Math.min(first.getDate(), lastDay));
+  return dayInMonth({
+    year: first.getFullYear(),
+    month: first.getMonth() + (MONTHS_BETWEEN[frequency] ?? 1) * k,
+    day: first.getDate()
+  });
 };
 
 /* Every date the payment goes out on from `from` to `to`, inclusive */
@@ -83,3 +85,16 @@ export const PER_MONTH: Record<PaymentFrequency, number> = {
   BIANNUALLY: 1 / 6,
   ANNUALLY: 1 / 12
 };
+
+/* How many times a year each comes round */
+export const PER_YEAR: Record<PaymentFrequency, number> = {
+  WEEKLY: 52,
+  BIWEEKLY: 26,
+  MONTHLY: 12,
+  QUARTERLY: 4,
+  BIANNUALLY: 2,
+  ANNUALLY: 1
+};
+
+/* Quarterly, 6-monthly and yearly: kept apart as a yearly total, never averaged into a month */
+export const isYearly = (frequency: PaymentFrequency) => PER_YEAR[frequency] < 12;

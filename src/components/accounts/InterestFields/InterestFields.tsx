@@ -5,9 +5,8 @@ import { Select } from '~/components/form/Select';
 import { TextInput } from '~/components/form/TextInput';
 import { InterestFrequency } from '~/graphql/generated';
 import { FREQUENCY_NAMES, interestPerPayment, nextMonthlyInterest } from '~/lib/accounts';
-import { addDays, parseIsoDate, toApiDate } from '~/lib/dates';
+import { addDays, formatShortDate, parseIsoDate, toApiDate } from '~/lib/dates';
 import { formatMoney } from '~/lib/format';
-import { formatShortDate } from '~/lib/payments';
 import { InterestDraft, InterestDraftErrors } from '../accountDraft';
 
 // A select can't hold an empty value, so not said yet has one of its own

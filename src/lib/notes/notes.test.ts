@@ -3,13 +3,14 @@ import { formatShortDay } from '~/lib/dates';
 import { Payment } from '~/lib/payments';
 import {
   BLANK_DRAFT,
-  followPayments,
   defaultRemind,
+  followPayments,
   Note,
   noteDateFrom,
+  noteHeading,
   noteInput,
-  reminderHint,
   remindChoices,
+  reminderHint,
   remindText,
   sameDraft
 } from './notes';
@@ -179,5 +180,12 @@ describe('repeats', () => {
         { today: TODAY, format: date => formatShortDay(date), paymentDue: day('2026-11-01') }
       )
     ).toBe('You’ll get a reminder on Sun 18 Oct, then before each payment after.');
+  });
+});
+
+describe('noteHeading', () => {
+  it('takes the first line, cut short with an ellipsis', () => {
+    expect(noteHeading('Pay the plumber\n\nAsk about the boiler')).toBe('Pay the plumber');
+    expect(noteHeading('x'.repeat(60))).toBe(`${'x'.repeat(47)}…`);
   });
 });

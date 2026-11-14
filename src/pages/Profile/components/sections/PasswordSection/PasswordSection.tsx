@@ -1,4 +1,5 @@
 import { Eye, EyeOff } from 'lucide-react';
+import { describedBy } from '~/components/form/describedBy';
 import { FieldError } from '~/components/form/FieldError';
 import { Label } from '~/components/form/Label';
 import { TextInput } from '~/components/form/TextInput';
@@ -19,9 +20,6 @@ const STRENGTH_COLOURS = [
   'bg-income'
 ];
 const STRENGTH_TEXT = ['', 'text-expense', 'text-note-amber-dot', 'text-income', 'text-income'];
-
-const describedBy = (...ids: (string | false | undefined)[]) =>
-  ids.filter(Boolean).join(' ') || undefined;
 
 /* Changing the password, with a strength meter */
 export const PasswordSection = () => {

@@ -1,6 +1,6 @@
-import { useState } from 'react';
 import { Landmark, Percent, RefreshCw } from 'lucide-react';
 import { Alert, AlertStack } from '~/components/alerts';
+import { useAlertIndex } from '~/hooks/useAlertIndex';
 import { useReminderActions } from '~/hooks/useReminderActions';
 import { useReminders } from '~/hooks/useReminders';
 import { useAccountQuickStore } from '~/state/accountQuick';
@@ -14,18 +14,16 @@ export const AccountAlerts = () => {
   const { budgetId, states, today, fresh } = useReminders();
   const actions = useReminderActions({ budgetId, states, today });
   const openQuick = useAccountQuickStore(s => s.openFor);
-  const [index, setIndex] = useState(0);
   const alerts = fresh.filter(
     reminder =>
       (reminder.kind === 'interestAdded' || reminder.kind === 'balance') && reminder.account
   );
-  // Dealing with the last one moves back to the one before
-  const current = Math.min(index, Math.max(0, alerts.length - 1));
+  const { index, go } = useAlertIndex(alerts.length);
 
   return (
     <AlertStack
-      index={current}
-      onGo={next => setIndex(Math.max(0, Math.min(alerts.length - 1, next)))}
+      index={index}
+      onGo={go}
       alerts={alerts.map(reminder => ({
         key: reminder.key,
         label: reminder.title,

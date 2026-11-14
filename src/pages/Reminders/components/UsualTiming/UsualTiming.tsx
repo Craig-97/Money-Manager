@@ -1,16 +1,10 @@
 import { ChipGroup } from '~/components/ui/ChipGroup';
-import { PAYMENT_REMINDER_DAYS, RENEWAL_REMINDER_DAYS, daysBeforeText } from '~/lib/payments';
+import { daysOptions, PAYMENT_REMINDER_DAYS, RENEWAL_REMINDER_DAYS } from '~/lib/payments';
 import { RemindersPage } from '../../hooks';
 
-const PAYMENT_OPTIONS = PAYMENT_REMINDER_DAYS.map(days => ({
-  value: String(days),
-  label: daysBeforeText(days)
-}));
+const PAYMENT_OPTIONS = daysOptions(PAYMENT_REMINDER_DAYS);
 
-const RENEWAL_OPTIONS = RENEWAL_REMINDER_DAYS.map(days => ({
-  value: String(days),
-  label: daysBeforeText(days)
-}));
+const RENEWAL_OPTIONS = daysOptions(RENEWAL_REMINDER_DAYS);
 
 const PAYDAY_OPTIONS = [
   { value: 'on', label: 'On the day' },

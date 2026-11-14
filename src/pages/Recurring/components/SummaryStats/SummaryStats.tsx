@@ -1,15 +1,14 @@
 import { ApproximatelyEqual } from '~/components/payments/PaymentParts';
 import { tileLift } from '~/components/ui/Tile';
 import { cn } from '~/lib/cn';
-import { formatMoney } from '~/lib/format';
-import { formatShortDate } from '~/lib/payments';
+import { formatShortDate } from '~/lib/dates';
+import { formatMoney, plural } from '~/lib/format';
 import { Recurring } from '../../hooks';
 import { signedTotal } from '../../recurringModel';
 
 const statClasses = 'flex min-w-0 flex-col gap-2.5 px-7 py-[26px]';
 const labelClasses = 'text-[13px] font-semibold text-muted';
 const figureClasses = 'num text-[32px] leading-[1.1] font-extrabold';
-const plural = (count: number, word: string) => `${count} ${word}${count === 1 ? '' : 's'}`;
 
 /* Desktop: monthly recurring, what's still to pay before payday, and renewals coming up */
 export const SummaryStats = ({ recurring }: { recurring: Recurring }) => {

@@ -8,9 +8,9 @@ import { IconButton } from '~/components/ui/IconButton';
 import { SegmentedControl } from '~/components/ui/SegmentedControl';
 import { NoteRepeat, PaymentFrequency } from '~/graphql/generated';
 import { cn } from '~/lib/cn';
-import { formatShortDay, toIsoDate } from '~/lib/dates';
+import { formatShortDate, formatShortDay, toIsoDate } from '~/lib/dates';
 import { defaultRemind, NoteDraft, REPEAT_LABELS, reminderHint, remindChoices } from '~/lib/notes';
-import { daysBeforeText, formatShortDate } from '~/lib/payments';
+import { daysBeforeText } from '~/lib/payments';
 import { NoteDraftState } from '../../useNoteDraft';
 
 // Radix's select can't have an empty value, so no payment is this

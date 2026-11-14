@@ -54,5 +54,5 @@ export const useSignInForm = () => {
   // the page wouldn't see formState's proxy update
   const { errors, isSubmitting } = useFormState({ control: form.control });
 
-  return { register: form.register, control: form.control, errors, isSubmitting, onSubmit };
+  return { register: form.register, errors, isSubmitting, onSubmit };
 };

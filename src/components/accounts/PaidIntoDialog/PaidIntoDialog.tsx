@@ -5,8 +5,8 @@ import { Button } from '~/components/ui/Button';
 import { Modal } from '~/components/ui/Modal';
 import { useBackToAccount } from '~/hooks/useBackToAccount';
 import { Account, paidIntoAccountOf } from '~/lib/accounts';
+import { formatShortDate } from '~/lib/dates';
 import { PayCycle } from '~/lib/payday';
-import { formatShortDate } from '~/lib/payments';
 import { useAccountQuickStore } from '~/state/accountQuick';
 import { AccountSummary } from '../AccountSummary';
 

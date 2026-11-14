@@ -1,7 +1,7 @@
 import { daysBetween } from '~/lib/dates';
 import { addDays } from '~/lib/dates';
 import { roundPence } from '~/lib/format';
-import { Debt, occurrencesBetween, PER_MONTH, RecurringPayment } from '~/lib/payments';
+import { Debt, occurrencesBetween, Payment, PER_MONTH, RecurringPayment } from '~/lib/payments';
 
 /*
  * Payoff estimates for the Debts page. Everything works month by month: each month a debt gets its
@@ -12,10 +12,11 @@ import { Debt, occurrencesBetween, PER_MONTH, RecurringPayment } from '~/lib/pay
 // A recurring payment that's paying off a debt
 export type DebtPayment = RecurringPayment & { debt: NonNullable<RecurringPayment['debt']> };
 
-export const isDebt = (payment: RecurringPayment): payment is DebtPayment => payment.debt !== null;
+export const isDebt = (payment: Payment): payment is DebtPayment =>
+  payment.kind === 'recurring' && payment.debt !== null;
 
 // What a payoff estimate needs from a debt, so a form can work one out before it's saved
-export type PayoffDebt = Pick<DebtPayment, 'id' | 'amount' | 'frequency'> & {
+type PayoffDebt = Pick<DebtPayment, 'id' | 'amount' | 'frequency'> & {
   debt: Pick<DebtPayment['debt'], 'balance' | 'apr'>;
 };
 
@@ -120,7 +121,7 @@ export const simulatePayoff = (
 export const monthFromNow = (today: Date, months: number) =>
   new Date(today.getFullYear(), today.getMonth() + months, 1);
 
-export interface DebtTotals {
+interface DebtTotals {
   // What's left to pay across them all
   left: number;
   // What was borrowed: each debt's starting balance, or its balance now when that isn't known
@@ -139,7 +140,7 @@ export const debtTotals = (debts: readonly DebtPayment[]): DebtTotals => {
   let monthly = 0;
   for (const debt of debts) {
     left += debt.debt.balance;
-    started += Math.max(debt.debt.startingBalance ?? debt.debt.balance, debt.debt.balance);
+    started += startedAt(debt);
     monthly += monthlyPayment(debt);
   }
   const paidOff = started - left;

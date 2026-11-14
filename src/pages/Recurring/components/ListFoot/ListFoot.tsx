@@ -1,6 +1,7 @@
 import { ListTotal } from '~/components/payments/PaymentParts';
 import { cn } from '~/lib/cn';
-import { formatShortDate } from '~/lib/payments';
+import { formatShortDate } from '~/lib/dates';
+import { plural } from '~/lib/format';
 import { Recurring } from '../../hooks';
 
 /*
@@ -15,7 +16,7 @@ export const ListFoot = ({
   compact?: boolean;
 }) => {
   const { tab, listed, listedTotals, cycle, today } = recurring;
-  const count = `${listed.length} ${listed.length === 1 ? 'payment' : 'payments'}`;
+  const count = plural(listed.length, 'payment');
   const label =
     tab === 'cycle'
       ? `${count} before payday · ${formatShortDate(cycle.end, today)}`

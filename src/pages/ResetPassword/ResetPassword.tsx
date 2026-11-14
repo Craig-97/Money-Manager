@@ -5,6 +5,7 @@ import { AuthHeading } from '~/components/auth/AuthHeading';
 import { AuthLayout } from '~/components/auth/AuthLayout';
 import { AuthResult } from '~/components/auth/AuthResult';
 import { PasswordRules } from '~/components/auth/PasswordRules';
+import { describedBy } from '~/components/form/describedBy';
 import { FieldError } from '~/components/form/FieldError';
 import { PasswordInput } from '~/components/form/PasswordInput';
 import {
@@ -59,9 +60,10 @@ export const ResetPassword = () => {
                 placeholder="Create a new password"
                 boxClassName={authInputBoxClasses}
                 invalid={!!errors.password}
-                aria-describedby={
-                  errors.password ? `password-rules ${authErrorId('password')}` : 'password-rules'
-                }
+                aria-describedby={describedBy(
+                  'password-rules',
+                  !!errors.password && authErrorId('password')
+                )}
                 {...register('password')}
               />
               <PasswordRules id="password-rules" password={password} invalid={!!errors.password} />

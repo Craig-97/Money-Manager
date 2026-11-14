@@ -12,8 +12,9 @@ import { useMediaQuery } from '~/hooks/useMediaQuery';
 import { usePayCycle } from '~/hooks/usePayCycle';
 import { toAccounts } from '~/lib/accounts';
 import { cn } from '~/lib/cn';
+import { formatShortDate } from '~/lib/dates';
 import { formatBalance } from '~/lib/format';
-import { formatShortDate, RecurringPayment, toPayments } from '~/lib/payments';
+import { RecurringPayment, toPayments } from '~/lib/payments';
 import { SetupPaymentRow } from './components';
 import { useSetupAccounts } from './useSetupAccounts';
 

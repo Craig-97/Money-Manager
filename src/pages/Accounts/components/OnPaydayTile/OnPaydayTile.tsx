@@ -1,7 +1,7 @@
 import { ArrowRight, Plus } from 'lucide-react';
 import { Tile } from '~/components/ui/Tile';
+import { formatShortDate } from '~/lib/dates';
 import { formatMoney } from '~/lib/format';
-import { formatShortDate } from '~/lib/payments';
 import { Accounts } from '../../hooks';
 
 const rowClasses = 'flex items-center gap-3 py-1 md:min-h-16 md:gap-3.5 md:py-1.5';

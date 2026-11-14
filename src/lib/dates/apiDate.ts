@@ -24,6 +24,10 @@ export const startOfToday = (now = new Date()) =>
 export const addDays = (date: Date, days: number) =>
   new Date(date.getFullYear(), date.getMonth(), date.getDate() + days);
 
+/* The given day in a month, or its last day when it's shorter: the 31st falls on 30 Sep */
+export const dayInMonth = ({ year, month, day }: { year: number; month: number; day: number }) =>
+  new Date(year, month, Math.min(day, new Date(year, month + 1, 0).getDate()));
+
 /* Whole days from one local midnight to another */
 export const daysBetween = (from: Date, to: Date) =>
   Math.round((startOfToday(to).getTime() - startOfToday(from).getTime()) / 86_400_000);

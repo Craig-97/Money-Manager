@@ -7,11 +7,10 @@ import {
   MarkPaymentsUnpaidDocument,
   SkipRecurringPaymentsDocument
 } from '~/graphql/generated';
-import { toApiDate } from '~/lib/dates';
-import { getApiErrorMessage } from '~/lib/errors';
+import { formatShortDate, startOfToday, toApiDate } from '~/lib/dates';
 import { formatMoney, roundPence } from '~/lib/format';
-import { formatShortDate, Payment, RecurringPayment, repeatsInCycle } from '~/lib/payments';
-import { showToast } from '~/state/toast';
+import { Payment, RecurringPayment, repeatsInCycle } from '~/lib/payments';
+import { showErrorToast, showToast } from '~/state/toast';
 
 const idsOf = (payments: readonly Payment[], kind: Payment['kind']) =>
   payments.filter(payment => payment.kind === kind).map(payment => payment.id);
@@ -39,9 +38,6 @@ const debtNote = (payment: Payment, balanceAfter: number | undefined) => {
   const moved = `${formatMoney(Math.abs(change))} ${change >= 0 ? 'off' : 'added to'} what you owe`;
   return ` · ${moved}${interest > 0 ? `, after ${formatMoney(interest)} interest` : ''}`;
 };
-
-const showError = (error: unknown) =>
-  showToast({ message: getApiErrorMessage(error, "Couldn't save that. Try again.") });
 
 /* Paying, skipping and deleting payments, with a toast to say it's done */
 export const usePaymentActions = (budgetId: string) => {
@@ -88,7 +84,7 @@ export const usePaymentActions = (budgetId: string) => {
         });
       }
     } catch (error) {
-      showError(error);
+      showErrorToast(error);
     }
   };
 
@@ -118,7 +114,7 @@ export const usePaymentActions = (budgetId: string) => {
           : `${payment.name} is no longer skipped`
       });
     } catch (error) {
-      showError(error);
+      showErrorToast(error);
     }
   };
 
@@ -140,14 +136,14 @@ export const usePaymentActions = (budgetId: string) => {
       const skipped = until
         ? 'for the rest of this cycle'
         : repeatsInCycle(payment) && payment.dueDate
-          ? `for ${formatShortDate(payment.dueDate)}`
+          ? `for ${formatShortDate(payment.dueDate, startOfToday())}`
           : 'this cycle';
       // A debt's interest doesn't stop for a skipped payment
       showToast({
         message: `${payment.name} skipped ${skipped}${payment.debt ? ' · its interest still builds up until the next payment' : ''}`
       });
     } catch (error) {
-      showError(error);
+      showErrorToast(error);
     }
   };
 
@@ -182,7 +178,7 @@ export const usePaymentActions = (budgetId: string) => {
       ]);
       showToast({ message: `Deleted ${describe(payments)}` });
     } catch (error) {
-      showError(error);
+      showErrorToast(error);
     }
   };
 

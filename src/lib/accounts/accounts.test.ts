@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 import { PayCycle } from '~/lib/payday';
 import { OneOffPayment, RecurringPayment } from '~/lib/payments';
 import {
-  joinNames,
   Account,
   accountMeta,
   accountOf,
@@ -10,7 +9,6 @@ import {
   forFreeToSpend,
   hasSeveralSpending,
   isStale,
-  staleText,
   updatedText
 } from './accounts';
 import { beforePaydayByAccount, goesBelowZero } from './beforePayday';
@@ -85,7 +83,6 @@ describe('accounts', () => {
     expect(updatedText(old, TODAY)).toBe('Updated 5 weeks ago');
     expect(isStale(old, TODAY)).toBe(true);
     expect(isStale({ balanceUpdatedAt: day('2026-09-05') }, TODAY)).toBe(false);
-    expect(staleText(old, TODAY)).toBe('Cash ISA hasn’t been updated in 5 weeks');
   });
 
   it('describes each account under its name', () => {
@@ -214,14 +211,5 @@ describe('before payday by account', () => {
     expect(rowOf('holiday').lowest).toEqual({ amount: -40, date: day('2026-10-23') });
     expect(goesBelowZero(rowOf('holiday'))).toBe(true);
     expect(goesBelowZero(rowOf('joint'))).toBe(false);
-  });
-});
-
-describe('joinNames', () => {
-  it('lists names as a sentence would', () => {
-    expect(joinNames([])).toBe('');
-    expect(joinNames(['Netflix'])).toBe('Netflix');
-    expect(joinNames(['Netflix', 'Gym'])).toBe('Netflix and Gym');
-    expect(joinNames(['Netflix', 'Gym', 'Phone'])).toBe('Netflix, Gym and Phone');
   });
 });

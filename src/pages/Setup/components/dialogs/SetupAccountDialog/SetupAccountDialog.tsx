@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Trash } from 'lucide-react';
 import {
   AccountChooser,
+  accountDialogTitle,
   AccountDraft,
   AccountFields,
   blankDraft,
@@ -45,13 +46,7 @@ export const SetupAccountDialog = ({ setup }: { setup: SetupState }) => {
     <Modal
       open={dialog.open}
       onOpenChange={next => (next ? undefined : dialog.close())}
-      title={
-        editing
-          ? `Edit ${editing.draft.name}`
-          : choosing
-            ? 'Add account'
-            : `Add ${draft.kind === 'SPENDING' ? 'spending' : 'savings'} account`
-      }
+      title={accountDialogTitle(draft.kind, { editing: editing?.draft.name, choosing })}
       onBack={!editing && !choosing ? () => setChoosing(true) : undefined}
       backLabel="Back to account types"
       initialFocusId={choosing ? undefined : 'account-balance'}

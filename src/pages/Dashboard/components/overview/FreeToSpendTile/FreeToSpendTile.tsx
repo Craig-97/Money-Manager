@@ -1,7 +1,7 @@
 import { Calendar, Check, PenLine, Plus, TriangleAlert, X } from 'lucide-react';
 import { Button } from '~/components/ui/Button';
+import { formatShortDate } from '~/lib/dates';
 import { formatBalance, formatMoney, splitPence } from '~/lib/format';
-import { formatShortDate } from '~/lib/payments';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
 import { Dashboard } from '../../../hooks';
 
@@ -9,7 +9,7 @@ const chipClasses = 'flex min-w-0 flex-col gap-1 rounded-[18px] bg-hero-chip px-
 
 /* The accent card on desktop: free to spend, and how it's worked out */
 export const FreeToSpendTile = ({ dashboard }: { dashboard: Dashboard }) => {
-  const { summary, cycle, isEmpty, balanceEditor: editor } = dashboard;
+  const { summary, cycle, today, isEmpty, balanceEditor: editor } = dashboard;
   const openChooser = usePaymentDialogStore(s => s.openChooser);
   const [whole, pence] = splitPence(summary.freeToSpend);
   const overdrawn = summary.freeToSpend < 0;
@@ -36,7 +36,7 @@ export const FreeToSpendTile = ({ dashboard }: { dashboard: Dashboard }) => {
         </div>
         <span className="inline-flex items-center gap-2 rounded-full bg-hero-chip px-3.5 py-2 text-[13px] font-bold">
           <Calendar size={15} strokeWidth={2.25} aria-hidden="true" />
-          Until {formatShortDate(cycle.end)}
+          Until {formatShortDate(cycle.end, today)}
         </span>
       </div>
 

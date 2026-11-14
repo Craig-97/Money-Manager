@@ -2,6 +2,7 @@ import { Check, ChevronDown } from 'lucide-react';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { AmountInput } from '~/components/form/AmountInput';
 import { DatePicker } from '~/components/form/DatePicker';
+import { describedBy } from '~/components/form/describedBy';
 import { FieldError } from '~/components/form/FieldError';
 import { Radio } from '~/components/form/Radio';
 import { Select } from '~/components/form/Select';
@@ -38,9 +39,6 @@ interface PayStepProps {
   // The next two paydays from these answers
   nextPaydays: Date[];
 }
-
-const describedBy = (...ids: (string | false | undefined)[]) =>
-  ids.filter(Boolean).join(' ') || undefined;
 
 /* Step 1: how often and on which day pay arrives, and how much */
 export const PayStep = ({ setup, errors, nextPaydays }: PayStepProps) => {

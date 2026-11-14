@@ -1,17 +1,19 @@
 import { PaydayConfig } from '~/lib/dates';
+import { ordinal } from '~/lib/format';
 import { PAY_FREQUENCY_LABELS, REGIONS, WEEKDAYS } from './options';
 
-const paydayRule = ({ type, weekday }: PaydayConfig) => {
-  const day = WEEKDAYS.find(item => item.value === weekday)?.long;
+/* "last working day", "last Friday", "the 15th", "Fridays" */
+const paydayRule = ({ type, weekday, dayOfMonth }: PaydayConfig) => {
+  const day = WEEKDAYS.find(item => item.value === weekday)?.long ?? 'Friday';
   switch (type) {
     case 'LAST_DAY':
       return 'last working day';
     case 'LAST_WEEKDAY':
-      return `last ${day ?? 'Friday'}`;
+      return `last ${day}`;
     case 'SET_DAY':
-      return 'set day';
+      return `the ${ordinal(dayOfMonth || 1)}`;
     case 'SET_WEEKDAY':
-      return 'set weekday';
+      return `${day}s`;
   }
 };
 

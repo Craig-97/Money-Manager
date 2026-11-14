@@ -47,6 +47,17 @@ export const EMPTY_ACCOUNT_DRAFT: AccountDraft = {
 };
 
 /* A new account of the kind chosen: a spending account counts in free to spend, savings don't */
+/* "Edit Joint bills", "Add account" while a kind is being chosen, "Add savings account" */
+export const accountDialogTitle = (
+  kind: AccountKind,
+  { editing, choosing }: { editing: string | undefined; choosing: boolean }
+) =>
+  editing
+    ? `Edit ${editing}`
+    : choosing
+      ? 'Add account'
+      : `Add ${kind === 'SPENDING' ? 'spending' : 'savings'} account`;
+
 export const blankDraft = (kind: AccountKind): AccountDraft => ({
   ...EMPTY_ACCOUNT_DRAFT,
   kind,

@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { formatLongDate } from '../dates';
-import { formatLabel } from './formatLabel';
 import { getInitials } from './initials';
+import { joinNames } from './joinNames';
 import { formatBalance, formatMoney, formatPayment, parseMoney } from './money';
+import { ordinal } from './ordinal';
+import { plural } from './plural';
 
 describe('getInitials', () => {
   it('takes the first letter of each name', () => {
@@ -16,10 +18,21 @@ describe('getInitials', () => {
   });
 });
 
-describe('formatLabel', () => {
-  it('turns API enums into labels', () => {
-    expect(formatLabel('ENGLAND_AND_WALES')).toBe('England & Wales');
-    expect(formatLabel('FOUR_WEEKLY')).toBe('4 Weekly');
+describe('ordinal', () => {
+  it('adds the suffix, with 11th to 13th as teens', () => {
+    expect([1, 2, 3, 4, 11, 12, 13, 21, 22, 23, 31].map(ordinal)).toEqual([
+      '1st',
+      '2nd',
+      '3rd',
+      '4th',
+      '11th',
+      '12th',
+      '13th',
+      '21st',
+      '22nd',
+      '23rd',
+      '31st'
+    ]);
   });
 });
 
@@ -52,5 +65,22 @@ describe('money', () => {
     expect(parseMoney('12.345')).toBeNull();
     expect(parseMoney('abc')).toBeNull();
     expect(parseMoney('')).toBeNull();
+  });
+});
+
+describe('plural', () => {
+  it('adds an s for any count but one', () => {
+    expect(plural(1, 'month')).toBe('1 month');
+    expect(plural(0, 'note')).toBe('0 notes');
+    expect(plural(3, 'recurring payment')).toBe('3 recurring payments');
+  });
+});
+
+describe('joinNames', () => {
+  it('lists names as a sentence would', () => {
+    expect(joinNames([])).toBe('');
+    expect(joinNames(['Netflix'])).toBe('Netflix');
+    expect(joinNames(['Netflix', 'Gym'])).toBe('Netflix and Gym');
+    expect(joinNames(['Netflix', 'Gym', 'Phone'])).toBe('Netflix, Gym and Phone');
   });
 });

@@ -4,7 +4,7 @@ import { Button } from '~/components/ui/Button';
 import { IconButton } from '~/components/ui/IconButton';
 import { tileLift } from '~/components/ui/Tile';
 import { cn } from '~/lib/cn';
-import { formatBalance, formatMoney } from '~/lib/format';
+import { formatBalance, formatMoney, plural } from '~/lib/format';
 import { paidText } from '~/lib/payday';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
 import { Dashboard } from '../../../hooks';
@@ -92,7 +92,7 @@ export const MonthlyStats = ({ dashboard }: { dashboard: Dashboard }) => {
           </>
         ) : (
           <p className="text-[13px] font-medium text-muted">
-            {recurringCount} {recurringCount === 1 ? 'recurring payment' : 'recurring payments'}
+            {plural(recurringCount, 'recurring payment')}
           </p>
         )}
       </div>

@@ -1,16 +1,16 @@
 import { formatMonthYear } from '~/lib/dates';
 import {
   clearedText,
+  comparedToNow,
   DebtPayment,
-  extraPerPayment,
+  debtTotals,
   monthFromNow,
-  monthlyPayment,
   Payoff,
   payoffOrder,
   PayoffStrategy,
   simulatePayoff
 } from '~/lib/debts';
-import { formatMoney, roundPence } from '~/lib/format';
+import { formatMoney } from '~/lib/format';
 
 /* The payoff plan's choices: what happens to a cleared debt's payment */
 export const STRATEGIES: Record<PayoffStrategy, { short: string; label: string; blurb: string }> = {
@@ -74,9 +74,7 @@ export const sortDebts = (
   return debts.toSorted((a, b) => by[sort](a, b) || a.name.localeCompare(b.name));
 };
 
-const monthsText = (months: number) => `${months} ${months === 1 ? 'month' : 'months'}`;
-
-export interface PlanFigures {
+interface PlanFigures {
   // As things are: each debt keeps its payment and nothing extra is paid
   base: Payoff;
   plan: Payoff;
@@ -111,23 +109,15 @@ export const planFigures = (
   const plan = simulatePayoff(debts, { strategy, extra });
   const ids = payoffOrder(debts, strategy);
   const byId = new Map(debts.map(debt => [debt.id, debt]));
-  const diff = base.months !== null && plan.months !== null ? base.months - plan.months : 0;
-  const saved = Math.round(base.interest - plan.interest);
-  const monthly = debts.reduce((sum, debt) => sum + monthlyPayment(debt), 0);
+  const { monthly } = debtTotals(debts);
 
   return {
     base,
     plan,
     baseFreeBy: clearedText(base.months, today),
     freeBy: clearedText(plan.months, today),
-    sooner:
-      base.months === null && plan.months !== null
-        ? 'Cleared at last'
-        : diff > 0
-          ? `${monthsText(diff)} sooner`
-          : 'Same as now',
+    ...comparedToNow(base, plan),
     interest: plan.interest,
-    saved: saved > 0 ? `${formatMoney(saved, { whole: true })} less than now` : 'Same as now',
     monthly: monthly + extra,
     monthlySub: extra
       ? `${formatMoney(monthly, { whole: true })} + ${formatMoney(extra, { whole: true })} extra`
@@ -139,15 +129,6 @@ export const planFigures = (
     })),
     target: ids.map(id => byId.get(id)!).find(debt => debt.debt.balance > 0 && debt.dueDate) ?? null
   };
-};
-
-const MONTH_NAME = new Intl.DateTimeFormat('en-GB', { month: 'long' });
-
-/* What applying the extra does: the target debt's payment goes up from its next one */
-export const applyChange = (target: DebtPayment, extra: number) => {
-  const amount = roundPence(target.amount + extraPerPayment(target, extra));
-  const from = target.dueDate ? MONTH_NAME.format(target.dueDate) : 'now';
-  return { amount, from };
 };
 
 /* The chart's words: where it starts, where the slower line ends, and the whole thing read out */
@@ -165,8 +146,8 @@ export const chartText = (figures: PlanFigures, { today, left }: { today: Date; 
 };
 
 /* The mobile hero's chips: the biggest balances first, named by their first word */
-export const biggestDebts = (debts: readonly DebtPayment[], count = 3) =>
+export const biggestDebts = (debts: readonly DebtPayment[]) =>
   debts
     .toSorted((a, b) => b.debt.balance - a.debt.balance)
-    .slice(0, count)
+    .slice(0, 3)
     .map(debt => ({ id: debt.id, label: debt.name.split(' ')[0], balance: debt.debt.balance }));

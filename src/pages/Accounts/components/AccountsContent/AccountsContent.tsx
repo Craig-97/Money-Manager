@@ -7,7 +7,7 @@ import { Tile } from '~/components/ui/Tile';
 import { MEDIA, ROUTES } from '~/constants';
 import { Budget } from '~/hooks/useBudget';
 import { useMediaQuery } from '~/hooks/useMediaQuery';
-import { formatBalance, formatMoney } from '~/lib/format';
+import { formatBalance, formatMoney, plural } from '~/lib/format';
 import { useAccountDialogStore } from '~/state/accountDialog';
 import { ACCOUNTS_VIEWS, AccountsViewState, useAccounts } from '../../hooks';
 import { AccountAlerts } from '../AccountAlerts';
@@ -80,9 +80,7 @@ export const AccountsContent = ({
         <DebtsIcon size={17} />
       </span>
       <span className="flex min-w-0 grow flex-col gap-0.5">
-        <span className="text-[15px] font-bold">
-          {debts.length} {debts.length === 1 ? 'debt' : 'debts'}
-        </span>
+        <span className="text-[15px] font-bold">{plural(debts.length, 'debt')}</span>
         <span className="text-xs font-semibold [overflow-wrap:anywhere] text-muted">
           {debtNames}
         </span>

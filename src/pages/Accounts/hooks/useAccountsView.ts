@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Budget } from '~/hooks/useBudget';
 
-export type AccountsView = 'balances' | 'before';
+type AccountsView = 'balances' | 'before';
 
 /*
  * Balances or Before payday. With one account to spend from there's nothing to split by account,

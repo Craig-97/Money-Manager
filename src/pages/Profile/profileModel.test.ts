@@ -1,14 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { toIsoDate } from '~/lib/dates';
-import {
-  passwordStrength,
-  paydayErrors,
-  paydayPlan,
-  paydayPreview,
-  toPaydayInput,
-  toPaydayValues,
-  withFrequency
-} from './profileModel';
+import { paydayErrors, toPaydayInput, toPaydayValues, withFrequency } from '~/lib/payday';
+import { passwordStrength, paydayPreview } from './profileModel';
 
 describe('passwordStrength', () => {
   it('scores length, numbers, mixed case and symbols', () => {
@@ -56,16 +49,6 @@ describe('payday form', () => {
     expect(paydayErrors({ ...toPaydayValues(payday), dayOfMonth: '32' }).dayOfMonth).toBe(
       'Choose a day between 1 and 31'
     );
-  });
-
-  it('describes the plan', () => {
-    expect(paydayPlan(payday)).toBe('Paid monthly · the 15th');
-    expect(paydayPlan({ ...payday, type: 'LAST_WEEKDAY', weekday: 'FRIDAY' })).toBe(
-      'Paid monthly · last Friday'
-    );
-    expect(
-      paydayPlan({ ...payday, frequency: 'WEEKLY', type: 'SET_WEEKDAY', weekday: 'THURSDAY' })
-    ).toBe('Paid weekly · Thursdays');
   });
 });
 

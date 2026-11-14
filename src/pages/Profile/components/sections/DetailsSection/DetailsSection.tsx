@@ -2,18 +2,16 @@ import { FieldError } from '~/components/form/FieldError';
 import { Label } from '~/components/form/Label';
 import { TextInput } from '~/components/form/TextInput';
 import { Button } from '~/components/ui/Button';
-import { CurrentUserQuery } from '~/graphql/generated';
+import { UserFieldsFragment } from '~/graphql/generated';
 import { useDetailsForm } from '../../../hooks';
 import { SECTION_ICONS } from '../sectionIcons';
 import { helpClasses } from '../settingsClasses';
 import { SettingsTile } from '../SettingsTile';
 
-type User = NonNullable<CurrentUserQuery['tokenFindUser']>;
-
 const errorId = (field: string) => `details-${field}-error`;
 
 /* First name, surname and the email they sign in with */
-export const DetailsSection = ({ user }: { user: User }) => {
+export const DetailsSection = ({ user }: { user: UserFieldsFragment }) => {
   const { register, errors, isSubmitting, isDirty, onSubmit } = useDetailsForm(user);
 
   return (

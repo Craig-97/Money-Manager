@@ -5,17 +5,16 @@ import {
   interestPerPayment,
   STALE_DAYS
 } from '~/lib/accounts';
-import { addDays, daysBetween, fromApiDate, toIsoDate } from '~/lib/dates';
+import { addDays, daysBetween, formatShortDate, fromApiDate, inDays, toIsoDate } from '~/lib/dates';
 import { formatMoney } from '~/lib/format';
 import { Note, noteDateFrom, noteHeading, remindText, repeatText } from '~/lib/notes';
 import { PayCycle } from '~/lib/payday';
 import {
-  formatShortDate,
   Payment,
+  ReminderSettings,
   Renewal,
   renewalHeading,
   renewalOf,
-  ReminderSettings,
   timingText
 } from '~/lib/payments';
 
@@ -150,9 +149,7 @@ export const overdueKey = (payment: Pick<Payment, 'id'>, due: Date) =>
  * dashboard's renewal alerts and the renewals list
  */
 export const inTime = (days: number) => {
-  if (days <= 0) return 'today';
-  if (days === 1) return 'tomorrow';
-  if (days < 60) return `in ${days} days`;
+  if (days < 60) return inDays(days);
   if (days < 182) return `in ${Math.round(days / 7)} weeks`;
   return `in ${Math.round(days / 30.44)} months`;
 };
@@ -162,7 +159,8 @@ const dueText = (payment: Payment, days: number) =>
   `${payment.type === 'INCOME' ? 'comes in' : 'is due'} ${inTime(days)}`;
 
 // Recurring payments' next dates, and one-offs not paid yet
-const isStillDue = (payment: Payment) =>
+/* Still to pay: a recurring payment with a next date, or a one-off not yet paid */
+export const isStillDue = (payment: Payment) =>
   payment.kind === 'recurring' ? !!payment.dueDate : !!payment.dueDate && !payment.paidAt;
 
 const paymentEvents = ({ payments, notes, today }: ReminderSources) =>
@@ -436,6 +434,18 @@ const interestAddedEvents = ({ accounts = [], today }: ReminderSources) =>
 const isPutAway = (state: ReminderState | undefined, today: Date) =>
   !!state?.snoozedUntil && state.snoozedUntil > today;
 
+/* Put away with Later until a day still to come, or cleared */
+export const isAway = (state: ReminderState | undefined, today: Date) =>
+  !!state?.cleared || isPutAway(state, today);
+
+/* The timing a payment's reminder goes by: the renewal's for a renewal, otherwise when it's due */
+export const timingOf = ({ kind, payment }: Pick<Reminder, 'kind' | 'payment'>) =>
+  !payment
+    ? null
+    : kind === 'renewal' && payment.kind === 'recurring'
+      ? payment.renewalReminder
+      : payment.dueReminder;
+
 /* Whether a reminder can be cleared: an overdue payment stays until it's paid or skipped */
 export const canClear = (reminder: Pick<Reminder, 'kind'>) => reminder.kind !== 'overdue';
 
@@ -459,7 +469,7 @@ export const laterUntil = (reminder: Pick<Reminder, 'kind'>, today: Date) =>
 const byTime = (a: Date, b: Date) => a.getTime() - b.getTime();
 
 /* Everything that reminds, gone off or not */
-export const allReminders = (sources: ReminderSources): Reminder[] =>
+const allReminders = (sources: ReminderSources): Reminder[] =>
   [
     ...paymentEvents(sources),
     ...renewalEvents(sources),
@@ -521,9 +531,6 @@ export const firedText = (reminder: Reminder, today: Date) => {
   if (days === 1) return 'Yesterday';
   return formatShortDate(reminder.firesOn!, today).replace(/^\w+ /, '');
 };
-
-/* "4 new", for the More menu */
-export const countText = (count: number) => (count ? `${count} new` : 'Nothing new');
 
 /* "Payment · Debt", "Renewal · has a note", "Note", "Payday": what a Coming up row is */
 export const kindText = (reminder: Reminder) => {

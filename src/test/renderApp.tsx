@@ -8,17 +8,9 @@ import { TooltipProvider } from '~/components/ui/Tooltip';
 import { createApolloClient, RefreshFn } from '~/graphql/client';
 import { CurrentUserDocument } from '~/graphql/generated';
 import { Session, useAuthStore } from '~/state/auth';
-import { usePaymentDialogStore } from '~/state/paymentDialog';
-import { usePrefsStore } from '~/state/prefs';
-import { useSidebarStore } from '~/state/sidebar';
 import { createFakeApi, DEFAULT_USER, FakeApi } from './fakeApi';
 
-// Zustand stores are module level state, so reset them between tests
 afterEach(() => {
-  useAuthStore.setState(useAuthStore.getInitialState(), true);
-  usePrefsStore.setState(usePrefsStore.getInitialState(), true);
-  useSidebarStore.setState(useSidebarStore.getInitialState(), true);
-  usePaymentDialogStore.setState(usePaymentDialogStore.getInitialState(), true);
   vi.unstubAllGlobals();
 });
 

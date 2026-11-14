@@ -6,11 +6,10 @@ import {
 } from '~/graphql/generated';
 import { Budget } from '~/hooks/useBudget';
 import { Account } from '~/lib/accounts';
-import { getApiErrorMessage } from '~/lib/errors';
-import { showToast } from '~/state/toast';
+import { showErrorToast, showToast } from '~/state/toast';
 
 const showError = (error: unknown) =>
-  showToast({ message: getApiErrorMessage(error, "Couldn't change that. Try again.") });
+  showErrorToast(error, { fallback: "Couldn't change that. Try again." });
 
 /*
  * What an account's row, menu and view can do without its full form: count it in or out of free to

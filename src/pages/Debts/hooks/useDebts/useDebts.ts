@@ -3,7 +3,7 @@ import { Budget } from '~/hooks/useBudget';
 import { useDebtActions } from '~/hooks/useDebtActions';
 import { usePayCycle } from '~/hooks/usePayCycle';
 import { debtTotals, isDebt, monthlyInterest, paidOffThisCycle, simulatePayoff } from '~/lib/debts';
-import { datesDue, RecurringPayment, toPayments } from '~/lib/payments';
+import { datesDue, toPayments } from '~/lib/payments';
 import { DebtSort, sortDebts } from '../../debtsModel';
 
 /* The budget's debts, what they add up to, and when they'd be paid off as things are */
@@ -12,9 +12,7 @@ export const useDebts = (budget: Budget) => {
   const actions = useDebtActions(budget.id);
   const [sort, setSort] = useState<DebtSort>('rate');
 
-  const debts = toPayments(budget, { today, holidays })
-    .filter((payment): payment is RecurringPayment => payment.kind === 'recurring')
-    .filter(isDebt);
+  const debts = toPayments(budget, { today, holidays }).filter(isDebt);
   // As things are: each debt keeps its own payment, with nothing extra
   const base = simulatePayoff(debts);
   const dueBeforePayday = debts

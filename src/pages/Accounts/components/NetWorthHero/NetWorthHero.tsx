@@ -1,6 +1,6 @@
 import { PageLink } from '~/components/ui/PageLink';
 import { ROUTES } from '~/constants';
-import { formatMoney, splitPence } from '~/lib/format';
+import { formatMoney, plural, splitPence } from '~/lib/format';
 import { Accounts } from '../../hooks';
 
 const chipClasses = 'flex min-w-0 flex-col gap-1 rounded-[18px] bg-hero-chip px-3.5 py-3';
@@ -21,7 +21,7 @@ export const NetWorthHero = ({
   const { totals, accounts, debts } = model;
   const [whole, pence] = splitPence(totals.netWorth);
   const owes = totals.owed > 0;
-  const across = `${accounts.length} ${accounts.length === 1 ? 'account' : 'accounts'}`;
+  const across = plural(accounts.length, 'account');
   const chips = [
     { label: 'Spending', value: totals.spending },
     { label: 'Savings', value: totals.savings }
@@ -59,8 +59,8 @@ export const NetWorthHero = ({
         {compact ? null : (
           <p className="mt-3.5 text-[15px] font-semibold text-hero-muted">
             Across {across}
-            {owes ? ` and ${debts.length} ${debts.length === 1 ? 'debt' : 'debts'}` : ''}. Balances
-            you type in, never linked to your bank.
+            {owes ? ` and ${plural(debts.length, 'debt')}` : ''}. Balances you type in, never linked
+            to your bank.
           </p>
         )}
       </div>

@@ -1,5 +1,7 @@
 import { InterestStrip } from '~/components/accounts/InterestStrip';
 import { PaymentLetter, summaryCardClasses } from '~/components/payments/PaymentParts';
+import { estimateText } from '~/lib/accounts';
+import { formatShortDate } from '~/lib/dates';
 import {
   aprText,
   clearedText,
@@ -10,7 +12,7 @@ import {
   simulatePayoff
 } from '~/lib/debts';
 import { formatMoney } from '~/lib/format';
-import { formatShortDate, PER_PERIOD } from '~/lib/payments';
+import { PER_PERIOD } from '~/lib/payments';
 import { DebtProgress } from '../DebtProgress';
 
 interface DebtSummaryProps {
@@ -64,9 +66,7 @@ export const DebtSummary = ({ debt, today, named = false }: DebtSummaryProps) =>
             }}
           />
           <p className="text-xs leading-[1.45] font-semibold text-muted">
-            An estimate worked out on each day’s balance
-            {since ? ` since ${formatShortDate(since, today)}` : ''}. The payment comes off after
-            it.
+            {estimateText(since, today)} The payment comes off after it.
           </p>
         </div>
       ) : null}

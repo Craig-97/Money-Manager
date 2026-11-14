@@ -58,7 +58,7 @@ export const DebtRow = ({ debt, debts }: { debt: DebtPayment; debts: Debts }) =>
         {clearedText(debts.base.clearedIn[debt.id], debts.today)}
       </span>
       <span role="cell" className="flex justify-end">
-        <DebtMenu debt={debt} onDelete={() => void debts.actions.remove([debt])} />
+        <DebtMenu debt={debt} actions={debts.actions} />
       </span>
     </div>
   );

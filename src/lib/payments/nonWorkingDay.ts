@@ -1,6 +1,6 @@
 import { NonWorkingDay } from '~/graphql/generated';
-import { addDays, toIsoDate } from '~/lib/dates';
-import { BankHolidays, isWorkingDay } from '~/lib/payday';
+import { toIsoDate } from '~/lib/dates';
+import { BankHolidays, toWorkingDay } from '~/lib/payday';
 
 /*
  * Moving a recurring payment's dates off weekends and bank holidays. The API keeps the dates the
@@ -30,10 +30,7 @@ export const DEFAULT_NON_WORKING_DAY: NonWorkingDay = 'NEXT';
 /* The day a date goes out on: itself on a working day, otherwise as the rule says */
 export const goesOutOn = (date: Date, move: DateMove | null | undefined) => {
   if (!move || move.rule === 'ON_DAY') return date;
-  const step = move.rule === 'BEFORE' ? -1 : 1;
-  let day = date;
-  while (!isWorkingDay(day, move.holidays)) day = addDays(day, step);
-  return day;
+  return toWorkingDay(date, { holidays: move.holidays, later: move.rule === 'NEXT' });
 };
 
 /* "a Saturday", "a Sunday" or "a bank holiday": why a date isn't a working day */

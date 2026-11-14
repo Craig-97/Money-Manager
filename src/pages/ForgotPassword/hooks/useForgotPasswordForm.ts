@@ -65,7 +65,6 @@ export const useForgotPasswordForm = () => {
 
   return {
     register: form.register,
-    control: form.control,
     errors,
     isSubmitting,
     onSubmit,

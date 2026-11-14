@@ -1,6 +1,6 @@
 import { ApproximatelyEqual } from '~/components/payments/PaymentParts';
-import { formatMoney } from '~/lib/format';
-import { formatShortDate } from '~/lib/payments';
+import { formatShortDate } from '~/lib/dates';
+import { formatMoney, plural } from '~/lib/format';
 import { Recurring } from '../../hooks';
 import { signedTotal } from '../../recurringModel';
 
@@ -36,7 +36,7 @@ export const MobileSummary = ({ recurring }: { recurring: Recurring }) => {
           <p className="mt-1 num text-2xl font-extrabold">{signedTotal(totals.stillToPay)}</p>
         </div>
         <p className="text-right text-xs font-medium text-muted">
-          {totals.inCycle} {totals.inCycle === 1 ? 'payment' : 'payments'}
+          {plural(totals.inCycle, 'payment')}
           <br />
           by {formatShortDate(cycle.end, today)}
         </p>

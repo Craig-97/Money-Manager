@@ -1,3 +1,4 @@
+import { plural } from '~/lib/format';
 // Dates in the app are local, so they're formatted in the browser's own time zone
 const longDate = new Intl.DateTimeFormat('en-GB', {
   weekday: 'long',
@@ -25,11 +26,45 @@ export const formatShortDay = (date: Date, { withYear = false } = {}) =>
   `${DAYS[date.getDay()]} ${date.getDate()} ${MONTHS[date.getMonth()]}` +
   (withYear ? ` ${date.getFullYear()}` : '');
 
+/*
+ * "Fri 9 Oct", with the year when it isn't this year: "Thu 1 Jul 2027", so a date stays short
+ * enough for a half-width field on a phone
+ */
+export const formatShortDate = (date: Date, today: Date) =>
+  formatShortDay(date, { withYear: date.getFullYear() !== today.getFullYear() });
+
+/* "1 month", "2 weeks", "3 days": how long before something */
+export const spanText = (days: number) => {
+  if (days === 30) return '1 month';
+  if (days % 7 === 0) return plural(days / 7, 'week');
+  return plural(days, 'day');
+};
+
+/* "today", "tomorrow", "in 3 days" */
+export const inDays = (days: number) =>
+  days <= 0 ? 'today' : days === 1 ? 'tomorrow' : `in ${days} days`;
+
 /* "9 Oct" */
 export const formatDayMonth = (date: Date) => `${date.getDate()} ${MONTHS[date.getMonth()]}`;
 
 /* "Sep" */
 export const formatShortMonth = (date: Date) => MONTHS[date.getMonth()];
+
+/* "Fri" */
+export const formatShortWeekday = (date: Date) => DAYS[date.getDay()];
+
+const longWeekday = new Intl.DateTimeFormat('en-GB', { weekday: 'long' });
+
+/* "Friday" */
+export const formatLongWeekday = (date: Date) => longWeekday.format(date);
+
+const longMonth = new Intl.DateTimeFormat('en-GB', { month: 'long' });
+
+/* "November" */
+export const formatLongMonth = (date: Date) => longMonth.format(date);
+
+/* "November 2026" */
+export const formatLongMonthYear = (date: Date) => `${formatLongMonth(date)} ${date.getFullYear()}`;
 
 /* "May 2028" */
 export const formatMonthYear = (date: Date) => `${formatShortMonth(date)} ${date.getFullYear()}`;

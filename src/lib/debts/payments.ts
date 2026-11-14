@@ -1,14 +1,6 @@
 import { PaymentFrequency } from '~/graphql/generated';
 import { roundPence } from '~/lib/format';
-
-const PAYMENTS_PER_YEAR: Record<PaymentFrequency, number> = {
-  WEEKLY: 52,
-  BIWEEKLY: 26,
-  MONTHLY: 12,
-  QUARTERLY: 4,
-  BIANNUALLY: 2,
-  ANNUALLY: 1
-};
+import { PER_YEAR } from '~/lib/payments';
 
 interface PaidOff {
   interest: number;
@@ -28,7 +20,7 @@ export const payTowardsDebt = (
   let balance = debt.balance;
   let interest = 0;
   for (let k = 0; k < times; k++) {
-    const periodInterest = roundPence((balance * debt.apr) / 100 / PAYMENTS_PER_YEAR[frequency]);
+    const periodInterest = roundPence((balance * debt.apr) / 100 / PER_YEAR[frequency]);
     interest += periodInterest;
     balance = Math.max(0, roundPence(balance + periodInterest - amount));
   }

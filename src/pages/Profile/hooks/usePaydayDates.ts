@@ -1,10 +1,8 @@
 import { useState } from 'react';
 import { useMutation } from '@apollo/client/react';
 import { SetPaydayOverrideDocument } from '~/graphql/generated';
-import { addDays, parseIsoDate, startOfToday, toIsoDate } from '~/lib/dates';
-import { getApiErrorMessage } from '~/lib/errors';
-import { formatShortDate } from '~/lib/payments';
-import { showToast } from '~/state/toast';
+import { addDays, formatShortDate, parseIsoDate, startOfToday, toIsoDate } from '~/lib/dates';
+import { showErrorToast, showToast } from '~/state/toast';
 import { PaydayPreview } from '../profileModel';
 
 export type QuickPick = 'before' | 'week' | 'pick';
@@ -45,7 +43,7 @@ export const usePaydayDates = ({
       : chosen < today
         ? 'Choose today or a later date'
         : next && chosen >= next.date
-          ? `Choose a date before ${formatShortDate(next.date)}`
+          ? `Choose a date before ${formatShortDate(next.date, today)}`
           : undefined;
 
   const start = (index: number) => {
@@ -67,13 +65,11 @@ export const usePaydayDates = ({
       setEditing(null);
       showToast({
         message: date
-          ? `Payday moved to ${formatShortDate(date)}`
-          : `Payday back to ${formatShortDate(target.usual)}`
+          ? `Payday moved to ${formatShortDate(date, today)}`
+          : `Payday back to ${formatShortDate(target.usual, today)}`
       });
     } catch (failure) {
-      showToast({
-        message: getApiErrorMessage(failure, "Couldn't change that payday. Try again.")
-      });
+      showErrorToast(failure, { fallback: "Couldn't change that payday. Try again." });
     }
   };
 
