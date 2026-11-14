@@ -4,8 +4,8 @@ import * as Popover from '@radix-ui/react-popover';
 import { popoverClasses } from '~/components/ui/popoverClasses';
 import { cn } from '~/lib/cn';
 import { formatShortDate, parseIsoDate, startOfToday, toIsoDate } from '~/lib/dates';
+import { Calendar } from '../Calendar';
 import { fieldClasses } from '../fieldClasses';
-import { Calendar } from './Calendar';
 
 interface DatePickerProps {
   // 'YYYY-MM-DD', or '' for no date

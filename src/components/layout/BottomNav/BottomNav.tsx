@@ -1,31 +1,9 @@
 import { Plus } from 'lucide-react';
-import { NavLink } from 'react-router';
-import { preloadPage } from '~/app/routes/pageModules';
-import { DashboardIcon, IconProps } from '~/components/icons';
 import { useAddAction } from '~/hooks/useAddAction';
 import { cn } from '~/lib/cn';
-import { NavItem, navItem } from '../navItems';
+import { navItem } from '../navItems';
+import { BottomNavLink } from './BottomNavLink';
 import { MoreMenu } from './MoreMenu';
-
-// The mobile nav draws the dashboard tiles with rounder corners
-const RoundedDashboardIcon = (props: IconProps) => <DashboardIcon cornerRadius={2} {...props} />;
-
-const BottomNavLink = ({ item }: { item: NavItem }) => {
-  const { to, label, page } = item;
-  const Icon = page === 'dashboard' ? RoundedDashboardIcon : item.Icon;
-  const preload = () => preloadPage(page);
-
-  return (
-    <NavLink
-      to={to}
-      aria-label={label}
-      onFocus={preload}
-      onTouchStart={preload}
-      className="flex h-[52px] w-14 items-center justify-center rounded-full text-nav-icon no-underline hover:text-nav-active-bg aria-[current=page]:bg-nav-active-bg aria-[current=page]:text-nav-active-text">
-      <Icon size={22} strokeWidth={1.9} />
-    </NavLink>
-  );
-};
 
 /*
  * The floating mobile nav: the everyday pages either side of the add button, and More for the
