@@ -1,4 +1,4 @@
-import { formatLongMonth, formatShortMonth, formatShortWeekday } from '~/lib/dates';
+import { formatLongMonth } from '~/lib/dates';
 import { Reminder, ReminderFilter } from '~/lib/reminders';
 
 export type RemindersTab = 'new' | 'up';
@@ -31,8 +31,5 @@ export const groupByMonth = (reminders: readonly Reminder[], today: Date): Remin
   return groups;
 };
 
-/* The date box's two lines: the weekday over the day, or the month once it's grouped by year */
-export const dateBox = (date: Date, today: Date) => ({
-  top: (isFar(date, today) ? formatShortMonth(date) : formatShortWeekday(date)).toUpperCase(),
-  day: date.getDate()
-});
+/* What the date box shows over the day: the weekday, or the month once it's grouped by year */
+export const dateBoxTop = (date: Date, today: Date) => (isFar(date, today) ? 'month' : 'weekday');

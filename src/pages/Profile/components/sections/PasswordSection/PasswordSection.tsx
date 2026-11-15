@@ -1,8 +1,9 @@
 import { Eye, EyeOff } from 'lucide-react';
 import { describedBy, FieldError, Label, TextInput } from '~/components/form';
-import { Button, IconButton } from '~/components/ui';
+import { IconButton } from '~/components/ui';
 import { cn } from '~/lib/cn';
 import { usePasswordForm } from '../../../hooks';
+import { SaveFooter } from '../SaveFooter';
 import { SECTION_ICONS } from '../sectionIcons';
 import { helpClasses } from '../settingsClasses';
 import { SettingsTile } from '../SettingsTile';
@@ -32,26 +33,12 @@ export const PasswordSection = () => {
       mobileDescription="Use one you don’t use anywhere else."
       onSubmit={() => void onSubmit()}
       footer={
-        <>
-          <span className={helpClasses}>
-            {errors.root ? (
-              <span role="alert" className="font-bold text-expense">
-                {errors.root.message}
-              </span>
-            ) : (
-              'You’ll stay signed in on this device.'
-            )}
-          </span>
-          <Button
-            type="submit"
-            variant="accent"
-            disabled={!canSubmit}
-            loading={isSubmitting}
-            loadingText="Saving…"
-            className="font-bold">
-            Save changes
-          </Button>
-        </>
+        <SaveFooter
+          help="You’ll stay signed in on this device."
+          error={errors.root?.message}
+          disabled={!canSubmit}
+          loading={isSubmitting}
+        />
       }>
       <div>
         <Label htmlFor="password-current">Current password</Label>

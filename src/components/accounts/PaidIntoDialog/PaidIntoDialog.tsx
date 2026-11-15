@@ -6,7 +6,7 @@ import { Account, paidIntoAccountOf } from '~/lib/accounts';
 import { formatShortDate } from '~/lib/dates';
 import { PayCycle } from '~/lib/payday';
 import { useAccountQuickStore } from '~/state/accountQuick';
-import { Button, Modal } from '../../ui';
+import { Modal, ModalActions } from '../../ui';
 import { AccountSummary } from '../AccountSummary';
 
 interface PaidIntoDialogProps {
@@ -42,19 +42,10 @@ export const PaidIntoDialog = ({ accounts, today, cycle, onConfirm }: PaidIntoDi
       onBack={back}
       backLabel={`Back to ${account.name}`}
       footer={
-        <>
-          <span className="flex-1" />
-          <Button variant="ghost" onClick={close} className="max-md:h-[52px]">
-            Cancel
-          </Button>
-          <Button
-            variant="accent"
-            onClick={() => void confirm()}
-            loading={saving}
-            className="max-md:h-[52px]">
-            Move my pay here
-          </Button>
-        </>
+        <ModalActions
+          cancel={{ onClick: close }}
+          confirm={{ label: 'Move my pay here', onClick: () => void confirm(), loading: saving }}
+        />
       }>
       <AccountSummary account={account} today={today} named />
       <p className="flex items-start gap-2.5 rounded-[18px] bg-accent-soft px-4 py-3 text-[13px] leading-[1.4] font-bold text-accent-text">

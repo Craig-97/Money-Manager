@@ -1,3 +1,4 @@
+import { FieldHint } from '../../../../form';
 import { SegmentedControl } from '../../../../ui';
 import { PaymentForm, PaymentRole } from '../../usePaymentForm';
 import { DebtFields } from '../DebtFields';
@@ -35,7 +36,7 @@ export const RoleChoice = ({ form }: { form: PaymentForm }) => {
           size="lg"
           fullWidth
         />
-        <p className="mt-2 ml-1 text-xs leading-[1.4] font-semibold text-muted">{current.hint}</p>
+        <FieldHint>{current.hint}</FieldHint>
       </div>
       {form.role === 'debt' ? <DebtFields form={form} /> : null}
       {form.role === 'move' ? <MoveInto form={form} /> : null}

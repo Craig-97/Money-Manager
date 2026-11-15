@@ -3,6 +3,7 @@ import { Budget } from '~/hooks/useBudget';
 import { usePayCycle } from '~/hooks/usePayCycle';
 import { forFreeToSpend } from '~/lib/accounts';
 import { daysBetween, formatLongMonthYear } from '~/lib/dates';
+import { pageOf } from '~/lib/paging';
 import { summarise, toPayments } from '~/lib/payments';
 import { defaultSpend, monthRows, project, spendLimit } from '../forecastModel';
 
@@ -42,8 +43,7 @@ export const useForecast = (budget: Budget) => {
         holidays
       })
     : [];
-  const pages = Math.max(1, Math.ceil(rows.length / perPage));
-  const currentPage = Math.min(page, pages - 1);
+  const table = pageOf(rows, { size: perPage, page });
   const cycleDays = Math.max(1, daysBetween(cycle.start, cycle.end));
 
   const inAYear = new Date(today.getFullYear() + 1, today.getMonth(), 1);
@@ -69,11 +69,9 @@ export const useForecast = (budget: Budget) => {
     cycleProgress: Math.min(100, (daysBetween(cycle.start, today) / cycleDays) * 100),
     afterPayday,
     setAfterPayday,
-    rows: rows.slice(currentPage * perPage, (currentPage + 1) * perPage),
-    totalRows: rows.length,
-    firstRow: currentPage * perPage,
-    page: currentPage,
-    pages,
+    rows: table.items,
+    // Which rows are showing, and which way the table can page
+    paging: table,
     setPage,
     perPage,
     setPerPage: (rows: RowsPerPage) => {

@@ -37,3 +37,5 @@ export const usePaymentSelection = (listed: Payment[]) => {
     }
   };
 };
+
+export type PaymentSelection = ReturnType<typeof usePaymentSelection>;

@@ -1,5 +1,5 @@
 import { Select } from '~/components/form';
-import { SegmentedControl, tileLift } from '~/components/ui';
+import { Pager, SegmentedControl, tileLift } from '~/components/ui';
 import { cn } from '~/lib/cn';
 import { formatShortDay } from '~/lib/dates';
 import { formatBalance, formatMoney } from '~/lib/format';
@@ -8,7 +8,6 @@ import { Forecast, ROWS_PER_PAGE, RowsPerPage } from '../../../hooks';
 import { BankHolidayTag } from '../BankHolidayTag';
 import { ChangeTag } from '../ChangeTag';
 import { NowTag } from '../NowTag';
-import { Pager } from '../Pager';
 
 const TIMING = [
   { value: 'before', label: 'Before payday' },
@@ -161,7 +160,7 @@ export const MonthTable = ({
             />
           </div>
         )}
-        <Pager forecast={forecast} />
+        <Pager paging={forecast.paging} onPage={forecast.setPage} />
       </div>
       <span className="sr-only">Each month changes by {signedMoney(net)}</span>
     </section>

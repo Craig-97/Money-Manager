@@ -1,7 +1,7 @@
 import { FieldError, Label, TextInput } from '~/components/form';
-import { Button } from '~/components/ui';
 import { UserFieldsFragment } from '~/graphql/generated';
 import { useDetailsForm } from '../../../hooks';
+import { SaveFooter } from '../SaveFooter';
 import { SECTION_ICONS } from '../sectionIcons';
 import { helpClasses } from '../settingsClasses';
 import { SettingsTile } from '../SettingsTile';
@@ -21,26 +21,12 @@ export const DetailsSection = ({ user }: { user: UserFieldsFragment }) => {
       mobileDescription="Your name and sign-in email."
       onSubmit={() => void onSubmit()}
       footer={
-        <>
-          <span className={helpClasses}>
-            {errors.root ? (
-              <span role="alert" className="font-bold text-expense">
-                {errors.root.message}
-              </span>
-            ) : (
-              'Your name shows in the sidebar and on this page.'
-            )}
-          </span>
-          <Button
-            type="submit"
-            variant="accent"
-            disabled={!isDirty}
-            loading={isSubmitting}
-            loadingText="Saving…"
-            className="font-bold">
-            Save changes
-          </Button>
-        </>
+        <SaveFooter
+          help="Your name shows in the sidebar and on this page."
+          error={errors.root?.message}
+          disabled={!isDirty}
+          loading={isSubmitting}
+        />
       }>
       <div className="grid gap-4 md:grid-cols-2">
         <div>

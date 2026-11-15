@@ -4,7 +4,7 @@ import { AccountInterestInput } from '~/graphql/generated';
 import { useBackToAccount } from '~/hooks/useBackToAccount';
 import { Account } from '~/lib/accounts';
 import { useAccountQuickStore } from '~/state/accountQuick';
-import { Button, Modal } from '../../ui';
+import { Modal, ModalActions } from '../../ui';
 import { checkInterestDraft, InterestDraft, interestDraftOf } from '../accountDraft';
 import { AccountSummary } from '../AccountSummary';
 import { InterestFields } from '../InterestFields';
@@ -68,19 +68,10 @@ export const InterestDialog = ({ accounts, today, onSave }: InterestDialogProps)
       backLabel={`Back to ${account.name}`}
       initialFocusId="account-rate"
       footer={
-        <>
-          <span className="flex-1" />
-          <Button variant="ghost" onClick={close} className="max-md:h-[52px]">
-            Cancel
-          </Button>
-          <Button
-            variant="accent"
-            onClick={() => void save()}
-            loading={saving}
-            className="max-md:h-[52px]">
-            Save interest
-          </Button>
-        </>
+        <ModalActions
+          cancel={{ onClick: close }}
+          confirm={{ label: 'Save interest', onClick: () => void save(), loading: saving }}
+        />
       }>
       <AccountSummary account={account} today={today} named />
       <InterestFields

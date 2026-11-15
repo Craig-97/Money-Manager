@@ -1,7 +1,7 @@
 import { useBackToDebt } from '~/hooks/useBackToDebt';
 import { DebtPayment } from '~/lib/debts';
-import { AmountInput, FieldError, Label } from '../../form';
-import { Button, ChangePreview, Modal } from '../../ui';
+import { BalanceDialog } from '../../form';
+import { ChangePreview } from '../../ui';
 import { DebtSummary } from '../DebtSummary';
 import { useUpdateBalance } from './useUpdateBalance';
 
@@ -11,10 +11,7 @@ interface UpdateBalanceDialogProps {
   onUpdate: (debt: DebtPayment, balance: number) => Promise<boolean>;
 }
 
-/*
- * Update balance: what's left on a debt, from a statement, as Change amount is for a payment. A
- * small dialog on desktop, a sheet on a phone. Edit debt has everything else.
- */
+/* Update balance for a debt: what's left on it, from a statement */
 export const UpdateBalanceDialog = ({ debts, today, onUpdate }: UpdateBalanceDialogProps) => {
   const form = useUpdateBalance({ debts, today, onUpdate });
   const back = useBackToDebt(form?.debt.id);
@@ -22,58 +19,16 @@ export const UpdateBalanceDialog = ({ debts, today, onUpdate }: UpdateBalanceDia
   const { debt } = form;
 
   return (
-    <Modal
-      open={form.open}
-      onOpenChange={next => (next ? undefined : form.close())}
-      title="Update balance"
+    <BalanceDialog
+      form={form}
+      id="debt-balance-now"
+      summary={<DebtSummary debt={debt} today={today} named />}
+      hint="From your latest statement. Balances after it are worked out from your APR again."
       onBack={back}
-      backLabel={`Back to ${debt.name}`}
-      initialFocusId="debt-balance-now"
-      footer={
-        <>
-          <span className="flex-1" />
-          <Button variant="ghost" onClick={form.close} className="max-md:h-[52px]">
-            Cancel
-          </Button>
-          <Button
-            variant="accent"
-            onClick={form.save}
-            disabled={!form.canSave}
-            loading={form.saving}
-            className="max-md:h-[52px]">
-            Save balance
-          </Button>
-        </>
-      }>
-      <DebtSummary debt={debt} today={today} named />
-      <div>
-        <Label tone="muted" htmlFor="debt-balance-now">
-          Balance now
-        </Label>
-        <AmountInput
-          id="debt-balance-now"
-          value={form.draft}
-          onChange={event => form.setDraft(event.target.value)}
-          onKeyDown={event => {
-            if (event.key === 'Enter') form.save();
-          }}
-          placeholder="0.00"
-          invalid={!!form.error}
-          aria-describedby={form.error ? 'debt-balance-now-error' : 'debt-balance-now-hint'}
-        />
-        {form.error ? (
-          <FieldError id="debt-balance-now-error">{form.error}</FieldError>
-        ) : (
-          <p
-            id="debt-balance-now-hint"
-            className="mt-2 ml-1 text-xs leading-[1.4] font-semibold text-muted">
-            From your latest statement. Balances after it are worked out from your APR again.
-          </p>
-        )}
-      </div>
+      backLabel={`Back to ${debt.name}`}>
       {form.cleared ? (
         <ChangePreview label="Cleared" before={form.cleared.before} after={form.cleared.after} />
       ) : null}
-    </Modal>
+    </BalanceDialog>
   );
 };

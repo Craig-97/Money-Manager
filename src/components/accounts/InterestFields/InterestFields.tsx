@@ -2,7 +2,7 @@ import { InterestFrequency } from '~/graphql/generated';
 import { FREQUENCY_NAMES, interestPerPayment, nextMonthlyInterest } from '~/lib/accounts';
 import { addDays, formatShortDate, parseIsoDate, toIsoDate } from '~/lib/dates';
 import { formatMoney } from '~/lib/format';
-import { DatePicker, FieldError, Label, Select, TextInput } from '../../form';
+import { DatePicker, FieldError, FieldHint, Label, Select, TextInput } from '../../form';
 import { InterestDraft, InterestDraftErrors } from '../accountDraft';
 
 // A select can't hold an empty value, so not said yet has one of its own
@@ -128,7 +128,7 @@ export const InterestFields = ({ draft, set, errors, balance, today }: InterestF
         </div>
         {whenField ? <div className="max-md:col-span-1">{whenField}</div> : null}
       </div>
-      <p className="ml-1 text-xs leading-[1.4] font-semibold text-muted">
+      <FieldHint className="mt-0">
         {estimate ? (
           <>
             <span className="font-bold text-text">{estimate}</span> {HOW_IT_WORKS}
@@ -138,7 +138,7 @@ export const InterestFields = ({ draft, set, errors, balance, today }: InterestF
         ) : (
           `Optional. Say when it’s paid. ${HOW_IT_WORKS}`
         )}
-      </p>
+      </FieldHint>
     </div>
   );
 };

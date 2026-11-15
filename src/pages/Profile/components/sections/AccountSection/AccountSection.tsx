@@ -1,8 +1,8 @@
 import { LogOut, MonitorOff, Trash2, TriangleAlert } from 'lucide-react';
 import { Button } from '~/components/ui';
-import { useDeleteAccount, useLogoutEverywhere } from '../../../hooks';
-import { DeleteAccountDialog } from '../DeleteAccountDialog';
-import { LogoutEverywhereDialog } from '../LogoutEverywhereDialog';
+import { DeleteCurrentUserDocument, LogoutEverywhereDocument } from '~/graphql/generated';
+import { useConfirmedSignOut } from '../../../hooks';
+import { ConfirmSignOutDialog } from '../ConfirmSignOutDialog';
 import { SECTION_ICONS } from '../sectionIcons';
 import { helpClasses } from '../settingsClasses';
 import { SettingsTile } from '../SettingsTile';
@@ -12,8 +12,12 @@ const dangerButton =
 
 /* Log out, signing out everywhere, and deleting the account */
 export const AccountSection = ({ email, onLogout }: { email: string; onLogout: () => void }) => {
-  const remove = useDeleteAccount();
-  const everywhere = useLogoutEverywhere();
+  const remove = useConfirmedSignOut(DeleteCurrentUserDocument, {
+    failed: "Couldn't delete your account. Try again."
+  });
+  const everywhere = useConfirmedSignOut(LogoutEverywhereDocument, {
+    failed: "Couldn't sign you out everywhere. Try again."
+  });
 
   return (
     <SettingsTile
@@ -74,8 +78,28 @@ export const AccountSection = ({ email, onLogout }: { email: string; onLogout: (
           </Button>
         </div>
       </section>
-      <LogoutEverywhereDialog everywhere={everywhere} />
-      <DeleteAccountDialog remove={remove} />
+      <ConfirmSignOutDialog
+        confirmed={everywhere}
+        title="Sign out everywhere?"
+        body="This signs you out on every device, including this one. Any other device that is open will be asked to sign in again the next time it talks to Money Manager."
+        keepLabel="Stay signed in"
+        action={{
+          label: 'Sign out everywhere',
+          loadingText: 'Signing out…',
+          variant: 'accent'
+        }}
+      />
+      <ConfirmSignOutDialog
+        confirmed={remove}
+        title="Delete your account?"
+        body="This permanently deletes your account, payments and notes. You won’t be able to get them back."
+        keepLabel="Keep my account"
+        action={{
+          label: 'Delete everything',
+          loadingText: 'Deleting…',
+          variant: 'danger'
+        }}
+      />
     </SettingsTile>
   );
 };

@@ -1,9 +1,12 @@
+import {
+  compactHeroFigureClasses,
+  heroFigureClasses,
+  heroOpClasses,
+  HeroTile
+} from '~/components/ui';
 import { daysBetween, formatShortDate } from '~/lib/dates';
 import { formatBalance, formatMoney, joinNames, plural, splitPence } from '~/lib/format';
 import { Accounts } from '../../hooks';
-
-const chipClasses = 'flex min-w-0 flex-col gap-1 rounded-[18px] bg-hero-chip px-3.5 py-3';
-const opClasses = 'flex items-center justify-center text-xl font-bold text-hero-muted';
 
 /*
  * What the accounts to spend from that count in free to spend have left by payday, once their own
@@ -29,17 +32,10 @@ export const BeforePaydayHero = ({
   const across = `Across ${joinNames(beforePayday.counted.map(account => account.name))}, once the payments due before payday go out.`;
 
   return (
-    <article
+    <HeroTile
       aria-label="Left at payday"
-      className={
-        compact
-          ? 'relative flex flex-col gap-3.5 overflow-hidden rounded-3xl bg-hero-bg p-[22px] text-hero-text'
-          : 'relative flex min-w-0 flex-col gap-6 overflow-hidden rounded-3xl bg-hero-bg p-7 text-hero-text'
-      }>
-      <div
-        aria-hidden="true"
-        className={`pointer-events-none absolute -top-[110px] -right-[90px] rounded-full bg-hero-chip ${compact ? 'size-[220px]' : 'size-[300px]'}`}
-      />
+      size={compact ? 'md' : 'lg'}
+      className={compact ? 'gap-3.5' : undefined}>
       <div className="relative flex flex-wrap items-center justify-between gap-2">
         <h2 className={`font-bold text-hero-muted ${compact ? 'text-[13px]' : 'text-[15px]'}`}>
           Left at payday
@@ -68,9 +64,7 @@ export const BeforePaydayHero = ({
           aria-label="How it is worked out"
           className="relative grid grid-cols-3 gap-2">
           {chips.map(chip => (
-            <div
-              key={chip.label}
-              className="flex min-w-0 flex-col gap-1 rounded-[16px] bg-hero-chip px-3 py-2.5">
+            <div key={chip.label} className={compactHeroFigureClasses}>
               <span className="text-[11px] font-bold text-hero-muted">{chip.label}</span>
               <span className="num text-[13px] font-extrabold whitespace-nowrap">{chip.value}</span>
             </div>
@@ -84,11 +78,11 @@ export const BeforePaydayHero = ({
           {chips.map((chip, index) => (
             <div key={chip.label} className="contents">
               {index ? (
-                <span aria-hidden="true" className={opClasses}>
+                <span aria-hidden="true" className={heroOpClasses}>
                   {index === 1 ? '−' : '='}
                 </span>
               ) : null}
-              <div className={chipClasses}>
+              <div className={heroFigureClasses}>
                 <span className="text-xs font-semibold text-hero-muted">{chip.label}</span>
                 <p className="num text-base font-extrabold [overflow-wrap:anywhere] md:text-lg">
                   {chip.value}
@@ -98,6 +92,6 @@ export const BeforePaydayHero = ({
           ))}
         </div>
       )}
-    </article>
+    </HeroTile>
   );
 };

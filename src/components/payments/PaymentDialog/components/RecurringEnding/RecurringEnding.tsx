@@ -1,5 +1,5 @@
 import { parseIsoDate } from '~/lib/dates';
-import { DatePicker, FieldError, Label } from '../../../../form';
+import { DatePicker, FieldError, FieldHint, Label } from '../../../../form';
 import { SegmentedControl } from '../../../../ui';
 import { ENDS_OPTIONS } from '../../paymentOptions';
 import { PaymentForm } from '../../usePaymentForm';
@@ -30,11 +30,7 @@ export const RecurringEnding = ({ form }: { form: PaymentForm }) => {
           size="lg"
           fullWidth
         />
-        {form.endsHint ? (
-          <p className="mt-2 ml-1 text-xs leading-[1.4] font-semibold text-muted">
-            {form.endsHint}
-          </p>
-        ) : null}
+        {form.endsHint ? <FieldHint>{form.endsHint}</FieldHint> : null}
       </div>
 
       {ends === 'stop' ? (
@@ -82,9 +78,7 @@ export const RecurringEnding = ({ form }: { form: PaymentForm }) => {
 
       {form.showSummary ? <ScheduleSummary text={form.summary} /> : null}
       {form.renewalMoved ? (
-        <p className="-mt-1.5 ml-1 text-xs font-semibold text-muted">
-          Check the amount above is your new price.
-        </p>
+        <FieldHint className="-mt-1.5">Check the amount above is your new price.</FieldHint>
       ) : null}
     </>
   );

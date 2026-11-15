@@ -12,7 +12,7 @@ import { SetupPaymentRow } from './components';
 import { useSetupAccounts } from './useSetupAccounts';
 import { InfoNote } from '../../feedback';
 import { Checkbox, CheckboxHitArea, Radio, Select } from '../../form';
-import { Button, IconButton, Modal } from '../../ui';
+import { Button, IconButton, Modal, ModalActions } from '../../ui';
 
 const questionClasses = 'text-base font-extrabold tracking-[-0.01em]';
 const hintClasses = 'mt-1 text-xs leading-[1.4] font-semibold text-muted md:text-[13px]';
@@ -131,18 +131,15 @@ export const SetupAccountsDialog = () => {
       size="widest"
       footer={
         isDesktop ? (
-          <>
-            {setup.payments.length ? (
-              <span className="num text-[13px] font-semibold text-muted">{setup.summary}</span>
-            ) : null}
-            <span className="flex-1" />
-            <Button variant="ghost" onClick={setup.close}>
-              Keep as is
-            </Button>
-            <Button variant="accent" onClick={setup.save} loading={setup.saving}>
-              Save
-            </Button>
-          </>
+          <ModalActions
+            start={
+              setup.payments.length ? (
+                <span className="num text-[13px] font-semibold text-muted">{setup.summary}</span>
+              ) : null
+            }
+            cancel={{ label: 'Keep as is', onClick: setup.close }}
+            confirm={{ label: 'Save', onClick: setup.save, loading: setup.saving }}
+          />
         ) : (
           <div className="flex w-full flex-col gap-2.5">
             {count ? mobileBulkBar : null}

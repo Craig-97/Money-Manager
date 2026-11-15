@@ -3,6 +3,7 @@ export * from './AccountDialog';
 export * from './AccountDialogs';
 export * from './accountDraft';
 export * from './AccountFields';
+export * from './AccountLetter';
 export * from './AccountSheet';
 export * from './AccountSummary';
 export * from './InterestDialog';

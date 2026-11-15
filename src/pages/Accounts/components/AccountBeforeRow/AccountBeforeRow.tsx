@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { AlertTriangle, ChevronDown } from 'lucide-react';
+import { AccountLetter } from '~/components/accounts';
 import { DateBox } from '~/components/ui';
-import { AccountBeforePayday, accountLetter, goesBelowZero } from '~/lib/accounts';
+import { AccountBeforePayday, goesBelowZero } from '~/lib/accounts';
 import { cn } from '~/lib/cn';
 import { formatShortDate } from '~/lib/dates';
 import { formatBalance, formatMoney, formatPayment } from '~/lib/format';
@@ -67,13 +68,7 @@ export const AccountBeforeRow = ({
   // An overdrawn balance is red, as Left is when it's below £0
   const balanceClasses = cn('num font-extrabold whitespace-nowrap', overdrawn && 'text-expense');
   const leftClasses = cn('num font-extrabold whitespace-nowrap', row.left < 0 && 'text-expense');
-  const letter = (
-    <span
-      aria-hidden="true"
-      className="inline-flex size-[38px] shrink-0 items-center justify-center rounded-xl border border-border bg-surface-2 text-sm font-extrabold">
-      {accountLetter(account)}
-    </span>
-  );
+  const letter = <AccountLetter account={account} />;
   const name = (
     <span className="flex min-w-0 flex-wrap items-center gap-2">
       <span className="text-base font-extrabold [overflow-wrap:anywhere]">{account.name}</span>

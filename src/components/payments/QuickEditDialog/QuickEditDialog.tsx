@@ -1,10 +1,8 @@
 import { formatBalance } from '~/lib/format';
-import { AmountInput, DatePicker, FieldError, Label } from '../../form';
-import { Button, ChangePreview, Modal } from '../../ui';
+import { AmountInput, DatePicker, FieldError, FieldHint, Label } from '../../form';
+import { ChangePreview, Modal, ModalActions } from '../../ui';
 import { PaymentSummary } from '../PaymentParts';
 import { useQuickEditDialog } from './useQuickEditDialog';
-
-const hintClasses = 'mt-2 ml-1 text-xs leading-[1.4] font-semibold text-muted';
 
 /*
  * Change amount or Change date: a small dialog on desktop, a sheet on mobile, for this payment
@@ -25,15 +23,14 @@ export const QuickEditDialog = () => {
       backLabel={`Back to ${payment.name}`}
       initialFocusId={amount ? 'quick-amount' : undefined}
       footer={
-        <>
-          <span className="flex-1" />
-          <Button variant="ghost" onClick={edit.close}>
-            Cancel
-          </Button>
-          <Button variant="accent" onClick={edit.save} disabled={!edit.canSave}>
-            {amount ? 'Save' : 'Change date'}
-          </Button>
-        </>
+        <ModalActions
+          cancel={{ onClick: edit.close }}
+          confirm={{
+            label: amount ? 'Save' : 'Change date',
+            onClick: edit.save,
+            disabled: !edit.canSave
+          }}
+        />
       }>
       <PaymentSummary payment={payment} due={edit.due} named />
 
@@ -56,9 +53,9 @@ export const QuickEditDialog = () => {
           {edit.amountError ? (
             <FieldError id="quick-amount-error">{edit.amountError}</FieldError>
           ) : edit.recurring ? (
-            <p className={hintClasses}>
+            <FieldHint>
               This payment and every one after. Payments already made keep their amount.
-            </p>
+            </FieldHint>
           ) : null}
         </div>
       ) : (
@@ -72,7 +69,7 @@ export const QuickEditDialog = () => {
             onChange={edit.setDate}
             min={edit.earliest}
           />
-          <p className={hintClasses}>{edit.dateHint}</p>
+          <FieldHint>{edit.dateHint}</FieldHint>
         </div>
       )}
 

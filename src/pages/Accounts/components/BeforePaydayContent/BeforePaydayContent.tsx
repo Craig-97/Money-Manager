@@ -1,8 +1,8 @@
+import { AccountLetter } from '~/components/accounts';
 import { InfoNote } from '~/components/feedback';
 import { Tile } from '~/components/ui';
 import { MEDIA } from '~/constants';
 import { useMediaQuery } from '~/hooks/useMediaQuery';
-import { accountLetter } from '~/lib/accounts';
 import { formatShortDate } from '~/lib/dates';
 import { formatBalance, formatMoney } from '~/lib/format';
 import { Accounts } from '../../hooks';
@@ -131,11 +131,7 @@ export const BeforePaydayContent = ({
                       ? 'flex min-h-[72px] items-center gap-3.5 px-2'
                       : 'flex min-h-[72px] items-center gap-3 px-2.5 py-2'
                   }>
-                  <span
-                    aria-hidden="true"
-                    className="inline-flex size-[38px] shrink-0 items-center justify-center rounded-xl border border-border bg-surface-2 text-sm font-extrabold">
-                    {accountLetter(row.account)}
-                  </span>
+                  <AccountLetter account={row.account} />
                   <span className="flex min-w-0 flex-1 flex-col gap-0.5">
                     <span className="text-[15px] font-bold [overflow-wrap:anywhere]">
                       {row.account.name}

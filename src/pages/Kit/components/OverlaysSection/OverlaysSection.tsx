@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Trash2 } from 'lucide-react';
 import { AmountInput, DatePicker, Label, Select, TextInput } from '~/components/form';
-import { Button, Modal } from '~/components/ui';
+import { Button, Modal, ModalActions } from '~/components/ui';
 import { showToast } from '~/state/toast';
 import { KitExample } from '../KitExample';
 import { KitSection } from '../KitSection';
@@ -37,19 +37,16 @@ export const OverlaysSection = () => {
         onBack={() => setOpen(false)}
         backLabel="Back to payment types"
         footer={
-          <>
-            <Button variant="dangerGhost">
-              <Trash2 size={16} aria-hidden="true" />
-              Delete
-            </Button>
-            <span className="flex-1" />
-            <Button variant="ghost" onClick={() => setOpen(false)}>
-              Cancel
-            </Button>
-            <Button variant="accent" onClick={() => setOpen(false)}>
-              Save payment
-            </Button>
-          </>
+          <ModalActions
+            start={
+              <Button variant="dangerGhost">
+                <Trash2 size={16} aria-hidden="true" />
+                Delete
+              </Button>
+            }
+            cancel={{ onClick: () => setOpen(false) }}
+            confirm={{ label: 'Save payment', onClick: () => setOpen(false) }}
+          />
         }>
         <div>
           <Label tone="muted" htmlFor="kit-dlg-name">

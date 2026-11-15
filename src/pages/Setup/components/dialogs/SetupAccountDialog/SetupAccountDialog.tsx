@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Trash } from 'lucide-react';
 import {
   AccountChooser,
   accountDialogTitle,
@@ -9,7 +8,7 @@ import {
   checkAccountDraft,
   EMPTY_ACCOUNT_DRAFT
 } from '~/components/accounts';
-import { Button, Modal } from '~/components/ui';
+import { Modal, ModalActions } from '~/components/ui';
 import { startOfToday } from '~/lib/dates';
 import { SetupState } from '../../../hooks';
 
@@ -51,24 +50,13 @@ export const SetupAccountDialog = ({ setup }: { setup: SetupState }) => {
       initialFocusId={choosing ? undefined : 'account-balance'}
       footer={
         choosing ? undefined : (
-          <>
-            {editing ? (
-              <Button
-                variant="dangerGhost"
-                onClick={() => dialog.remove(editing.key)}
-                className="max-md:-ml-2">
-                <Trash size={16} aria-hidden="true" />
-                Remove
-              </Button>
-            ) : null}
-            <span className="flex-1" />
-            <Button variant="ghost" onClick={dialog.close} className="max-md:h-[52px]">
-              Cancel
-            </Button>
-            <Button variant="accent" onClick={save} className="max-md:h-[52px]">
-              {editing ? 'Save' : 'Add account'}
-            </Button>
-          </>
+          <ModalActions
+            remove={
+              editing ? { label: 'Remove', onClick: () => dialog.remove(editing.key) } : undefined
+            }
+            cancel={{ onClick: dialog.close }}
+            confirm={{ label: editing ? 'Save' : 'Add account', onClick: save }}
+          />
         )
       }>
       {choosing ? (

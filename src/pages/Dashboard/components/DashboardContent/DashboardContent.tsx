@@ -13,7 +13,7 @@ import {
   NextPaydayTile
 } from '../overview';
 import { PaydayPrompt } from '../payday';
-import { MobileBulkBar, MobilePayments, PaymentsTable } from '../payments';
+import { MobileDashboardList, DashboardTable } from '../payments';
 
 // Only one layout is rendered, so each control exists once
 export const DashboardContent = ({ budget }: { budget: Budget }) => {
@@ -40,15 +40,14 @@ export const DashboardContent = ({ budget }: { budget: Budget }) => {
           <FreeToSpendTile dashboard={dashboard} />
           <NextPaydayTile dashboard={dashboard} />
           <MonthlyStats dashboard={dashboard} />
-          <PaymentsTable dashboard={dashboard} />
+          <DashboardTable dashboard={dashboard} />
         </section>
       ) : (
         <section aria-label="Overview" className="flex flex-col gap-3.5">
           <MobileHero dashboard={dashboard} />
           <MobileFigures dashboard={dashboard} />
           <MobileDiscretionary dashboard={dashboard} />
-          <MobilePayments dashboard={dashboard} />
-          <MobileBulkBar dashboard={dashboard} />
+          <MobileDashboardList dashboard={dashboard} />
         </section>
       )}
     </>

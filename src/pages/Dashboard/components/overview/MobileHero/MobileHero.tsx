@@ -1,5 +1,5 @@
 import { Calendar, Check, PenLine, Plus, TriangleAlert, X } from 'lucide-react';
-import { Button } from '~/components/ui';
+import { Button, HeroTile } from '~/components/ui';
 import { cn } from '~/lib/cn';
 import { formatShortDate } from '~/lib/dates';
 import { formatBalance, formatMoney, formatPayment, splitPence } from '~/lib/format';
@@ -27,13 +27,7 @@ export const MobileHero = ({ dashboard }: { dashboard: Dashboard }) => {
   const [whole, pence] = splitPence(summary.freeToSpend);
 
   return (
-    <article
-      aria-label="Free to spend"
-      className="relative flex flex-col gap-4 overflow-hidden rounded-3xl bg-hero-bg p-[22px] text-hero-text">
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -top-[110px] -right-[90px] size-[220px] rounded-full bg-hero-chip"
-      />
+    <HeroTile aria-label="Free to spend" size="md">
       <div className="relative flex items-center justify-between gap-2">
         <h2 className="text-[13px] font-bold text-hero-muted">Free to spend</h2>
         {override.canChange ? (
@@ -172,6 +166,6 @@ export const MobileHero = ({ dashboard }: { dashboard: Dashboard }) => {
         </div>
       </div>
       {override.canChange ? <PaydayOverrideDialog override={override} /> : null}
-    </article>
+    </HeroTile>
   );
 };

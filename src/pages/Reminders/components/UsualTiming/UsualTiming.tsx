@@ -1,3 +1,4 @@
+import { FieldHint } from '~/components/form';
 import { ChipGroup } from '~/components/ui';
 import { daysOptions, PAYMENT_REMINDER_DAYS, RENEWAL_REMINDER_DAYS } from '~/lib/payments';
 import { RemindersPage } from '../../hooks';
@@ -38,10 +39,10 @@ export const UsualTiming = ({ page }: { page: RemindersPage }) => {
           onValueChange={value => change({ paymentDays: Number(value) })}
           options={PAYMENT_OPTIONS}
         />
-        <p className="mt-2 ml-1 text-xs leading-[1.45] font-semibold text-muted">
+        <FieldHint>
           A payment’s reminder goes once you mark it paid or skip it. Still unpaid after its date,
           it shows as overdue and stays in New until you do.
-        </p>
+        </FieldHint>
       </div>
       <div>
         <p id="timing-renewals" className={groupLabel}>

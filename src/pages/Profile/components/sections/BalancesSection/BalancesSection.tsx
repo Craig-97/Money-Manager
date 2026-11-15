@@ -1,11 +1,12 @@
 import { ChevronRight } from 'lucide-react';
 import { AmountInput, FieldError, Label } from '~/components/form';
-import { Button, PageLink } from '~/components/ui';
+import { PageLink } from '~/components/ui';
 import { ROUTES } from '~/constants';
 import { Budget } from '~/hooks/useBudget';
 import { cn } from '~/lib/cn';
 import { formatBalance } from '~/lib/format';
 import { useBalanceSettings } from '../../../hooks';
+import { SaveFooter } from '../SaveFooter';
 import { SECTION_ICONS } from '../sectionIcons';
 import { helpClasses } from '../settingsClasses';
 import { SettingsTile } from '../SettingsTile';
@@ -28,18 +29,11 @@ export const BalancesSection = ({ budget }: { budget: Budget }) => {
       description="Your accounts make up the bank balance on your dashboard."
       onSubmit={balances.save}
       footer={
-        <>
-          <span className={helpClasses}>Your forecast updates as soon as you save.</span>
-          <Button
-            type="submit"
-            variant="accent"
-            disabled={!balances.isDirty}
-            loading={balances.saving}
-            loadingText="Saving…"
-            className="font-bold">
-            Save changes
-          </Button>
-        </>
+        <SaveFooter
+          help="Your forecast updates as soon as you save."
+          disabled={!balances.isDirty}
+          loading={balances.saving}
+        />
       }>
       <div className="grid items-start gap-4 md:grid-cols-2">
         <div>

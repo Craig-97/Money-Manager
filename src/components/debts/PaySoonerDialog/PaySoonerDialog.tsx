@@ -3,7 +3,7 @@ import { useBackToDebt } from '~/hooks/useBackToDebt';
 import { usePaySooner } from '~/hooks/usePaySooner';
 import { DebtPayment } from '~/lib/debts';
 import { useDebtDialogStore } from '~/state/debtDialog';
-import { Button, Modal } from '../../ui';
+import { Modal, ModalActions } from '../../ui';
 import { PaySoonerCard } from '../PaySoonerCard';
 
 interface PaySoonerDialogProps {
@@ -47,20 +47,15 @@ export const PaySoonerDialog = ({ debts, today, onPayMore }: PaySoonerDialogProp
       onBack={back}
       backLabel={`Back to ${sooner.debt.name}`}
       footer={
-        <>
-          <span className="flex-1" />
-          <Button variant="ghost" onClick={close} className="max-md:h-[52px]">
-            Cancel
-          </Button>
-          <Button
-            variant="accent"
-            onClick={sooner.apply}
-            disabled={!sooner.applyLabel}
-            loading={sooner.applying}
-            className="max-md:h-[52px]">
-            {sooner.applyLabel ?? 'Pay more'}
-          </Button>
-        </>
+        <ModalActions
+          cancel={{ onClick: close }}
+          confirm={{
+            label: sooner.applyLabel ?? 'Pay more',
+            onClick: sooner.apply,
+            disabled: !sooner.applyLabel,
+            loading: sooner.applying
+          }}
+        />
       }>
       <PaySoonerCard sooner={sooner} />
       <p className="px-2 text-center text-xs font-medium text-muted">

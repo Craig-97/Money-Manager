@@ -1,16 +1,20 @@
 import { MoreHorizontal } from 'lucide-react';
-import { IconButton } from '~/components/ui';
+import { DateBox, IconButton } from '~/components/ui';
 import { cn } from '~/lib/cn';
 import { kindText, Reminder } from '~/lib/reminders';
 import { RemindersPage } from '../../hooks';
-import { DateBox } from '../DateBox';
+import { dateBoxTop } from '../../remindersModel';
 import { ReminderAmount } from '../ReminderAmount';
 import { UpcomingMenu } from '../UpcomingMenu';
 
 /* One thing coming up, on desktop: its date, what it is, when it reminds, the money and a menu */
 export const UpcomingRow = ({ reminder, page }: { reminder: Reminder; page: RemindersPage }) => (
   <li className="grid min-h-[74px] grid-cols-[52px_minmax(0,1.3fr)_minmax(0,1fr)_120px_44px] items-center gap-x-3 rounded-2xl px-2 transition-colors hover:bg-hover">
-    <DateBox date={reminder.date} today={page.today} accent={reminder.kind === 'payday'} />
+    <DateBox
+      date={reminder.date}
+      top={dateBoxTop(reminder.date, page.today)}
+      accent={reminder.kind === 'payday'}
+    />
     <span className="flex min-w-0 flex-col items-start gap-1">
       <span
         title={reminder.name}

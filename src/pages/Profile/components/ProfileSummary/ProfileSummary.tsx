@@ -1,5 +1,5 @@
 import { CalendarDays } from 'lucide-react';
-import { tileLift } from '~/components/ui';
+import { HeroTile, tileLift } from '~/components/ui';
 import { UserFieldsFragment } from '~/graphql/generated';
 import { Budget } from '~/hooks/useBudget';
 import { usePayCycle } from '~/hooks/usePayCycle';
@@ -24,13 +24,7 @@ export const ProfileSummary = ({ user, budget, compact }: ProfileSummaryProps) =
 
   if (compact) {
     return (
-      <section
-        aria-label="Account summary"
-        className="relative flex flex-col gap-4 overflow-hidden rounded-3xl bg-hero-bg p-5 text-hero-text">
-        <span
-          aria-hidden="true"
-          className="pointer-events-none absolute -top-[70px] -right-[60px] size-[180px] rounded-full bg-hero-chip"
-        />
+      <HeroTile as="section" aria-label="Account summary" size="sm">
         <div className="relative flex items-center gap-4">
           <span
             aria-hidden="true"
@@ -54,7 +48,7 @@ export const ProfileSummary = ({ user, budget, compact }: ProfileSummaryProps) =
             {next}
           </span>
         </div>
-      </section>
+      </HeroTile>
     );
   }
 

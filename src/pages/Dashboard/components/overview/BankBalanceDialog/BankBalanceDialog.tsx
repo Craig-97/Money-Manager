@@ -1,7 +1,8 @@
+import { AccountLetter } from '~/components/accounts';
 import { AmountInput } from '~/components/form';
-import { Button, Modal, PageLink } from '~/components/ui';
+import { Modal, ModalActions, PageLink } from '~/components/ui';
 import { ROUTES } from '~/constants';
-import { accountLetter, isStale, updatedText } from '~/lib/accounts';
+import { isStale, updatedText } from '~/lib/accounts';
 import { cn } from '~/lib/cn';
 import { formatBalance } from '~/lib/format';
 import { BankBalanceDialog as Dialog } from '../../../hooks/useBankBalanceDialog';
@@ -17,36 +18,30 @@ export const BankBalanceDialog = ({ dialog, today }: { dialog: Dialog; today: Da
     title="Bank balance"
     description="The accounts that count in free to spend"
     footer={
-      <>
-        <PageLink
-          page="accounts"
-          to={ROUTES.accounts}
-          className="mr-auto rounded-full px-2 py-2.5 text-[13px] font-bold text-accent-text hover:underline">
-          Manage accounts
-        </PageLink>
-        <Button variant="ghost" onClick={dialog.close} className="max-md:h-[52px]">
-          Cancel
-        </Button>
-        <Button
-          variant="accent"
-          onClick={dialog.save}
-          disabled={!dialog.valid}
-          loading={dialog.saving}
-          className="max-md:h-[52px]">
-          Save
-        </Button>
-      </>
+      <ModalActions
+        start={
+          <PageLink
+            page="accounts"
+            to={ROUTES.accounts}
+            className="rounded-full px-2 py-2.5 text-[13px] font-bold text-accent-text hover:underline">
+            Manage accounts
+          </PageLink>
+        }
+        cancel={{ onClick: dialog.close }}
+        confirm={{
+          label: 'Save',
+          onClick: dialog.save,
+          disabled: !dialog.valid,
+          loading: dialog.saving
+        }}
+      />
     }>
     <div className="flex flex-col gap-2">
       {dialog.rows.map(({ account, value, setValue }) => (
         <div
           key={account.id}
           className="flex items-center gap-2.5 rounded-[18px] border border-border bg-surface-2 py-2.5 pr-2.5 pl-3.5 md:gap-3 md:pl-3">
-          <span
-            aria-hidden="true"
-            className="hidden size-9 shrink-0 items-center justify-center rounded-xl border border-border bg-surface text-sm font-extrabold md:inline-flex">
-            {accountLetter(account)}
-          </span>
+          <AccountLetter account={account} size="sm" onGrey className="hidden md:inline-flex" />
           <span className="flex min-w-0 grow flex-col gap-0.5">
             <label htmlFor={`balance-${account.id}`} className="text-sm font-bold">
               {account.name}

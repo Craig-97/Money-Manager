@@ -1,3 +1,4 @@
+import { HeroTile } from '~/components/ui';
 import { cn } from '~/lib/cn';
 import { formatLongDate } from '~/lib/dates';
 import { formatBalance, formatMoney, parseMoney, plural } from '~/lib/format';
@@ -78,11 +79,7 @@ export const ReviewStep = ({ setup, firstCycle, nextPayday, today }: ReviewStepP
           </p>
         </div>
       ) : (
-        <div className="relative overflow-hidden rounded-3xl bg-hero-bg p-5 text-hero-text">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute -top-[70px] -right-[60px] size-[180px] rounded-full bg-hero-chip"
-          />
+        <HeroTile as="div" size="sm" className="block">
           <p className="relative text-[13px] font-bold text-hero-muted">Free to spend this cycle</p>
           <p className="relative mt-1 num text-4xl font-extrabold tracking-[-0.04em]">
             {formatBalance(firstCycle.freeToSpend)}
@@ -105,7 +102,7 @@ export const ReviewStep = ({ setup, firstCycle, nextPayday, today }: ReviewStepP
             ) : null}
             .
           </p>
-        </div>
+        </HeroTile>
       )}
 
       <ReviewCard label="Pay" onEdit={() => goTo(0)} disabled={saving}>

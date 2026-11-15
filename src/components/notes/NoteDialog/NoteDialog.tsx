@@ -1,4 +1,3 @@
-import { Trash } from 'lucide-react';
 import { Budget, useBudget } from '~/hooks/useBudget';
 import { useNoteActions } from '~/hooks/useNoteActions';
 import { usePayCycle } from '~/hooks/usePayCycle';
@@ -9,7 +8,7 @@ import { BankHolidays } from '~/lib/payday';
 import { PER_PERIOD, toPayments } from '~/lib/payments';
 import { ColorSwatches, NotePaymentAndReminder, NotePaymentOption } from './components';
 import { useNoteDialog } from './useNoteDialog';
-import { Button, Modal } from '../../ui';
+import { Modal, ModalActions } from '../../ui';
 
 /*
  * The recurring payments a note can be about, by name: "Car insurance · £612.00 a year", with
@@ -51,26 +50,16 @@ export const NoteDialog = () => {
       title={editing ? 'Edit note' : 'New note'}
       initialFocusId="note-text"
       footer={
-        <>
-          {editing ? (
-            <Button variant="dangerGhost" onClick={dialog.remove} className="max-md:-ml-2">
-              <Trash size={16} aria-hidden="true" />
-              Delete
-            </Button>
-          ) : null}
-          <span className="flex-1" />
-          <Button variant="ghost" onClick={dialog.close} className="max-md:h-[52px]">
-            Cancel
-          </Button>
-          <Button
-            variant="accent"
-            onClick={dialog.save}
-            disabled={draft.empty}
-            loading={draft.saving}
-            className="max-md:h-[52px]">
-            Save note
-          </Button>
-        </>
+        <ModalActions
+          remove={editing ? { label: 'Delete', onClick: dialog.remove } : undefined}
+          cancel={{ onClick: dialog.close }}
+          confirm={{
+            label: 'Save note',
+            onClick: dialog.save,
+            disabled: draft.empty,
+            loading: draft.saving
+          }}
+        />
       }>
       <div>
         <label htmlFor="note-text" className="sr-only">

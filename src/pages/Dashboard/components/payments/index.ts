@@ -1,3 +1,2 @@
-export * from './MobileBulkBar';
-export * from './MobilePayments';
-export * from './PaymentsTable';
+export * from './DashboardTable';
+export * from './MobileDashboardList';

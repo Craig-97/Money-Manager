@@ -5,8 +5,8 @@ import { DebtPayment } from '~/lib/debts';
 import { formatMoney } from '~/lib/format';
 import { useDebtDialogStore } from '~/state/debtDialog';
 import { useOverpaymentForm } from './useOverpaymentForm';
-import { AmountInput, FieldError, Label, Select } from '../../form';
-import { Button, Modal } from '../../ui';
+import { AmountInput, FieldError, FieldHint, Label, Select } from '../../form';
+import { Modal, ModalActions } from '../../ui';
 
 interface OverpaymentDialogProps {
   debts: readonly DebtPayment[];
@@ -45,20 +45,15 @@ export const OverpaymentDialog = ({ debts, onOverpay }: OverpaymentDialogProps) 
       onBack={back}
       backLabel={debt ? `Back to ${debt.name}` : undefined}
       footer={
-        <>
-          <span className="flex-1" />
-          <Button variant="ghost" onClick={close} className="max-md:h-[52px]">
-            Cancel
-          </Button>
-          <Button
-            variant="accent"
-            onClick={form.save}
-            disabled={!form.canSave}
-            loading={form.saving}
-            className="max-md:h-[52px]">
-            Log overpayment
-          </Button>
-        </>
+        <ModalActions
+          cancel={{ onClick: close }}
+          confirm={{
+            label: 'Log overpayment',
+            onClick: form.save,
+            disabled: !form.canSave,
+            loading: form.saving
+          }}
+        />
       }>
       {debt ? (
         <>
@@ -91,10 +86,10 @@ export const OverpaymentDialog = ({ debts, onOverpay }: OverpaymentDialogProps) 
             {form.error ? (
               <FieldError id="overpayment-amount-error">{form.error}</FieldError>
             ) : (
-              <p id="overpayment-left" className="mt-2 ml-1 text-xs font-semibold text-muted">
+              <FieldHint id="overpayment-left">
                 <span className="mr-0.5 num text-text">{formatMoney(debt.debt.balance)}</span> left
                 on {debt.name}
-              </p>
+              </FieldHint>
             )}
           </div>
           <p className="flex items-start gap-2.5 rounded-[18px] bg-accent-soft px-4 py-3 text-[13px] leading-[1.4] font-bold text-accent-text">

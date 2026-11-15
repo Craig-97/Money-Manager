@@ -1,8 +1,8 @@
-import { useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { Account } from '~/lib/accounts';
-import { formatBalance, formatMoneyInput, parseMoney, roundPence } from '~/lib/format';
+import { formatBalance, roundPence } from '~/lib/format';
 import { useAccountQuickStore } from '~/state/accountQuick';
+import { useBalanceDraft } from '../../form';
 
 interface Options {
   accounts: readonly Account[];
@@ -11,7 +11,7 @@ interface Options {
 
 /*
  * An account's balance from the bank: what it is now, and what that does to the bank balance on the
- * dashboard when it counts there. Each opening starts from the balance as it is.
+ * dashboard when it counts there. It can be below £0, and typing the same balance still dates it.
  */
 export const useUpdateAccountBalance = ({ accounts, onUpdate }: Options) => {
   const { open, accountId, opened, close } = useAccountQuickStore(
@@ -23,30 +23,24 @@ export const useUpdateAccountBalance = ({ accounts, onUpdate }: Options) => {
     }))
   );
   const account = accounts.find(item => item.id === accountId);
-  const [draft, setDraft] = useState('');
-  const [saving, setSaving] = useState(false);
-  // A new opening starts from its balance (React's "reset state on a prop change" pattern)
-  const [currentOpening, setCurrentOpening] = useState(opened);
-  if (opened !== currentOpening) {
-    setCurrentOpening(opened);
-    setDraft(account ? formatMoneyInput(account.balance) : '');
-  }
+  const {
+    draft,
+    setDraft,
+    typed: balance,
+    saving,
+    save
+  } = useBalanceDraft({
+    opened,
+    balance: account?.balance,
+    close
+  });
 
   if (!account) return null;
 
-  const balance = parseMoney(draft);
   const changed = balance !== null && balance !== account.balance;
   const counted = roundPence(
     accounts.filter(item => item.counts).reduce((sum, item) => sum + item.balance, 0)
   );
-
-  const save = async () => {
-    if (balance === null) return;
-    setSaving(true);
-    const saved = await onUpdate(account, balance);
-    setSaving(false);
-    if (saved) close();
-  };
 
   return {
     open: open && !!account,
@@ -62,10 +56,11 @@ export const useUpdateAccountBalance = ({ accounts, onUpdate }: Options) => {
             after: formatBalance(roundPence(counted - account.balance + balance))
           }
         : null,
-    // Typing in the same balance still dates it today
     canSave: balance !== null && !saving,
     saving,
     close,
-    save: () => void save()
+    save: () => {
+      if (balance !== null) void save(() => onUpdate(account, balance));
+    }
   };
 };

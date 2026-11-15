@@ -2,12 +2,11 @@ import { ReactNode, useState } from 'react';
 import { AccountKind } from '~/graphql/generated';
 import { cn } from '~/lib/cn';
 import { parseMoney } from '~/lib/format';
-import { AmountInput, FieldError, Label, TextInput } from '../../form';
+import { AmountInput, FieldError, FieldHint, Label, TextInput } from '../../form';
 import { MoreOptions, SegmentedControl, Switch } from '../../ui';
 import { AccountDraft, AccountDraftErrors } from '../accountDraft';
 import { InterestFields } from '../InterestFields';
 
-const helpClasses = 'mt-2 ml-1 text-xs font-semibold text-muted';
 export const panelClasses =
   'flex items-center gap-3 rounded-[18px] border border-border bg-surface-2 px-4 py-3.5';
 
@@ -90,9 +89,9 @@ export const AccountFields = ({
         {errors.balance ? (
           <FieldError id="account-balance-error">{errors.balance}</FieldError>
         ) : (
-          <p id="account-balance-help" className={helpClasses}>
+          <FieldHint id="account-balance-help">
             Check your banking app and type what it says.
-          </p>
+          </FieldHint>
         )}
       </div>
 
@@ -169,7 +168,7 @@ export const AccountFields = ({
               fullWidth
               className="bg-surface"
             />
-            <p className={helpClasses}>{KIND_HINTS[draft.kind]}</p>
+            <FieldHint>{KIND_HINTS[draft.kind]}</FieldHint>
           </div>
         ) : null}
 

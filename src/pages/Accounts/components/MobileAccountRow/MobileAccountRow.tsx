@@ -1,13 +1,6 @@
 import { ChevronRight } from 'lucide-react';
-import { InterestStrip } from '~/components/accounts';
-import {
-  Account,
-  accountLetter,
-  interestLine,
-  isStale,
-  mobileAccountMeta,
-  updatedText
-} from '~/lib/accounts';
+import { AccountLetter, InterestStrip } from '~/components/accounts';
+import { Account, interestLine, isStale, mobileAccountMeta, updatedText } from '~/lib/accounts';
 import { cn } from '~/lib/cn';
 import { formatBalance } from '~/lib/format';
 import { useAccountViewStore } from '~/state/accountView';
@@ -40,11 +33,7 @@ export const MobileAccountRow = ({ account, today, several }: MobileAccountRowPr
         onClick={() => openView(account.id)}
         aria-haspopup="dialog"
         className="flex min-h-[72px] w-full cursor-pointer items-center gap-3 rounded-[18px] px-2.5 py-2 text-left transition-colors hover:bg-hover">
-        <span
-          aria-hidden="true"
-          className="inline-flex size-10 shrink-0 items-center justify-center rounded-[13px] border border-border bg-surface-2 text-[15px] font-extrabold">
-          {accountLetter(account)}
-        </span>
+        <AccountLetter account={account} size="lg" />
         <span className="flex min-w-0 grow flex-col gap-[3px]">
           <span className="text-[15px] font-bold [overflow-wrap:anywhere]">{account.name}</span>
           <span className="text-xs leading-[1.35] font-semibold [overflow-wrap:anywhere] text-muted">

@@ -1,5 +1,6 @@
 import { ReactNode } from 'react';
 import { cn } from '~/lib/cn';
+import { HeroTile } from '../../ui';
 
 interface HeroCardProps {
   // Classes for the content row
@@ -9,10 +10,11 @@ interface HeroCardProps {
 
 /* The small accent card at the top of the mobile sign in and forgot password screens. Decorative. */
 export const HeroCard = ({ className, children }: HeroCardProps) => (
-  <div
+  <HeroTile
+    as="div"
     aria-hidden="true"
-    className="relative overflow-hidden rounded-[28px] bg-hero-bg px-[22px] py-5 text-hero-text md:hidden">
-    <div className="absolute -top-[70px] -right-[60px] size-[180px] rounded-full bg-hero-chip" />
+    size="sm"
+    className="block rounded-[28px] px-[22px] py-5 md:hidden">
     <div className={cn('relative flex gap-3', className)}>{children}</div>
-  </div>
+  </HeroTile>
 );

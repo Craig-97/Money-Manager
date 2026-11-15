@@ -1,5 +1,5 @@
 import { formatMoney, parseMoney } from '~/lib/format';
-import { Label, Select } from '../../../../form';
+import { FieldHint, Label, Select } from '../../../../form';
 import { targetDescription } from '../../paymentAccounts';
 import { PaymentForm } from '../../usePaymentForm';
 
@@ -28,11 +28,11 @@ export const MoveInto = ({ form }: { form: PaymentForm }) => {
           description: targetDescription(account)
         }))}
       />
-      <p className="mt-2 ml-1 text-xs leading-[1.45] font-semibold text-muted">
+      <FieldHint>
         {into.counts
           ? `${into.name} counts in free to spend, so this only moves money between your accounts. It’s left out of your monthly totals.`
           : `Comes off free to spend like any payment. When it’s marked paid, ${amount ? `${formatMoney(amount)} is` : 'it’s'} added to ${into.name}.`}
-      </p>
+      </FieldHint>
     </div>
   );
 };

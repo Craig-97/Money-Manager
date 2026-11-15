@@ -1,8 +1,8 @@
 import { Label, Select } from '~/components/form';
-import { Button } from '~/components/ui';
 import { Budget } from '~/hooks/useBudget';
 import { cn } from '~/lib/cn';
 import { usePaymentSettings } from '../../../hooks';
+import { SaveFooter } from '../SaveFooter';
 import { SECTION_ICONS } from '../sectionIcons';
 import { helpClasses } from '../settingsClasses';
 import { SettingsTile } from '../SettingsTile';
@@ -22,21 +22,11 @@ export const PaymentsSection = ({ budget }: { budget: Budget }) => {
       description="How your recurring payments are dated."
       onSubmit={settings.save}
       footer={
-        <>
-          <span className={helpClasses}>
-            Applies now to payments that haven’t gone out yet. You can change it for one payment in
-            its form.
-          </span>
-          <Button
-            type="submit"
-            variant="accent"
-            disabled={!settings.isDirty}
-            loading={settings.saving}
-            loadingText="Saving…"
-            className="font-bold">
-            Save changes
-          </Button>
-        </>
+        <SaveFooter
+          help="Applies now to payments that haven’t gone out yet. You can change it for one payment in its form."
+          disabled={!settings.isDirty}
+          loading={settings.saving}
+        />
       }>
       <div>
         <Label htmlFor="payments-non-working-day">On a weekend or bank holiday</Label>

@@ -5,7 +5,7 @@ import { cn } from '~/lib/cn';
 import { formatShortDate, formatShortDay, toIsoDate } from '~/lib/dates';
 import { defaultRemind, NoteDraft, REPEAT_LABELS, reminderHint, remindChoices } from '~/lib/notes';
 import { daysBeforeText } from '~/lib/payments';
-import { DatePicker, Select } from '../../../../form';
+import { DatePicker, FieldHint, Select } from '../../../../form';
 import { Button, ChipGroup, IconButton, SegmentedControl } from '../../../../ui';
 import { NoteDraftState } from '../../useNoteDraft';
 
@@ -233,11 +233,9 @@ export const NotePaymentAndReminder = ({ draft, payments, today }: NotePaymentAn
           ) : null}
 
           {hint ? (
-            <p
-              aria-live="polite"
-              className="-mt-1 ml-1 text-xs leading-[1.4] font-semibold text-muted">
+            <FieldHint live className="-mt-1">
               {hint}
-            </p>
+            </FieldHint>
           ) : null}
         </section>
       ) : (
