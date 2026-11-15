@@ -1,9 +1,10 @@
 // Not through the client barrel: its client.ts loads this file, so that would be a loop
 import { createApolloClient } from '~/graphql/client/createApolloClient';
-import { addDays, startOfToday, toIsoDate } from '~/lib/dates';
+import { addDays, daysBetween, startOfToday, toIsoDate } from '~/lib/dates';
 import { roundPence } from '~/lib/format';
 import { useAuthStore } from '~/state/auth';
-import { apiDate } from '~/test/dates';
+import { fakeRecurring } from '~/test/builders';
+import { apiDate, apiDateFromToday as fromToday } from '~/test/dates';
 import {
   createFakeApi,
   DEFAULT_USER,
@@ -29,8 +30,6 @@ import {
  *   interest - away for three months: three interest payments added at once, and the debts
  */
 
-const fromToday = (days: number) => apiDate(toIsoDate(addDays(startOfToday(), days)));
-
 // The next Saturday after today
 const comingSaturday = () => {
   const today = startOfToday();
@@ -39,8 +38,47 @@ const comingSaturday = () => {
 const addMonths = (date: Date, months: number) =>
   new Date(date.getFullYear(), date.getMonth() + months, date.getDate());
 
+/*
+ * A recurring payment due some days from today: monthly, first paid a year before unless
+ * startedInDays says when, and renewing if renewInDays is given. A debt brings its balance, the
+ * interest built up since its last payment, and its past payments.
+ */
+const mockPayment = ({
+  dueInDays,
+  startedInDays = dueInDays - 365,
+  renewInDays,
+  debt,
+  paid = 3,
+  ...fields
+}: Pick<FakeRecurringPayment, 'id' | 'name' | 'amount' | 'category'> &
+  Partial<Omit<FakeRecurringPayment, 'debt'>> & {
+    dueInDays: number;
+    startedInDays?: number;
+    renewInDays?: number;
+    // Paid monthly, with a balance set from a statement a few weeks ago
+    debt?: { balance: number; startingBalance: number; apr: number };
+    // How many past payments a debt has, for its history
+    paid?: number;
+  }): FakeRecurringPayment =>
+  fakeRecurring({
+    firstPaymentDate: fromToday(startedInDays),
+    nextDueDate: fromToday(dueInDays),
+    renewalDate: renewInDays === undefined ? null : fromToday(renewInDays),
+    ...(debt && {
+      history: pastPayments({ amount: fields.amount, dueInDays, debt, count: paid }),
+      // Its last payment was a month before the next
+      debt: {
+        ...debt,
+        balanceUpdatedAt: fromToday(-21),
+        accrued: 0,
+        accruedTo: fromToday(dueInDays - 30)
+      }
+    }),
+    ...fields
+  });
+
 // The accounts scenario's other spending accounts: a joint one for bills, a holiday one that
-// would go below Â£0 before payday, and a spare card that's already below it
+// would go below £0 before payday, and a spare card that's already below it
 const demoSpendingAccounts = (): FakeAccount[] => [
   {
     id: 'joint',
@@ -63,7 +101,7 @@ const demoSpendingAccounts = (): FakeAccount[] => [
     balanceUpdatedAt: fromToday(0)
   },
   {
-    // Already below Â£0, with nothing going out of it before payday
+    // Already below £0, with nothing going out of it before payday
     id: 'spare',
     name: 'Spare card',
     kind: 'SPENDING',
@@ -75,43 +113,33 @@ const demoSpendingAccounts = (): FakeAccount[] => [
   }
 ];
 
-const jointBill = (
-  id: string,
-  {
-    name,
-    amount,
-    due,
-    account
-  }: { name: string; amount: number; due: number; account: string | null }
-): FakeRecurringPayment => ({
-  id,
-  name,
-  amount,
-  category: 'BILLS',
-  frequency: 'MONTHLY',
-  type: 'EXPENSE',
-  firstPaymentDate: fromToday(due),
-  lastPaymentDate: null,
-  nextDueDate: fromToday(due),
-  thisCycle: [],
-  renewalDate: null,
-  account
-});
-
 // Bills out of Joint bills, water not saying which account yet, and a top-up into it
 const demoJointPayments = (): FakeRecurringPayment[] => [
-  jointBill('energy', { name: 'Energy', amount: 120, due: 7, account: 'joint' }),
-  jointBill('broadband', { name: 'Broadband', amount: 32, due: 12, account: 'joint' }),
-  jointBill('water', { name: 'Water', amount: 43.02, due: 16, account: null }),
-  {
-    ...jointBill('joint-top-up', {
-      name: 'Joint bills top-up',
-      amount: 600,
-      due: 5,
-      account: null
-    }),
+  mockPayment({
+    id: 'energy',
+    name: 'Energy',
+    amount: 120,
+    category: 'BILLS',
+    dueInDays: 7,
+    account: 'joint'
+  }),
+  mockPayment({
+    id: 'broadband',
+    name: 'Broadband',
+    amount: 32,
+    category: 'BILLS',
+    dueInDays: 12,
+    account: 'joint'
+  }),
+  mockPayment({ id: 'water', name: 'Water', amount: 43.02, category: 'BILLS', dueInDays: 16 }),
+  mockPayment({
+    id: 'joint-top-up',
+    name: 'Joint bills top-up',
+    amount: 600,
+    category: 'BILLS',
+    dueInDays: 5,
     paysInto: 'joint'
-  }
+  })
 ];
 
 const demoHolidayPayments = (): FakeOneOffPayment[] => [
@@ -211,88 +239,60 @@ const demoBudget = (scenario: string | null): FakeBudget => {
       ...payday
     },
     recurringPayments: [
-      {
+      mockPayment({
         id: 'netflix',
         name: 'Netflix',
         amount: 20,
         category: 'SUBSCRIPTIONS',
-        frequency: 'MONTHLY',
-        type: 'EXPENSE',
-        firstPaymentDate: fromToday(-273),
-        lastPaymentDate: null,
-        nextDueDate: fromToday(0),
-        thisCycle: [],
-        renewalDate: null
-      },
-      {
+        dueInDays: 0,
+        startedInDays: -273
+      }),
+      mockPayment({
         id: 'mortgage',
         name: 'Mortgage',
         amount: scenario === 'overdrawn' ? 1250 : 750,
         category: 'BILLS',
-        frequency: 'MONTHLY',
-        type: 'EXPENSE',
-        firstPaymentDate: fromToday(-247),
-        lastPaymentDate: null,
         // On payday it's left over from the last cycle, so the prompt offers to move it on
-        nextDueDate: fromToday(scenario === 'payday' ? -2 : 24),
-        thisCycle: [],
-        renewalDate: null
-      },
-      {
+        dueInDays: scenario === 'payday' ? -2 : 24,
+        startedInDays: -247
+      }),
+      mockPayment({
         id: 'prime',
         name: 'Amazon Prime',
         amount: 95,
         category: 'SUBSCRIPTIONS',
         frequency: 'ANNUALLY',
-        type: 'EXPENSE',
-        firstPaymentDate: fromToday(-93),
-        lastPaymentDate: null,
-        nextDueDate: fromToday(272),
-        thisCycle: [],
-        renewalDate: null
-      },
-      {
-        // Weekly, so it's due more than once before payday: the Ã—2 tag and its dates
+        dueInDays: 272,
+        startedInDays: -93
+      }),
+      mockPayment({
+        // Weekly, so it's due more than once before payday: the ×2 tag and its dates
         id: 'cleaner',
         name: 'Cleaner',
         amount: 50,
         category: 'BILLS',
         frequency: 'WEEKLY',
-        type: 'EXPENSE',
-        firstPaymentDate: fromToday(-27),
-        lastPaymentDate: null,
-        nextDueDate: fromToday(1),
-        thisCycle: [],
-        renewalDate: null
-      },
-      {
+        dueInDays: 1,
+        startedInDays: -27
+      }),
+      mockPayment({
         // Due on the coming Saturday, so it goes out the Monday after: the Moved from tag
         id: 'car-insurance',
         name: 'Car insurance',
         amount: 52,
         category: 'BILLS',
-        frequency: 'MONTHLY',
-        type: 'EXPENSE',
-        firstPaymentDate: apiDate(toIsoDate(addMonths(comingSaturday(), -6))),
-        lastPaymentDate: null,
-        nextDueDate: apiDate(toIsoDate(comingSaturday())),
-        thisCycle: [],
-        renewalDate: null
-      },
-      {
+        dueInDays: daysBetween(startOfToday(), comingSaturday()),
+        firstPaymentDate: apiDate(toIsoDate(addMonths(comingSaturday(), -6)))
+      }),
+      mockPayment({
         id: 'isa-top-up',
         name: 'ISA top-up',
         amount: 250,
         category: 'SAVINGS',
-        frequency: 'MONTHLY',
-        type: 'EXPENSE',
-        firstPaymentDate: fromToday(-180),
-        lastPaymentDate: null,
-        nextDueDate: fromToday(3),
-        thisCycle: [],
-        renewalDate: null,
+        dueInDays: 3,
+        startedInDays: -180,
         paysInto: 'isa'
-      }
+      })
     ],
     oneOffPayments: [
       {
@@ -364,16 +364,22 @@ const demoBudget = (scenario: string | null): FakeBudget => {
       accounts: [demoSpendingAccounts()[0], ...(budget.accounts ?? [])],
       recurringPayments: [
         ...budget.recurringPayments,
-        jointBill('energy', { name: 'Energy', amount: 120, due: -3, account: 'joint' }),
-        {
-          ...jointBill('joint-top-up', {
-            name: 'Joint bills top-up',
-            amount: 600,
-            due: 0,
-            account: null
-          }),
+        mockPayment({
+          id: 'energy',
+          name: 'Energy',
+          amount: 120,
+          category: 'BILLS',
+          dueInDays: -3,
+          account: 'joint'
+        }),
+        mockPayment({
+          id: 'joint-top-up',
+          name: 'Joint bills top-up',
+          amount: 600,
+          category: 'BILLS',
+          dueInDays: 0,
           paysInto: 'joint'
-        }
+        })
       ]
     };
   }
@@ -387,39 +393,17 @@ const demoBudget = (scenario: string | null): FakeBudget => {
   return budget;
 };
 
-const demoPayment = (fields: {
-  id: string;
-  name: string;
-  amount: number;
-  category: string;
-  frequency?: string;
-  dueInDays: number;
-  renewInDays?: number;
-}) => ({
-  id: fields.id,
-  name: fields.name,
-  amount: fields.amount,
-  category: fields.category,
-  frequency: fields.frequency ?? 'MONTHLY',
-  type: 'EXPENSE' as const,
-  firstPaymentDate: fromToday(fields.dueInDays - 365),
-  lastPaymentDate: null,
-  nextDueDate: fromToday(fields.dueInDays),
-  thisCycle: [],
-  renewalDate: fields.renewInDays === undefined ? null : fromToday(fields.renewInDays)
-});
-
 // Spotify went by unpaid yesterday; home insurance renews in five weeks with a note about it
 const demoReminderPayments = () => [
-  demoPayment({
+  mockPayment({
     id: 'spotify',
     name: 'Spotify',
     amount: 20,
     category: 'SUBSCRIPTIONS',
     dueInDays: -1
   }),
-  demoPayment({ id: 'energy', name: 'Energy', amount: 120, category: 'BILLS', dueInDays: 1 }),
-  demoPayment({
+  mockPayment({ id: 'energy', name: 'Energy', amount: 120, category: 'BILLS', dueInDays: 1 }),
+  mockPayment({
     id: 'home-insurance',
     name: 'Home insurance',
     amount: 612,
@@ -427,7 +411,7 @@ const demoReminderPayments = () => [
     frequency: 'ANNUALLY',
     dueInDays: 36
   }),
-  demoPayment({
+  mockPayment({
     id: 'prescription',
     name: 'Prescription',
     amount: 114.5,
@@ -435,7 +419,7 @@ const demoReminderPayments = () => [
     frequency: 'BIANNUALLY',
     dueInDays: 25
   }),
-  demoPayment({
+  mockPayment({
     id: 'phone',
     name: 'Phone contract',
     amount: 32,
@@ -467,7 +451,7 @@ const demoDatedNotes = () =>
     },
     {
       id: 'note-mot',
-      body: 'Car MOT and service at the garage on the high street. Ask them to check the tyres and the brake pads while itâ€™s in.',
+      body: 'Car MOT and service at the garage on the high street. Ask them to check the tyres and the brake pads while it’s in.',
       color: 'BLUE',
       date: fromToday(20),
       remind: [14],
@@ -475,40 +459,6 @@ const demoDatedNotes = () =>
       payment: null
     }
   ].map(note => ({ ...note, createdAt: String(Date.now()), updatedAt: String(Date.now()) }));
-
-// Paid monthly, with a balance set from a statement a few weeks ago
-interface DemoDebt {
-  id: string;
-  name: string;
-  category: string;
-  amount: number;
-  dueInDays: number;
-  debt: { balance: number; startingBalance: number; apr: number };
-  // How many past payments it has, for its history
-  paid?: number;
-}
-
-const demoDebt = ({ id, name, category, amount, dueInDays, debt, paid = 3 }: DemoDebt) => ({
-  id,
-  name,
-  amount,
-  category,
-  frequency: 'MONTHLY',
-  type: 'EXPENSE' as const,
-  firstPaymentDate: fromToday(dueInDays - 365),
-  lastPaymentDate: null,
-  nextDueDate: fromToday(dueInDays),
-  thisCycle: [],
-  history: pastPayments({ amount, dueInDays, debt, count: paid }),
-  renewalDate: null,
-  // Interest has built up since its last payment, a month before the next
-  debt: {
-    ...debt,
-    balanceUpdatedAt: fromToday(-21),
-    accrued: 0,
-    accruedTo: fromToday(dueInDays - 30)
-  }
-});
 
 /*
  * Its last few monthly payments, newest first, from before this cycle so they can't be undone,
@@ -547,7 +497,7 @@ const pastPayments = ({
 };
 
 const demoDebts = () => [
-  demoDebt({
+  mockPayment({
     id: 'credit-card',
     name: 'Credit card',
     category: 'FINANCES',
@@ -560,7 +510,7 @@ const demoDebts = () => [
     },
     paid: 18
   }),
-  demoDebt({
+  mockPayment({
     id: 'car-finance',
     name: 'Car finance',
     category: 'FINANCES',
@@ -572,7 +522,7 @@ const demoDebts = () => [
       apr: 6.9
     }
   }),
-  demoDebt({
+  mockPayment({
     id: 'family-loan',
     name: 'Family loan',
     category: 'FINANCES',
