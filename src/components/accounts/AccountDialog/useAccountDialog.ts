@@ -2,17 +2,16 @@ import { useState } from 'react';
 import { useMutation } from '@apollo/client/react';
 import { useShallow } from 'zustand/react/shallow';
 import {
+  AccountKind,
   CreateAccountDocument,
   DeleteAccountDocument,
   UpdateAccountDocument
 } from '~/graphql/generated';
-import { AccountKind } from '~/graphql/generated';
 import { Account, paidIntoAccountOf, spendingOf } from '~/lib/accounts';
-import { getApiErrorMessage } from '~/lib/errors';
 import { formatMoneyInput } from '~/lib/format';
 import { useAccountDialogStore } from '~/state/accountDialog';
 import { useSetupAccountsStore } from '~/state/setupAccounts';
-import { showToast } from '~/state/toast';
+import { showErrorToast, showToast } from '~/state/toast';
 import { AccountDraft, blankDraft, checkAccountDraft, interestDraftOf } from '../accountDraft';
 
 const draftOf = (
@@ -107,9 +106,6 @@ export const useAccountDialog = ({
   // Where pay lands always counts
   const paidIntoInput = canBePaidInto && draft.paidInto ? { paidInto: true, counts: true } : {};
 
-  const failed = (error: unknown, fallback: string) =>
-    showToast({ message: getApiErrorMessage(error, fallback) });
-
   const save = async () => {
     setSubmitted(true);
     if (!fields) return;
@@ -136,7 +132,7 @@ export const useAccountDialog = ({
       const becameSpending = !account || account.kind !== 'SPENDING';
       if (becameSpending && spending && otherSpending.length === 1) openSetup();
     } catch (error) {
-      failed(error, "Couldn't save the account. Try again.");
+      showErrorToast(error, { fallback: "Couldn't save the account. Try again." });
     }
   };
 
@@ -147,7 +143,7 @@ export const useAccountDialog = ({
       close();
       showToast({ message: `${account.name} deleted` });
     } catch (error) {
-      failed(error, "Couldn't delete the account. Try again.");
+      showErrorToast(error, { fallback: "Couldn't delete the account. Try again." });
     }
   };
 
@@ -185,5 +181,3 @@ export const useAccountDialog = ({
     confirmDelete: () => void confirmDelete()
   };
 };
-
-export type AccountDialogForm = ReturnType<typeof useAccountDialog>;

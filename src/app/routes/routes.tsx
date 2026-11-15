@@ -1,6 +1,6 @@
 import { Navigate, RouteObject } from 'react-router';
-import { FullPageLoader } from '~/components/feedback/FullPageLoader';
-import { AppShell } from '~/components/layout/AppShell';
+import { FullPageLoader } from '~/components/feedback';
+import { AppShell } from '~/components/layout';
 import { ROUTES } from '~/constants';
 import { PublicOnly, RequireBudget, RequireAuth, RequireNoBudget } from '../guards';
 import { RootLayout } from '../RootLayout';

@@ -1,6 +1,5 @@
 import { ChevronLeft } from 'lucide-react';
-import { BrandMark } from '~/components/ui/BrandMark';
-import { IconButton } from '~/components/ui/IconButton';
+import { BrandMark, IconButton } from '~/components/ui';
 import { useLogout } from '~/hooks/useLogout';
 import { cn } from '~/lib/cn';
 import { SetupState } from '../../../hooks';

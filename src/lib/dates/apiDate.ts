@@ -13,9 +13,6 @@ export const fromApiDate = (value: string | null | undefined) => {
   return new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
 };
 
-/* A local Date -> 'YYYY-MM-DD', which the API reads as that calendar day */
-export const toApiDate = (date: Date) => toIsoDate(date);
-
 /* Today as a local Date at midnight */
 export const startOfToday = (now = new Date()) =>
   new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -23,6 +20,10 @@ export const startOfToday = (now = new Date()) =>
 /* A local Date some number of days later, keeping midnight across clock changes */
 export const addDays = (date: Date, days: number) =>
   new Date(date.getFullYear(), date.getMonth(), date.getDate() + days);
+
+/* The given day in a month, or its last day when it's shorter: the 31st falls on 30 Sep */
+export const dayInMonth = ({ year, month, day }: { year: number; month: number; day: number }) =>
+  new Date(year, month, Math.min(day, new Date(year, month + 1, 0).getDate()));
 
 /* Whole days from one local midnight to another */
 export const daysBetween = (from: Date, to: Date) =>

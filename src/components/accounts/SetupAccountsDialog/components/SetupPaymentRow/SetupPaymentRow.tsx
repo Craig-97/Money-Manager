@@ -1,9 +1,10 @@
-import { Checkbox, CheckboxHitArea } from '~/components/form/Checkbox';
-import { Select } from '~/components/form/Select';
-import { Account, accountLetter } from '~/lib/accounts';
+import { Account } from '~/lib/accounts';
 import { cn } from '~/lib/cn';
+import { formatShortDate } from '~/lib/dates';
 import { formatMoney } from '~/lib/format';
-import { categoryLabel, formatShortDate, FREQUENCY_LABELS, RecurringPayment } from '~/lib/payments';
+import { categoryLabel, FREQUENCY_LABELS, RecurringPayment } from '~/lib/payments';
+import { Checkbox, CheckboxHitArea, Select } from '../../../../form';
+import { AccountLetter } from '../../../AccountLetter';
 
 interface SetupPaymentRowProps {
   payment: RecurringPayment;
@@ -57,13 +58,7 @@ export const SetupPaymentRow = ({
           aria-label={`Select ${payment.name}`}
         />
       </CheckboxHitArea>
-      {compact ? null : (
-        <span
-          aria-hidden="true"
-          className="inline-flex size-[38px] shrink-0 items-center justify-center rounded-xl border border-border bg-surface-2 text-sm font-extrabold">
-          {accountLetter(payment)}
-        </span>
-      )}
+      {compact ? null : <AccountLetter account={payment} />}
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         <span className="text-[15px] font-bold [overflow-wrap:anywhere]">{payment.name}</span>
         <span className="num text-xs font-semibold text-muted">

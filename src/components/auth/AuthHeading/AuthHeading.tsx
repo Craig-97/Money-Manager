@@ -1,6 +1,6 @@
 import { ComponentType, ReactNode } from 'react';
-import { IconProps } from '~/components/icons';
 import { cn } from '~/lib/cn';
+import { IconProps } from '../../icons';
 
 interface AuthHeadingProps {
   title: string;

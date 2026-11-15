@@ -2,7 +2,7 @@ import { useBudget } from '~/hooks/useBudget';
 import { useDebtActions } from '~/hooks/useDebtActions';
 import { usePayCycle } from '~/hooks/usePayCycle';
 import { isDebt } from '~/lib/debts';
-import { RecurringPayment, toPayments } from '~/lib/payments';
+import { toPayments } from '~/lib/payments';
 import { DebtSheet } from '../DebtSheet';
 import { OverpaymentDialog } from '../OverpaymentDialog';
 import { PaymentsDialog } from '../PaymentsDialog';
@@ -17,11 +17,7 @@ export const DebtDialogs = () => {
   const { budget } = useBudget();
   const { today, holidays } = usePayCycle(budget?.payday);
   const actions = useDebtActions(budget?.id ?? '');
-  const debts = budget
-    ? toPayments(budget, { today, holidays })
-        .filter((payment): payment is RecurringPayment => payment.kind === 'recurring')
-        .filter(isDebt)
-    : [];
+  const debts = budget ? toPayments(budget, { today, holidays }).filter(isDebt) : [];
 
   return (
     <>

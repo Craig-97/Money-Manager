@@ -5,7 +5,7 @@ import { usePaymentActions } from '~/hooks/usePaymentActions';
 import { usePaymentSelection } from '~/hooks/usePaymentSelection';
 import { isDebt } from '~/lib/debts';
 import { notesByPayment, toNotes } from '~/lib/notes';
-import { canPay, DEFAULT_SORT, PaymentSort, toPayments } from '~/lib/payments';
+import { canPay, DEFAULT_SORT, isRecurring, PaymentSort, toPayments } from '~/lib/payments';
 import {
   ALL_CATEGORIES,
   categoriesUsed,
@@ -13,7 +13,6 @@ import {
   filterPayments,
   listTotals,
   RecurringTab,
-  recurringOnly,
   tabCounts,
   upcomingRenewals
 } from '../../recurringModel';
@@ -31,7 +30,7 @@ export const useRecurring = (budget: Budget) => {
   const [category, setCategory] = useState<string>(ALL_CATEGORIES);
   const [sort, setSort] = useState<PaymentSort>(DEFAULT_SORT);
 
-  const payments = recurringOnly(toPayments(budget, { today, holidays }));
+  const payments = toPayments(budget, { today, holidays }).filter(isRecurring);
   const paymentNotes = notesByPayment(toNotes(budget.notes));
   const listed = filterPayments(payments, { tab, query, category, cycle, today, sort });
   const selection = usePaymentSelection(listed);

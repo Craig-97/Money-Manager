@@ -1,5 +1,5 @@
 import { CombinedGraphQLErrors } from '@apollo/client/errors';
-import { ErrorCode } from '~/constants';
+import { ERRORS, ErrorCode } from '~/constants';
 
 /* The API's error code from the first GraphQL error, e.g. BUDGET_NOT_LINKED */
 export const getErrorCode = (error: unknown): ErrorCode | undefined => {
@@ -12,7 +12,7 @@ export const hasErrorCode = (error: unknown, code: ErrorCode) => getErrorCode(er
 /* The API marks an UNAUTHENTICATED error as `expired` or `invalid` */
 export const isSessionError = (error: unknown) => {
   if (!CombinedGraphQLErrors.is(error)) return false;
-  return error.errors.some(e => e.extensions?.code === 'UNAUTHENTICATED');
+  return error.errors.some(e => e.extensions?.code === ERRORS.UNAUTHENTICATED);
 };
 
 /*

@@ -1,5 +1,5 @@
 import { SearchX } from 'lucide-react';
-import { Button } from '~/components/ui/Button';
+import { Button } from '~/components/ui';
 import { StatePanel } from '../StatePanel';
 
 export const NotesNoResults = ({ query, onClear }: { query: string; onClear: () => void }) => (

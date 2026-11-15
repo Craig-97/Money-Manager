@@ -1,8 +1,8 @@
 import { Percent } from 'lucide-react';
-import { greenTagClasses } from '~/components/payments/PaymentParts';
-import { Tooltip } from '~/components/ui/Tooltip';
 import { cn } from '~/lib/cn';
-import { formatShortDate } from '~/lib/payments';
+import { formatShortDate } from '~/lib/dates';
+import { greenTagClasses } from '../../payments';
+import { Tooltip } from '../../ui';
 
 interface PendingInterestTagProps {
   // "Pending interest £30.25"

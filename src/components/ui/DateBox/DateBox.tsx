@@ -1,7 +1,5 @@
 import { cn } from '~/lib/cn';
-import { formatShortMonth } from '~/lib/dates';
-
-const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+import { formatShortMonth, formatShortWeekday } from '~/lib/dates';
 
 interface DateBoxProps {
   date: Date;
@@ -27,7 +25,7 @@ export const DateBox = ({ date, top = 'month', accent = false, size = 'md' }: Da
         'text-[10px] font-extrabold tracking-[0.06em] uppercase',
         accent ? 'text-accent-text' : 'text-muted'
       )}>
-      {top === 'month' ? formatShortMonth(date) : WEEKDAYS[date.getDay()]}
+      {top === 'month' ? formatShortMonth(date) : formatShortWeekday(date)}
     </span>
     <span
       className={cn('mt-[3px] num font-extrabold', size === 'md' ? 'text-[19px]' : 'text-[17px]')}>

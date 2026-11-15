@@ -1,7 +1,7 @@
-import { isSameDay } from '~/lib/dates';
-import { roundPence } from '~/lib/format';
-import { PayCycle } from '~/lib/payday';
-import { datesDue, Payment } from '~/lib/payments';
+import { isSameDay } from '../dates';
+import { roundPence } from '../format';
+import { PayCycle } from '../payday';
+import { datesDue, Payment } from '../payments';
 import { Account, accountOf } from './accounts';
 
 /*
@@ -10,7 +10,7 @@ import { Account, accountOf } from './accounts';
  * the total across them doesn't change.
  */
 
-export interface Movement {
+interface Movement {
   // The payment and date, so each date of a weekly payment has its own row
   key: string;
   payment: Payment;

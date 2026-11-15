@@ -1,6 +1,6 @@
 import { PaymentFrequency } from '~/graphql/generated';
-import { daysBetween, formatDayMonth } from '~/lib/dates';
-import { formatShortDate } from './labels';
+import { daysBetween, formatDayMonth, formatMonthYear, formatShortDate, inDays } from '../dates';
+import { capitalise } from '../format';
 import { Payment, RecurringPayment } from './payments';
 
 /*
@@ -63,9 +63,7 @@ export const renewalDay = (renewal: Renewal, today: Date) => {
       renewal.date.getFullYear() === today.getFullYear() ? '' : ` ${renewal.date.getFullYear()}`;
     return `${formatDayMonth(renewal.date)}${year}`;
   }
-  if (renewal.days === 0) return 'Today';
-  if (renewal.days === 1) return 'Tomorrow';
-  return `In ${renewal.days} days`;
+  return capitalise(inDays(renewal.days));
 };
 
 /* "Renews in 22 days", "Renews 19 Jan", "Needs renewing" */
@@ -121,44 +119,46 @@ interface RenewalWindow<T> {
   label: string;
 }
 
-const MONTH_YEAR = new Intl.DateTimeFormat('en-GB', { month: 'short', year: 'numeric' });
+// How many renewals the window aims to hold
+const SHOWN = 3;
 
 /*
  * The shortest window that holds the soonest few renewals, so the list always reads sensibly: a
  * month when several are close, up to two years when they're spread out. Ones that need renewing
  * always come first and don't decide the window.
  */
-export const renewalWindow = <T extends { renewal: Renewal }>(
-  items: T[],
-  { size = 3 }: { size?: number } = {}
-): RenewalWindow<T> => {
+export const renewalWindow = <T extends { renewal: Renewal }>(items: T[]): RenewalWindow<T> => {
   const sorted = items.toSorted((a, b) => a.renewal.date.getTime() - b.renewal.date.getTime());
   const passed = sorted.filter(item => item.renewal.passed);
   const coming = sorted.filter(item => !item.renewal.passed);
-  if (coming.length === 0) return { shown: passed.slice(0, size), count: passed.length, label: '' };
+  if (coming.length === 0)
+    return { shown: passed.slice(0, SHOWN), count: passed.length, label: '' };
 
-  const target = coming[Math.min(size, coming.length) - 1].renewal.days;
+  const target = coming[Math.min(SHOWN, coming.length) - 1].renewal.days;
   // The window holding the soonest few; failing that, one holding at least the next
   const window =
     WINDOWS.find(w => target <= w.days) ?? WINDOWS.find(w => coming[0].renewal.days <= w.days);
   if (!window) {
     return {
-      shown: [...passed, coming[0]].slice(0, size),
+      shown: [...passed, coming[0]].slice(0, SHOWN),
       count: passed.length,
-      label: `Next in ${MONTH_YEAR.format(coming[0].renewal.date)}`
+      label: `Next in ${formatMonthYear(coming[0].renewal.date)}`
     };
   }
   const inWindow = coming.filter(item => item.renewal.days <= window.days);
   return {
-    shown: [...passed, ...inWindow].slice(0, size),
+    shown: [...passed, ...inWindow].slice(0, SHOWN),
     count: passed.length + inWindow.length,
     label: window.label
   };
 };
 
 /* For a payment's category line while its renewal needs a look: "Renews in 22 days" */
+/* Close enough to show, or gone by without the next date being set */
+export const isRenewalDue = (renewal: Renewal) => renewal.soon || renewal.passed;
+
 export const renewalNote = (payment: Payment, today: Date) => {
   if (payment.kind !== 'recurring') return null;
   const renewal = renewalOf(payment, today);
-  return renewal && (renewal.soon || renewal.passed) ? renewalTag(renewal, today) : null;
+  return renewal && isRenewalDue(renewal) ? renewalTag(renewal, today) : null;
 };

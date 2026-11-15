@@ -1,17 +1,15 @@
 import { CalendarDays } from 'lucide-react';
-import { tileLift } from '~/components/ui/Tile';
-import { CurrentUserQuery } from '~/graphql/generated';
+import { HeroTile, tileLift } from '~/components/ui';
+import { UserFieldsFragment } from '~/graphql/generated';
 import { Budget } from '~/hooks/useBudget';
 import { usePayCycle } from '~/hooks/usePayCycle';
 import { cn } from '~/lib/cn';
 import { formatShortDay } from '~/lib/dates';
 import { getInitials } from '~/lib/format';
-import { paydayPlan } from '../../profileModel';
-
-type User = NonNullable<CurrentUserQuery['tokenFindUser']>;
+import { paidText } from '~/lib/payday';
 
 interface ProfileSummaryProps {
-  user: User;
+  user: UserFieldsFragment;
   budget: Budget;
   compact: boolean;
 }
@@ -21,18 +19,12 @@ export const ProfileSummary = ({ user, budget, compact }: ProfileSummaryProps) =
   const { cycle } = usePayCycle(budget.payday);
   const initials = getInitials(user.firstName, user.surname);
   const name = `${user.firstName} ${user.surname}`;
-  const plan = paydayPlan(budget.payday);
+  const plan = paidText(budget.payday);
   const next = formatShortDay(cycle.end);
 
   if (compact) {
     return (
-      <section
-        aria-label="Account summary"
-        className="relative flex flex-col gap-4 overflow-hidden rounded-3xl bg-hero-bg p-5 text-hero-text">
-        <span
-          aria-hidden="true"
-          className="pointer-events-none absolute -top-[70px] -right-[60px] size-[180px] rounded-full bg-hero-chip"
-        />
+      <HeroTile as="section" aria-label="Account summary" size="sm">
         <div className="relative flex items-center gap-4">
           <span
             aria-hidden="true"
@@ -56,7 +48,7 @@ export const ProfileSummary = ({ user, budget, compact }: ProfileSummaryProps) =
             {next}
           </span>
         </div>
-      </section>
+      </HeroTile>
     );
   }
 

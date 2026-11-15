@@ -1,4 +1,4 @@
-import { SegmentedControl } from '~/components/ui/SegmentedControl';
+import { SegmentedControl } from '~/components/ui';
 import { LeftOverOutcome } from '~/graphql/generated';
 import { formatMoney } from '~/lib/format';
 import { PaydayPrompt } from '../../../hooks/usePaydayPrompt';

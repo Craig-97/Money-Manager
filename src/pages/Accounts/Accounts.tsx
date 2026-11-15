@@ -1,10 +1,8 @@
 import { Plus } from 'lucide-react';
-import { BudgetError } from '~/components/feedback/BudgetError';
-import { PageHeader } from '~/components/layout/PageHeader';
+import { BudgetError } from '~/components/feedback';
+import { PageHeader } from '~/components/layout';
 import { ReminderBell } from '~/components/reminders';
-import { Button } from '~/components/ui/Button';
-import { IconButton } from '~/components/ui/IconButton';
-import { SegmentedControl } from '~/components/ui/SegmentedControl';
+import { Button, IconButton, SegmentedControl } from '~/components/ui';
 import { useBudget } from '~/hooks/useBudget';
 import { useAccountDialogStore } from '~/state/accountDialog';
 import { AccountsContent, AccountsSkeleton } from './components';

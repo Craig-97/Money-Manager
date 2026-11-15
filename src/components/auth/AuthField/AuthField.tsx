@@ -1,6 +1,5 @@
 import { ReactNode } from 'react';
-import { FieldError } from '~/components/form/FieldError';
-import { Label } from '~/components/form/Label';
+import { FieldError, Label } from '../../form';
 
 interface AuthFieldProps {
   // The input's id. Its error has the id `${id}-error`, for the input's aria-describedby.

@@ -1,9 +1,10 @@
 import { FileText } from 'lucide-react';
-import { Tooltip } from '~/components/ui/Tooltip';
 import { cn } from '~/lib/cn';
+import { plural } from '~/lib/format';
 import { Note, noteHeading } from '~/lib/notes';
 import { Payment } from '~/lib/payments';
 import { usePaymentNotesStore } from '~/state/paymentNotes';
+import { Tooltip } from '../../../ui';
 import { tagClasses } from '../tagClasses';
 
 interface NoteChipProps {
@@ -22,7 +23,7 @@ const chipClasses = cn(tagClasses, 'h-[22px] shrink-0 gap-1 px-2 num text-[11px]
 export const NoteChip = ({ payment, notes, hint = true }: NoteChipProps) => {
   const openNotes = usePaymentNotesStore(s => s.openFor);
   if (!notes.length) return null;
-  const label = `${notes.length} ${notes.length === 1 ? 'note' : 'notes'} on ${payment.name}`;
+  const label = `${plural(notes.length, 'note')} on ${payment.name}`;
   const icon = (
     <FileText size={12} strokeWidth={2.25} className="text-note-amber-dot" aria-hidden="true" />
   );

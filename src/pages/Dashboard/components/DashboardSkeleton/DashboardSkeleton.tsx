@@ -1,6 +1,4 @@
-import { Skeleton } from '~/components/ui/Skeleton';
-
-const heroChip = 'flex min-w-0 flex-col gap-1 rounded-[18px] bg-hero-chip px-3.5 py-3';
+import { heroFigureClasses, Skeleton } from '~/components/ui';
 
 /* The dashboard's shape while the budget loads */
 export const DashboardSkeleton = () => (
@@ -30,17 +28,17 @@ export const DashboardSkeleton = () => (
         />
       </div>
       <div className="mt-auto hidden grid-cols-[minmax(0,1fr)_20px_minmax(0,1fr)_20px_minmax(0,1fr)] gap-2 md:grid">
-        <div className={heroChip}>
+        <div className={heroFigureClasses}>
           <Skeleton tone="hero" className="h-5 w-[70px]" />
           <Skeleton tone="hero" className="h-6 w-[90px]" />
         </div>
         <span />
-        <div className={heroChip}>
+        <div className={heroFigureClasses}>
           <Skeleton tone="hero" className="h-5 w-[70px]" />
           <Skeleton tone="hero" className="h-6 w-[90px]" />
         </div>
         <span />
-        <div className={heroChip}>
+        <div className={heroFigureClasses}>
           <Skeleton tone="hero" className="h-5 w-[70px]" />
           <Skeleton tone="hero" className="h-6 w-[90px]" />
         </div>

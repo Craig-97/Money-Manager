@@ -1,5 +1,5 @@
 import { Calendar, Plus } from 'lucide-react';
-import { Button } from '~/components/ui/Button';
+import { Button } from '~/components/ui';
 import { PaymentTab } from '../../../dashboardModel';
 import { EMPTY_TEXT } from '../paymentText';
 

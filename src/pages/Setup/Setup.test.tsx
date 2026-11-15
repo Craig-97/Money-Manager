@@ -1,12 +1,11 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { screen, within } from '@testing-library/react';
-import { createFakeApi, DEFAULT_BUDGET } from '~/test/fakeApi';
+import { createFakeApi, freshBudget } from '~/test/fakeApi';
+import { findPageHeading } from '~/test/queries';
 import { renderApp } from '~/test/renderApp';
 import { resetViewport, setViewportWidth } from '~/test/viewport';
 
-const findPageHeading = (name: string) => screen.findByRole('heading', { level: 1, name });
-
-const renderSetup = () => renderApp({ route: '/setup', api: createFakeApi({ budget: null }) });
+const renderSetup = () => renderApp({ route: '/setup', budget: null });
 
 type User = ReturnType<typeof renderApp>['user'];
 
@@ -199,7 +198,7 @@ describe('setup', () => {
     await cont(user);
     await user.click(await screen.findByRole('button', { name: 'Skip for now' }));
     // Finished elsewhere while this page was open
-    api.db.budget = structuredClone(DEFAULT_BUDGET);
+    api.db.budget = freshBudget();
     await user.click(await screen.findByRole('button', { name: 'Finish setup' }));
 
     expect(await findPageHeading('Dashboard')).toBeInTheDocument();

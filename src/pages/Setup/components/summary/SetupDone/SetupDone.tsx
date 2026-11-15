@@ -1,5 +1,5 @@
 import { Check } from 'lucide-react';
-import { Button } from '~/components/ui/Button';
+import { Button } from '~/components/ui';
 import { useCurrentUser } from '~/hooks/useCurrentUser';
 import { formatLongDate } from '~/lib/dates';
 import { formatBalance } from '~/lib/format';

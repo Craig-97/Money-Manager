@@ -1,13 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { screen, within } from '@testing-library/react';
-import {
-  apiDate,
-  apiDateFromToday,
-  createFakeApi,
-  DEFAULT_BUDGET,
-  FakeBudget,
-  FakeRecurringPayment
-} from '~/test/fakeApi';
+import { apiDate, apiDateFromToday } from '~/test/dates';
+import { DEFAULT_BUDGET, FakeBudget, FakeRecurringPayment, freshBudget } from '~/test/fakeApi';
 import { renderApp } from '~/test/renderApp';
 import { resetViewport, setViewportWidth } from '~/test/viewport';
 
@@ -36,28 +30,25 @@ const cleaner: FakeRecurringPayment = {
   renewalDate: null
 };
 
-const budget = (): FakeBudget => ({
-  ...structuredClone(DEFAULT_BUDGET),
-  // Started today, so the payday prompt stays away
-  cycleStartedOn: apiDateFromToday(0),
-  recurringPayments: [...structuredClone(DEFAULT_BUDGET.recurringPayments), cleaner],
-  notes: [
-    ...structuredClone(DEFAULT_BUDGET.notes),
-    {
-      id: 'note-mortgage',
-      body: 'Fixed rate ends in March',
-      color: 'AMBER',
-      createdAt: apiDate('2026-09-01'),
-      updatedAt: apiDate('2026-09-01'),
-      payment: 'recurring-1'
-    }
-  ]
-});
+const budget = (): FakeBudget =>
+  freshBudget({
+    // Started today, so the payday prompt stays away
+    cycleStartedOn: apiDateFromToday(0),
+    recurringPayments: [...structuredClone(DEFAULT_BUDGET.recurringPayments), cleaner],
+    notes: [
+      ...structuredClone(DEFAULT_BUDGET.notes),
+      {
+        id: 'note-mortgage',
+        body: 'Fixed rate ends in March',
+        color: 'AMBER',
+        createdAt: apiDate('2026-09-01'),
+        updatedAt: apiDate('2026-09-01'),
+        payment: 'recurring-1'
+      }
+    ]
+  });
 
-const renderDashboard = () => {
-  const api = createFakeApi({ budget: budget() });
-  return { ...renderApp({ route: '/dashboard', api }), api };
-};
+const renderDashboard = () => renderApp({ route: '/dashboard', budget: budget() });
 
 describe('notes on a payment, on desktop', () => {
   it('shows a note chip by the payment and lists its notes when clicked', async () => {

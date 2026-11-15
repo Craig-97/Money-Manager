@@ -1,3 +1,4 @@
+import { formatLongMonth } from '~/lib/dates';
 import { Reminder, ReminderFilter } from '~/lib/reminders';
 
 export type RemindersTab = 'new' | 'up';
@@ -9,38 +10,7 @@ export const FILTERS: { value: ReminderFilter; label: string }[] = [
   { value: 'notes', label: 'Notes' }
 ];
 
-const MONTHS = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December'
-];
-
-const SHORT_MONTHS = [
-  'Jan',
-  'Feb',
-  'Mar',
-  'Apr',
-  'May',
-  'Jun',
-  'Jul',
-  'Aug',
-  'Sep',
-  'Oct',
-  'Nov',
-  'Dec'
-];
-const SHORT_DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
-export interface ReminderGroup {
+interface ReminderGroup {
   label: string;
   reminders: Reminder[];
 }
@@ -53,7 +23,7 @@ export const groupByMonth = (reminders: readonly Reminder[], today: Date): Remin
   const groups: ReminderGroup[] = [];
   for (const reminder of reminders) {
     const { date } = reminder;
-    const label = isFar(date, today) ? String(date.getFullYear()) : MONTHS[date.getMonth()];
+    const label = isFar(date, today) ? String(date.getFullYear()) : formatLongMonth(date);
     const last = groups.at(-1);
     if (last?.label === label) last.reminders.push(reminder);
     else groups.push({ label, reminders: [reminder] });
@@ -61,14 +31,5 @@ export const groupByMonth = (reminders: readonly Reminder[], today: Date): Remin
   return groups;
 };
 
-/* The date box's two lines: the weekday over the day, or the month once it's grouped by year */
-export const dateBox = (date: Date, today: Date) => ({
-  top: (isFar(date, today)
-    ? SHORT_MONTHS[date.getMonth()]
-    : SHORT_DAYS[date.getDay()]
-  ).toUpperCase(),
-  day: date.getDate()
-});
-
-/* "5 reminders" */
-export const countText = (count: number) => `${count} ${count === 1 ? 'reminder' : 'reminders'}`;
+/* What the date box shows over the day: the weekday, or the month once it's grouped by year */
+export const dateBoxTop = (date: Date, today: Date) => (isFar(date, today) ? 'month' : 'weekday');

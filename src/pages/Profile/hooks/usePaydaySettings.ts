@@ -4,18 +4,17 @@ import { UpdatePaydayDocument } from '~/graphql/generated';
 import { useBankHolidays } from '~/hooks/useBankHolidays';
 import { Budget } from '~/hooks/useBudget';
 import { startOfToday } from '~/lib/dates';
-import { getApiErrorMessage } from '~/lib/errors';
-import { showToast } from '~/state/toast';
-import { usePaydayDates } from './usePaydayDates';
 import {
   paydayErrors,
-  paydayPreview,
   PaydayValues,
   toPaydayConfig,
   toPaydayInput,
   toPaydayValues,
   withFrequency
-} from '../profileModel';
+} from '~/lib/payday';
+import { showErrorToast, showToast } from '~/state/toast';
+import { usePaydayDates } from './usePaydayDates';
+import { paydayPreview } from '../profileModel';
 
 /* The payday form, with the next few paydays it gives updating as it changes */
 export const usePaydaySettings = (budget: Budget) => {
@@ -48,7 +47,7 @@ export const usePaydaySettings = (budget: Budget) => {
       setSaved(values);
       showToast({ message: 'Payday settings saved' });
     } catch (error) {
-      showToast({ message: getApiErrorMessage(error, "Couldn't save your payday. Try again.") });
+      showErrorToast(error, { fallback: "Couldn't save your payday. Try again." });
     }
   };
 

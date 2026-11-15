@@ -1,9 +1,10 @@
 import { NoteColor, NoteFieldsFragment, NoteRepeat, PaymentFrequency } from '~/graphql/generated';
-import { addDays, formatShortDay, fromApiDate, parseIsoDate, toIsoDate } from '~/lib/dates';
-import { nextOccurrence, Payment } from '~/lib/payments';
+import { addDays, formatShortDay, fromApiDate, parseIsoDate, spanText, toIsoDate } from '../dates';
+import { joinNames } from '../format';
+import { nextOccurrence, Payment } from '../payments';
 
 // The days before a note's date it can remind: on the day, the day before, a week, two weeks, a month
-export const NOTE_REMIND_DAYS = [0, 1, 7, 14, 30] as const;
+const NOTE_REMIND_DAYS = [0, 1, 7, 14, 30] as const;
 
 // A new date reminds a week before, until other reminders are picked
 export const DEFAULT_NOTE_REMIND = [7];
@@ -32,7 +33,7 @@ const toTime = (value: string) => {
   return Number.isNaN(ms) ? Date.parse(value) || 0 : ms;
 };
 
-export const toNote = (note: NoteFieldsFragment): Note => ({
+const toNote = (note: NoteFieldsFragment): Note => ({
   id: note.id,
   body: note.body,
   color: note.color,
@@ -123,34 +124,13 @@ export const repeatText = (repeat: NoteRepeat, paymentName?: string) => {
   return REPEAT_LABELS[repeat].toLowerCase();
 };
 
-/* The note's next date, today included */
-export const nextNoteDate = (note: Pick<Note, 'date' | 'repeat'>, today: Date) =>
-  noteDateFrom(note, today);
-
-// "1 month", "2 weeks", "1 day": how long before, without the "before"
-const spanText = (days: number) => {
-  if (days === 30) return '1 month';
-  if (days % 7 === 0) return `${days / 7} ${days === 7 ? 'week' : 'weeks'}`;
-  return `${days} ${days === 1 ? 'day' : 'days'}`;
-};
-
-const joinAnd = (parts: string[]) =>
-  parts.length <= 1 ? (parts[0] ?? '') : `${parts.slice(0, -1).join(', ')} and ${parts.at(-1)}`;
-
 /* "1 month and 1 week before", "On the day", "2 weeks before and on the day" */
 export const remindText = (remind: readonly number[]) => {
   const before = [...remind].filter(days => days > 0).sort((a, b) => b - a);
   const onTheDay = remind.includes(0);
   if (!before.length) return onTheDay ? 'On the day' : '';
-  const text = `${joinAnd(before.map(spanText))} before`;
+  const text = `${joinNames(before.map(spanText))} before`;
   return onTheDay ? `${text} and on the day` : text;
-};
-
-/* The days the note reminds on, soonest first, for its next date */
-export const remindDates = (note: Pick<Note, 'date' | 'repeat' | 'remind'>, today: Date) => {
-  const date = nextNoteDate(note, today);
-  if (!date) return [];
-  return note.remind.map(days => addDays(date, -days)).sort((a, b) => a.getTime() - b.getTime());
 };
 
 /* The start of the note's first line, short enough for a heading */
@@ -216,9 +196,6 @@ export const noteInput = (draft: NoteDraft) => {
 export const sameDraft = (a: NoteDraft, b: NoteDraft) =>
   JSON.stringify(noteInput(a)) === JSON.stringify(noteInput(b));
 
-const joinDates = (dates: string[]) =>
-  dates.length <= 1 ? (dates[0] ?? '') : `${dates.slice(0, -1).join(', ')} and ${dates.at(-1)}`;
-
 // What comes after the first reminders, for each repeat
 const THEN: Record<NoteRepeat, string> = {
   NONE: '',
@@ -256,7 +233,7 @@ export const reminderHint = (
     .filter(day => day >= today);
   if (!dates.length) return repeats ? '' : 'Its reminders have gone by.';
   const plural = dates.length === 1 ? 'a reminder' : 'reminders';
-  return `You’ll get ${plural} on ${joinDates(dates.map(format))}${THEN[repeat]}.`;
+  return `You’ll get ${plural} on ${joinNames(dates.map(format))}${THEN[repeat]}.`;
 };
 
 /* Each recurring payment's notes, the most recently changed first */
@@ -275,7 +252,7 @@ export const notesByPayment = (notes: readonly Note[]) => {
  * "Each payment · Reminds you 1 week before", "Tue 1 Dec · No reminder" or "No date"
  */
 export const paymentNoteFoot = (note: Note, today: Date) => {
-  const date = nextNoteDate(note, today);
+  const date = noteDateFrom(note, today);
   if (!date) return 'No date';
   if (date < today) return 'Its date has gone by';
   const when = note.repeat === 'WITH_PAYMENT' ? 'Each payment' : formatShortDay(date);

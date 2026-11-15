@@ -1,6 +1,6 @@
-import { InfoNote } from '~/components/feedback/InfoNote';
-import { Tile } from '~/components/ui/Tile';
-import { formatBalance } from '~/lib/format';
+import { InfoNote } from '~/components/feedback';
+import { Tile } from '~/components/ui';
+import { formatBalance, plural } from '~/lib/format';
 import { Accounts } from '../../hooks';
 
 /*
@@ -16,7 +16,7 @@ export const CountedTile = ({
 }) => {
   const { totals, several } = model;
   const made = several ? 'your spending accounts' : 'your current account';
-  const pill = `${totals.countedCount} ${totals.countedCount === 1 ? 'account' : 'accounts'}`;
+  const pill = plural(totals.countedCount, 'account');
 
   if (compact) {
     return (

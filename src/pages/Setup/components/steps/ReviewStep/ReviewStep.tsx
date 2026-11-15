@@ -1,13 +1,14 @@
+import { HeroTile } from '~/components/ui';
 import { cn } from '~/lib/cn';
 import { formatLongDate } from '~/lib/dates';
-import { formatBalance, formatMoney, MINUS, parseMoney } from '~/lib/format';
+import { formatBalance, formatMoney, parseMoney, plural } from '~/lib/format';
 import { SetupState, useSetupDesktop } from '../../../hooks';
 import {
   accountDetails,
   FirstCycle,
-  PAY_FREQUENCY_LABELS,
-  RULES,
-  setupAccounts
+  payRuleText,
+  setupAccounts,
+  setupAmount
 } from '../../../setupModel';
 import { oneOffDetails, regularDetails, regularNext } from '../../../setupPayments';
 import { ReviewCard } from '../ReviewCard';
@@ -31,11 +32,8 @@ export const ReviewStep = ({ setup, firstCycle, nextPayday, today }: ReviewStepP
   const income = parseMoney(values.income) ?? 0;
   const accounts = setupAccounts(values);
   const counted = accounts.filter(account => account.counts);
-  // Desktop leaves money out unsigned, in red; mobile's board signs it
-  const amountOf = (input: { amount: number; type: string }) =>
-    (input.type === 'INCOME' ? '+' : isDesktop ? '' : MINUS) + formatMoney(input.amount);
   const toneOf = (input: { type: string }) => (input.type === 'INCOME' ? 'income' : 'expense');
-  const rule = `${PAY_FREQUENCY_LABELS[values.frequency]} · ${RULES[values.rule].title.toLowerCase()}`;
+  const rule = payRuleText(values);
   const nextPay = nextPayday ? `Next ${formatLongDate(nextPayday, { withYear: false })}` : null;
   const cycleEnd = formatLongDate(firstCycle.cycleEnd, { withYear: false });
 
@@ -81,11 +79,7 @@ export const ReviewStep = ({ setup, firstCycle, nextPayday, today }: ReviewStepP
           </p>
         </div>
       ) : (
-        <div className="relative overflow-hidden rounded-3xl bg-hero-bg p-5 text-hero-text">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute -top-[70px] -right-[60px] size-[180px] rounded-full bg-hero-chip"
-          />
+        <HeroTile as="div" size="sm" className="block">
           <p className="relative text-[13px] font-bold text-hero-muted">Free to spend this cycle</p>
           <p className="relative mt-1 num text-4xl font-extrabold tracking-[-0.04em]">
             {formatBalance(firstCycle.freeToSpend)}
@@ -108,7 +102,7 @@ export const ReviewStep = ({ setup, firstCycle, nextPayday, today }: ReviewStepP
             ) : null}
             .
           </p>
-        </div>
+        </HeroTile>
       )}
 
       <ReviewCard label="Pay" onEdit={() => goTo(0)} disabled={saving}>
@@ -156,7 +150,7 @@ export const ReviewStep = ({ setup, firstCycle, nextPayday, today }: ReviewStepP
             <span className="num font-extrabold text-text">
               {formatBalance(firstCycle.balance)}
             </span>{' '}
-            · {counted.length} {counted.length === 1 ? 'account' : 'accounts'}
+            · {plural(counted.length, 'account')}
           </p>
         )}
       </ReviewCard>
@@ -174,7 +168,7 @@ export const ReviewStep = ({ setup, firstCycle, nextPayday, today }: ReviewStepP
             key: regular.id,
             name: regular.input.name,
             details: regularDetails(regular, { accounts, today }),
-            amount: amountOf(regular.input),
+            amount: setupAmount(regular.input, { desktop: isDesktop }),
             tone: toneOf(regular.input),
             next: regularNext(regular, { today })
           }))}
@@ -189,7 +183,7 @@ export const ReviewStep = ({ setup, firstCycle, nextPayday, today }: ReviewStepP
             key: oneOff.id,
             name: oneOff.input.name,
             details: oneOffDetails(oneOff, { accounts, today }),
-            amount: amountOf(oneOff.input),
+            amount: setupAmount(oneOff.input, { desktop: isDesktop }),
             tone: toneOf(oneOff.input)
           }))}
         />

@@ -1,8 +1,9 @@
-import { Tooltip } from '~/components/ui/Tooltip';
 import { cn } from '~/lib/cn';
+import { formatShortDate } from '~/lib/dates';
 import { formatPayment } from '~/lib/format';
 import { PayCycle } from '~/lib/payday';
-import { datesDue, formatShortDate, Payment } from '~/lib/payments';
+import { datesDue, Payment } from '~/lib/payments';
+import { Tooltip } from '../../../ui';
 import { tagClasses } from '../tagClasses';
 
 interface TimesDueProps {

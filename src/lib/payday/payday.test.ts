@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { PaydayConfig, toIsoDate } from '~/lib/dates';
+import { PaydayConfig, toIsoDate } from '../dates';
 import {
   BankHolidays,
   countPaydays,
@@ -7,11 +7,8 @@ import {
   getNextPaydays,
   getPayCycle
 } from './payday';
-
-const day = (iso: string) => {
-  const [year, month, date] = iso.split('-').map(Number);
-  return new Date(year, month - 1, date);
-};
+import { paidText } from './text';
+import { day } from '~/test/dates';
 
 const NO_HOLIDAYS = new Set<string>();
 
@@ -254,5 +251,19 @@ describe('moving a single payday', () => {
     const result = getPayCycle(later, { holidays: christmas, today: day('2026-12-20') });
     expect(toIsoDate(result.end)).toBe('2026-12-28');
     expect(toIsoDate(result.endUsual)).toBe('2026-12-24');
+  });
+});
+
+describe('paidText', () => {
+  it('says how often and on which day', () => {
+    const payday: PaydayConfig = { frequency: 'MONTHLY', type: 'SET_DAY', dayOfMonth: 15 };
+    expect(paidText(payday)).toBe('Paid monthly · the 15th');
+    expect(paidText({ ...payday, type: 'LAST_WEEKDAY', weekday: 'FRIDAY' })).toBe(
+      'Paid monthly · last Friday'
+    );
+    expect(paidText({ frequency: 'WEEKLY', type: 'SET_WEEKDAY', weekday: 'THURSDAY' })).toBe(
+      'Paid weekly · Thursdays'
+    );
+    expect(paidText(null)).toBe('Paid monthly · last working day');
   });
 });

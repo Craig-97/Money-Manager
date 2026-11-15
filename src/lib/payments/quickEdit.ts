@@ -1,4 +1,4 @@
-import { addDays } from '~/lib/dates';
+import { addDays } from '../dates';
 import { scheduleText } from './labels';
 import { Payment } from './payments';
 import { nextOccurrence } from './recurrence';

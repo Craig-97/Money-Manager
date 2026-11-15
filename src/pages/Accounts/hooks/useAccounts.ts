@@ -13,7 +13,7 @@ import {
 } from '~/lib/accounts';
 import { debtTotals, isDebt } from '~/lib/debts';
 import { roundPence } from '~/lib/format';
-import { RecurringPayment, toPayments } from '~/lib/payments';
+import { toPayments } from '~/lib/payments';
 
 /* Everything the Accounts page shows and does, worked out from the budget */
 export const useAccounts = (budget: Budget) => {
@@ -22,10 +22,7 @@ export const useAccounts = (budget: Budget) => {
 
   const accounts = toAccounts(budget.accounts, today);
   const payments = toPayments(budget, { today, holidays });
-  const debts = payments
-    .filter((payment): payment is RecurringPayment => payment.kind === 'recurring')
-    .filter(isDebt)
-    .filter(debt => debt.debt.balance > 0);
+  const debts = payments.filter(isDebt).filter(debt => debt.debt.balance > 0);
   const totals = accountTotals(accounts, { owed: debtTotals(debts).left });
   const several = hasSeveralSpending(accounts);
 
@@ -56,7 +53,7 @@ export const useAccounts = (budget: Budget) => {
       now,
       left,
       goesOut: roundPence(now - left),
-      monthlyIncome: budget.monthlyIncome ?? 0,
+      monthlyIncome: budget.monthlyIncome,
       // Money moving on payday itself, into or out of the spending accounts
       onPayday: spendingRows.flatMap(row =>
         row.onPayday

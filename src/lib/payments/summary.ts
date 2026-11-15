@@ -1,9 +1,9 @@
-import { addDays, daysBetween, isSameDay, toIsoDate } from '~/lib/dates';
-import { roundPence } from '~/lib/format';
-import { PayCycle } from '~/lib/payday';
+import { addDays, daysBetween, isSameDay, toIsoDate } from '../dates';
+import { roundPence } from '../format';
+import { PayCycle } from '../payday';
 import { datesDue, isInCycle } from './cycle';
 import { movesTo, Payment } from './payments';
-import { PER_MONTH } from './recurrence';
+import { isYearly, PER_MONTH, PER_YEAR } from './recurrence';
 
 interface SummaryInput {
   payments: Payment[];
@@ -33,8 +33,8 @@ export const summarise = ({ payments, bankBalance, monthlyIncome, cycle, today }
   const averaged: { name: string; perMonth: number }[] = [];
   for (const payment of activeRecurring) {
     if (payment.kind !== 'recurring') continue;
-    if (['QUARTERLY', 'BIANNUALLY', 'ANNUALLY'].includes(payment.frequency)) {
-      annualRecurring -= payment.signedAmount * PER_MONTH[payment.frequency] * 12;
+    if (isYearly(payment.frequency)) {
+      annualRecurring -= payment.signedAmount * PER_YEAR[payment.frequency];
       continue;
     }
     monthlyRecurring -= payment.signedAmount * PER_MONTH[payment.frequency];
@@ -65,7 +65,6 @@ export const summarise = ({ payments, bankBalance, monthlyIncome, cycle, today }
     monthlyRecurring,
     annualRecurring,
     averagedRecurring: averaged,
-    recurringCount: activeRecurring.length,
     afterRecurring: roundPence(onPayday - monthlyRecurring),
     discretionary: roundPence(monthlyIncome - monthlyRecurring),
     recurringShare,

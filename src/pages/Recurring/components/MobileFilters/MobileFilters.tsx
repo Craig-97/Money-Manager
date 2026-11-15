@@ -1,4 +1,4 @@
-import { SearchInput } from '~/components/form/SearchInput';
+import { SearchInput } from '~/components/form';
 import { cn } from '~/lib/cn';
 import { categoryLabel } from '~/lib/payments';
 import { Recurring } from '../../hooks';

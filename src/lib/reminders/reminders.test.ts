@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { Note } from '~/lib/notes';
-import { DEFAULT_REMINDER_SETTINGS, OneOffPayment, RecurringPayment } from '~/lib/payments';
+import { Note } from '../notes';
+import { DEFAULT_REMINDER_SETTINGS, OneOffPayment } from '../payments';
 import {
   canClear,
   filterReminders,
@@ -14,47 +14,15 @@ import {
   ReminderState,
   upcomingReminders
 } from './reminders';
+import { recurringPayment } from '~/test/builders';
+import { day, TODAY } from '~/test/dates';
 
-const day = (iso: string) => {
-  const [year, month, date] = iso.split('-').map(Number);
-  return new Date(year, month - 1, date);
-};
-
-// Friday 2 October 2026; paid on Friday 25 September, next on Friday 30 October
-const TODAY = day('2026-10-02');
 const CYCLE = {
   start: day('2026-09-25'),
   end: day('2026-10-30'),
   endUsual: day('2026-10-30'),
   isPayday: false
 };
-
-const payment = (overrides: Partial<RecurringPayment> & { id: string }): RecurringPayment => ({
-  kind: 'recurring',
-  account: null,
-  into: null,
-  paysInto: null,
-  nonWorkingDay: null,
-  move: { rule: 'ON_DAY', holidays: new Set() },
-  movedFrom: null,
-  name: overrides.id,
-  amount: 20,
-  signedAmount: -20,
-  type: 'EXPENSE',
-  category: 'SUBSCRIPTIONS',
-  frequency: 'MONTHLY',
-  firstPaymentDate: day('2026-01-09'),
-  lastPaymentDate: null,
-  dueDate: day('2026-10-09'),
-  thisCycle: [],
-  renewalDate: null,
-  dueReminder: { off: false, days: null },
-  renewalReminder: { off: false, days: null },
-  dueReminderDays: 1,
-  renewalReminderDays: 30,
-  debt: null,
-  ...overrides
-});
 
 const note = (overrides: Partial<Note> & { id: string }): Note => ({
   body: 'Car MOT and service',
@@ -91,8 +59,8 @@ const titles = (list: { title: string }[]) => list.map(item => item.title);
 
 describe('new reminders', () => {
   it('goes off the usual day before a payment, and not before', () => {
-    const energy = payment({ id: 'Energy', dueDate: day('2026-10-03') });
-    const later = payment({ id: 'Gym', dueDate: day('2026-10-09') });
+    const energy = recurringPayment({ id: 'Energy', dueDate: day('2026-10-03') });
+    const later = recurringPayment({ id: 'Gym', dueDate: day('2026-10-09') });
 
     const fresh = newReminders(sources({ payments: [energy, later], payday: undefined } as never));
 
@@ -101,8 +69,8 @@ describe('new reminders', () => {
   });
 
   it('puts overdue payments first, and they can only be put away, not cleared', () => {
-    const spotify = payment({ id: 'Spotify', dueDate: day('2026-10-01') });
-    const energy = payment({ id: 'Energy', dueDate: day('2026-10-03') });
+    const spotify = recurringPayment({ id: 'Spotify', dueDate: day('2026-10-01') });
+    const energy = recurringPayment({ id: 'Energy', dueDate: day('2026-10-03') });
 
     const [first] = newReminders(sources({ payments: [energy, spotify] }));
 
@@ -116,7 +84,7 @@ describe('new reminders', () => {
   });
 
   it('words a renewal as the dashboard alert does', () => {
-    const tax = payment({
+    const tax = recurringPayment({
       id: 'Car tax',
       firstPaymentDate: day('2026-01-16'),
       dueDate: day('2026-10-16'),
@@ -129,7 +97,7 @@ describe('new reminders', () => {
   });
 
   it('leaves out ones cleared or put away, until the day they come back', () => {
-    const energy = payment({ id: 'Energy', dueDate: day('2026-10-03') });
+    const energy = recurringPayment({ id: 'Energy', dueDate: day('2026-10-03') });
     const key = 'due:Energy:2026-10-03';
 
     expect(
@@ -147,7 +115,11 @@ describe('new reminders', () => {
   });
 
   it("doesn't remind about a payment whose reminder is off", () => {
-    const energy = payment({ id: 'Energy', dueDate: day('2026-10-03'), dueReminderDays: null });
+    const energy = recurringPayment({
+      id: 'Energy',
+      dueDate: day('2026-10-03'),
+      dueReminderDays: null
+    });
 
     expect(newReminders(sources({ payments: [energy] }))).toEqual(
       expect.not.arrayContaining([expect.objectContaining({ kind: 'due' })])
@@ -227,8 +199,8 @@ describe('coming up', () => {
     const list = upcomingReminders(
       sources({
         payments: [
-          payment({ id: 'Energy', dueDate: day('2026-10-09') }),
-          payment({
+          recurringPayment({ id: 'Energy', dueDate: day('2026-10-09') }),
+          recurringPayment({
             id: 'Phone',
             renewalDate: day('2027-01-19'),
             firstPaymentDate: day('2026-01-19'),
@@ -257,7 +229,7 @@ describe('coming up', () => {
   });
 
   it('shows a yearly payment once, as its renewal', () => {
-    const insurance = payment({
+    const insurance = recurringPayment({
       id: 'Car insurance',
       frequency: 'ANNUALLY',
       firstPaymentDate: day('2025-11-07'),
@@ -273,7 +245,7 @@ describe('coming up', () => {
 
   it('filters to payments, renewals or notes', () => {
     const list = upcomingReminders(
-      sources({ payments: [payment({ id: 'Energy' })], notes: [note({ id: 'mot' })] })
+      sources({ payments: [recurringPayment({ id: 'Energy' })], notes: [note({ id: 'mot' })] })
     );
 
     expect(filterReminders(list, 'notes').map(item => item.kind)).toEqual(['note']);

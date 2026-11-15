@@ -1,13 +1,8 @@
 import { PenLine, RefreshCw } from 'lucide-react';
 import { Alert } from '~/components/alerts';
+import { formatShortDate } from '~/lib/dates';
 import { formatMoney } from '~/lib/format';
-import {
-  formatShortDate,
-  PER_PERIOD,
-  RecurringPayment,
-  Renewal,
-  renewalHeading
-} from '~/lib/payments';
+import { PER_PERIOD, RecurringPayment, Renewal, renewalHeading } from '~/lib/payments';
 
 interface RenewalAlertProps {
   payment: RecurringPayment;

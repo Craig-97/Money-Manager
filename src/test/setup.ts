@@ -3,20 +3,14 @@
 import '@testing-library/jest-dom/vitest';
 import { afterEach, vi } from 'vitest';
 import { cleanup, configure } from '@testing-library/react';
-import { useAccountDialogStore } from '~/state/accountDialog';
-import { useAccountQuickStore } from '~/state/accountQuick';
-import { useAccountViewStore } from '~/state/accountView';
-import { useDebtDialogStore } from '~/state/debtDialog';
-import { useDebtViewStore } from '~/state/debtView';
-import { useNoteDialogStore } from '~/state/noteDialog';
-import { usePaymentDialogStore } from '~/state/paymentDialog';
-import { usePaymentNotesStore } from '~/state/paymentNotes';
-import { usePaymentSheetStore } from '~/state/paymentSheet';
-import { DEFAULT_ACCENT, usePrefsStore } from '~/state/prefs';
-import { useQuickEditStore } from '~/state/quickEdit';
-import { useReminderChooserStore } from '~/state/reminderChooser';
-import { useSetupAccountsStore } from '~/state/setupAccounts';
+import { resetStores } from './storeResets';
 import { installMatchMedia, resetViewport } from './viewport';
+
+// Every zustand store goes back to how it started after each test (see storeResets)
+vi.mock('zustand', async importOriginal => {
+  const { rememberingStores } = await import('./storeResets');
+  return rememberingStores(await importOriginal());
+});
 
 // Component tests render the whole app, so give async queries (findBy*, waitFor) more time than
 // the 1s default. The first test in a file also waits for its page's code to load, which can take
@@ -56,20 +50,8 @@ afterEach(() => {
   cleanup();
   // e.g. holdExitAnimations' getComputedStyle
   vi.restoreAllMocks();
+  resetStores();
   localStorage.clear();
-  usePrefsStore.setState({ theme: 'dark', accent: DEFAULT_ACCENT });
-  useNoteDialogStore.setState(useNoteDialogStore.getInitialState(), true);
-  useAccountDialogStore.setState(useAccountDialogStore.getInitialState(), true);
-  useAccountViewStore.setState(useAccountViewStore.getInitialState(), true);
-  useAccountQuickStore.setState(useAccountQuickStore.getInitialState(), true);
-  useSetupAccountsStore.setState(useSetupAccountsStore.getInitialState(), true);
-  usePaymentDialogStore.setState(usePaymentDialogStore.getInitialState(), true);
-  usePaymentNotesStore.setState(usePaymentNotesStore.getInitialState(), true);
-  usePaymentSheetStore.setState(usePaymentSheetStore.getInitialState(), true);
-  useQuickEditStore.setState(useQuickEditStore.getInitialState(), true);
-  useDebtDialogStore.setState(useDebtDialogStore.getInitialState(), true);
-  useDebtViewStore.setState(useDebtViewStore.getInitialState(), true);
-  useReminderChooserStore.setState(useReminderChooserStore.getInitialState(), true);
   resetViewport();
   delete document.documentElement.dataset.theme;
   delete document.documentElement.dataset.accent;

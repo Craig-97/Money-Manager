@@ -1,13 +1,8 @@
-import { DatePicker } from '~/components/form/DatePicker';
-import { FieldError } from '~/components/form/FieldError';
-import { Label } from '~/components/form/Label';
-import { Select } from '~/components/form/Select';
-import { TextInput } from '~/components/form/TextInput';
 import { InterestFrequency } from '~/graphql/generated';
 import { FREQUENCY_NAMES, interestPerPayment, nextMonthlyInterest } from '~/lib/accounts';
-import { addDays, parseIsoDate, toApiDate } from '~/lib/dates';
+import { addDays, formatShortDate, parseIsoDate, toIsoDate } from '~/lib/dates';
 import { formatMoney } from '~/lib/format';
-import { formatShortDate } from '~/lib/payments';
+import { DatePicker, FieldError, FieldHint, Label, Select, TextInput } from '../../form';
 import { InterestDraft, InterestDraftErrors } from '../accountDraft';
 
 // A select can't hold an empty value, so not said yet has one of its own
@@ -89,7 +84,7 @@ export const InterestFields = ({ draft, set, errors, balance, today }: InterestF
           id="account-interest-date"
           value={draft.nextDate}
           onChange={nextDate => set({ nextDate })}
-          min={toApiDate(addDays(today, 1))}
+          min={toIsoDate(addDays(today, 1))}
           invalid={!!errors.nextDate}
           aria-describedby={errors.nextDate ? 'account-interest-date-error' : undefined}
         />
@@ -133,7 +128,7 @@ export const InterestFields = ({ draft, set, errors, balance, today }: InterestF
         </div>
         {whenField ? <div className="max-md:col-span-1">{whenField}</div> : null}
       </div>
-      <p className="ml-1 text-xs leading-[1.4] font-semibold text-muted">
+      <FieldHint className="mt-0">
         {estimate ? (
           <>
             <span className="font-bold text-text">{estimate}</span> {HOW_IT_WORKS}
@@ -143,7 +138,7 @@ export const InterestFields = ({ draft, set, errors, balance, today }: InterestF
         ) : (
           `Optional. Say when it’s paid. ${HOW_IT_WORKS}`
         )}
-      </p>
+      </FieldHint>
     </div>
   );
 };

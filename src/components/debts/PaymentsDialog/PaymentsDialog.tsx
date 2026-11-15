@@ -1,11 +1,5 @@
 import { ArrowUp } from 'lucide-react';
 import { useShallow } from 'zustand/react/shallow';
-import { InfoNote } from '~/components/feedback/InfoNote';
-import { accentTagClasses, greenTagClasses, tagClasses } from '~/components/payments/PaymentParts';
-import { Button } from '~/components/ui/Button';
-import { DateBox } from '~/components/ui/DateBox';
-import { Modal } from '~/components/ui/Modal';
-import { Skeleton } from '~/components/ui/Skeleton';
 import { MEDIA } from '~/constants';
 import { useBackToDebt } from '~/hooks/useBackToDebt';
 import { useDebtHistory } from '~/hooks/useDebtHistory';
@@ -15,7 +9,11 @@ import { formatShortDay } from '~/lib/dates';
 import { DebtPayment, HistoryEntry, paidOffShare, startedAt } from '~/lib/debts';
 import { formatMoney } from '~/lib/format';
 import { useDebtDialogStore } from '~/state/debtDialog';
+import { InfoNote } from '../../feedback';
+import { accentTagClasses, greenTagClasses, tagClasses } from '../../payments';
+import { Button, DateBox, Modal, Skeleton } from '../../ui';
 import { PaymentsList } from '../PaymentsList';
+import { PaymentsLoadError } from '../PaymentsLoadError';
 import { ShowOlderPayments } from '../ShowOlderPayments';
 
 interface PaymentsDialogProps {
@@ -61,7 +59,7 @@ export const PaymentsDialog = ({ debts, today, onUndoOverpayment }: PaymentsDial
   return (
     <Modal
       open={open}
-      wide
+      size="wide"
       onOpenChange={next => (next ? undefined : close())}
       title={`${debt.name} payments`}
       onBack={back}
@@ -82,7 +80,9 @@ export const PaymentsDialog = ({ debts, today, onUndoOverpayment }: PaymentsDial
         left · {formatMoney(paid, { whole: true })} paid off ·{' '}
         {Math.round(paidOffShare(debt) * 100)}%
       </p>
-      {isDesktop ? (
+      {isDesktop && history.error ? (
+        <PaymentsLoadError onRetry={history.retry} />
+      ) : isDesktop ? (
         <>
           <div role="table" aria-label="Payments" className="flex flex-col">
             <div

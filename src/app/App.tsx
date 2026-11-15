@@ -1,7 +1,7 @@
 import { createBrowserRouter } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
 import { ApolloProvider } from '@apollo/client/react';
-import { TooltipProvider } from '~/components/ui/Tooltip';
+import { TooltipProvider } from '~/components/ui';
 import { client } from '~/graphql/client';
 import { routes } from './routes';
 

@@ -1,9 +1,9 @@
 import { PointerEvent, useRef, useState } from 'react';
 import { ChevronDown, Clock, X } from 'lucide-react';
-import { Button } from '~/components/ui/Button';
 import { ReminderOpen } from '~/hooks/useReminderOpen';
 import { cn } from '~/lib/cn';
 import { canClear, firedText, Reminder } from '~/lib/reminders';
+import { Button } from '../../ui';
 import { ReminderIcon } from '../ReminderIcon';
 
 interface ReminderRowProps {

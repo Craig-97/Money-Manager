@@ -1,24 +1,20 @@
 import { useWatch } from 'react-hook-form';
 import {
+  authErrorId,
   authErrorLinkClasses,
+  AuthField,
+  AuthHeading,
   authInputBoxClasses,
-  authTextLinkClasses
-} from '~/components/auth/authClasses';
-import { AuthField, authErrorId } from '~/components/auth/AuthField';
-import { AuthHeading } from '~/components/auth/AuthHeading';
-import { AuthLayout } from '~/components/auth/AuthLayout';
-import { PasswordRules } from '~/components/auth/PasswordRules';
-import { FieldError } from '~/components/form/FieldError';
-import { PasswordInput } from '~/components/form/PasswordInput';
-import { TextInput } from '~/components/form/TextInput';
+  AuthLayout,
+  authTextLinkClasses,
+  PasswordRules
+} from '~/components/auth';
+import { describedBy, FieldError, PasswordInput, TextInput } from '~/components/form';
 import { ArrowRightIcon } from '~/components/icons';
-import { Button } from '~/components/ui/Button';
-import { PageLink } from '~/components/ui/PageLink';
+import { Button, PageLink } from '~/components/ui';
 import { ROUTES } from '~/constants';
 import { AccountCreated, RegisterPanel, RegisterProgress } from './components';
 import { useRegisterForm } from './hooks';
-
-const describedBy = (...ids: (string | false)[]) => ids.filter(Boolean).join(' ') || undefined;
 
 export const Register = () => {
   const { register, control, onSubmit, created, errors, isSubmitting } = useRegisterForm();

@@ -1,3 +1,4 @@
+import { spanText } from '../dates';
 /*
  * When a payment's reminders go off. Each payment has a timing for when it's due and one for when
  * it renews: off, a number of days before, or (no days) the budget's usual timing.
@@ -38,10 +39,7 @@ export const RENEWAL_REMINDER_DAYS = [7, 14, 30] as const;
 
 /* "On the day", "1 day before", "2 weeks before", "1 month before" */
 export const daysBeforeText = (days: number) => {
-  if (days === 0) return 'On the day';
-  if (days === 30) return '1 month before';
-  if (days % 7 === 0) return `${days / 7} ${days === 7 ? 'week' : 'weeks'} before`;
-  return `${days} ${days === 1 ? 'day' : 'days'} before`;
+  return days === 0 ? 'On the day' : `${spanText(days)} before`;
 };
 
 /* "1 day before", or "Off" when it's off */
@@ -60,6 +58,10 @@ export const fromTimingChoice = (choice: TimingChoice): ReminderTiming =>
       ? { off: true, days: null }
       : { off: false, days: Number(choice) };
 
+/* Each number of days as a choice: "1 day before" */
+export const daysOptions = (days: readonly number[]) =>
+  days.map(day => ({ value: `${day}` as const, label: daysBeforeText(day) }));
+
 /* The choices for a timing: the usual one (saying what it is), each number of days, then off */
 export const timingOptions = ({
   days,
@@ -69,6 +71,6 @@ export const timingOptions = ({
   usual: number;
 }): { value: TimingChoice; label: string }[] => [
   { value: 'usual', label: `Usual · ${daysBeforeText(usual).toLowerCase()}` },
-  ...days.map(day => ({ value: `${day}` as TimingChoice, label: daysBeforeText(day) })),
+  ...daysOptions(days),
   { value: 'off', label: 'Off' }
 ];

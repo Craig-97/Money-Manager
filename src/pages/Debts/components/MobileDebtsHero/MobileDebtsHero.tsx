@@ -1,3 +1,4 @@
+import { HeroTile } from '~/components/ui';
 import { clearedText } from '~/lib/debts';
 import { formatMoney, splitPence } from '~/lib/format';
 import { biggestDebts } from '../../debtsModel';
@@ -13,13 +14,7 @@ export const MobileDebtsHero = ({ debts: model }: { debts: Debts }) => {
     .filter(debt => debt.debt.balance > 0);
 
   return (
-    <article
-      aria-label="Left to pay"
-      className="relative flex flex-col gap-4 overflow-hidden rounded-3xl bg-hero-bg p-[22px] text-hero-text">
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -top-[110px] -right-[90px] size-[220px] rounded-full bg-hero-chip"
-      />
+    <HeroTile aria-label="Left to pay" size="md">
       <div className="relative flex items-center justify-between gap-2">
         <h2 className="text-[13px] font-bold text-hero-muted">Left to pay</h2>
         <span className="inline-flex items-center rounded-full bg-hero-chip px-[11px] py-[7px] text-xs font-bold">
@@ -65,6 +60,6 @@ export const MobileDebtsHero = ({ debts: model }: { debts: Debts }) => {
           </li>
         ))}
       </ul>
-    </article>
+    </HeroTile>
   );
 };

@@ -39,7 +39,9 @@ export const MoreSheet = ({ links, current, onNavigate }: MoreSheetProps) => {
             <span className="flex min-w-0 flex-1 flex-col">
               <span className="text-[15px] font-bold">{label}</span>
               {subtitles[page] ? (
-                <span className="truncate text-xs font-semibold text-muted">{subtitles[page]}</span>
+                <span className="text-xs font-semibold [overflow-wrap:anywhere] text-muted">
+                  {subtitles[page]}
+                </span>
               ) : null}
             </span>
             <ChevronRight size={18} className="shrink-0 text-muted" aria-hidden="true" />

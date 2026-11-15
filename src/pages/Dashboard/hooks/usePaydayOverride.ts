@@ -2,11 +2,10 @@ import { useState } from 'react';
 import { useMutation } from '@apollo/client/react';
 import { SetPaydayOverrideDocument } from '~/graphql/generated';
 import { Budget } from '~/hooks/useBudget';
-import { addDays, toIsoDate } from '~/lib/dates';
-import { getApiErrorMessage } from '~/lib/errors';
+import { addDays, formatShortDate, toIsoDate } from '~/lib/dates';
 import { BankHolidays, getNextPaydays, PayCycle } from '~/lib/payday';
-import { formatShortDate, Payment } from '~/lib/payments';
-import { showToast } from '~/state/toast';
+import { Payment } from '~/lib/payments';
+import { showErrorToast, showToast } from '~/state/toast';
 import { overridePreview } from '../dashboardModel';
 
 // How far a payday can be moved later when there's no payday after it to stop at
@@ -47,7 +46,7 @@ export const usePaydayOverride = ({ budget, cycle, today, holidays, payments }: 
       });
       return true;
     } catch (error) {
-      showToast({ message: getApiErrorMessage(error, "Couldn't change your payday. Try again.") });
+      showErrorToast(error, { fallback: "Couldn't change your payday. Try again." });
       return false;
     }
   };
@@ -59,8 +58,8 @@ export const usePaydayOverride = ({ budget, cycle, today, holidays, payments }: 
     setOpen(false);
     showToast({
       message: date
-        ? `Payday moved to ${formatShortDate(date)}`
-        : `Payday back to ${formatShortDate(cycle.endUsual)}`,
+        ? `Payday moved to ${formatShortDate(date, today)}`
+        : `Payday back to ${formatShortDate(cycle.endUsual, today)}`,
       action: { label: 'Undo', onClick: () => void move(undoTo) }
     });
   };
@@ -83,6 +82,7 @@ export const usePaydayOverride = ({ budget, cycle, today, holidays, payments }: 
     usual: cycle.endUsual,
     picked,
     pick: setPicked,
+    today,
     earliest: today,
     latest,
     holidays,

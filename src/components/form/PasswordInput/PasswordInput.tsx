@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
-import { IconButton } from '~/components/ui/IconButton';
+import { IconButton } from '../../ui';
 import { TextInput, TextInputProps } from '../TextInput';
 
 /* A password field with a button to show what's been typed */

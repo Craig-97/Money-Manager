@@ -2,9 +2,8 @@ import { useState } from 'react';
 import { useMutation } from '@apollo/client/react';
 import { UpdateAccountBalancesDocument } from '~/graphql/generated';
 import { Account } from '~/lib/accounts';
-import { getApiErrorMessage } from '~/lib/errors';
 import { formatMoneyInput, parseMoney, roundPence } from '~/lib/format';
-import { showToast } from '~/state/toast';
+import { showErrorToast } from '~/state/toast';
 
 /*
  * The dashboard's bank balance once more than one account counts: each counted account's balance
@@ -41,7 +40,7 @@ export const useBankBalanceDialog = ({
       if (balances.length) await saveBalances({ variables: { input: { budgetId, balances } } });
       setOpen(false);
     } catch (error) {
-      showToast({ message: getApiErrorMessage(error, "Couldn't save the balances. Try again.") });
+      showErrorToast(error, { fallback: "Couldn't save the balances. Try again." });
     }
   };
 

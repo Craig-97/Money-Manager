@@ -1,14 +1,17 @@
-import { AuthAlternative } from '~/components/auth/AuthAlternative';
-import { authInputBoxClasses, authTextLinkClasses } from '~/components/auth/authClasses';
-import { AuthField, authErrorId } from '~/components/auth/AuthField';
-import { AuthHeading } from '~/components/auth/AuthHeading';
-import { AuthLayout } from '~/components/auth/AuthLayout';
-import { AuthResult } from '~/components/auth/AuthResult';
-import { HeroCard } from '~/components/auth/HeroCard';
-import { TextInput } from '~/components/form/TextInput';
+import {
+  AuthAlternative,
+  authErrorId,
+  AuthField,
+  AuthHeading,
+  authInputBoxClasses,
+  AuthLayout,
+  AuthResult,
+  authTextLinkClasses,
+  HeroCard
+} from '~/components/auth';
+import { TextInput } from '~/components/form';
 import { ArrowRightIcon, ClockIcon, LockIcon, MailIcon } from '~/components/icons';
-import { Button } from '~/components/ui/Button';
-import { PageLink } from '~/components/ui/PageLink';
+import { Button, PageLink } from '~/components/ui';
 import { ROUTES } from '~/constants';
 import { ForgotPasswordPanel, ResendCard } from './components';
 import { useForgotPasswordForm } from './hooks';

@@ -1,5 +1,5 @@
 import { Plus, Repeat, SearchX } from 'lucide-react';
-import { Button } from '~/components/ui/Button';
+import { Button } from '~/components/ui';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
 
 /*

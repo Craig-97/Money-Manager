@@ -1,5 +1,4 @@
-import { Label } from '~/components/form/Label';
-import { Select } from '~/components/form/Select';
+import { FieldHint, Label, Select } from '../../../../form';
 import { PaymentForm } from '../../usePaymentForm';
 
 /*
@@ -23,11 +22,7 @@ export const NonWorkingDayField = ({ form }: { form: PaymentForm }) => {
         aria-describedby="payment-non-working-day-hint"
         className="bg-surface"
       />
-      <p
-        id="payment-non-working-day-hint"
-        className="mt-2 ml-1 text-xs leading-[1.4] font-semibold text-muted">
-        {hint}
-      </p>
+      <FieldHint id="payment-non-working-day-hint">{hint}</FieldHint>
     </div>
   );
 };

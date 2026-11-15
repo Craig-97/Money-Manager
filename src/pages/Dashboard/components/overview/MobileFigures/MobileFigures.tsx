@@ -1,10 +1,9 @@
 import { PenLine, Repeat } from 'lucide-react';
-import { ApproximatelyEqual } from '~/components/payments/PaymentParts';
-import { Button } from '~/components/ui/Button';
-import { IconButton } from '~/components/ui/IconButton';
+import { ApproximatelyEqual } from '~/components/payments';
+import { Button, IconButton } from '~/components/ui';
 import { cn } from '~/lib/cn';
+import { formatShortDate } from '~/lib/dates';
 import { formatBalance, formatMoney } from '~/lib/format';
-import { formatShortDate } from '~/lib/payments';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
 import { Dashboard } from '../../../hooks';
 import { FigureRow } from '../FigureRow';
@@ -13,7 +12,7 @@ import { OverdrawnPill } from '../OverdrawnPill';
 
 /* Mobile: payday balance, after recurring, income and recurring as a list */
 export const MobileFigures = ({ dashboard }: { dashboard: Dashboard }) => {
-  const { summary, cycle, isEmpty, monthlyIncome, incomeEditor: editor } = dashboard;
+  const { summary, cycle, today, isEmpty, monthlyIncome, incomeEditor: editor } = dashboard;
   const openAdd = usePaymentDialogStore(s => s.openAdd);
 
   return (
@@ -42,7 +41,7 @@ export const MobileFigures = ({ dashboard }: { dashboard: Dashboard }) => {
                 {formatBalance(summary.onPayday)}
               </span>
             }
-            aside={formatShortDate(cycle.end)}
+            aside={formatShortDate(cycle.end, today)}
           />
           <FigureRow
             label={

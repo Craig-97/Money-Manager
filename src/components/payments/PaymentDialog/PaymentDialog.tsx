@@ -1,7 +1,4 @@
-import { Trash } from 'lucide-react';
 import { useShallow } from 'zustand/react/shallow';
-import { Button } from '~/components/ui/Button';
-import { Modal } from '~/components/ui/Modal';
 import { MEDIA } from '~/constants';
 import { useBudget } from '~/hooks/useBudget';
 import { useMediaQuery } from '~/hooks/useMediaQuery';
@@ -12,6 +9,7 @@ import { DEFAULT_NON_WORKING_DAY, DEFAULT_REMINDER_SETTINGS, toPayments } from '
 import { usePaymentDialogStore } from '~/state/paymentDialog';
 import { Chooser, FormBody, StatusLine } from './components';
 import { usePaymentForm } from './usePaymentForm';
+import { Modal, ModalActions } from '../../ui';
 
 /*
  * Adding or editing a payment: a dialog on desktop, a bottom sheet on mobile. Lives in the app
@@ -84,32 +82,26 @@ export const PaymentDialog = () => {
       backLabel="Back to payment types"
       footer={
         target ? (
-          <>
-            {editing ? (
-              <Button
-                variant="dangerGhost"
-                onClick={() => {
-                  if (payment) void remove([payment]);
-                  close();
-                }}
-                className="max-md:-ml-2">
-                <Trash size={16} aria-hidden="true" />
-                Delete
-              </Button>
-            ) : null}
-            <span className="flex-1" />
-            <Button variant="ghost" onClick={close} className="max-md:h-[52px]">
-              Cancel
-            </Button>
-            <Button
-              variant="accent"
-              onClick={form.save}
-              disabled={!form.canSave}
-              loading={form.saving}
-              className="max-md:h-[52px]">
-              {submitLabel}
-            </Button>
-          </>
+          <ModalActions
+            remove={
+              editing
+                ? {
+                    label: 'Delete',
+                    onClick: () => {
+                      if (payment) void remove([payment]);
+                      close();
+                    }
+                  }
+                : undefined
+            }
+            cancel={{ onClick: close }}
+            confirm={{
+              label: submitLabel,
+              onClick: form.save,
+              disabled: !form.canSave,
+              loading: form.saving
+            }}
+          />
         ) : undefined
       }>
       {target ? <FormBody form={form} kind={kind} /> : <Chooser />}

@@ -10,11 +10,7 @@ import { getApiErrorMessage, getErrorCode } from '~/lib/errors';
 import { newPasswordSchema } from '~/lib/validation';
 
 const schema = z.object({
-  password: newPasswordSchema({
-    required: 'Enter a new password',
-    tooShort: 'Use at least 8 characters including a number',
-    noNumber: 'Use at least 8 characters including a number'
-  })
+  password: newPasswordSchema('Enter a new password')
 });
 
 type ResetPasswordValues = z.infer<typeof schema>;

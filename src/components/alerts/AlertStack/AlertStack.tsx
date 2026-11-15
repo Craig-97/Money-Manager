@@ -6,7 +6,7 @@ import { AlertPager } from '../AlertPager';
 // How far a swipe has to travel to move to the next alert
 const SWIPE_PX = 40;
 
-export interface StackedAlert {
+interface StackedAlert {
   key: string;
   // What the alert is about, for screen readers
   label: string;

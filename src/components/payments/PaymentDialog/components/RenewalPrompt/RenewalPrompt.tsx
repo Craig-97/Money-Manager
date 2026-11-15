@@ -1,5 +1,5 @@
-import { Button } from '~/components/ui/Button';
 import { formatShortDay } from '~/lib/dates';
+import { Button } from '../../../../ui';
 
 interface RenewalPromptProps {
   renewedOn: Date;

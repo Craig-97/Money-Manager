@@ -1,6 +1,6 @@
 import { AccountFieldsFragment, AccountKind } from '~/graphql/generated';
-import { daysBetween, fromApiDate } from '~/lib/dates';
-import { roundPence } from '~/lib/format';
+import { daysBetween, fromApiDate } from '../dates';
+import { roundPence } from '../format';
 import { AccountInterest } from './interest';
 
 /*
@@ -119,12 +119,6 @@ export const updatedText = (account: Pick<Account, 'balanceUpdatedAt'>, today: D
   return `Updated ${Math.round(days / 30.44)} months ago`;
 };
 
-/* "Cash ISA hasn't been updated in 5 weeks" */
-export const staleText = (account: Pick<Account, 'name' | 'balanceUpdatedAt'>, today: Date) => {
-  const weeks = Math.max(1, Math.round(balanceAge(account, today) / 7));
-  return `${account.name} hasn’t been updated in ${weeks} ${weeks === 1 ? 'week' : 'weeks'}`;
-};
-
 /*
  * The line under an account's name. With one account to spend from it's "Where you get paid";
  * with several, "Spending · Shared household bills" (a tag says which one pay lands in). Savings
@@ -167,7 +161,3 @@ export const accountLetter = (account: Pick<Account, 'name'>) =>
 export const forFreeToSpend = <T extends { kind: string; into?: { counts: boolean } | null }>(
   payments: readonly T[]
 ) => payments.filter(payment => !(payment.kind === 'recurring' && payment.into?.counts));
-
-/* Names in a sentence: "Netflix", "Netflix and Gym", "Netflix, Gym and Phone" */
-export const joinNames = (names: readonly string[]) =>
-  names.length <= 1 ? (names[0] ?? '') : `${names.slice(0, -1).join(', ')} and ${names.at(-1)}`;

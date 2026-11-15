@@ -1,8 +1,7 @@
 import { Link } from 'react-router';
-import { Button } from '~/components/ui/Button';
-import { buttonVariants } from '~/components/ui/Button/buttonVariants';
-import { Modal } from '~/components/ui/Modal';
 import { ROUTES } from '~/constants';
+import { plural } from '~/lib/format';
+import { Button, buttonVariants, Modal } from '../../ui';
 import { Bell } from '../ReminderBell/useBell';
 import { ReminderRow } from '../ReminderRow';
 
@@ -24,7 +23,7 @@ export const BellSheet = ({ bell }: { bell: Bell }) => (
       <>
         <div className="-mt-2 -mb-2 flex items-center justify-between">
           <p className="text-xs font-bold tracking-[0.06em] text-muted uppercase">
-            {bell.fresh.length} {bell.fresh.length === 1 ? 'reminder' : 'reminders'}
+            {plural(bell.fresh.length, 'reminder')}
           </p>
           <span className="flex">
             {bell.unread ? (

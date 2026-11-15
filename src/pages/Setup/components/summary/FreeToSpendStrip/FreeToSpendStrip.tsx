@@ -1,6 +1,6 @@
 import { cn } from '~/lib/cn';
+import { formatShortDate } from '~/lib/dates';
 import { formatBalance } from '~/lib/format';
-import { formatShortDate } from '~/lib/payments';
 import { FirstCycle } from '../../../setupModel';
 
 /*
@@ -8,13 +8,13 @@ import { FirstCycle } from '../../../setupModel';
  * desktop. The bar fills with how much of the balance is already spoken for.
  */
 export const FreeToSpendStrip = ({ firstCycle }: { firstCycle: FirstCycle }) => {
-  const { cycleEnd, freeToSpend, spokenForPercent } = firstCycle;
+  const { cycleEnd, today, freeToSpend, spokenForPercent } = firstCycle;
 
   return (
     <div className="flex items-center justify-between gap-2.5 rounded-[20px] border border-border bg-surface px-3.5 py-3">
       <p className="flex flex-col gap-0.5">
         <span className="text-xs text-muted">
-          Free to spend · until {formatShortDate(cycleEnd)}
+          Free to spend · until {formatShortDate(cycleEnd, today)}
         </span>
         <span className={cn('num text-lg font-extrabold', freeToSpend < 0 && 'text-expense')}>
           {formatBalance(freeToSpend)}

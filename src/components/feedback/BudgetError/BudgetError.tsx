@@ -1,5 +1,5 @@
 import { RefreshCw, TriangleAlert } from 'lucide-react';
-import { Button } from '~/components/ui/Button';
+import { Button } from '../../ui';
 
 /* When the budget couldn't be loaded */
 export const BudgetError = ({ onRetry }: { onRetry: () => void }) => (

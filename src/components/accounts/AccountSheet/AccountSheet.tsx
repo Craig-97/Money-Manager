@@ -1,11 +1,6 @@
 import { ArrowLeftRight, Landmark, PenLine, Percent, RefreshCw } from 'lucide-react';
-import { ActionRow } from '~/components/ui/ActionRow';
-import { ActionRows } from '~/components/ui/ActionRows';
-import { ActionTile } from '~/components/ui/ActionTile';
-import { ActionTiles } from '~/components/ui/ActionTiles';
-import { Modal } from '~/components/ui/Modal';
-import { Switch } from '~/components/ui/Switch';
 import { updatedText } from '~/lib/accounts';
+import { ActionRow, ActionRows, ActionTile, ActionTiles, Modal, Switch } from '../../ui';
 import { AccountSummary } from '../AccountSummary';
 import { InterestStrip } from '../InterestStrip';
 import { MaturedPrompt } from '../MaturedPrompt';

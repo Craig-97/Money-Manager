@@ -1,5 +1,5 @@
 import { Info } from 'lucide-react';
-import { tileLift } from '~/components/ui/Tile';
+import { tileLift } from '~/components/ui';
 import { cn } from '~/lib/cn';
 import { formatMoney, MINUS } from '~/lib/format';
 import { signedMoney, spendHelper } from '../../../forecastModel';

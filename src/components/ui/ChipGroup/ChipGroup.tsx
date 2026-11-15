@@ -1,7 +1,7 @@
 import * as ToggleGroup from '@radix-ui/react-toggle-group';
 import { cn } from '~/lib/cn';
 
-export interface ChipOption<T extends string = string> {
+interface ChipOption<T extends string = string> {
   value: T;
   label: string;
 }

@@ -1,13 +1,6 @@
-import { PendingInterestTag } from '~/components/accounts';
-import { Switch } from '~/components/ui/Switch';
-import {
-  Account,
-  accountLetter,
-  accountMeta,
-  interestLine,
-  isStale,
-  updatedText
-} from '~/lib/accounts';
+import { AccountLetter, PendingInterestTag } from '~/components/accounts';
+import { Switch } from '~/components/ui';
+import { Account, accountMeta, interestLine, isStale, updatedText } from '~/lib/accounts';
 import { cn } from '~/lib/cn';
 import { formatBalance } from '~/lib/format';
 import { useAccountViewStore } from '~/state/accountView';
@@ -43,11 +36,7 @@ export const AccountRow = ({ account, today, several, onCounts }: AccountRowProp
   return (
     <div className="grid min-h-[72px] grid-cols-[minmax(0,1fr)_minmax(120px,auto)_150px_44px] items-center gap-x-4 rounded-2xl px-2 transition-colors hover:bg-hover wide:grid-cols-[minmax(0,1fr)_auto_minmax(130px,auto)_150px_44px]">
       <div className="flex min-w-0 items-center gap-3.5">
-        <span
-          aria-hidden="true"
-          className="inline-flex size-[38px] shrink-0 items-center justify-center rounded-xl border border-border bg-surface-2 text-sm font-extrabold">
-          {accountLetter(account)}
-        </span>
+        <AccountLetter account={account} />
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <button

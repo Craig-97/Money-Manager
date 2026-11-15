@@ -6,17 +6,13 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { ERRORS } from '~/constants';
 import { AuthSessionFragment, RegisterAndLoginDocument } from '~/graphql/generated';
 import { getApiErrorMessage, getErrorCode } from '~/lib/errors';
-import { emailSchema, newPasswordSchema } from '~/lib/validation';
+import { emailSchema, firstNameSchema, newPasswordSchema, surnameSchema } from '~/lib/validation';
 
 const schema = z.object({
-  firstName: z.string().trim().min(1, 'Enter your first name'),
-  surname: z.string().trim().min(1, 'Enter your surname'),
+  firstName: firstNameSchema,
+  surname: surnameSchema,
   email: emailSchema,
-  password: newPasswordSchema({
-    required: 'Create a password',
-    tooShort: 'Password must be at least 8 characters',
-    noNumber: 'Password must contain a number'
-  })
+  password: newPasswordSchema('Create a password')
 });
 
 type RegisterValues = z.infer<typeof schema>;

@@ -1,5 +1,4 @@
-import { Label } from '~/components/form/Label';
-import { Select } from '~/components/form/Select';
+import { Label, Select } from '../../../../form';
 import { accountDescription } from '../../paymentAccounts';
 import { PaymentForm } from '../../usePaymentForm';
 

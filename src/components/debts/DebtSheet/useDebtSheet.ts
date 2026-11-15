@@ -2,7 +2,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { useBudget } from '~/hooks/useBudget';
 import { usePayCycle } from '~/hooks/usePayCycle';
 import { isDebt } from '~/lib/debts';
-import { RecurringPayment, toPayments } from '~/lib/payments';
+import { toPayments } from '~/lib/payments';
 import { useDebtDialogStore } from '~/state/debtDialog';
 import { useDebtViewStore } from '~/state/debtView';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
@@ -29,7 +29,6 @@ export const useDebtSheet = () => {
 
   const debt = budget
     ? toPayments(budget, { today, holidays })
-        .filter((payment): payment is RecurringPayment => payment.kind === 'recurring')
         .filter(isDebt)
         .find(payment => payment.id === debtId)
     : undefined;

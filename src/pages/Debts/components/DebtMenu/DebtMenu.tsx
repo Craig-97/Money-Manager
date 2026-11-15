@@ -1,21 +1,28 @@
 import { ArrowUp, Ellipsis, History, PenLine, RefreshCw, Timer, Trash } from 'lucide-react';
 import { useShallow } from 'zustand/react/shallow';
-import { IconButton } from '~/components/ui/IconButton';
-import { Menu, MenuContent, MenuItem, MenuSeparator, MenuTrigger } from '~/components/ui/Menu';
+import {
+  IconButton,
+  Menu,
+  MenuContent,
+  MenuItem,
+  MenuSeparator,
+  MenuTrigger
+} from '~/components/ui';
+import { DebtActions } from '~/hooks/useDebtActions';
 import { DebtPayment } from '~/lib/debts';
 import { useDebtDialogStore } from '~/state/debtDialog';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
 
 interface DebtMenuProps {
   debt: DebtPayment;
-  onDelete: () => void;
+  actions: DebtActions;
 }
 
 /*
  * Edit, update the balance, overpay, pay off sooner, see payments and delete, from the row's more
  * button
  */
-export const DebtMenu = ({ debt, onDelete }: DebtMenuProps) => {
+export const DebtMenu = ({ debt, actions }: DebtMenuProps) => {
   const openEdit = usePaymentDialogStore(s => s.openEdit);
   const { openBalance, openOverpayment, openPaySooner, openPayments } = useDebtDialogStore(
     useShallow(s => ({
@@ -52,7 +59,7 @@ export const DebtMenu = ({ debt, onDelete }: DebtMenuProps) => {
           See payments
         </MenuItem>
         <MenuSeparator />
-        <MenuItem danger icon={<Trash size={16} />} onSelect={onDelete}>
+        <MenuItem danger icon={<Trash size={16} />} onSelect={() => void actions.remove([debt])}>
           Delete
         </MenuItem>
       </MenuContent>

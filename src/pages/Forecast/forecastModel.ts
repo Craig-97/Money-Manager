@@ -1,21 +1,6 @@
-import { formatShortDay, PaydayConfig, toIsoDate } from '~/lib/dates';
+import { formatLongMonthYear, formatShortDay, PaydayConfig, toIsoDate } from '~/lib/dates';
 import { formatMoney, MINUS } from '~/lib/format';
 import { BankHolidays, getPaydayDates, getPaydays } from '~/lib/payday';
-
-const MONTHS = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December'
-];
 
 export const PROJECTION_MONTHS = 12;
 export const TABLE_MONTHS = 24;
@@ -182,7 +167,7 @@ export const monthRows = ({
     const movedFrom = found?.usual ?? heldBack;
     const previous = i ? value(i - 1) : 0;
     return {
-      month: `${MONTHS[month.getMonth()]} ${month.getFullYear()}`,
+      month: formatLongMonthYear(month),
       isNow: i === 0,
       payday: found?.actual ?? null,
       movedFrom,

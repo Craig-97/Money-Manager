@@ -1,7 +1,4 @@
-import { AmountInput } from '~/components/form/AmountInput';
-import { FieldError } from '~/components/form/FieldError';
-import { Label } from '~/components/form/Label';
-import { TextInput } from '~/components/form/TextInput';
+import { AmountInput, FieldError, FieldHint, Label, TextInput } from '../../../../form';
 import { PaymentForm } from '../../usePaymentForm';
 
 /*
@@ -78,11 +75,9 @@ export const DebtFields = ({ form }: { form: PaymentForm }) => {
             ) : null}
           </div>
         </div>
-        <p
-          id="payment-started-hint"
-          className="mt-2 ml-1 text-xs leading-[1.45] font-semibold text-muted">
+        <FieldHint id="payment-started-hint">
           What you owed at the start, so Debts can show how far you’ve come.
-        </p>
+        </FieldHint>
       </div>
     </>
   );

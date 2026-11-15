@@ -3,10 +3,9 @@ import { useMutation } from '@apollo/client/react';
 import { useShallow } from 'zustand/react/shallow';
 import { AssignPaymentAccountsDocument, UpdateAccountDocument } from '~/graphql/generated';
 import { Account, paidIntoAccountOf, spendingOf } from '~/lib/accounts';
-import { getApiErrorMessage } from '~/lib/errors';
 import { RecurringPayment } from '~/lib/payments';
 import { useSetupAccountsStore } from '~/state/setupAccounts';
-import { showToast } from '~/state/toast';
+import { showErrorToast, showToast } from '~/state/toast';
 
 interface Options {
   budgetId: string;
@@ -103,7 +102,7 @@ export const useSetupAccounts = ({ budgetId, accounts, payments }: Options) => {
       close();
       showToast({ message: 'Accounts set up' });
     } catch (error) {
-      showToast({ message: getApiErrorMessage(error, "Couldn't save that. Try again.") });
+      showErrorToast(error);
     }
   };
 
@@ -141,5 +140,3 @@ export const useSetupAccounts = ({ budgetId, accounts, payments }: Options) => {
     save: () => void save()
   };
 };
-
-export type SetupAccounts = ReturnType<typeof useSetupAccounts>;

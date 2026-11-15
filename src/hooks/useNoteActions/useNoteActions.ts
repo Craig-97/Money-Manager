@@ -1,12 +1,8 @@
 import { useMutation } from '@apollo/client/react';
 import { addNote, removeFromBudget } from '~/graphql/cache';
 import { CreateNoteDocument, DeleteNoteDocument, UpdateNoteDocument } from '~/graphql/generated';
-import { getApiErrorMessage } from '~/lib/errors';
 import { Note, NoteDraft, noteInput, toDraft } from '~/lib/notes';
-import { showToast } from '~/state/toast';
-
-const showError = (error: unknown) =>
-  showToast({ message: getApiErrorMessage(error, "Couldn't save that. Try again.") });
+import { showErrorToast, showToast } from '~/state/toast';
 
 /* Adding, changing and deleting notes. Each returns whether it worked. */
 export const useNoteActions = (budgetId: string) => {
@@ -25,7 +21,7 @@ export const useNoteActions = (budgetId: string) => {
       });
       return true;
     } catch (error) {
-      showError(error);
+      showErrorToast(error);
       return false;
     }
   };
@@ -35,7 +31,7 @@ export const useNoteActions = (budgetId: string) => {
       await updateNote({ variables: { id, input: noteInput(draft) } });
       return true;
     } catch (error) {
-      showError(error);
+      showErrorToast(error);
       return false;
     }
   };
@@ -54,7 +50,7 @@ export const useNoteActions = (budgetId: string) => {
       });
       return true;
     } catch (error) {
-      showError(error);
+      showErrorToast(error);
       return false;
     }
   };

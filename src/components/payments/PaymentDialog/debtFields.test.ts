@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { paidOffRow, parseApr } from './debtFields';
-
-const today = new Date(2026, 9, 2);
+import { TODAY } from '~/test/dates';
 
 describe('parseApr', () => {
   it('reads a rate from 0 to 100, with or without a % sign', () => {
@@ -24,24 +23,24 @@ describe('paidOffRow', () => {
   const figures = { balance: 800, apr: 0, amount: 100, frequency: 'MONTHLY' as const };
 
   it('gives the month it would be paid off, and at what', () => {
-    expect(paidOffText(figures, today)).toBe('About Jun 2027 at £100 a month');
+    expect(paidOffText(figures, TODAY)).toBe('About Jun 2027 at £100 a month');
   });
 
   it('says how often for other schedules', () => {
-    expect(paidOffText({ ...figures, amount: 12.5, frequency: 'WEEKLY' }, today)).toMatch(
+    expect(paidOffText({ ...figures, amount: 12.5, frequency: 'WEEKLY' }, TODAY)).toMatch(
       /at £12\.50 a week$/
     );
   });
 
   it('waits for what it needs', () => {
-    expect(paidOffText({ ...figures, balance: null }, today)).toBe(
+    expect(paidOffText({ ...figures, balance: null }, TODAY)).toBe(
       'Shown once you add the balance'
     );
-    expect(paidOffText({ ...figures, apr: null }, today)).toBe('Shown once you add the APR');
-    expect(paidOffText({ ...figures, amount: null }, today)).toBe('Shown once you add the amount');
+    expect(paidOffText({ ...figures, apr: null }, TODAY)).toBe('Shown once you add the APR');
+    expect(paidOffText({ ...figures, amount: null }, TODAY)).toBe('Shown once you add the amount');
   });
 
   it('says when it is already paid off', () => {
-    expect(paidOffText({ ...figures, balance: 0 }, today)).toBe('Already paid off');
+    expect(paidOffText({ ...figures, balance: 0 }, TODAY)).toBe('Already paid off');
   });
 });

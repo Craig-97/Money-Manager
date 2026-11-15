@@ -2,9 +2,8 @@ import { describe, expect, it, vi } from 'vitest';
 import { screen, waitFor } from '@testing-library/react';
 import { useAuthStore } from '~/state/auth';
 import { createFakeApi, DEFAULT_BUDGET, DEFAULT_USER } from '~/test/fakeApi';
+import { findPageHeading } from '~/test/queries';
 import { renderApp } from '~/test/renderApp';
-
-const findPageHeading = (name: string) => screen.findByRole('heading', { level: 1, name });
 
 describe('routing', () => {
   it('sends signed-out people to sign in', async () => {
@@ -46,7 +45,7 @@ describe('routing', () => {
   });
 
   it('sends people without a budget to setup', async () => {
-    renderApp({ route: '/dashboard', api: createFakeApi({ budget: null }) });
+    renderApp({ route: '/dashboard', budget: null });
 
     expect(await findPageHeading('When do you get paid?')).toBeInTheDocument();
   });

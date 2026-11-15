@@ -1,13 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { screen, within } from '@testing-library/react';
 import { usePrefsStore } from '~/state/prefs';
-import { createFakeApi, DEFAULT_BUDGET, DEFAULT_PASSWORD } from '~/test/fakeApi';
+import { DEFAULT_BUDGET, DEFAULT_PASSWORD, freshBudget } from '~/test/fakeApi';
 import { renderApp } from '~/test/renderApp';
 
-const renderProfile = () => {
-  const api = createFakeApi({ budget: structuredClone(DEFAULT_BUDGET) });
-  return { ...renderApp({ route: '/profile', api }), api };
-};
+const renderProfile = () => renderApp({ route: '/profile', budget: freshBudget() });
 
 const section = (name: string) => screen.findByRole('region', { name });
 

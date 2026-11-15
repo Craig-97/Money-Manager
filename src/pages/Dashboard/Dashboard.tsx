@@ -1,7 +1,7 @@
 import { Plus, Repeat } from 'lucide-react';
-import { BudgetError } from '~/components/feedback/BudgetError';
-import { PageHeader } from '~/components/layout/PageHeader';
-import { Button } from '~/components/ui/Button';
+import { BudgetError } from '~/components/feedback';
+import { PageHeader } from '~/components/layout';
+import { Button } from '~/components/ui';
 import { useBudget } from '~/hooks/useBudget';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
 import { DashboardContent, DashboardSkeleton } from './components';

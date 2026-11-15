@@ -11,20 +11,25 @@ import {
   toAccounts,
   updatedText
 } from '~/lib/accounts';
-import { daysBetween, fromApiDate, toApiDate } from '~/lib/dates';
-import { getApiErrorMessage } from '~/lib/errors';
-import { formatMoney, formatMoneyInput, parseMoney, roundPence } from '~/lib/format';
-import { BankHolidays, countPaydays, PayCycle } from '~/lib/payday';
-import { formatShortDate, Payment } from '~/lib/payments';
-import { showToast } from '~/state/toast';
+import { daysBetween, toIsoDate } from '~/lib/dates';
+import { formatMoneyInput, parseMoney, plural, roundPence } from '~/lib/format';
+import { BankHolidays, PayCycle } from '~/lib/payday';
+import { Payment } from '~/lib/payments';
+import { showErrorToast, showToast } from '~/state/toast';
 import {
+  accountMoves,
   balanceParts,
   dueSinceDetail,
   dueSinceOf,
   leftOverDetail,
   leftOverNote,
   leftOverOf,
-  listNames,
+  movedInto,
+  needsNewCycle,
+  otherAccountLine,
+  overdueOneOffs,
+  paydaysSince,
+  startedText,
   suggestedBalance
 } from '../paydayCheck';
 
@@ -37,29 +42,8 @@ interface Options {
   markPaid: (payments: Payment[]) => Promise<void>;
 }
 
-/*
- * Whether the latest payday's cycle still needs starting: it's after the last cycle was started.
- * Setup counts as a start, so a new budget waits for its first payday. That also catches a payday
- * missed over a weekend.
- */
-const needsNewCycle = (cycle: PayCycle, cycleStartedOn: string | null | undefined) => {
-  const started = fromApiDate(cycleStartedOn);
-  return !started || started < cycle.start;
-};
-
 // What a left-over payment starts as: most are direct debits that went out on their own
 const DEFAULT_OUTCOME: LeftOverOutcome = 'PAID';
-
-/*
- * The line under another account to spend from in step 3: "After £440.02 of bills, with the
- * £600.00 top-up", or "After £440.02 of bills · updated 3 days ago"
- */
-const spendingSub = ({ out, added, updated }: { out: number; added: number; updated: string }) => {
-  const topUp = added ? `the ${formatMoney(added)} top-up` : null;
-  if (!out) return topUp ? `With ${topUp}` : updated;
-  const bills = `After ${formatMoney(out)} of bills`;
-  return topUp ? `${bills}, with ${topUp}` : `${bills} · ${updated.toLowerCase()}`;
-};
 
 /*
  * The payday prompt: check what's gone out, confirm the account pay lands in, update the other
@@ -75,13 +59,8 @@ export const usePaydayPrompt = ({
 }: Options) => {
   const [startCycle, { loading: starting }] = useMutation(StartPaydayCycleDocument);
   const due = needsNewCycle(cycle, budget.cycleStartedOn);
-  // Every payday since the last cycle was started, not just this one, when the app wasn't opened
-  // for a while: the pay from each is in the bank
-  const started = fromApiDate(budget.cycleStartedOn);
-  const paydays =
-    started && budget.payday
-      ? Math.max(1, countPaydays(budget.payday, { holidays, after: started, upTo: cycle.start }))
-      : 1;
+  // The pay from each payday missed is in the bank
+  const paydays = paydaysSince(budget, { cycle, holidays });
   const income = roundPence(budget.monthlyIncome * paydays);
   const [open, setOpen] = useState(due);
   // The steps, or the summary once the cycle has started. Kept as it is while the dialog closes, so
@@ -120,14 +99,7 @@ export const usePaydayPrompt = ({
   const dueSince = dueSinceOf(payments, { cycle, today, stillDue });
   const goneOut = dueSince.filter(item => ticked.has(item.key));
   const paidLeftOver = leftOver.filter(item => outcomeOf(item.payment.id) === 'PAID');
-  // One-offs from last cycle never paid; ones due since payday are in "Check what's gone out"
-  const overdue = payments.filter(
-    payment =>
-      payment.kind === 'oneOff' &&
-      !payment.paidAt &&
-      payment.dueDate &&
-      payment.dueDate < cycle.start
-  );
+  const overdue = overdueOneOffs(payments, cycle);
 
   // Pay lands in this account, so that's what's confirmed. Only what goes out of it comes off.
   const lastBalance = current?.balance ?? budget.bankBalance;
@@ -143,37 +115,15 @@ export const usePaydayPrompt = ({
   });
   // The same figures, as the line under the balance shows them
   const parts = balanceParts({ bankBalance: lastBalance, outcomes, intoNameOf, ...fromCurrent });
-  // What ticked payments move into other accounts, for the line under step 1
-  const movedIn = new Map<string, number>();
-  for (const item of goneOut) {
-    const into = intoNameOf(item.payment);
-    if (into) {
-      movedIn.set(
-        into,
-        roundPence((movedIn.get(into) ?? 0) + item.payment.amount * item.dates.length)
-      );
-    }
-  }
   // Changes with the choices above until it's typed over
   const balance = typed ?? formatMoneyInput(projected);
   const parsed = parseMoney(balance);
   const edited = typed !== null && (parsed === null || Math.abs(parsed - projected) > 0.004);
 
-  // What payments moving money into other accounts add, and what's gone out of each, from the
-  // ones recorded as paid here
-  const paidIn = new Map<string, number>();
-  const paidOut = new Map<string, number>();
-  const add = (map: Map<string, number>, { id, amount }: { id: string; amount: number }) =>
-    map.set(id, roundPence((map.get(id) ?? 0) + amount));
-  for (const item of [...paidLeftOver, ...goneOut]) {
-    const times = item.dates.length;
-    const from = accountOf(item.payment, accounts);
-    if (from && from.id !== current?.id)
-      add(paidOut, { id: from.id, amount: -item.payment.signedAmount * times });
-    if (item.payment.kind === 'recurring' && item.payment.paysInto) {
-      add(paidIn, { id: item.payment.paysInto, amount: item.payment.amount * times });
-    }
-  }
+  const { paidIn, paidOut } = accountMoves([...paidLeftOver, ...goneOut], {
+    accounts,
+    paidIntoId: current?.id
+  });
   const savingsRows = others.map(account => {
     const added = paidIn.get(account.id) ?? 0;
     const out = paidOut.get(account.id) ?? 0;
@@ -182,22 +132,9 @@ export const usePaydayPrompt = ({
     const expected = roundPence(afterApi - out);
     const value = savingsTyped[account.id] ?? formatMoneyInput(expected);
     const amount = parseMoney(value);
-    const updated = updatedText(account, today);
-    // Interest the app added since the balance was typed in, to check here
-    const interest = account.interest?.added ?? [];
-    const interestText = interest.length
-      ? `Includes ${formatMoney(roundPence(interest.reduce((sum, item) => sum + item.amount, 0)))} interest added ${formatShortDate(interest.at(-1)!.date, today)}`
-      : null;
-    // A spending account says what bills have come off and any top-up; savings what's paid in
-    const sub = isSpending(account)
-      ? spendingSub({ out, added, updated })
-      : [
-          added ? `Includes ${formatMoney(added)} paid in` : null,
-          interestText,
-          out ? `${formatMoney(out)} gone out` : null
-        ]
-          .filter(Boolean)
-          .join(' · ');
+    const line = otherAccountLine(account, { added, out, today });
+    // Interest the app added since the balance was typed in is checked here
+    const interestAdded = (account.interest?.added.length ?? 0) > 0;
     return {
       account,
       value,
@@ -205,12 +142,9 @@ export const usePaydayPrompt = ({
       // Sent only when it isn't what the API would leave it at, or interest was added: then it's
       // been checked, which clears the alert asking to
       changed:
-        amount !== null && (Math.abs(amount - afterApi) > 0.004 || interest.length > 0)
-          ? amount
-          : null,
-      sub: sub || updated,
-      // Amber only while the line is just how long ago it was updated
-      stale: (!sub || sub === updated) && isStale(account, today),
+        amount !== null && (Math.abs(amount - afterApi) > 0.004 || interestAdded) ? amount : null,
+      sub: line.text,
+      stale: line.stale,
       setValue: (next: string) =>
         setSavingsTyped(currentTyped => ({ ...currentTyped, [account.id]: next }))
     };
@@ -225,7 +159,7 @@ export const usePaydayPrompt = ({
         variables: {
           input: {
             budgetId: budget.id,
-            payday: toApiDate(cycle.start),
+            payday: toIsoDate(cycle.start),
             paidIntoBalance,
             accountBalances: updated.map(row => ({
               accountId: row.account.id,
@@ -251,30 +185,23 @@ export const usePaydayPrompt = ({
       const skipped = leftOver
         .filter(item => outcomeOf(item.payment.id) === 'SKIPPED')
         .map(item => item.payment.name);
-      const added = savingsRows
+      const moved = savingsRows
         .filter(row => row.changed === null && paidIn.has(row.account.id))
-        .map(
-          row =>
-            `${formatMoney(paidIn.get(row.account.id) ?? 0)} ${isSpending(row.account) ? 'moved' : 'added'} to ${row.account.name}.`
-        );
-      const text = [
-        paid.length
-          ? `${listNames(paid)} ${paid.length === 1 ? 'was' : 'were'} recorded as paid.`
-          : '',
-        skipped.length
-          ? `${listNames(skipped)} ${skipped.length === 1 ? 'was' : 'were'} recorded as skipped.`
-          : '',
-        ...added,
-        updated.length
-          ? `${listNames(updated.map(row => row.account.name))} ${updated.length === 1 ? 'was' : 'were'} updated.`
-          : ''
-      ]
-        .filter(Boolean)
-        .join(' ');
+        .map(row => ({
+          amount: paidIn.get(row.account.id) ?? 0,
+          name: row.account.name,
+          spending: isSpending(row.account)
+        }));
+      const text = startedText({
+        paid,
+        skipped,
+        moved,
+        updated: updated.map(row => row.account.name)
+      });
       setResult({ balance: paidIntoBalance, text });
       setStage('done');
     } catch (error) {
-      showToast({ message: getApiErrorMessage(error, "Couldn't start the new cycle. Try again.") });
+      showErrorToast(error, { fallback: "Couldn't start the new cycle. Try again." });
     }
   };
 
@@ -339,7 +266,7 @@ export const usePaydayPrompt = ({
     // The suggestion's parts: where it starts, then each change after the pay
     parts,
     // What the ticked payments add to other accounts: "The £600.00 is added to Joint bills."
-    movedIn: [...movedIn].map(([name, amount]) => ({ name, amount })),
+    movedIn: movedInto(goneOut, intoNameOf),
     balance,
     setBalance: setTyped,
     edited,
@@ -348,7 +275,7 @@ export const usePaydayPrompt = ({
       open: savingsOpen,
       toggle: () => setSavingsOpen(open => !open),
       // "3 accounts", then "Cash ISA updated 5 weeks ago" in amber when one is old
-      count: `${others.length} ${others.length === 1 ? 'account' : 'accounts'}`,
+      count: plural(others.length, 'account'),
       staleText: staleSavings[0]
         ? `${staleSavings[0].name} ${updatedText(staleSavings[0], today).toLowerCase()}`
         : null

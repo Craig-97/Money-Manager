@@ -1,12 +1,13 @@
 import { CalendarClock, PenLine } from 'lucide-react';
-import { DatePicker } from '~/components/form/DatePicker';
-import { choiceClasses } from '~/components/form/fieldClasses';
-import { FieldError } from '~/components/form/FieldError';
-import { Label } from '~/components/form/Label';
-import { Radio } from '~/components/form/Radio';
-import { Select } from '~/components/form/Select';
-import { TextInput } from '~/components/form/TextInput';
-import { Button } from '~/components/ui/Button';
+import {
+  choiceClasses,
+  DatePicker,
+  FieldError,
+  Label,
+  Radio,
+  Select,
+  TextInput
+} from '~/components/form';
 import { Budget } from '~/hooks/useBudget';
 import { cn } from '~/lib/cn';
 import { formatShortDay } from '~/lib/dates';
@@ -14,6 +15,7 @@ import { allowedRules, REGIONS, ruleDescription, RULES, usesWeekday, WEEKDAYS } 
 import { usePaydaySettings } from '../../../hooks';
 import { PaydayDateEditor } from '../PaydayDateEditor';
 import { FREQUENCIES } from '../paydayOptions';
+import { SaveFooter } from '../SaveFooter';
 import { SECTION_ICONS } from '../sectionIcons';
 import { helpClasses } from '../settingsClasses';
 import { SettingsTile } from '../SettingsTile';
@@ -34,21 +36,11 @@ export const PaydaySection = ({ budget }: { budget: Budget }) => {
       mobileDescription="Drives your countdown and Free to spend."
       onSubmit={payday.save}
       footer={
-        <>
-          <span className={helpClasses}>
-            Your current cycle moves to match straight away. A single moved payday clears itself
-            once it has passed.
-          </span>
-          <Button
-            type="submit"
-            variant="accent"
-            disabled={!payday.isDirty}
-            loading={payday.saving}
-            loadingText="Saving…"
-            className="font-bold">
-            Save changes
-          </Button>
-        </>
+        <SaveFooter
+          help="Your current cycle moves to match straight away. A single moved payday clears itself once it has passed."
+          disabled={!payday.isDirty}
+          loading={payday.saving}
+        />
       }>
       <div className="grid gap-4 md:grid-cols-2">
         <div>

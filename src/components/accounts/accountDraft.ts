@@ -1,6 +1,6 @@
 import { AccountInterestInput, AccountKind, InterestFrequency } from '~/graphql/generated';
 import { AccountInterest } from '~/lib/accounts';
-import { parseIsoDate, toApiDate } from '~/lib/dates';
+import { parseIsoDate, toIsoDate } from '~/lib/dates';
 import { parseMoney } from '~/lib/format';
 
 /* An account's fields as typed, shared by the account dialog and setup */
@@ -47,6 +47,17 @@ export const EMPTY_ACCOUNT_DRAFT: AccountDraft = {
 };
 
 /* A new account of the kind chosen: a spending account counts in free to spend, savings don't */
+/* "Edit Joint bills", "Add account" while a kind is being chosen, "Add savings account" */
+export const accountDialogTitle = (
+  kind: AccountKind,
+  { editing, choosing }: { editing: string | undefined; choosing: boolean }
+) =>
+  editing
+    ? `Edit ${editing}`
+    : choosing
+      ? 'Add account'
+      : `Add ${kind === 'SPENDING' ? 'spending' : 'savings'} account`;
+
 export const blankDraft = (kind: AccountKind): AccountDraft => ({
   ...EMPTY_ACCOUNT_DRAFT,
   kind,
@@ -61,7 +72,7 @@ export const interestDraftOf = (interest: AccountInterest | null): InterestDraft
         frequency: interest.frequency ?? '',
         day: interest.day && interest.frequency === 'MONTHLY' ? String(interest.day) : '',
         nextDate:
-          interest.nextDate && interest.frequency !== 'MONTHLY' ? toApiDate(interest.nextDate) : ''
+          interest.nextDate && interest.frequency !== 'MONTHLY' ? toIsoDate(interest.nextDate) : ''
       }
     : EMPTY_INTEREST_DRAFT;
 

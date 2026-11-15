@@ -1,6 +1,7 @@
+import { HeroTile } from '~/components/ui';
 import { cn } from '~/lib/cn';
+import { formatShortDate } from '~/lib/dates';
 import { formatBalance, formatMoney, MINUS } from '~/lib/format';
-import { formatShortDate } from '~/lib/payments';
 import { FirstCycle } from '../../../setupModel';
 
 interface FirstCycleSummaryProps {
@@ -16,6 +17,7 @@ const rowClasses =
 export const FirstCycleSummary = ({ firstCycle, paidIntoName }: FirstCycleSummaryProps) => {
   const {
     cycleEnd,
+    today,
     balance,
     countedCount,
     keptOut,
@@ -31,14 +33,10 @@ export const FirstCycleSummary = ({ firstCycle, paidIntoName }: FirstCycleSummar
 
   return (
     <aside aria-label="Your first cycle" className="sticky top-10 hidden min-[73.75rem]:block">
-      <div className="relative flex flex-col gap-1 overflow-hidden rounded-[28px] bg-hero-bg p-[22px] text-hero-text">
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -top-[70px] -right-[60px] size-[180px] rounded-full bg-hero-chip"
-        />
+      <HeroTile as="div" size="sm" className="gap-1 rounded-[28px] p-[22px]">
         <p className="relative text-[13px] font-bold text-hero-muted">Your first cycle</p>
         <p className="relative mb-2.5 text-[15px] font-extrabold">
-          Today to {formatShortDate(cycleEnd)}
+          Today to {formatShortDate(cycleEnd, today)}
         </p>
         <div className={rowClasses}>
           <span className="text-hero-muted">
@@ -96,7 +94,7 @@ export const FirstCycleSummary = ({ firstCycle, paidIntoName }: FirstCycleSummar
             balance is already spoken for.
           </p>
         </div>
-      </div>
+      </HeroTile>
       {keptOut.length ? (
         <p className="mx-1 mt-3.5 text-xs leading-normal text-muted">
           Kept out of free to spend:{' '}

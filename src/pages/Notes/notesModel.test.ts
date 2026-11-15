@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { charactersLeft, findNotes, Note, noteMeta, notePreview, toNotes } from './notesModel';
+import { charactersLeft, Note, toNotes } from '~/lib/notes';
+import { findNotes, noteMeta } from './notesModel';
+import { TODAY } from '~/test/dates';
 
 const at = (iso: string) => Date.parse(iso);
-const TODAY = new Date(2026, 9, 2);
 
 const notes: Note[] = [
   {
@@ -79,11 +80,6 @@ describe('note text', () => {
   it('dates a note and says when it has been edited', () => {
     expect(noteMeta(notes[0])).toBe('9 Dec 2024 · Edited');
     expect(noteMeta(notes[1])).toBe('9 Dec 2024');
-  });
-
-  it('previews the start of the first line', () => {
-    expect(notePreview('Test Note\n\nDo Da Dee')).toBe('Test Note');
-    expect(notePreview('x'.repeat(40))).toHaveLength(30);
   });
 
   it('counts the characters left, warning near the limit', () => {

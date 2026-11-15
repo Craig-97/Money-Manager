@@ -5,8 +5,8 @@ import { usePayCycle } from '~/hooks/usePayCycle';
 import { useReminders } from '~/hooks/useReminders';
 import { isStale, toAccounts } from '~/lib/accounts';
 import { clearedText, debtTotals, isDebt, simulatePayoff } from '~/lib/debts';
-import { formatMoney } from '~/lib/format';
-import { RecurringPayment, toPayments } from '~/lib/payments';
+import { formatMoney, plural } from '~/lib/format';
+import { toPayments } from '~/lib/payments';
 
 /*
  * The line under each of More's pages: how many accounts, what's left on the debts, how many notes,
@@ -17,11 +17,7 @@ export const useMoreSubtitles = (): Partial<Record<PageName, string>> => {
   const { user } = useCurrentUser();
   const { today, holidays } = usePayCycle(budget?.payday);
 
-  const debts = budget
-    ? toPayments(budget, { today, holidays })
-        .filter((payment): payment is RecurringPayment => payment.kind === 'recurring')
-        .filter(isDebt)
-    : [];
+  const debts = budget ? toPayments(budget, { today, holidays }).filter(isDebt) : [];
   const { months } = simulatePayoff(debts);
   const notes = budget?.notes?.length ?? 0;
   const accounts = toAccounts(budget?.accounts, today);
@@ -30,14 +26,13 @@ export const useMoreSubtitles = (): Partial<Record<PageName, string>> => {
 
   return {
     accounts: accounts.length
-      ? `${accounts.length} ${accounts.length === 1 ? 'account' : 'accounts'}` +
-        (stale ? ` · ${stale.name} needs updating` : '')
+      ? plural(accounts.length, 'account') + (stale ? ` · ${stale.name} needs updating` : '')
       : 'Your current account and savings',
     debts: debts.length
       ? `${formatMoney(debtTotals(debts).left, { whole: true })} left` +
         (months === null ? '' : ` · debt-free ${clearedText(months, today)}`)
       : 'Loans and cards you’re paying off',
-    notes: notes ? `${notes} ${notes === 1 ? 'note' : 'notes'}` : 'Nothing written yet',
+    notes: notes ? plural(notes, 'note') : 'Nothing written yet',
     reminders: unread ? `${unread} new` : 'What’s due, renewing and coming up',
     profile: user ? `${user.firstName} ${user.surname}` : undefined
   };

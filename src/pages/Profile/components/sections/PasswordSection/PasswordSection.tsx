@@ -1,11 +1,9 @@
 import { Eye, EyeOff } from 'lucide-react';
-import { FieldError } from '~/components/form/FieldError';
-import { Label } from '~/components/form/Label';
-import { TextInput } from '~/components/form/TextInput';
-import { Button } from '~/components/ui/Button';
-import { IconButton } from '~/components/ui/IconButton';
+import { describedBy, FieldError, Label, TextInput } from '~/components/form';
+import { IconButton } from '~/components/ui';
 import { cn } from '~/lib/cn';
 import { usePasswordForm } from '../../../hooks';
+import { SaveFooter } from '../SaveFooter';
 import { SECTION_ICONS } from '../sectionIcons';
 import { helpClasses } from '../settingsClasses';
 import { SettingsTile } from '../SettingsTile';
@@ -19,9 +17,6 @@ const STRENGTH_COLOURS = [
   'bg-income'
 ];
 const STRENGTH_TEXT = ['', 'text-expense', 'text-note-amber-dot', 'text-income', 'text-income'];
-
-const describedBy = (...ids: (string | false | undefined)[]) =>
-  ids.filter(Boolean).join(' ') || undefined;
 
 /* Changing the password, with a strength meter */
 export const PasswordSection = () => {
@@ -38,26 +33,12 @@ export const PasswordSection = () => {
       mobileDescription="Use one you don’t use anywhere else."
       onSubmit={() => void onSubmit()}
       footer={
-        <>
-          <span className={helpClasses}>
-            {errors.root ? (
-              <span role="alert" className="font-bold text-expense">
-                {errors.root.message}
-              </span>
-            ) : (
-              'You’ll stay signed in on this device.'
-            )}
-          </span>
-          <Button
-            type="submit"
-            variant="accent"
-            disabled={!canSubmit}
-            loading={isSubmitting}
-            loadingText="Saving…"
-            className="font-bold">
-            Save changes
-          </Button>
-        </>
+        <SaveFooter
+          help="You’ll stay signed in on this device."
+          error={errors.root?.message}
+          disabled={!canSubmit}
+          loading={isSubmitting}
+        />
       }>
       <div>
         <Label htmlFor="password-current">Current password</Label>

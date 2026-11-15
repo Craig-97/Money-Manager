@@ -1,15 +1,14 @@
 import { useState } from 'react';
-import { Trash } from 'lucide-react';
 import {
   AccountChooser,
+  accountDialogTitle,
   AccountDraft,
   AccountFields,
   blankDraft,
   checkAccountDraft,
   EMPTY_ACCOUNT_DRAFT
 } from '~/components/accounts';
-import { Button } from '~/components/ui/Button';
-import { Modal } from '~/components/ui/Modal';
+import { Modal, ModalActions } from '~/components/ui';
 import { startOfToday } from '~/lib/dates';
 import { SetupState } from '../../../hooks';
 
@@ -45,36 +44,19 @@ export const SetupAccountDialog = ({ setup }: { setup: SetupState }) => {
     <Modal
       open={dialog.open}
       onOpenChange={next => (next ? undefined : dialog.close())}
-      title={
-        editing
-          ? `Edit ${editing.draft.name}`
-          : choosing
-            ? 'Add account'
-            : `Add ${draft.kind === 'SPENDING' ? 'spending' : 'savings'} account`
-      }
+      title={accountDialogTitle(draft.kind, { editing: editing?.draft.name, choosing })}
       onBack={!editing && !choosing ? () => setChoosing(true) : undefined}
       backLabel="Back to account types"
       initialFocusId={choosing ? undefined : 'account-balance'}
       footer={
         choosing ? undefined : (
-          <>
-            {editing ? (
-              <Button
-                variant="dangerGhost"
-                onClick={() => dialog.remove(editing.key)}
-                className="max-md:-ml-2">
-                <Trash size={16} aria-hidden="true" />
-                Remove
-              </Button>
-            ) : null}
-            <span className="flex-1" />
-            <Button variant="ghost" onClick={dialog.close} className="max-md:h-[52px]">
-              Cancel
-            </Button>
-            <Button variant="accent" onClick={save} className="max-md:h-[52px]">
-              {editing ? 'Save' : 'Add account'}
-            </Button>
-          </>
+          <ModalActions
+            remove={
+              editing ? { label: 'Remove', onClick: () => dialog.remove(editing.key) } : undefined
+            }
+            cancel={{ onClick: dialog.close }}
+            confirm={{ label: editing ? 'Save' : 'Add account', onClick: save }}
+          />
         )
       }>
       {choosing ? (

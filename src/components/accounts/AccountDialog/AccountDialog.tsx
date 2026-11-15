@@ -1,25 +1,19 @@
 import { ArrowRight, ChevronRight, Repeat } from 'lucide-react';
-import { Button } from '~/components/ui/Button';
-import { Modal } from '~/components/ui/Modal';
-import { Switch } from '~/components/ui/Switch';
 import { useBudget } from '~/hooks/useBudget';
 import { usePayCycle } from '~/hooks/usePayCycle';
-import {
-  accountLetter,
-  accountOf,
-  isStale,
-  spendingOf,
-  toAccounts,
-  updatedText
-} from '~/lib/accounts';
+import { accountOf, isStale, spendingOf, toAccounts, updatedText } from '~/lib/accounts';
 import { cn } from '~/lib/cn';
+import { formatShortDate } from '~/lib/dates';
 import { formatMoney } from '~/lib/format';
-import { formatShortDate, PER_PERIOD, toPayments } from '~/lib/payments';
+import { PER_PERIOD, toPayments } from '~/lib/payments';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
+import { Modal, ModalActions, Switch } from '../../ui';
 import { AccountChooser } from '../AccountChooser';
 import { AccountFields, panelClasses } from '../AccountFields';
 import { deleteTextOf } from './deleteText';
 import { useAccountDialog } from './useAccountDialog';
+import { accountDialogTitle } from '../accountDraft';
+import { AccountLetter } from '../AccountLetter';
 
 /*
  * Adding an account or changing one: a dialog on desktop, a bottom sheet on mobile. Adding starts
@@ -52,11 +46,7 @@ export const AccountDialog = () => {
     : null;
   const title = dialog.confirming
     ? `Delete ${account?.name ?? 'account'}?`
-    : account
-      ? `Edit ${account.name}`
-      : dialog.choosing
-        ? 'Add account'
-        : `Add ${draft.kind === 'SPENDING' ? 'spending' : 'savings'} account`;
+    : accountDialogTitle(draft.kind, { editing: account?.name, choosing: dialog.choosing });
 
   return (
     <Modal
@@ -65,15 +55,7 @@ export const AccountDialog = () => {
       title={title}
       onBack={!account && !dialog.choosing ? dialog.backToChooser : undefined}
       backLabel="Back to account types"
-      leading={
-        account && !dialog.confirming ? (
-          <span
-            aria-hidden="true"
-            className="inline-flex size-[38px] shrink-0 items-center justify-center rounded-xl border border-border bg-surface-2 text-sm font-extrabold">
-            {accountLetter(account)}
-          </span>
-        ) : undefined
-      }
+      leading={account && !dialog.confirming ? <AccountLetter account={account} /> : undefined}
       subtitle={
         account && !dialog.confirming ? (
           <span
@@ -88,38 +70,27 @@ export const AccountDialog = () => {
       initialFocusId={dialog.confirming || dialog.choosing ? undefined : 'account-balance'}
       footer={
         dialog.choosing ? undefined : dialog.confirming ? (
-          <>
-            <span className="flex-1" />
-            <Button variant="ghost" onClick={dialog.keep} className="max-md:h-[52px]">
-              Keep it
-            </Button>
-            <Button
-              variant="danger"
-              onClick={dialog.confirmDelete}
-              loading={dialog.deleting}
-              className="max-md:h-[52px]">
-              Delete account
-            </Button>
-          </>
+          <ModalActions
+            cancel={{ label: 'Keep it', onClick: dialog.keep }}
+            confirm={{
+              label: 'Delete account',
+              onClick: dialog.confirmDelete,
+              loading: dialog.deleting,
+              variant: 'danger'
+            }}
+          />
         ) : (
-          <>
-            {dialog.canDelete ? (
-              <Button variant="dangerGhost" onClick={dialog.askDelete} className="max-md:-ml-2">
-                Delete account
-              </Button>
-            ) : null}
-            <span className="flex-1" />
-            <Button variant="ghost" onClick={dialog.close} className="max-md:h-[52px]">
-              Cancel
-            </Button>
-            <Button
-              variant="accent"
-              onClick={dialog.save}
-              loading={dialog.saving}
-              className="max-md:h-[52px]">
-              {account ? 'Save' : 'Add account'}
-            </Button>
-          </>
+          <ModalActions
+            remove={
+              dialog.canDelete ? { label: 'Delete account', onClick: dialog.askDelete } : undefined
+            }
+            cancel={{ onClick: dialog.close }}
+            confirm={{
+              label: account ? 'Save' : 'Add account',
+              onClick: dialog.save,
+              loading: dialog.saving
+            }}
+          />
         )
       }>
       {dialog.choosing ? (

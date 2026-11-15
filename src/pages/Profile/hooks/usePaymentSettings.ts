@@ -3,18 +3,16 @@ import { useMutation } from '@apollo/client/react';
 import { NonWorkingDay, UpdateBudgetDocument } from '~/graphql/generated';
 import { Budget } from '~/hooks/useBudget';
 import { usePayCycle } from '~/hooks/usePayCycle';
-import { addDays, parseIsoDate, toIsoDate } from '~/lib/dates';
-import { getApiErrorMessage } from '~/lib/errors';
+import { addDays, formatShortDate, parseIsoDate, toIsoDate } from '~/lib/dates';
 import { REGIONS } from '~/lib/payday';
 import {
   DEFAULT_NON_WORKING_DAY,
-  formatShortDate,
   goesOutOn,
   movedHow,
   NON_WORKING_DAY_LABELS,
   NON_WORKING_DAYS
 } from '~/lib/payments';
-import { showToast } from '~/state/toast';
+import { showErrorToast, showToast } from '~/state/toast';
 
 const OPTIONS = NON_WORKING_DAYS.map(rule => ({
   value: rule,
@@ -65,7 +63,7 @@ export const usePaymentSettings = (budget: Budget) => {
             : `Weekend payments now go out ${movedHow(rule)}`
       });
     } catch (error) {
-      showToast({ message: getApiErrorMessage(error, "Couldn't save that. Try again.") });
+      showErrorToast(error);
     }
   };
 

@@ -1,10 +1,10 @@
 import { LeftOverOutcome } from '~/graphql/generated';
-import { addDays } from '~/lib/dates';
+import { Account, accountOf, isSpending, isStale, updatedText } from '~/lib/accounts';
+import { addDays, formatShortDate, fromApiDate, PaydayConfig } from '~/lib/dates';
 import { payTowardsDebt } from '~/lib/debts';
-import { formatMoney, roundPence } from '~/lib/format';
-import { PayCycle } from '~/lib/payday';
+import { formatMoney, joinNames, roundPence } from '~/lib/format';
+import { BankHolidays, countPaydays, PayCycle } from '~/lib/payday';
 import {
-  formatShortDate,
   FREQUENCY_LABELS,
   nextOccurrence,
   occurrencesBetween,
@@ -20,13 +20,13 @@ import {
  */
 
 // A recurring payment's dates from last cycle that were never paid or skipped
-export interface LeftOver {
+interface LeftOver {
   payment: RecurringPayment;
   dates: Date[];
 }
 
 // A payment due from payday to today: a recurring one's dates in that time, or a one-off
-export interface DueSince {
+interface DueSince {
   key: string;
   payment: RecurringPayment | OneOffPayment;
   dates: Date[];
@@ -216,6 +216,151 @@ export const balanceParts = ({
   return { start, changes: changes.filter(change => change.amount !== 0) };
 };
 
-/* "Netflix", "Netflix and Gym", "Netflix, Gym and Rent" */
-export const listNames = (names: readonly string[]) =>
-  new Intl.ListFormat('en-GB', { style: 'long', type: 'conjunction' }).format(names);
+/*
+ * Whether the latest payday's cycle still needs starting: it's after the last cycle was started.
+ * Setup counts as a start, so a new budget waits for its first payday. That also catches a payday
+ * missed over a weekend.
+ */
+export const needsNewCycle = (cycle: PayCycle, cycleStartedOn: string | null | undefined) => {
+  const started = fromApiDate(cycleStartedOn);
+  return !started || started < cycle.start;
+};
+
+/*
+ * How many paydays the pay is from: every one since the last cycle was started, not just this one,
+ * when the app wasn't opened for a while
+ */
+export const paydaysSince = (
+  budget: { cycleStartedOn?: string | null; payday?: PaydayConfig | null },
+  { cycle, holidays }: { cycle: PayCycle; holidays: BankHolidays }
+) => {
+  const started = fromApiDate(budget.cycleStartedOn);
+  return started && budget.payday
+    ? Math.max(1, countPaydays(budget.payday, { holidays, after: started, upTo: cycle.start }))
+    : 1;
+};
+
+/* One-offs from last cycle never paid; ones due since payday are in "Check what's gone out" */
+export const overdueOneOffs = (payments: readonly Payment[], cycle: PayCycle) =>
+  payments.filter(
+    payment =>
+      payment.kind === 'oneOff' &&
+      !payment.paidAt &&
+      payment.dueDate &&
+      payment.dueDate < cycle.start
+  );
+
+/* What ticked payments move into other accounts, for the line under step 1 */
+export const movedInto = (
+  goneOut: readonly DueSince[],
+  intoNameOf: (payment: Payment) => string | null
+) => {
+  const totals = new Map<string, number>();
+  for (const item of goneOut) {
+    const into = intoNameOf(item.payment);
+    if (into) {
+      totals.set(
+        into,
+        roundPence((totals.get(into) ?? 0) + item.payment.amount * item.dates.length)
+      );
+    }
+  }
+  return [...totals].map(([name, amount]) => ({ name, amount }));
+};
+
+/*
+ * From the payments recorded as paid: what's moved into each account, and what's gone out of each
+ * one other than where pay lands, by account id
+ */
+export const accountMoves = (
+  paid: readonly (LeftOver | DueSince)[],
+  { accounts, paidIntoId }: { accounts: readonly Account[]; paidIntoId: string | undefined }
+) => {
+  const paidIn = new Map<string, number>();
+  const paidOut = new Map<string, number>();
+  const add = (map: Map<string, number>, { id, amount }: { id: string; amount: number }) =>
+    map.set(id, roundPence((map.get(id) ?? 0) + amount));
+  for (const item of paid) {
+    const times = item.dates.length;
+    const from = accountOf(item.payment, accounts);
+    if (from && from.id !== paidIntoId)
+      add(paidOut, { id: from.id, amount: -item.payment.signedAmount * times });
+    if (item.payment.kind === 'recurring' && item.payment.paysInto) {
+      add(paidIn, { id: item.payment.paysInto, amount: item.payment.amount * times });
+    }
+  }
+  return { paidIn, paidOut };
+};
+
+/*
+ * The line under another account to spend from in step 3: "After £440.02 of bills, with the
+ * £600.00 top-up", or "After £440.02 of bills · updated 3 days ago"
+ */
+const spendingLine = ({ out, added, updated }: { out: number; added: number; updated: string }) => {
+  const topUp = added ? `the ${formatMoney(added)} top-up` : null;
+  if (!out) return topUp ? `With ${topUp}` : updated;
+  const bills = `After ${formatMoney(out)} of bills`;
+  return topUp ? `${bills}, with ${topUp}` : `${bills} · ${updated.toLowerCase()}`;
+};
+
+/*
+ * The line under another account in step 3. A spending account says what bills have come off and
+ * any top-up; savings what's paid in, interest added, and what's gone out. Amber only while it's
+ * just how long ago the balance was updated.
+ */
+export const otherAccountLine = (
+  account: Account,
+  { added, out, today }: { added: number; out: number; today: Date }
+) => {
+  const updated = updatedText(account, today);
+  const interest = account.interest?.added ?? [];
+  const interestText = interest.length
+    ? `Includes ${formatMoney(roundPence(interest.reduce((sum, item) => sum + item.amount, 0)))} interest added ${formatShortDate(interest.at(-1)!.date, today)}`
+    : null;
+  const text = isSpending(account)
+    ? spendingLine({ out, added, updated })
+    : [
+        added ? `Includes ${formatMoney(added)} paid in` : null,
+        interestText,
+        out ? `${formatMoney(out)} gone out` : null
+      ]
+        .filter(Boolean)
+        .join(' · ');
+  return {
+    text: text || updated,
+    stale: (!text || text === updated) && isStale(account, today)
+  };
+};
+
+// "Netflix and Rent were recorded as paid."
+const recordedText = (names: readonly string[], what: string) =>
+  names.length ? `${joinNames(names)} ${names.length === 1 ? 'was' : 'were'} ${what}.` : '';
+
+/*
+ * What starting the cycle did, for the summary: "Netflix was recorded as paid. £600.00 added to
+ * Cash ISA. Joint bills was updated."
+ */
+export const startedText = ({
+  paid,
+  skipped,
+  moved,
+  updated
+}: {
+  paid: readonly string[];
+  skipped: readonly string[];
+  // Money moved into accounts whose balance wasn't typed over
+  moved: readonly { amount: number; name: string; spending: boolean }[];
+  // Accounts whose balance was
+  updated: readonly string[];
+}) =>
+  [
+    recordedText(paid, 'recorded as paid'),
+    recordedText(skipped, 'recorded as skipped'),
+    ...moved.map(
+      ({ amount, name, spending }) =>
+        `${formatMoney(amount)} ${spending ? 'moved' : 'added'} to ${name}.`
+    ),
+    recordedText(updated, 'updated')
+  ]
+    .filter(Boolean)
+    .join(' ');

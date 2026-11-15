@@ -1,10 +1,9 @@
 import { ReactNode } from 'react';
 import { ChevronLeft } from 'lucide-react';
 import { PageName } from '~/app/routes/pageModules';
-import { BrandMark } from '~/components/ui/BrandMark';
-import { PageLink } from '~/components/ui/PageLink';
 import { ROUTES } from '~/constants';
 import { cn } from '~/lib/cn';
+import { BrandMark, PageLink } from '../../ui';
 
 interface BackLink {
   page: PageName;

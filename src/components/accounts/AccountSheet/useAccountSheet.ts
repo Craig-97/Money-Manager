@@ -3,6 +3,7 @@ import { useAccountActions } from '~/hooks/useAccountActions';
 import { useBudget } from '~/hooks/useBudget';
 import { usePayCycle } from '~/hooks/usePayCycle';
 import {
+  estimateText,
   hasMatured,
   interestLine,
   interestScheduleText,
@@ -10,7 +11,6 @@ import {
   paidIntoAccountOf,
   toAccounts
 } from '~/lib/accounts';
-import { formatShortDate } from '~/lib/payments';
 import { useAccountDialogStore } from '~/state/accountDialog';
 import { useAccountQuickStore } from '~/state/accountQuick';
 import { useAccountViewStore } from '~/state/accountView';
@@ -56,10 +56,7 @@ export const useAccountSheet = () => {
     updateBalance: then(() => openQuick('balance', options)),
     interestLine: line,
     // Under what's built up: how it's worked out
-    interestNote:
-      line?.tone === 'earning'
-        ? `An estimate worked out on each day’s balance${line.since ? ` since ${formatShortDate(line.since, today)}` : ''}.`
-        : null,
+    interestNote: line?.tone === 'earning' ? estimateText(line.since, today) : null,
     // Savings only: its rate and when it's paid
     interest: savings
       ? {

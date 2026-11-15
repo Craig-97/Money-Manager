@@ -1,7 +1,8 @@
 import { Bell, Pencil, Trash2 } from 'lucide-react';
 import { cn } from '~/lib/cn';
+import { Note, noteColor, noteHeading } from '~/lib/notes';
 import { NotesBoard } from '../../../hooks';
-import { Note, noteColor, noteDateText, noteFoot, notePreview } from '../../../notesModel';
+import { noteDateText, noteFoot } from '../../../notesModel';
 
 const noteButton =
   'inline-flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full text-muted transition-colors hover:bg-surface hover:text-text';
@@ -12,7 +13,7 @@ const noteButton =
  */
 export const NoteCard = ({ note, board }: { note: Note; board: NotesBoard }) => {
   const color = noteColor(note.color);
-  const preview = notePreview(note.body);
+  const preview = noteHeading(note.body);
   const date = noteDateText(note, board.today);
 
   return (

@@ -1,6 +1,12 @@
 import { Check, Ellipsis, Landmark, PenLine, Percent, RefreshCw, Trash } from 'lucide-react';
-import { IconButton } from '~/components/ui/IconButton';
-import { Menu, MenuContent, MenuItem, MenuSeparator, MenuTrigger } from '~/components/ui/Menu';
+import {
+  IconButton,
+  Menu,
+  MenuContent,
+  MenuItem,
+  MenuSeparator,
+  MenuTrigger
+} from '~/components/ui';
 import { Account, isSpending } from '~/lib/accounts';
 import { useAccountDialogStore } from '~/state/accountDialog';
 import { useAccountQuickStore } from '~/state/accountQuick';

@@ -3,7 +3,8 @@ import { useSearchParams } from 'react-router';
 import { useReminderActions } from '~/hooks/useReminderActions';
 import { useReminderOpen } from '~/hooks/useReminderOpen';
 import { useReminders } from '~/hooks/useReminders';
-import { filterReminders, Reminder, ReminderFilter } from '~/lib/reminders';
+import { fromTimingChoice, USUAL_TIMING } from '~/lib/payments';
+import { filterReminders, Reminder, ReminderFilter, timingOf } from '~/lib/reminders';
 import { useNoteDialogStore } from '~/state/noteDialog';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
 import { groupByMonth, RemindersTab } from '../remindersModel';
@@ -53,17 +54,13 @@ export const useRemindersPage = () => {
     }
     if (!payment || (reminder.kind !== 'due' && reminder.kind !== 'renewal')) return null;
     const which = reminder.kind === 'due' ? 'dueReminder' : 'renewalReminder';
-    const timing =
-      which === 'renewalReminder' && payment.kind === 'recurring'
-        ? payment.renewalReminder
-        : payment.dueReminder;
-    const on = !timing.off;
+    const on = !timingOf(reminder)?.off;
     return {
       on,
       run: () =>
         void actions.changeTiming(payment, {
           which,
-          timing: on ? { off: true, days: null } : { off: false, days: null }
+          timing: on ? fromTimingChoice('off') : USUAL_TIMING
         })
     };
   };

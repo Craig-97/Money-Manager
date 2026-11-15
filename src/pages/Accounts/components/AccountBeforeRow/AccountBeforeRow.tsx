@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { AlertTriangle, ChevronDown } from 'lucide-react';
-import { DateBox } from '~/components/ui/DateBox';
-import { AccountBeforePayday, accountLetter, goesBelowZero } from '~/lib/accounts';
+import { AccountLetter } from '~/components/accounts';
+import { DateBox } from '~/components/ui';
+import { AccountBeforePayday, goesBelowZero } from '~/lib/accounts';
 import { cn } from '~/lib/cn';
+import { formatShortDate } from '~/lib/dates';
 import { formatBalance, formatMoney, formatPayment } from '~/lib/format';
-import { categoryLabel, formatShortDate, FREQUENCY_LABELS } from '~/lib/payments';
+import { categoryLabel, FREQUENCY_LABELS } from '~/lib/payments';
 import { PaidIntoTag } from '../PaidIntoTag';
 
 interface AccountBeforeRowProps {
@@ -66,13 +68,7 @@ export const AccountBeforeRow = ({
   // An overdrawn balance is red, as Left is when it's below £0
   const balanceClasses = cn('num font-extrabold whitespace-nowrap', overdrawn && 'text-expense');
   const leftClasses = cn('num font-extrabold whitespace-nowrap', row.left < 0 && 'text-expense');
-  const letter = (
-    <span
-      aria-hidden="true"
-      className="inline-flex size-[38px] shrink-0 items-center justify-center rounded-xl border border-border bg-surface-2 text-sm font-extrabold">
-      {accountLetter(account)}
-    </span>
-  );
+  const letter = <AccountLetter account={account} />;
   const name = (
     <span className="flex min-w-0 flex-wrap items-center gap-2">
       <span className="text-base font-extrabold [overflow-wrap:anywhere]">{account.name}</span>
@@ -214,80 +210,75 @@ export const AccountBeforeRow = ({
                 </span>
               </p>
             ) : null}
-            {row.movements.length || row.onPayday.length ? (
-              <ul className="flex flex-col">
-                {row.movements.map(item => (
-                  <li
-                    key={item.key}
-                    className={cn(
-                      'flex items-center',
-                      across ? 'min-h-16 gap-3.5 py-1.5' : 'min-h-[60px] gap-3 py-1.5'
-                    )}>
-                    <DateBox date={item.date} top="weekday" size={across ? 'md' : 'sm'} />
-                    <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                      <span
-                        className={cn(
-                          'font-bold [overflow-wrap:anywhere]',
-                          across ? 'text-[15px]' : 'text-sm'
-                        )}>
-                        {item.payment.name}
-                      </span>
-                      <span className="text-xs leading-[1.35] font-semibold text-muted">
-                        {detailsOf(item)}
-                      </span>
-                    </span>
+            <ul className="flex flex-col">
+              {row.movements.map(item => (
+                <li
+                  key={item.key}
+                  className={cn(
+                    'flex items-center',
+                    across ? 'min-h-16 gap-3.5 py-1.5' : 'min-h-[60px] gap-3 py-1.5'
+                  )}>
+                  <DateBox date={item.date} top="weekday" size={across ? 'md' : 'sm'} />
+                  <span className="flex min-w-0 flex-1 flex-col gap-0.5">
                     <span
                       className={cn(
-                        'shrink-0 num font-extrabold whitespace-nowrap',
-                        across ? 'w-[130px] text-right text-[15px]' : 'text-sm',
-                        item.amount < 0 ? 'text-expense' : 'text-income'
+                        'font-bold [overflow-wrap:anywhere]',
+                        across ? 'text-[15px]' : 'text-sm'
+                      )}>
+                      {item.payment.name}
+                    </span>
+                    <span className="text-xs leading-[1.35] font-semibold text-muted">
+                      {detailsOf(item)}
+                    </span>
+                  </span>
+                  <span
+                    className={cn(
+                      'shrink-0 num font-extrabold whitespace-nowrap',
+                      across ? 'w-[130px] text-right text-[15px]' : 'text-sm',
+                      item.amount < 0 ? 'text-expense' : 'text-income'
+                    )}>
+                    {formatPayment(item.amount)}
+                  </span>
+                  {across ? <span aria-hidden="true" className="w-8 shrink-0" /> : null}
+                </li>
+              ))}
+              {row.onPayday.map(item => (
+                <li
+                  key={item.key}
+                  className={cn(
+                    'mt-1.5 flex items-center border-t border-dashed border-border-strong pt-3',
+                    across ? 'gap-3.5' : 'gap-3'
+                  )}>
+                  <DateBox date={item.date} top="weekday" accent size={across ? 'md' : 'sm'} />
+                  <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                    <span
+                      className={cn(
+                        'font-bold [overflow-wrap:anywhere]',
+                        across ? 'text-[15px]' : 'text-sm'
+                      )}>
+                      {item.payment.name}
+                    </span>
+                    <span className="text-xs leading-[1.35] font-semibold text-muted">
+                      {detailsOf(item)}
+                    </span>
+                  </span>
+                  <span
+                    className={cn('flex shrink-0 flex-col items-end gap-1', across && 'w-[130px]')}>
+                    <span
+                      className={cn(
+                        'num font-extrabold whitespace-nowrap text-muted',
+                        across ? 'text-[15px]' : 'text-sm'
                       )}>
                       {formatPayment(item.amount)}
                     </span>
-                    {across ? <span aria-hidden="true" className="w-8 shrink-0" /> : null}
-                  </li>
-                ))}
-                {row.onPayday.map(item => (
-                  <li
-                    key={item.key}
-                    className={cn(
-                      'mt-1.5 flex items-center border-t border-dashed border-border-strong pt-3',
-                      across ? 'gap-3.5' : 'gap-3'
-                    )}>
-                    <DateBox date={item.date} top="weekday" accent size={across ? 'md' : 'sm'} />
-                    <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                      <span
-                        className={cn(
-                          'font-bold [overflow-wrap:anywhere]',
-                          across ? 'text-[15px]' : 'text-sm'
-                        )}>
-                        {item.payment.name}
-                      </span>
-                      <span className="text-xs leading-[1.35] font-semibold text-muted">
-                        {detailsOf(item)}
-                      </span>
+                    <span className="inline-flex h-5 items-center rounded-full border border-border bg-surface-2 px-2 text-[10px] font-bold whitespace-nowrap text-muted">
+                      Next cycle
                     </span>
-                    <span
-                      className={cn(
-                        'flex shrink-0 flex-col items-end gap-1',
-                        across && 'w-[130px]'
-                      )}>
-                      <span
-                        className={cn(
-                          'num font-extrabold whitespace-nowrap text-muted',
-                          across ? 'text-[15px]' : 'text-sm'
-                        )}>
-                        {formatPayment(item.amount)}
-                      </span>
-                      <span className="inline-flex h-5 items-center rounded-full border border-border bg-surface-2 px-2 text-[10px] font-bold whitespace-nowrap text-muted">
-                        Next cycle
-                      </span>
-                    </span>
-                    {across ? <span aria-hidden="true" className="w-8 shrink-0" /> : null}
-                  </li>
-                ))}
-              </ul>
-            ) : null}
+                  </span>
+                  {across ? <span aria-hidden="true" className="w-8 shrink-0" /> : null}
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       )}

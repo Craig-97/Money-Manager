@@ -2,9 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { screen } from '@testing-library/react';
 import { useAuthStore } from '~/state/auth';
 import { createFakeApi, DEFAULT_USER, VALID_RESET_TOKEN } from '~/test/fakeApi';
+import { findPageHeading } from '~/test/queries';
 import { renderApp } from '~/test/renderApp';
-
-const findPageHeading = (name: string) => screen.findByRole('heading', { level: 1, name });
 
 const resetRoute = (token = VALID_RESET_TOKEN) => `/reset-password?token=${token}`;
 
@@ -62,9 +61,7 @@ describe('reset password', () => {
     await user.type(screen.getByLabelText('New password'), 'nonumbers');
     await user.click(screen.getByRole('button', { name: 'Update password' }));
 
-    expect(
-      await screen.findByText('Use at least 8 characters including a number')
-    ).toBeInTheDocument();
+    expect(await screen.findByText('Password must contain a number')).toBeInTheDocument();
     expect(api.callsTo('ResetPassword')).toHaveLength(0);
   });
 });

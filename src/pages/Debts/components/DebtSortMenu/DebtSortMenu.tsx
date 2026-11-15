@@ -1,12 +1,12 @@
 import { ListFilter } from 'lucide-react';
-import { Button } from '~/components/ui/Button';
 import {
+  Button,
   Menu,
   MenuContent,
   MenuRadioGroup,
   MenuRadioItem,
   MenuTrigger
-} from '~/components/ui/Menu';
+} from '~/components/ui';
 import { DEBT_SORTS, DebtSort, sortLabelOf } from '../../debtsModel';
 
 interface DebtSortMenuProps {

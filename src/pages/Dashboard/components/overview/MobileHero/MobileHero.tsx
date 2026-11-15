@@ -1,8 +1,8 @@
 import { Calendar, Check, PenLine, Plus, TriangleAlert, X } from 'lucide-react';
-import { Button } from '~/components/ui/Button';
+import { Button, HeroTile } from '~/components/ui';
 import { cn } from '~/lib/cn';
+import { formatShortDate } from '~/lib/dates';
 import { formatBalance, formatMoney, formatPayment, splitPence } from '~/lib/format';
-import { formatShortDate } from '~/lib/payments';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
 import { Dashboard } from '../../../hooks';
 import { PaydayOverrideDialog } from '../../payday/PaydayOverrideDialog';
@@ -16,6 +16,7 @@ export const MobileHero = ({ dashboard }: { dashboard: Dashboard }) => {
   const {
     summary,
     cycle,
+    today,
     days,
     isEmpty,
     bankBalance,
@@ -26,31 +27,25 @@ export const MobileHero = ({ dashboard }: { dashboard: Dashboard }) => {
   const [whole, pence] = splitPence(summary.freeToSpend);
 
   return (
-    <article
-      aria-label="Free to spend"
-      className="relative flex flex-col gap-4 overflow-hidden rounded-3xl bg-hero-bg p-[22px] text-hero-text">
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -top-[110px] -right-[90px] size-[220px] rounded-full bg-hero-chip"
-      />
+    <HeroTile aria-label="Free to spend" size="md">
       <div className="relative flex items-center justify-between gap-2">
         <h2 className="text-[13px] font-bold text-hero-muted">Free to spend</h2>
         {override.canChange ? (
           <button
             type="button"
-            aria-label={`${summary.daysToPayday} days, ${formatShortDate(cycle.end)}. Change this payday`}
+            aria-label={`${summary.daysToPayday} days, ${formatShortDate(cycle.end, today)}. Change this payday`}
             onClick={() => override.setOpen(true)}
             className={cn(
               'inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-full px-3 text-xs font-bold',
               override.moved ? 'bg-hero-text text-hero-ink' : 'bg-hero-chip'
             )}>
-            {summary.daysToPayday} days · {formatShortDate(cycle.end)}
+            {summary.daysToPayday} days · {formatShortDate(cycle.end, today)}
             <PenLine size={13} strokeWidth={2.25} aria-hidden="true" />
           </button>
         ) : (
           <span className="inline-flex items-center gap-1.5 rounded-full bg-hero-chip px-[11px] py-[7px] text-xs font-bold">
             <Calendar size={13} strokeWidth={2.25} aria-hidden="true" />
-            {summary.daysToPayday} days · {formatShortDate(cycle.end)}
+            {summary.daysToPayday} days · {formatShortDate(cycle.end, today)}
           </span>
         )}
       </div>
@@ -161,16 +156,16 @@ export const MobileHero = ({ dashboard }: { dashboard: Dashboard }) => {
       </div>
 
       <div className="relative flex flex-col gap-1.5 rounded-[18px] bg-black/24 px-3.5 pt-3 pb-2.5">
-        <CycleBar days={days} tone="hero" className="-mt-2.5 -mb-2" />
+        <CycleBar days={days} today={today} tone="hero" className="-mt-2.5 -mb-2" />
         <div className="flex justify-between text-[11px] font-semibold text-hero-muted">
-          <span>Paid {formatShortDate(cycle.start)}</span>
+          <span>Paid {formatShortDate(cycle.start, today)}</span>
           <span>
-            Payday {formatShortDate(cycle.end)}
-            {override.moved ? ` · usual ${formatShortDate(override.usual)}` : ''}
+            Payday {formatShortDate(cycle.end, today)}
+            {override.moved ? ` · usual ${formatShortDate(override.usual, today)}` : ''}
           </span>
         </div>
       </div>
       {override.canChange ? <PaydayOverrideDialog override={override} /> : null}
-    </article>
+    </HeroTile>
   );
 };

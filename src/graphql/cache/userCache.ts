@@ -1,5 +1,5 @@
 import { ApolloCache } from '@apollo/client';
-import { BudgetDocument, BudgetFieldsFragment } from '~/graphql/generated';
+import { BudgetDocument, BudgetFieldsFragment } from '../generated';
 
 /*
  * Links a new budget to the signed-in user, which takes them out of setup: the route guards read

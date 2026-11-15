@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 
 interface ScrollShade {
   // Scrolled down from the top, so the header should shade what passes under it
@@ -17,7 +17,8 @@ const NONE: ScrollShade = { top: false, bottom: false };
 export const useScrollShade = () => {
   const [shade, setShade] = useState(NONE);
 
-  const ref = useCallback((el: HTMLElement | null) => {
+  // The React Compiler keeps this the same function between renders
+  const ref = (el: HTMLElement | null) => {
     if (!el) return;
     const measure = () => {
       const top = el.scrollTop > 1;
@@ -49,7 +50,7 @@ export const useScrollShade = () => {
       resize.disconnect();
       added.disconnect();
     };
-  }, []);
+  };
 
   return { ref, ...shade };
 };

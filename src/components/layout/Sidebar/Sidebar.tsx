@@ -1,11 +1,10 @@
 import { ChevronLeft } from 'lucide-react';
 import { NavLink } from 'react-router';
-import { BrandMark } from '~/components/ui/BrandMark';
-import { Tooltip } from '~/components/ui/Tooltip';
 import { ROUTES } from '~/constants';
 import { useEscapeKey } from '~/hooks/useEscapeKey';
 import { useSidebarMode } from '~/hooks/useSidebarMode';
 import { cn } from '~/lib/cn';
+import { BrandMark, Tooltip } from '../../ui';
 import { navSection } from '../navItems';
 import { SidebarNavLink } from './SidebarNavLink';
 import { SidebarThemeSwitch } from './SidebarThemeSwitch';

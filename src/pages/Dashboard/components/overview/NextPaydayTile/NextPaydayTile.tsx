@@ -1,11 +1,9 @@
 import { ArrowRight, PenLine, Repeat } from 'lucide-react';
-import { Button } from '~/components/ui/Button';
-import { IconButton } from '~/components/ui/IconButton';
-import { Tile } from '~/components/ui/Tile';
+import { Button, IconButton, Tile } from '~/components/ui';
 import { cn } from '~/lib/cn';
+import { formatShortDate } from '~/lib/dates';
 import { formatMoney, formatPayment, MINUS } from '~/lib/format';
 import { paydayText } from '~/lib/payday';
-import { formatShortDate } from '~/lib/payments';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
 import { Dashboard } from '../../../hooks';
 import { PaydayOverrideDialog } from '../../payday/PaydayOverrideDialog';
@@ -16,6 +14,7 @@ import { Figure } from '../Figure';
 export const NextPaydayTile = ({ dashboard }: { dashboard: Dashboard }) => {
   const {
     cycle,
+    today,
     summary,
     days,
     isEmpty,
@@ -37,7 +36,7 @@ export const NextPaydayTile = ({ dashboard }: { dashboard: Dashboard }) => {
                 ? 'bg-accent font-extrabold text-on-accent'
                 : 'bg-accent-soft text-accent-text'
             )}>
-            {formatShortDate(cycle.end)}
+            {formatShortDate(cycle.end, today)}
           </span>
           {override.canChange ? (
             <IconButton aria-label="Change this payday" onClick={() => override.setOpen(true)}>
@@ -59,16 +58,16 @@ export const NextPaydayTile = ({ dashboard }: { dashboard: Dashboard }) => {
           {override.moved ? (
             <span className="inline-flex h-7 items-center gap-1.5 rounded-full bg-accent-soft px-2.5 text-xs font-bold whitespace-nowrap text-accent-text">
               <ArrowRight size={13} strokeWidth={2.25} aria-hidden="true" />
-              Moved from {formatShortDate(override.usual)}
+              Moved from {formatShortDate(override.usual, today)}
             </span>
           ) : null}
           <p className="text-[13px] font-medium text-muted">{paydayText(payday)}</p>
         </div>
       </div>
       <div className="flex flex-col gap-2">
-        <CycleBar days={days} className="-my-[9px]" />
+        <CycleBar days={days} today={today} className="-my-[9px]" />
         <div className="flex flex-wrap justify-between gap-2 text-xs font-semibold text-muted">
-          <span>Paid {formatShortDate(cycle.start)}</span>
+          <span>Paid {formatShortDate(cycle.start, today)}</span>
           <span className="inline-flex items-center gap-3">
             <span className="inline-flex items-center gap-1.5">
               <span aria-hidden="true" className="size-2 rounded-full bg-expense" />
@@ -88,11 +87,11 @@ export const NextPaydayTile = ({ dashboard }: { dashboard: Dashboard }) => {
           </span>
           {override.moved ? (
             <span className="inline-flex gap-2">
-              <span className="font-bold text-text">{formatShortDate(cycle.end)}</span>
-              <span className="text-faint">Usual {formatShortDate(override.usual)}</span>
+              <span className="font-bold text-text">{formatShortDate(cycle.end, today)}</span>
+              <span className="text-faint">Usual {formatShortDate(override.usual, today)}</span>
             </span>
           ) : (
-            <span>{formatShortDate(cycle.end)}</span>
+            <span>{formatShortDate(cycle.end, today)}</span>
           )}
         </div>
       </div>

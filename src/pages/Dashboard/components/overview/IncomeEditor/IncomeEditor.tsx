@@ -1,5 +1,5 @@
 import { Check, X } from 'lucide-react';
-import { IconButton } from '~/components/ui/IconButton';
+import { IconButton } from '~/components/ui';
 import { MoneyEditor } from '../../../hooks';
 
 /* The monthly income field while it's being edited: Enter saves, Escape cancels */

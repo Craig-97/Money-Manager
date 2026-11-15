@@ -1,8 +1,8 @@
 import { useBankHolidays } from '~/hooks/useBankHolidays';
 import { cn } from '~/lib/cn';
 import { addDays, startOfToday } from '~/lib/dates';
-import { formatMoney } from '~/lib/format';
-import { getNextPaydays } from '~/lib/payday';
+import { formatMoney, plural } from '~/lib/format';
+import { getNextPaydays, toPaydayConfig } from '~/lib/payday';
 import {
   AccountsStep,
   ComingUpStep,
@@ -22,10 +22,8 @@ import { useSetup, useSetupDesktop } from './hooks';
 import {
   accountsErrors,
   COMING_UP_STEP,
-  PAY_FREQUENCY_LABELS,
   payErrors,
-  paydayConfig,
-  RULES,
+  payRuleText,
   setupAccounts,
   STEPS,
   summariseFirstCycle
@@ -41,7 +39,7 @@ export const Setup = () => {
 
   const firstCycle = summariseFirstCycle(values, { holidays, today });
   // Paydays after today, so on payday itself the first cycle runs to the next one
-  const nextPaydays = getNextPaydays(paydayConfig(values), {
+  const nextPaydays = getNextPaydays(toPaydayConfig(values), {
     holidays,
     from: addDays(today, 1),
     count: 2
@@ -50,16 +48,14 @@ export const Setup = () => {
   const shownPayErrors = showErrors ? payErrors(values) : {};
 
   const stepSummaries = [
-    `${PAY_FREQUENCY_LABELS[values.frequency]} · ${RULES[values.rule].title.toLowerCase()}`,
+    payRuleText(values),
     values.accounts.length
       ? `${values.accounts.length + 1} accounts`
       : firstCycle.balance > 0
         ? formatMoney(firstCycle.balance)
         : 'Not set yet',
-    `${values.regulars.length} ${values.regulars.length === 1 ? 'payment' : 'payments'}`,
-    values.oneOffs.length
-      ? `${values.oneOffs.length} ${values.oneOffs.length === 1 ? 'payment' : 'payments'}`
-      : 'Optional',
+    plural(values.regulars.length, 'payment'),
+    values.oneOffs.length ? plural(values.oneOffs.length, 'payment') : 'Optional',
     'Check and finish'
   ];
 

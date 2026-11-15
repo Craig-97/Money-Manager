@@ -1,7 +1,13 @@
 import { DebtProgress } from '~/components/debts';
-import { PaymentLetter } from '~/components/payments/PaymentParts';
-import { DebtPayment, monthlyPayment, paidOffShare } from '~/lib/debts';
-import { aprText, clearedText, whenPaid } from '~/lib/debts';
+import { PaymentLetter } from '~/components/payments';
+import {
+  aprText,
+  clearedText,
+  DebtPayment,
+  monthlyPayment,
+  paidOffShare,
+  whenPaid
+} from '~/lib/debts';
 import { formatMoney } from '~/lib/format';
 import { useDebtViewStore } from '~/state/debtView';
 import { Debts } from '../../hooks';
@@ -58,7 +64,7 @@ export const DebtRow = ({ debt, debts }: { debt: DebtPayment; debts: Debts }) =>
         {clearedText(debts.base.clearedIn[debt.id], debts.today)}
       </span>
       <span role="cell" className="flex justify-end">
-        <DebtMenu debt={debt} onDelete={() => void debts.actions.remove([debt])} />
+        <DebtMenu debt={debt} actions={debts.actions} />
       </span>
     </div>
   );

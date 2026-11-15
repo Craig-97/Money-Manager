@@ -13,21 +13,20 @@ import {
   UpdateOneOffPaymentDocument,
   UpdateRecurringPaymentDocument
 } from '~/graphql/generated';
-import { addDays, formatShortDay, parseIsoDate, toApiDate } from '~/lib/dates';
-import { getApiErrorMessage, getErrorCode } from '~/lib/errors';
+import { addDays, formatShortDate, formatShortDay, parseIsoDate, toIsoDate } from '~/lib/dates';
+import { getErrorCode } from '~/lib/errors';
 import { formatMoneyInput, parseMoney } from '~/lib/format';
 import {
   addYear,
   categoriesFor,
   DateMove,
   daysBeforeText,
-  formatShortDate,
   fromTimingChoice,
   goesOutOn,
   movedHow,
+  nextOccurrence,
   NON_WORKING_DAY_LABELS,
   NON_WORKING_DAYS,
-  nextOccurrence,
   nonWorkingReason,
   occurrencesBetween,
   Payment,
@@ -41,7 +40,7 @@ import {
   timingOptions,
   toTimingChoice
 } from '~/lib/payments';
-import { showToast } from '~/state/toast';
+import { showErrorToast, showToast } from '~/state/toast';
 import { paidOffRow, parseApr } from './debtFields';
 import { accountChoices, FormAccount } from './paymentAccounts';
 
@@ -91,7 +90,7 @@ const UNTOUCHED: Record<TouchedField, boolean> = {
   started: false
 };
 
-const iso = (date: Date | null) => (date ? toApiDate(date) : '');
+const iso = (date: Date | null) => (date ? toIsoDate(date) : '');
 
 const initialValues = ({
   kind,
@@ -235,7 +234,7 @@ const sameSchedule = (values: PaymentFormValues, before: PaymentFormValues) =>
   values.first === before.first &&
   sameEnding(values, before);
 
-export interface SummaryRow {
+interface SummaryRow {
   label: string;
   value: string;
 }
@@ -329,7 +328,7 @@ const withPaidOff = (
  * The line under the Ends choice, only when it says something the choice doesn't: a yearly payment
  * that keeps going renews with each payment
  */
-export const endsHint = (values: PaymentFormValues, today: Date) => {
+const endsHint = (values: PaymentFormValues, today: Date) => {
   const { yearly, ends } = recurringEnding(values);
   if (!yearly || ends !== 'keep') return null;
   const first = parseIsoDate(values.first);
@@ -743,7 +742,7 @@ export const usePaymentForm = ({
       if (code === 'PAYMENT_EXISTS' || code === 'RECURRING_PAYMENT_EXISTS') {
         setNameTaken(`You already have a payment called ${name}`);
       } else {
-        showToast({ message: getApiErrorMessage(error, "Couldn't save that payment. Try again.") });
+        showErrorToast(error, { fallback: "Couldn't save that payment. Try again." });
       }
     } finally {
       setSaving(false);

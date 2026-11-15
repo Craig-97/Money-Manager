@@ -1,8 +1,7 @@
 import { Plus } from 'lucide-react';
-import { Button } from '~/components/ui/Button';
-import { tileLift } from '~/components/ui/Tile';
+import { Button, tileLift } from '~/components/ui';
 import { cn } from '~/lib/cn';
-import { formatMoney } from '~/lib/format';
+import { formatMoney, plural } from '~/lib/format';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
 import { Debts } from '../../hooks';
 import { DebtRow, debtRowClasses } from '../DebtRow';
@@ -12,7 +11,7 @@ import { DebtSortMenu } from '../DebtSortMenu';
 export const DebtsTable = ({ debts }: { debts: Debts }) => {
   const { sorted, sort, setSort, totals } = debts;
   const openAddDebt = usePaymentDialogStore(s => s.openAddDebt);
-  const count = `${sorted.length} ${sorted.length === 1 ? 'debt' : 'debts'}`;
+  const count = plural(sorted.length, 'debt');
 
   return (
     <article

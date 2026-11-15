@@ -1,7 +1,5 @@
-import { Trash } from 'lucide-react';
-import { FormBody, usePaymentForm } from '~/components/payments/PaymentDialog';
-import { Button } from '~/components/ui/Button';
-import { Modal } from '~/components/ui/Modal';
+import { FormBody, usePaymentForm } from '~/components/payments';
+import { Modal, ModalActions } from '~/components/ui';
 import { DEFAULT_REMINDER_SETTINGS } from '~/lib/payments';
 import { SetupState } from '../../../hooks';
 import { setupAccounts } from '../../../setupModel';
@@ -43,24 +41,13 @@ export const SetupPaymentDialog = ({ setup, today }: { setup: SetupState; today:
       title={payment ? `Edit ${kindName}` : `Add ${kindName}`}
       initialFocusId={payment || dialog.preset ? 'payment-amount' : 'payment-name'}
       footer={
-        <>
-          {payment ? (
-            <Button
-              variant="dangerGhost"
-              onClick={() => dialog.remove(payment.id)}
-              className="max-md:-ml-2">
-              <Trash size={16} aria-hidden="true" />
-              Remove
-            </Button>
-          ) : null}
-          <span className="flex-1" />
-          <Button variant="ghost" onClick={dialog.close} className="max-md:h-[52px]">
-            Cancel
-          </Button>
-          <Button variant="accent" onClick={form.save} className="max-md:h-[52px]">
-            {payment ? 'Save' : 'Add payment'}
-          </Button>
-        </>
+        <ModalActions
+          remove={
+            payment ? { label: 'Remove', onClick: () => dialog.remove(payment.id) } : undefined
+          }
+          cancel={{ onClick: dialog.close }}
+          confirm={{ label: payment ? 'Save' : 'Add payment', onClick: form.save }}
+        />
       }>
       <FormBody form={form} kind={target.kind} />
     </Modal>

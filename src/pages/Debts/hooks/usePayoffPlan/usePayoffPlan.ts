@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { PayoffStrategy } from '~/lib/debts';
+import { applyChange, PayoffStrategy } from '~/lib/debts';
 import { formatMoney } from '~/lib/format';
-import { applyChange, planFigures } from '../../debtsModel';
+import { planFigures } from '../../debtsModel';
 import { Debts } from '../useDebts';
 
 /*

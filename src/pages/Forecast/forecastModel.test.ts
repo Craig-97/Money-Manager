@@ -10,6 +10,7 @@ import {
   spendHelper,
   spendLimit
 } from './forecastModel';
+import { TODAY } from '~/test/dates';
 
 describe('project', () => {
   // The design's example: £9,165 free now, £3,600 income, £770 recurring, spending £1,000
@@ -74,7 +75,7 @@ describe('spend text', () => {
 
 describe('monthRows', () => {
   const rows = monthRows({
-    today: new Date(2026, 9, 2),
+    today: TODAY,
     start: 9165,
     net: 2600,
     income: 3600,
@@ -105,7 +106,7 @@ describe('monthRows', () => {
 
   it('flags a payday the user moved, apart from bank holidays', () => {
     const moved = monthRows({
-      today: new Date(2026, 9, 2),
+      today: TODAY,
       start: 9165,
       net: 2600,
       income: 3600,

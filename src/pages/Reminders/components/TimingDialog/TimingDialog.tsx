@@ -1,7 +1,5 @@
 import { useState } from 'react';
-import { Button } from '~/components/ui/Button';
-import { ChipGroup } from '~/components/ui/ChipGroup';
-import { Modal } from '~/components/ui/Modal';
+import { ChipGroup, Modal, ModalActions } from '~/components/ui';
 import {
   fromTimingChoice,
   PAYMENT_REMINDER_DAYS,
@@ -10,7 +8,7 @@ import {
   timingOptions,
   toTimingChoice
 } from '~/lib/payments';
-import { Reminder } from '~/lib/reminders';
+import { Reminder, timingOf } from '~/lib/reminders';
 import { RemindersPage } from '../../hooks';
 
 /*
@@ -27,16 +25,8 @@ export const TimingDialog = ({ page }: { page: RemindersPage }) => {
   // A new opening starts from the payment's timing (React's "reset state on a prop change" pattern)
   if (changing && changing !== shown) {
     setShown(changing);
-    const payment = changing.payment;
-    if (payment) {
-      setChoice(
-        toTimingChoice(
-          changing.kind === 'renewal' && payment.kind === 'recurring'
-            ? payment.renewalReminder
-            : payment.dueReminder
-        )
-      );
-    }
+    const timing = timingOf(changing);
+    if (timing) setChoice(toTimingChoice(timing));
   }
 
   const reminder = changing ?? shown;
@@ -63,19 +53,10 @@ export const TimingDialog = ({ page }: { page: RemindersPage }) => {
       onOpenChange={open => (open ? undefined : page.stopChanging())}
       title={payment ? `Remind me about ${payment.name}` : 'Change when'}
       footer={
-        <>
-          <span className="flex-1" />
-          <Button variant="ghost" onClick={page.stopChanging} className="max-md:h-[52px]">
-            Cancel
-          </Button>
-          <Button
-            variant="accent"
-            onClick={() => void save()}
-            loading={saving}
-            className="max-md:h-[52px]">
-            Save
-          </Button>
-        </>
+        <ModalActions
+          cancel={{ onClick: page.stopChanging }}
+          confirm={{ label: 'Save', onClick: () => void save(), loading: saving }}
+        />
       }>
       <div>
         <p id="timing-choice" className="mb-2 text-[13px] font-bold text-muted">

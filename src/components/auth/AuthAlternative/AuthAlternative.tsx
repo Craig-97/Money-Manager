@@ -1,8 +1,7 @@
 import { ComponentType } from 'react';
 import { PageName } from '~/app/routes/pageModules';
-import { IconProps } from '~/components/icons';
-import { buttonVariants } from '~/components/ui/Button';
-import { PageLink } from '~/components/ui/PageLink';
+import { IconProps } from '../../icons';
+import { buttonVariants, PageLink } from '../../ui';
 
 interface AuthAlternativeProps {
   icon: ComponentType<IconProps>;

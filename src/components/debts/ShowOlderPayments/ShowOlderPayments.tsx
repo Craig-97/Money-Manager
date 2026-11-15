@@ -1,5 +1,5 @@
 import { ChevronDown } from 'lucide-react';
-import { Button } from '~/components/ui/Button';
+import { Button } from '../../ui';
 
 interface ShowOlderPaymentsProps {
   onClick: () => void;

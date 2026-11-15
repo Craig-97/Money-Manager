@@ -1,7 +1,7 @@
 import { PaydayFieldsFragment } from '~/graphql/generated';
-import { useBankHolidays } from '~/hooks/useBankHolidays';
 import { startOfToday } from '~/lib/dates';
 import { getPayCycle } from '~/lib/payday';
+import { useBankHolidays } from '../useBankHolidays';
 
 // Used when a budget has no payday saved: paid on the last working day of the month
 const DEFAULT_PAYDAY = { frequency: 'MONTHLY', type: 'LAST_DAY' } as const;

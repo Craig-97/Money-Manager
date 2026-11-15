@@ -2,11 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { DebtHistoryQuery } from '~/graphql/generated';
 import { DebtPayment } from './debts';
 import { byMonth, debtHistory, dueInText } from './history';
+import { apiDate, TODAY } from '~/test/dates';
 
 type HistoryRecord = NonNullable<DebtHistoryQuery['recurringPayment']>['history'][number];
-
-const apiDate = (iso: string) => String(Date.parse(`${iso}T00:00:00Z`));
-const today = new Date(2026, 9, 2);
 
 const card: DebtPayment = {
   kind: 'recurring',
@@ -69,7 +67,7 @@ const record = (
 
 describe('debtHistory', () => {
   it('leads with the next payment, estimating what it will leave', () => {
-    const [next] = debtHistory(card, { records: [], today });
+    const [next] = debtHistory(card, { records: [], today: TODAY });
     // £2,340 + a month's interest at 24.9% (£48.56) − £150
     expect(next).toMatchObject({
       kind: 'due',
@@ -105,7 +103,7 @@ describe('debtHistory', () => {
           }
         })
       ],
-      today
+      today: TODAY
     }).slice(1);
 
     expect(entries.map(entry => [entry.label, entry.detail, entry.amount, entry.undoable])).toEqual(
@@ -120,16 +118,16 @@ describe('debtHistory', () => {
 
   it("has no next payment once it's paid off", () => {
     expect(
-      debtHistory({ ...card, debt: { ...card.debt, balance: 0 } }, { records: [], today })
+      debtHistory({ ...card, debt: { ...card.debt, balance: 0 } }, { records: [], today: TODAY })
     ).toEqual([]);
   });
 });
 
 describe('dueInText', () => {
   it('counts the days to go', () => {
-    expect(dueInText(today, today)).toBe('Due today');
-    expect(dueInText(new Date(2026, 9, 3), today)).toBe('Due tomorrow');
-    expect(dueInText(new Date(2026, 8, 30), today)).toBe('Overdue');
+    expect(dueInText(TODAY, TODAY)).toBe('Due today');
+    expect(dueInText(new Date(2026, 9, 3), TODAY)).toBe('Due tomorrow');
+    expect(dueInText(new Date(2026, 8, 30), TODAY)).toBe('Overdue');
   });
 });
 
@@ -141,7 +139,7 @@ describe('byMonth', () => {
         record('PAID', { date: '2026-09-01', balanceChange: -150, debt: null }),
         record('PAID', { date: '2026-08-15', balanceChange: -150, debt: null })
       ],
-      today
+      today: TODAY
     });
     expect(byMonth(entries).map(month => [month.label, month.entries.length])).toEqual([
       ['October 2026', 1],

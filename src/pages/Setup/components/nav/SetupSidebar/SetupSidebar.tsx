@@ -1,6 +1,6 @@
 import { Check } from 'lucide-react';
-import { SidebarUserChip } from '~/components/layout/Sidebar/SidebarUserChip';
-import { BrandMark } from '~/components/ui/BrandMark';
+import { SidebarUserChip } from '~/components/layout';
+import { BrandMark } from '~/components/ui';
 import { cn } from '~/lib/cn';
 import { SetupState } from '../../../hooks';
 import { STEPS } from '../../../setupModel';

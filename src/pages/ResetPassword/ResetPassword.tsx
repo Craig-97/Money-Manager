@@ -1,12 +1,14 @@
 import { useWatch } from 'react-hook-form';
-import { authInputBoxClasses } from '~/components/auth/authClasses';
-import { AuthField, authErrorId } from '~/components/auth/AuthField';
-import { AuthHeading } from '~/components/auth/AuthHeading';
-import { AuthLayout } from '~/components/auth/AuthLayout';
-import { AuthResult } from '~/components/auth/AuthResult';
-import { PasswordRules } from '~/components/auth/PasswordRules';
-import { FieldError } from '~/components/form/FieldError';
-import { PasswordInput } from '~/components/form/PasswordInput';
+import {
+  authErrorId,
+  AuthField,
+  AuthHeading,
+  authInputBoxClasses,
+  AuthLayout,
+  AuthResult,
+  PasswordRules
+} from '~/components/auth';
+import { describedBy, FieldError, PasswordInput } from '~/components/form';
 import {
   ArrowRightIcon,
   BrokenLinkIcon,
@@ -14,9 +16,7 @@ import {
   KeyIcon,
   ShieldCheckIcon
 } from '~/components/icons';
-import { Button, buttonVariants } from '~/components/ui/Button';
-import { PageLink } from '~/components/ui/PageLink';
-import { Spinner } from '~/components/ui/Spinner';
+import { Button, buttonVariants, PageLink, Spinner } from '~/components/ui';
 import { ROUTES } from '~/constants';
 import { ResetPasswordPanel } from './components';
 import { useResetPasswordForm, useResetToken } from './hooks';
@@ -59,9 +59,10 @@ export const ResetPassword = () => {
                 placeholder="Create a new password"
                 boxClassName={authInputBoxClasses}
                 invalid={!!errors.password}
-                aria-describedby={
-                  errors.password ? `password-rules ${authErrorId('password')}` : 'password-rules'
-                }
+                aria-describedby={describedBy(
+                  'password-rules',
+                  !!errors.password && authErrorId('password')
+                )}
                 {...register('password')}
               />
               <PasswordRules id="password-rules" password={password} invalid={!!errors.password} />

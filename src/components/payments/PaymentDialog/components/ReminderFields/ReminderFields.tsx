@@ -1,6 +1,5 @@
-import { Label } from '~/components/form/Label';
-import { Select } from '~/components/form/Select';
 import { cn } from '~/lib/cn';
+import { Label, Select } from '../../../../form';
 import { PaymentForm } from '../../usePaymentForm';
 
 /* When to be reminded before it's due, and before it renews when it does. Under More options. */

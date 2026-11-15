@@ -8,16 +8,12 @@ import {
   SkipForward,
   Undo2
 } from 'lucide-react';
-import { DebtsIcon } from '~/components/icons';
-import { ActionRow } from '~/components/ui/ActionRow';
-import { ActionRows } from '~/components/ui/ActionRows';
-import { ActionTile } from '~/components/ui/ActionTile';
-import { ActionTiles } from '~/components/ui/ActionTiles';
-import { Modal } from '~/components/ui/Modal';
 import { cn } from '~/lib/cn';
-import { formatMoney } from '~/lib/format';
+import { formatShortDate } from '~/lib/dates';
+import { formatMoney, plural } from '~/lib/format';
 import { noteColor } from '~/lib/notes';
-import { formatShortDate } from '~/lib/payments';
+import { DebtsIcon } from '../../icons';
+import { ActionRow, ActionRows, ActionTile, ActionTiles, Modal } from '../../ui';
 import { PaymentSummary } from '../PaymentParts';
 import { usePaymentSheet } from './usePaymentSheet';
 
@@ -57,7 +53,7 @@ export const PaymentSheet = () => {
         <button
           type="button"
           onClick={sheet.showNotes}
-          aria-label={`${notes.length} ${notes.length === 1 ? 'note' : 'notes'} on ${payment.name}`}
+          aria-label={`${plural(notes.length, 'note')} on ${payment.name}`}
           className={cn(
             'flex w-full cursor-pointer flex-col gap-2 rounded-[18px] border px-4 py-3.5 text-left',
             noteColor(firstNote.color).card
@@ -68,7 +64,7 @@ export const PaymentSheet = () => {
           <span className="flex w-full items-center justify-between text-xs font-bold text-muted">
             <span className="flex items-center gap-1.5">
               <FileText size={13} strokeWidth={2.25} aria-hidden="true" />
-              {notes.length} {notes.length === 1 ? 'note' : 'notes'}
+              {plural(notes.length, 'note')}
             </span>
             <ChevronRight size={15} aria-hidden="true" />
           </span>

@@ -1,11 +1,6 @@
-import { AmountInput } from '~/components/form/AmountInput';
-import { DatePicker } from '~/components/form/DatePicker';
-import { FieldError } from '~/components/form/FieldError';
-import { Label } from '~/components/form/Label';
-import { Select } from '~/components/form/Select';
-import { TextInput } from '~/components/form/TextInput';
-import { MoreOptions } from '~/components/ui/MoreOptions';
 import { Payment } from '~/lib/payments';
+import { AmountInput, DatePicker, FieldError, Label, Select, TextInput } from '../../../../form';
+import { MoreOptions } from '../../../../ui';
 import { categoryOptions, FREQUENCY_OPTIONS } from '../../paymentOptions';
 import { PaymentForm } from '../../usePaymentForm';
 import { DebtFields } from '../DebtFields';

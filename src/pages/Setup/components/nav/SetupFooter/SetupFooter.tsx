@@ -1,5 +1,5 @@
 import { ChevronLeft, CircleAlert } from 'lucide-react';
-import { Button } from '~/components/ui/Button';
+import { Button } from '~/components/ui';
 import { cn } from '~/lib/cn';
 import { SetupState, useSetupDesktop } from '../../../hooks';
 import { isStepValid, LAST_STEP } from '../../../setupModel';

@@ -1,6 +1,6 @@
-import { Tooltip } from '~/components/ui/Tooltip';
 import { cn } from '~/lib/cn';
 import { formatPayment } from '~/lib/format';
+import { Tooltip } from '../../../ui';
 
 interface ApproximatelyEqualProps {
   // The payments counted at their monthly average, negative for money out

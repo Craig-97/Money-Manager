@@ -1,4 +1,4 @@
-import { Skeleton } from '~/components/ui/Skeleton';
+import { Skeleton } from '~/components/ui';
 import { cn } from '~/lib/cn';
 
 const card = 'flex min-w-0 flex-col rounded-3xl border border-border bg-surface';

@@ -1,7 +1,7 @@
 import { Percent } from 'lucide-react';
 import { cn } from '~/lib/cn';
 
-export interface InterestStripLine {
+interface InterestStripLine {
   tone: 'earning' | 'matured';
   // "Pending interest £0.46"
   short: string;

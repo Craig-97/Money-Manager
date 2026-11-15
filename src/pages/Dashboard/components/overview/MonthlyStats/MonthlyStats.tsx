@@ -1,10 +1,8 @@
 import { PenLine, Plus } from 'lucide-react';
-import { ApproximatelyEqual } from '~/components/payments/PaymentParts';
-import { Button } from '~/components/ui/Button';
-import { IconButton } from '~/components/ui/IconButton';
-import { tileLift } from '~/components/ui/Tile';
+import { ApproximatelyEqual } from '~/components/payments';
+import { Button, IconButton, tileLift } from '~/components/ui';
 import { cn } from '~/lib/cn';
-import { formatBalance, formatMoney } from '~/lib/format';
+import { formatBalance, formatMoney, plural } from '~/lib/format';
 import { paidText } from '~/lib/payday';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
 import { Dashboard } from '../../../hooks';
@@ -92,7 +90,7 @@ export const MonthlyStats = ({ dashboard }: { dashboard: Dashboard }) => {
           </>
         ) : (
           <p className="text-[13px] font-medium text-muted">
-            {recurringCount} {recurringCount === 1 ? 'recurring payment' : 'recurring payments'}
+            {plural(recurringCount, 'recurring payment')}
           </p>
         )}
       </div>

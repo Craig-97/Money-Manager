@@ -1,16 +1,12 @@
 import { useState } from 'react';
 import { Bell, Repeat, X } from 'lucide-react';
-import { DatePicker } from '~/components/form/DatePicker';
-import { Select } from '~/components/form/Select';
-import { Button } from '~/components/ui/Button';
-import { ChipGroup } from '~/components/ui/ChipGroup';
-import { IconButton } from '~/components/ui/IconButton';
-import { SegmentedControl } from '~/components/ui/SegmentedControl';
 import { NoteRepeat, PaymentFrequency } from '~/graphql/generated';
 import { cn } from '~/lib/cn';
-import { formatShortDay, toIsoDate } from '~/lib/dates';
+import { formatShortDate, formatShortDay, toIsoDate } from '~/lib/dates';
 import { defaultRemind, NoteDraft, REPEAT_LABELS, reminderHint, remindChoices } from '~/lib/notes';
-import { daysBeforeText, formatShortDate } from '~/lib/payments';
+import { daysBeforeText } from '~/lib/payments';
+import { DatePicker, FieldHint, Select } from '../../../../form';
+import { Button, ChipGroup, IconButton, SegmentedControl } from '../../../../ui';
 import { NoteDraftState } from '../../useNoteDraft';
 
 // Radix's select can't have an empty value, so no payment is this
@@ -237,11 +233,9 @@ export const NotePaymentAndReminder = ({ draft, payments, today }: NotePaymentAn
           ) : null}
 
           {hint ? (
-            <p
-              aria-live="polite"
-              className="-mt-1 ml-1 text-xs leading-[1.4] font-semibold text-muted">
+            <FieldHint live className="-mt-1">
               {hint}
-            </p>
+            </FieldHint>
           ) : null}
         </section>
       ) : (

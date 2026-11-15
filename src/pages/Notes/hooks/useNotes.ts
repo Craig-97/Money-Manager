@@ -4,10 +4,10 @@ import { Budget } from '~/hooks/useBudget';
 import { useNoteActions } from '~/hooks/useNoteActions';
 import { usePayCycle } from '~/hooks/usePayCycle';
 import { formatMoney } from '~/lib/format';
-import { followPayments } from '~/lib/notes';
+import { followPayments, toNotes } from '~/lib/notes';
 import { PER_PERIOD, toPayments } from '~/lib/payments';
 import { useNoteDialogStore } from '~/state/noteDialog';
-import { findNotes, NoteSort, toNotes } from '../notesModel';
+import { findNotes, NoteSort } from '../notesModel';
 
 /* The notes board: search, sort, opening a note to write or change, and the actions */
 export const useNotes = (budget: Budget) => {
@@ -35,8 +35,6 @@ export const useNotes = (budget: Budget) => {
   };
 
   return {
-    all,
-    total: all.length,
     notes,
     today,
     paymentLabel,

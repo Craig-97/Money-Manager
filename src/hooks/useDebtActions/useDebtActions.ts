@@ -1,19 +1,17 @@
 import { useApolloClient, useMutation } from '@apollo/client/react';
+import { ERRORS } from '~/constants';
 import {
   DebtHistoryDocument,
   LogDebtOverpaymentDocument,
   UndoDebtOverpaymentDocument,
   UpdateRecurringPaymentDocument
 } from '~/graphql/generated';
-import { usePaymentActions } from '~/hooks/usePaymentActions';
 import { DebtPayment } from '~/lib/debts';
 import { getApiErrorMessage, hasErrorCode } from '~/lib/errors';
 import { formatMoney } from '~/lib/format';
 import { PER_PERIOD } from '~/lib/payments';
-import { showToast } from '~/state/toast';
-
-const showError = (error: unknown) =>
-  showToast({ message: getApiErrorMessage(error, "Couldn't save that. Try again.") });
+import { showErrorToast, showToast } from '~/state/toast';
+import { usePaymentActions } from '../usePaymentActions';
 
 /* Overpaying a debt, taking an overpayment back, and paying more each time from the payoff plan */
 export const useDebtActions = (budgetId: string) => {
@@ -29,7 +27,7 @@ export const useDebtActions = (budgetId: string) => {
       await undoOverpaymentMutation({ variables: { input: { budgetId, recordId } } });
       showToast({ message: `Took back the overpayment on ${name}` });
     } catch (error) {
-      showError(error);
+      showErrorToast(error);
     }
   };
 
@@ -67,8 +65,8 @@ export const useDebtActions = (budgetId: string) => {
       });
       return null;
     } catch (error) {
-      if (hasErrorCode(error, 'BAD_USER_INPUT')) return getApiErrorMessage(error);
-      showError(error);
+      if (hasErrorCode(error, ERRORS.BAD_USER_INPUT)) return getApiErrorMessage(error);
+      showErrorToast(error);
       return null;
     }
   };
@@ -81,7 +79,7 @@ export const useDebtActions = (budgetId: string) => {
         message: `${debt.name} is now ${formatMoney(amount)} ${PER_PERIOD[debt.frequency]}`
       });
     } catch (error) {
-      showError(error);
+      showErrorToast(error);
     }
   };
 
@@ -99,10 +97,12 @@ export const useDebtActions = (budgetId: string) => {
       showToast({ message: `${debt.name} has ${formatMoney(balance)} left` });
       return true;
     } catch (error) {
-      showError(error);
+      showErrorToast(error);
       return false;
     }
   };
 
   return { overpay, undoOverpayment, payMore, updateBalance, remove };
 };
+
+export type DebtActions = ReturnType<typeof useDebtActions>;

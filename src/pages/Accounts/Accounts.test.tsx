@@ -1,13 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, screen, waitFor, within } from '@testing-library/react';
 import { useSetupAccountsStore } from '~/state/setupAccounts';
+import { apiDate } from '~/test/dates';
 import {
-  apiDate,
   CURRENT_ACCOUNT_ID,
-  createFakeApi,
   DEFAULT_BUDGET,
   FakeAccount,
-  FakeBudget
+  FakeBudget,
+  freshBudget
 } from '~/test/fakeApi';
 import { renderApp } from '~/test/renderApp';
 import { setViewportWidth } from '~/test/viewport';
@@ -30,23 +30,22 @@ const savings = (fields: Partial<FakeAccount> & { id: string; name: string }): F
 });
 
 // The current account's £1,000, a Cash ISA last updated five weeks ago, and a bills pot
-const budget = (): FakeBudget => ({
-  ...structuredClone(DEFAULT_BUDGET),
-  currentAccount: { balanceUpdatedAt: apiDate('2026-10-02') },
-  accounts: [
-    savings({
-      id: 'isa',
-      name: 'Cash ISA',
-      balance: 8650,
-      interest: { rate: 4.5, frequency: null, day: null, nextDate: null },
-      balanceUpdatedAt: apiDate('2026-08-28')
-    }),
-    savings({ id: 'pot', name: 'Bills pot', balance: 1240, purpose: 'For yearly bills' })
-  ]
-});
+const budget = (): FakeBudget =>
+  freshBudget({
+    currentAccount: { balanceUpdatedAt: apiDate('2026-10-02') },
+    accounts: [
+      savings({
+        id: 'isa',
+        name: 'Cash ISA',
+        balance: 8650,
+        interest: { rate: 4.5, frequency: null, day: null, nextDate: null },
+        balanceUpdatedAt: apiDate('2026-08-28')
+      }),
+      savings({ id: 'pot', name: 'Bills pot', balance: 1240, purpose: 'For yearly bills' })
+    ]
+  });
 
-const renderAccounts = (data = budget()) =>
-  renderApp({ route: '/accounts', api: createFakeApi({ budget: data }) });
+const renderAccounts = (data = budget()) => renderApp({ route: '/accounts', budget: data });
 
 describe('accounts', () => {
   it('shows everything you have, what counts in free to spend, and each account', async () => {
@@ -190,7 +189,7 @@ describe('accounts', () => {
   });
 
   it('suggests adding savings when there are none, and leaves out Owed without debts', async () => {
-    renderAccounts({ ...structuredClone(DEFAULT_BUDGET), recurringPayments: [] });
+    renderAccounts(freshBudget({ recurringPayments: [] }));
 
     const savingsGroup = await screen.findByRole('region', { name: 'Savings' });
     expect(savingsGroup).toHaveTextContent('No savings yet.');

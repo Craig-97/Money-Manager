@@ -1,5 +1,5 @@
-import { Modal } from '~/components/ui/Modal';
-import { formatShortDate } from '~/lib/payments';
+import { Modal } from '~/components/ui';
+import { formatShortDate } from '~/lib/dates';
 import { PaydayOverride } from '../../../hooks';
 import { PaydayPickerActions } from '../PaydayPickerActions';
 import { PaydayPickerBody } from '../PaydayPickerBody';
@@ -10,10 +10,10 @@ export const PaydayOverrideDialog = ({ override }: { override: PaydayOverride })
     open={override.open}
     onOpenChange={override.setOpen}
     title="Change this payday"
-    description={`Just this payday. Usually ${formatShortDate(override.usual)}.`}
+    description={`Just this payday. Usually ${formatShortDate(override.usual, override.today)}.`}
     footer={<PaydayPickerActions override={override} onCancel={() => override.setOpen(false)} />}>
     <p className="-mt-1 pl-1 text-[13px] font-medium text-muted md:pl-0">
-      Just this one. Usually {formatShortDate(override.usual)}.
+      Just this one. Usually {formatShortDate(override.usual, override.today)}.
     </p>
     <PaydayPickerBody override={override} />
   </Modal>

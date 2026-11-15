@@ -1,19 +1,22 @@
 import { describe, expect, it } from 'vitest';
-import { OneOffPaymentFieldsFragment, RecurringPaymentFieldsFragment } from '~/graphql/generated';
-import { toIsoDate } from '~/lib/dates';
+import { RecurringPaymentFieldsFragment } from '~/graphql/generated';
+import { toIsoDate } from '../dates';
 import { cycleStatus, datesDue, paymentChoices } from './cycle';
 import { dueInfo } from './due';
 import { scheduleText } from './labels';
 import { RecurringPayment, toPayments } from './payments';
 import { nextOccurrence, occurrence, occurrencesBetween } from './recurrence';
 import { cycleDays, summarise } from './summary';
+import { oneOffFields, recurringFields } from '~/test/builders';
+import { apiDate, day, TODAY } from '~/test/dates';
 
 const NO_HOLIDAYS = new Set<string>();
-const day = (iso: string) => {
-  const [year, month, date] = iso.split('-').map(Number);
-  return new Date(year, month - 1, date);
-};
-const apiDate = (iso: string) => String(Date.parse(`${iso}T00:00:00Z`));
+// This file's payments are £10 unless a test says otherwise
+const recurring = (overrides: Parameters<typeof recurringFields>[0]) =>
+  recurringFields({ amount: 10, ...overrides });
+const oneOff = (overrides: Parameters<typeof oneOffFields>[0]) =>
+  oneOffFields({ amount: 10, ...overrides });
+
 type CycleRecord = RecurringPaymentFieldsFragment['thisCycle'][number];
 let records = 0;
 const record = (kind: 'PAID' | 'SKIPPED', dates: string[]): CycleRecord => ({
@@ -26,47 +29,7 @@ const record = (kind: 'PAID' | 'SKIPPED', dates: string[]): CycleRecord => ({
 const paid = (...dates: string[]) => record('PAID', dates);
 const skipped = (...dates: string[]) => record('SKIPPED', dates);
 
-const recurring = (
-  overrides: Partial<RecurringPaymentFieldsFragment> & { name: string }
-): RecurringPaymentFieldsFragment => ({
-  __typename: 'RecurringPayment',
-  id: overrides.name.toLowerCase(),
-  amount: 10,
-  category: 'SUBSCRIPTIONS',
-  frequency: 'MONTHLY',
-  type: 'EXPENSE',
-  firstPaymentDate: apiDate('2026-01-02'),
-  lastPaymentDate: null,
-  nextDueDate: null,
-  thisCycle: [],
-  renewalDate: null,
-  dueReminder: { __typename: 'ReminderTiming', off: false, days: null },
-  renewalReminder: { __typename: 'ReminderTiming', off: false, days: null },
-  debt: null,
-  account: null,
-  paysInto: null,
-  // On its own dates, unless a test is about moving them off weekends
-  nonWorkingDay: 'ON_DAY',
-  ...overrides
-});
-
-const oneOff = (
-  overrides: Partial<OneOffPaymentFieldsFragment> & { name: string }
-): OneOffPaymentFieldsFragment => ({
-  __typename: 'OneOffPayment',
-  id: overrides.name.toLowerCase(),
-  amount: 10,
-  dueDate: apiDate('2026-10-09'),
-  type: 'EXPENSE',
-  category: 'GENERAL',
-  paidAt: null,
-  dueReminder: { __typename: 'ReminderTiming', off: false, days: null },
-  account: null,
-  ...overrides
-});
-
 // The design's example: today Fri 2 Oct 2026, paid on the last Friday of the month
-const today = day('2026-10-02');
 const cycle = {
   start: day('2026-09-25'),
   end: day('2026-10-30'),
@@ -98,7 +61,7 @@ const designPayments = toPayments(
       oneOff({ name: 'Birthday', amount: 75, category: 'GIFTS', dueDate: apiDate('2026-10-20') })
     ]
   },
-  { today, holidays: NO_HOLIDAYS }
+  { today: TODAY, holidays: NO_HOLIDAYS }
 );
 
 describe('recurrence', () => {
@@ -143,14 +106,14 @@ describe('dates on a weekend or bank holiday', () => {
   it('go out the next working day unless the budget says otherwise', () => {
     const [moved] = toPayments(
       { recurringPayments: [insurance()] },
-      { today: day('2026-10-02'), holidays: NO_HOLIDAYS }
+      { today: TODAY, holidays: NO_HOLIDAYS }
     );
     expect(toIsoDate(moved.dueDate!)).toBe('2026-10-26');
     expect(moved.kind === 'recurring' && toIsoDate(moved.movedFrom!)).toBe('2026-10-24');
 
     const [before] = toPayments(
       { recurringPayments: [insurance()], nonWorkingDay: 'BEFORE' },
-      { today: day('2026-10-02'), holidays: NO_HOLIDAYS }
+      { today: TODAY, holidays: NO_HOLIDAYS }
     );
     expect(toIsoDate(before.dueDate!)).toBe('2026-10-23');
   });
@@ -158,7 +121,7 @@ describe('dates on a weekend or bank holiday', () => {
   it("follow the payment's own choice over the budget's", () => {
     const [onDay] = toPayments(
       { recurringPayments: [insurance({ nonWorkingDay: 'ON_DAY' })], nonWorkingDay: 'BEFORE' },
-      { today: day('2026-10-02'), holidays: NO_HOLIDAYS }
+      { today: TODAY, holidays: NO_HOLIDAYS }
     );
     expect(toIsoDate(onDay.dueDate!)).toBe('2026-10-24');
     expect(onDay.kind === 'recurring' && onDay.movedFrom).toBeNull();
@@ -206,7 +169,7 @@ describe('summarise', () => {
     bankBalance: 10000,
     monthlyIncome: 3600,
     cycle,
-    today
+    today: TODAY
   });
 
   it('matches the design: free to spend is the balance less what is due before payday', () => {
@@ -239,18 +202,17 @@ describe('summarise', () => {
               })
             ]
           },
-          { today, holidays: NO_HOLIDAYS }
+          { today: TODAY, holidays: NO_HOLIDAYS }
         )
       ],
       bankBalance: 10000,
       monthlyIncome: 3600,
       cycle,
-      today
+      today: TODAY
     });
     expect(withIncome.monthlyRecurring).toBe(470);
     expect(withIncome.afterRecurring).toBe(12295);
     expect(withIncome.discretionary).toBe(3130);
-    expect(withIncome.recurringCount).toBe(4);
   });
 
   it('keeps quarterly payments with the yearly ones, at four a year', () => {
@@ -268,13 +230,13 @@ describe('summarise', () => {
               })
             ]
           },
-          { today, holidays: NO_HOLIDAYS }
+          { today: TODAY, holidays: NO_HOLIDAYS }
         )
       ],
       bankBalance: 10000,
       monthlyIncome: 3600,
       cycle,
-      today
+      today: TODAY
     });
     expect(withQuarterly.monthlyRecurring).toBe(770);
     expect(withQuarterly.annualRecurring).toBe(215);
@@ -308,9 +270,15 @@ describe('summarise', () => {
         ],
         oneOffPayments: [oneOff({ name: 'Overdue', dueDate: apiDate('2026-09-01') })]
       },
-      { today, holidays: NO_HOLIDAYS }
+      { today: TODAY, holidays: NO_HOLIDAYS }
     );
-    const result = summarise({ payments, bankBalance: 1000, monthlyIncome: 0, cycle, today });
+    const result = summarise({
+      payments,
+      bankBalance: 1000,
+      monthlyIncome: 0,
+      cycle,
+      today: TODAY
+    });
 
     expect(result.inCycle.map(p => p.name)).toEqual(['Cleaner', 'Overdue']);
     expect(result.upcomingNet).toBe(-210);
@@ -322,7 +290,7 @@ describe('summarise', () => {
 
 describe('cycleDays', () => {
   it('has a day for each date from the last payday to the next', () => {
-    const days = cycleDays(cycle, { today, payments: designPayments });
+    const days = cycleDays(cycle, { today: TODAY, payments: designPayments });
 
     expect(days).toHaveLength(36);
     expect(days[0]).toMatchObject({ kind: 'past', isLastPayday: true });
@@ -334,7 +302,7 @@ describe('cycleDays', () => {
 
   it('runs ghost days on from a payday brought forward to its usual date', () => {
     const early = { ...cycle, end: day('2026-10-23') };
-    const days = cycleDays(early, { today, payments: designPayments });
+    const days = cycleDays(early, { today: TODAY, payments: designPayments });
 
     // The new payday is 23 Oct, a week before the usual 30 Oct: six ghost days, then the usual day
     expect(days).toHaveLength(36);
@@ -347,10 +315,8 @@ describe('cycleDays', () => {
 describe('scheduleText', () => {
   it('describes how a payment repeats', () => {
     expect(scheduleText(day('2026-01-02'), { frequency: 'MONTHLY' })).toBe('Monthly on the 2nd');
-    expect(scheduleText(day('2026-10-02'), { frequency: 'WEEKLY' })).toBe('Weekly on Fridays');
-    expect(scheduleText(day('2026-10-02'), { frequency: 'BIWEEKLY', lower: true })).toBe(
-      'every other Friday'
-    );
+    expect(scheduleText(TODAY, { frequency: 'WEEKLY' })).toBe('Weekly on Fridays');
+    expect(scheduleText(TODAY, { frequency: 'BIWEEKLY', lower: true })).toBe('every other Friday');
     expect(scheduleText(day('2025-07-01'), { frequency: 'ANNUALLY' })).toBe('Annually on 1 Jul');
   });
 });
@@ -371,7 +337,7 @@ describe('a weekly payment through the cycle', () => {
           })
         ]
       },
-      { today, holidays: NO_HOLIDAYS }
+      { today: TODAY, holidays: NO_HOLIDAYS }
     )[0] as RecurringPayment;
 
   it('is due on every date left before payday', () => {
@@ -400,7 +366,9 @@ describe('a weekly payment through the cycle', () => {
   });
 
   it('offers to pay or skip the next date by name, or skip the rest of the cycle', () => {
-    expect(paymentChoices(cleaner('2026-10-05', [paid('2026-09-28')]), { cycle, today })).toEqual({
+    expect(
+      paymentChoices(cleaner('2026-10-05', [paid('2026-09-28')]), { cycle, today: TODAY })
+    ).toEqual({
       pay: 'Mark Mon 5 Oct as paid',
       undo: 'Mark Mon 28 Sep as unpaid',
       skipNext: 'Skip Mon 5 Oct',
@@ -412,7 +380,7 @@ describe('a weekly payment through the cycle', () => {
     const done = cleaner('2026-11-02', [
       skipped('2026-09-28', '2026-10-05', '2026-10-12', '2026-10-19', '2026-10-26')
     ]);
-    expect(paymentChoices(done, { cycle, today })).toEqual({
+    expect(paymentChoices(done, { cycle, today: TODAY })).toEqual({
       pay: null,
       undo: 'Undo skipping 5 dates',
       skipNext: null,
@@ -429,18 +397,18 @@ describe('a monthly payment through the cycle', () => {
           recurring({ name: 'Netflix', nextDueDate: apiDate(nextDueDate), thisCycle })
         ]
       },
-      { today, holidays: NO_HOLIDAYS }
+      { today: TODAY, holidays: NO_HOLIDAYS }
     )[0];
 
   it('keeps the labels it always had', () => {
-    expect(paymentChoices(netflix('2026-10-02'), { cycle, today })).toEqual({
+    expect(paymentChoices(netflix('2026-10-02'), { cycle, today: TODAY })).toEqual({
       pay: 'Mark as paid',
       undo: null,
       skipNext: 'Skip this cycle',
       skipRest: null
     });
     expect(
-      paymentChoices(netflix('2026-11-02', [paid('2026-10-02')]), { cycle, today })
+      paymentChoices(netflix('2026-11-02', [paid('2026-10-02')]), { cycle, today: TODAY })
     ).toMatchObject({
       pay: null,
       undo: 'Mark as unpaid'
@@ -453,7 +421,7 @@ describe('a payment added partway through a cycle', () => {
   const added = (fields: Partial<RecurringPaymentFieldsFragment>) =>
     toPayments(
       { recurringPayments: [recurring({ name: 'Added', ...fields })] },
-      { today, holidays: NO_HOLIDAYS }
+      { today: TODAY, holidays: NO_HOLIDAYS }
     )[0] as RecurringPayment;
 
   it('counts a date this cycle from before it was added as paid, with nothing to undo', () => {
@@ -463,7 +431,10 @@ describe('a payment added partway through a cycle', () => {
       nextDueDate: apiDate('2026-11-01')
     });
     expect(cycleStatus(mortgage, cycle)).toEqual({ tone: 'paid', label: 'Paid' });
-    expect(paymentChoices(mortgage, { cycle, today })).toMatchObject({ pay: null, undo: null });
+    expect(paymentChoices(mortgage, { cycle, today: TODAY })).toMatchObject({
+      pay: null,
+      undo: null
+    });
   });
 
   it('counts the weeks already gone as paid', () => {
@@ -482,6 +453,6 @@ describe('a payment added partway through a cycle', () => {
     });
     expect(cycleStatus(gym, cycle).label).toBe('Not due yet');
     // It can still be paid ahead
-    expect(paymentChoices(gym, { cycle, today }).pay).toBe('Mark as paid');
+    expect(paymentChoices(gym, { cycle, today: TODAY }).pay).toBe('Mark as paid');
   });
 });

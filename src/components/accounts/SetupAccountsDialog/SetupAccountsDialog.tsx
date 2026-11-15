@@ -1,21 +1,18 @@
 import { ArrowRight, X } from 'lucide-react';
-import { InfoNote } from '~/components/feedback/InfoNote';
-import { Checkbox, CheckboxHitArea } from '~/components/form/Checkbox';
-import { Radio } from '~/components/form/Radio';
-import { Select } from '~/components/form/Select';
-import { Button } from '~/components/ui/Button';
-import { IconButton } from '~/components/ui/IconButton';
-import { Modal } from '~/components/ui/Modal';
 import { MEDIA } from '~/constants';
 import { useBudget } from '~/hooks/useBudget';
 import { useMediaQuery } from '~/hooks/useMediaQuery';
 import { usePayCycle } from '~/hooks/usePayCycle';
 import { toAccounts } from '~/lib/accounts';
 import { cn } from '~/lib/cn';
+import { formatShortDate } from '~/lib/dates';
 import { formatBalance } from '~/lib/format';
-import { formatShortDate, RecurringPayment, toPayments } from '~/lib/payments';
+import { RecurringPayment, toPayments } from '~/lib/payments';
 import { SetupPaymentRow } from './components';
 import { useSetupAccounts } from './useSetupAccounts';
+import { InfoNote } from '../../feedback';
+import { Checkbox, CheckboxHitArea, Radio, Select } from '../../form';
+import { Button, IconButton, Modal, ModalActions } from '../../ui';
 
 const questionClasses = 'text-base font-extrabold tracking-[-0.01em]';
 const hintClasses = 'mt-1 text-xs leading-[1.4] font-semibold text-muted md:text-[13px]';
@@ -131,21 +128,18 @@ export const SetupAccountsDialog = () => {
           each payment comes from{isDesktop ? ', so each balance stays right.' : '.'}
         </p>
       }
-      extraWide
+      size="widest"
       footer={
         isDesktop ? (
-          <>
-            {setup.payments.length ? (
-              <span className="num text-[13px] font-semibold text-muted">{setup.summary}</span>
-            ) : null}
-            <span className="flex-1" />
-            <Button variant="ghost" onClick={setup.close}>
-              Keep as is
-            </Button>
-            <Button variant="accent" onClick={setup.save} loading={setup.saving}>
-              Save
-            </Button>
-          </>
+          <ModalActions
+            start={
+              setup.payments.length ? (
+                <span className="num text-[13px] font-semibold text-muted">{setup.summary}</span>
+              ) : null
+            }
+            cancel={{ label: 'Keep as is', onClick: setup.close }}
+            confirm={{ label: 'Save', onClick: setup.save, loading: setup.saving }}
+          />
         ) : (
           <div className="flex w-full flex-col gap-2.5">
             {count ? mobileBulkBar : null}

@@ -4,21 +4,13 @@ import { ApolloProvider } from '@apollo/client/react';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { routes } from '~/app/routes';
-import { TooltipProvider } from '~/components/ui/Tooltip';
+import { TooltipProvider } from '~/components/ui';
 import { createApolloClient, RefreshFn } from '~/graphql/client';
 import { CurrentUserDocument } from '~/graphql/generated';
 import { Session, useAuthStore } from '~/state/auth';
-import { usePaymentDialogStore } from '~/state/paymentDialog';
-import { usePrefsStore } from '~/state/prefs';
-import { useSidebarStore } from '~/state/sidebar';
-import { createFakeApi, DEFAULT_USER, FakeApi } from './fakeApi';
+import { createFakeApi, DEFAULT_USER, FakeApi, FakeBudget } from './fakeApi';
 
-// Zustand stores are module level state, so reset them between tests
 afterEach(() => {
-  useAuthStore.setState(useAuthStore.getInitialState(), true);
-  usePrefsStore.setState(usePrefsStore.getInitialState(), true);
-  useSidebarStore.setState(useSidebarStore.getInitialState(), true);
-  usePaymentDialogStore.setState(usePaymentDialogStore.getInitialState(), true);
   vi.unstubAllGlobals();
 });
 
@@ -31,6 +23,8 @@ export const testSession = (overrides: Partial<Session> = {}): Session => ({
 
 interface RenderAppOptions {
   route?: string;
+  // The budget the fake API starts with, in place of passing an api
+  budget?: FakeBudget | null;
   api?: FakeApi;
   // Pass null to render signed out
   session?: Session | null;
@@ -45,7 +39,8 @@ interface RenderAppOptions {
 // Mounts the real app (routes, guards, hooks, stores) against an in-memory fake API
 export const renderApp = ({
   route = '/',
-  api = createFakeApi(),
+  budget,
+  api = createFakeApi(budget === undefined ? {} : { budget }),
   session = testSession(),
   refresh = async () => null,
   cacheUser = true,

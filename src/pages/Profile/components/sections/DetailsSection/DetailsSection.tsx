@@ -1,19 +1,15 @@
-import { FieldError } from '~/components/form/FieldError';
-import { Label } from '~/components/form/Label';
-import { TextInput } from '~/components/form/TextInput';
-import { Button } from '~/components/ui/Button';
-import { CurrentUserQuery } from '~/graphql/generated';
+import { FieldError, Label, TextInput } from '~/components/form';
+import { UserFieldsFragment } from '~/graphql/generated';
 import { useDetailsForm } from '../../../hooks';
+import { SaveFooter } from '../SaveFooter';
 import { SECTION_ICONS } from '../sectionIcons';
 import { helpClasses } from '../settingsClasses';
 import { SettingsTile } from '../SettingsTile';
 
-type User = NonNullable<CurrentUserQuery['tokenFindUser']>;
-
 const errorId = (field: string) => `details-${field}-error`;
 
 /* First name, surname and the email they sign in with */
-export const DetailsSection = ({ user }: { user: User }) => {
+export const DetailsSection = ({ user }: { user: UserFieldsFragment }) => {
   const { register, errors, isSubmitting, isDirty, onSubmit } = useDetailsForm(user);
 
   return (
@@ -25,26 +21,12 @@ export const DetailsSection = ({ user }: { user: User }) => {
       mobileDescription="Your name and sign-in email."
       onSubmit={() => void onSubmit()}
       footer={
-        <>
-          <span className={helpClasses}>
-            {errors.root ? (
-              <span role="alert" className="font-bold text-expense">
-                {errors.root.message}
-              </span>
-            ) : (
-              'Your name shows in the sidebar and on this page.'
-            )}
-          </span>
-          <Button
-            type="submit"
-            variant="accent"
-            disabled={!isDirty}
-            loading={isSubmitting}
-            loadingText="Saving…"
-            className="font-bold">
-            Save changes
-          </Button>
-        </>
+        <SaveFooter
+          help="Your name shows in the sidebar and on this page."
+          error={errors.root?.message}
+          disabled={!isDirty}
+          loading={isSubmitting}
+        />
       }>
       <div className="grid gap-4 md:grid-cols-2">
         <div>

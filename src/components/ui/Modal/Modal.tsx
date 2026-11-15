@@ -8,6 +8,13 @@ import { cn } from '~/lib/cn';
 import { IconButton } from '../IconButton';
 import { footerShade, headerShade, scrollBodyClasses } from './scrollShades';
 
+// Desktop widths: the usual dialog, one with a table, and one with a table of pickers
+const WIDTHS = {
+  default: 'w-[min(560px,calc(100%-32px))]',
+  wide: 'w-[min(640px,calc(100%-32px))]',
+  widest: 'w-[min(720px,calc(100%-32px))]'
+} as const;
+
 interface ModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -24,10 +31,8 @@ interface ModalProps {
   leading?: ReactNode;
   // Shown under the title, e.g. how old a balance is or a line saying what the dialog is for
   subtitle?: ReactNode;
-  // Wider on desktop, for a table
-  wide?: boolean;
-  // Wider still, for a table with a column of pickers
-  extraWide?: boolean;
+  // How wide it is on desktop
+  size?: keyof typeof WIDTHS;
   // The field to focus when it opens, in place of the first control
   initialFocusId?: string;
 }
@@ -47,8 +52,7 @@ export const Modal = ({
   footer,
   leading,
   subtitle,
-  wide = false,
-  extraWide = false,
+  size = 'default',
   initialFocusId
 }: ModalProps) => {
   const isDesktop = useMediaQuery(MEDIA.desktop);
@@ -68,12 +72,7 @@ export const Modal = ({
           }}
           className={cn(
             'fixed z-90 flex flex-col overflow-hidden border border-border bg-surface outline-none',
-            isDesktop &&
-              (extraWide
-                ? 'w-[min(720px,calc(100%-32px))]'
-                : wide
-                  ? 'w-[min(640px,calc(100%-32px))]'
-                  : 'w-[min(560px,calc(100%-32px))]'),
+            isDesktop && WIDTHS[size],
             isDesktop
               ? 'top-1/2 left-1/2 max-h-[calc(100dvh-48px)] -translate-1/2 rounded-[32px] shadow-[0_40px_90px_-30px_var(--shadow)] data-[state=closed]:animate-dialog-out data-[state=open]:animate-dialog-in'
               : 'inset-x-0 bottom-0 max-h-[min(760px,calc(100dvh-24px))] rounded-t-[28px] border-b-0 pt-2.5 shadow-[0_-20px_48px_-16px_var(--shadow)] data-[state=closed]:animate-sheet-out data-[state=open]:animate-sheet-in'

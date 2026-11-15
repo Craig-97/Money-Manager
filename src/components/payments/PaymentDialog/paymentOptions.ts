@@ -1,7 +1,7 @@
-import { SegmentedOption } from '~/components/ui/SegmentedControl';
 import { PaymentCategory, PaymentType } from '~/graphql/generated';
 import { categoriesFor, categoryLabel, FREQUENCIES, FREQUENCY_LABELS } from '~/lib/payments';
 import { Ends } from './usePaymentForm';
+import { SegmentedOption } from '../../ui';
 
 // The choices the payment form offers
 

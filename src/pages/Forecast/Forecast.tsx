@@ -1,7 +1,7 @@
 import { CalendarDays } from 'lucide-react';
-import { BudgetError } from '~/components/feedback/BudgetError';
-import { PageHeader } from '~/components/layout/PageHeader';
-import { tileLift } from '~/components/ui/Tile';
+import { BudgetError } from '~/components/feedback';
+import { PageHeader } from '~/components/layout';
+import { tileLift } from '~/components/ui';
 import { useBudget } from '~/hooks/useBudget';
 import { formatMoney } from '~/lib/format';
 import { paidText } from '~/lib/payday';

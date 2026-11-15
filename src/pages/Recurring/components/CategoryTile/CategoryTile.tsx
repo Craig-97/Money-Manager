@@ -1,11 +1,10 @@
 import { useState } from 'react';
-import { tileLift } from '~/components/ui/Tile';
+import { Pager, tileLift } from '~/components/ui';
 import { cn } from '~/lib/cn';
-import { formatMoney } from '~/lib/format';
-import { CategoryBreakdown, pageOf } from '../../recurringModel';
+import { pageOf } from '~/lib/paging';
+import { CategoryBreakdown, signedTotal } from '../../recurringModel';
 import { CategoryBar } from '../CategoryBar';
 import { CategoryLegend } from '../CategoryLegend';
-import { LegendPager } from '../LegendPager';
 
 interface CategoryTileProps {
   breakdown: CategoryBreakdown;
@@ -39,8 +38,7 @@ export const CategoryTile = ({ breakdown, narrow, compact = false }: CategoryTil
         </h2>
         <span className="text-xs font-semibold text-muted">
           <span className={cn('num font-bold', breakdown.net >= 0 ? 'text-income' : 'text-text')}>
-            {breakdown.net > 0 ? '+' : ''}
-            {formatMoney(breakdown.net)}
+            {signedTotal(breakdown.net)}
           </span>{' '}
           a year
         </span>
@@ -54,13 +52,7 @@ export const CategoryTile = ({ breakdown, narrow, compact = false }: CategoryTil
           slots={legend.paged ? pageSize : 0}
         />
         {legend.paged ? (
-          <LegendPager
-            label={legend.label}
-            hasPrev={legend.hasPrev}
-            hasNext={legend.hasNext}
-            onPrev={() => setPage(legend.page - 1)}
-            onNext={() => setPage(legend.page + 1)}
-          />
+          <Pager paging={legend} onPage={setPage} of="categories" variant="legend" />
         ) : null}
       </div>
     </section>

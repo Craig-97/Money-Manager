@@ -1,13 +1,6 @@
 import { ListFilter } from 'lucide-react';
-import { Button } from '~/components/ui/Button';
-import {
-  Menu,
-  MenuContent,
-  MenuRadioGroup,
-  MenuRadioItem,
-  MenuTrigger
-} from '~/components/ui/Menu';
 import { pickSort, SORT_KEYS, SortKey, sortDirection, sortLabel } from '~/lib/payments';
+import { Button, Menu, MenuContent, MenuRadioGroup, MenuRadioItem, MenuTrigger } from '../../../ui';
 import { SortProps } from '../sortProps';
 
 /* Desktop: "Sort: Date ↑", opening Date, Amount and Name. Picking the current one turns it round. */

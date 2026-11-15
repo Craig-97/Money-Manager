@@ -1,4 +1,5 @@
 import { NoteColor } from '~/graphql/generated';
+import { plural } from '../format';
 
 export const NOTE_MAX_LENGTH = 200;
 // The counter turns red with this many characters left
@@ -60,7 +61,7 @@ export const charactersLeft = (text: string) => {
   const left = NOTE_MAX_LENGTH - text.length;
   return {
     left,
-    label: `${left} ${left === 1 ? 'character' : 'characters'} remaining`,
+    label: `${plural(left, 'character')} remaining`,
     low: left <= NOTE_LOW_LENGTH
   };
 };

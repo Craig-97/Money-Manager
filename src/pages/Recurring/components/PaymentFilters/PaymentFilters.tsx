@@ -1,5 +1,4 @@
-import { SearchInput } from '~/components/form/SearchInput';
-import { Select } from '~/components/form/Select';
+import { SearchInput, Select } from '~/components/form';
 import { categoryLabel } from '~/lib/payments';
 import { Recurring } from '../../hooks';
 import { ALL_CATEGORIES } from '../../recurringModel';

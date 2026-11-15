@@ -1,5 +1,5 @@
-import { BudgetError } from '~/components/feedback/BudgetError';
-import { PageHeader } from '~/components/layout/PageHeader';
+import { BudgetError } from '~/components/feedback';
+import { PageHeader } from '~/components/layout';
 import { useBudget } from '~/hooks/useBudget';
 import { useCurrentUser } from '~/hooks/useCurrentUser';
 import { ProfileContent, ProfileSkeleton } from './components';

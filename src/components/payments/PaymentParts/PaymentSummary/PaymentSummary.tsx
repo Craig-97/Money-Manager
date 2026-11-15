@@ -48,7 +48,7 @@ export const PaymentSummary = ({ payment, due, named = false, children }: Paymen
           {payment.kind === 'recurring'
             ? `${FREQUENCY_LABELS[payment.frequency]} · `
             : 'One-off · '}
-          {payment.kind === 'recurring' && isDebt(payment)
+          {isDebt(payment)
             ? `Debt · ${formatMoney(payment.debt.balance)} left`
             : (intoText(payment) ?? categoryLabel(payment.category))}
           {movesTo(payment) ? ' · Not in totals' : null}

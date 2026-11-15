@@ -1,6 +1,5 @@
-import { addDays } from '~/lib/dates';
-import { PayCycle } from '~/lib/payday';
-import { formatShortDate } from './labels';
+import { addDays, formatShortDate } from '../dates';
+import { PayCycle } from '../payday';
 import { CycleRecordKind, Payment, RecurringPayment } from './payments';
 import { occurrencesBetween } from './recurrence';
 

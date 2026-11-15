@@ -1,4 +1,4 @@
-import { Modal } from '~/components/ui/Modal';
+import { Modal } from '~/components/ui';
 import { RemindersPage } from '../../hooks';
 import { HowYoullHear } from '../HowYoullHear';
 import { UsualTiming } from '../UsualTiming';

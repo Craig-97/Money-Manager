@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router';
 import { MEDIA } from '~/constants';
-import { CurrentUserQuery } from '~/graphql/generated';
+import { UserFieldsFragment } from '~/graphql/generated';
 import { Budget } from '~/hooks/useBudget';
 import { useLogout } from '~/hooks/useLogout';
 import { useMediaQuery } from '~/hooks/useMediaQuery';
@@ -19,9 +19,7 @@ import {
   RemindersSection
 } from '../sections';
 
-type User = NonNullable<CurrentUserQuery['tokenFindUser']>;
-
-export const ProfileContent = ({ user, budget }: { user: User; budget: Budget }) => {
+export const ProfileContent = ({ user, budget }: { user: UserFieldsFragment; budget: Budget }) => {
   const isDesktop = useMediaQuery(MEDIA.desktop);
   const logout = useLogout();
   const [current, setCurrent] = useState<SectionId>('personal');

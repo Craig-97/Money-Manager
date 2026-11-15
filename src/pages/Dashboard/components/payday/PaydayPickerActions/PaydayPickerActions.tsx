@@ -1,6 +1,5 @@
-import { Button } from '~/components/ui/Button';
-import { isSameDay } from '~/lib/dates';
-import { formatShortDate } from '~/lib/payments';
+import { Button } from '~/components/ui';
+import { formatShortDate, isSameDay } from '~/lib/dates';
 import { PaydayOverride } from '../../../hooks';
 
 /* Save, cancel and put it back, for the picker's footer */
@@ -38,10 +37,10 @@ export const PaydayPickerActions = ({
           onClick={override.save}
           className="font-bold max-md:h-[52px]">
           {!override.changed
-            ? `Keep ${formatShortDate(override.picked)}`
+            ? `Keep ${formatShortDate(override.picked, override.today)}`
             : usualDate
               ? 'Use usual date'
-              : `Move to ${formatShortDate(override.picked)}`}
+              : `Move to ${formatShortDate(override.picked, override.today)}`}
         </Button>
       </div>
     </div>

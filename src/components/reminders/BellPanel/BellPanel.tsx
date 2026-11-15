@@ -1,7 +1,7 @@
 import { SlidersHorizontal } from 'lucide-react';
 import { Link } from 'react-router';
-import { Button } from '~/components/ui/Button';
 import { ROUTES } from '~/constants';
+import { Button } from '../../ui';
 import { Bell } from '../ReminderBell/useBell';
 import { ReminderCard } from '../ReminderCard';
 

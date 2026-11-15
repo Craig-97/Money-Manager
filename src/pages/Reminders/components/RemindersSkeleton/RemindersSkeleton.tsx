@@ -1,4 +1,4 @@
-import { Skeleton } from '~/components/ui/Skeleton';
+import { Skeleton } from '~/components/ui';
 import { cn } from '~/lib/cn';
 
 const TITLE_WIDTHS = ['w-[62%]', 'w-[48%]', 'w-[70%]', 'w-[54%]'];

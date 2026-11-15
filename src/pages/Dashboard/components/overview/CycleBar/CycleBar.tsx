@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { hintCardClasses } from '~/components/ui/popoverClasses';
+import { hintCardClasses } from '~/components/ui';
 import { cn } from '~/lib/cn';
 import { formatPayment } from '~/lib/format';
 import { CycleDay, CycleDayKind, movesTo } from '~/lib/payments';
@@ -42,6 +42,7 @@ const tagsFor = (day: CycleDay) => [
 
 interface CycleBarProps {
   days: CycleDay[];
+  today: Date;
   tone?: Tone;
   className?: string;
 }
@@ -50,7 +51,7 @@ interface CycleBarProps {
  * A tick for each day from the last payday to the next, coloured by what's due. Hovering, focusing
  * or tapping a tick shows that day's payments.
  */
-export const CycleBar = ({ days, tone = 'default', className }: CycleBarProps) => {
+export const CycleBar = ({ days, today, tone = 'default', className }: CycleBarProps) => {
   const [open, setOpen] = useState<number | null>(null);
 
   return (
@@ -60,7 +61,7 @@ export const CycleBar = ({ days, tone = 'default', className }: CycleBarProps) =
       className={cn('flex', tone === 'hero' ? 'gap-0.5' : 'gap-[3px]', className)}>
       {days.map((day, index) => {
         const tags = tagsFor(day);
-        const title = dayTitle(day.date, tags);
+        const title = dayTitle(day.date, { tags, today });
         const lines = day.payments.map(p => `${p.name} ${formatPayment(p.signedAmount)}`);
         const label =
           title + (lines.length ? `: ${lines.join(', ')}` : tags.length ? '' : ': nothing due');

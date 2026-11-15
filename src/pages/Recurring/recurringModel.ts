@@ -7,7 +7,7 @@ import {
   isInCycle,
   movesTo,
   PaymentSort,
-  PER_MONTH,
+  PER_YEAR,
   RecurringPayment,
   Renewal,
   renewalOf,
@@ -33,8 +33,14 @@ interface RecurringFilters {
   category: string;
 }
 
-export const recurringOnly = (payments: { kind: string }[]) =>
-  payments.filter((payment): payment is RecurringPayment => payment.kind === 'recurring');
+// Whether a tab lists a payment
+const inTab = (
+  payment: RecurringPayment,
+  { tab, cycle, today }: { tab: RecurringTab; cycle: PayCycle; today: Date }
+) =>
+  tab === 'all' ||
+  (tab === 'cycle' && isInCycle(payment, cycle)) ||
+  (tab === 'renewals' && renewalOf(payment, today) !== null);
 
 /* The payments a tab lists, narrowed by the search and category, in the chosen order */
 export const filterPayments = (
@@ -52,9 +58,7 @@ export const filterPayments = (
   return sortPayments(
     payments.filter(
       payment =>
-        (tab === 'all' ||
-          (tab === 'cycle' && isInCycle(payment, cycle)) ||
-          (tab === 'renewals' && renewalOf(payment, today) !== null)) &&
+        inTab(payment, { tab, cycle, today }) &&
         (category === ALL_CATEGORIES || payment.category === category) &&
         (!search ||
           payment.name.toLowerCase().includes(search) ||
@@ -69,8 +73,8 @@ export const tabCounts = (
   { cycle, today }: { cycle: PayCycle; today: Date }
 ): Record<RecurringTab, number> => ({
   all: payments.length,
-  cycle: payments.filter(payment => isInCycle(payment, cycle)).length,
-  renewals: payments.filter(payment => renewalOf(payment, today) !== null).length
+  cycle: payments.filter(payment => inTab(payment, { tab: 'cycle', cycle, today })).length,
+  renewals: payments.filter(payment => inTab(payment, { tab: 'renewals', cycle, today })).length
 });
 
 /* The tabs with how many each lists */
@@ -134,7 +138,7 @@ export const categoryBreakdown = (payments: RecurringPayment[]) => {
     // Ended payments no longer cost anything, and money moving between accounts that count isn't
     // spent
     if (!payment.dueDate || movesTo(payment)) continue;
-    const yearly = payment.signedAmount * PER_MONTH[payment.frequency] * 12;
+    const yearly = payment.signedAmount * PER_YEAR[payment.frequency];
     byCategory.set(payment.category, (byCategory.get(payment.category) ?? 0) + yearly);
   }
   const entries = [...byCategory].map(([category, yearly]) => ({ category, yearly }));
@@ -166,35 +170,16 @@ const sliceColour = (index: number, count: number) => {
   return `color-mix(in srgb, var(--accent) ${strength.toFixed(1)}%, var(--surface))`;
 };
 
-/* One page of a list: "1–8 of 11", with which way it can move */
-export const pageOf = <T>(items: T[], { size, page }: { size: number; page: number }) => {
-  const pages = Math.max(1, Math.ceil(items.length / size));
-  const current = Math.min(page, pages - 1);
-  const from = current * size;
-  const to = Math.min(items.length, from + size);
-  return {
-    items: items.slice(from, to),
-    page: current,
-    paged: pages > 1,
-    label: `${from + 1}–${to} of ${items.length}`,
-    hasPrev: current > 0,
-    hasNext: current < pages - 1
-  };
-};
-
 export interface RenewalItem {
   payment: RecurringPayment;
   renewal: Renewal;
 }
 
 /* The payments with a renewal, and the soonest few in a window that makes sense of them */
-export const upcomingRenewals = (
-  payments: RecurringPayment[],
-  { today, size = 3 }: { today: Date; size?: number }
-) => {
+export const upcomingRenewals = (payments: RecurringPayment[], { today }: { today: Date }) => {
   const items = payments.flatMap(payment => {
     const renewal = renewalOf(payment, today);
     return renewal ? [{ payment, renewal }] : [];
   });
-  return { ...renewalWindow(items, { size }), total: items.length };
+  return { ...renewalWindow(items), total: items.length };
 };

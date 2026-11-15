@@ -1,13 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
+import { apiDate } from '~/test/dates';
 import { holdExitAnimations } from '~/test/exitAnimation';
 import {
-  apiDate,
   createFakeApi,
-  DEFAULT_BUDGET,
   FakeBudget,
   fakeRecord,
-  FakeRecurringPayment
+  FakeRecurringPayment,
+  freshBudget
 } from '~/test/fakeApi';
 import { renderApp } from '~/test/renderApp';
 import { setViewportWidth } from '~/test/viewport';
@@ -124,15 +124,15 @@ const longPaidCard = (count: number) => {
   return { ...card(), history };
 };
 
-const budget = (recurringPayments = [card(), car(), family()]): FakeBudget => ({
-  ...structuredClone(DEFAULT_BUDGET),
-  cycleStartedOn: apiDate('2026-09-30'),
-  oneOffPayments: [],
-  recurringPayments
-});
+const budget = (recurringPayments = [card(), car(), family()]): FakeBudget =>
+  freshBudget({
+    cycleStartedOn: apiDate('2026-09-30'),
+    oneOffPayments: [],
+    recurringPayments
+  });
 
 const renderDebts = (route = '/debts', payments?: FakeRecurringPayment[]) =>
-  renderApp({ route, api: createFakeApi({ budget: budget(payments) }) });
+  renderApp({ route, budget: budget(payments) });
 
 describe('debts on desktop', () => {
   it("shows what's left, how it's worked out, and what's due before payday", async () => {
@@ -230,7 +230,7 @@ describe('debts on desktop', () => {
       target: { value: '50' }
     });
     expect(dialog).toHaveTextContent('6 months sooner');
-    expect(dialog).toHaveTextContent('£148 less');
+    expect(dialog).toHaveTextContent('£148 less than now');
 
     await user.click(within(dialog).getByRole('button', { name: 'Pay £200 a month from October' }));
 
@@ -386,14 +386,14 @@ describe('debts on desktop', () => {
     expect(
       within(dialog).queryByRole('button', { name: 'Back to Car finance' })
     ).not.toBeInTheDocument();
-    expect(within(dialog).getByRole('button', { name: 'Save' })).toBeDisabled();
+    expect(within(dialog).getByRole('button', { name: 'Save balance' })).toBeDisabled();
 
     await user.clear(field);
     await user.type(field, '6000');
     expect(within(dialog).getByRole('status')).toHaveTextContent(
       /^Cleared\w{3} \d{4} → \w{3} \d{4}$/
     );
-    await user.click(within(dialog).getByRole('button', { name: 'Save' }));
+    await user.click(within(dialog).getByRole('button', { name: 'Save balance' }));
 
     expect(await screen.findByText('Car finance has £6,000.00 left')).toBeInTheDocument();
     // The rate and what it started at stay as they are
@@ -490,7 +490,7 @@ describe('debts on mobile', () => {
       target: { value: '50' }
     });
     expect(sheet).toHaveTextContent('6 months sooner');
-    expect(sheet).toHaveTextContent('£148 less');
+    expect(sheet).toHaveTextContent('£148 less than now');
 
     await user.click(within(sheet).getByRole('button', { name: 'Pay £200 a month from October' }));
 

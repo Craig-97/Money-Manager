@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useRouteError } from 'react-router';
-import { ErrorState } from '~/components/feedback/ErrorState';
-import { Button } from '~/components/ui/Button';
+import { ErrorState } from '~/components/feedback';
+import { Button } from '~/components/ui';
 
 /* Shown when a route throws while rendering or fails to load its code */
 export const RouteError = () => {

@@ -6,7 +6,7 @@ import { useNoteDialogStore } from '~/state/noteDialog';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
 import { useReminderChooserStore } from '~/state/reminderChooser';
 
-export interface AddAction {
+interface AddAction {
   label: string;
   // Opens a dialog: the note dialog, or the payment one
   open: () => void;

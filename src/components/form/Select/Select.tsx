@@ -1,7 +1,7 @@
 import { Check, ChevronDown } from 'lucide-react';
 import * as SelectPrimitive from '@radix-ui/react-select';
-import { optionClasses, popoverClasses } from '~/components/ui/popoverClasses';
 import { cn } from '~/lib/cn';
+import { optionClasses, popoverClasses } from '../../ui';
 import { fieldClasses } from '../fieldClasses';
 
 interface SelectOption<T extends string = string> {

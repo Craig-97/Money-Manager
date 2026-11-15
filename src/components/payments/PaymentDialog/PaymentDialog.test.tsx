@@ -1,12 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { screen, within } from '@testing-library/react';
+import { apiDate } from '~/test/dates';
 import { holdExitAnimations } from '~/test/exitAnimation';
 import {
-  apiDate,
   createFakeApi,
   DEFAULT_BUDGET,
   FakeBudget,
-  FakeRecurringPayment
+  FakeRecurringPayment,
+  freshBudget
 } from '~/test/fakeApi';
 import { editFromRow } from '~/test/paymentRow';
 import { renderApp } from '~/test/renderApp';
@@ -34,12 +35,12 @@ const carFinance: FakeRecurringPayment = {
   debt: { balance: 6860, startingBalance: 12000, apr: 6.9, balanceUpdatedAt: null }
 };
 
-const budget = (): FakeBudget => ({
-  ...structuredClone(DEFAULT_BUDGET),
-  recurringPayments: [...structuredClone(DEFAULT_BUDGET.recurringPayments), carFinance]
-});
+const budget = (): FakeBudget =>
+  freshBudget({
+    recurringPayments: [...structuredClone(DEFAULT_BUDGET.recurringPayments), carFinance]
+  });
 
-const renderAt = (route: string) => renderApp({ route, api: createFakeApi({ budget: budget() }) });
+const renderAt = (route: string) => renderApp({ route, budget: budget() });
 
 describe('choosing a category', () => {
   const openAdd = async () => {
@@ -191,7 +192,7 @@ describe('paying into savings', () => {
   it('pays a new recurring expense into a savings account, saying what that means', async () => {
     const { user, api } = renderApp({
       route: '/recurring',
-      api: createFakeApi({ budget: withSavings() })
+      budget: withSavings()
     });
 
     await user.click(await screen.findByRole('button', { name: 'Recurring payment' }));
@@ -216,7 +217,7 @@ describe('paying into savings', () => {
   it('says a payment into savings that counts only moves money', async () => {
     const { user } = renderApp({
       route: '/recurring',
-      api: createFakeApi({ budget: withSavings() })
+      budget: withSavings()
     });
 
     await user.click(await screen.findByRole('button', { name: 'Recurring payment' }));
@@ -269,7 +270,7 @@ describe('several accounts to spend from', () => {
   const openAdd = async () => {
     const rendered = renderApp({
       route: '/recurring',
-      api: createFakeApi({ budget: withJoint() })
+      budget: withJoint()
     });
     await rendered.user.click(await screen.findByRole('button', { name: 'Recurring payment' }));
     const dialog = await screen.findByRole('dialog', { name: 'Add recurring payment' });

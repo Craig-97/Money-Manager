@@ -1,19 +1,19 @@
 import { describe, expect, it } from 'vitest';
 import { screen, within } from '@testing-library/react';
-import { apiDate, createFakeApi, DEFAULT_BUDGET } from '~/test/fakeApi';
+import { apiDate } from '~/test/dates';
+import { freshBudget } from '~/test/fakeApi';
 import { renderApp } from '~/test/renderApp';
 
 // Nothing due before payday, so free to spend is the £1,000 balance; £2,500 income and a £750
 // mortgage that isn't due until well after payday
 const budget = () => {
-  const data = structuredClone(DEFAULT_BUDGET);
+  const data = freshBudget();
   data.oneOffPayments = [];
   data.recurringPayments[0].nextDueDate = apiDate('2099-01-28');
   return data;
 };
 
-const renderForecast = () =>
-  renderApp({ route: '/forecast', api: createFakeApi({ budget: budget() }) });
+const renderForecast = () => renderApp({ route: '/forecast', budget: budget() });
 
 describe('forecast', () => {
   it('projects the balance at a monthly spend', async () => {

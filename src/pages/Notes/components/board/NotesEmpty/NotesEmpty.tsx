@@ -1,5 +1,5 @@
 import { FileText, Plus } from 'lucide-react';
-import { Button } from '~/components/ui/Button';
+import { Button } from '~/components/ui';
 import { StatePanel } from '../StatePanel';
 
 export const NotesEmpty = ({ onAdd }: { onAdd: () => void }) => (

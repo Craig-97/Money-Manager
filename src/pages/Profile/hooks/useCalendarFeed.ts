@@ -1,10 +1,9 @@
 import { useMutation } from '@apollo/client/react';
 import { ResetCalendarFeedDocument, UpdateCalendarFeedDocument } from '~/graphql/generated';
 import { Budget } from '~/hooks/useBudget';
-import { getApiErrorMessage } from '~/lib/errors';
-import { showToast } from '~/state/toast';
+import { showErrorToast, showToast } from '~/state/toast';
 
-export type FeedInclude = 'payments' | 'paydays' | 'renewals' | 'notes' | 'debtFree';
+type FeedInclude = 'payments' | 'paydays' | 'renewals' | 'notes' | 'debtFree';
 
 export const FEED_INCLUDES: { value: FeedInclude; label: string }[] = [
   { value: 'payments', label: 'Payments due' },
@@ -14,14 +13,11 @@ export const FEED_INCLUDES: { value: FeedInclude; label: string }[] = [
   { value: 'debtFree', label: 'Debt-free dates' }
 ];
 
-const showError = (error: unknown) =>
-  showToast({ message: getApiErrorMessage(error, "Couldn't save that. Try again.") });
-
 /*
  * The feed's addresses. The app reaches the API through its own origin, so the feed is there too:
  * https for copying, webcal for calendar apps that subscribe from a link.
  */
-export const feedUrls = (token: string, origin = window.location.origin) => {
+const feedUrls = (token: string, origin = window.location.origin) => {
   const https = `${origin}/cal/${token}.ics`;
   const webcal = https.replace(/^https?:/, 'webcal:');
   return {
@@ -64,7 +60,7 @@ export const useCalendarFeed = (budget: Budget) => {
           : {})
       });
     } catch (error) {
-      showError(error);
+      showErrorToast(error);
     }
   };
 
@@ -81,7 +77,7 @@ export const useCalendarFeed = (budget: Budget) => {
         await resetFeed({ variables: { budgetId: budget.id } });
         showToast({ message: 'New link made. Add it to your calendar again.' });
       } catch (error) {
-        showError(error);
+        showErrorToast(error);
       }
     },
     copy: async () => {

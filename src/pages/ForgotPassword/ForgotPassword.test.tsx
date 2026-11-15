@@ -1,9 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { screen } from '@testing-library/react';
 import { createFakeApi } from '~/test/fakeApi';
+import { findPageHeading } from '~/test/queries';
 import { renderApp } from '~/test/renderApp';
-
-const findPageHeading = (name: string) => screen.findByRole('heading', { level: 1, name });
 
 describe('forgot password', () => {
   it('sends a reset link and waits before allowing a resend', async () => {

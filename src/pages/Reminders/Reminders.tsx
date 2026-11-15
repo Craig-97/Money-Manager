@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { SlidersHorizontal } from 'lucide-react';
-import { BudgetError } from '~/components/feedback/BudgetError';
-import { PageHeader } from '~/components/layout/PageHeader';
-import { IconButton } from '~/components/ui/IconButton';
+import { BudgetError } from '~/components/feedback';
+import { PageHeader } from '~/components/layout';
+import { IconButton } from '~/components/ui';
 import { useBudget } from '~/hooks/useBudget';
 import { RemindersContent, RemindersSkeleton, SettingsSheet } from './components';
 import { useRemindersPage } from './hooks';

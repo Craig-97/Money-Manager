@@ -1,7 +1,7 @@
 import { ProgressRing } from '~/components/debts';
-import { Tile } from '~/components/ui/Tile';
+import { Tile } from '~/components/ui';
+import { formatShortDate } from '~/lib/dates';
 import { formatMoney, formatPayment } from '~/lib/format';
-import { formatShortDate } from '~/lib/payments';
 import { Debts } from '../../hooks';
 
 /* Desktop: how much is paid off so far, and which debts are due before payday */

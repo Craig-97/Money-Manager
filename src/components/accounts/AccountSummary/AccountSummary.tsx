@@ -1,8 +1,9 @@
 import { ReactNode } from 'react';
-import { summaryCardClasses } from '~/components/payments/PaymentParts';
-import { Account, accountLetter, isSpending, isStale, updatedText } from '~/lib/accounts';
+import { Account, isSpending, isStale, updatedText } from '~/lib/accounts';
 import { cn } from '~/lib/cn';
 import { formatBalance } from '~/lib/format';
+import { summaryCardClasses } from '../../payments';
+import { AccountLetter } from '../AccountLetter';
 
 interface AccountSummaryProps {
   account: Account;
@@ -25,11 +26,7 @@ export const AccountSummary = ({
 
   return (
     <div className={summaryCardClasses}>
-      <span
-        aria-hidden="true"
-        className="inline-flex size-[38px] shrink-0 items-center justify-center rounded-xl border border-border bg-surface text-sm font-extrabold">
-        {accountLetter(account)}
-      </span>
+      <AccountLetter account={account} onGrey />
       <div className="min-w-0 flex-1">
         {named ? <p className="text-[15px] font-extrabold">{account.name}</p> : null}
         <p
