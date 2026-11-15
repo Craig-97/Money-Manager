@@ -1,12 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { screen, within } from '@testing-library/react';
-import {
-  apiDate,
-  createFakeApi,
-  DEFAULT_BUDGET,
-  FakeBudget,
-  FakeRecurringPayment
-} from '~/test/fakeApi';
+import { apiDate } from '~/test/dates';
+import { FakeBudget, FakeRecurringPayment, freshBudget } from '~/test/fakeApi';
 import { renderApp } from '~/test/renderApp';
 import { setViewportWidth } from '~/test/viewport';
 
@@ -32,40 +27,38 @@ const monthly = (fields: Partial<FakeRecurringPayment> & { id: string; name: str
 });
 
 // Spotify went by unpaid yesterday, energy is due tomorrow, and the MOT is in three weeks
-const budget = (): FakeBudget => ({
-  ...structuredClone(DEFAULT_BUDGET),
-  recurringPayments: [
-    monthly({ id: 'spotify', name: 'Spotify', nextDueDate: apiDate('2026-10-01') }),
-    monthly({
-      id: 'energy',
-      name: 'Energy',
-      amount: 120,
-      category: 'BILLS',
-      firstPaymentDate: apiDate('2026-01-03'),
-      nextDueDate: apiDate('2026-10-03')
-    })
-  ],
-  notes: [
-    {
-      id: 'mot',
-      body: 'Car MOT and service',
-      color: 'BLUE',
-      createdAt: String(Date.parse('2026-09-01T10:00:00Z')),
-      updatedAt: String(Date.parse('2026-09-01T10:00:00Z')),
-      date: apiDate('2026-10-22'),
-      remind: [14],
-      repeat: 'YEARLY',
-      payment: null
-    }
-  ],
-  // Started on payday, so payday's reminder says so
-  cycleStartedOn: apiDate('2026-09-30')
-});
+const budget = (): FakeBudget =>
+  freshBudget({
+    recurringPayments: [
+      monthly({ id: 'spotify', name: 'Spotify', nextDueDate: apiDate('2026-10-01') }),
+      monthly({
+        id: 'energy',
+        name: 'Energy',
+        amount: 120,
+        category: 'BILLS',
+        firstPaymentDate: apiDate('2026-01-03'),
+        nextDueDate: apiDate('2026-10-03')
+      })
+    ],
+    notes: [
+      {
+        id: 'mot',
+        body: 'Car MOT and service',
+        color: 'BLUE',
+        createdAt: String(Date.parse('2026-09-01T10:00:00Z')),
+        updatedAt: String(Date.parse('2026-09-01T10:00:00Z')),
+        date: apiDate('2026-10-22'),
+        remind: [14],
+        repeat: 'YEARLY',
+        payment: null
+      }
+    ],
+    // Started on payday, so payday's reminder says so
+    cycleStartedOn: apiDate('2026-09-30')
+  });
 
-const renderReminders = (route = '/reminders', data = budget()) => {
-  const api = createFakeApi({ budget: data });
-  return { ...renderApp({ route, api }), api };
-};
+const renderReminders = (route = '/reminders', data = budget()) =>
+  renderApp({ route, budget: data });
 
 const newList = () => screen.findByRole('region', { name: 'New reminders' });
 const reminderTitles = (list: HTMLElement) =>

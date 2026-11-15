@@ -1,31 +1,28 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { screen, waitFor, within } from '@testing-library/react';
 import { holdExitAnimations } from '~/test/exitAnimation';
-import { createFakeApi, DEFAULT_BUDGET, FakeBudget } from '~/test/fakeApi';
+import { FakeBudget, freshBudget } from '~/test/fakeApi';
 import { renderApp } from '~/test/renderApp';
 import { resetViewport, setViewportWidth } from '~/test/viewport';
 
 const NOTE_TIME = String(Date.parse('2024-12-09T10:00:00'));
 
-const budget = (overrides: Partial<FakeBudget> = {}): FakeBudget => ({
-  ...structuredClone(DEFAULT_BUDGET),
-  notes: [
-    { id: 'milk', body: 'Buy milk', color: 'BLUE', createdAt: NOTE_TIME, updatedAt: NOTE_TIME },
-    {
-      id: 'plumber',
-      body: 'Pay the plumber',
-      color: 'ROSE',
-      createdAt: String(Number(NOTE_TIME) + 60_000),
-      updatedAt: String(Number(NOTE_TIME) + 60_000)
-    }
-  ],
-  ...overrides
-});
+const budget = (overrides: Partial<FakeBudget> = {}): FakeBudget =>
+  freshBudget({
+    notes: [
+      { id: 'milk', body: 'Buy milk', color: 'BLUE', createdAt: NOTE_TIME, updatedAt: NOTE_TIME },
+      {
+        id: 'plumber',
+        body: 'Pay the plumber',
+        color: 'ROSE',
+        createdAt: String(Number(NOTE_TIME) + 60_000),
+        updatedAt: String(Number(NOTE_TIME) + 60_000)
+      }
+    ],
+    ...overrides
+  });
 
-const renderNotes = (data = budget()) => {
-  const api = createFakeApi({ budget: data });
-  return { ...renderApp({ route: '/notes', api }), api };
-};
+const renderNotes = (data = budget()) => renderApp({ route: '/notes', budget: data });
 
 // Waits past the loading skeleton, which is labelled Notes too
 const board = async () => {

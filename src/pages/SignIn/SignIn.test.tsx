@@ -2,9 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { screen, within } from '@testing-library/react';
 import { useAuthStore } from '~/state/auth';
 import { createFakeApi, DEFAULT_PASSWORD, DEFAULT_USER } from '~/test/fakeApi';
+import { findPageHeading } from '~/test/queries';
 import { renderApp } from '~/test/renderApp';
-
-const findPageHeading = (name: string) => screen.findByRole('heading', { level: 1, name });
 
 const signIn = async ({
   route,

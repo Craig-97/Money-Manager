@@ -14,6 +14,7 @@ import {
   remindText,
   sameDraft
 } from './notes';
+import { day, TODAY } from '~/test/dates';
 
 const BLANK_NOTE: Note = {
   id: 'note',
@@ -26,13 +27,6 @@ const BLANK_NOTE: Note = {
   repeat: 'NONE',
   paymentId: null
 };
-
-const day = (iso: string) => {
-  const [year, month, date] = iso.split('-').map(Number);
-  return new Date(year, month - 1, date);
-};
-
-const TODAY = day('2026-10-02');
 
 describe('noteDateFrom', () => {
   it('keeps a one-off date, gone by or not', () => {

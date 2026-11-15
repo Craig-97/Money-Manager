@@ -17,6 +17,7 @@ import {
   occurrencesBetween,
   Schedule
 } from '~/lib/payments';
+import { apiDate, apiDateFromToday } from './dates';
 import { typeDefs } from './schema';
 
 // Shapes as the API returns them: dates are epoch milliseconds in a string
@@ -338,12 +339,6 @@ export const DEFAULT_PASSWORD = 'password1';
 // The token in a reset link that the fake API accepts, once
 export const VALID_RESET_TOKEN = 'valid-reset-token';
 
-/* 'YYYY-MM-DD' -> the API's date: midnight UTC as epoch milliseconds */
-export const apiDate = (iso: string) => String(Date.parse(`${iso}T00:00:00Z`));
-
-/* A date some days from today, in the API's format, for data that has to be current */
-export const apiDateFromToday = (days: number) => apiDate(toIsoDate(addDays(startOfToday(), days)));
-
 // The API stores whatever a YYYY-MM-DD input says as that day
 const fromInput = (value: string) => apiDate(value.slice(0, 10));
 
@@ -519,6 +514,12 @@ const apiError = (
     extensions = {}
   }: { message?: string; extensions?: Record<string, unknown> } = {}
 ) => new GraphQLError(message, { extensions: { code, ...extensions } });
+
+/* A copy of the default budget to change, with any fields given */
+export const freshBudget = (overrides: Partial<FakeBudget> = {}): FakeBudget => ({
+  ...structuredClone(DEFAULT_BUDGET),
+  ...overrides
+});
 
 export interface FakeApi {
   link: ApolloLink;

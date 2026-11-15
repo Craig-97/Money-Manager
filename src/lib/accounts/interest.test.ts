@@ -9,13 +9,7 @@ import {
   pendingInterest,
   previousInterestDate
 } from './interest';
-
-const day = (iso: string) => {
-  const [year, month, date] = iso.split('-').map(Number);
-  return new Date(year, month - 1, date);
-};
-// The boards' today: a Friday, so the 3rd is tomorrow
-const TODAY = day('2026-10-02');
+import { day, TODAY } from '~/test/dates';
 
 // Counted up to the last payment, with nothing built up since
 const monthly = (date: number, { next, since }: { next: string; since?: string }) => ({

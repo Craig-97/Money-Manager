@@ -2,9 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { screen } from '@testing-library/react';
 import { useAuthStore } from '~/state/auth';
 import { createFakeApi, DEFAULT_USER, VALID_RESET_TOKEN } from '~/test/fakeApi';
+import { findPageHeading } from '~/test/queries';
 import { renderApp } from '~/test/renderApp';
-
-const findPageHeading = (name: string) => screen.findByRole('heading', { level: 1, name });
 
 const resetRoute = (token = VALID_RESET_TOKEN) => `/reset-password?token=${token}`;
 

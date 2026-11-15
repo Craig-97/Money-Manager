@@ -1,14 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { screen, within } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
-import {
-  apiDate,
-  apiDateFromToday,
-  createFakeApi,
-  DEFAULT_BUDGET,
-  FakeBudget,
-  FakeRecurringPayment
-} from '~/test/fakeApi';
+import { fakeRecurring } from '~/test/builders';
+import { apiDate, apiDateFromToday } from '~/test/dates';
+import { FakeBudget, freshBudget } from '~/test/fakeApi';
 import { renderApp } from '~/test/renderApp';
 import { resetViewport, setViewportWidth } from '~/test/viewport';
 
@@ -22,70 +17,53 @@ afterEach(() => {
   resetViewport();
 });
 
-const recurring = (
-  fields: Partial<FakeRecurringPayment> & Pick<FakeRecurringPayment, 'id' | 'name'>
-): FakeRecurringPayment => ({
-  amount: 20,
-  category: 'BILLS',
-  frequency: 'MONTHLY',
-  type: 'EXPENSE',
-  firstPaymentDate: apiDate('2026-01-02'),
-  lastPaymentDate: null,
-  nextDueDate: null,
-  thisCycle: [],
-  renewalDate: null,
-  ...fields
-});
+const budget = (): FakeBudget =>
+  freshBudget({
+    // Started today, so the payday prompt stays away
+    cycleStartedOn: apiDateFromToday(0),
+    bankBalance: 2000,
+    recurringPayments: [
+      // Every Wednesday: 7, 14, 21 and 28 October fall before payday
+      fakeRecurring({
+        id: 'cleaner',
+        name: 'Cleaner',
+        category: 'BILLS',
+        amount: 50,
+        frequency: 'WEEKLY',
+        firstPaymentDate: apiDate('2026-01-07')
+      }),
+      // The 26th of each month
+      fakeRecurring({
+        id: 'loan',
+        name: 'Car loan',
+        amount: 245,
+        category: 'FINANCES',
+        firstPaymentDate: apiDate('2026-01-26')
+      })
+    ],
+    oneOffPayments: [
+      {
+        id: 'birthday',
+        name: 'Birthday',
+        amount: 75,
+        dueDate: apiDateFromToday(5),
+        type: 'EXPENSE',
+        category: 'GIFTS'
+      },
+      {
+        id: 'dentist',
+        name: 'Dentist',
+        amount: 40,
+        dueDate: apiDateFromToday(-1),
+        type: 'EXPENSE',
+        category: 'PERSONAL_CARE',
+        paidAt: apiDateFromToday(-1)
+      }
+    ],
+    notes: []
+  });
 
-const budget = (): FakeBudget => ({
-  ...structuredClone(DEFAULT_BUDGET),
-  // Started today, so the payday prompt stays away
-  cycleStartedOn: apiDateFromToday(0),
-  bankBalance: 2000,
-  recurringPayments: [
-    // Every Wednesday: 7, 14, 21 and 28 October fall before payday
-    recurring({
-      id: 'cleaner',
-      name: 'Cleaner',
-      amount: 50,
-      frequency: 'WEEKLY',
-      firstPaymentDate: apiDate('2026-01-07')
-    }),
-    // The 26th of each month
-    recurring({
-      id: 'loan',
-      name: 'Car loan',
-      amount: 245,
-      category: 'FINANCES',
-      firstPaymentDate: apiDate('2026-01-26')
-    })
-  ],
-  oneOffPayments: [
-    {
-      id: 'birthday',
-      name: 'Birthday',
-      amount: 75,
-      dueDate: apiDateFromToday(5),
-      type: 'EXPENSE',
-      category: 'GIFTS'
-    },
-    {
-      id: 'dentist',
-      name: 'Dentist',
-      amount: 40,
-      dueDate: apiDateFromToday(-1),
-      type: 'EXPENSE',
-      category: 'PERSONAL_CARE',
-      paidAt: apiDateFromToday(-1)
-    }
-  ],
-  notes: []
-});
-
-const renderDashboard = () => {
-  const api = createFakeApi({ budget: budget() });
-  return { ...renderApp({ route: '/dashboard', api }), api };
-};
+const renderDashboard = () => renderApp({ route: '/dashboard', budget: budget() });
 
 const fromMenu = async (user: UserEvent, { payment, item }: { payment: string; item: string }) => {
   await user.click(await screen.findByRole('button', { name: `More actions for ${payment}` }));

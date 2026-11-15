@@ -12,12 +12,7 @@ import {
   updatedText
 } from './accounts';
 import { beforePaydayByAccount, goesBelowZero } from './beforePayday';
-
-const day = (iso: string) => {
-  const [year, month, date] = iso.split('-').map(Number);
-  return new Date(year, month - 1, date);
-};
-const TODAY = day('2026-10-02');
+import { day, TODAY } from '~/test/dates';
 
 const account = (fields: Partial<Account> & { id: string }): Account => ({
   name: fields.id,

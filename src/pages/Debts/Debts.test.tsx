@@ -1,13 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
+import { apiDate } from '~/test/dates';
 import { holdExitAnimations } from '~/test/exitAnimation';
 import {
-  apiDate,
   createFakeApi,
-  DEFAULT_BUDGET,
   FakeBudget,
   fakeRecord,
-  FakeRecurringPayment
+  FakeRecurringPayment,
+  freshBudget
 } from '~/test/fakeApi';
 import { renderApp } from '~/test/renderApp';
 import { setViewportWidth } from '~/test/viewport';
@@ -124,15 +124,15 @@ const longPaidCard = (count: number) => {
   return { ...card(), history };
 };
 
-const budget = (recurringPayments = [card(), car(), family()]): FakeBudget => ({
-  ...structuredClone(DEFAULT_BUDGET),
-  cycleStartedOn: apiDate('2026-09-30'),
-  oneOffPayments: [],
-  recurringPayments
-});
+const budget = (recurringPayments = [card(), car(), family()]): FakeBudget =>
+  freshBudget({
+    cycleStartedOn: apiDate('2026-09-30'),
+    oneOffPayments: [],
+    recurringPayments
+  });
 
 const renderDebts = (route = '/debts', payments?: FakeRecurringPayment[]) =>
-  renderApp({ route, api: createFakeApi({ budget: budget(payments) }) });
+  renderApp({ route, budget: budget(payments) });
 
 describe('debts on desktop', () => {
   it("shows what's left, how it's worked out, and what's due before payday", async () => {

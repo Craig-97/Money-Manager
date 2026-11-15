@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest';
-import { OneOffPaymentFieldsFragment, RecurringPaymentFieldsFragment } from '~/graphql/generated';
 import { Account } from '~/lib/accounts';
 import { PaydayConfig } from '~/lib/dates';
 import { toPayments } from '~/lib/payments';
@@ -19,52 +18,10 @@ import {
   startedText,
   suggestedBalance
 } from './paydayCheck';
+import { oneOffFields, recurringFields } from '~/test/builders';
+import { apiDate, day } from '~/test/dates';
 
 const NO_HOLIDAYS = new Set<string>();
-const day = (iso: string) => {
-  const [year, month, date] = iso.split('-').map(Number);
-  return new Date(year, month - 1, date);
-};
-const apiDate = (iso: string) => String(Date.parse(`${iso}T00:00:00Z`));
-
-const recurring = (
-  overrides: Partial<RecurringPaymentFieldsFragment> & { name: string }
-): RecurringPaymentFieldsFragment => ({
-  __typename: 'RecurringPayment',
-  id: overrides.name.toLowerCase(),
-  amount: 20,
-  category: 'SUBSCRIPTIONS',
-  frequency: 'MONTHLY',
-  type: 'EXPENSE',
-  firstPaymentDate: apiDate('2026-01-26'),
-  lastPaymentDate: null,
-  nextDueDate: null,
-  thisCycle: [],
-  renewalDate: null,
-  dueReminder: { __typename: 'ReminderTiming', off: false, days: null },
-  renewalReminder: { __typename: 'ReminderTiming', off: false, days: null },
-  debt: null,
-  account: null,
-  paysInto: null,
-  // On its own dates, unless a test is about moving them off weekends
-  nonWorkingDay: 'ON_DAY',
-  ...overrides
-});
-
-const oneOff = (
-  overrides: Partial<OneOffPaymentFieldsFragment> & { name: string }
-): OneOffPaymentFieldsFragment => ({
-  __typename: 'OneOffPayment',
-  id: overrides.name.toLowerCase(),
-  amount: 50,
-  dueDate: apiDate('2026-10-20'),
-  type: 'EXPENSE',
-  category: 'BILLS',
-  paidAt: null,
-  account: null,
-  dueReminder: { __typename: 'ReminderTiming', off: false, days: null },
-  ...overrides
-});
 
 // Payday was Fri 30 Oct 2026, and the prompt is open the day after
 const today = day('2026-10-31');
@@ -79,8 +36,12 @@ const payments = toPayments(
   {
     recurringPayments: [
       // Never marked paid for Mon 26 Oct
-      recurring({ name: 'Netflix', nextDueDate: apiDate('2026-10-26') }),
-      recurring({
+      recurringFields({
+        name: 'Netflix',
+        firstPaymentDate: apiDate('2026-01-26'),
+        nextDueDate: apiDate('2026-10-26')
+      }),
+      recurringFields({
         name: 'Card',
         amount: 150,
         category: 'FINANCES',
@@ -98,7 +59,7 @@ const payments = toPayments(
         }
       }),
       // Due on payday
-      recurring({
+      recurringFields({
         name: 'Gym',
         amount: 35,
         firstPaymentDate: apiDate('2026-01-30'),
@@ -229,9 +190,13 @@ describe('starting the cycle', () => {
       {
         recurringPayments: [],
         oneOffPayments: [
-          oneOff({ name: 'Boiler', dueDate: apiDate('2026-10-20') }),
-          oneOff({ name: 'Tyres', dueDate: apiDate('2026-10-21'), paidAt: apiDate('2026-10-21') }),
-          oneOff({ name: 'Gift', dueDate: apiDate('2026-10-31') })
+          oneOffFields({ name: 'Boiler', dueDate: apiDate('2026-10-20') }),
+          oneOffFields({
+            name: 'Tyres',
+            dueDate: apiDate('2026-10-21'),
+            paidAt: apiDate('2026-10-21')
+          }),
+          oneOffFields({ name: 'Gift', dueDate: apiDate('2026-10-31') })
         ]
       },
       { today, holidays: NO_HOLIDAYS }
@@ -243,7 +208,7 @@ describe('starting the cycle', () => {
     const [toIsa] = toPayments(
       {
         recurringPayments: [
-          recurring({
+          recurringFields({
             name: 'Saving',
             amount: 200,
             nextDueDate: apiDate('2026-10-30'),

@@ -1,8 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { screen } from '@testing-library/react';
+import { findPageHeading } from '~/test/queries';
 import { renderApp } from '~/test/renderApp';
-
-const findPageHeading = (name: string) => screen.findByRole('heading', { level: 1, name });
 
 describe('landing', () => {
   it('opens register from the hero', async () => {

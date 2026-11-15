@@ -8,11 +8,7 @@ import {
   getPayCycle
 } from './payday';
 import { paidText } from './text';
-
-const day = (iso: string) => {
-  const [year, month, date] = iso.split('-').map(Number);
-  return new Date(year, month - 1, date);
-};
+import { day } from '~/test/dates';
 
 const NO_HOLIDAYS = new Set<string>();
 

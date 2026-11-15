@@ -1,12 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { screen, within } from '@testing-library/react';
-import {
-  apiDate,
-  createFakeApi,
-  DEFAULT_BUDGET,
-  FakeBudget,
-  FakeRecurringPayment
-} from '~/test/fakeApi';
+import { fakeRecurring } from '~/test/builders';
+import { apiDate } from '~/test/dates';
+import { createFakeApi, FakeBudget, freshBudget } from '~/test/fakeApi';
 import { editFromRow } from '~/test/paymentRow';
 import { renderApp } from '~/test/renderApp';
 import { resetViewport, setViewportWidth } from '~/test/viewport';
@@ -21,67 +17,51 @@ afterEach(() => {
   resetViewport();
 });
 
-const recurring = (
-  fields: Partial<FakeRecurringPayment> & Pick<FakeRecurringPayment, 'id' | 'name'>
-): FakeRecurringPayment => ({
-  amount: 20,
-  category: 'SUBSCRIPTIONS',
-  frequency: 'MONTHLY',
-  type: 'EXPENSE',
-  firstPaymentDate: apiDate('2026-01-02'),
-  lastPaymentDate: null,
-  // Worked out by the app from the schedule
-  nextDueDate: null,
-  thisCycle: [],
-  renewalDate: null,
-  ...fields
-});
-
-const budget = (): FakeBudget => ({
-  ...structuredClone(DEFAULT_BUDGET),
-  cycleStartedOn: apiDate('2026-09-30'),
-  oneOffPayments: [],
-  recurringPayments: [
-    recurring({ id: 'netflix', name: 'Netflix' }),
-    recurring({
-      id: 'home',
-      name: 'Home insurance',
-      amount: 21,
-      category: 'FINANCES',
-      firstPaymentDate: apiDate('2025-02-20'),
-      renewalDate: apiDate('2027-02-02'),
-      renewalReminder: { off: false, days: 30 }
-    }),
-    recurring({
-      id: 'car',
-      name: 'Car insurance',
-      amount: 612,
-      category: 'FINANCES',
-      frequency: 'ANNUALLY',
-      firstPaymentDate: apiDate('2023-10-24'),
-      renewalReminder: { off: false, days: 30 }
-    }),
-    // Its renewal went by on Monday and hasn't been moved on
-    recurring({
-      id: 'breakdown',
-      name: 'Breakdown cover',
-      amount: 7.5,
-      category: 'TRANSPORT',
-      firstPaymentDate: apiDate('2025-09-28'),
-      renewalDate: apiDate('2026-09-28'),
-      renewalReminder: { off: false, days: 30 }
-    }),
-    // Every Wednesday: 7, 14, 21 and 28 October fall before payday
-    recurring({
-      id: 'cleaner',
-      name: 'Cleaner',
-      amount: 50,
-      category: 'BILLS',
-      frequency: 'WEEKLY',
-      firstPaymentDate: apiDate('2026-01-07')
-    })
-  ]
-});
+const budget = (): FakeBudget =>
+  freshBudget({
+    cycleStartedOn: apiDate('2026-09-30'),
+    oneOffPayments: [],
+    recurringPayments: [
+      fakeRecurring({ id: 'netflix', name: 'Netflix' }),
+      fakeRecurring({
+        id: 'home',
+        name: 'Home insurance',
+        amount: 21,
+        category: 'FINANCES',
+        firstPaymentDate: apiDate('2025-02-20'),
+        renewalDate: apiDate('2027-02-02'),
+        renewalReminder: { off: false, days: 30 }
+      }),
+      fakeRecurring({
+        id: 'car',
+        name: 'Car insurance',
+        amount: 612,
+        category: 'FINANCES',
+        frequency: 'ANNUALLY',
+        firstPaymentDate: apiDate('2023-10-24'),
+        renewalReminder: { off: false, days: 30 }
+      }),
+      // Its renewal went by on Monday and hasn't been moved on
+      fakeRecurring({
+        id: 'breakdown',
+        name: 'Breakdown cover',
+        amount: 7.5,
+        category: 'TRANSPORT',
+        firstPaymentDate: apiDate('2025-09-28'),
+        renewalDate: apiDate('2026-09-28'),
+        renewalReminder: { off: false, days: 30 }
+      }),
+      // Every Wednesday: 7, 14, 21 and 28 October fall before payday
+      fakeRecurring({
+        id: 'cleaner',
+        name: 'Cleaner',
+        amount: 50,
+        category: 'BILLS',
+        frequency: 'WEEKLY',
+        firstPaymentDate: apiDate('2026-01-07')
+      })
+    ]
+  });
 
 // An ISA top-up paid into a Cash ISA
 const withSavings = (): FakeBudget => {
@@ -102,7 +82,7 @@ const withSavings = (): FakeBudget => {
     ],
     recurringPayments: [
       ...data.recurringPayments,
-      recurring({ id: 'top-up', name: 'ISA top-up', amount: 250, paysInto: 'isa' })
+      fakeRecurring({ id: 'top-up', name: 'ISA top-up', amount: 250, paysInto: 'isa' })
     ]
   };
 };
@@ -126,7 +106,7 @@ const withJoint = (): FakeBudget => {
     ],
     recurringPayments: [
       ...data.recurringPayments,
-      recurring({
+      fakeRecurring({
         id: 'joint-top-up',
         name: 'Joint bills top-up',
         amount: 600,
@@ -138,10 +118,7 @@ const withJoint = (): FakeBudget => {
   };
 };
 
-const renderRecurring = (data = budget()) => {
-  const api = createFakeApi({ budget: data });
-  return { ...renderApp({ route: '/recurring', api }), api };
-};
+const renderRecurring = (data = budget()) => renderApp({ route: '/recurring', budget: data });
 
 describe('recurring page', () => {
   it('sums up the recurring payments', async () => {
@@ -236,7 +213,7 @@ describe('recurring page', () => {
     // A fifth category makes two pages of four beside the renewals
     const data = budget();
     data.recurringPayments.push(
-      recurring({ id: 'gym', name: 'Gym', amount: 34, category: 'ENTERTAINMENT' })
+      fakeRecurring({ id: 'gym', name: 'Gym', amount: 34, category: 'ENTERTAINMENT' })
     );
     const { user } = renderRecurring(data);
 

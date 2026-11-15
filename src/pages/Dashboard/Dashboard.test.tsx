@@ -1,58 +1,49 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { screen, waitFor, within } from '@testing-library/react';
+import { apiDate, apiDateFromToday } from '~/test/dates';
 import { holdExitAnimations } from '~/test/exitAnimation';
-import {
-  apiDate,
-  apiDateFromToday,
-  createFakeApi,
-  DEFAULT_BUDGET,
-  FakeBudget,
-  fakeRecord
-} from '~/test/fakeApi';
+import { FakeBudget, fakeRecord, freshBudget } from '~/test/fakeApi';
 import { editFromRow } from '~/test/paymentRow';
 import { renderApp } from '~/test/renderApp';
 import { resetViewport, setViewportWidth } from '~/test/viewport';
 
 // Everything due today, so it falls once before payday. Tests pin today themselves, as a payday a
 // month or more before the next one would put a monthly payment in the cycle twice.
-const budget = (overrides: Partial<FakeBudget> = {}): FakeBudget => ({
-  ...structuredClone(DEFAULT_BUDGET),
-  cycleStartedOn: apiDateFromToday(0),
-  bankBalance: 1000,
-  monthlyIncome: 2500,
-  recurringPayments: [
-    {
-      id: 'netflix',
-      name: 'Netflix',
-      amount: 20,
-      category: 'SUBSCRIPTIONS',
-      frequency: 'MONTHLY',
-      type: 'EXPENSE',
-      // Starting today, so today is one of its dates whatever day the tests run
-      firstPaymentDate: apiDateFromToday(0),
-      lastPaymentDate: null,
-      nextDueDate: apiDateFromToday(0),
-      thisCycle: [],
-      renewalDate: null
-    }
-  ],
-  oneOffPayments: [
-    {
-      id: 'refund',
-      name: 'Refund',
-      amount: 50,
-      dueDate: apiDateFromToday(0),
-      type: 'INCOME',
-      category: 'GENERAL'
-    }
-  ],
-  ...overrides
-});
+const budget = (overrides: Partial<FakeBudget> = {}): FakeBudget =>
+  freshBudget({
+    cycleStartedOn: apiDateFromToday(0),
+    bankBalance: 1000,
+    monthlyIncome: 2500,
+    recurringPayments: [
+      {
+        id: 'netflix',
+        name: 'Netflix',
+        amount: 20,
+        category: 'SUBSCRIPTIONS',
+        frequency: 'MONTHLY',
+        type: 'EXPENSE',
+        // Starting today, so today is one of its dates whatever day the tests run
+        firstPaymentDate: apiDateFromToday(0),
+        lastPaymentDate: null,
+        nextDueDate: apiDateFromToday(0),
+        thisCycle: [],
+        renewalDate: null
+      }
+    ],
+    oneOffPayments: [
+      {
+        id: 'refund',
+        name: 'Refund',
+        amount: 50,
+        dueDate: apiDateFromToday(0),
+        type: 'INCOME',
+        category: 'GENERAL'
+      }
+    ],
+    ...overrides
+  });
 
-const renderDashboard = (data = budget()) => {
-  const api = createFakeApi({ budget: data });
-  return { ...renderApp({ route: '/dashboard', api }), api };
-};
+const renderDashboard = (data = budget()) => renderApp({ route: '/dashboard', budget: data });
 
 const freeToSpend = () => screen.getByRole('group', { name: 'How free to spend is worked out' });
 

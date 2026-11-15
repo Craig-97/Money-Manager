@@ -8,7 +8,7 @@ import { TooltipProvider } from '~/components/ui';
 import { createApolloClient, RefreshFn } from '~/graphql/client';
 import { CurrentUserDocument } from '~/graphql/generated';
 import { Session, useAuthStore } from '~/state/auth';
-import { createFakeApi, DEFAULT_USER, FakeApi } from './fakeApi';
+import { createFakeApi, DEFAULT_USER, FakeApi, FakeBudget } from './fakeApi';
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -23,6 +23,8 @@ export const testSession = (overrides: Partial<Session> = {}): Session => ({
 
 interface RenderAppOptions {
   route?: string;
+  // The budget the fake API starts with, in place of passing an api
+  budget?: FakeBudget | null;
   api?: FakeApi;
   // Pass null to render signed out
   session?: Session | null;
@@ -37,7 +39,8 @@ interface RenderAppOptions {
 // Mounts the real app (routes, guards, hooks, stores) against an in-memory fake API
 export const renderApp = ({
   route = '/',
-  api = createFakeApi(),
+  budget,
+  api = createFakeApi(budget === undefined ? {} : { budget }),
   session = testSession(),
   refresh = async () => null,
   cacheUser = true,

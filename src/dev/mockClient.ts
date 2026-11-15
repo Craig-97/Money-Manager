@@ -3,8 +3,8 @@ import { createApolloClient } from '~/graphql/client/createApolloClient';
 import { addDays, startOfToday, toIsoDate } from '~/lib/dates';
 import { roundPence } from '~/lib/format';
 import { useAuthStore } from '~/state/auth';
+import { apiDate } from '~/test/dates';
 import {
-  apiDate,
   createFakeApi,
   DEFAULT_USER,
   FakeAccount,
@@ -40,7 +40,7 @@ const addMonths = (date: Date, months: number) =>
   new Date(date.getFullYear(), date.getMonth() + months, date.getDate());
 
 // The accounts scenario's other spending accounts: a joint one for bills, a holiday one that
-// would go below £0 before payday, and a spare card that's already below it
+// would go below Â£0 before payday, and a spare card that's already below it
 const demoSpendingAccounts = (): FakeAccount[] => [
   {
     id: 'joint',
@@ -63,7 +63,7 @@ const demoSpendingAccounts = (): FakeAccount[] => [
     balanceUpdatedAt: fromToday(0)
   },
   {
-    // Already below £0, with nothing going out of it before payday
+    // Already below Â£0, with nothing going out of it before payday
     id: 'spare',
     name: 'Spare card',
     kind: 'SPENDING',
@@ -252,7 +252,7 @@ const demoBudget = (scenario: string | null): FakeBudget => {
         renewalDate: null
       },
       {
-        // Weekly, so it's due more than once before payday: the ×2 tag and its dates
+        // Weekly, so it's due more than once before payday: the Ã—2 tag and its dates
         id: 'cleaner',
         name: 'Cleaner',
         amount: 50,
@@ -467,7 +467,7 @@ const demoDatedNotes = () =>
     },
     {
       id: 'note-mot',
-      body: 'Car MOT and service at the garage on the high street. Ask them to check the tyres and the brake pads while it’s in.',
+      body: 'Car MOT and service at the garage on the high street. Ask them to check the tyres and the brake pads while itâ€™s in.',
       color: 'BLUE',
       date: fromToday(20),
       remind: [14],

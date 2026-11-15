@@ -10,42 +10,22 @@ import {
   renewalWhen,
   renewalWindow
 } from './renewal';
+import { recurringPayment } from '~/test/builders';
+import { day, TODAY } from '~/test/dates';
 
-const day = (iso: string) => {
-  const [year, month, date] = iso.split('-').map(Number);
-  return new Date(year, month - 1, date);
-};
-
-// Friday 2 October 2026
-const TODAY = day('2026-10-02');
-
-const payment = (overrides: Partial<RecurringPayment> = {}): RecurringPayment => ({
-  kind: 'recurring',
-  account: null,
-  into: null,
-  paysInto: null,
-  nonWorkingDay: null,
-  move: { rule: 'ON_DAY', holidays: new Set() },
-  movedFrom: null,
-  id: 'home',
-  name: 'Home insurance',
-  amount: 21,
-  signedAmount: -21,
-  type: 'EXPENSE',
-  category: 'FINANCES',
-  frequency: 'MONTHLY',
-  firstPaymentDate: day('2025-02-20'),
-  lastPaymentDate: null,
-  dueDate: day('2026-10-20'),
-  thisCycle: [],
-  renewalDate: day('2027-02-02'),
-  renewalReminderDays: 30,
-  dueReminder: { off: false, days: null },
-  renewalReminder: { off: false, days: 30 },
-  dueReminderDays: 1,
-  debt: null,
-  ...overrides
-});
+// Home insurance, renewing on 2 Feb with a 30-day reminder
+const payment = (overrides: Partial<RecurringPayment> = {}) =>
+  recurringPayment({
+    id: 'home',
+    name: 'Home insurance',
+    amount: 21,
+    category: 'FINANCES',
+    firstPaymentDate: day('2025-02-20'),
+    dueDate: day('2026-10-20'),
+    renewalDate: day('2027-02-02'),
+    renewalReminder: { off: false, days: 30 },
+    ...overrides
+  });
 
 const renewal = (days: number, extra: Partial<Renewal> = {}): Renewal => ({
   date: day('2026-10-02'),
