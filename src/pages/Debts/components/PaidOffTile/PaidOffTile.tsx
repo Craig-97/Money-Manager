@@ -1,5 +1,5 @@
 import { ProgressRing } from '~/components/debts';
-import { Tile } from '~/components/ui/Tile';
+import { Tile } from '~/components/ui';
 import { formatShortDate } from '~/lib/dates';
 import { formatMoney, formatPayment } from '~/lib/format';
 import { Debts } from '../../hooks';

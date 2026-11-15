@@ -1,10 +1,10 @@
 import { useNavigate } from 'react-router';
 import { ROUTES } from '~/constants';
-import { usePaymentActions } from '~/hooks/usePaymentActions';
 import { Reminder } from '~/lib/reminders';
 import { useAccountQuickStore } from '~/state/accountQuick';
 import { useNoteDialogStore } from '~/state/noteDialog';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
+import { usePaymentActions } from '../usePaymentActions';
 
 export interface ReminderOpen {
   label: string;

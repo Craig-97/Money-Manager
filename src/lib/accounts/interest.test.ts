@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { checkInterestDraft, EMPTY_INTEREST_DRAFT } from '~/components/accounts/accountDraft';
+import { checkInterestDraft, EMPTY_INTEREST_DRAFT } from '~/components/accounts';
 import {
   hasMatured,
   interestLine,

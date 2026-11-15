@@ -1,6 +1,5 @@
-import { Label } from '~/components/form/Label';
-import { Select } from '~/components/form/Select';
 import { formatMoney, parseMoney } from '~/lib/format';
+import { Label, Select } from '../../../../form';
 import { targetDescription } from '../../paymentAccounts';
 import { PaymentForm } from '../../usePaymentForm';
 

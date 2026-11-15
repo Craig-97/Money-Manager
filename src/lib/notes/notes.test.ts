@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { formatShortDay } from '~/lib/dates';
-import { Payment } from '~/lib/payments';
+import { formatShortDay } from '../dates';
+import { Payment } from '../payments';
 import {
   BLANK_DRAFT,
   defaultRemind,

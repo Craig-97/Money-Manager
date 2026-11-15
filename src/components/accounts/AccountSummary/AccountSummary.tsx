@@ -1,8 +1,8 @@
 import { ReactNode } from 'react';
-import { summaryCardClasses } from '~/components/payments/PaymentParts';
 import { Account, accountLetter, isSpending, isStale, updatedText } from '~/lib/accounts';
 import { cn } from '~/lib/cn';
 import { formatBalance } from '~/lib/format';
+import { summaryCardClasses } from '../../payments';
 
 interface AccountSummaryProps {
   account: Account;

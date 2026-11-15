@@ -1,6 +1,4 @@
 import { Trash } from 'lucide-react';
-import { Button } from '~/components/ui/Button';
-import { Modal } from '~/components/ui/Modal';
 import { Budget, useBudget } from '~/hooks/useBudget';
 import { useNoteActions } from '~/hooks/useNoteActions';
 import { usePayCycle } from '~/hooks/usePayCycle';
@@ -11,6 +9,7 @@ import { BankHolidays } from '~/lib/payday';
 import { PER_PERIOD, toPayments } from '~/lib/payments';
 import { ColorSwatches, NotePaymentAndReminder, NotePaymentOption } from './components';
 import { useNoteDialog } from './useNoteDialog';
+import { Button, Modal } from '../../ui';
 
 /*
  * The recurring payments a note can be about, by name: "Car insurance · £612.00 a year", with

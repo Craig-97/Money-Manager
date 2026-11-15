@@ -1,4 +1,4 @@
-import { Skeleton } from '~/components/ui/Skeleton';
+import { Skeleton } from '~/components/ui';
 
 const heroChip = 'flex min-w-0 flex-col gap-1 rounded-[18px] bg-hero-chip px-3.5 py-3';
 

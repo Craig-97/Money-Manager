@@ -1,4 +1,4 @@
-import { Tile } from '~/components/ui/Tile';
+import { Tile } from '~/components/ui';
 import { RemindersPage } from '../../hooks';
 import { MobileUpcomingRow } from '../MobileUpcomingRow';
 import { UpcomingRow } from '../UpcomingRow';

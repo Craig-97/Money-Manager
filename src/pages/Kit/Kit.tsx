@@ -1,6 +1,5 @@
 import { useShallow } from 'zustand/react/shallow';
-import { SegmentedControl } from '~/components/ui/SegmentedControl';
-import { Toaster } from '~/components/ui/Toaster';
+import { SegmentedControl, Toaster } from '~/components/ui';
 import { cn } from '~/lib/cn';
 import { ACCENTS, Theme, usePrefsStore } from '~/state/prefs';
 import {

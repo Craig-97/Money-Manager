@@ -1,6 +1,6 @@
 import { InterestFrequency } from '~/graphql/generated';
-import { dayInMonth, daysBetween, formatShortDate } from '~/lib/dates';
-import { formatMoney, ordinal, roundPence } from '~/lib/format';
+import { dayInMonth, daysBetween, formatShortDate } from '../dates';
+import { formatMoney, ordinal, roundPence } from '../format';
 
 // A payment the app added on its own, to check against the bank
 interface InterestAdded {

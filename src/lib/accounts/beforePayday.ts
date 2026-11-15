@@ -1,7 +1,7 @@
-import { isSameDay } from '~/lib/dates';
-import { roundPence } from '~/lib/format';
-import { PayCycle } from '~/lib/payday';
-import { datesDue, Payment } from '~/lib/payments';
+import { isSameDay } from '../dates';
+import { roundPence } from '../format';
+import { PayCycle } from '../payday';
+import { datesDue, Payment } from '../payments';
 import { Account, accountOf } from './accounts';
 
 /*

@@ -1,9 +1,7 @@
 import { Link } from 'react-router';
-import { Button } from '~/components/ui/Button';
-import { buttonVariants } from '~/components/ui/Button/buttonVariants';
-import { Modal } from '~/components/ui/Modal';
 import { ROUTES } from '~/constants';
 import { plural } from '~/lib/format';
+import { Button, buttonVariants, Modal } from '../../ui';
 import { Bell } from '../ReminderBell/useBell';
 import { ReminderRow } from '../ReminderRow';
 

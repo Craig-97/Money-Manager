@@ -1,9 +1,5 @@
 import { ArrowUp, History, PenLine, RefreshCw, Timer } from 'lucide-react';
-import { ActionRow } from '~/components/ui/ActionRow';
-import { ActionRows } from '~/components/ui/ActionRows';
-import { ActionTile } from '~/components/ui/ActionTile';
-import { ActionTiles } from '~/components/ui/ActionTiles';
-import { Modal } from '~/components/ui/Modal';
+import { ActionRow, ActionRows, ActionTile, ActionTiles, Modal } from '../../ui';
 import { DebtSummary } from '../DebtSummary';
 import { useDebtSheet } from './useDebtSheet';
 

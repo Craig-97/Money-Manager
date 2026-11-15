@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { PaydayConfig, toIsoDate } from '~/lib/dates';
+import { PaydayConfig, toIsoDate } from '../dates';
 import {
   BankHolidays,
   countPaydays,

@@ -1,8 +1,6 @@
 import { PenLine, Plus } from 'lucide-react';
-import { ApproximatelyEqual } from '~/components/payments/PaymentParts';
-import { Button } from '~/components/ui/Button';
-import { IconButton } from '~/components/ui/IconButton';
-import { tileLift } from '~/components/ui/Tile';
+import { ApproximatelyEqual } from '~/components/payments';
+import { Button, IconButton, tileLift } from '~/components/ui';
 import { cn } from '~/lib/cn';
 import { formatBalance, formatMoney, plural } from '~/lib/format';
 import { paidText } from '~/lib/payday';

@@ -1,5 +1,5 @@
 import { CalendarDays } from 'lucide-react';
-import { tileLift } from '~/components/ui/Tile';
+import { tileLift } from '~/components/ui';
 import { UserFieldsFragment } from '~/graphql/generated';
 import { Budget } from '~/hooks/useBudget';
 import { usePayCycle } from '~/hooks/usePayCycle';

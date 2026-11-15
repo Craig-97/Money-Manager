@@ -1,7 +1,5 @@
 import { ArrowRight, PenLine, Repeat } from 'lucide-react';
-import { Button } from '~/components/ui/Button';
-import { IconButton } from '~/components/ui/IconButton';
-import { Tile } from '~/components/ui/Tile';
+import { Button, IconButton, Tile } from '~/components/ui';
 import { cn } from '~/lib/cn';
 import { formatShortDate } from '~/lib/dates';
 import { formatMoney, formatPayment, MINUS } from '~/lib/format';

@@ -1,6 +1,6 @@
 import { PaymentCategory, PaymentFrequency, PaymentType } from '~/graphql/generated';
-import { formatDayMonth, formatLongWeekday } from '~/lib/dates';
-import { capitalise, ordinal } from '~/lib/format';
+import { formatDayMonth, formatLongWeekday } from '../dates';
+import { capitalise, ordinal } from '../format';
 
 /* "HOME_MAINTENANCE" -> "Home maintenance" */
 export const categoryLabel = (category: string) => {

@@ -1,4 +1,4 @@
-import { ApproximatelyEqual } from '~/components/payments/PaymentParts';
+import { ApproximatelyEqual } from '~/components/payments';
 import { formatShortDate } from '~/lib/dates';
 import { formatMoney, plural } from '~/lib/format';
 import { Recurring } from '../../hooks';

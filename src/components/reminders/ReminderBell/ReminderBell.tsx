@@ -1,9 +1,9 @@
 import { Bell as BellIcon } from 'lucide-react';
 import * as Popover from '@radix-ui/react-popover';
-import { popoverClasses } from '~/components/ui/popoverClasses';
 import { MEDIA } from '~/constants';
 import { useMediaQuery } from '~/hooks/useMediaQuery';
 import { cn } from '~/lib/cn';
+import { popoverClasses } from '../../ui';
 import { BellPanel } from '../BellPanel';
 import { BellSheet } from '../BellSheet';
 import { useBell } from './useBell';

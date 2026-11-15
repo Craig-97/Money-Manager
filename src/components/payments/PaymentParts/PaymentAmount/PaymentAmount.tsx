@@ -1,7 +1,7 @@
-import { Tooltip } from '~/components/ui/Tooltip';
 import { cn } from '~/lib/cn';
 import { formatPayment } from '~/lib/format';
 import { movesTo, Payment } from '~/lib/payments';
+import { Tooltip } from '../../../ui';
 
 interface PaymentAmountProps {
   payment: Payment;

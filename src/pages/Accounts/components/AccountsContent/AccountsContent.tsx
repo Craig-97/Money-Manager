@@ -1,9 +1,6 @@
 import { ChevronRight, Plus } from 'lucide-react';
 import { DebtsIcon } from '~/components/icons';
-import { Button } from '~/components/ui/Button';
-import { PageLink } from '~/components/ui/PageLink';
-import { SegmentedControl } from '~/components/ui/SegmentedControl';
-import { Tile } from '~/components/ui/Tile';
+import { Button, PageLink, SegmentedControl, Tile } from '~/components/ui';
 import { MEDIA, ROUTES } from '~/constants';
 import { Budget } from '~/hooks/useBudget';
 import { useMediaQuery } from '~/hooks/useMediaQuery';

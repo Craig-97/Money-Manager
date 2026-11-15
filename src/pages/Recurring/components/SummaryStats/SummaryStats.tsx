@@ -1,5 +1,5 @@
-import { ApproximatelyEqual } from '~/components/payments/PaymentParts';
-import { tileLift } from '~/components/ui/Tile';
+import { ApproximatelyEqual } from '~/components/payments';
+import { tileLift } from '~/components/ui';
 import { cn } from '~/lib/cn';
 import { formatShortDate } from '~/lib/dates';
 import { formatMoney, plural } from '~/lib/format';

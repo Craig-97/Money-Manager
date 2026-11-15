@@ -1,4 +1,4 @@
-import { AuthPanel } from '~/components/auth/AuthPanel';
+import { AuthPanel } from '~/components/auth';
 
 // Example figures, to show what the app does
 const STATS = [

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { tileLift } from '~/components/ui/Tile';
+import { tileLift } from '~/components/ui';
 import { cn } from '~/lib/cn';
 import { CategoryBreakdown, pageOf, signedTotal } from '../../recurringModel';
 import { CategoryBar } from '../CategoryBar';

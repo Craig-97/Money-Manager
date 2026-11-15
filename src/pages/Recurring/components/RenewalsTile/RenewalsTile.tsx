@@ -1,4 +1,4 @@
-import { tileLift } from '~/components/ui/Tile';
+import { tileLift } from '~/components/ui';
 import { cn } from '~/lib/cn';
 import { Recurring } from '../../hooks';
 import { RenewalRow } from '../RenewalRow';

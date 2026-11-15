@@ -1,5 +1,5 @@
 import { ArrowUp } from 'lucide-react';
-import { tileLift } from '~/components/ui/Tile';
+import { tileLift } from '~/components/ui';
 import { cn } from '~/lib/cn';
 import { formatShortMonth } from '~/lib/dates';
 import { formatBalance, formatMoney } from '~/lib/format';

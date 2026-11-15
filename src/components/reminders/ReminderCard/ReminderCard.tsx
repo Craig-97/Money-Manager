@@ -1,9 +1,8 @@
 import { Clock, X } from 'lucide-react';
-import { Button } from '~/components/ui/Button';
-import { IconButton } from '~/components/ui/IconButton';
 import { ReminderOpen } from '~/hooks/useReminderOpen';
 import { cn } from '~/lib/cn';
 import { canClear, firedText, Reminder } from '~/lib/reminders';
+import { Button, IconButton } from '../../ui';
 import { ReminderIcon } from '../ReminderIcon';
 
 interface ReminderCardProps {

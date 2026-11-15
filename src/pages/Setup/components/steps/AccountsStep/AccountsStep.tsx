@@ -1,9 +1,7 @@
 import { Plus, RotateCcw } from 'lucide-react';
-import { InfoNote } from '~/components/feedback/InfoNote';
-import { AmountInput } from '~/components/form/AmountInput';
-import { FieldError } from '~/components/form/FieldError';
-import { TextInput } from '~/components/form/TextInput';
-import { Button } from '~/components/ui/Button';
+import { InfoNote } from '~/components/feedback';
+import { AmountInput, FieldError, TextInput } from '~/components/form';
+import { Button } from '~/components/ui';
 import { cn } from '~/lib/cn';
 import { formatBalance } from '~/lib/format';
 import { SetupState, useSetupDesktop } from '../../../hooks';

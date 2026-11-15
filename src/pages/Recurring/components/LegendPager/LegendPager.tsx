@@ -1,5 +1,5 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { IconButton } from '~/components/ui/IconButton';
+import { IconButton } from '~/components/ui';
 
 interface LegendPagerProps {
   // "1–8 of 11"

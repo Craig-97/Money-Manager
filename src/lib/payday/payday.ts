@@ -8,7 +8,7 @@ import {
   parseIsoDate,
   PaydayConfig,
   toIsoDate
-} from '~/lib/dates';
+} from '../dates';
 
 // Bank holidays as 'YYYY-MM-DD', for the region the user picked
 export type BankHolidays = ReadonlySet<string>;

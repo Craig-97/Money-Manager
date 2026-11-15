@@ -1,11 +1,6 @@
-import { AmountInput } from '~/components/form/AmountInput';
-import { DatePicker } from '~/components/form/DatePicker';
-import { FieldError } from '~/components/form/FieldError';
-import { Label } from '~/components/form/Label';
-import { Button } from '~/components/ui/Button';
-import { ChangePreview } from '~/components/ui/ChangePreview';
-import { Modal } from '~/components/ui/Modal';
 import { formatBalance } from '~/lib/format';
+import { AmountInput, DatePicker, FieldError, Label } from '../../form';
+import { Button, ChangePreview, Modal } from '../../ui';
 import { PaymentSummary } from '../PaymentParts';
 import { useQuickEditDialog } from './useQuickEditDialog';
 

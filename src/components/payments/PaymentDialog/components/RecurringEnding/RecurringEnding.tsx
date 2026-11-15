@@ -1,8 +1,6 @@
-import { DatePicker } from '~/components/form/DatePicker';
-import { FieldError } from '~/components/form/FieldError';
-import { Label } from '~/components/form/Label';
-import { SegmentedControl } from '~/components/ui/SegmentedControl';
 import { parseIsoDate } from '~/lib/dates';
+import { DatePicker, FieldError, Label } from '../../../../form';
+import { SegmentedControl } from '../../../../ui';
 import { ENDS_OPTIONS } from '../../paymentOptions';
 import { PaymentForm } from '../../usePaymentForm';
 import { RenewalPrompt } from '../RenewalPrompt';

@@ -2,9 +2,9 @@ import { useRef, useState } from 'react';
 import { matchPath, useLocation } from 'react-router';
 import * as Dialog from '@radix-ui/react-dialog';
 import { preloadPage } from '~/app/routes/pageModules';
-import { MoreIcon } from '~/components/icons';
 import { useReminders } from '~/hooks/useReminders';
 import { cn } from '~/lib/cn';
+import { MoreIcon } from '../../../icons';
 import { MoreSheet } from '../MoreSheet';
 import { MORE_LINKS } from './moreLinks';
 

@@ -1,7 +1,7 @@
 import { CalendarDays } from 'lucide-react';
-import { Tooltip } from '~/components/ui/Tooltip';
 import { cn } from '~/lib/cn';
 import { MovedDate } from '~/lib/payments';
+import { Tooltip } from '../../../ui';
 import { accentTagClasses } from '../tagClasses';
 
 /*

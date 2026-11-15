@@ -1,11 +1,7 @@
-import { AmountInput } from '~/components/form/AmountInput';
-import { FieldError } from '~/components/form/FieldError';
-import { Label } from '~/components/form/Label';
-import { Button } from '~/components/ui/Button';
-import { ChangePreview } from '~/components/ui/ChangePreview';
-import { Modal } from '~/components/ui/Modal';
 import { useBackToDebt } from '~/hooks/useBackToDebt';
 import { DebtPayment } from '~/lib/debts';
+import { AmountInput, FieldError, Label } from '../../form';
+import { Button, ChangePreview, Modal } from '../../ui';
 import { DebtSummary } from '../DebtSummary';
 import { useUpdateBalance } from './useUpdateBalance';
 

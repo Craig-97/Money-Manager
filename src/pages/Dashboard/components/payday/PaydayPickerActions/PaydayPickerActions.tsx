@@ -1,4 +1,4 @@
-import { Button } from '~/components/ui/Button';
+import { Button } from '~/components/ui';
 import { formatShortDate, isSameDay } from '~/lib/dates';
 import { PaydayOverride } from '../../../hooks';
 

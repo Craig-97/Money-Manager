@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { hintCardClasses } from '~/components/ui/popoverClasses';
+import { hintCardClasses } from '~/components/ui';
 import { cn } from '~/lib/cn';
 import { formatPayment } from '~/lib/format';
 import { CycleDay, CycleDayKind, movesTo } from '~/lib/payments';

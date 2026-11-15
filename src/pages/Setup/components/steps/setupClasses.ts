@@ -9,7 +9,7 @@ export const fieldLabelClasses = 'mb-1.5 block text-xs font-bold text-muted';
 export const helpClasses = 'mt-2 text-[13px] leading-normal font-medium text-muted';
 
 // A pill that stays pressed when picked, e.g. a pay frequency
-export { choiceClasses } from '~/components/form/fieldClasses';
+export { choiceClasses } from '~/components/form';
 
 // The rounded card each step sits in
 export const stepCardClasses =

@@ -1,16 +1,12 @@
 import { Info } from 'lucide-react';
 import { useShallow } from 'zustand/react/shallow';
-import { AmountInput } from '~/components/form/AmountInput';
-import { FieldError } from '~/components/form/FieldError';
-import { Label } from '~/components/form/Label';
-import { Select } from '~/components/form/Select';
-import { Button } from '~/components/ui/Button';
-import { Modal } from '~/components/ui/Modal';
 import { useBackToDebt } from '~/hooks/useBackToDebt';
 import { DebtPayment } from '~/lib/debts';
 import { formatMoney } from '~/lib/format';
 import { useDebtDialogStore } from '~/state/debtDialog';
 import { useOverpaymentForm } from './useOverpaymentForm';
+import { AmountInput, FieldError, Label, Select } from '../../form';
+import { Button, Modal } from '../../ui';
 
 interface OverpaymentDialogProps {
   debts: readonly DebtPayment[];

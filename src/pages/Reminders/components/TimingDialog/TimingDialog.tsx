@@ -1,7 +1,5 @@
 import { useState } from 'react';
-import { Button } from '~/components/ui/Button';
-import { ChipGroup } from '~/components/ui/ChipGroup';
-import { Modal } from '~/components/ui/Modal';
+import { Button, ChipGroup, Modal } from '~/components/ui';
 import {
   fromTimingChoice,
   PAYMENT_REMINDER_DAYS,

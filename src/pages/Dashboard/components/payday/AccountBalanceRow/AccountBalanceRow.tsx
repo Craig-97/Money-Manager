@@ -1,4 +1,4 @@
-import { AmountInput } from '~/components/form/AmountInput';
+import { AmountInput } from '~/components/form';
 import { accountLetter } from '~/lib/accounts';
 import { cn } from '~/lib/cn';
 import { PaydayPrompt } from '../../../hooks/usePaydayPrompt';

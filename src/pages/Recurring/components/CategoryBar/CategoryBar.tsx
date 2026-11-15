@@ -1,4 +1,4 @@
-import { Tooltip } from '~/components/ui/Tooltip';
+import { Tooltip } from '~/components/ui';
 import { formatMoney } from '~/lib/format';
 import { CategoryShare } from '../../recurringModel';
 

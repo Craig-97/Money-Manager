@@ -7,8 +7,8 @@ import {
   PaymentType,
   RecurringPaymentFieldsFragment
 } from '~/graphql/generated';
-import { fromApiDate } from '~/lib/dates';
-import { BankHolidays } from '~/lib/payday';
+import { fromApiDate } from '../dates';
+import { BankHolidays } from '../payday';
 import { DateMove, DEFAULT_NON_WORKING_DAY, goesOutOn } from './nonWorkingDay';
 import { nextOccurrence } from './recurrence';
 import {

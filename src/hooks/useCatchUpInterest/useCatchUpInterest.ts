@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { useMutation } from '@apollo/client/react';
 import { CatchUpInterestDocument } from '~/graphql/generated';
-import { useBudget } from '~/hooks/useBudget';
 import { fromApiDate, startOfToday } from '~/lib/dates';
+import { useBudget } from '../useBudget';
 
 /*
  * Savings interest is added on the day it's paid, so nobody has to. Once the budget has loaded, any

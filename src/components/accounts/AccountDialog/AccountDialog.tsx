@@ -1,7 +1,4 @@
 import { ArrowRight, ChevronRight, Repeat } from 'lucide-react';
-import { Button } from '~/components/ui/Button';
-import { Modal } from '~/components/ui/Modal';
-import { Switch } from '~/components/ui/Switch';
 import { useBudget } from '~/hooks/useBudget';
 import { usePayCycle } from '~/hooks/usePayCycle';
 import {
@@ -17,6 +14,7 @@ import { formatShortDate } from '~/lib/dates';
 import { formatMoney } from '~/lib/format';
 import { PER_PERIOD, toPayments } from '~/lib/payments';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
+import { Button, Modal, Switch } from '../../ui';
 import { AccountChooser } from '../AccountChooser';
 import { AccountFields, panelClasses } from '../AccountFields';
 import { deleteTextOf } from './deleteText';

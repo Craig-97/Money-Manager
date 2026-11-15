@@ -1,5 +1,5 @@
 import { MoreHorizontal } from 'lucide-react';
-import { IconButton } from '~/components/ui/IconButton';
+import { IconButton } from '~/components/ui';
 import { cn } from '~/lib/cn';
 import { kindText, Reminder } from '~/lib/reminders';
 import { RemindersPage } from '../../hooks';

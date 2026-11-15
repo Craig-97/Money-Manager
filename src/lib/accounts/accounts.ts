@@ -1,6 +1,6 @@
 import { AccountFieldsFragment, AccountKind } from '~/graphql/generated';
-import { daysBetween, fromApiDate } from '~/lib/dates';
-import { roundPence } from '~/lib/format';
+import { daysBetween, fromApiDate } from '../dates';
+import { roundPence } from '../format';
 import { AccountInterest } from './interest';
 
 /*

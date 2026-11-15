@@ -1,5 +1,4 @@
-import { buttonVariants } from '~/components/ui/Button';
-import { PageLink } from '~/components/ui/PageLink';
+import { buttonVariants, PageLink } from '~/components/ui';
 import { ROUTES } from '~/constants';
 import { cn } from '~/lib/cn';
 import { cardClasses, eyebrowClasses, h2Classes, wrapClasses } from '../../landingClasses';

@@ -1,11 +1,9 @@
 import { Plus } from 'lucide-react';
 import { Link } from 'react-router';
-import { Button } from '~/components/ui/Button';
-import { buttonVariants } from '~/components/ui/Button/buttonVariants';
-import { Modal } from '~/components/ui/Modal';
 import { ROUTES } from '~/constants';
 import { formatMoney } from '~/lib/format';
 import { PER_PERIOD } from '~/lib/payments';
+import { Button, buttonVariants, Modal } from '../../ui';
 import { PaymentNoteCard } from '../PaymentNoteCard';
 import { usePaymentNotesDialog } from './usePaymentNotesDialog';
 

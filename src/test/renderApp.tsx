@@ -4,7 +4,7 @@ import { ApolloProvider } from '@apollo/client/react';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { routes } from '~/app/routes';
-import { TooltipProvider } from '~/components/ui/Tooltip';
+import { TooltipProvider } from '~/components/ui';
 import { createApolloClient, RefreshFn } from '~/graphql/client';
 import { CurrentUserDocument } from '~/graphql/generated';
 import { Session, useAuthStore } from '~/state/auth';

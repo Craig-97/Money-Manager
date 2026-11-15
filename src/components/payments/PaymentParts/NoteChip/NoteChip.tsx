@@ -1,10 +1,10 @@
 import { FileText } from 'lucide-react';
-import { Tooltip } from '~/components/ui/Tooltip';
 import { cn } from '~/lib/cn';
 import { plural } from '~/lib/format';
 import { Note, noteHeading } from '~/lib/notes';
 import { Payment } from '~/lib/payments';
 import { usePaymentNotesStore } from '~/state/paymentNotes';
+import { Tooltip } from '../../../ui';
 import { tagClasses } from '../tagClasses';
 
 interface NoteChipProps {

@@ -1,5 +1,5 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { IconButton } from '~/components/ui/IconButton';
+import { IconButton } from '../../ui';
 
 interface AlertPagerProps {
   index: number;

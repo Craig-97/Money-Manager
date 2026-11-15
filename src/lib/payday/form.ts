@@ -6,7 +6,7 @@ import {
   PaydayType,
   Weekday
 } from '~/graphql/generated';
-import { fromApiDate, PaydayConfig, toIsoDate } from '~/lib/dates';
+import { fromApiDate, PaydayConfig, toIsoDate } from '../dates';
 import { allowedRules, usesWeekday } from './options';
 
 // The payday form, as Setup and Profile both ask it

@@ -1,5 +1,5 @@
-import { InfoNote } from '~/components/feedback/InfoNote';
-import { Tile } from '~/components/ui/Tile';
+import { InfoNote } from '~/components/feedback';
+import { Tile } from '~/components/ui';
 import { formatBalance, plural } from '~/lib/format';
 import { Accounts } from '../../hooks';
 

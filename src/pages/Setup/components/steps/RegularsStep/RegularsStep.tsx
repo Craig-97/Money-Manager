@@ -1,5 +1,5 @@
 import { Check, Plus } from 'lucide-react';
-import { Button } from '~/components/ui/Button';
+import { Button } from '~/components/ui';
 import { cn } from '~/lib/cn';
 import { formatMoney } from '~/lib/format';
 import { SetupState, useSetupDesktop } from '../../../hooks';

@@ -1,6 +1,6 @@
-import { daysBetween, formatShortDate, formatShortWeekday, inDays } from '~/lib/dates';
-import { capitalise } from '~/lib/format';
-import { PayCycle } from '~/lib/payday';
+import { daysBetween, formatShortDate, formatShortWeekday, inDays } from '../dates';
+import { capitalise } from '../format';
+import { PayCycle } from '../payday';
 import { movedHow, nonWorkingReason } from './nonWorkingDay';
 import { Payment } from './payments';
 

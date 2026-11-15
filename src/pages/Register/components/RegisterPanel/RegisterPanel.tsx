@@ -1,4 +1,4 @@
-import { AuthPanel, Journey } from '~/components/auth/AuthPanel';
+import { AuthPanel, Journey } from '~/components/auth';
 
 const steps = (created: boolean) => [
   {

@@ -1,4 +1,4 @@
-import { ListTotal } from '~/components/payments/PaymentParts';
+import { ListTotal } from '~/components/payments';
 import { Dashboard } from '../../../hooks';
 
 /*

@@ -6,12 +6,12 @@ import {
   UndoDebtOverpaymentDocument,
   UpdateRecurringPaymentDocument
 } from '~/graphql/generated';
-import { usePaymentActions } from '~/hooks/usePaymentActions';
 import { DebtPayment } from '~/lib/debts';
 import { getApiErrorMessage, hasErrorCode } from '~/lib/errors';
 import { formatMoney } from '~/lib/format';
 import { PER_PERIOD } from '~/lib/payments';
 import { showErrorToast, showToast } from '~/state/toast';
+import { usePaymentActions } from '../usePaymentActions';
 
 /* Overpaying a debt, taking an overpayment back, and paying more each time from the payoff plan */
 export const useDebtActions = (budgetId: string) => {

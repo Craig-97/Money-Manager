@@ -1,13 +1,12 @@
 import { useState } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { useShallow } from 'zustand/react/shallow';
-import { Button } from '~/components/ui/Button';
-import { Modal } from '~/components/ui/Modal';
 import { useBackToAccount } from '~/hooks/useBackToAccount';
 import { Account, paidIntoAccountOf } from '~/lib/accounts';
 import { formatShortDate } from '~/lib/dates';
 import { PayCycle } from '~/lib/payday';
 import { useAccountQuickStore } from '~/state/accountQuick';
+import { Button, Modal } from '../../ui';
 import { AccountSummary } from '../AccountSummary';
 
 interface PaidIntoDialogProps {

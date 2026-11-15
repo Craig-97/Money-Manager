@@ -1,10 +1,8 @@
 import { Bell, CalendarDays, Copy, Mail, RotateCcw } from 'lucide-react';
-import { InfoNote } from '~/components/feedback/InfoNote';
-import { Checkbox } from '~/components/form/Checkbox';
+import { InfoNote } from '~/components/feedback';
+import { Checkbox } from '~/components/form';
 import { ReminderWay, WayTag } from '~/components/reminders';
-import { Button } from '~/components/ui/Button';
-import { buttonVariants } from '~/components/ui/Button/buttonVariants';
-import { Switch } from '~/components/ui/Switch';
+import { Button, buttonVariants, Switch } from '~/components/ui';
 import { Budget } from '~/hooks/useBudget';
 import { cn } from '~/lib/cn';
 import { FEED_INCLUDES, useCalendarFeed } from '../../../hooks';

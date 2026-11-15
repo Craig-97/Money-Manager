@@ -1,16 +1,17 @@
 import { Plus } from 'lucide-react';
-import { AuthAlternative } from '~/components/auth/AuthAlternative';
-import { authErrorLinkClasses, authInputBoxClasses } from '~/components/auth/authClasses';
-import { AuthField, authErrorId } from '~/components/auth/AuthField';
-import { AuthHeading } from '~/components/auth/AuthHeading';
-import { AuthLayout } from '~/components/auth/AuthLayout';
-import { HeroCard } from '~/components/auth/HeroCard';
-import { FieldError } from '~/components/form/FieldError';
-import { PasswordInput } from '~/components/form/PasswordInput';
-import { TextInput } from '~/components/form/TextInput';
+import {
+  AuthAlternative,
+  authErrorId,
+  authErrorLinkClasses,
+  AuthField,
+  AuthHeading,
+  authInputBoxClasses,
+  AuthLayout,
+  HeroCard
+} from '~/components/auth';
+import { FieldError, PasswordInput, TextInput } from '~/components/form';
 import { ArrowRightIcon } from '~/components/icons';
-import { Button } from '~/components/ui/Button';
-import { PageLink } from '~/components/ui/PageLink';
+import { Button, PageLink } from '~/components/ui';
 import { ROUTES } from '~/constants';
 import { useAuthStore } from '~/state/auth';
 import { SignInPanel } from './components';

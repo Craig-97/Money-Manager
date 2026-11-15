@@ -1,4 +1,4 @@
-import { Checkbox, CheckboxHitArea } from '~/components/form/Checkbox';
+import { Checkbox, CheckboxHitArea } from '~/components/form';
 import { formatMoney } from '~/lib/format';
 import { PaydayPrompt } from '../../../hooks/usePaydayPrompt';
 

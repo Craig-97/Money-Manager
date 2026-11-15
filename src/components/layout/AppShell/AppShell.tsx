@@ -1,13 +1,13 @@
 import { CSSProperties } from 'react';
 import { Outlet } from 'react-router';
-import { AccountDialogs } from '~/components/accounts';
-import { DebtDialogs } from '~/components/debts';
-import { NoteDialogs } from '~/components/notes';
-import { PaymentDialogs } from '~/components/payments/PaymentDialogs';
-import { Toaster } from '~/components/ui/Toaster';
 import { useCatchUpInterest } from '~/hooks/useCatchUpInterest';
 import { useScrollTopOnNavigate } from '~/hooks/useScrollTopOnNavigate';
 import { useSidebarMode } from '~/hooks/useSidebarMode';
+import { AccountDialogs } from '../../accounts';
+import { DebtDialogs } from '../../debts';
+import { NoteDialogs } from '../../notes';
+import { PaymentDialogs } from '../../payments';
+import { Toaster } from '../../ui';
 import { BottomNav } from '../BottomNav';
 import { Sidebar } from '../Sidebar';
 

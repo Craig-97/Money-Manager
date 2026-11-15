@@ -1,14 +1,8 @@
-import {
-  Account,
-  AccountInterest,
-  balanceAge,
-  interestPerPayment,
-  STALE_DAYS
-} from '~/lib/accounts';
-import { addDays, daysBetween, formatShortDate, fromApiDate, inDays, toIsoDate } from '~/lib/dates';
-import { formatMoney } from '~/lib/format';
-import { Note, noteDateFrom, noteHeading, remindText, repeatText } from '~/lib/notes';
-import { PayCycle } from '~/lib/payday';
+import { Account, AccountInterest, balanceAge, interestPerPayment, STALE_DAYS } from '../accounts';
+import { addDays, daysBetween, formatShortDate, fromApiDate, inDays, toIsoDate } from '../dates';
+import { formatMoney } from '../format';
+import { Note, noteDateFrom, noteHeading, remindText, repeatText } from '../notes';
+import { PayCycle } from '../payday';
 import {
   Payment,
   ReminderSettings,
@@ -16,7 +10,7 @@ import {
   renewalHeading,
   renewalOf,
   timingText
-} from '~/lib/payments';
+} from '../payments';
 
 /*
  * Reminders, worked out from the payments, notes and payday each time they're needed. Only what

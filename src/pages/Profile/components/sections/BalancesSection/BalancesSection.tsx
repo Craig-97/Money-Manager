@@ -1,9 +1,6 @@
 import { ChevronRight } from 'lucide-react';
-import { AmountInput } from '~/components/form/AmountInput';
-import { FieldError } from '~/components/form/FieldError';
-import { Label } from '~/components/form/Label';
-import { Button } from '~/components/ui/Button';
-import { PageLink } from '~/components/ui/PageLink';
+import { AmountInput, FieldError, Label } from '~/components/form';
+import { Button, PageLink } from '~/components/ui';
 import { ROUTES } from '~/constants';
 import { Budget } from '~/hooks/useBudget';
 import { cn } from '~/lib/cn';

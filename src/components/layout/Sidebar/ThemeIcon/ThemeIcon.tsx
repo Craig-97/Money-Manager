@@ -1,6 +1,6 @@
 import { Sun } from 'lucide-react';
-import { MoonIcon } from '~/components/icons';
 import { Theme } from '~/state/prefs';
+import { MoonIcon } from '../../../icons';
 
 /* The sun or moon for a theme */
 export const ThemeIcon = ({ theme, size }: { theme: Theme; size: number }) =>

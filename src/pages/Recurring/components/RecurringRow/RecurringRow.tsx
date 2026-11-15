@@ -1,6 +1,6 @@
 import { Repeat } from 'lucide-react';
 import { DebtLeft } from '~/components/debts';
-import { Checkbox, CheckboxHitArea } from '~/components/form/Checkbox';
+import { Checkbox, CheckboxHitArea } from '~/components/form';
 import {
   DueCell,
   NoteChip,
@@ -10,7 +10,7 @@ import {
   RenewalTag,
   StatusTag,
   TimesDue
-} from '~/components/payments/PaymentParts';
+} from '~/components/payments';
 import { cn } from '~/lib/cn';
 import { isDebt } from '~/lib/debts';
 import {

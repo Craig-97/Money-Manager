@@ -1,5 +1,5 @@
 import { PendingInterestTag } from '~/components/accounts';
-import { Switch } from '~/components/ui/Switch';
+import { Switch } from '~/components/ui';
 import {
   Account,
   accountLetter,

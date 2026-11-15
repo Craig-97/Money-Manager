@@ -1,5 +1,5 @@
-import { formatLongMonth, formatMonthYear } from '~/lib/dates';
-import { formatMoney, ordinal, plural, roundPence } from '~/lib/format';
+import { formatLongMonth, formatMonthYear } from '../dates';
+import { formatMoney, ordinal, plural, roundPence } from '../format';
 import { DebtPayment, extraPerPayment, monthFromNow, Payoff } from './debts';
 
 // How debts read on the Debts pages

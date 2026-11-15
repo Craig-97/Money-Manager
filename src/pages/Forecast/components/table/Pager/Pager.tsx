@@ -1,5 +1,5 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { IconButton } from '~/components/ui/IconButton';
+import { IconButton } from '~/components/ui';
 import { Forecast } from '../../../hooks';
 
 /* Which rows are showing, with previous and next */

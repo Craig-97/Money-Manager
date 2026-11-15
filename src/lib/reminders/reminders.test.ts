@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { Note } from '~/lib/notes';
-import { DEFAULT_REMINDER_SETTINGS, OneOffPayment, RecurringPayment } from '~/lib/payments';
+import { Note } from '../notes';
+import { DEFAULT_REMINDER_SETTINGS, OneOffPayment, RecurringPayment } from '../payments';
 import {
   canClear,
   filterReminders,

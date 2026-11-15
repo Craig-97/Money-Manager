@@ -1,8 +1,7 @@
 import { ReactNode } from 'react';
 import { LucideIcon, X } from 'lucide-react';
-import { Button } from '~/components/ui/Button';
-import { IconButton } from '~/components/ui/IconButton';
 import { cn } from '~/lib/cn';
+import { Button, IconButton } from '../../ui';
 
 const TONES = {
   expense: 'bg-expense-bg text-expense',

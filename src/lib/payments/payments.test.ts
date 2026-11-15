@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { OneOffPaymentFieldsFragment, RecurringPaymentFieldsFragment } from '~/graphql/generated';
-import { toIsoDate } from '~/lib/dates';
+import { toIsoDate } from '../dates';
 import { cycleStatus, datesDue, paymentChoices } from './cycle';
 import { dueInfo } from './due';
 import { scheduleText } from './labels';

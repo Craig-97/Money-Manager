@@ -1,7 +1,6 @@
-import { daysBetween } from '~/lib/dates';
-import { addDays } from '~/lib/dates';
-import { roundPence } from '~/lib/format';
-import { Debt, occurrencesBetween, Payment, PER_MONTH, RecurringPayment } from '~/lib/payments';
+import { addDays, daysBetween } from '../dates';
+import { roundPence } from '../format';
+import { Debt, occurrencesBetween, Payment, PER_MONTH, RecurringPayment } from '../payments';
 
 /*
  * Payoff estimates for the Debts page. Everything works month by month: each month a debt gets its

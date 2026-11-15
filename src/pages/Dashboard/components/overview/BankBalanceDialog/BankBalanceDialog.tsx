@@ -1,7 +1,5 @@
-import { AmountInput } from '~/components/form/AmountInput';
-import { Button } from '~/components/ui/Button';
-import { Modal } from '~/components/ui/Modal';
-import { PageLink } from '~/components/ui/PageLink';
+import { AmountInput } from '~/components/form';
+import { Button, Modal, PageLink } from '~/components/ui';
 import { ROUTES } from '~/constants';
 import { accountLetter, isStale, updatedText } from '~/lib/accounts';
 import { cn } from '~/lib/cn';

@@ -1,11 +1,7 @@
 import { useState } from 'react';
 import { CheckCheck, MoreHorizontal, Pencil, SkipForward, Trash2 } from 'lucide-react';
-import { DatePicker } from '~/components/form/DatePicker';
-import { FieldError } from '~/components/form/FieldError';
-import { Label } from '~/components/form/Label';
-import { Select } from '~/components/form/Select';
-import { IconButton } from '~/components/ui/IconButton';
-import { Menu, MenuContent, MenuItem, MenuTrigger } from '~/components/ui/Menu';
+import { DatePicker, FieldError, Label, Select } from '~/components/form';
+import { IconButton, Menu, MenuContent, MenuItem, MenuTrigger } from '~/components/ui';
 import { showToast } from '~/state/toast';
 import { KitExample } from '../KitExample';
 import { KitSection } from '../KitSection';

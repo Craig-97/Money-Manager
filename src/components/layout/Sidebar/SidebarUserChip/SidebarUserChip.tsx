@@ -1,13 +1,12 @@
 import { LogOut } from 'lucide-react';
 import { NavLink } from 'react-router';
 import { preloadPage } from '~/app/routes/pageModules';
-import { Avatar } from '~/components/ui/Avatar';
-import { Tooltip } from '~/components/ui/Tooltip';
 import { ROUTES } from '~/constants';
 import { useCurrentUser } from '~/hooks/useCurrentUser';
 import { useLogout } from '~/hooks/useLogout';
 import { cn } from '~/lib/cn';
 import { getInitials } from '~/lib/format';
+import { Avatar, Tooltip } from '../../../ui';
 
 interface SidebarUserChipProps {
   expanded: boolean;

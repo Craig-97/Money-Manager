@@ -1,5 +1,5 @@
-import { MobileSortButton } from '~/components/payments/PaymentControls';
-import { SegmentedControl } from '~/components/ui/SegmentedControl';
+import { MobileSortButton } from '~/components/payments';
+import { SegmentedControl } from '~/components/ui';
 import { formatShortDate } from '~/lib/dates';
 import { tabOptions } from '../../../dashboardModel';
 import { Dashboard } from '../../../hooks';

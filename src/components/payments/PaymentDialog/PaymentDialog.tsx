@@ -1,7 +1,5 @@
 import { Trash } from 'lucide-react';
 import { useShallow } from 'zustand/react/shallow';
-import { Button } from '~/components/ui/Button';
-import { Modal } from '~/components/ui/Modal';
 import { MEDIA } from '~/constants';
 import { useBudget } from '~/hooks/useBudget';
 import { useMediaQuery } from '~/hooks/useMediaQuery';
@@ -12,6 +10,7 @@ import { DEFAULT_NON_WORKING_DAY, DEFAULT_REMINDER_SETTINGS, toPayments } from '
 import { usePaymentDialogStore } from '~/state/paymentDialog';
 import { Chooser, FormBody, StatusLine } from './components';
 import { usePaymentForm } from './usePaymentForm';
+import { Button, Modal } from '../../ui';
 
 /*
  * Adding or editing a payment: a dialog on desktop, a bottom sheet on mobile. Lives in the app

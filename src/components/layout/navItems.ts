@@ -1,5 +1,6 @@
 import { ComponentType } from 'react';
 import { PageName } from '~/app/routes/pageModules';
+import { ROUTES } from '~/constants';
 import {
   AccountsIcon,
   DashboardIcon,
@@ -9,8 +10,7 @@ import {
   NotesIcon,
   RecurringIcon,
   RemindersIcon
-} from '~/components/icons';
-import { ROUTES } from '~/constants';
+} from '../icons';
 
 export interface NavItem {
   to: string;

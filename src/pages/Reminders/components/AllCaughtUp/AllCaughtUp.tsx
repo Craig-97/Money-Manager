@@ -1,5 +1,5 @@
 import { CheckCheck } from 'lucide-react';
-import { Tile } from '~/components/ui/Tile';
+import { Tile } from '~/components/ui';
 
 /* Nothing in New */
 export const AllCaughtUp = () => (

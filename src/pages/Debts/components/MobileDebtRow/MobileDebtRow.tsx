@@ -1,8 +1,7 @@
 import { ChevronRight } from 'lucide-react';
 import { DebtProgress } from '~/components/debts';
-import { PaymentLetter } from '~/components/payments/PaymentParts';
-import { DebtPayment, paidOffShare } from '~/lib/debts';
-import { aprText, clearedText, paymentText } from '~/lib/debts';
+import { PaymentLetter } from '~/components/payments';
+import { aprText, clearedText, DebtPayment, paidOffShare, paymentText } from '~/lib/debts';
 import { formatMoney } from '~/lib/format';
 import { useDebtViewStore } from '~/state/debtView';
 

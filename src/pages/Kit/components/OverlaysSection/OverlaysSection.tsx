@@ -1,12 +1,7 @@
 import { useState } from 'react';
 import { Trash2 } from 'lucide-react';
-import { AmountInput } from '~/components/form/AmountInput';
-import { DatePicker } from '~/components/form/DatePicker';
-import { Label } from '~/components/form/Label';
-import { Select } from '~/components/form/Select';
-import { TextInput } from '~/components/form/TextInput';
-import { Button } from '~/components/ui/Button';
-import { Modal } from '~/components/ui/Modal';
+import { AmountInput, DatePicker, Label, Select, TextInput } from '~/components/form';
+import { Button, Modal } from '~/components/ui';
 import { showToast } from '~/state/toast';
 import { KitExample } from '../KitExample';
 import { KitSection } from '../KitSection';

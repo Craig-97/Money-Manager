@@ -1,5 +1,5 @@
 import { PaymentFrequency } from '~/graphql/generated';
-import { addDays, dayInMonth } from '~/lib/dates';
+import { addDays, dayInMonth } from '../dates';
 import { DateMove, goesOutOn, MAX_MOVE_DAYS } from './nonWorkingDay';
 
 // The same schedule maths as the API (utils/dates/recurrence.ts), on local dates

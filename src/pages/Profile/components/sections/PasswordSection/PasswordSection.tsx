@@ -1,10 +1,6 @@
 import { Eye, EyeOff } from 'lucide-react';
-import { describedBy } from '~/components/form/describedBy';
-import { FieldError } from '~/components/form/FieldError';
-import { Label } from '~/components/form/Label';
-import { TextInput } from '~/components/form/TextInput';
-import { Button } from '~/components/ui/Button';
-import { IconButton } from '~/components/ui/IconButton';
+import { describedBy, FieldError, Label, TextInput } from '~/components/form';
+import { Button, IconButton } from '~/components/ui';
 import { cn } from '~/lib/cn';
 import { usePasswordForm } from '../../../hooks';
 import { SECTION_ICONS } from '../sectionIcons';

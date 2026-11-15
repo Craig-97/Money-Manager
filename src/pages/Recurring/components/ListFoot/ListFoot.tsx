@@ -1,4 +1,4 @@
-import { ListTotal } from '~/components/payments/PaymentParts';
+import { ListTotal } from '~/components/payments';
 import { cn } from '~/lib/cn';
 import { formatShortDate } from '~/lib/dates';
 import { plural } from '~/lib/format';

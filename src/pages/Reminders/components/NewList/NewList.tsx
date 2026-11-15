@@ -1,5 +1,5 @@
 import { ReminderCard, ReminderRow } from '~/components/reminders';
-import { Tile } from '~/components/ui/Tile';
+import { Tile } from '~/components/ui';
 import { RemindersPage } from '../../hooks';
 import { AllCaughtUp } from '../AllCaughtUp';
 

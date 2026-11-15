@@ -1,6 +1,6 @@
 import { ChevronRight, FileText, Repeat } from 'lucide-react';
 import { useShallow } from 'zustand/react/shallow';
-import { Modal } from '~/components/ui/Modal';
+import { Modal } from '~/components/ui';
 import { useNoteDialogStore } from '~/state/noteDialog';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
 import { useReminderChooserStore } from '~/state/reminderChooser';

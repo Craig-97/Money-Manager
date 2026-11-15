@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { AlertTriangle, ChevronDown } from 'lucide-react';
-import { DateBox } from '~/components/ui/DateBox';
+import { DateBox } from '~/components/ui';
 import { AccountBeforePayday, accountLetter, goesBelowZero } from '~/lib/accounts';
 import { cn } from '~/lib/cn';
 import { formatShortDate } from '~/lib/dates';

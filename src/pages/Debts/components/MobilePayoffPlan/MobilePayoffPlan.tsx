@@ -1,6 +1,5 @@
 import { PayoffChart } from '~/components/debts';
-import { Button } from '~/components/ui/Button';
-import { SegmentedControl } from '~/components/ui/SegmentedControl';
+import { Button, SegmentedControl } from '~/components/ui';
 import { chartText, STRATEGY_OPTIONS } from '../../debtsModel';
 import { Debts, PayoffPlan } from '../../hooks';
 import { ExtraChoices } from '../ExtraChoices';

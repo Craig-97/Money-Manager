@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useApolloClient, useMutation } from '@apollo/client/react';
 import { AccountDraft } from '~/components/accounts';
-import { DraftPayment } from '~/components/payments/PaymentDialog';
+import { DraftPayment } from '~/components/payments';
 import { ERRORS } from '~/constants';
 import { linkBudget } from '~/graphql/cache';
 import {

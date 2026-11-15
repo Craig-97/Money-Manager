@@ -1,4 +1,4 @@
-import { Skeleton } from '~/components/ui/Skeleton';
+import { Skeleton } from '~/components/ui';
 
 const tile = 'flex min-w-0 flex-col gap-5 rounded-3xl border border-border bg-surface p-5 md:p-6';
 

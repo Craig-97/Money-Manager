@@ -1,14 +1,16 @@
 import { Check, ChevronDown } from 'lucide-react';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
-import { AmountInput } from '~/components/form/AmountInput';
-import { DatePicker } from '~/components/form/DatePicker';
-import { describedBy } from '~/components/form/describedBy';
-import { FieldError } from '~/components/form/FieldError';
-import { Radio } from '~/components/form/Radio';
-import { Select } from '~/components/form/Select';
-import { TextInput } from '~/components/form/TextInput';
+import {
+  AmountInput,
+  DatePicker,
+  describedBy,
+  FieldError,
+  Radio,
+  Select,
+  TextInput
+} from '~/components/form';
 import { CalendarIcon } from '~/components/icons';
-import { optionClasses, popoverClasses } from '~/components/ui/popoverClasses';
+import { optionClasses, popoverClasses } from '~/components/ui';
 import { PayFrequency } from '~/graphql/generated';
 import { cn } from '~/lib/cn';
 import { formatLongDate } from '~/lib/dates';

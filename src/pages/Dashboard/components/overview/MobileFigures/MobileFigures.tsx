@@ -1,7 +1,6 @@
 import { PenLine, Repeat } from 'lucide-react';
-import { ApproximatelyEqual } from '~/components/payments/PaymentParts';
-import { Button } from '~/components/ui/Button';
-import { IconButton } from '~/components/ui/IconButton';
+import { ApproximatelyEqual } from '~/components/payments';
+import { Button, IconButton } from '~/components/ui';
 import { cn } from '~/lib/cn';
 import { formatShortDate } from '~/lib/dates';
 import { formatBalance, formatMoney } from '~/lib/format';

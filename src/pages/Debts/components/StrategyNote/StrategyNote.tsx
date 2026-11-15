@@ -1,4 +1,4 @@
-import { InfoNote } from '~/components/feedback/InfoNote';
+import { InfoNote } from '~/components/feedback';
 import { PayoffStrategy } from '~/lib/debts';
 import { STRATEGIES } from '../../debtsModel';
 

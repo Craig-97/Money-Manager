@@ -1,7 +1,7 @@
-import { Tooltip } from '~/components/ui/Tooltip';
 import { useTheme } from '~/hooks/useTheme';
 import { cn } from '~/lib/cn';
 import { Theme } from '~/state/prefs';
+import { Tooltip } from '../../../ui';
 import { ThemeIcon } from '../ThemeIcon';
 
 const THEMES: { value: Theme; label: string }[] = [

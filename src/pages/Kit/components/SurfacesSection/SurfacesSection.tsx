@@ -1,5 +1,4 @@
-import { Skeleton } from '~/components/ui/Skeleton';
-import { Tile } from '~/components/ui/Tile';
+import { Skeleton, Tile } from '~/components/ui';
 import { KitExample } from '../KitExample';
 import { KitSection } from '../KitSection';
 

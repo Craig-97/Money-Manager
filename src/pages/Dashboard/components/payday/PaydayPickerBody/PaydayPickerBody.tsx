@@ -1,4 +1,4 @@
-import { Calendar } from '~/components/form/Calendar';
+import { Calendar } from '~/components/form';
 import { cn } from '~/lib/cn';
 import { isSameDay, toIsoDate } from '~/lib/dates';
 import { formatBalance } from '~/lib/format';

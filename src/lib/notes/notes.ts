@@ -1,14 +1,7 @@
 import { NoteColor, NoteFieldsFragment, NoteRepeat, PaymentFrequency } from '~/graphql/generated';
-import {
-  addDays,
-  formatShortDay,
-  fromApiDate,
-  parseIsoDate,
-  spanText,
-  toIsoDate
-} from '~/lib/dates';
-import { joinNames } from '~/lib/format';
-import { nextOccurrence, Payment } from '~/lib/payments';
+import { addDays, formatShortDay, fromApiDate, parseIsoDate, spanText, toIsoDate } from '../dates';
+import { joinNames } from '../format';
+import { nextOccurrence, Payment } from '../payments';
 
 // The days before a note's date it can remind: on the day, the day before, a week, two weeks, a month
 const NOTE_REMIND_DAYS = [0, 1, 7, 14, 30] as const;

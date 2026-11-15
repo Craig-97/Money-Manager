@@ -1,6 +1,6 @@
 import { NonWorkingDay } from '~/graphql/generated';
-import { toIsoDate } from '~/lib/dates';
-import { BankHolidays, toWorkingDay } from '~/lib/payday';
+import { toIsoDate } from '../dates';
+import { BankHolidays, toWorkingDay } from '../payday';
 
 /*
  * Moving a recurring payment's dates off weekends and bank holidays. The API keeps the dates the

@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router';
 import { preloadPage } from '~/app/routes/pageModules';
-import { DashboardIcon } from '~/components/icons';
+import { DashboardIcon } from '../../../icons';
 import { NavItem } from '../../navItems';
 
 /* One of the mobile nav's pages, as a round icon button */

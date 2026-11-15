@@ -1,14 +1,9 @@
 import { ReactNode, useState } from 'react';
-import { AmountInput } from '~/components/form/AmountInput';
-import { FieldError } from '~/components/form/FieldError';
-import { Label } from '~/components/form/Label';
-import { TextInput } from '~/components/form/TextInput';
-import { MoreOptions } from '~/components/ui/MoreOptions';
-import { SegmentedControl } from '~/components/ui/SegmentedControl';
-import { Switch } from '~/components/ui/Switch';
 import { AccountKind } from '~/graphql/generated';
 import { cn } from '~/lib/cn';
 import { parseMoney } from '~/lib/format';
+import { AmountInput, FieldError, Label, TextInput } from '../../form';
+import { MoreOptions, SegmentedControl, Switch } from '../../ui';
 import { AccountDraft, AccountDraftErrors } from '../accountDraft';
 import { InterestFields } from '../InterestFields';
 

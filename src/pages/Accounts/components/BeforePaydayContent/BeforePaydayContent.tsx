@@ -1,5 +1,5 @@
-import { InfoNote } from '~/components/feedback/InfoNote';
-import { Tile } from '~/components/ui/Tile';
+import { InfoNote } from '~/components/feedback';
+import { Tile } from '~/components/ui';
 import { MEDIA } from '~/constants';
 import { useMediaQuery } from '~/hooks/useMediaQuery';
 import { accountLetter } from '~/lib/accounts';

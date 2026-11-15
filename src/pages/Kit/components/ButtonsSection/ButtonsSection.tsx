@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Plus, Repeat, Trash2 } from 'lucide-react';
-import { Button } from '~/components/ui/Button';
-import { IconButton } from '~/components/ui/IconButton';
+import { Button, IconButton } from '~/components/ui';
 import { KitExample } from '../KitExample';
 import { KitSection } from '../KitSection';
 

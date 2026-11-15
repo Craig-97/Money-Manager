@@ -1,5 +1,5 @@
-import { PaydayConfig } from '~/lib/dates';
-import { ordinal } from '~/lib/format';
+import { PaydayConfig } from '../dates';
+import { ordinal } from '../format';
 import { PAY_FREQUENCY_LABELS, REGIONS, WEEKDAYS } from './options';
 
 /* "last working day", "last Friday", "the 15th", "Fridays" */

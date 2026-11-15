@@ -1,6 +1,6 @@
 import { PaymentFrequency } from '~/graphql/generated';
-import { roundPence } from '~/lib/format';
-import { PER_YEAR } from '~/lib/payments';
+import { roundPence } from '../format';
+import { PER_YEAR } from '../payments';
 
 interface PaidOff {
   interest: number;

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { PayCycle } from '~/lib/payday';
-import { OneOffPayment, RecurringPayment } from '~/lib/payments';
+import { PayCycle } from '../payday';
+import { OneOffPayment, RecurringPayment } from '../payments';
 import {
   Account,
   accountMeta,

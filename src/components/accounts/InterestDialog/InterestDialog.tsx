@@ -1,11 +1,10 @@
 import { useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
-import { Button } from '~/components/ui/Button';
-import { Modal } from '~/components/ui/Modal';
 import { AccountInterestInput } from '~/graphql/generated';
 import { useBackToAccount } from '~/hooks/useBackToAccount';
 import { Account } from '~/lib/accounts';
 import { useAccountQuickStore } from '~/state/accountQuick';
+import { Button, Modal } from '../../ui';
 import { checkInterestDraft, InterestDraft, interestDraftOf } from '../accountDraft';
 import { AccountSummary } from '../AccountSummary';
 import { InterestFields } from '../InterestFields';

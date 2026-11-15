@@ -1,5 +1,5 @@
-import { MobileBulkBar, MobileSortButton } from '~/components/payments/PaymentControls';
-import { SegmentedControl } from '~/components/ui/SegmentedControl';
+import { MobileBulkBar, MobileSortButton } from '~/components/payments';
+import { SegmentedControl } from '~/components/ui';
 import { PAYMENTS_HEADING_ID, Recurring } from '../../hooks';
 import { tabOptions } from '../../recurringModel';
 import { ListFoot } from '../ListFoot';

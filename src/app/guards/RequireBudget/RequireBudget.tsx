@@ -1,6 +1,6 @@
 import { Navigate, Outlet } from 'react-router';
 import { skipToken, useQuery } from '@apollo/client/react';
-import { FullPageLoader } from '~/components/feedback/FullPageLoader';
+import { FullPageLoader } from '~/components/feedback';
 import { ROUTES } from '~/constants';
 import { BudgetDocument } from '~/graphql/generated';
 import { useBudgetStatus } from '~/hooks/useBudgetStatus';

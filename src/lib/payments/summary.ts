@@ -1,6 +1,6 @@
-import { addDays, daysBetween, isSameDay, toIsoDate } from '~/lib/dates';
-import { roundPence } from '~/lib/format';
-import { PayCycle } from '~/lib/payday';
+import { addDays, daysBetween, isSameDay, toIsoDate } from '../dates';
+import { roundPence } from '../format';
+import { PayCycle } from '../payday';
 import { datesDue, isInCycle } from './cycle';
 import { movesTo, Payment } from './payments';
 import { isYearly, PER_MONTH, PER_YEAR } from './recurrence';

@@ -1,6 +1,5 @@
 import { Plus } from 'lucide-react';
-import { Button } from '~/components/ui/Button';
-import { tileLift } from '~/components/ui/Tile';
+import { Button, tileLift } from '~/components/ui';
 import { cn } from '~/lib/cn';
 import { formatMoney, plural } from '~/lib/format';
 import { usePaymentDialogStore } from '~/state/paymentDialog';

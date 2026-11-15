@@ -1,5 +1,3 @@
-import { InterestStrip } from '~/components/accounts/InterestStrip';
-import { PaymentLetter, summaryCardClasses } from '~/components/payments/PaymentParts';
 import { estimateText } from '~/lib/accounts';
 import { formatShortDate } from '~/lib/dates';
 import {
@@ -13,6 +11,8 @@ import {
 } from '~/lib/debts';
 import { formatMoney } from '~/lib/format';
 import { PER_PERIOD } from '~/lib/payments';
+import { InterestStrip } from '../../accounts';
+import { PaymentLetter, summaryCardClasses } from '../../payments';
 import { DebtProgress } from '../DebtProgress';
 
 interface DebtSummaryProps {

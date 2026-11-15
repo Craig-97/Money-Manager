@@ -1,4 +1,4 @@
-import { MobileBulkBar as BulkBar } from '~/components/payments/PaymentControls';
+import { MobileBulkBar as BulkBar } from '~/components/payments';
 import { Dashboard } from '../../../hooks';
 
 /* Mobile select mode: sits over the bottom nav with the bulk actions */

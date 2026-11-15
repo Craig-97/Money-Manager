@@ -1,4 +1,4 @@
-import { ChipGroup } from '~/components/ui/ChipGroup';
+import { ChipGroup } from '~/components/ui';
 import { daysOptions, PAYMENT_REMINDER_DAYS, RENEWAL_REMINDER_DAYS } from '~/lib/payments';
 import { RemindersPage } from '../../hooks';
 

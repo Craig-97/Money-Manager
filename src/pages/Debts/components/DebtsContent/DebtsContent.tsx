@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { SegmentedControl } from '~/components/ui/SegmentedControl';
-import { Tile } from '~/components/ui/Tile';
+import { SegmentedControl, Tile } from '~/components/ui';
 import { MEDIA } from '~/constants';
 import { Budget } from '~/hooks/useBudget';
 import { useMediaQuery } from '~/hooks/useMediaQuery';

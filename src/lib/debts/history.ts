@@ -1,7 +1,7 @@
 import { DebtHistoryQuery } from '~/graphql/generated';
-import { daysBetween, formatLongMonthYear, fromApiDate, inDays } from '~/lib/dates';
-import { formatMoney, roundPence } from '~/lib/format';
-import { PER_YEAR } from '~/lib/payments';
+import { daysBetween, formatLongMonthYear, fromApiDate, inDays } from '../dates';
+import { formatMoney, roundPence } from '../format';
+import { PER_YEAR } from '../payments';
 import { DebtPayment } from './debts';
 
 type HistoryRecord = NonNullable<DebtHistoryQuery['recurringPayment']>['history'][number];

@@ -1,7 +1,6 @@
 import { Trash } from 'lucide-react';
-import { FormBody, usePaymentForm } from '~/components/payments/PaymentDialog';
-import { Button } from '~/components/ui/Button';
-import { Modal } from '~/components/ui/Modal';
+import { FormBody, usePaymentForm } from '~/components/payments';
+import { Button, Modal } from '~/components/ui';
 import { DEFAULT_REMINDER_SETTINGS } from '~/lib/payments';
 import { SetupState } from '../../../hooks';
 import { setupAccounts } from '../../../setupModel';

@@ -1,9 +1,7 @@
 import { Plus } from 'lucide-react';
-import { Checkbox, CheckboxHitArea } from '~/components/form/Checkbox';
-import { BulkActions, SortMenu } from '~/components/payments/PaymentControls';
-import { Button } from '~/components/ui/Button';
-import { SegmentedControl } from '~/components/ui/SegmentedControl';
-import { tileLift } from '~/components/ui/Tile';
+import { Checkbox, CheckboxHitArea } from '~/components/form';
+import { BulkActions, SortMenu } from '~/components/payments';
+import { Button, SegmentedControl, tileLift } from '~/components/ui';
 import { cn } from '~/lib/cn';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
 import { PAYMENTS_HEADING_ID, Recurring } from '../../hooks';

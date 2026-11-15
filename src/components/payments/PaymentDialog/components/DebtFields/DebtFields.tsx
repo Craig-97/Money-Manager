@@ -1,7 +1,4 @@
-import { AmountInput } from '~/components/form/AmountInput';
-import { FieldError } from '~/components/form/FieldError';
-import { Label } from '~/components/form/Label';
-import { TextInput } from '~/components/form/TextInput';
+import { AmountInput, FieldError, Label, TextInput } from '../../../../form';
 import { PaymentForm } from '../../usePaymentForm';
 
 /*

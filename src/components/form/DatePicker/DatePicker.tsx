@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { CalendarDays } from 'lucide-react';
 import * as Popover from '@radix-ui/react-popover';
-import { popoverClasses } from '~/components/ui/popoverClasses';
 import { cn } from '~/lib/cn';
 import { formatShortDate, parseIsoDate, startOfToday, toIsoDate } from '~/lib/dates';
+import { popoverClasses } from '../../ui';
 import { Calendar } from '../Calendar';
 import { fieldClasses } from '../fieldClasses';
 

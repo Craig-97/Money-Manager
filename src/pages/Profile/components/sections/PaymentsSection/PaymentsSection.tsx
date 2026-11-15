@@ -1,6 +1,5 @@
-import { Label } from '~/components/form/Label';
-import { Select } from '~/components/form/Select';
-import { Button } from '~/components/ui/Button';
+import { Label, Select } from '~/components/form';
+import { Button } from '~/components/ui';
 import { Budget } from '~/hooks/useBudget';
 import { cn } from '~/lib/cn';
 import { usePaymentSettings } from '../../../hooks';

@@ -1,6 +1,6 @@
 import { PaymentFrequency } from '~/graphql/generated';
-import { daysBetween, formatDayMonth, formatMonthYear, formatShortDate, inDays } from '~/lib/dates';
-import { capitalise } from '~/lib/format';
+import { daysBetween, formatDayMonth, formatMonthYear, formatShortDate, inDays } from '../dates';
+import { capitalise } from '../format';
 import { Payment, RecurringPayment } from './payments';
 
 /*

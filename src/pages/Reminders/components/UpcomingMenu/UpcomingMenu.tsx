@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { BellOff, BellRing, Clock, ExternalLink } from 'lucide-react';
-import { Menu, MenuContent, MenuItem, MenuTrigger } from '~/components/ui/Menu';
+import { Menu, MenuContent, MenuItem, MenuTrigger } from '~/components/ui';
 import { Reminder } from '~/lib/reminders';
 import { RemindersPage } from '../../hooks';
 

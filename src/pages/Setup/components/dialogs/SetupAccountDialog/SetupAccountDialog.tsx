@@ -9,8 +9,7 @@ import {
   checkAccountDraft,
   EMPTY_ACCOUNT_DRAFT
 } from '~/components/accounts';
-import { Button } from '~/components/ui/Button';
-import { Modal } from '~/components/ui/Modal';
+import { Button, Modal } from '~/components/ui';
 import { startOfToday } from '~/lib/dates';
 import { SetupState } from '../../../hooks';
 

@@ -1,12 +1,8 @@
-import { DatePicker } from '~/components/form/DatePicker';
-import { FieldError } from '~/components/form/FieldError';
-import { Label } from '~/components/form/Label';
-import { Select } from '~/components/form/Select';
-import { TextInput } from '~/components/form/TextInput';
 import { InterestFrequency } from '~/graphql/generated';
 import { FREQUENCY_NAMES, interestPerPayment, nextMonthlyInterest } from '~/lib/accounts';
 import { addDays, formatShortDate, parseIsoDate, toIsoDate } from '~/lib/dates';
 import { formatMoney } from '~/lib/format';
+import { DatePicker, FieldError, Label, Select, TextInput } from '../../form';
 import { InterestDraft, InterestDraftErrors } from '../accountDraft';
 
 // A select can't hold an empty value, so not said yet has one of its own

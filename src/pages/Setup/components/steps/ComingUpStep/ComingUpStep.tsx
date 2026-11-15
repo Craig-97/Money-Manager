@@ -1,5 +1,5 @@
 import { Plus } from 'lucide-react';
-import { Button } from '~/components/ui/Button';
+import { Button } from '~/components/ui';
 import { cn } from '~/lib/cn';
 import { SetupState, useSetupDesktop } from '../../../hooks';
 import { MAX_ONE_OFFS, setupAccounts, setupAmount } from '../../../setupModel';

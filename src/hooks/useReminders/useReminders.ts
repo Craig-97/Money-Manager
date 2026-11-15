@@ -1,5 +1,3 @@
-import { useBudget } from '~/hooks/useBudget';
-import { usePayCycle } from '~/hooks/usePayCycle';
 import { toAccounts } from '~/lib/accounts';
 import { fromApiDate } from '~/lib/dates';
 import { followPayments, toNotes } from '~/lib/notes';
@@ -10,6 +8,8 @@ import {
   toReminderStates,
   upcomingReminders
 } from '~/lib/reminders';
+import { useBudget } from '../useBudget';
+import { usePayCycle } from '../usePayCycle';
 
 /*
  * The budget's reminders: New, the ones that have gone off, and Coming up. Worked out from the

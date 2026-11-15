@@ -1,11 +1,7 @@
-import { AmountInput } from '~/components/form/AmountInput';
-import { FieldError } from '~/components/form/FieldError';
-import { Label } from '~/components/form/Label';
-import { Button } from '~/components/ui/Button';
-import { ChangePreview } from '~/components/ui/ChangePreview';
-import { Modal } from '~/components/ui/Modal';
 import { useBackToAccount } from '~/hooks/useBackToAccount';
 import { Account } from '~/lib/accounts';
+import { AmountInput, FieldError, Label } from '../../form';
+import { Button, ChangePreview, Modal } from '../../ui';
 import { AccountSummary } from '../AccountSummary';
 import { useUpdateAccountBalance } from './useUpdateAccountBalance';
 

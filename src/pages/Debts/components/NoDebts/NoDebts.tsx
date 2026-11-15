@@ -1,6 +1,6 @@
 import { Plus } from 'lucide-react';
 import { DebtsIcon } from '~/components/icons';
-import { Button } from '~/components/ui/Button';
+import { Button } from '~/components/ui';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
 
 /* No recurring payments are tracked as debts yet */

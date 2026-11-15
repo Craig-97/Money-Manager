@@ -1,4 +1,4 @@
-import { spanText } from '~/lib/dates';
+import { spanText } from '../dates';
 /*
  * When a payment's reminders go off. Each payment has a timing for when it's due and one for when
  * it renews: off, a number of days before, or (no days) the budget's usual timing.

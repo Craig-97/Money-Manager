@@ -1,5 +1,5 @@
 import { Navigate, Outlet, useLocation } from 'react-router';
-import { FullPageLoader } from '~/components/feedback/FullPageLoader';
+import { FullPageLoader } from '~/components/feedback';
 import { ROUTES } from '~/constants';
 import { useAuthStore } from '~/state/auth';
 

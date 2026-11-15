@@ -1,4 +1,4 @@
-import { PageLink } from '~/components/ui/PageLink';
+import { PageLink } from '~/components/ui';
 import { ROUTES } from '~/constants';
 import { formatMoney, plural, splitPence } from '~/lib/format';
 import { Accounts } from '../../hooks';

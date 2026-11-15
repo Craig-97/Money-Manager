@@ -1,7 +1,6 @@
 import { ArrowDownWideNarrow, Plus } from 'lucide-react';
-import { SearchInput } from '~/components/form/SearchInput';
-import { Select } from '~/components/form/Select';
-import { Button } from '~/components/ui/Button';
+import { SearchInput, Select } from '~/components/form';
+import { Button } from '~/components/ui';
 import { plural } from '~/lib/format';
 import { NotesBoard } from '../../../hooks';
 import { NOTE_SORTS } from '../../../notesModel';

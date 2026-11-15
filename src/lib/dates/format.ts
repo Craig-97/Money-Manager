@@ -1,4 +1,4 @@
-import { plural } from '~/lib/format';
+import { plural } from '../format';
 // Dates in the app are local, so they're formatted in the browser's own time zone
 const longDate = new Intl.DateTimeFormat('en-GB', {
   weekday: 'long',

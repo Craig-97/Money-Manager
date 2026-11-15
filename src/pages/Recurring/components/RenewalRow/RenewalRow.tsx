@@ -1,9 +1,4 @@
-import {
-  accentTagClasses,
-  PaymentLetter,
-  redTagClasses,
-  tagClasses
-} from '~/components/payments/PaymentParts';
+import { accentTagClasses, PaymentLetter, redTagClasses, tagClasses } from '~/components/payments';
 import { formatMoney } from '~/lib/format';
 import { renewalLine, renewalWhen } from '~/lib/payments';
 import { usePaymentDialogStore } from '~/state/paymentDialog';

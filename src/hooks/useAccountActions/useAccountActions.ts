@@ -4,9 +4,9 @@ import {
   UpdateAccountBalancesDocument,
   UpdateAccountDocument
 } from '~/graphql/generated';
-import { Budget } from '~/hooks/useBudget';
 import { Account } from '~/lib/accounts';
 import { showErrorToast, showToast } from '~/state/toast';
+import { Budget } from '../useBudget';
 
 const showError = (error: unknown) =>
   showErrorToast(error, { fallback: "Couldn't change that. Try again." });

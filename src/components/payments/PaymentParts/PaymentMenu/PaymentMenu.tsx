@@ -10,8 +10,6 @@ import {
   Trash,
   Undo2
 } from 'lucide-react';
-import { IconButton } from '~/components/ui/IconButton';
-import { Menu, MenuContent, MenuItem, MenuSeparator, MenuTrigger } from '~/components/ui/Menu';
 import { PaymentActions } from '~/hooks/usePaymentActions';
 import { PayCycle } from '~/lib/payday';
 import { Payment, paymentChoices, quickEdits } from '~/lib/payments';
@@ -19,6 +17,7 @@ import { useNoteDialogStore } from '~/state/noteDialog';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
 import { usePaymentNotesStore } from '~/state/paymentNotes';
 import { useQuickEditStore } from '~/state/quickEdit';
+import { IconButton, Menu, MenuContent, MenuItem, MenuSeparator, MenuTrigger } from '../../../ui';
 
 interface PaymentMenuProps {
   payment: Payment;

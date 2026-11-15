@@ -1,4 +1,4 @@
-import { AuthPanel } from '~/components/auth/AuthPanel';
+import { AuthPanel } from '~/components/auth';
 import { ClockIcon, ShieldCheckIcon } from '~/components/icons';
 
 const FACTS = [

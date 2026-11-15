@@ -1,8 +1,5 @@
-import { DatePicker } from '~/components/form/DatePicker';
-import { FieldError } from '~/components/form/FieldError';
-import { Label } from '~/components/form/Label';
-import { Button } from '~/components/ui/Button';
-import { SegmentedControl, SegmentedOption } from '~/components/ui/SegmentedControl';
+import { DatePicker, FieldError, Label } from '~/components/form';
+import { Button, SegmentedControl, SegmentedOption } from '~/components/ui';
 import { cn } from '~/lib/cn';
 import { formatShortDay, toIsoDate } from '~/lib/dates';
 import { PaydayDates, QuickPick } from '../../../hooks';

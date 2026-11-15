@@ -1,5 +1,5 @@
 import { Calendar, Check, PenLine, Plus, TriangleAlert, X } from 'lucide-react';
-import { Button } from '~/components/ui/Button';
+import { Button } from '~/components/ui';
 import { formatShortDate } from '~/lib/dates';
 import { formatBalance, formatMoney, splitPence } from '~/lib/format';
 import { usePaymentDialogStore } from '~/state/paymentDialog';

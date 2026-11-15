@@ -1,4 +1,4 @@
-import { AuthPanel, Journey } from '~/components/auth/AuthPanel';
+import { AuthPanel, Journey } from '~/components/auth';
 
 const STEPS = [
   { title: 'Enter your email', description: 'The one you signed up with' },

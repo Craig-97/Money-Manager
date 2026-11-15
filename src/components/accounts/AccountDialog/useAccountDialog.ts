@@ -2,11 +2,11 @@ import { useState } from 'react';
 import { useMutation } from '@apollo/client/react';
 import { useShallow } from 'zustand/react/shallow';
 import {
+  AccountKind,
   CreateAccountDocument,
   DeleteAccountDocument,
   UpdateAccountDocument
 } from '~/graphql/generated';
-import { AccountKind } from '~/graphql/generated';
 import { Account, paidIntoAccountOf, spendingOf } from '~/lib/accounts';
 import { formatMoneyInput } from '~/lib/format';
 import { useAccountDialogStore } from '~/state/accountDialog';

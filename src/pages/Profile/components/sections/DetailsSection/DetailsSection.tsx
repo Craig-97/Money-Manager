@@ -1,7 +1,5 @@
-import { FieldError } from '~/components/form/FieldError';
-import { Label } from '~/components/form/Label';
-import { TextInput } from '~/components/form/TextInput';
-import { Button } from '~/components/ui/Button';
+import { FieldError, Label, TextInput } from '~/components/form';
+import { Button } from '~/components/ui';
 import { UserFieldsFragment } from '~/graphql/generated';
 import { useDetailsForm } from '../../../hooks';
 import { SECTION_ICONS } from '../sectionIcons';

@@ -1,6 +1,4 @@
-import { BrandMark } from '~/components/ui/BrandMark';
-import { buttonVariants } from '~/components/ui/Button';
-import { PageLink } from '~/components/ui/PageLink';
+import { BrandMark, buttonVariants, PageLink } from '~/components/ui';
 import { ROUTES } from '~/constants';
 import { cn } from '~/lib/cn';
 import { wrapClasses } from '../../landingClasses';

@@ -1,12 +1,14 @@
 import { CalendarClock, PenLine } from 'lucide-react';
-import { DatePicker } from '~/components/form/DatePicker';
-import { choiceClasses } from '~/components/form/fieldClasses';
-import { FieldError } from '~/components/form/FieldError';
-import { Label } from '~/components/form/Label';
-import { Radio } from '~/components/form/Radio';
-import { Select } from '~/components/form/Select';
-import { TextInput } from '~/components/form/TextInput';
-import { Button } from '~/components/ui/Button';
+import {
+  choiceClasses,
+  DatePicker,
+  FieldError,
+  Label,
+  Radio,
+  Select,
+  TextInput
+} from '~/components/form';
+import { Button } from '~/components/ui';
 import { Budget } from '~/hooks/useBudget';
 import { cn } from '~/lib/cn';
 import { formatShortDay } from '~/lib/dates';

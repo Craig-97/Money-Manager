@@ -1,5 +1,5 @@
 import { Navigate, Outlet } from 'react-router';
-import { FullPageLoader } from '~/components/feedback/FullPageLoader';
+import { FullPageLoader } from '~/components/feedback';
 import { ROUTES } from '~/constants';
 import { useBudgetStatus } from '~/hooks/useBudgetStatus';
 import { BudgetLoadError } from '../BudgetLoadError';

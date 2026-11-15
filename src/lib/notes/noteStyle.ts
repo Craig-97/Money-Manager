@@ -1,5 +1,5 @@
 import { NoteColor } from '~/graphql/generated';
-import { plural } from '~/lib/format';
+import { plural } from '../format';
 
 export const NOTE_MAX_LENGTH = 200;
 // The counter turns red with this many characters left

@@ -1,9 +1,8 @@
-import { DateBox } from '~/components/ui/DateBox';
-import { Skeleton } from '~/components/ui/Skeleton';
 import { DebtHistory } from '~/hooks/useDebtHistory';
 import { cn } from '~/lib/cn';
 import { DebtPayment } from '~/lib/debts';
 import { formatMoney } from '~/lib/format';
+import { DateBox, Skeleton } from '../../ui';
 import { PaymentsLoadError } from '../PaymentsLoadError';
 import { ShowOlderPayments } from '../ShowOlderPayments';
 

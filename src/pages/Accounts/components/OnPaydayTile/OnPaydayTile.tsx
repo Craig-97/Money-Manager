@@ -1,5 +1,5 @@
 import { ArrowRight, Plus } from 'lucide-react';
-import { Tile } from '~/components/ui/Tile';
+import { Tile } from '~/components/ui';
 import { formatShortDate } from '~/lib/dates';
 import { formatMoney } from '~/lib/format';
 import { Accounts } from '../../hooks';

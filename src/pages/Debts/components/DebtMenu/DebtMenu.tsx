@@ -1,7 +1,13 @@
 import { ArrowUp, Ellipsis, History, PenLine, RefreshCw, Timer, Trash } from 'lucide-react';
 import { useShallow } from 'zustand/react/shallow';
-import { IconButton } from '~/components/ui/IconButton';
-import { Menu, MenuContent, MenuItem, MenuSeparator, MenuTrigger } from '~/components/ui/Menu';
+import {
+  IconButton,
+  Menu,
+  MenuContent,
+  MenuItem,
+  MenuSeparator,
+  MenuTrigger
+} from '~/components/ui';
 import { DebtActions } from '~/hooks/useDebtActions';
 import { DebtPayment } from '~/lib/debts';
 import { useDebtDialogStore } from '~/state/debtDialog';

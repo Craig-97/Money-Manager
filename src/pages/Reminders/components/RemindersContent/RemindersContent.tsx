@@ -1,9 +1,6 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router';
-import { Button } from '~/components/ui/Button';
-import { ChipGroup } from '~/components/ui/ChipGroup';
-import { SegmentedControl } from '~/components/ui/SegmentedControl';
-import { Tile } from '~/components/ui/Tile';
+import { Button, ChipGroup, SegmentedControl, Tile } from '~/components/ui';
 import { MEDIA } from '~/constants';
 import { useMediaQuery } from '~/hooks/useMediaQuery';
 import { plural } from '~/lib/format';

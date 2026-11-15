@@ -1,6 +1,5 @@
-import { Select } from '~/components/form/Select';
-import { SegmentedControl } from '~/components/ui/SegmentedControl';
-import { tileLift } from '~/components/ui/Tile';
+import { Select } from '~/components/form';
+import { SegmentedControl, tileLift } from '~/components/ui';
 import { cn } from '~/lib/cn';
 import { formatShortDay } from '~/lib/dates';
 import { formatBalance, formatMoney } from '~/lib/format';

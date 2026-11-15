@@ -1,4 +1,4 @@
-import { Modal } from '~/components/ui/Modal';
+import { Modal } from '~/components/ui';
 import { formatShortDate } from '~/lib/dates';
 import { PaydayOverride } from '../../../hooks';
 import { PaydayPickerActions } from '../PaydayPickerActions';

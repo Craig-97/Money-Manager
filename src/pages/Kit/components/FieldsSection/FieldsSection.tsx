@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { AmountInput } from '~/components/form/AmountInput';
-import { FieldError } from '~/components/form/FieldError';
-import { Label } from '~/components/form/Label';
-import { PasswordInput } from '~/components/form/PasswordInput';
-import { SearchInput } from '~/components/form/SearchInput';
-import { TextInput } from '~/components/form/TextInput';
-import { MoreOptions } from '~/components/ui/MoreOptions';
+import {
+  AmountInput,
+  FieldError,
+  Label,
+  PasswordInput,
+  SearchInput,
+  TextInput
+} from '~/components/form';
+import { MoreOptions } from '~/components/ui';
 import { KitExample } from '../KitExample';
 import { KitSection } from '../KitSection';
 

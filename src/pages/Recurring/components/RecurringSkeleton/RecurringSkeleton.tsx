@@ -1,4 +1,4 @@
-import { Skeleton } from '~/components/ui/Skeleton';
+import { Skeleton } from '~/components/ui';
 
 const tileClasses = 'rounded-3xl border border-border bg-surface';
 

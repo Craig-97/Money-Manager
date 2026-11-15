@@ -1,5 +1,4 @@
-import { BrandMark } from '~/components/ui/BrandMark';
-import { PageLink } from '~/components/ui/PageLink';
+import { BrandMark, PageLink } from '~/components/ui';
 import { ROUTES } from '~/constants';
 import { cn } from '~/lib/cn';
 import { wrapClasses } from '../../landingClasses';

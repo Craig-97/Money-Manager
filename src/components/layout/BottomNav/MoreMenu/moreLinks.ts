@@ -1,7 +1,7 @@
 import { ComponentType } from 'react';
 import { PageName } from '~/app/routes/pageModules';
-import { IconProps, ProfileIcon } from '~/components/icons';
 import { ROUTES } from '~/constants';
+import { IconProps, ProfileIcon } from '../../../icons';
 import { navSection } from '../../navItems';
 
 export interface MoreLink {

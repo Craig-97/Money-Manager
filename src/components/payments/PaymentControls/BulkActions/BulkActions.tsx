@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { Check, Trash } from 'lucide-react';
-import { Button } from '~/components/ui/Button';
+import { Button } from '../../../ui';
 
 export interface BulkActionsProps {
   // The select all checkbox, which stays in place as the row changes

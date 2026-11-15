@@ -1,7 +1,7 @@
 import { addTypenameToDocument } from '@apollo/client/utilities';
 import { print } from 'graphql';
 import { ERRORS } from '~/constants';
-import { AuthSessionFragment, RefreshSessionDocument } from '~/graphql/generated';
+import { AuthSessionFragment, RefreshSessionDocument } from '../generated';
 import { apiUrl } from './apiUrl';
 
 // Asks for __typename as Apollo's own requests do. The user is written to the cache through the

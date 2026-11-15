@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { tileLift } from '~/components/ui/Tile';
+import { tileLift } from '~/components/ui';
 import { SectionId } from '../../../profileModel';
 
 interface SettingsTileProps {

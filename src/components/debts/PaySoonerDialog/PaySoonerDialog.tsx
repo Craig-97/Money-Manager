@@ -1,10 +1,9 @@
 import { useShallow } from 'zustand/react/shallow';
-import { Button } from '~/components/ui/Button';
-import { Modal } from '~/components/ui/Modal';
 import { useBackToDebt } from '~/hooks/useBackToDebt';
 import { usePaySooner } from '~/hooks/usePaySooner';
 import { DebtPayment } from '~/lib/debts';
 import { useDebtDialogStore } from '~/state/debtDialog';
+import { Button, Modal } from '../../ui';
 import { PaySoonerCard } from '../PaySoonerCard';
 
 interface PaySoonerDialogProps {

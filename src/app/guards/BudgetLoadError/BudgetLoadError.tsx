@@ -1,4 +1,4 @@
-import { BudgetError } from '~/components/feedback/BudgetError';
+import { BudgetError } from '~/components/feedback';
 
 /* The guards' error, on its own page: they show before the app shell */
 export const BudgetLoadError = ({ onRetry }: { onRetry: () => void }) => (

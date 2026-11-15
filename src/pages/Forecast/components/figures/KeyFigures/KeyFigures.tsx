@@ -1,5 +1,5 @@
 import { CalendarDays, CreditCard, TrendingUp } from 'lucide-react';
-import { Tile } from '~/components/ui/Tile';
+import { Tile } from '~/components/ui';
 import { cn } from '~/lib/cn';
 import { formatShortDate } from '~/lib/dates';
 import { formatBalance, formatMoney } from '~/lib/format';

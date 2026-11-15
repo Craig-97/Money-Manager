@@ -9,7 +9,7 @@ import {
   RecurringPaymentFieldsFragmentDoc,
   ReminderStateFieldsFragment,
   ReminderStateFieldsFragmentDoc
-} from '~/graphql/generated';
+} from '../generated';
 
 // The budget's lists in the cache. Mutations that return an updated payment or note update it
 // everywhere by themselves; creating or deleting one also has to change the budget's list.

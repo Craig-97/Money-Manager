@@ -1,5 +1,5 @@
 import { LogOut, MonitorOff, Trash2, TriangleAlert } from 'lucide-react';
-import { Button } from '~/components/ui/Button';
+import { Button } from '~/components/ui';
 import { useDeleteAccount, useLogoutEverywhere } from '../../../hooks';
 import { DeleteAccountDialog } from '../DeleteAccountDialog';
 import { LogoutEverywhereDialog } from '../LogoutEverywhereDialog';

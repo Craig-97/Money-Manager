@@ -1,4 +1,4 @@
-import { Checkbox, CheckboxHitArea } from '~/components/form/Checkbox';
+import { Checkbox, CheckboxHitArea } from '~/components/form';
 import { cn } from '~/lib/cn';
 import { SegmentKind, useDueDemo } from '../../../hooks';
 

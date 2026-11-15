@@ -8,16 +8,12 @@ import {
   SkipForward,
   Undo2
 } from 'lucide-react';
-import { DebtsIcon } from '~/components/icons';
-import { ActionRow } from '~/components/ui/ActionRow';
-import { ActionRows } from '~/components/ui/ActionRows';
-import { ActionTile } from '~/components/ui/ActionTile';
-import { ActionTiles } from '~/components/ui/ActionTiles';
-import { Modal } from '~/components/ui/Modal';
 import { cn } from '~/lib/cn';
 import { formatShortDate } from '~/lib/dates';
 import { formatMoney, plural } from '~/lib/format';
 import { noteColor } from '~/lib/notes';
+import { DebtsIcon } from '../../icons';
+import { ActionRow, ActionRows, ActionTile, ActionTiles, Modal } from '../../ui';
 import { PaymentSummary } from '../PaymentParts';
 import { usePaymentSheet } from './usePaymentSheet';
 

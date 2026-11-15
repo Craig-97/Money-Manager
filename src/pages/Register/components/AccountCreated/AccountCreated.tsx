@@ -1,6 +1,6 @@
-import { AuthResult } from '~/components/auth/AuthResult';
+import { AuthResult } from '~/components/auth';
 import { ArrowRightIcon, CheckIcon } from '~/components/icons';
-import { Button } from '~/components/ui/Button';
+import { Button } from '~/components/ui';
 import { AuthSessionFragment } from '~/graphql/generated';
 import { useStartSession } from '~/hooks/useStartSession';
 

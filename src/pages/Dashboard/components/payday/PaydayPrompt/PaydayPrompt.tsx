@@ -1,11 +1,9 @@
 import { Fragment } from 'react';
 import { ArrowRight, Check, Clock, X } from 'lucide-react';
 import * as Dialog from '@radix-ui/react-dialog';
-import { AmountInput } from '~/components/form/AmountInput';
+import { AmountInput } from '~/components/form';
 import { PaydayIcon } from '~/components/icons';
-import { Button } from '~/components/ui/Button';
-import { IconButton } from '~/components/ui/IconButton';
-import { footerShade, headerShade, scrollBodyClasses } from '~/components/ui/Modal';
+import { Button, footerShade, headerShade, IconButton, scrollBodyClasses } from '~/components/ui';
 import { MEDIA } from '~/constants';
 import { useMediaQuery } from '~/hooks/useMediaQuery';
 import { useScrollShade } from '~/hooks/useScrollShade';

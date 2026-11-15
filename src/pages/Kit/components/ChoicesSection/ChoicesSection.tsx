@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { Moon, Sun } from 'lucide-react';
-import { Checkbox, CheckboxHitArea } from '~/components/form/Checkbox';
-import { Radio } from '~/components/form/Radio';
-import { SegmentedControl } from '~/components/ui/SegmentedControl';
+import { Checkbox, CheckboxHitArea, Radio } from '~/components/form';
+import { SegmentedControl } from '~/components/ui';
 import { KitExample } from '../KitExample';
 import { KitSection } from '../KitSection';
 

@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router';
 import { preloadPage } from '~/app/routes/pageModules';
-import { Tooltip } from '~/components/ui/Tooltip';
 import { cn } from '~/lib/cn';
+import { Tooltip } from '../../../ui';
 import { NavItem } from '../../navItems';
 import { SidebarReminderCount } from '../SidebarReminderCount';
 

@@ -1,3 +1,4 @@
+// Not through the client barrel: its client.ts loads this file, so that would be a loop
 import { createApolloClient } from '~/graphql/client/createApolloClient';
 import { addDays, startOfToday, toIsoDate } from '~/lib/dates';
 import { roundPence } from '~/lib/format';

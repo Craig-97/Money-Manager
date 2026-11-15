@@ -1,4 +1,4 @@
-import { SegmentedControl } from '~/components/ui/SegmentedControl';
+import { SegmentedControl } from '../../../../ui';
 import { PaymentForm, PaymentRole } from '../../usePaymentForm';
 import { DebtFields } from '../DebtFields';
 import { MoveInto } from '../MoveInto';

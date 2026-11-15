@@ -1,4 +1,4 @@
-import { Skeleton } from '~/components/ui/Skeleton';
+import { Skeleton } from '~/components/ui';
 
 /* The debts page's shape while the budget loads */
 export const DebtsSkeleton = () => (

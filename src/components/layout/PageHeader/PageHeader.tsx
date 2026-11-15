@@ -1,12 +1,12 @@
 import { ReactNode } from 'react';
 import { Link } from 'react-router';
-import { ReminderBell } from '~/components/reminders';
-import { Avatar } from '~/components/ui/Avatar';
 import { MEDIA, ROUTES } from '~/constants';
 import { useCurrentUser } from '~/hooks/useCurrentUser';
 import { useMediaQuery } from '~/hooks/useMediaQuery';
 import { formatLongDate } from '~/lib/dates';
 import { getInitials } from '~/lib/format';
+import { ReminderBell } from '../../reminders';
+import { Avatar } from '../../ui';
 
 interface PageHeaderProps {
   title: string;

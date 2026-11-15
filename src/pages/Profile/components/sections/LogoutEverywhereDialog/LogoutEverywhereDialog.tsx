@@ -1,6 +1,5 @@
 import { MonitorOff } from 'lucide-react';
-import { Button } from '~/components/ui/Button';
-import { Modal } from '~/components/ui/Modal';
+import { Button, Modal } from '~/components/ui';
 import { useLogoutEverywhere } from '../../../hooks';
 
 export const LogoutEverywhereDialog = ({

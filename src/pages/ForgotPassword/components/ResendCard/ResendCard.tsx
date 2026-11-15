@@ -1,6 +1,6 @@
-import { FieldError } from '~/components/form/FieldError';
+import { FieldError } from '~/components/form';
 import { CheckIcon, ResendIcon } from '~/components/icons';
-import { Button } from '~/components/ui/Button';
+import { Button } from '~/components/ui';
 
 interface ResendCardProps {
   cooldownSeconds: number;
