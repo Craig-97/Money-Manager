@@ -6,6 +6,7 @@ import { toPayments } from '~/lib/payments';
 import { useDebtDialogStore } from '~/state/debtDialog';
 import { useDebtViewStore } from '~/state/debtView';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
+import { usePaymentHistoryStore } from '~/state/paymentHistory';
 
 /*
  * The debt a name opened, and where its tiles go. Each closes the view and opens its small dialog,
@@ -21,10 +22,10 @@ export const useDebtSheet = () => {
     useShallow(s => ({
       openBalance: s.openBalance,
       openOverpayment: s.openOverpayment,
-      openPaySooner: s.openPaySooner,
-      openPayments: s.openPayments
+      openPaySooner: s.openPaySooner
     }))
   );
+  const openPayments = usePaymentHistoryStore(s => s.openFor);
   const openEdit = usePaymentDialogStore(s => s.openEdit);
 
   const debt = budget
@@ -48,7 +49,7 @@ export const useDebtSheet = () => {
     updateBalance: then(() => dialogs.openBalance(debt.id, fromView)),
     overpay: then(() => dialogs.openOverpayment(debt.id, fromView)),
     paySooner: then(() => dialogs.openPaySooner(debt.id, fromView)),
-    payments: then(() => dialogs.openPayments(debt.id, fromView)),
+    payments: then(() => openPayments(debt.id, { backTo: 'debt' })),
     edit: then(() => openEdit('recurring', { paymentId: debt.id, asDebt: true }))
   } as const;
 };

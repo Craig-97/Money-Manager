@@ -9,3 +9,4 @@ export * from './renewal';
 export * from './sort';
 export * from './summary';
 export * from './quickEdit';
+export * from './history';

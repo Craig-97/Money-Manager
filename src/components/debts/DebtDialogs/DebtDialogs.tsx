@@ -5,7 +5,6 @@ import { isDebt } from '~/lib/debts';
 import { toPayments } from '~/lib/payments';
 import { DebtSheet } from '../DebtSheet';
 import { OverpaymentDialog } from '../OverpaymentDialog';
-import { PaymentsDialog } from '../PaymentsDialog';
 import { PaySoonerDialog } from '../PaySoonerDialog';
 import { UpdateBalanceDialog } from '../UpdateBalanceDialog';
 
@@ -24,11 +23,6 @@ export const DebtDialogs = () => {
       <DebtSheet />
       <UpdateBalanceDialog debts={debts} today={today} onUpdate={actions.updateBalance} />
       <OverpaymentDialog debts={debts} onOverpay={actions.overpay} />
-      <PaymentsDialog
-        debts={debts}
-        today={today}
-        onUndoOverpayment={(id, name) => void actions.undoOverpayment(id, name)}
-      />
       <PaySoonerDialog debts={debts} today={today} onPayMore={actions.payMore} />
     </>
   );

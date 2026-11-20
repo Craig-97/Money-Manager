@@ -9,6 +9,7 @@ import { datesDue, dueInfo, paymentChoices, quickEdits, toPayments } from '~/lib
 import { useDebtViewStore } from '~/state/debtView';
 import { useNoteDialogStore } from '~/state/noteDialog';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
+import { usePaymentHistoryStore } from '~/state/paymentHistory';
 import { usePaymentNotesStore } from '~/state/paymentNotes';
 import { usePaymentSheetStore } from '~/state/paymentSheet';
 import { useQuickEditStore } from '~/state/quickEdit';
@@ -29,6 +30,7 @@ export const usePaymentSheet = () => {
   const openNewNote = useNoteDialogStore(s => s.openNewFor);
   const openQuickEdit = useQuickEditStore(s => s.openFor);
   const openDebt = useDebtViewStore(s => s.openFor);
+  const openHistory = usePaymentHistoryStore(s => s.openFor);
 
   const payment = budget
     ? toPayments(budget, { today, holidays }).find(item => item.id === paymentId)
@@ -68,6 +70,8 @@ export const usePaymentSheet = () => {
       if (recurring) void actions.skip(recurring);
     }),
     edit: then(() => openEdit(payment.kind, { paymentId: payment.id })),
+    // Its history, with a back arrow to here; a one-off only ever has one payment
+    seePayments: recurring ? then(() => openHistory(recurring.id, { backTo: 'payment' })) : null,
     // A debt's payment opens the debt's view, with what's left and its small dialogs
     viewDebt: recurring && isDebt(recurring) ? then(() => openDebt(recurring.id)) : null,
     // Change amount and Change date come back here with their back arrow

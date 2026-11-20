@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { DebtHistoryQuery } from '~/graphql/generated';
-import { DebtPayment } from './debts';
-import { byMonth, debtHistory, dueInText } from './history';
+import { PaymentHistoryQuery } from '~/graphql/generated';
+import { byMonth, dueInText, historySummary, paymentHistory } from './history';
+import { RecurringPayment } from './payments';
 import { apiDate, TODAY } from '~/test/dates';
 
-type HistoryRecord = NonNullable<DebtHistoryQuery['recurringPayment']>['history'][number];
+type HistoryRecord = NonNullable<PaymentHistoryQuery['recurringPayment']>['history'][number];
 
-const card: DebtPayment = {
+const card: RecurringPayment = {
   kind: 'recurring',
   id: 'card',
   name: 'Credit card',
@@ -46,13 +46,15 @@ const record = (
   {
     date,
     balanceChange,
-    debt,
-    open = false
+    debt = null,
+    open = false,
+    account = null
   }: {
     date: string;
     balanceChange: number;
-    debt: Omit<NonNullable<HistoryRecord['debt']>, '__typename'> | null;
+    debt?: Omit<NonNullable<HistoryRecord['debt']>, '__typename'> | null;
     open?: boolean;
+    account?: string | null;
   }
 ): HistoryRecord => ({
   __typename: 'PaymentRecord',
@@ -60,14 +62,18 @@ const record = (
   kind,
   dates: [apiDate(date)],
   balanceChange,
+  account,
   open,
   createdAt: apiDate(date),
   debt: debt && { ...debt, __typename: 'PaymentRecordDebt' }
 });
 
-describe('debtHistory', () => {
+// As the dialog has it with one account to spend from: no From column
+const noAccounts = { accountName: () => null, next: true };
+
+describe('paymentHistory for a debt', () => {
   it('leads with the next payment, estimating what it will leave', () => {
-    const [next] = debtHistory(card, { records: [], today: TODAY });
+    const [next] = paymentHistory(card, { records: [], today: TODAY, ...noAccounts });
     // £2,340 + a month's interest at 24.9% (£48.56) − £150
     expect(next).toMatchObject({
       kind: 'due',
@@ -79,7 +85,7 @@ describe('debtHistory', () => {
   });
 
   it('says what each record did', () => {
-    const entries = debtHistory(card, {
+    const entries = paymentHistory(card, {
       records: [
         record('OVERPAYMENT', {
           date: '2026-10-01',
@@ -103,7 +109,8 @@ describe('debtHistory', () => {
           }
         })
       ],
-      today: TODAY
+      today: TODAY,
+      ...noAccounts
     }).slice(1);
 
     expect(entries.map(entry => [entry.label, entry.detail, entry.amount, entry.undoable])).toEqual(
@@ -118,7 +125,10 @@ describe('debtHistory', () => {
 
   it("has no next payment once it's paid off", () => {
     expect(
-      debtHistory({ ...card, debt: { ...card.debt, balance: 0 } }, { records: [], today: TODAY })
+      paymentHistory(
+        { ...card, debt: { ...card.debt!, balance: 0 } },
+        { records: [], today: TODAY, ...noAccounts }
+      )
     ).toEqual([]);
   });
 });
@@ -133,7 +143,8 @@ describe('dueInText', () => {
 
 describe('byMonth', () => {
   it("puts each month's entries under it, newest first", () => {
-    const entries = debtHistory(card, {
+    const entries = paymentHistory(card, {
+      ...noAccounts,
       records: [
         record('PAID', { date: '2026-09-15', balanceChange: -150, debt: null }),
         record('PAID', { date: '2026-09-01', balanceChange: -150, debt: null }),
@@ -146,5 +157,81 @@ describe('byMonth', () => {
       ['September 2026', 2],
       ['August 2026', 1]
     ]);
+  });
+});
+
+const netflix: RecurringPayment = {
+  ...card,
+  id: 'netflix',
+  name: 'Netflix',
+  amount: 20,
+  debt: null
+};
+
+describe('paymentHistory for any other payment', () => {
+  it('says where a price changed, and what each pay and skip was', () => {
+    const entries = paymentHistory(netflix, {
+      ...noAccounts,
+      next: false,
+      today: TODAY,
+      records: [
+        record('PAID', { date: '2026-09-02', balanceChange: -20 }),
+        record('PAID', { date: '2026-08-02', balanceChange: -20 }),
+        record('SKIPPED', { date: '2026-07-02', balanceChange: 0 }),
+        record('PAID', { date: '2026-06-02', balanceChange: -18 }),
+        record('PAID', { date: '2026-05-02', balanceChange: 0 })
+      ]
+    });
+
+    expect(entries.map(entry => [entry.label, entry.note, entry.detail, entry.amount])).toEqual([
+      ['Paid', null, '', 20],
+      ['Paid', 'Up from £18.00', 'Up from £18.00', 20],
+      ['Skipped', null, 'Nothing paid this time', null],
+      ['Paid', null, '', 18],
+      ['Paid', null, 'Counted in your payday balance', null]
+    ]);
+  });
+
+  it('names the account each came out of once there are several, and leads with the next', () => {
+    const [next, paid] = paymentHistory(
+      { ...netflix, account: 'everyday' },
+      {
+        accountName: id => (id === 'everyday' ? 'Everyday' : null),
+        next: true,
+        today: TODAY,
+        records: [
+          record('PAID', { date: '2026-09-02', balanceChange: -20, account: 'everyday' }),
+          record('PAID', { date: '2026-08-02', balanceChange: -18, account: 'everyday' })
+        ]
+      }
+    );
+
+    expect(next).toMatchObject({
+      kind: 'due',
+      account: 'Everyday',
+      balanceAfter: null,
+      amount: 20
+    });
+    expect(paid).toMatchObject({ account: 'Everyday', detail: 'From Everyday · up from £18.00' });
+  });
+});
+
+describe('historySummary', () => {
+  it('adds up what a year paid and skipped', () => {
+    const entries = paymentHistory(netflix, {
+      ...noAccounts,
+      today: TODAY,
+      records: [
+        record('PAID', { date: '2026-09-02', balanceChange: -20 }),
+        record('SKIPPED', { date: '2026-08-02', balanceChange: 0 }),
+        record('PAID', { date: '2026-07-02', balanceChange: -18 })
+      ]
+    });
+    expect(historySummary(netflix, { entries, year: 2026 })).toBe(
+      'a month · £38.00 paid in 2026 · 1 skipped'
+    );
+    expect(historySummary(netflix, { entries: [], year: 2025 })).toBe(
+      'a month · nothing paid in 2025'
+    );
   });
 });

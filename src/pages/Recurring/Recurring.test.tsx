@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { screen, within } from '@testing-library/react';
 import { fakeRecurring } from '~/test/builders';
 import { apiDate } from '~/test/dates';
-import { createFakeApi, FakeBudget, freshBudget } from '~/test/fakeApi';
+import { createFakeApi, FakeBudget, fakeRecord, freshBudget } from '~/test/fakeApi';
 import { editFromRow } from '~/test/paymentRow';
 import { renderApp } from '~/test/renderApp';
 import { resetViewport, setViewportWidth } from '~/test/viewport';
@@ -372,6 +372,55 @@ describe('recurring page', () => {
   });
 });
 
+// Netflix's pays this year: up from £18 in August, and July skipped
+const withHistory = (): FakeBudget => {
+  const data = budget();
+  const paid = (iso: string, amount: number) =>
+    fakeRecord('PAID', {
+      dates: [apiDate(iso)],
+      balanceChange: -amount,
+      account: 'account-current'
+    });
+  return {
+    ...data,
+    recurringPayments: data.recurringPayments.map(payment =>
+      payment.id === 'netflix'
+        ? {
+            ...payment,
+            history: [
+              paid('2026-09-02', 20),
+              paid('2026-08-02', 20),
+              fakeRecord('SKIPPED', { dates: [apiDate('2026-07-02')] }),
+              paid('2026-06-02', 18)
+            ]
+          }
+        : payment
+    )
+  };
+};
+
+describe("a payment's history", () => {
+  it("opens from the row's menu: a year of pays and skips, where the price went up and the total", async () => {
+    const { user } = renderRecurring(withHistory());
+
+    await user.click(await screen.findByRole('button', { name: 'More actions for Netflix' }));
+    await user.click(screen.getByRole('menuitem', { name: 'See payments' }));
+
+    const dialog = await screen.findByRole('dialog', { name: 'Netflix payments' });
+    const table = await within(dialog).findByRole('table', { name: 'Payments in 2026' });
+    expect(dialog).toHaveTextContent('£20.00 a month · £58.00 paid in 2026 · 1 skipped');
+    expect(within(table).getByText('Up from £18.00')).toBeInTheDocument();
+    expect(within(table).getByText('Skipped')).toBeInTheDocument();
+    // Due today, then the four records
+    expect(within(table).getAllByRole('row')).toHaveLength(1 + 1 + 4);
+    // One account to spend from, so nothing to say which; opened from the menu, so no way back
+    expect(within(table).queryByRole('columnheader', { name: 'From' })).not.toBeInTheDocument();
+    expect(
+      within(dialog).queryByRole('button', { name: 'Back to Netflix' })
+    ).not.toBeInTheDocument();
+  });
+});
+
 describe('recurring page on mobile', () => {
   beforeEach(() => setViewportWidth(390));
 
@@ -409,6 +458,22 @@ describe('recurring page on mobile', () => {
     expect(await row('Netflix')).toContain('Monthly · Unpaid');
     // Its 30 September date was before it was added, so it counts as paid, as on the dashboard
     expect(await row('Cleaner')).toContain('Weekly · 1 of 5 paid');
+  });
+
+  it("opens a payment's history from its sheet, with a way back to it", async () => {
+    const { user } = renderRecurring(withHistory());
+
+    await user.click(await screen.findByRole('button', { name: 'Netflix' }));
+    const sheet = await screen.findByRole('dialog', { name: 'Netflix' });
+    await user.click(within(sheet).getByRole('button', { name: 'See payments' }));
+
+    const payments = await screen.findByRole('dialog', { name: 'Netflix payments' });
+    expect(await within(payments).findByText('Due today')).toBeInTheDocument();
+    expect(within(payments).getByText('Up from £18.00')).toBeInTheDocument();
+    expect(within(payments).queryByRole('table')).not.toBeInTheDocument();
+
+    await user.click(within(payments).getByRole('button', { name: 'Back to Netflix' }));
+    expect(await screen.findByRole('dialog', { name: 'Netflix' })).toBeInTheDocument();
   });
 
   it('says which savings account a payment goes into', async () => {

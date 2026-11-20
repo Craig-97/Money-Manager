@@ -3,6 +3,7 @@ import {
   Check,
   ChevronRight,
   FileText,
+  History,
   PenLine,
   PoundSterling,
   SkipForward,
@@ -71,11 +72,7 @@ export const PaymentSheet = () => {
         </button>
       ) : null}
 
-      {choices.pay ||
-      choices.undo ||
-      edits.amount ||
-      edits.date ||
-      (recurring && choices.skipNext) ? (
+      {choices.pay || choices.undo || edits.amount || edits.date || recurring ? (
         <ActionTiles>
           {choices.pay ? (
             <ActionTile
@@ -108,6 +105,13 @@ export const PaymentSheet = () => {
           ) : null}
           {choices.undo ? (
             <ActionTile icon={<Undo2 size={20} />} label={choices.undo} onClick={sheet.undo} />
+          ) : null}
+          {sheet.seePayments ? (
+            <ActionTile
+              icon={<History size={20} />}
+              label="See payments"
+              onClick={sheet.seePayments}
+            />
           ) : null}
         </ActionTiles>
       ) : null}

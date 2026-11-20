@@ -628,6 +628,81 @@ describe("an account's view", () => {
   });
 });
 
+// The Cash ISA's year: interest, money moved in, a balance typed in
+const withIsaHistory = (): FakeBudget => {
+  const data = budget();
+  const change = (
+    kind: 'INTEREST' | 'MOVE_IN' | 'BALANCE_SET' | 'OPENING',
+    {
+      iso,
+      amount,
+      balanceAfter,
+      name = null
+    }: { iso: string; amount: number; balanceAfter: number; name?: string | null }
+  ) => ({ id: `${kind}-${iso}`, kind, date: apiDate(iso), change: amount, balanceAfter, name });
+  return {
+    ...data,
+    accounts: (data.accounts ?? []).map(account =>
+      account.id === 'isa'
+        ? {
+            ...account,
+            history: [
+              change('INTEREST', { iso: '2026-09-03', amount: 31.3, balanceAfter: 8650 }),
+              change('MOVE_IN', {
+                iso: '2026-08-25',
+                amount: 250,
+                balanceAfter: 8618.7,
+                name: 'Current account'
+              }),
+              change('BALANCE_SET', { iso: '2026-08-28', amount: -4.12, balanceAfter: 8368.7 }),
+              change('OPENING', { iso: '2026-01-01', amount: 8372.82, balanceAfter: 8372.82 })
+            ]
+          }
+        : account
+    )
+  };
+};
+
+describe("an account's balance changes", () => {
+  it('open from a savings account’s view, with a way back to it', async () => {
+    const { user } = renderAccounts(withIsaHistory());
+
+    await user.click(await screen.findByRole('button', { name: 'Cash ISA' }));
+    const view = await screen.findByRole('dialog', { name: 'Cash ISA' });
+    await user.click(within(view).getByRole('button', { name: 'See balance changes' }));
+
+    const dialog = await screen.findByRole('dialog', { name: 'Cash ISA balance changes' });
+    const table = await within(dialog).findByRole('table', { name: 'Balance changes in 2026' });
+    expect(dialog).toHaveTextContent('£8,650.00 now · £31.30 interest in 2026');
+    expect(within(table).getByText('From Current account')).toBeInTheDocument();
+    expect(within(table).getByText('Was £8,372.82')).toBeInTheDocument();
+    expect(within(table).getByText('+£31.30')).toBeInTheDocument();
+
+    await user.click(within(dialog).getByRole('button', { name: 'Back to Cash ISA' }));
+    expect(await screen.findByRole('dialog', { name: 'Cash ISA' })).toBeInTheDocument();
+  });
+
+  it('open from a savings account’s menu, but spending accounts don’t have them', async () => {
+    const { user } = renderAccounts(withIsaHistory());
+
+    await user.click(await screen.findByRole('button', { name: 'More actions for Cash ISA' }));
+    await user.click(screen.getByRole('menuitem', { name: 'See balance changes' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Cash ISA balance changes' });
+    // Opened from the menu, so there's no view to go back to
+    expect(
+      within(dialog).queryByRole('button', { name: 'Back to Cash ISA' })
+    ).not.toBeInTheDocument();
+    await user.click(within(dialog).getByRole('button', { name: 'Close' }));
+    await waitFor(() => expect(dialog).not.toBeInTheDocument());
+
+    await user.click(await screen.findByRole('button', { name: 'Current account' }));
+    const view = await screen.findByRole('dialog', { name: 'Current account' });
+    expect(
+      within(view).queryByRole('button', { name: 'See balance changes' })
+    ).not.toBeInTheDocument();
+  });
+});
+
 describe('savings interest', () => {
   // Easy access pays monthly on the 1st, so yesterday's hasn't been added yet; the ISA pays on the
   // 3rd, tomorrow, and has been building up since the 3rd of last month

@@ -9,6 +9,7 @@ import {
   createFakeApi,
   DEFAULT_USER,
   FakeAccount,
+  FakeAccountChange,
   FakeBudget,
   FakeNote,
   FakeOneOffPayment,
@@ -76,6 +77,47 @@ const mockPayment = ({
     }),
     ...fields
   });
+
+// Netflix's last nine months: up from £18 three months ago, and one skipped
+const netflixHistory = () =>
+  Array.from({ length: 9 }, (_, i) => {
+    const dates = [apiDate(toIsoDate(addMonths(startOfToday(), -(i + 1))))];
+    const record =
+      i === 5
+        ? fakeRecord('SKIPPED', { dates })
+        : fakeRecord('PAID', { dates, balanceChange: i < 3 ? -20 : -18 });
+    return { ...record, open: false };
+  });
+
+// Easy access since its history started: interest each month, money moved in and out, and a
+// balance typed in
+const easyAccessHistory = (): FakeAccountChange[] => {
+  const change = (
+    kind: FakeAccountChange['kind'],
+    {
+      days,
+      amount,
+      after,
+      name = null
+    }: { days: number; amount: number; after: number; name?: string | null }
+  ) => ({
+    id: `easy-${kind}-${days}`,
+    kind,
+    date: fromToday(days),
+    change: amount,
+    balanceAfter: after,
+    name
+  });
+  return [
+    change('BALANCE_SET', { days: -9, amount: -4.12, after: 4200 }),
+    change('MOVE_IN', { days: -18, amount: 500, after: 4204.12, name: 'Current account' }),
+    change('INTEREST', { days: -32, amount: 12.42, after: 3704.12 }),
+    change('MOVE_OUT', { days: -47, amount: -250, after: 3691.7, name: 'Current account' }),
+    change('INTEREST', { days: -62, amount: 13.09, after: 3941.7 }),
+    change('INTEREST', { days: -93, amount: 13.27, after: 3928.61 }),
+    change('OPENING', { days: -120, amount: 3915.34, after: 3915.34 })
+  ];
+};
 
 // The accounts scenario's other spending accounts: a joint one for bills, a holiday one that
 // would go below £0 before payday, and a spare card that's already below it
@@ -191,7 +233,8 @@ const demoBudget = (scenario: string | null): FakeBudget => {
           accruedTo: fromToday(-31)
         },
         purpose: null,
-        balanceUpdatedAt: fromToday(-9)
+        balanceUpdatedAt: fromToday(-9),
+        history: easyAccessHistory()
       },
       {
         id: 'isa',
@@ -245,7 +288,8 @@ const demoBudget = (scenario: string | null): FakeBudget => {
         amount: 20,
         category: 'SUBSCRIPTIONS',
         dueInDays: 0,
-        startedInDays: -273
+        startedInDays: -273,
+        history: netflixHistory()
       }),
       mockPayment({
         id: 'mortgage',

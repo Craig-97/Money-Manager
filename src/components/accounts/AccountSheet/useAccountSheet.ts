@@ -64,6 +64,9 @@ export const useAccountSheet = () => {
           open: then(() => openQuick('interest', options))
         }
       : null,
+    // Savings only: what's moved its balance. Spending accounts list every payment, which Before
+    // payday already covers.
+    seeChanges: savings ? then(() => openQuick('history', options)) : null,
     // A fixed term that has paid out: a new term, or done
     matured: hasMatured(interest)
       ? {

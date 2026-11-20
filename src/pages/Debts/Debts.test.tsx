@@ -263,28 +263,33 @@ describe('debts on desktop', () => {
     expect(within(reopened).getByRole('slider', { name: 'Pay extra each month' })).toHaveValue('0');
   });
 
-  it('shows the latest payments by month, and older ones when asked', async () => {
+  it('shows a year of payments by month, paging back through the years', async () => {
+    // Monthly from April 2024 to September 2026
     const { user } = renderDebts('/debts', [longPaidCard(30), car(), family()]);
 
     await user.click(await screen.findByRole('button', { name: 'More actions for Credit card' }));
     await user.click(screen.getByRole('menuitem', { name: 'See payments' }));
     const dialog = await screen.findByRole('dialog', { name: 'Credit card payments' });
-    const table = await within(dialog).findByRole('table', { name: 'Payments' });
+    const thisYear = await within(dialog).findByRole('table', { name: 'Payments in 2026' });
 
-    // The next one due, then the latest 12, each month under its own heading
+    // The next one due, then this year's, each month under its own heading
     expect(
-      within(table)
+      within(thisYear)
         .getAllByRole('rowgroup')
         .map(group => group.getAttribute('aria-label'))
-    ).toEqual(expect.arrayContaining(['October 2026', 'September 2026', 'October 2025']));
-    expect(within(table).getAllByRole('row')).toHaveLength(1 + 1 + 12);
+    ).toEqual(expect.arrayContaining(['October 2026', 'September 2026', 'January 2026']));
+    expect(within(thisYear).getAllByRole('row')).toHaveLength(1 + 1 + 9);
+    expect(within(dialog).getByRole('button', { name: 'Next year' })).toBeDisabled();
 
-    await user.click(within(dialog).getByRole('button', { name: 'Show older payments' }));
-    await waitFor(() => expect(within(table).getAllByRole('row')).toHaveLength(1 + 1 + 30));
-    // Everything's showing, so there's nothing older to ask for
-    expect(
-      within(dialog).queryByRole('button', { name: 'Show older payments' })
-    ).not.toBeInTheDocument();
+    await user.click(within(dialog).getByRole('button', { name: 'Previous year' }));
+    const lastYear = await within(dialog).findByRole('table', { name: 'Payments in 2025' });
+    await waitFor(() => expect(within(lastYear).getAllByRole('row')).toHaveLength(1 + 12));
+
+    await user.click(within(dialog).getByRole('button', { name: 'Previous year' }));
+    const oldest = await within(dialog).findByRole('table', { name: 'Payments in 2024' });
+    await waitFor(() => expect(within(oldest).getAllByRole('row')).toHaveLength(1 + 9));
+    // The first year there is, so there's nothing older
+    expect(within(dialog).getByRole('button', { name: 'Previous year' })).toBeDisabled();
   });
 
   it('keeps See payments as it was while Log an overpayment opens from it', async () => {
@@ -515,7 +520,8 @@ describe('debts on mobile', () => {
     expect(await screen.findByRole('dialog', { name: 'Credit card' })).toBeInTheDocument();
   });
 
-  it("shows a debt's latest payments by month, and older ones when asked", async () => {
+  it("shows this year of a debt's payments by month, adding older years when asked", async () => {
+    // Monthly from August 2025 to September 2026
     const { user } = renderApp({
       route: '/debts',
       api: createFakeApi({ budget: budget([longPaidCard(14), car(), family()]) })
@@ -527,12 +533,16 @@ describe('debts on mobile', () => {
     expect(
       await within(sheet).findByRole('region', { name: 'September 2026' })
     ).toBeInTheDocument();
-    expect(within(sheet).getAllByRole('listitem')).toHaveLength(1 + 12);
+    expect(within(sheet).getAllByRole('listitem')).toHaveLength(1 + 9);
 
     await user.click(within(sheet).getByRole('button', { name: 'Show older payments' }));
 
     await waitFor(() => expect(within(sheet).getAllByRole('listitem')).toHaveLength(1 + 14));
     expect(within(sheet).getByRole('region', { name: 'August 2025' })).toBeInTheDocument();
+    // That was the last year there is
+    expect(
+      within(sheet).queryByRole('button', { name: 'Show older payments' })
+    ).not.toBeInTheDocument();
     expect(within(sheet).getByRole('button', { name: 'Log an overpayment' })).toBeInTheDocument();
   });
 
