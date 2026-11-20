@@ -322,6 +322,19 @@ describe('several accounts to spend from', () => {
     );
   });
 
+  it('opens a payment from an account’s list, to edit it from there', async () => {
+    const { user } = renderAccounts(several());
+
+    await user.click(await screen.findByRole('radio', { name: 'Before payday' }));
+    const holiday = screen.getByRole('region', { name: 'Holiday spending before payday' });
+    await user.click(within(holiday).getByRole('button', { name: /Hotel deposit/ }));
+
+    const sheet = await screen.findByRole('dialog', { name: 'Hotel deposit' });
+    await user.click(within(sheet).getByRole('button', { name: 'Edit payment' }));
+    const form = await screen.findByRole('dialog', { name: /^Edit / });
+    expect(within(form).getByLabelText('Name')).toHaveValue('Hotel deposit');
+  });
+
   it('leaves an account with nothing going out as a plain row, with nothing to open', async () => {
     // The hotel deposit's gone, so nothing comes out of the holiday account before payday
     const { user } = renderAccounts({ ...several(), oneOffPayments: [] });
