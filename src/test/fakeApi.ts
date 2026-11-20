@@ -154,6 +154,18 @@ export interface FakeAccount {
   interest?: FakeInterest | null;
   purpose: string | null;
   balanceUpdatedAt: string;
+  // What moved its balance, newest first, as the API's history field; left out, its opening balance
+  history?: FakeAccountChange[];
+}
+
+// Something that moved an account's balance, as the API sends it
+export interface FakeAccountChange {
+  id: string;
+  kind: 'OPENING' | 'BALANCE_SET' | 'INTEREST' | 'PAYMENT' | 'MOVE_IN' | 'MOVE_OUT';
+  date: string;
+  change: number;
+  balanceAfter: number;
+  name: string | null;
 }
 
 // As the API sends it: nextDate in milliseconds
@@ -392,6 +404,10 @@ const PAYMENTS_PER_YEAR: Record<string, number> = {
   BIANNUALLY: 2,
   ANNUALLY: 1
 };
+
+// As the API: the year a record shows under, by the last date it covers
+const recordYear = (record: FakeRecord) =>
+  new Date(Number(record.dates.at(-1) ?? record.createdAt)).getUTCFullYear();
 
 // As the API: a record goes on the payment's history, and its pays and skips on thisCycle
 const addRecord = (payment: FakeRecurringPayment, record: FakeRecord) => {
@@ -831,10 +847,40 @@ export const createFakeApi = ({
     },
     recurringPayment: ({ id }: Args) => {
       const payment = findRecurring(id);
-      // As the API: the latest `limit` records, 50 when it isn't given
+      const records = payment.history ?? [];
+      // As the API: the latest `limit` records (50 when it isn't given), or one year's by the
+      // last date each covers, and the years there are
       return {
         ...payment,
-        history: ({ limit }: Args) => (payment.history ?? []).slice(0, limit ?? 50)
+        history: ({ limit, year }: Args) =>
+          year == null
+            ? records.slice(0, limit ?? 50)
+            : records.filter(record => recordYear(record) === year),
+        historyYears: () => [...new Set(records.map(recordYear))].toSorted((a, b) => b - a)
+      };
+    },
+    // As the API: an account's history; left out, just the balance it started with, this year
+    account: ({ id }: Args) => {
+      const account = accountsOf(requireBudget()).find(item => item.id === id);
+      if (!account) throw apiError('ACCOUNT_NOT_FOUND', { message: `No account '${id}'` });
+      const changes = ('history' in account ? account.history : undefined) ?? [
+        {
+          id: `${account.id}-opening`,
+          kind: 'OPENING' as const,
+          date: apiDateFromToday(0),
+          change: account.balance,
+          balanceAfter: account.balance,
+          name: null
+        }
+      ];
+      const yearOf = (item: FakeAccountChange) => new Date(Number(item.date)).getUTCFullYear();
+      return {
+        ...account,
+        history: ({ limit, year }: Args) =>
+          year == null
+            ? changes.slice(0, limit ?? 50)
+            : changes.filter(item => yearOf(item) === year),
+        historyYears: () => [...new Set(changes.map(yearOf))].toSorted((a, b) => b - a)
       };
     },
     // Messages and codes as the real API sends them

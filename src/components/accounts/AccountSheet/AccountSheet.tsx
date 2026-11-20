@@ -1,4 +1,4 @@
-import { ArrowLeftRight, Landmark, PenLine, Percent, RefreshCw } from 'lucide-react';
+import { ArrowLeftRight, History, Landmark, PenLine, Percent, RefreshCw } from 'lucide-react';
 import { updatedText } from '~/lib/accounts';
 import { ActionRow, ActionRows, ActionTile, ActionTiles, Modal, Switch } from '../../ui';
 import { AccountSummary } from '../AccountSummary';
@@ -78,6 +78,13 @@ export const AccountSheet = () => {
             label="Make where you get paid"
             detail={sheet.paidInto.detail}
             onClick={sheet.paidInto.open}
+          />
+        ) : null}
+        {sheet.seeChanges ? (
+          <ActionTile
+            icon={<History size={20} />}
+            label="See balance changes"
+            onClick={sheet.seeChanges}
           />
         ) : null}
       </ActionTiles>

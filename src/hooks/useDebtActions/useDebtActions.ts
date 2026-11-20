@@ -1,11 +1,12 @@
 import { useApolloClient, useMutation } from '@apollo/client/react';
 import { ERRORS } from '~/constants';
 import {
-  DebtHistoryDocument,
   LogDebtOverpaymentDocument,
+  PaymentHistoryDocument,
   UndoDebtOverpaymentDocument,
   UpdateRecurringPaymentDocument
 } from '~/graphql/generated';
+import { startOfToday } from '~/lib/dates';
 import { DebtPayment } from '~/lib/debts';
 import { getApiErrorMessage, hasErrorCode } from '~/lib/errors';
 import { formatMoney } from '~/lib/format';
@@ -49,9 +50,9 @@ export const useDebtActions = (budgetId: string) => {
       }
       // The overpayment's record, so the toast can take it back
       const history = await client.query({
-        query: DebtHistoryDocument,
-        // The newest few are enough to find the one just made
-        variables: { id: debt.id, limit: 5 },
+        query: PaymentHistoryDocument,
+        // This year's has the one just made
+        variables: { id: debt.id, year: startOfToday().getFullYear() },
         fetchPolicy: 'network-only'
       });
       const record = history.data?.recurringPayment?.history.find(

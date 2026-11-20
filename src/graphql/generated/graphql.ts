@@ -33,6 +33,28 @@ export type AccountFieldsFragment = {
   } | null;
 };
 
+export type AccountHistoryQueryVariables = Exact<{
+  id: string | number;
+  year: number;
+}>;
+
+export type AccountHistoryQuery = {
+  account: {
+    __typename: 'Account';
+    id: string;
+    historyYears: Array<number>;
+    history: Array<{
+      __typename: 'AccountChange';
+      id: string;
+      kind: Types.AccountChangeKind;
+      date: string;
+      change: number;
+      balanceAfter: number;
+      name: string | null;
+    }>;
+  } | null;
+};
+
 export type AssignPaymentAccountsMutationVariables = Exact<{
   input: Types.AssignPaymentAccountsInput;
 }>;
@@ -1688,33 +1710,6 @@ export type CreateRecurringPaymentMutation = {
   };
 };
 
-export type DebtHistoryQueryVariables = Exact<{
-  id: string | number;
-  limit: number;
-}>;
-
-export type DebtHistoryQuery = {
-  recurringPayment: {
-    __typename: 'RecurringPayment';
-    id: string;
-    history: Array<{
-      __typename: 'PaymentRecord';
-      id: string;
-      kind: Types.PaymentRecordKind;
-      dates: Array<string>;
-      balanceChange: number;
-      open: boolean;
-      createdAt: string;
-      debt: {
-        __typename: 'PaymentRecordDebt';
-        interest: number;
-        reduction: number;
-        balanceAfter: number;
-      } | null;
-    }>;
-  } | null;
-};
-
 export type OneOffPaymentFieldsFragment = {
   __typename: 'OneOffPayment';
   id: string;
@@ -1726,6 +1721,35 @@ export type OneOffPaymentFieldsFragment = {
   paidAt: string | null;
   account: string | null;
   dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
+};
+
+export type PaymentHistoryQueryVariables = Exact<{
+  id: string | number;
+  year: number;
+}>;
+
+export type PaymentHistoryQuery = {
+  recurringPayment: {
+    __typename: 'RecurringPayment';
+    id: string;
+    historyYears: Array<number>;
+    history: Array<{
+      __typename: 'PaymentRecord';
+      id: string;
+      kind: Types.PaymentRecordKind;
+      dates: Array<string>;
+      balanceChange: number;
+      account: string | null;
+      open: boolean;
+      createdAt: string;
+      debt: {
+        __typename: 'PaymentRecordDebt';
+        interest: number;
+        reduction: number;
+        balanceAfter: number;
+      } | null;
+    }>;
+  } | null;
 };
 
 export type RecurringPaymentFieldsFragment = {
@@ -2699,6 +2723,79 @@ export const BudgetFieldsFragmentDoc = {
     }
   ]
 } as unknown as DocumentNode<BudgetFieldsFragment, unknown>;
+export const AccountHistoryDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'AccountHistory' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } }
+          }
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'year' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } }
+          }
+        }
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'account' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'id' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'id' } }
+              }
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'historyYears' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'history' },
+                  arguments: [
+                    {
+                      kind: 'Argument',
+                      name: { kind: 'Name', value: 'year' },
+                      value: { kind: 'Variable', name: { kind: 'Name', value: 'year' } }
+                    }
+                  ],
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'kind' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'date' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'change' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'balanceAfter' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+} as unknown as DocumentNode<AccountHistoryQuery, AccountHistoryQueryVariables>;
 export const AssignPaymentAccountsDocument = {
   kind: 'Document',
   definitions: [
@@ -6970,13 +7067,13 @@ export const CreateRecurringPaymentDocument = {
   CreateRecurringPaymentMutation,
   CreateRecurringPaymentMutationVariables
 >;
-export const DebtHistoryDocument = {
+export const PaymentHistoryDocument = {
   kind: 'Document',
   definitions: [
     {
       kind: 'OperationDefinition',
       operation: 'query',
-      name: { kind: 'Name', value: 'DebtHistory' },
+      name: { kind: 'Name', value: 'PaymentHistory' },
       variableDefinitions: [
         {
           kind: 'VariableDefinition',
@@ -6988,7 +7085,7 @@ export const DebtHistoryDocument = {
         },
         {
           kind: 'VariableDefinition',
-          variable: { kind: 'Variable', name: { kind: 'Name', value: 'limit' } },
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'year' } },
           type: {
             kind: 'NonNullType',
             type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } }
@@ -7012,14 +7109,15 @@ export const DebtHistoryDocument = {
               kind: 'SelectionSet',
               selections: [
                 { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'historyYears' } },
                 {
                   kind: 'Field',
                   name: { kind: 'Name', value: 'history' },
                   arguments: [
                     {
                       kind: 'Argument',
-                      name: { kind: 'Name', value: 'limit' },
-                      value: { kind: 'Variable', name: { kind: 'Name', value: 'limit' } }
+                      name: { kind: 'Name', value: 'year' },
+                      value: { kind: 'Variable', name: { kind: 'Name', value: 'year' } }
                     }
                   ],
                   selectionSet: {
@@ -7029,6 +7127,7 @@ export const DebtHistoryDocument = {
                       { kind: 'Field', name: { kind: 'Name', value: 'kind' } },
                       { kind: 'Field', name: { kind: 'Name', value: 'dates' } },
                       { kind: 'Field', name: { kind: 'Name', value: 'balanceChange' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'account' } },
                       { kind: 'Field', name: { kind: 'Name', value: 'open' } },
                       { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
                       {
@@ -7053,7 +7152,7 @@ export const DebtHistoryDocument = {
       }
     }
   ]
-} as unknown as DocumentNode<DebtHistoryQuery, DebtHistoryQueryVariables>;
+} as unknown as DocumentNode<PaymentHistoryQuery, PaymentHistoryQueryVariables>;
 export const UpdateOneOffPaymentDocument = {
   kind: 'Document',
   definitions: [

@@ -1,0 +1,16 @@
+# What moved an account's balance in one year, newest first, with the balance after each.
+# historyYears are the years it has any, for paging through them.
+query AccountHistory($id: ID!, $year: Int!) {
+  account(id: $id) {
+    id
+    historyYears
+    history(year: $year) {
+      id
+      kind
+      date
+      change
+      balanceAfter
+      name
+    }
+  }
+}

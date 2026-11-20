@@ -1,4 +1,13 @@
-import { Check, Ellipsis, Landmark, PenLine, Percent, RefreshCw, Trash } from 'lucide-react';
+import {
+  Check,
+  Ellipsis,
+  History,
+  Landmark,
+  PenLine,
+  Percent,
+  RefreshCw,
+  Trash
+} from 'lucide-react';
 import {
   IconButton,
   Menu,
@@ -20,8 +29,9 @@ interface AccountMenuProps {
 
 /*
  * From the row's more button, in the order a debt's menu uses: Edit, Update balance, a savings
- * account's interest, make another spending account where you get paid, count in or keep out of free to spend, and delete. Where pay
- * lands always counts and stays, so it has no more than Edit and Update balance.
+ * account's interest, make another spending account where you get paid, count in or keep out of
+ * free to spend, a savings account's balance changes, and delete. Where pay lands always counts
+ * and stays, so it has no more than Edit and Update balance.
  */
 export const AccountMenu = ({ account, several, onCounts }: AccountMenuProps) => {
   const openEdit = useAccountDialogStore(s => s.openEdit);
@@ -64,6 +74,13 @@ export const AccountMenu = ({ account, several, onCounts }: AccountMenuProps) =>
             <MenuItem icon={<Check size={16} />} onSelect={() => onCounts(!account.counts)}>
               {account.counts ? 'Keep out of free to spend' : 'Count in free to spend'}
             </MenuItem>
+            {isSpending(account) ? null : (
+              <MenuItem
+                icon={<History size={16} />}
+                onSelect={() => openQuick('history', { accountId: account.id })}>
+                See balance changes
+              </MenuItem>
+            )}
             <MenuSeparator />
             <MenuItem danger icon={<Trash size={16} />} onSelect={() => openDelete(account.id)}>
               Delete

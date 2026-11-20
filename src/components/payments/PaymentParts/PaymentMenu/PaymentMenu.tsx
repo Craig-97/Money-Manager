@@ -4,6 +4,7 @@ import {
   Ellipsis,
   FastForward,
   FileText,
+  History,
   PenLine,
   PoundSterling,
   SkipForward,
@@ -15,6 +16,7 @@ import { PayCycle } from '~/lib/payday';
 import { Payment, paymentChoices, quickEdits } from '~/lib/payments';
 import { useNoteDialogStore } from '~/state/noteDialog';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
+import { usePaymentHistoryStore } from '~/state/paymentHistory';
 import { usePaymentNotesStore } from '~/state/paymentNotes';
 import { useQuickEditStore } from '~/state/quickEdit';
 import { IconButton, Menu, MenuContent, MenuItem, MenuSeparator, MenuTrigger } from '../../../ui';
@@ -29,8 +31,8 @@ interface PaymentMenuProps {
 }
 
 /*
- * Edit, pay, undo, skip, change its amount or date, its notes and delete, from the row's more
- * button
+ * Edit, pay, undo, skip, change its amount or date, its notes, its payments and delete, from the
+ * row's more button
  */
 export const PaymentMenu = ({
   payment,
@@ -43,6 +45,7 @@ export const PaymentMenu = ({
   const openNotes = usePaymentNotesStore(s => s.openFor);
   const openNewNote = useNoteDialogStore(s => s.openNewFor);
   const openQuickEdit = useQuickEditStore(s => s.openFor);
+  const openHistory = usePaymentHistoryStore(s => s.openFor);
   const { pay, undo, skip, remove } = actions;
   const choices = paymentChoices(payment, { cycle, today });
   const recurring = payment.kind === 'recurring' ? payment : null;
@@ -104,6 +107,11 @@ export const PaymentMenu = ({
             icon={<FileText size={16} />}
             onSelect={() => (noteCount ? openNotes(recurring.id) : openNewNote(recurring.id))}>
             {noteCount ? `Notes (${noteCount})` : 'Add a note'}
+          </MenuItem>
+        ) : null}
+        {recurring ? (
+          <MenuItem icon={<History size={16} />} onSelect={() => openHistory(recurring.id)}>
+            See payments
           </MenuItem>
         ) : null}
         <MenuSeparator />

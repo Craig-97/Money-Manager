@@ -14,6 +14,8 @@ export type Account = {
   balance: Scalars['Float']['output'];
   balanceUpdatedAt: Scalars['String']['output'];
   counts: Scalars['Boolean']['output'];
+  history: Array<AccountChange>;
+  historyYears: Array<Scalars['Int']['output']>;
   id: Scalars['ID']['output'];
   interest: Maybe<AccountInterest>;
   kind: AccountKind;
@@ -22,10 +24,28 @@ export type Account = {
   purpose: Maybe<Scalars['String']['output']>;
 };
 
+export type AccountHistoryArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  year?: InputMaybe<Scalars['Int']['input']>;
+};
+
 export type AccountBalanceInput = {
   accountId: Scalars['ID']['input'];
   balance: Scalars['Float']['input'];
 };
+
+export type AccountChange = {
+  __typename: 'AccountChange';
+  balanceAfter: Scalars['Float']['output'];
+  change: Scalars['Float']['output'];
+  date: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  kind: AccountChangeKind;
+  name: Maybe<Scalars['String']['output']>;
+};
+
+export type AccountChangeKind =
+  'BALANCE_SET' | 'INTEREST' | 'MOVE_IN' | 'MOVE_OUT' | 'OPENING' | 'PAYMENT';
 
 export type AccountInterest = {
   __typename: 'AccountInterest';
@@ -568,6 +588,7 @@ export type PaymentFrequency =
 
 export type PaymentRecord = {
   __typename: 'PaymentRecord';
+  account: Maybe<Scalars['ID']['output']>;
   balanceChange: Scalars['Float']['output'];
   createdAt: Scalars['String']['output'];
   dates: Array<Scalars['String']['output']>;
@@ -597,10 +618,15 @@ export type PaymentType = 'EXPENSE' | 'INCOME';
 
 export type Query = {
   __typename: 'Query';
+  account: Maybe<Account>;
   budget: Maybe<Budget>;
   passwordResetTokenValid: PasswordResetTokenCheck;
   recurringPayment: Maybe<RecurringPayment>;
   tokenFindUser: Maybe<User>;
+};
+
+export type QueryAccountArgs = {
+  id: Scalars['ID']['input'];
 };
 
 export type QueryBudgetArgs = {
@@ -626,6 +652,7 @@ export type RecurringPayment = {
   firstPaymentDate: Scalars['String']['output'];
   frequency: PaymentFrequency;
   history: Array<PaymentRecord>;
+  historyYears: Array<Scalars['Int']['output']>;
   id: Scalars['ID']['output'];
   lastPaymentDate: Maybe<Scalars['String']['output']>;
   name: Scalars['String']['output'];
@@ -640,6 +667,7 @@ export type RecurringPayment = {
 
 export type RecurringPaymentHistoryArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
+  year?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type RecurringPaymentInput = {

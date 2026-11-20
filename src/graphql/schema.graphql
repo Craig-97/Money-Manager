@@ -18,6 +18,7 @@ type Query {
   tokenFindUser: User
   passwordResetTokenValid(token: String!): PasswordResetTokenCheck!
   budget(id: ID): Budget
+  account(id: ID!): Account
   recurringPayment(id: ID!): RecurringPayment
 }
 
@@ -210,6 +211,15 @@ enum AccountKind {
   SAVINGS
 }
 
+enum AccountChangeKind {
+  OPENING
+  BALANCE_SET
+  INTEREST
+  PAYMENT
+  MOVE_IN
+  MOVE_OUT
+}
+
 enum InterestFrequency {
   MONTHLY
   QUARTERLY
@@ -250,6 +260,17 @@ type Account {
   interest: AccountInterest
   purpose: String
   balanceUpdatedAt: String!
+  history(limit: Int, year: Int): [AccountChange!]!
+  historyYears: [Int!]!
+}
+
+type AccountChange {
+  id: ID!
+  kind: AccountChangeKind!
+  date: String!
+  change: Float!
+  balanceAfter: Float!
+  name: String
 }
 
 input CreateAccountInput {
@@ -297,32 +318,6 @@ type AccountResponse {
   account: Account
   budget: Budget
   success: Boolean!
-}
-
-enum PaymentType {
-  INCOME
-  EXPENSE
-}
-
-enum PaymentCategory {
-  BILLS
-  CHARITY
-  EATING_OUT
-  ENTERTAINMENT
-  EXPENSES
-  FAMILY
-  FINANCES
-  GENERAL
-  GIFTS
-  GROCERIES
-  HOLIDAYS
-  INCOME
-  PERSONAL_CARE
-  SAVINGS
-  SHOPPING
-  SUBSCRIPTIONS
-  TRANSFERS
-  TRANSPORT
 }
 
 type OneOffPayment {
@@ -374,6 +369,27 @@ type OneOffPaymentResponse {
   success: Boolean!
 }
 
+enum PaymentCategory {
+  BILLS
+  CHARITY
+  EATING_OUT
+  ENTERTAINMENT
+  EXPENSES
+  FAMILY
+  FINANCES
+  GENERAL
+  GIFTS
+  GROCERIES
+  HOLIDAYS
+  INCOME
+  PERSONAL_CARE
+  SAVINGS
+  SHOPPING
+  SUBSCRIPTIONS
+  TRANSFERS
+  TRANSPORT
+}
+
 enum PaymentFrequency {
   WEEKLY
   BIWEEKLY
@@ -381,6 +397,11 @@ enum PaymentFrequency {
   QUARTERLY
   BIANNUALLY
   ANNUALLY
+}
+
+enum PaymentType {
+  INCOME
+  EXPENSE
 }
 
 enum PaymentRecordKind {
@@ -408,7 +429,8 @@ type RecurringPayment {
   lastPaymentDate: String
   nextDueDate: String
   thisCycle: [PaymentRecord!]!
-  history(limit: Int): [PaymentRecord!]!
+  history(limit: Int, year: Int): [PaymentRecord!]!
+  historyYears: [Int!]!
   renewalDate: String
   dueReminder: ReminderTiming!
   renewalReminder: ReminderTiming!
@@ -439,6 +461,7 @@ type PaymentRecord {
   kind: PaymentRecordKind!
   dates: [String!]!
   balanceChange: Float!
+  account: ID
   debt: PaymentRecordDebt
   transfer: PaymentRecordTransfer
   open: Boolean!

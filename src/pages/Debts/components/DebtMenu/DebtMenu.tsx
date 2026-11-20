@@ -12,6 +12,7 @@ import { DebtActions } from '~/hooks/useDebtActions';
 import { DebtPayment } from '~/lib/debts';
 import { useDebtDialogStore } from '~/state/debtDialog';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
+import { usePaymentHistoryStore } from '~/state/paymentHistory';
 
 interface DebtMenuProps {
   debt: DebtPayment;
@@ -24,12 +25,12 @@ interface DebtMenuProps {
  */
 export const DebtMenu = ({ debt, actions }: DebtMenuProps) => {
   const openEdit = usePaymentDialogStore(s => s.openEdit);
-  const { openBalance, openOverpayment, openPaySooner, openPayments } = useDebtDialogStore(
+  const openPayments = usePaymentHistoryStore(s => s.openFor);
+  const { openBalance, openOverpayment, openPaySooner } = useDebtDialogStore(
     useShallow(s => ({
       openBalance: s.openBalance,
       openOverpayment: s.openOverpayment,
-      openPaySooner: s.openPaySooner,
-      openPayments: s.openPayments
+      openPaySooner: s.openPaySooner
     }))
   );
 

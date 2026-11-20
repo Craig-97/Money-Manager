@@ -4,4 +4,7 @@ export * from './PaymentDialogs';
 export * from './PaymentList';
 export * from './PaymentParts';
 export * from './PaymentSheet';
+export * from './PaymentsDialog';
+export * from './PaymentsList';
+export * from './PaymentsTable';
 export * from './QuickEditDialog';
