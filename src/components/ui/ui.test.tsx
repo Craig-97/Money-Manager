@@ -4,6 +4,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { showToast, useToastStore } from '~/state/toast';
 import { Button } from './Button';
+import { Menu, MenuContent, MenuItem, MenuTrigger } from './Menu';
 import { Modal } from './Modal';
 import { SegmentedControl } from './SegmentedControl';
 import { Toaster } from './Toaster';
@@ -72,6 +73,45 @@ describe('SegmentedControl', () => {
     await user.keyboard('{ArrowLeft}');
 
     expect(screen.getByRole('radio', { name: '6 months' })).toHaveFocus();
+  });
+});
+
+describe('Menu', () => {
+  const renderMenu = () =>
+    render(
+      <Menu>
+        <MenuTrigger>
+          <button type="button">Actions</button>
+        </MenuTrigger>
+        <MenuContent>
+          <MenuItem>Change when</MenuItem>
+        </MenuContent>
+      </Menu>
+    );
+
+  it('opens on a tap, not when a finger lands on it to scroll', async () => {
+    const user = userEvent.setup();
+    renderMenu();
+    const button = screen.getByRole('button', { name: 'Actions' });
+
+    // A finger lands and stays down, as when starting a scroll
+    await user.pointer({ keys: '[TouchA>]', target: button });
+    expect(screen.queryByRole('menuitem', { name: 'Change when' })).not.toBeInTheDocument();
+    await user.pointer({ keys: '[/TouchA]', target: button });
+
+    expect(await screen.findByRole('menuitem', { name: 'Change when' })).toBeInTheDocument();
+  });
+
+  it('opens as soon as a mouse presses it', async () => {
+    const user = userEvent.setup();
+    renderMenu();
+
+    await user.pointer({
+      keys: '[MouseLeft>]',
+      target: screen.getByRole('button', { name: 'Actions' })
+    });
+
+    expect(await screen.findByRole('menuitem', { name: 'Change when' })).toBeInTheDocument();
   });
 });
 

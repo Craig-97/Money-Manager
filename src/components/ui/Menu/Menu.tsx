@@ -1,15 +1,54 @@
-import { ComponentProps, ReactNode } from 'react';
+import { ComponentProps, createContext, ReactNode, use, useRef, useState } from 'react';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { cn } from '~/lib/cn';
 import { optionClasses, popoverClasses } from '../popoverClasses';
 
-/* A menu of actions opened from a button, e.g. a row's "more" button */
-export const Menu = DropdownMenu.Root;
-
-/* Wraps the button that opens the menu */
-export const MenuTrigger = (props: ComponentProps<typeof DropdownMenu.Trigger>) => (
-  <DropdownMenu.Trigger asChild {...props} />
+// Whether the menu is open, so its button can open it on a tap
+const MenuOpenContext = createContext<{ open: boolean; setOpen: (open: boolean) => void } | null>(
+  null
 );
+
+/* A menu of actions opened from a button, e.g. a row's "more" button */
+export const Menu = ({ children }: { children: ReactNode }) => {
+  const [open, setOpen] = useState(false);
+  return (
+    <MenuOpenContext value={{ open, setOpen }}>
+      <DropdownMenu.Root open={open} onOpenChange={setOpen}>
+        {children}
+      </DropdownMenu.Root>
+    </MenuOpenContext>
+  );
+};
+
+/*
+ * Wraps the button that opens the menu. A mouse opens it on press, as Radix does. A finger opens it
+ * on a tap instead, so a scroll that starts on the button doesn't open it: the browser sends no
+ * click once the finger moves.
+ */
+export const MenuTrigger = ({
+  onPointerDown,
+  onClick,
+  ...props
+}: ComponentProps<typeof DropdownMenu.Trigger>) => {
+  const menu = use(MenuOpenContext);
+  const touched = useRef(false);
+  return (
+    <DropdownMenu.Trigger
+      asChild
+      onPointerDown={event => {
+        onPointerDown?.(event);
+        touched.current = event.pointerType !== 'mouse';
+        // Stops Radix opening it on the press
+        if (touched.current) event.preventDefault();
+      }}
+      onClick={event => {
+        onClick?.(event);
+        if (touched.current) menu?.setOpen(!menu.open);
+      }}
+      {...props}
+    />
+  );
+};
 
 export const MenuContent = ({
   className,
