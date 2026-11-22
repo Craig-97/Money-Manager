@@ -714,6 +714,26 @@ describe("an account's balance changes", () => {
       within(view).queryByRole('button', { name: 'See balance changes' })
     ).not.toBeInTheDocument();
   });
+
+  it('says so when nothing has changed an account’s balance yet', async () => {
+    // An account from before balance changes were kept, with none on record
+    const data = budget();
+    data.accounts = (data.accounts ?? []).map(account =>
+      account.id === 'pot' ? { ...account, history: [] } : account
+    );
+    const { user } = renderAccounts(data);
+
+    await user.click(await screen.findByRole('button', { name: 'More actions for Bills pot' }));
+    await user.click(screen.getByRole('menuitem', { name: 'See balance changes' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Bills pot balance changes' });
+
+    expect(
+      await within(dialog).findByText(
+        'No changes yet. Interest and money moved in or out show here as they happen.'
+      )
+    ).toBeInTheDocument();
+    expect(within(dialog).queryByRole('table')).not.toBeInTheDocument();
+  });
 });
 
 describe('savings interest', () => {

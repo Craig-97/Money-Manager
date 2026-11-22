@@ -48,6 +48,10 @@ export const BalanceChangesDialog = ({ accounts, today }: BalanceChangesDialogPr
       }>
       {history.error ? (
         <LoadError message="Couldn’t load the balance changes" onRetry={history.retry} />
+      ) : dialog.empty ? (
+        <p className="py-4 text-center text-sm font-semibold text-muted">
+          No changes yet. Interest and money moved in or out show here as they happen.
+        </p>
       ) : isDesktop ? (
         <BalanceChangesTable dialog={dialog} />
       ) : (

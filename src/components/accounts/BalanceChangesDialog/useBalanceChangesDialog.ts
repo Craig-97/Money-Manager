@@ -49,6 +49,7 @@ export const useBalanceChangesDialog = ({
     // Desktop: the year showing. A phone: it and the older years added below it.
     months: byMonth(changes),
     allMonths: byMonth([...changes, ...older]),
+    empty: !!history.records && !changes.length,
     paging: yearPaging(history.years, history.year),
     // "£4,200.00 now · £118.10 interest in 2026"
     summary: {
