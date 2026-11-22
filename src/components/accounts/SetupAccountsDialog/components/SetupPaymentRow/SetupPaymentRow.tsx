@@ -4,7 +4,7 @@ import { formatShortDate } from '~/lib/dates';
 import { formatMoney } from '~/lib/format';
 import { categoryLabel, FREQUENCY_LABELS, RecurringPayment } from '~/lib/payments';
 import { Checkbox, CheckboxHitArea, Select } from '../../../../form';
-import { AccountLetter } from '../../../AccountLetter';
+import { AccountIcon } from '../../../AccountIcon';
 
 interface SetupPaymentRowProps {
   payment: RecurringPayment;
@@ -58,7 +58,7 @@ export const SetupPaymentRow = ({
           aria-label={`Select ${payment.name}`}
         />
       </CheckboxHitArea>
-      {compact ? null : <AccountLetter account={payment} />}
+      {compact ? null : <AccountIcon account={payment} />}
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         <span className="text-[15px] font-bold [overflow-wrap:anywhere]">{payment.name}</span>
         <span className="num text-xs font-semibold text-muted">

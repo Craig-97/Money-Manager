@@ -2,6 +2,9 @@ import { PaymentCategory, PaymentFrequency, PaymentType } from '~/graphql/genera
 import { formatDayMonth, formatLongWeekday } from '../dates';
 import { capitalise, ordinal } from '../format';
 
+/* A payment's first letter, as its icon when it has no logo */
+export const paymentLetter = (name: string) => (name.trim().charAt(0) || '?').toUpperCase();
+
 /* "HOME_MAINTENANCE" -> "Home maintenance" */
 export const categoryLabel = (category: string) => {
   return capitalise(category.toLowerCase().replace(/_/g, ' '));

@@ -1,8 +1,10 @@
 import { ReactNode, useState } from 'react';
 import { AccountKind } from '~/graphql/generated';
+import { accountLetter } from '~/lib/accounts';
 import { cn } from '~/lib/cn';
 import { parseMoney } from '~/lib/format';
-import { AmountInput, FieldError, FieldHint, Label, TextInput } from '../../form';
+import { logoSummary, readLogoInput } from '~/lib/icons';
+import { AmountInput, FieldError, FieldHint, Label, LogoField, TextInput } from '../../form';
 import { MoreOptions, SegmentedControl, Switch } from '../../ui';
 import { AccountDraft, AccountDraftErrors } from '../accountDraft';
 import { InterestFields } from '../InterestFields';
@@ -20,9 +22,9 @@ const KIND_HINTS: Record<AccountKind, string> = {
   SAVINGS: 'Money you put aside. It stays out of free to spend unless you switch it on.'
 };
 
-const PLACEHOLDERS: Record<AccountKind, { name: string; purpose: string }> = {
-  SPENDING: { name: 'e.g. Joint bills', purpose: 'e.g. Shared household bills' },
-  SAVINGS: { name: 'e.g. Easy access', purpose: 'e.g. Holiday fund' }
+const PLACEHOLDERS: Record<AccountKind, { name: string; purpose: string; logo: string }> = {
+  SPENDING: { name: 'e.g. Joint bills', purpose: 'e.g. Shared household bills', logo: 'tsb.co.uk' },
+  SAVINGS: { name: 'e.g. Easy access', purpose: 'e.g. Holiday fund', logo: 'trading212.com' }
 };
 
 interface AccountFieldsProps {
@@ -40,12 +42,14 @@ interface AccountFieldsProps {
   beforeCounts?: ReactNode;
   // The count switch, hidden where pay lands as that always counts
   showCounts?: boolean;
+  // The Logo field. Setup leaves it out; it's added from Edit later.
+  showLogo?: boolean;
 }
 
 /*
  * An account's fields, the same wherever one is added or changed: the balance first, then its
- * name and, for savings, its interest. What most people leave alone, what it's for, whether it counts
- * in free to spend and its type, is under More options.
+ * name and, for savings, its interest. What most people leave alone, its logo, what it's for,
+ * whether it counts in free to spend and its type, is under More options.
  */
 export const AccountFields = ({
   draft,
@@ -56,18 +60,24 @@ export const AccountFields = ({
   editing = false,
   afterKind,
   beforeCounts,
-  showCounts = true
+  showCounts = true,
+  showLogo = false
 }: AccountFieldsProps) => {
   const placeholders = PLACEHOLDERS[draft.kind];
   const savings = draft.kind === 'SAVINGS';
   const usualCounts = draft.kind === 'SPENDING';
   const [moreOpen, setMoreOpen] = useState(
-    () => editing && (!!draft.purpose.trim() || (showCounts && draft.counts !== usualCounts))
+    () =>
+      editing &&
+      (!!draft.purpose.trim() ||
+        !!draft.logo.trim() ||
+        (showCounts && draft.counts !== usualCounts))
   );
   const moreSummary = [
     draft.purpose.trim() || 'What it’s for',
     canChangeKind ? draft.kind.toLowerCase() : null,
-    showCounts ? (draft.counts ? 'counts in free to spend' : 'kept out of free to spend') : null
+    showCounts ? (draft.counts ? 'counts in free to spend' : 'kept out of free to spend') : null,
+    showLogo ? logoSummary(readLogoInput(draft.logo)) : null
   ]
     .filter(Boolean)
     .join(' · ');
@@ -134,6 +144,16 @@ export const AccountFields = ({
       {savings ? beforeCounts : null}
 
       <MoreOptions summary={moreSummary} open={moreOpen} onOpenChange={setMoreOpen}>
+        {showLogo ? (
+          <LogoField
+            id="account-logo"
+            letter={accountLetter(draft)}
+            value={draft.logo}
+            onChange={logo => set({ logo })}
+            example={placeholders.logo}
+            error={errors.logo}
+          />
+        ) : null}
         <div>
           <Label tone="muted" htmlFor="account-purpose">
             What it’s for

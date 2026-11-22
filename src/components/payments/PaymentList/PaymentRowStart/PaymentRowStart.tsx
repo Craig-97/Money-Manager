@@ -4,7 +4,7 @@ import { PayCycle } from '~/lib/payday';
 import { Payment } from '~/lib/payments';
 import { usePaymentSheetStore } from '~/state/paymentSheet';
 import { Checkbox, CheckboxHitArea } from '../../../form';
-import { NoteChip, PaymentLetter, TimesDue } from '../../PaymentParts';
+import { NoteChip, PaymentIcon, TimesDue } from '../../PaymentParts';
 
 interface PaymentRowStartProps {
   payment: Payment;
@@ -45,7 +45,7 @@ export const PaymentRowStart = ({
         </CheckboxHitArea>
       </span>
       <div role="cell" className="flex min-w-0 items-center gap-3">
-        <PaymentLetter payment={payment} className="size-[38px] rounded-xl text-sm" />
+        <PaymentIcon payment={payment} className="size-[38px] rounded-xl text-sm" />
         <div className="min-w-0">
           <div className="flex items-center gap-2 text-[15px] font-bold">
             <button

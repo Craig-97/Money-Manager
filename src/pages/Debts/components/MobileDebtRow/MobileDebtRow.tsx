@@ -1,6 +1,6 @@
 import { ChevronRight } from 'lucide-react';
 import { DebtProgress } from '~/components/debts';
-import { PaymentLetter } from '~/components/payments';
+import { PaymentIcon } from '~/components/payments';
 import { aprText, clearedText, DebtPayment, paidOffShare, paymentText } from '~/lib/debts';
 import { formatMoney } from '~/lib/format';
 import { useDebtViewStore } from '~/state/debtView';
@@ -23,7 +23,7 @@ export const MobileDebtRow = ({ debt, clearedIn, today }: MobileDebtRowProps) =>
       aria-haspopup="dialog"
       onClick={() => openView(debt.id)}
       className="flex min-h-[76px] w-full cursor-pointer items-center gap-3 rounded-[18px] px-2.5 py-2 text-left text-text transition-colors hover:bg-hover">
-      <PaymentLetter payment={debt} className="size-10 rounded-[13px] text-[15px]" />
+      <PaymentIcon payment={debt} className="size-10 rounded-[13px] text-[15px]" />
       <span className="flex min-w-0 grow flex-col gap-1.5">
         <span className="flex items-baseline justify-between gap-2">
           <span className="min-w-0 text-[15px] font-bold [overflow-wrap:anywhere]">

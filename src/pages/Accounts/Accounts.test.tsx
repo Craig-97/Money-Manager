@@ -838,3 +838,44 @@ describe('savings interest', () => {
     ]);
   });
 });
+
+describe('account logos', () => {
+  const LOGO = 'https://www.google.com/s2/favicons?sz=128&domain=trading212.com';
+
+  const editIsa = async (user: ReturnType<typeof renderAccounts>['user']) => {
+    await user.click(await screen.findByRole('button', { name: 'Cash ISA' }));
+    const view = await screen.findByRole('dialog', { name: 'Cash ISA' });
+    await user.click(within(view).getByRole('button', { name: 'Edit account' }));
+    return screen.findByRole('dialog', { name: 'Edit Cash ISA' });
+  };
+
+  it('uses a website’s icon in place of the letter, set under More options', async () => {
+    const { user, api } = renderAccounts();
+    const dialog = await editIsa(user);
+    const more = within(dialog).getByRole('button', { name: /More options/ });
+
+    await user.click(more);
+    await user.type(within(dialog).getByLabelText('Logo'), 'trading212.com');
+    expect(dialog).toHaveTextContent('Using trading212.com’s icon.');
+    expect(more).toHaveTextContent('logo from trading212.com');
+    await user.click(within(dialog).getByRole('button', { name: 'Save' }));
+
+    expect(await screen.findByText('Cash ISA saved')).toBeInTheDocument();
+    expect(api.callsTo('UpdateAccount')[0].input).toMatchObject({ iconUrl: LOGO });
+    expect(document.querySelector(`img[src="${LOGO}"]`)).not.toBeNull();
+  });
+
+  it('starts with the website of a saved logo, and × goes back to the letter', async () => {
+    const data = budget();
+    data.accounts![0].iconUrl = LOGO;
+    const { user, api } = renderAccounts(data);
+    const dialog = await editIsa(user);
+
+    expect(within(dialog).getByLabelText('Logo')).toHaveValue('trading212.com');
+    await user.click(within(dialog).getByRole('button', { name: 'Remove the logo' }));
+    await user.click(within(dialog).getByRole('button', { name: 'Save' }));
+
+    expect(await screen.findByText('Cash ISA saved')).toBeInTheDocument();
+    expect(api.callsTo('UpdateAccount')[0].input).toMatchObject({ iconUrl: null });
+  });
+});

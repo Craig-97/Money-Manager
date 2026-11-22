@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { screen, within } from '@testing-library/react';
+import { fireEvent, screen, within } from '@testing-library/react';
 import { apiDate } from '~/test/dates';
 import { holdExitAnimations } from '~/test/exitAnimation';
 import {
@@ -593,5 +593,78 @@ describe('a payment on a weekend', () => {
     expect(
       within(dialog).getByRole('combobox', { name: 'On a weekend or bank holiday' })
     ).toHaveTextContent('On the day');
+  });
+});
+
+describe('a logo', () => {
+  const NETFLIX = 'https://www.google.com/s2/favicons?sz=128&domain=netflix.com';
+
+  const openMore = async (user: ReturnType<typeof renderAt>['user']) => {
+    await editFromRow(user, 'Mortgage');
+    const dialog = await screen.findByRole('dialog', { name: 'Edit recurring payment' });
+    const more = within(dialog).getByRole('button', { name: /More options/ });
+    if (more.getAttribute('aria-expanded') === 'false') await user.click(more);
+    return { dialog, more };
+  };
+
+  it('uses a website’s icon in place of the letter, set under More options', async () => {
+    const { user, api } = renderAt('/recurring');
+    const { dialog, more } = await openMore(user);
+
+    await user.type(within(dialog).getByLabelText('Logo'), 'netflix.com');
+    expect(dialog).toHaveTextContent('Using netflix.com’s icon.');
+    expect(more).toHaveTextContent('logo from netflix.com');
+    await user.click(within(dialog).getByRole('button', { name: 'Save changes' }));
+
+    expect(await screen.findByText('Saved Mortgage')).toBeInTheDocument();
+    expect(api.callsTo('UpdateRecurringPayment')[0].input).toMatchObject({ iconUrl: NETFLIX });
+    expect(document.querySelector(`img[src="${NETFLIX}"]`)).not.toBeNull();
+  });
+
+  it('says when a logo won’t load, shows the letter, and still saves it', async () => {
+    const { user, api } = renderAt('/recurring');
+    const { dialog } = await openMore(user);
+    const link = 'https://example.com/missing.png';
+
+    await user.type(within(dialog).getByLabelText('Logo'), link);
+    fireEvent.error(dialog.querySelector(`img[src="${link}"]`)!);
+    expect(dialog).toHaveTextContent(
+      'Couldn’t load a logo from this, so the letter shows instead.'
+    );
+    expect(dialog.querySelector(`img[src="${link}"]`)).toBeNull();
+
+    await user.click(within(dialog).getByRole('button', { name: 'Save changes' }));
+    expect(await screen.findByText('Saved Mortgage')).toBeInTheDocument();
+    expect(api.callsTo('UpdateRecurringPayment')[0].input).toMatchObject({ iconUrl: link });
+  });
+
+  it('won’t save something that isn’t a website or a link', async () => {
+    const { user, api } = renderAt('/recurring');
+    const { dialog } = await openMore(user);
+
+    await user.type(within(dialog).getByLabelText('Logo'), 'netflix');
+    await user.click(within(dialog).getByRole('button', { name: 'Save changes' }));
+
+    expect(dialog).toHaveTextContent('Type a website, or a link that starts https://');
+    expect(api.callsTo('UpdateRecurringPayment')).toEqual([]);
+  });
+
+  it('opens More options with the website of a saved logo, and × takes it off', async () => {
+    const data = budget();
+    data.recurringPayments.find(payment => payment.name === 'Mortgage')!.iconUrl = NETFLIX;
+    const { user, api } = renderApp({ route: '/recurring', budget: data });
+
+    await editFromRow(user, 'Mortgage');
+    const dialog = await screen.findByRole('dialog', { name: 'Edit recurring payment' });
+    expect(within(dialog).getByRole('button', { name: /More options/ })).toHaveAttribute(
+      'aria-expanded',
+      'true'
+    );
+    expect(within(dialog).getByLabelText('Logo')).toHaveValue('netflix.com');
+
+    await user.click(within(dialog).getByRole('button', { name: 'Remove the logo' }));
+    await user.click(within(dialog).getByRole('button', { name: 'Save changes' }));
+    expect(await screen.findByText('Saved Mortgage')).toBeInTheDocument();
+    expect(api.callsTo('UpdateRecurringPayment')[0].input).toMatchObject({ iconUrl: null });
   });
 });

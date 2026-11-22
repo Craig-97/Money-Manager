@@ -8,6 +8,7 @@ export * from './fieldClasses';
 export * from './FieldError';
 export * from './FieldHint';
 export * from './Label';
+export * from './LogoField';
 export * from './PasswordInput';
 export * from './Radio';
 export * from './SearchInput';

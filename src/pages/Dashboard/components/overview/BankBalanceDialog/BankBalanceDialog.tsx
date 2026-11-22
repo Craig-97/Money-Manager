@@ -1,4 +1,4 @@
-import { AccountLetter } from '~/components/accounts';
+import { AccountIcon } from '~/components/accounts';
 import { AmountInput } from '~/components/form';
 import { Modal, ModalActions, PageLink } from '~/components/ui';
 import { ROUTES } from '~/constants';
@@ -41,7 +41,7 @@ export const BankBalanceDialog = ({ dialog, today }: { dialog: Dialog; today: Da
         <div
           key={account.id}
           className="flex items-center gap-2.5 rounded-[18px] border border-border bg-surface-2 py-2.5 pr-2.5 pl-3.5 md:gap-3 md:pl-3">
-          <AccountLetter account={account} size="sm" onGrey className="hidden md:inline-flex" />
+          <AccountIcon account={account} size="sm" onGrey className="hidden md:inline-flex" />
           <span className="flex min-w-0 grow flex-col gap-0.5">
             <label htmlFor={`balance-${account.id}`} className="text-sm font-bold">
               {account.name}

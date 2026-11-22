@@ -171,6 +171,7 @@ describe('one-off payments', () => {
     dueReminder: { off: false, days: null },
     dueReminderDays: 1,
     account: null,
+    iconUrl: null,
     ...overrides
   });
 
@@ -271,6 +272,7 @@ describe('old balances', () => {
       added: []
     },
     purpose: null,
+    iconUrl: null,
     balanceUpdatedAt: day(updated)
   });
 
@@ -319,6 +321,7 @@ describe('savings interest', () => {
       added
     },
     purpose: null,
+    iconUrl: null,
     balanceUpdatedAt: TODAY
   });
 

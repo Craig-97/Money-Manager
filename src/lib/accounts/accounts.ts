@@ -20,6 +20,8 @@ export interface Account {
   // Savings only: its rate, and when it's paid once that's been said
   interest: AccountInterest | null;
   purpose: string | null;
+  // A logo shown in place of its letter, as a link to an image
+  iconUrl: string | null;
   // The day the balance was last typed in
   balanceUpdatedAt: Date;
 }
@@ -54,6 +56,7 @@ export const toAccounts = (
         }
       : null,
     purpose: account.purpose ?? null,
+    iconUrl: account.iconUrl ?? null,
     balanceUpdatedAt: fromApiDate(account.balanceUpdatedAt) ?? today
   }));
 

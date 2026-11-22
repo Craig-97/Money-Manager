@@ -66,6 +66,8 @@ export const regularAsPayment = (
       : null,
     account: input.account ?? null,
     paysInto: input.paysInto ?? null,
+    // Setup doesn't ask for a logo; it's added from Edit later
+    iconUrl: null,
     // Setup works out moves between accounts itself, from the accounts being set up
     into: null,
     nonWorkingDay: input.nonWorkingDay ?? null,
@@ -89,7 +91,8 @@ export const oneOffAsPayment = ({ id, input }: SetupOneOff): OneOffPayment => {
     paidAt: null,
     dueReminder,
     dueReminderDays: reminderDays(dueReminder, DEFAULT_REMINDER_SETTINGS.paymentDays),
-    account: input.account ?? null
+    account: input.account ?? null,
+    iconUrl: null
   };
 };
 

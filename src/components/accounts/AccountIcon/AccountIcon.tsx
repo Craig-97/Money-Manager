@@ -1,5 +1,6 @@
 import { Account, accountLetter } from '~/lib/accounts';
 import { cn } from '~/lib/cn';
+import { LetterIcon } from '../../ui';
 
 const SIZES = {
   // Beside a field in a dialog
@@ -9,29 +10,25 @@ const SIZES = {
   lg: 'size-10 rounded-[13px] text-[15px]'
 } as const;
 
-interface AccountLetterProps {
-  account: Pick<Account, 'name'>;
+interface AccountIconProps {
+  account: Pick<Account, 'name' | 'iconUrl'>;
   size?: keyof typeof SIZES;
   // On a grey card it takes the page's colour, so it still stands out
   onGrey?: boolean;
   className?: string;
 }
 
-/* An account's first letter in a small square, as its icon */
-export const AccountLetter = ({
+/* An account's logo, or its first letter in a small square */
+export const AccountIcon = ({
   account,
   size = 'md',
   onGrey = false,
   className
-}: AccountLetterProps) => (
-  <span
-    aria-hidden="true"
-    className={cn(
-      'inline-flex shrink-0 items-center justify-center border border-border font-extrabold',
-      SIZES[size],
-      onGrey ? 'bg-surface' : 'bg-surface-2',
-      className
-    )}>
-    {accountLetter(account)}
-  </span>
+}: AccountIconProps) => (
+  <LetterIcon
+    letter={accountLetter(account)}
+    iconUrl={account.iconUrl}
+    className={cn(SIZES[size], className)}
+    letterClassName={cn('border border-border', onGrey ? 'bg-surface' : 'bg-surface-2')}
+  />
 );

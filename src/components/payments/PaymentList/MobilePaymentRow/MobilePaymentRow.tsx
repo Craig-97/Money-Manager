@@ -6,7 +6,7 @@ import { PayCycle } from '~/lib/payday';
 import { dueInfo, Payment } from '~/lib/payments';
 import { usePaymentSheetStore } from '~/state/paymentSheet';
 import { Checkbox, CheckboxHitArea } from '../../../form';
-import { NoteChip, PaymentAmount, PaymentLetter, TimesDue } from '../../PaymentParts';
+import { NoteChip, PaymentAmount, PaymentIcon, TimesDue } from '../../PaymentParts';
 
 interface MobilePaymentRowProps {
   payment: Payment;
@@ -69,7 +69,7 @@ export const MobilePaymentRow = ({
         aria-haspopup={selecting ? undefined : 'dialog'}
         onClick={() => (selecting ? toggle(payment.id) : openSheet(payment.id))}
         className="flex min-h-[68px] min-w-0 flex-1 cursor-pointer items-center gap-3 rounded-[14px] text-left">
-        <PaymentLetter payment={payment} className="size-10 rounded-[13px] text-[15px]" />
+        <PaymentIcon payment={payment} className="size-10 rounded-[13px] text-[15px]" />
         <span className="min-w-0 grow">
           <span className="flex items-center gap-1.5 text-[15px] font-bold">
             <span className="min-w-0">{payment.name}</span>

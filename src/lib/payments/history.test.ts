@@ -35,6 +35,7 @@ const card: RecurringPayment = {
   },
   account: null,
   paysInto: null,
+  iconUrl: null,
   into: null,
   nonWorkingDay: null,
   move: { rule: 'ON_DAY', holidays: new Set() },
