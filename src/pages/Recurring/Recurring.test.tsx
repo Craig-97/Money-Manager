@@ -230,6 +230,23 @@ describe('recurring page', () => {
     expect(rows()).toHaveLength(4);
   });
 
+  it('switches the categories to a month, keeping yearly payments apart', async () => {
+    const { user } = renderRecurring();
+
+    const tile = await screen.findByRole('region', { name: 'By category' });
+    // Finances is the loan and the car insurance, a year of each
+    expect(tile).toHaveTextContent('£3,794.00 a year');
+    expect(tile).toHaveTextContent('Finances£864.00');
+
+    await user.click(within(tile).getByRole('radio', { name: 'Month' }));
+
+    expect(within(tile).getByRole('group', { name: 'Monthly spend by category' })).toBeVisible();
+    // The weekly cleaner counts at its average, and the car insurance shows apart as a yearly figure
+    expect(tile).toHaveTextContent('≈ £265.17 a month · + £612.00/yr annual');
+    expect(tile).toHaveTextContent('Bills£216.67');
+    expect(tile).toHaveTextContent('Finances£21.00');
+  });
+
   it('says which savings account a payment goes into, in place of its category', async () => {
     renderRecurring(withSavings());
 

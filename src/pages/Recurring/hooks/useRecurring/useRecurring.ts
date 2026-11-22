@@ -10,6 +10,7 @@ import {
   ALL_CATEGORIES,
   categoriesUsed,
   categoryBreakdown,
+  CategoryPeriod,
   filterPayments,
   listTotals,
   RecurringTab,
@@ -29,6 +30,7 @@ export const useRecurring = (budget: Budget) => {
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState<string>(ALL_CATEGORIES);
   const [sort, setSort] = useState<PaymentSort>(DEFAULT_SORT);
+  const [categoryPeriod, setCategoryPeriod] = useState<CategoryPeriod>('year');
 
   const payments = toPayments(budget, { today, holidays }).filter(isRecurring);
   const paymentNotes = notesByPayment(toNotes(budget.notes));
@@ -55,7 +57,12 @@ export const useRecurring = (budget: Budget) => {
     isEmpty: payments.length === 0,
     totals: listTotals(payments, { cycle, today }),
     renewals: upcomingRenewals(payments, { today }),
-    breakdown: categoryBreakdown(payments),
+    // By category, over a year or a month
+    breakdown: categoryBreakdown(payments, categoryPeriod),
+    // Whether there's anything to break down at all, whichever period shows
+    hasCategories: categoryBreakdown(payments, 'year').items.length > 0,
+    categoryPeriod,
+    setCategoryPeriod,
     counts: tabCounts(payments, { cycle, today }),
     categories: categoriesUsed(payments),
     tab,

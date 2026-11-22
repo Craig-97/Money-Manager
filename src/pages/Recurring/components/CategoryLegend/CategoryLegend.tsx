@@ -10,7 +10,7 @@ interface CategoryLegendProps {
 }
 
 /*
- * Each category with its colour, a year's amount and its share of money out. Categories that
+ * Each category with its colour, its amount over the period and its share of money out. Categories that
  * bring money in show in green with a plus, outside the bar.
  */
 export const CategoryLegend = ({ items, columns, slots = 0 }: CategoryLegendProps) => (
@@ -31,7 +31,7 @@ export const CategoryLegend = ({ items, columns, slots = 0 }: CategoryLegendProp
           </span>
           <span className={cn('num font-bold', incoming && 'text-income')}>
             {incoming ? '+' : ''}
-            {formatMoney(item.yearly)}
+            {formatMoney(item.amount)}
           </span>
           <span className="w-9 text-right num text-xs font-semibold text-muted">
             {incoming ? '' : `${Math.round(item.share! * 100)}%`}

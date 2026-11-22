@@ -1,12 +1,14 @@
 import { forFreeToSpend } from '~/lib/accounts';
-import { formatMoney } from '~/lib/format';
+import { formatMoney, roundPence } from '~/lib/format';
 import { PayCycle } from '~/lib/payday';
 import {
   activeRecurringCount,
   categoryLabel,
   isInCycle,
+  isYearly,
   movesTo,
   PaymentSort,
+  PER_MONTH,
   PER_YEAR,
   RecurringPayment,
   Renewal,
@@ -117,11 +119,19 @@ export const listTotals = (
 /* A total with "+" in front when it brings money in, as the dashboard shows it */
 export const signedTotal = (net: number) => (net > 0 ? '+' : '') + formatMoney(net);
 
+/* What the By category tile adds up: a year of everything, or a month without the yearly ones */
+export type CategoryPeriod = 'year' | 'month';
+
+export const CATEGORY_PERIODS: { value: CategoryPeriod; label: string }[] = [
+  { value: 'year', label: 'Year' },
+  { value: 'month', label: 'Month' }
+];
+
 export interface CategoryShare {
   category: string;
   label: string;
-  // A year of the category's payments: negative for money out, positive for money in
-  yearly: number;
+  // The category's payments over the period: negative for money out, positive for money in
+  amount: number;
   // Of all money out, for the bar; null for money in
   share: number | null;
   // Its slice of the bar, and its dot in the legend; null for money in
@@ -129,27 +139,37 @@ export interface CategoryShare {
 }
 
 /*
- * A year of payments by category. Money out makes the bar, largest first; categories that bring
- * money in follow, kept out of the bar. The total is what's left after both.
+ * Payments by category, over a year or a month. Money out makes the bar, largest first; categories
+ * that bring money in follow, kept out of the bar. The total is what's left after both. A month
+ * counts weekly and fortnightly payments at their average and leaves quarterly and yearly ones
+ * out, as the summary does, giving what they come to a year on its own.
  */
-export const categoryBreakdown = (payments: RecurringPayment[]) => {
+export const categoryBreakdown = (payments: RecurringPayment[], period: CategoryPeriod) => {
   const byCategory = new Map<string, number>();
+  let averaged = false;
+  let annual = 0;
   for (const payment of payments) {
     // Ended payments no longer cost anything, and money moving between accounts that count isn't
     // spent
     if (!payment.dueDate || movesTo(payment)) continue;
-    const yearly = payment.signedAmount * PER_YEAR[payment.frequency];
-    byCategory.set(payment.category, (byCategory.get(payment.category) ?? 0) + yearly);
+    if (period === 'month' && isYearly(payment.frequency)) {
+      annual -= payment.signedAmount * PER_YEAR[payment.frequency];
+      continue;
+    }
+    if (period === 'month' && payment.frequency !== 'MONTHLY') averaged = true;
+    const amount =
+      payment.signedAmount * (period === 'year' ? PER_YEAR : PER_MONTH)[payment.frequency];
+    byCategory.set(payment.category, (byCategory.get(payment.category) ?? 0) + amount);
   }
-  const entries = [...byCategory].map(([category, yearly]) => ({ category, yearly }));
-  const out = entries.filter(entry => entry.yearly < 0).sort((a, b) => a.yearly - b.yearly);
-  const into = entries.filter(entry => entry.yearly > 0).sort((a, b) => b.yearly - a.yearly);
-  const totalOut = out.reduce((total, entry) => total + entry.yearly, 0);
+  const entries = [...byCategory].map(([category, amount]) => ({ category, amount }));
+  const out = entries.filter(entry => entry.amount < 0).sort((a, b) => a.amount - b.amount);
+  const into = entries.filter(entry => entry.amount > 0).sort((a, b) => b.amount - a.amount);
+  const totalOut = out.reduce((total, entry) => total + entry.amount, 0);
 
   const items: CategoryShare[] = [
     ...out.map((entry, index) => ({
       ...entry,
-      share: entry.yearly / totalOut,
+      share: entry.amount / totalOut,
       colour: sliceColour(index, out.length)
     })),
     ...into.map(entry => ({ ...entry, share: null, colour: null }))
@@ -158,7 +178,11 @@ export const categoryBreakdown = (payments: RecurringPayment[]) => {
   return {
     items,
     spending: items.filter(item => item.share !== null),
-    net: entries.reduce((total, entry) => total + entry.yearly, 0)
+    net: entries.reduce((total, entry) => total + entry.amount, 0),
+    // "≈" when weekly or fortnightly payments count at their average a month
+    averaged,
+    // Quarterly and yearly money out a month leaves out, as a yearly figure
+    annual: roundPence(annual)
   };
 };
 

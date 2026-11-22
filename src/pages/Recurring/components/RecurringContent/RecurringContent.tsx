@@ -25,7 +25,7 @@ export const RecurringContent = ({ budget }: { budget: Budget }) => {
       <SummaryStats recurring={recurring} />
       <div className="grid items-stretch gap-4 min-[56.25rem]:grid-cols-2">
         <RenewalsTile recurring={recurring} />
-        <CategoryTile breakdown={recurring.breakdown} narrow={isSplit} />
+        <CategoryTile recurring={recurring} narrow={isSplit} />
       </div>
       <RecurringTable recurring={recurring} />
     </section>
@@ -38,7 +38,7 @@ export const RecurringContent = ({ budget }: { budget: Budget }) => {
       <RenewalsTile recurring={recurring} compact />
       {recurring.isEmpty ? null : <MobileFilters recurring={recurring} />}
       <MobileRecurringList recurring={recurring} />
-      <CategoryTile breakdown={recurring.breakdown} narrow compact />
+      <CategoryTile recurring={recurring} narrow compact />
     </section>
   );
 };
