@@ -13,7 +13,7 @@ import { AccountFields, panelClasses } from '../AccountFields';
 import { deleteTextOf } from './deleteText';
 import { useAccountDialog } from './useAccountDialog';
 import { accountDialogTitle } from '../accountDraft';
-import { AccountLetter } from '../AccountLetter';
+import { AccountIcon } from '../AccountIcon';
 
 /*
  * Adding an account or changing one: a dialog on desktop, a bottom sheet on mobile. Adding starts
@@ -55,7 +55,7 @@ export const AccountDialog = () => {
       title={title}
       onBack={!account && !dialog.choosing ? dialog.backToChooser : undefined}
       backLabel="Back to account types"
-      leading={account && !dialog.confirming ? <AccountLetter account={account} /> : undefined}
+      leading={account && !dialog.confirming ? <AccountIcon account={account} /> : undefined}
       subtitle={
         account && !dialog.confirming ? (
           <span
@@ -117,6 +117,7 @@ export const AccountDialog = () => {
           canChangeKind={!!account && dialog.canChangeKind}
           editing={!!account}
           showCounts={dialog.showCounts}
+          showLogo
           afterKind={
             dialog.showPaidInto ? (
               <div

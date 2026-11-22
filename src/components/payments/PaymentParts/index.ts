@@ -6,7 +6,7 @@ export * from './ListTotal';
 export * from './MovedTag';
 export * from './NoteChip';
 export * from './PaymentAmount';
-export * from './PaymentLetter';
+export * from './PaymentIcon';
 export * from './PaymentMenu';
 export * from './PaymentSummary';
 export * from './RenewalTag';

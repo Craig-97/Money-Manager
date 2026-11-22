@@ -1,5 +1,5 @@
 import { DebtProgress } from '~/components/debts';
-import { PaymentLetter } from '~/components/payments';
+import { PaymentIcon } from '~/components/payments';
 import {
   aprText,
   clearedText,
@@ -23,7 +23,7 @@ export const DebtRow = ({ debt, debts }: { debt: DebtPayment; debts: Debts }) =>
   return (
     <div role="row" className={`${debtRowClasses} hover:bg-hover`}>
       <div role="cell" className="flex min-w-0 items-center gap-3">
-        <PaymentLetter payment={debt} className="size-[38px] rounded-xl text-sm" />
+        <PaymentIcon payment={debt} className="size-[38px] rounded-xl text-sm" />
         <div className="min-w-0">
           <button
             type="button"

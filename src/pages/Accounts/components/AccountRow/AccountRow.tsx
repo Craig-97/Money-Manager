@@ -1,4 +1,4 @@
-import { AccountLetter, PendingInterestTag } from '~/components/accounts';
+import { AccountIcon, PendingInterestTag } from '~/components/accounts';
 import { Switch } from '~/components/ui';
 import { Account, accountMeta, interestLine, isStale, updatedText } from '~/lib/accounts';
 import { cn } from '~/lib/cn';
@@ -36,7 +36,7 @@ export const AccountRow = ({ account, today, several, onCounts }: AccountRowProp
   return (
     <div className="grid min-h-[72px] grid-cols-[minmax(0,1fr)_minmax(120px,auto)_150px_44px] items-center gap-x-4 rounded-2xl px-2 transition-colors hover:bg-hover wide:grid-cols-[minmax(0,1fr)_auto_minmax(130px,auto)_150px_44px]">
       <div className="flex min-w-0 items-center gap-3.5">
-        <AccountLetter account={account} />
+        <AccountIcon account={account} />
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <button

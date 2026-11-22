@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
-import { AccountLetter } from '~/components/accounts';
+import { AccountIcon } from '~/components/accounts';
 import { AccountBeforePayday, goesBelowZero } from '~/lib/accounts';
 import { cn } from '~/lib/cn';
 import { formatShortDate } from '~/lib/dates';
@@ -52,7 +52,7 @@ export const AccountBeforeRow = ({
       : below
         ? `Goes below £0 on ${formatShortDate(lowest.date, today)} (${formatBalance(lowest.amount)})`
         : `Lowest point ${formatBalance(lowest.amount)} on ${formatShortDate(lowest.date, today)}`;
-  const letter = <AccountLetter account={account} />;
+  const icon = <AccountIcon account={account} />;
   const name = (
     <span className="flex min-w-0 flex-wrap items-center gap-2">
       <span className="text-base font-extrabold [overflow-wrap:anywhere]">{account.name}</span>
@@ -101,7 +101,7 @@ export const AccountBeforeRow = ({
           )}>
           {across ? (
             <>
-              {letter}
+              {icon}
               <span className="flex min-w-0 flex-1 flex-col gap-[3px]">
                 {name}
                 {lowLine}
@@ -112,7 +112,7 @@ export const AccountBeforeRow = ({
           ) : (
             <>
               <span className="flex items-center gap-3">
-                {letter}
+                {icon}
                 <span className="flex min-w-0 flex-1">{name}</span>
                 {empty ? null : chevron}
               </span>

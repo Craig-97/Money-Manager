@@ -233,6 +233,7 @@ const demoBudget = (scenario: string | null): FakeBudget => {
           accruedTo: fromToday(-31)
         },
         purpose: null,
+        iconUrl: 'https://www.google.com/s2/favicons?sz=128&domain=trading212.com',
         balanceUpdatedAt: fromToday(-9),
         history: easyAccessHistory()
       },
@@ -289,7 +290,9 @@ const demoBudget = (scenario: string | null): FakeBudget => {
         category: 'SUBSCRIPTIONS',
         dueInDays: 0,
         startedInDays: -273,
-        history: netflixHistory()
+        history: netflixHistory(),
+        // A logo from its website; the rest show their letter
+        iconUrl: 'https://www.google.com/s2/favicons?sz=128&domain=netflix.com'
       }),
       mockPayment({
         id: 'mortgage',

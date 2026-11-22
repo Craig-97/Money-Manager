@@ -24,5 +24,7 @@ fragment AccountFields on Account {
     }
   }
   purpose
+  # A logo shown in place of its letter; null shows the letter
+  iconUrl
   balanceUpdatedAt
 }

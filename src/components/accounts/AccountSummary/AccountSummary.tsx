@@ -3,7 +3,7 @@ import { Account, isSpending, isStale, updatedText } from '~/lib/accounts';
 import { cn } from '~/lib/cn';
 import { formatBalance } from '~/lib/format';
 import { summaryCardClasses } from '../../payments';
-import { AccountLetter } from '../AccountLetter';
+import { AccountIcon } from '../AccountIcon';
 
 interface AccountSummaryProps {
   account: Account;
@@ -26,7 +26,7 @@ export const AccountSummary = ({
 
   return (
     <div className={summaryCardClasses}>
-      <AccountLetter account={account} onGrey />
+      <AccountIcon account={account} onGrey />
       <div className="min-w-0 flex-1">
         {named ? <p className="text-[15px] font-extrabold">{account.name}</p> : null}
         <p

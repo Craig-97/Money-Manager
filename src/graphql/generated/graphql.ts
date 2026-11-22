@@ -15,6 +15,7 @@ export type AccountFieldsFragment = {
   counts: boolean;
   paidInto: boolean;
   purpose: string | null;
+  iconUrl: string | null;
   balanceUpdatedAt: string;
   interest: {
     __typename: 'AccountInterest';
@@ -80,6 +81,7 @@ export type AssignPaymentAccountsMutation = {
         account: string | null;
         paysInto: string | null;
         nonWorkingDay: Types.NonWorkingDay | null;
+        iconUrl: string | null;
         dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
         renewalReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
         thisCycle: Array<{
@@ -124,6 +126,7 @@ export type CatchUpInterestMutation = {
         counts: boolean;
         paidInto: boolean;
         purpose: string | null;
+        iconUrl: string | null;
         balanceUpdatedAt: string;
         interest: {
           __typename: 'AccountInterest';
@@ -161,6 +164,7 @@ export type CreateAccountMutation = {
       counts: boolean;
       paidInto: boolean;
       purpose: string | null;
+      iconUrl: string | null;
       balanceUpdatedAt: string;
       interest: {
         __typename: 'AccountInterest';
@@ -191,6 +195,7 @@ export type CreateAccountMutation = {
         counts: boolean;
         paidInto: boolean;
         purpose: string | null;
+        iconUrl: string | null;
         balanceUpdatedAt: string;
         interest: {
           __typename: 'AccountInterest';
@@ -223,6 +228,7 @@ export type CreateAccountMutation = {
         account: string | null;
         paysInto: string | null;
         nonWorkingDay: Types.NonWorkingDay | null;
+        iconUrl: string | null;
         dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
         renewalReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
         thisCycle: Array<{
@@ -267,6 +273,7 @@ export type DeleteAccountMutation = {
         counts: boolean;
         paidInto: boolean;
         purpose: string | null;
+        iconUrl: string | null;
         balanceUpdatedAt: string;
         interest: {
           __typename: 'AccountInterest';
@@ -299,6 +306,7 @@ export type DeleteAccountMutation = {
         account: string | null;
         paysInto: string | null;
         nonWorkingDay: Types.NonWorkingDay | null;
+        iconUrl: string | null;
         dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
         renewalReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
         thisCycle: Array<{
@@ -329,6 +337,7 @@ export type DeleteAccountMutation = {
         category: Types.PaymentCategory;
         paidAt: string | null;
         account: string | null;
+        iconUrl: string | null;
         dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
       } | null> | null;
     } | null;
@@ -352,6 +361,7 @@ export type UpdateAccountMutation = {
       counts: boolean;
       paidInto: boolean;
       purpose: string | null;
+      iconUrl: string | null;
       balanceUpdatedAt: string;
       interest: {
         __typename: 'AccountInterest';
@@ -382,6 +392,7 @@ export type UpdateAccountMutation = {
         counts: boolean;
         paidInto: boolean;
         purpose: string | null;
+        iconUrl: string | null;
         balanceUpdatedAt: string;
         interest: {
           __typename: 'AccountInterest';
@@ -414,6 +425,7 @@ export type UpdateAccountMutation = {
         account: string | null;
         paysInto: string | null;
         nonWorkingDay: Types.NonWorkingDay | null;
+        iconUrl: string | null;
         dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
         renewalReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
         thisCycle: Array<{
@@ -444,6 +456,7 @@ export type UpdateAccountMutation = {
         category: Types.PaymentCategory;
         paidAt: string | null;
         account: string | null;
+        iconUrl: string | null;
         dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
       } | null> | null;
     } | null;
@@ -470,6 +483,7 @@ export type UpdateAccountBalancesMutation = {
         counts: boolean;
         paidInto: boolean;
         purpose: string | null;
+        iconUrl: string | null;
         balanceUpdatedAt: string;
         interest: {
           __typename: 'AccountInterest';
@@ -644,6 +658,7 @@ export type BudgetQuery = {
       counts: boolean;
       paidInto: boolean;
       purpose: string | null;
+      iconUrl: string | null;
       balanceUpdatedAt: string;
       interest: {
         __typename: 'AccountInterest';
@@ -687,6 +702,7 @@ export type BudgetQuery = {
       account: string | null;
       paysInto: string | null;
       nonWorkingDay: Types.NonWorkingDay | null;
+      iconUrl: string | null;
       dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
       renewalReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
       thisCycle: Array<{
@@ -717,6 +733,7 @@ export type BudgetQuery = {
       category: Types.PaymentCategory;
       paidAt: string | null;
       account: string | null;
+      iconUrl: string | null;
       dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
     } | null> | null;
     notes: Array<{
@@ -773,6 +790,7 @@ export type BudgetFieldsFragment = {
     counts: boolean;
     paidInto: boolean;
     purpose: string | null;
+    iconUrl: string | null;
     balanceUpdatedAt: string;
     interest: {
       __typename: 'AccountInterest';
@@ -816,6 +834,7 @@ export type BudgetFieldsFragment = {
     account: string | null;
     paysInto: string | null;
     nonWorkingDay: Types.NonWorkingDay | null;
+    iconUrl: string | null;
     dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
     renewalReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
     thisCycle: Array<{
@@ -846,6 +865,7 @@ export type BudgetFieldsFragment = {
     category: Types.PaymentCategory;
     paidAt: string | null;
     account: string | null;
+    iconUrl: string | null;
     dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
   } | null> | null;
   notes: Array<{
@@ -908,6 +928,7 @@ export type CreateBudgetMutation = {
         counts: boolean;
         paidInto: boolean;
         purpose: string | null;
+        iconUrl: string | null;
         balanceUpdatedAt: string;
         interest: {
           __typename: 'AccountInterest';
@@ -951,6 +972,7 @@ export type CreateBudgetMutation = {
         account: string | null;
         paysInto: string | null;
         nonWorkingDay: Types.NonWorkingDay | null;
+        iconUrl: string | null;
         dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
         renewalReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
         thisCycle: Array<{
@@ -981,6 +1003,7 @@ export type CreateBudgetMutation = {
         category: Types.PaymentCategory;
         paidAt: string | null;
         account: string | null;
+        iconUrl: string | null;
         dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
       } | null> | null;
       notes: Array<{
@@ -1042,6 +1065,7 @@ export type LogDebtOverpaymentMutation = {
         counts: boolean;
         paidInto: boolean;
         purpose: string | null;
+        iconUrl: string | null;
         balanceUpdatedAt: string;
         interest: {
           __typename: 'AccountInterest';
@@ -1074,6 +1098,7 @@ export type LogDebtOverpaymentMutation = {
         account: string | null;
         paysInto: string | null;
         nonWorkingDay: Types.NonWorkingDay | null;
+        iconUrl: string | null;
         dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
         renewalReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
         thisCycle: Array<{
@@ -1118,6 +1143,7 @@ export type MarkPaymentsPaidMutation = {
         counts: boolean;
         paidInto: boolean;
         purpose: string | null;
+        iconUrl: string | null;
         balanceUpdatedAt: string;
         interest: {
           __typename: 'AccountInterest';
@@ -1150,6 +1176,7 @@ export type MarkPaymentsPaidMutation = {
         account: string | null;
         paysInto: string | null;
         nonWorkingDay: Types.NonWorkingDay | null;
+        iconUrl: string | null;
         dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
         renewalReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
         thisCycle: Array<{
@@ -1180,6 +1207,7 @@ export type MarkPaymentsPaidMutation = {
         category: Types.PaymentCategory;
         paidAt: string | null;
         account: string | null;
+        iconUrl: string | null;
         dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
       } | null> | null;
     } | null;
@@ -1206,6 +1234,7 @@ export type MarkPaymentsUnpaidMutation = {
         counts: boolean;
         paidInto: boolean;
         purpose: string | null;
+        iconUrl: string | null;
         balanceUpdatedAt: string;
         interest: {
           __typename: 'AccountInterest';
@@ -1238,6 +1267,7 @@ export type MarkPaymentsUnpaidMutation = {
         account: string | null;
         paysInto: string | null;
         nonWorkingDay: Types.NonWorkingDay | null;
+        iconUrl: string | null;
         dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
         renewalReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
         thisCycle: Array<{
@@ -1268,6 +1298,7 @@ export type MarkPaymentsUnpaidMutation = {
         category: Types.PaymentCategory;
         paidAt: string | null;
         account: string | null;
+        iconUrl: string | null;
         dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
       } | null> | null;
     } | null;
@@ -1299,6 +1330,7 @@ export type SkipRecurringPaymentsMutation = {
         account: string | null;
         paysInto: string | null;
         nonWorkingDay: Types.NonWorkingDay | null;
+        iconUrl: string | null;
         dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
         renewalReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
         thisCycle: Array<{
@@ -1344,6 +1376,7 @@ export type StartPaydayCycleMutation = {
         counts: boolean;
         paidInto: boolean;
         purpose: string | null;
+        iconUrl: string | null;
         balanceUpdatedAt: string;
         interest: {
           __typename: 'AccountInterest';
@@ -1376,6 +1409,7 @@ export type StartPaydayCycleMutation = {
         account: string | null;
         paysInto: string | null;
         nonWorkingDay: Types.NonWorkingDay | null;
+        iconUrl: string | null;
         dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
         renewalReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
         thisCycle: Array<{
@@ -1406,6 +1440,7 @@ export type StartPaydayCycleMutation = {
         category: Types.PaymentCategory;
         paidAt: string | null;
         account: string | null;
+        iconUrl: string | null;
         dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
       } | null> | null;
     } | null;
@@ -1432,6 +1467,7 @@ export type UndoDebtOverpaymentMutation = {
         counts: boolean;
         paidInto: boolean;
         purpose: string | null;
+        iconUrl: string | null;
         balanceUpdatedAt: string;
         interest: {
           __typename: 'AccountInterest';
@@ -1464,6 +1500,7 @@ export type UndoDebtOverpaymentMutation = {
         account: string | null;
         paysInto: string | null;
         nonWorkingDay: Types.NonWorkingDay | null;
+        iconUrl: string | null;
         dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
         renewalReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
         thisCycle: Array<{
@@ -1660,6 +1697,7 @@ export type CreateOneOffPaymentMutation = {
       category: Types.PaymentCategory;
       paidAt: string | null;
       account: string | null;
+      iconUrl: string | null;
       dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
     } | null;
   };
@@ -1687,6 +1725,7 @@ export type CreateRecurringPaymentMutation = {
       account: string | null;
       paysInto: string | null;
       nonWorkingDay: Types.NonWorkingDay | null;
+      iconUrl: string | null;
       dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
       renewalReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
       thisCycle: Array<{
@@ -1720,6 +1759,7 @@ export type OneOffPaymentFieldsFragment = {
   category: Types.PaymentCategory;
   paidAt: string | null;
   account: string | null;
+  iconUrl: string | null;
   dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
 };
 
@@ -1767,6 +1807,7 @@ export type RecurringPaymentFieldsFragment = {
   account: string | null;
   paysInto: string | null;
   nonWorkingDay: Types.NonWorkingDay | null;
+  iconUrl: string | null;
   dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
   renewalReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
   thisCycle: Array<{
@@ -1806,6 +1847,7 @@ export type UpdateOneOffPaymentMutation = {
       category: Types.PaymentCategory;
       paidAt: string | null;
       account: string | null;
+      iconUrl: string | null;
       dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
     } | null;
   };
@@ -1834,6 +1876,7 @@ export type UpdateRecurringPaymentMutation = {
       account: string | null;
       paysInto: string | null;
       nonWorkingDay: Types.NonWorkingDay | null;
+      iconUrl: string | null;
       dueReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
       renewalReminder: { __typename: 'ReminderTiming'; off: boolean; days: number | null };
       thisCycle: Array<{
@@ -2151,6 +2194,7 @@ export const AccountFieldsFragmentDoc = {
             }
           },
           { kind: 'Field', name: { kind: 'Name', value: 'purpose' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'iconUrl' } },
           { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } }
         ]
       }
@@ -2248,6 +2292,7 @@ export const RecurringPaymentFieldsFragmentDoc = {
           { kind: 'Field', name: { kind: 'Name', value: 'account' } },
           { kind: 'Field', name: { kind: 'Name', value: 'paysInto' } },
           { kind: 'Field', name: { kind: 'Name', value: 'nonWorkingDay' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'iconUrl' } },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'debt' },
@@ -2287,6 +2332,7 @@ export const OneOffPaymentFieldsFragmentDoc = {
           { kind: 'Field', name: { kind: 'Name', value: 'category' } },
           { kind: 'Field', name: { kind: 'Name', value: 'paidAt' } },
           { kind: 'Field', name: { kind: 'Name', value: 'account' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'iconUrl' } },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'dueReminder' },
@@ -2523,6 +2569,7 @@ export const BudgetFieldsFragmentDoc = {
             }
           },
           { kind: 'Field', name: { kind: 'Name', value: 'purpose' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'iconUrl' } },
           { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } }
         ]
       }
@@ -2610,6 +2657,7 @@ export const BudgetFieldsFragmentDoc = {
           { kind: 'Field', name: { kind: 'Name', value: 'account' } },
           { kind: 'Field', name: { kind: 'Name', value: 'paysInto' } },
           { kind: 'Field', name: { kind: 'Name', value: 'nonWorkingDay' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'iconUrl' } },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'debt' },
@@ -2644,6 +2692,7 @@ export const BudgetFieldsFragmentDoc = {
           { kind: 'Field', name: { kind: 'Name', value: 'category' } },
           { kind: 'Field', name: { kind: 'Name', value: 'paidAt' } },
           { kind: 'Field', name: { kind: 'Name', value: 'account' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'iconUrl' } },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'dueReminder' },
@@ -2913,6 +2962,7 @@ export const AssignPaymentAccountsDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'account' } },
           { kind: 'Field', name: { kind: 'Name', value: 'paysInto' } },
           { kind: 'Field', name: { kind: 'Name', value: 'nonWorkingDay' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'iconUrl' } },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'debt' },
@@ -3038,6 +3088,7 @@ export const CatchUpInterestDocument = {
             }
           },
           { kind: 'Field', name: { kind: 'Name', value: 'purpose' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'iconUrl' } },
           { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } }
         ]
       }
@@ -3171,6 +3222,7 @@ export const CreateAccountDocument = {
             }
           },
           { kind: 'Field', name: { kind: 'Name', value: 'purpose' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'iconUrl' } },
           { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } }
         ]
       }
@@ -3230,6 +3282,7 @@ export const CreateAccountDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'account' } },
           { kind: 'Field', name: { kind: 'Name', value: 'paysInto' } },
           { kind: 'Field', name: { kind: 'Name', value: 'nonWorkingDay' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'iconUrl' } },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'debt' },
@@ -3381,6 +3434,7 @@ export const DeleteAccountDocument = {
             }
           },
           { kind: 'Field', name: { kind: 'Name', value: 'purpose' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'iconUrl' } },
           { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } }
         ]
       }
@@ -3440,6 +3494,7 @@ export const DeleteAccountDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'account' } },
           { kind: 'Field', name: { kind: 'Name', value: 'paysInto' } },
           { kind: 'Field', name: { kind: 'Name', value: 'nonWorkingDay' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'iconUrl' } },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'debt' },
@@ -3474,6 +3529,7 @@ export const DeleteAccountDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'category' } },
           { kind: 'Field', name: { kind: 'Name', value: 'paidAt' } },
           { kind: 'Field', name: { kind: 'Name', value: 'account' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'iconUrl' } },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'dueReminder' },
@@ -3643,6 +3699,7 @@ export const UpdateAccountDocument = {
             }
           },
           { kind: 'Field', name: { kind: 'Name', value: 'purpose' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'iconUrl' } },
           { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } }
         ]
       }
@@ -3702,6 +3759,7 @@ export const UpdateAccountDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'account' } },
           { kind: 'Field', name: { kind: 'Name', value: 'paysInto' } },
           { kind: 'Field', name: { kind: 'Name', value: 'nonWorkingDay' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'iconUrl' } },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'debt' },
@@ -3736,6 +3794,7 @@ export const UpdateAccountDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'category' } },
           { kind: 'Field', name: { kind: 'Name', value: 'paidAt' } },
           { kind: 'Field', name: { kind: 'Name', value: 'account' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'iconUrl' } },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'dueReminder' },
@@ -3856,6 +3915,7 @@ export const UpdateAccountBalancesDocument = {
             }
           },
           { kind: 'Field', name: { kind: 'Name', value: 'purpose' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'iconUrl' } },
           { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } }
         ]
       }
@@ -4372,6 +4432,7 @@ export const BudgetDocument = {
             }
           },
           { kind: 'Field', name: { kind: 'Name', value: 'purpose' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'iconUrl' } },
           { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } }
         ]
       }
@@ -4459,6 +4520,7 @@ export const BudgetDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'account' } },
           { kind: 'Field', name: { kind: 'Name', value: 'paysInto' } },
           { kind: 'Field', name: { kind: 'Name', value: 'nonWorkingDay' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'iconUrl' } },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'debt' },
@@ -4493,6 +4555,7 @@ export const BudgetDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'category' } },
           { kind: 'Field', name: { kind: 'Name', value: 'paidAt' } },
           { kind: 'Field', name: { kind: 'Name', value: 'account' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'iconUrl' } },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'dueReminder' },
@@ -4755,6 +4818,7 @@ export const CreateBudgetDocument = {
             }
           },
           { kind: 'Field', name: { kind: 'Name', value: 'purpose' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'iconUrl' } },
           { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } }
         ]
       }
@@ -4842,6 +4906,7 @@ export const CreateBudgetDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'account' } },
           { kind: 'Field', name: { kind: 'Name', value: 'paysInto' } },
           { kind: 'Field', name: { kind: 'Name', value: 'nonWorkingDay' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'iconUrl' } },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'debt' },
@@ -4876,6 +4941,7 @@ export const CreateBudgetDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'category' } },
           { kind: 'Field', name: { kind: 'Name', value: 'paidAt' } },
           { kind: 'Field', name: { kind: 'Name', value: 'account' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'iconUrl' } },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'dueReminder' },
@@ -5165,6 +5231,7 @@ export const LogDebtOverpaymentDocument = {
             }
           },
           { kind: 'Field', name: { kind: 'Name', value: 'purpose' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'iconUrl' } },
           { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } }
         ]
       }
@@ -5224,6 +5291,7 @@ export const LogDebtOverpaymentDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'account' } },
           { kind: 'Field', name: { kind: 'Name', value: 'paysInto' } },
           { kind: 'Field', name: { kind: 'Name', value: 'nonWorkingDay' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'iconUrl' } },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'debt' },
@@ -5375,6 +5443,7 @@ export const MarkPaymentsPaidDocument = {
             }
           },
           { kind: 'Field', name: { kind: 'Name', value: 'purpose' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'iconUrl' } },
           { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } }
         ]
       }
@@ -5434,6 +5503,7 @@ export const MarkPaymentsPaidDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'account' } },
           { kind: 'Field', name: { kind: 'Name', value: 'paysInto' } },
           { kind: 'Field', name: { kind: 'Name', value: 'nonWorkingDay' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'iconUrl' } },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'debt' },
@@ -5468,6 +5538,7 @@ export const MarkPaymentsPaidDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'category' } },
           { kind: 'Field', name: { kind: 'Name', value: 'paidAt' } },
           { kind: 'Field', name: { kind: 'Name', value: 'account' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'iconUrl' } },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'dueReminder' },
@@ -5614,6 +5685,7 @@ export const MarkPaymentsUnpaidDocument = {
             }
           },
           { kind: 'Field', name: { kind: 'Name', value: 'purpose' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'iconUrl' } },
           { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } }
         ]
       }
@@ -5673,6 +5745,7 @@ export const MarkPaymentsUnpaidDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'account' } },
           { kind: 'Field', name: { kind: 'Name', value: 'paysInto' } },
           { kind: 'Field', name: { kind: 'Name', value: 'nonWorkingDay' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'iconUrl' } },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'debt' },
@@ -5707,6 +5780,7 @@ export const MarkPaymentsUnpaidDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'category' } },
           { kind: 'Field', name: { kind: 'Name', value: 'paidAt' } },
           { kind: 'Field', name: { kind: 'Name', value: 'account' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'iconUrl' } },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'dueReminder' },
@@ -5840,6 +5914,7 @@ export const SkipRecurringPaymentsDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'account' } },
           { kind: 'Field', name: { kind: 'Name', value: 'paysInto' } },
           { kind: 'Field', name: { kind: 'Name', value: 'nonWorkingDay' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'iconUrl' } },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'debt' },
@@ -5992,6 +6067,7 @@ export const StartPaydayCycleDocument = {
             }
           },
           { kind: 'Field', name: { kind: 'Name', value: 'purpose' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'iconUrl' } },
           { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } }
         ]
       }
@@ -6051,6 +6127,7 @@ export const StartPaydayCycleDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'account' } },
           { kind: 'Field', name: { kind: 'Name', value: 'paysInto' } },
           { kind: 'Field', name: { kind: 'Name', value: 'nonWorkingDay' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'iconUrl' } },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'debt' },
@@ -6085,6 +6162,7 @@ export const StartPaydayCycleDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'category' } },
           { kind: 'Field', name: { kind: 'Name', value: 'paidAt' } },
           { kind: 'Field', name: { kind: 'Name', value: 'account' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'iconUrl' } },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'dueReminder' },
@@ -6218,6 +6296,7 @@ export const UndoDebtOverpaymentDocument = {
             }
           },
           { kind: 'Field', name: { kind: 'Name', value: 'purpose' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'iconUrl' } },
           { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } }
         ]
       }
@@ -6277,6 +6356,7 @@ export const UndoDebtOverpaymentDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'account' } },
           { kind: 'Field', name: { kind: 'Name', value: 'paysInto' } },
           { kind: 'Field', name: { kind: 'Name', value: 'nonWorkingDay' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'iconUrl' } },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'debt' },
@@ -6917,6 +6997,7 @@ export const CreateOneOffPaymentDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'category' } },
           { kind: 'Field', name: { kind: 'Name', value: 'paidAt' } },
           { kind: 'Field', name: { kind: 'Name', value: 'account' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'iconUrl' } },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'dueReminder' },
@@ -7043,6 +7124,7 @@ export const CreateRecurringPaymentDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'account' } },
           { kind: 'Field', name: { kind: 'Name', value: 'paysInto' } },
           { kind: 'Field', name: { kind: 'Name', value: 'nonWorkingDay' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'iconUrl' } },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'debt' },
@@ -7233,6 +7315,7 @@ export const UpdateOneOffPaymentDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'category' } },
           { kind: 'Field', name: { kind: 'Name', value: 'paidAt' } },
           { kind: 'Field', name: { kind: 'Name', value: 'account' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'iconUrl' } },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'dueReminder' },
@@ -7372,6 +7455,7 @@ export const UpdateRecurringPaymentDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'account' } },
           { kind: 'Field', name: { kind: 'Name', value: 'paysInto' } },
           { kind: 'Field', name: { kind: 'Name', value: 'nonWorkingDay' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'iconUrl' } },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'debt' },

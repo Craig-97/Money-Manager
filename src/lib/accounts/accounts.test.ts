@@ -22,6 +22,7 @@ const account = (fields: Partial<Account> & { id: string }): Account => ({
   paidInto: false,
   interest: null,
   purpose: null,
+  iconUrl: null,
   balanceUpdatedAt: TODAY,
   ...fields
 });
@@ -144,6 +145,7 @@ describe('before payday by account', () => {
       debt: null,
       account: null,
       paysInto: null,
+      iconUrl: null,
       ...fields
     }) as RecurringPayment;
   const oneOff = (fields: Partial<OneOffPayment> & { id: string; amount: number; dueDate: Date }) =>
@@ -157,6 +159,7 @@ describe('before payday by account', () => {
       dueReminder: { off: false, days: null },
       dueReminderDays: 1,
       account: null,
+      iconUrl: null,
       ...fields
     }) as OneOffPayment;
 

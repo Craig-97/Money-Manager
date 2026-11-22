@@ -2,6 +2,7 @@ import { AccountInterestInput, AccountKind, InterestFrequency } from '~/graphql/
 import { AccountInterest } from '~/lib/accounts';
 import { parseIsoDate, toIsoDate } from '~/lib/dates';
 import { parseMoney } from '~/lib/format';
+import { LOGO_INVALID, logoIconUrl, readLogoInput } from '~/lib/icons';
 
 /* An account's fields as typed, shared by the account dialog and setup */
 
@@ -25,6 +26,8 @@ export interface AccountDraft {
   balance: string;
   interest: InterestDraft;
   purpose: string;
+  // The Logo box as typed: a website or an image's link; '' shows the letter
+  logo: string;
   counts: boolean;
   paidInto: boolean;
 }
@@ -42,6 +45,7 @@ export const EMPTY_ACCOUNT_DRAFT: AccountDraft = {
   balance: '',
   interest: EMPTY_INTEREST_DRAFT,
   purpose: '',
+  logo: '',
   counts: false,
   paidInto: false
 };
@@ -142,6 +146,7 @@ export interface AccountDraftErrors extends InterestDraftErrors {
   balance?: string;
   name?: string;
   purpose?: string;
+  logo?: string;
 }
 
 /*
@@ -158,6 +163,7 @@ export const checkAccountDraft = (
   const purpose = draft.purpose.trim();
   const spending = draft.kind === 'SPENDING';
   const interest = checkInterestDraft(draft.interest, { today, before });
+  const logo = readLogoInput(draft.logo);
   const errors: AccountDraftErrors = {
     balance: balance === null ? 'Enter the balance, like 1,250.00' : undefined,
     name: !name
@@ -166,7 +172,8 @@ export const checkAccountDraft = (
         ? `Keep it to ${NAME_MAX} characters`
         : undefined,
     ...(spending ? {} : interest.errors),
-    purpose: purpose.length > PURPOSE_MAX ? `Keep it to ${PURPOSE_MAX} characters` : undefined
+    purpose: purpose.length > PURPOSE_MAX ? `Keep it to ${PURPOSE_MAX} characters` : undefined,
+    logo: logo.kind === 'invalid' ? LOGO_INVALID : undefined
   };
   const valid = Object.values(errors).every(error => !error);
   const common = { name, balance: balance!, counts: draft.counts, purpose: purpose || null };
@@ -177,6 +184,8 @@ export const checkAccountDraft = (
         ? spending || interest.unchanged
           ? common
           : { ...common, interest: interest.input }
-        : null
+        : null,
+    // Only the account dialog asks for a logo, so it's sent from there
+    iconUrl: logoIconUrl(logo)
   };
 };

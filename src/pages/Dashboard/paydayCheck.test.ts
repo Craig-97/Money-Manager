@@ -160,6 +160,7 @@ describe('starting the cycle', () => {
     paidInto: false,
     interest: null,
     purpose: null,
+    iconUrl: null,
     balanceUpdatedAt: day('2026-10-28'),
     ...overrides
   });

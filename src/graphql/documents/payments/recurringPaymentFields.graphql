@@ -31,6 +31,8 @@ fragment RecurringPaymentFields on RecurringPayment {
   paysInto
   # When a date on a weekend or bank holiday goes out; null follows the budget's choice
   nonWorkingDay
+  # A logo shown in place of its letter; null shows the letter
+  iconUrl
   debt {
     balance
     startingBalance

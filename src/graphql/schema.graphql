@@ -259,6 +259,7 @@ type Account {
   paidInto: Boolean!
   interest: AccountInterest
   purpose: String
+  iconUrl: String
   balanceUpdatedAt: String!
   history(limit: Int, year: Int): [AccountChange!]!
   historyYears: [Int!]!
@@ -282,6 +283,7 @@ input CreateAccountInput {
   paidInto: Boolean
   interest: AccountInterestInput
   purpose: String
+  iconUrl: String
 }
 
 input UpdateAccountInput {
@@ -292,6 +294,7 @@ input UpdateAccountInput {
   paidInto: Boolean
   interest: AccountInterestInput
   purpose: String
+  iconUrl: String
 }
 
 input AccountBalanceInput {
@@ -331,6 +334,7 @@ type OneOffPayment {
   paidAt: String
   dueReminder: ReminderTiming!
   account: ID
+  iconUrl: String
 }
 
 input CreateOneOffPaymentInput {
@@ -342,6 +346,7 @@ input CreateOneOffPaymentInput {
   category: PaymentCategory!
   dueReminder: ReminderTimingInput
   account: ID
+  iconUrl: String
 }
 
 input OneOffPaymentInput {
@@ -362,6 +367,7 @@ input UpdateOneOffPaymentInput {
   category: PaymentCategory
   dueReminder: ReminderTimingInput
   account: ID
+  iconUrl: String
 }
 
 type OneOffPaymentResponse {
@@ -438,6 +444,7 @@ type RecurringPayment {
   account: ID
   paysInto: ID
   nonWorkingDay: NonWorkingDay
+  iconUrl: String
 }
 
 type Debt {
@@ -495,6 +502,7 @@ input CreateRecurringPaymentInput {
   account: ID
   paysInto: ID
   nonWorkingDay: NonWorkingDay
+  iconUrl: String
 }
 
 input RecurringPaymentInput {
@@ -529,6 +537,7 @@ input UpdateRecurringPaymentInput {
   account: ID
   paysInto: ID
   nonWorkingDay: NonWorkingDay
+  iconUrl: String
 }
 
 type RecurringPaymentResponse {

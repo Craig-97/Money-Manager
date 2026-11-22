@@ -25,6 +25,7 @@ export const recurringFields = (
   debt: null,
   account: null,
   paysInto: null,
+  iconUrl: null,
   // On its own dates, unless a test is about moving them off weekends
   nonWorkingDay: 'ON_DAY',
   ...overrides
@@ -43,6 +44,7 @@ export const oneOffFields = (
   paidAt: null,
   dueReminder: { __typename: 'ReminderTiming', off: false, days: null },
   account: null,
+  iconUrl: null,
   ...overrides
 });
 
@@ -73,6 +75,7 @@ export const recurringPayment = (
     account: null,
     into: null,
     paysInto: null,
+    iconUrl: null,
     nonWorkingDay: null,
     move: { rule: 'ON_DAY', holidays: new Set() },
     movedFrom: null,

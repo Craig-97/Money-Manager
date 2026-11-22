@@ -16,6 +16,7 @@ export type Account = {
   counts: Scalars['Boolean']['output'];
   history: Array<AccountChange>;
   historyYears: Array<Scalars['Int']['output']>;
+  iconUrl: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   interest: Maybe<AccountInterest>;
   kind: AccountKind;
@@ -142,6 +143,7 @@ export type CreateAccountInput = {
   balance: Scalars['Float']['input'];
   budgetId: Scalars['ID']['input'];
   counts?: InputMaybe<Scalars['Boolean']['input']>;
+  iconUrl?: InputMaybe<Scalars['String']['input']>;
   interest?: InputMaybe<AccountInterestInput>;
   kind?: InputMaybe<AccountKind>;
   name: Scalars['String']['input'];
@@ -176,6 +178,7 @@ export type CreateOneOffPaymentInput = {
   category: PaymentCategory;
   dueDate: Scalars['String']['input'];
   dueReminder?: InputMaybe<ReminderTimingInput>;
+  iconUrl?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
   type: PaymentType;
 };
@@ -189,6 +192,7 @@ export type CreateRecurringPaymentInput = {
   dueReminder?: InputMaybe<ReminderTimingInput>;
   firstPaymentDate: Scalars['String']['input'];
   frequency: PaymentFrequency;
+  iconUrl?: InputMaybe<Scalars['String']['input']>;
   lastPaymentDate?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
   nonWorkingDay?: InputMaybe<NonWorkingDay>;
@@ -491,6 +495,7 @@ export type OneOffPayment = {
   category: PaymentCategory;
   dueDate: Scalars['String']['output'];
   dueReminder: ReminderTiming;
+  iconUrl: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   name: Scalars['String']['output'];
   paidAt: Maybe<Scalars['String']['output']>;
@@ -653,6 +658,7 @@ export type RecurringPayment = {
   frequency: PaymentFrequency;
   history: Array<PaymentRecord>;
   historyYears: Array<Scalars['Int']['output']>;
+  iconUrl: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   lastPaymentDate: Maybe<Scalars['String']['output']>;
   name: Scalars['String']['output'];
@@ -769,6 +775,7 @@ export type UpdateAccountBalancesInput = {
 export type UpdateAccountInput = {
   balance?: InputMaybe<Scalars['Float']['input']>;
   counts?: InputMaybe<Scalars['Boolean']['input']>;
+  iconUrl?: InputMaybe<Scalars['String']['input']>;
   interest?: InputMaybe<AccountInterestInput>;
   kind?: InputMaybe<AccountKind>;
   name?: InputMaybe<Scalars['String']['input']>;
@@ -807,6 +814,7 @@ export type UpdateOneOffPaymentInput = {
   category?: InputMaybe<PaymentCategory>;
   dueDate?: InputMaybe<Scalars['String']['input']>;
   dueReminder?: InputMaybe<ReminderTimingInput>;
+  iconUrl?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   type?: InputMaybe<PaymentType>;
 };
@@ -819,6 +827,7 @@ export type UpdateRecurringPaymentInput = {
   dueReminder?: InputMaybe<ReminderTimingInput>;
   firstPaymentDate?: InputMaybe<Scalars['String']['input']>;
   frequency?: InputMaybe<PaymentFrequency>;
+  iconUrl?: InputMaybe<Scalars['String']['input']>;
   lastPaymentDate?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   nonWorkingDay?: InputMaybe<NonWorkingDay>;

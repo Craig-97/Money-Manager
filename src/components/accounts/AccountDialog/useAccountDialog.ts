@@ -9,6 +9,7 @@ import {
 } from '~/graphql/generated';
 import { Account, paidIntoAccountOf, spendingOf } from '~/lib/accounts';
 import { formatMoneyInput } from '~/lib/format';
+import { logoInputOf } from '~/lib/icons';
 import { useAccountDialogStore } from '~/state/accountDialog';
 import { useSetupAccountsStore } from '~/state/setupAccounts';
 import { showErrorToast, showToast } from '~/state/toast';
@@ -25,6 +26,7 @@ const draftOf = (
         balance: formatMoneyInput(account.balance),
         interest: interestDraftOf(account.interest),
         purpose: account.purpose ?? '',
+        logo: logoInputOf(account.iconUrl),
         counts: account.counts,
         paidInto: account.paidInto || !!paidInto
       }
@@ -84,7 +86,7 @@ export const useAccountDialog = ({
     setDraft(currentDraft => ({ ...currentDraft, ...fields }));
 
   const name = draft.name.trim();
-  const { errors, fields } = checkAccountDraft(draft, {
+  const { errors, fields, iconUrl } = checkAccountDraft(draft, {
     submitted,
     today,
     // Editing, interest only goes when it changed
@@ -117,13 +119,23 @@ export const useAccountDialog = ({
             input: {
               ...fields,
               ...(isPaidInto || draft.kind === account.kind ? {} : { kind: draft.kind }),
+              // Sent when it changes; null shows the letter again
+              ...(iconUrl !== account.iconUrl ? { iconUrl } : {}),
               ...paidIntoInput
             }
           }
         });
       } else {
         await create({
-          variables: { input: { budgetId, kind: draft.kind, ...fields, ...paidIntoInput } }
+          variables: {
+            input: {
+              budgetId,
+              kind: draft.kind,
+              ...fields,
+              ...(iconUrl ? { iconUrl } : {}),
+              ...paidIntoInput
+            }
+          }
         });
       }
       close();

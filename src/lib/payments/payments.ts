@@ -66,6 +66,8 @@ interface BasePayment {
   dueReminderDays: number | null;
   // The account it goes out of, or an income lands in; null for the one pay lands in
   account: string | null;
+  // A logo shown in place of its letter, as a link to an image
+  iconUrl: string | null;
 }
 
 export interface RecurringPayment extends BasePayment {
@@ -175,6 +177,7 @@ const toRecurringPayment = (
         }
       : null,
     account: payment.account ?? null,
+    iconUrl: payment.iconUrl ?? null,
     paysInto: payment.paysInto ?? null,
     into: into ? { name: into.name, counts: into.counts } : null,
     nonWorkingDay: payment.nonWorkingDay ?? null,
@@ -198,7 +201,8 @@ const toOneOffPayment = (
   paidAt: fromApiDate(payment.paidAt),
   dueReminder: payment.dueReminder,
   dueReminderDays: reminderDays(payment.dueReminder, settings.paymentDays),
-  account: payment.account ?? null
+  account: payment.account ?? null,
+  iconUrl: payment.iconUrl ?? null
 });
 
 interface BudgetPayments {

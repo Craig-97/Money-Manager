@@ -1,4 +1,4 @@
-import { AccountLetter } from '~/components/accounts';
+import { AccountIcon } from '~/components/accounts';
 import { InfoNote } from '~/components/feedback';
 import { Tile } from '~/components/ui';
 import { MEDIA } from '~/constants';
@@ -131,7 +131,7 @@ export const BeforePaydayContent = ({
                       ? 'flex min-h-[72px] items-center gap-3.5 px-2'
                       : 'flex min-h-[72px] items-center gap-3 px-2.5 py-2'
                   }>
-                  <AccountLetter account={row.account} />
+                  <AccountIcon account={row.account} />
                   <span className="flex min-w-0 flex-1 flex-col gap-0.5">
                     <span className="text-[15px] font-bold [overflow-wrap:anywhere]">
                       {row.account.name}

@@ -74,6 +74,8 @@ export interface FakeRecurringPayment {
   paysInto?: string | null;
   // Its own choice for dates on a weekend or bank holiday; left out, the budget's
   nonWorkingDay?: NonWorkingDay | null;
+  // Its logo; left out, the letter
+  iconUrl?: string | null;
 }
 
 export interface FakeTiming {
@@ -93,6 +95,8 @@ export interface FakeOneOffPayment {
   dueReminder?: FakeTiming;
   // The account it goes out of or into; left out, the one pay lands in
   account?: string | null;
+  // Its logo; left out, the letter
+  iconUrl?: string | null;
 }
 
 export interface FakeNote {
@@ -153,6 +157,8 @@ export interface FakeAccount {
   paidInto?: boolean;
   interest?: FakeInterest | null;
   purpose: string | null;
+  // Its logo; left out, the letter
+  iconUrl?: string | null;
   balanceUpdatedAt: string;
   // What moved its balance, newest first, as the API's history field; left out, its opening balance
   history?: FakeAccountChange[];
@@ -688,7 +694,8 @@ export const createFakeApi = ({
       debt: input.debt ? debtFrom(input.debt) : null,
       account: input.account ?? null,
       paysInto: input.paysInto ?? null,
-      nonWorkingDay: input.nonWorkingDay ?? null
+      nonWorkingDay: input.nonWorkingDay ?? null,
+      iconUrl: input.iconUrl ?? null
     };
     const created = { ...payment, nextDueDate: dueDateFor(payment) };
     if (created.debt) balanceSet(created, null);
@@ -740,7 +747,8 @@ export const createFakeApi = ({
     category: input.category,
     paidAt: null,
     dueReminder: input.dueReminder ?? USUAL_TIMING,
-    account: input.account ?? null
+    account: input.account ?? null,
+    iconUrl: input.iconUrl ?? null
   });
 
   const debtFrom = (input: Args): FakeDebt => ({
@@ -1039,6 +1047,7 @@ export const createFakeApi = ({
         paidInto,
         interest: fakeInterestOf(input.interest, spending),
         purpose: input.purpose?.trim() || null,
+        iconUrl: input.iconUrl ?? null,
         balanceUpdatedAt: String(Date.now())
       };
       current.accounts = [...(current.accounts ?? []), account];
@@ -1069,7 +1078,8 @@ export const createFakeApi = ({
         current.currentAccount = {
           ...current.currentAccount,
           ...(input.name !== undefined ? { name: input.name.trim() } : {}),
-          ...(input.purpose !== undefined ? { purpose: input.purpose?.trim() || null } : {})
+          ...(input.purpose !== undefined ? { purpose: input.purpose?.trim() || null } : {}),
+          ...(input.iconUrl !== undefined ? { iconUrl: input.iconUrl } : {})
         };
         if (input.balance !== undefined) setBalanceOf(id, input.balance);
         return { account: accountById(id), budget: current, success: true };
@@ -1088,6 +1098,7 @@ export const createFakeApi = ({
         account.interest = fakeInterestOf(input.interest, kind === 'SPENDING');
       else if (becameSpending) account.interest = null;
       if (input.purpose !== undefined) account.purpose = input.purpose?.trim() || null;
+      if (input.iconUrl !== undefined) account.iconUrl = input.iconUrl;
       if (becameSavings) moveOffAccount(id, { expenses: true });
       if (becameSpending) recordPaymentAccounts();
       return { account: accountById(id), budget: current, success: true };

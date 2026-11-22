@@ -12,6 +12,7 @@ export * from './DateBox';
 export * from './HeroTile';
 export * from './historyClasses';
 export * from './IconButton';
+export * from './LetterIcon';
 export * from './LoadError';
 export * from './Menu';
 export * from './Modal';

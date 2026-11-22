@@ -12,7 +12,7 @@ import {
 import { formatMoney } from '~/lib/format';
 import { PER_PERIOD } from '~/lib/payments';
 import { InterestStrip } from '../../accounts';
-import { PaymentLetter, summaryCardClasses } from '../../payments';
+import { PaymentIcon, summaryCardClasses } from '../../payments';
 import { DebtProgress } from '../DebtProgress';
 
 interface DebtSummaryProps {
@@ -34,7 +34,7 @@ export const DebtSummary = ({ debt, today, named = false }: DebtSummaryProps) =>
 
   return (
     <div className={summaryCardClasses}>
-      <PaymentLetter payment={debt} className="size-[38px] rounded-xl text-sm" />
+      <PaymentIcon payment={debt} className="size-[38px] rounded-xl text-sm" />
       <div className="min-w-0 flex-1">
         {named ? <p className="text-[15px] font-extrabold">{debt.name}</p> : null}
         <p className={named ? 'mt-0.5 text-[13px] font-extrabold' : 'text-lg font-extrabold'}>

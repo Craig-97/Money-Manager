@@ -16,6 +16,7 @@ import {
 import { addDays, formatShortDate, formatShortDay, parseIsoDate, toIsoDate } from '~/lib/dates';
 import { getErrorCode } from '~/lib/errors';
 import { formatMoneyInput, parseMoney } from '~/lib/format';
+import { LOGO_INVALID, logoIconUrl, logoInputOf, logoSummary, readLogoInput } from '~/lib/icons';
 import {
   addYear,
   categoriesFor,
@@ -76,18 +77,21 @@ interface PaymentFormValues {
   paysInto: string;
   // When a recurring payment's date on a weekend or bank holiday goes out; 'usual' for the budget's
   nonWorkingDay: NonWorkingDay | 'usual';
+  // The Logo box as typed: a website or an image's link; '' shows the letter
+  logo: string;
   balance: string;
   apr: string;
   started: string;
 }
 
-type TouchedField = 'name' | 'amount' | 'balance' | 'apr' | 'started';
+type TouchedField = 'name' | 'amount' | 'balance' | 'apr' | 'started' | 'logo';
 const UNTOUCHED: Record<TouchedField, boolean> = {
   name: false,
   amount: false,
   balance: false,
   apr: false,
-  started: false
+  started: false,
+  logo: false
 };
 
 const iso = (date: Date | null) => (date ? toIsoDate(date) : '');
@@ -120,6 +124,7 @@ const initialValues = ({
     account: '',
     paysInto: '',
     nonWorkingDay: 'usual',
+    logo: '',
     balance: '',
     apr: '',
     started: ''
@@ -133,7 +138,8 @@ const initialValues = ({
     amount: formatMoneyInput(payment.amount),
     category: payment.category,
     dueReminder: toTimingChoice(payment.dueReminder),
-    account: payment.account ?? ''
+    account: payment.account ?? '',
+    logo: logoInputOf(payment.iconUrl)
   };
   return payment.kind === 'recurring'
     ? {
@@ -223,6 +229,7 @@ const isUnchanged = (
   values.date === before.date &&
   values.dueReminder === before.dueReminder &&
   values.nonWorkingDay === before.nonWorkingDay &&
+  values.logo.trim() === before.logo &&
   values.frequency === before.frequency &&
   values.first === before.first &&
   sameEnding(values, before) &&
@@ -469,6 +476,7 @@ export const usePaymentForm = ({
     const { several, paidInto } = accountChoices(start, accounts);
     const ending = recurringEnding(start);
     return (
+      !!start.logo ||
       (several && !!start.account && start.account !== paidInto?.id) ||
       start.dueReminder !== 'usual' ||
       (kind === 'recurring' && start.nonWorkingDay !== 'usual') ||
@@ -552,6 +560,9 @@ export const usePaymentForm = ({
   const aprOk = apr !== null;
   const startedOk = !values.started.trim() || parseMoney(values.started) !== null;
   const debtOk = kind !== 'recurring' || !values.tracked || (balanceOk && aprOk && startedOk);
+  const logo = readLogoInput(values.logo);
+  const logoOk = logo.kind !== 'invalid';
+  const iconUrl = logoIconUrl(logo);
   const datesOk =
     kind === 'oneOff'
       ? !!parseIsoDate(values.date)
@@ -571,7 +582,8 @@ export const usePaymentForm = ({
     renewal: renewalBad ? 'Choose a date after the first payment' : undefined,
     balance: touched.balance && !balanceOk ? 'Enter what you owe now' : undefined,
     apr: touched.apr && !aprOk ? 'Enter a rate from 0 to 100%' : undefined,
-    started: touched.started && !startedOk ? 'Enter an amount, or leave it empty' : undefined
+    started: touched.started && !startedOk ? 'Enter an amount, or leave it empty' : undefined,
+    logo: touched.logo && !logoOk ? LOGO_INVALID : undefined
   };
 
   // Set next renewal: the same day a year on, or as many years on as it takes to reach today
@@ -599,8 +611,15 @@ export const usePaymentForm = ({
   };
 
   const save = async () => {
-    if (!nameOk || !amountOk || !datesOk || !debtOk) {
-      setTouched({ name: true, amount: true, balance: true, apr: true, started: true });
+    if (!nameOk || !amountOk || !datesOk || !debtOk || !logoOk) {
+      setTouched({
+        name: true,
+        amount: true,
+        balance: true,
+        apr: true,
+        started: true,
+        logo: true
+      });
       return;
     }
     const name = values.name.trim();
@@ -621,6 +640,8 @@ export const usePaymentForm = ({
       const chosen = values.nonWorkingDay === 'usual' ? null : values.nonWorkingDay;
       return chosen !== saved ? { nonWorkingDay: chosen } : {};
     };
+    // Sent when it changes; null shows the letter again
+    const iconUrlField = (saved: string | null) => (iconUrl !== saved ? { iconUrl } : {});
     if (draft) {
       const paysInto = paysIntoOf(values, accounts);
       const taken = draft(
@@ -678,6 +699,7 @@ export const usePaymentForm = ({
                   ? { paysInto: paysIntoOf(values, accounts) }
                   : {}),
                 ...nonWorkingDayField(payment.kind === 'recurring' ? payment.nonWorkingDay : null),
+                ...iconUrlField(payment.iconUrl),
                 // Sent when it's a debt, and as null to stop tracking one
                 ...(values.tracked
                   ? { debt: debtFields(values) }
@@ -699,6 +721,7 @@ export const usePaymentForm = ({
                 ...accountField(null),
                 ...(paysIntoOf(values, accounts) ? { paysInto: paysIntoOf(values, accounts) } : {}),
                 ...nonWorkingDayField(null),
+                ...iconUrlField(null),
                 ...(values.tracked ? { debt: debtFields(values) } : {})
               }
             },
@@ -720,11 +743,20 @@ export const usePaymentForm = ({
         };
         if (payment) {
           await updateOneOff({
-            variables: { id: payment.id, input: { ...fields, ...accountField(payment.account) } }
+            variables: {
+              id: payment.id,
+              input: {
+                ...fields,
+                ...accountField(payment.account),
+                ...iconUrlField(payment.iconUrl)
+              }
+            }
           });
         } else {
           await createOneOff({
-            variables: { input: { ...fields, ...accountField(null), budgetId } },
+            variables: {
+              input: { ...fields, ...accountField(null), ...iconUrlField(null), budgetId }
+            },
             update: (cache, { data }) => {
               if (data)
                 addOneOffPayment(cache, {
@@ -771,7 +803,8 @@ export const usePaymentForm = ({
         ? 'no renewal reminder'
         : `${daysBeforeText(renewalDays).toLowerCase()} it renews`
       : null,
-    move && values.nonWorkingDay !== 'usual' ? NON_WORKING_DAY_SUMMARY[values.nonWorkingDay] : null
+    move && values.nonWorkingDay !== 'usual' ? NON_WORKING_DAY_SUMMARY[values.nonWorkingDay] : null,
+    logoSummary(logo)
   ]
     .filter(Boolean)
     .join(' · ');
@@ -784,6 +817,8 @@ export const usePaymentForm = ({
     touch: (field: TouchedField) => setTouched(current => ({ ...current, [field]: true })),
     errors,
     canSave: nameOk && amountOk && datesOk && debtOk && !nameTaken,
+    // Setup doesn't ask for a logo; it's added from Edit later
+    showLogo: !draft,
     saving,
     save: () => void save(),
     // The schedule in one line; where money moves to is in its own field above it

@@ -10,7 +10,7 @@ import {
   movesTo,
   Payment
 } from '~/lib/payments';
-import { PaymentLetter } from '../PaymentLetter';
+import { PaymentIcon } from '../PaymentIcon';
 import { summaryCardClasses } from './summaryCardClasses';
 
 interface PaymentSummaryProps {
@@ -31,7 +31,7 @@ export const PaymentSummary = ({ payment, due, named = false, children }: Paymen
   const urgent = due.state === 'today' || due.state === 'overdue';
   return (
     <div className={summaryCardClasses}>
-      <PaymentLetter payment={payment} className="size-[38px] rounded-xl text-sm" />
+      <PaymentIcon payment={payment} className="size-[38px] rounded-xl text-sm" />
       <div className="min-w-0 flex-1">
         {named ? <p className="text-[15px] font-extrabold">{payment.name}</p> : null}
         <p className={cn('font-extrabold', named ? 'mt-0.5 text-[13px]' : 'text-base')}>

@@ -1,5 +1,13 @@
-import { Payment } from '~/lib/payments';
-import { AmountInput, DatePicker, FieldError, Label, Select, TextInput } from '../../../../form';
+import { Payment, paymentLetter } from '~/lib/payments';
+import {
+  AmountInput,
+  DatePicker,
+  FieldError,
+  Label,
+  LogoField,
+  Select,
+  TextInput
+} from '../../../../form';
 import { MoreOptions } from '../../../../ui';
 import { categoryOptions, FREQUENCY_OPTIONS } from '../../paymentOptions';
 import { PaymentForm } from '../../usePaymentForm';
@@ -21,8 +29,8 @@ const nameAmountClasses =
 /*
  * The payment's fields: name and amount, type and category, then for a recurring expense what it
  * is (a payment, a debt or money moving to another account) with that choice's own fields, then
- * its date or schedule. What most people leave alone, which account and the reminders, is under
- * More options.
+ * its date or schedule. What most people leave alone, its logo, which account and the reminders, is
+ * under More options.
  */
 export const FormBody = ({ form, kind }: { form: PaymentForm; kind: Payment['kind'] }) => {
   const { values, set, touch, errors } = form;
@@ -137,6 +145,16 @@ export const FormBody = ({ form, kind }: { form: PaymentForm; kind: Payment['kin
         summary={form.more.summary}
         open={form.more.open}
         onOpenChange={form.more.setOpen}>
+        {form.showLogo ? (
+          <LogoField
+            id="payment-logo"
+            letter={paymentLetter(values.name)}
+            value={values.logo}
+            onChange={logo => set('logo', logo)}
+            example="netflix.com"
+            error={errors.logo}
+          />
+        ) : null}
         {form.choices.several ? <FromAccount form={form} /> : null}
         <NonWorkingDayField form={form} />
         <ReminderFields form={form} />
