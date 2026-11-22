@@ -71,8 +71,9 @@ export const MobilePaymentRow = ({
         className="flex min-h-[68px] min-w-0 flex-1 cursor-pointer items-center gap-3 rounded-[14px] text-left">
         <PaymentIcon payment={payment} className="size-10 rounded-[13px] text-[15px]" />
         <span className="min-w-0 grow">
-          <span className="flex items-center gap-1.5 text-[15px] font-bold">
-            <span className="min-w-0">{payment.name}</span>
+          {/* The pills move under the name when there isn't room beside it, rather than over it */}
+          <span className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[15px] font-bold">
+            <span className="min-w-0 [overflow-wrap:anywhere]">{payment.name}</span>
             {timesDue ? (
               <TimesDue payment={payment} cycle={cycle} today={today} hint={false} />
             ) : null}
