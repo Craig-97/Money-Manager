@@ -24,6 +24,8 @@ describe('register', () => {
 
     expect(await findPageHeading('Account created')).toBeInTheDocument();
     expect(screen.getByText(/Nice to meet you, Sam/)).toBeInTheDocument();
+    // What happens next is Setup's steps
+    expect(screen.getByText('Where your money is')).toBeInTheDocument();
     expect(api.callsTo('RegisterAndLogin')).toEqual([
       {
         input: {
