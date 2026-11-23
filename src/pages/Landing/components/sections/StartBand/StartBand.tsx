@@ -16,8 +16,8 @@ export const StartBand = () => (
       <div className="relative max-w-[620px]">
         <h2 className={h2Classes}>Start your first cycle.</h2>
         <p className="mt-3.5 text-[15px] leading-[1.6] font-medium text-hero-muted md:text-[17px]">
-          Create an account, tell us when you're paid and add what goes out. We'll show you what's
-          left.
+          Create an account, tell us when you're paid and add your accounts and what goes out. We'll
+          show you what's left.
         </p>
       </div>
       <div className="relative mt-1.5 flex flex-col gap-2.5 md:mt-0 md:flex-row md:flex-wrap md:gap-3">

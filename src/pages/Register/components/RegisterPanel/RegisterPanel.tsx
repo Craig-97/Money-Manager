@@ -6,13 +6,12 @@ const steps = (created: boolean) => [
     description: 'Name, email and a password',
     tag: created ? 'Done' : 'Now'
   },
-  {
-    title: 'Tell us when you’re paid',
-    description: 'Your pay schedule and take-home pay',
-    tag: created ? 'Next' : undefined
-  },
-  { title: 'Add your regular payments', description: 'Rent, bills, subscriptions — tap to add' },
-  { title: 'Start your first cycle', description: 'See what’s left before payday' }
+  // Then Setup's steps
+  { title: 'Pay', description: 'When you get paid', tag: created ? 'Next' : undefined },
+  { title: 'Your accounts', description: 'Where you keep your money' },
+  { title: 'Regular payments', description: 'Rent, bills, subscriptions' },
+  { title: 'Coming up', description: 'One-offs due soon', tag: 'Optional' },
+  { title: 'Review', description: 'Check and finish' }
 ];
 
 /* The brand panel beside the register form: what happens after the account is created */

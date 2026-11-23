@@ -24,7 +24,7 @@ export const LandingHero = () => (
         Know what's left before payday.
       </h1>
       <p className="mt-[18px] max-w-[520px] text-base leading-[1.6] font-medium text-muted md:mt-[22px] md:text-[19px]">
-        Money Manager tracks your balance, bills and subscriptions from one payday to the next, so
+        Money Manager tracks your balance, bills, savings and debts from one payday to the next, so
         you always know what's actually spare.
       </p>
       <div className="mt-6 flex flex-col gap-2.5 md:mt-[34px] md:flex-row md:flex-wrap md:gap-3">

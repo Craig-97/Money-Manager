@@ -1,11 +1,16 @@
+import { History } from 'lucide-react';
 import {
+  AccountsIcon,
   CheckIcon,
+  DebtsIcon,
   ForecastIcon,
-  NotesIcon,
   PaydayIcon,
-  SquareCheckIcon
+  RemindersIcon
 } from '~/components/icons';
+import { accentTagClasses, redTagClasses } from '~/components/payments';
+import { LetterIcon } from '~/components/ui';
 import { cn } from '~/lib/cn';
+import { logoIconUrl, readLogoInput } from '~/lib/icons';
 import {
   cardClasses,
   eyebrowClasses,
@@ -27,9 +32,17 @@ const FORECAST_BARS = [
 ];
 
 const PAYDAY_STEPS = [
-  { label: 'Confirm bank balance', value: '£12,765.00', isMoney: true },
-  { label: 'Reset 2 recurring payments', value: 'Nov', isMoney: false }
+  { label: 'Check what’s gone out', value: '2 accounts', isMoney: false },
+  { label: 'Confirm where you get paid', value: '£12,765.00', isMoney: true },
+  { label: 'Your other accounts', value: 'Savings', isMoney: false }
 ];
+
+// The payment history card's example row shows Netflix's own logo, as a payment with one does
+const NETFLIX_LOGO = logoIconUrl(readLogoInput('netflix.com'));
+
+// A row in a card's little example, kept to one line
+const mockRowClasses =
+  'flex min-h-12 items-center gap-2.5 rounded-2xl bg-surface-2 px-3.5 py-2 text-[13px] font-bold whitespace-nowrap';
 
 export const Features = () => (
   <section id="features" className={cn(wrapClasses, 'flex flex-col pb-14 md:pb-24')}>
@@ -49,8 +62,9 @@ export const Features = () => (
         </span>
         <h3 className={cn(featureTitleClasses, 'relative')}>Payday cycles</h3>
         <p className={cn(featureBodyClasses, 'relative text-hero-muted')}>
-          Your money runs from payday to payday, not the 1st to the 31st. Each payday, confirm your
-          balance and start the next cycle.
+          Your money runs from payday to payday, not the 1st to the 31st. Each payday we check what
+          has gone out of each account, confirm where you get paid and start the next cycle.
+          Weekends and bank holidays are handled.
         </p>
         <div aria-hidden="true" className="relative mt-[18px] md:mt-auto md:pt-7">
           <div className="flex flex-col gap-2 rounded-[18px] bg-surface p-3.5 text-text shadow-[0_30px_60px_-30px_rgb(0_0_0/0.6)] md:rounded-[22px] md:p-[18px]">
@@ -68,8 +82,8 @@ export const Features = () => (
             {PAYDAY_STEPS.map(step => (
               <div
                 key={step.label}
-                className="flex h-10 items-center gap-2.5 rounded-xl bg-surface-2 px-3 text-[13px] font-bold md:h-11 md:rounded-[14px] md:px-3.5">
-                <span className="inline-flex size-[18px] items-center justify-center rounded-md bg-accent text-white md:size-5 md:rounded-[7px]">
+                className="flex min-h-10 items-center gap-2.5 rounded-xl bg-surface-2 px-3 py-2 text-[13px] font-bold md:min-h-11 md:rounded-[14px] md:px-3.5">
+                <span className="inline-flex size-[18px] shrink-0 items-center justify-center rounded-md bg-accent text-white md:size-5 md:rounded-[7px]">
                   <CheckIcon size={11} strokeWidth={4} />
                 </span>
                 {step.label}
@@ -117,33 +131,72 @@ export const Features = () => (
         </div>
       </article>
 
-      <article className={cn(cardClasses, 'p-5 md:p-7')}>
+      <article className={cn(cardClasses, 'col-span-2 p-[22px] md:p-8 min-[67.5rem]:col-span-1')}>
         <span className={featureIconClasses}>
-          <NotesIcon size={24} className="size-[22px] md:size-6" />
+          <AccountsIcon size={24} className="size-[22px] md:size-6" />
         </span>
-        <h3 className={cn(featureTitleClasses, 'text-[17px]')}>Notes</h3>
-        <p className={cn(featureBodyClasses, 'text-[13px]')}>
-          <span className="md:hidden">Reminders right next to your money.</span>
-          <span className="hidden md:inline">
-            Jot down reminders — “Ask about the car insurance renewal” — right next to your money.
-          </span>
+        <h3 className={featureTitleClasses}>Accounts</h3>
+        <p className={featureBodyClasses}>
+          Keep your current account and savings together. Savings interest is added for you, and you
+          see everything you have after what you owe.
         </p>
       </article>
 
-      <article className={cn(cardClasses, 'p-5 md:p-7')}>
+      <article className={cn(cardClasses, 'col-span-2 p-[22px] md:p-8 min-[67.5rem]:col-span-1')}>
         <span className={featureIconClasses}>
-          <SquareCheckIcon size={24} className="size-[22px] md:size-6" />
+          <DebtsIcon size={24} className="size-[22px] md:size-6" />
         </span>
-        <h3 className={cn(featureTitleClasses, 'text-[17px]')}>
-          <span className="md:hidden">Bulk mark paid</span>
-          <span className="hidden md:inline">Mark paid in bulk</span>
-        </h3>
-        <p className={cn(featureBodyClasses, 'text-[13px]')}>
-          <span className="md:hidden">Tick several payments off at once.</span>
-          <span className="hidden md:inline">
-            Select several payments and tick them off together when they leave your account.
-          </span>
+        <h3 className={featureTitleClasses}>Debts</h3>
+        <p className={featureBodyClasses}>
+          Add loans and cards with their APR. Interest is worked out daily, and your payoff plan
+          shows when each one is paid off.
         </p>
+      </article>
+
+      <article className={cn(cardClasses, 'col-span-2 p-[22px] md:p-8')}>
+        <span className={featureIconClasses}>
+          <RemindersIcon size={24} className="size-[22px] md:size-6" />
+        </span>
+        <h3 className={featureTitleClasses}>Reminders</h3>
+        <p className={featureBodyClasses}>
+          The bell shows what’s new and what’s coming up, so nothing catches you out.
+        </p>
+        <div aria-hidden="true" className="mt-[18px] flex flex-col gap-2 md:mt-[22px]">
+          <div className={mockRowClasses}>
+            <span className="size-2 shrink-0 rounded-full bg-accent" />
+            Interest added
+            <span className={cn(accentTagClasses, 'ml-auto h-6 px-2 text-[11px]')}>New</span>
+          </div>
+          <div className={mockRowClasses}>
+            <span className="size-2 shrink-0 rounded-full bg-border-strong" />
+            Car insurance renews
+            <span className="ml-auto text-[11px] font-bold text-muted">Coming up</span>
+          </div>
+        </div>
+      </article>
+
+      <article className={cn(cardClasses, 'col-span-2 p-[22px] md:p-8')}>
+        <span className={featureIconClasses}>
+          <History size={24} className="size-[22px] md:size-6" />
+        </span>
+        <h3 className={featureTitleClasses}>Payment history</h3>
+        <p className={featureBodyClasses}>
+          Tick several off at once, add a note, and use See payments to look back at what you paid,
+          including price rises.
+        </p>
+        <div
+          aria-hidden="true"
+          className={cn(mockRowClasses, 'mt-[18px] min-h-[60px] gap-3 md:mt-[22px]')}>
+          <LetterIcon
+            letter="N"
+            iconUrl={NETFLIX_LOGO}
+            className="size-9 rounded-xl text-sm"
+            letterClassName="bg-expense-bg text-expense"
+          />
+          <span className="text-sm">Netflix</span>
+          <span className="num font-semibold text-muted">£10.99 to £12.99</span>
+          <span className={cn(redTagClasses, 'ml-auto h-6 px-2 text-[11px]')}>Price rise</span>
+        </div>
       </article>
     </div>
   </section>
