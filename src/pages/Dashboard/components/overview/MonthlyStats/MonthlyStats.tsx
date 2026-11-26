@@ -1,5 +1,6 @@
 import { PenLine, Plus } from 'lucide-react';
 import { ApproximatelyEqual } from '~/components/payments';
+import { tourTarget } from '~/components/tour';
 import { Button, IconButton, tileLift } from '~/components/ui';
 import { cn } from '~/lib/cn';
 import { formatBalance, formatMoney, plural } from '~/lib/format';
@@ -27,6 +28,7 @@ export const MonthlyStats = ({ dashboard }: { dashboard: Dashboard }) => {
   return (
     <section
       aria-label="Monthly money"
+      {...tourTarget('monthly')}
       className={cn(
         tileLift,
         'col-span-full grid grid-cols-1 rounded-3xl border border-border bg-surface min-[56.25rem]:grid-cols-3 [&>*+*]:border-t [&>*+*]:border-border min-[56.25rem]:[&>*+*]:border-t-0 min-[56.25rem]:[&>*+*]:border-l'

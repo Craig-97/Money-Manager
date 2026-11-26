@@ -10,6 +10,7 @@ export type SectionId =
   | 'balances'
   | 'reminders'
   | 'appearance'
+  | 'help'
   | 'account';
 
 // The settings sections, in page order. `short` is the mobile jump chip.
@@ -21,6 +22,7 @@ export const SECTIONS: { id: SectionId; label: string; short: string }[] = [
   { id: 'balances', label: 'Balances', short: 'Balances' },
   { id: 'reminders', label: 'Reminders', short: 'Reminders' },
   { id: 'appearance', label: 'Appearance', short: 'Appearance' },
+  { id: 'help', label: 'Help', short: 'Help' },
   { id: 'account', label: 'Account', short: 'Account' }
 ];
 

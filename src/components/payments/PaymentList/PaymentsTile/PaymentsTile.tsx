@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
 import { Plus } from 'lucide-react';
 import { cn } from '~/lib/cn';
+import { TourTarget, tourTarget } from '../../../tour/tourSteps';
 import { Button, tileLift } from '../../../ui';
 import { SortMenu } from '../../PaymentControls';
 import { SortProps } from '../../PaymentControls/sortProps';
@@ -13,6 +14,8 @@ interface PaymentsTileProps extends SortProps {
   // Says what Add adds, when the button alone doesn't
   addLabel?: string;
   className?: string;
+  // What the first-time tour calls it, on a page the tour visits
+  tour?: TourTarget;
   children: ReactNode;
 }
 
@@ -25,10 +28,12 @@ export const PaymentsTile = ({
   sort,
   onSort,
   className,
+  tour,
   children
 }: PaymentsTileProps) => (
   <article
     aria-labelledby={headingId}
+    {...(tour ? tourTarget(tour) : undefined)}
     className={cn(
       tileLift,
       'flex flex-col gap-3.5 rounded-3xl border border-border bg-surface p-5',

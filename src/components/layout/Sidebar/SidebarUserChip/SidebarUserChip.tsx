@@ -6,6 +6,7 @@ import { useCurrentUser } from '~/hooks/useCurrentUser';
 import { useLogout } from '~/hooks/useLogout';
 import { cn } from '~/lib/cn';
 import { getInitials } from '~/lib/format';
+import { tourTarget } from '../../../tour/tourSteps';
 import { Avatar, Tooltip } from '../../../ui';
 
 interface SidebarUserChipProps {
@@ -34,6 +35,7 @@ export const SidebarUserChip = ({ expanded, onNavigate }: SidebarUserChipProps) 
           onClick={onNavigate}
           onMouseEnter={preload}
           onFocus={preload}
+          {...tourTarget('profile')}
           className={cn(
             'flex min-h-[52px] items-center rounded-[18px] text-text no-underline transition-colors hover:bg-hover aria-[current=page]:bg-hover',
             expanded ? 'min-w-0 flex-1 gap-2.5 px-2 py-1' : 'w-[52px] justify-center'

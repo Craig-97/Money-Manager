@@ -1,0 +1,9 @@
+# Records that the first-time tour has been offered, so no other device offers it again
+mutation MarkTourSeen {
+  markTourSeen {
+    user {
+      id
+      tourSeen
+    }
+  }
+}

@@ -221,6 +221,7 @@ export interface FakeUser {
   surname: string;
   theme: ThemePreference | null;
   accent: string | null;
+  tourSeen: boolean;
 }
 
 export interface FakeDb {
@@ -349,7 +350,9 @@ export const DEFAULT_USER: FakeUser = {
   firstName: 'Test',
   surname: 'Account',
   theme: null,
-  accent: null
+  accent: null,
+  // Seen, so pages open without the welcome; tests of the tour start from a new user
+  tourSeen: true
 };
 
 export const DEFAULT_PASSWORD = 'password1';
@@ -918,7 +921,8 @@ export const createFakeApi = ({
         firstName: input.firstName,
         surname: input.surname,
         theme: null,
-        accent: null
+        accent: null,
+        tourSeen: false
       };
       db.password = input.password;
       db.budget = null;
@@ -933,6 +937,10 @@ export const createFakeApi = ({
     logoutEverywhere: () => ({ success: true }),
     updatePreferences: ({ theme, accent }: Args) => {
       db.user = { ...db.user, theme: theme ?? db.user.theme, accent: accent ?? db.user.accent };
+      return { user: currentUser(), success: true };
+    },
+    markTourSeen: () => {
+      db.user = { ...db.user, tourSeen: true };
       return { user: currentUser(), success: true };
     },
     resetPassword: ({ token, password: newPassword }: Args) => {

@@ -2,6 +2,7 @@ export * from './AccountSection';
 export * from './AppearanceSection';
 export * from './BalancesSection';
 export * from './DetailsSection';
+export * from './HelpSection';
 export * from './PasswordSection';
 export * from './PaymentsSection';
 export * from './PaydaySection';

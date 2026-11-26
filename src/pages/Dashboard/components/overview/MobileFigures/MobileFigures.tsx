@@ -1,5 +1,6 @@
 import { PenLine, Repeat } from 'lucide-react';
 import { ApproximatelyEqual } from '~/components/payments';
+import { tourTarget } from '~/components/tour';
 import { Button, IconButton } from '~/components/ui';
 import { cn } from '~/lib/cn';
 import { formatShortDate } from '~/lib/dates';
@@ -16,7 +17,9 @@ export const MobileFigures = ({ dashboard }: { dashboard: Dashboard }) => {
   const openAdd = usePaymentDialogStore(s => s.openAdd);
 
   return (
-    <article className="flex flex-col rounded-3xl border border-border bg-surface px-5 py-2">
+    <article
+      className="flex flex-col rounded-3xl border border-border bg-surface px-5 py-2"
+      {...tourTarget('monthly')}>
       {isEmpty ? (
         <div className="flex flex-col items-start gap-2.5 border-b border-border py-3.5">
           <p className="text-[13px] font-medium text-muted">

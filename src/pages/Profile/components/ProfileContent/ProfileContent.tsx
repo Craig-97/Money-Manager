@@ -13,6 +13,7 @@ import {
   AppearanceSection,
   BalancesSection,
   DetailsSection,
+  HelpSection,
   PasswordSection,
   PaydaySection,
   PaymentsSection,
@@ -48,6 +49,7 @@ export const ProfileContent = ({ user, budget }: { user: UserFieldsFragment; bud
       <BalancesSection budget={budget} />
       <RemindersSection budget={budget} />
       <AppearanceSection />
+      <HelpSection />
       <AccountSection email={user.email} onLogout={logout} />
     </div>
   );

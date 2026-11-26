@@ -1,4 +1,5 @@
 import { Calendar, Check, PenLine, Plus, TriangleAlert, X } from 'lucide-react';
+import { tourTarget } from '~/components/tour';
 import { Button, HeroTile } from '~/components/ui';
 import { cn } from '~/lib/cn';
 import { formatShortDate } from '~/lib/dates';
@@ -27,7 +28,7 @@ export const MobileHero = ({ dashboard }: { dashboard: Dashboard }) => {
   const [whole, pence] = splitPence(summary.freeToSpend);
 
   return (
-    <HeroTile aria-label="Free to spend" size="md">
+    <HeroTile aria-label="Free to spend" size="md" {...tourTarget('free-to-spend')}>
       <div className="relative flex items-center justify-between gap-2">
         <h2 className="text-[13px] font-bold text-hero-muted">Free to spend</h2>
         {override.canChange ? (

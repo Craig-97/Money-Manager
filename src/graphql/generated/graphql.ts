@@ -518,6 +518,7 @@ export type AuthSessionFragment = {
     surname: string;
     theme: Types.ThemePreference | null;
     accent: string | null;
+    tourSeen: boolean;
   };
 };
 
@@ -540,6 +541,7 @@ export type LoginMutation = {
       surname: string;
       theme: Types.ThemePreference | null;
       accent: string | null;
+      tourSeen: boolean;
     };
   };
 };
@@ -582,6 +584,7 @@ export type RefreshSessionMutation = {
       surname: string;
       theme: Types.ThemePreference | null;
       accent: string | null;
+      tourSeen: boolean;
     };
   };
 };
@@ -604,6 +607,7 @@ export type RegisterAndLoginMutation = {
       surname: string;
       theme: Types.ThemePreference | null;
       accent: string | null;
+      tourSeen: boolean;
     };
   };
 };
@@ -635,6 +639,7 @@ export type ResetPasswordMutation = {
       surname: string;
       theme: Types.ThemePreference | null;
       accent: string | null;
+      tourSeen: boolean;
     };
   };
 };
@@ -2032,6 +2037,7 @@ export type CurrentUserQuery = {
     surname: string;
     theme: Types.ThemePreference | null;
     accent: string | null;
+    tourSeen: boolean;
   } | null;
 };
 
@@ -2039,6 +2045,15 @@ export type DeleteCurrentUserMutationVariables = Exact<{ [key: string]: never }>
 
 export type DeleteCurrentUserMutation = {
   deleteCurrentUser: { __typename: 'UserResponse'; success: boolean };
+};
+
+export type MarkTourSeenMutationVariables = Exact<{ [key: string]: never }>;
+
+export type MarkTourSeenMutation = {
+  markTourSeen: {
+    __typename: 'UserResponse';
+    user: { __typename: 'User'; id: string; tourSeen: boolean } | null;
+  };
 };
 
 export type UpdateCurrentUserMutationVariables = Exact<{
@@ -2084,6 +2099,7 @@ export type UserFieldsFragment = {
   surname: string;
   theme: Types.ThemePreference | null;
   accent: string | null;
+  tourSeen: boolean;
 };
 
 export const UserFieldsFragmentDoc = {
@@ -2102,7 +2118,8 @@ export const UserFieldsFragmentDoc = {
           { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
           { kind: 'Field', name: { kind: 'Name', value: 'surname' } },
           { kind: 'Field', name: { kind: 'Name', value: 'theme' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'accent' } }
+          { kind: 'Field', name: { kind: 'Name', value: 'accent' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'tourSeen' } }
         ]
       }
     }
@@ -2144,7 +2161,8 @@ export const AuthSessionFragmentDoc = {
           { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
           { kind: 'Field', name: { kind: 'Name', value: 'surname' } },
           { kind: 'Field', name: { kind: 'Name', value: 'theme' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'accent' } }
+          { kind: 'Field', name: { kind: 'Name', value: 'accent' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'tourSeen' } }
         ]
       }
     }
@@ -3986,7 +4004,8 @@ export const LoginDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
           { kind: 'Field', name: { kind: 'Name', value: 'surname' } },
           { kind: 'Field', name: { kind: 'Name', value: 'theme' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'accent' } }
+          { kind: 'Field', name: { kind: 'Name', value: 'accent' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'tourSeen' } }
         ]
       }
     },
@@ -4135,7 +4154,8 @@ export const RefreshSessionDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
           { kind: 'Field', name: { kind: 'Name', value: 'surname' } },
           { kind: 'Field', name: { kind: 'Name', value: 'theme' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'accent' } }
+          { kind: 'Field', name: { kind: 'Name', value: 'accent' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'tourSeen' } }
         ]
       }
     },
@@ -4212,7 +4232,8 @@ export const RegisterAndLoginDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
           { kind: 'Field', name: { kind: 'Name', value: 'surname' } },
           { kind: 'Field', name: { kind: 'Name', value: 'theme' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'accent' } }
+          { kind: 'Field', name: { kind: 'Name', value: 'accent' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'tourSeen' } }
         ]
       }
     },
@@ -4342,7 +4363,8 @@ export const ResetPasswordDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
           { kind: 'Field', name: { kind: 'Name', value: 'surname' } },
           { kind: 'Field', name: { kind: 'Name', value: 'theme' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'accent' } }
+          { kind: 'Field', name: { kind: 'Name', value: 'accent' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'tourSeen' } }
         ]
       }
     },
@@ -7880,7 +7902,8 @@ export const CurrentUserDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
           { kind: 'Field', name: { kind: 'Name', value: 'surname' } },
           { kind: 'Field', name: { kind: 'Name', value: 'theme' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'accent' } }
+          { kind: 'Field', name: { kind: 'Name', value: 'accent' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'tourSeen' } }
         ]
       }
     }
@@ -7909,6 +7932,41 @@ export const DeleteCurrentUserDocument = {
     }
   ]
 } as unknown as DocumentNode<DeleteCurrentUserMutation, DeleteCurrentUserMutationVariables>;
+export const MarkTourSeenDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'MarkTourSeen' },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'markTourSeen' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'user' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'tourSeen' } }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+} as unknown as DocumentNode<MarkTourSeenMutation, MarkTourSeenMutationVariables>;
 export const UpdateCurrentUserDocument = {
   kind: 'Document',
   definitions: [

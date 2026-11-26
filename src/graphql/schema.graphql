@@ -30,6 +30,7 @@ type User {
   surname: String!
   theme: ThemePreference
   accent: String
+  tourSeen: Boolean!
 }
 
 input RegisterInput {
@@ -74,6 +75,7 @@ type Mutation {
   changePassword(currentPassword: String!, newPassword: String!): UserResponse!
   deleteCurrentUser: UserResponse!
   updatePreferences(theme: ThemePreference, accent: String): UserResponse!
+  markTourSeen: UserResponse!
   createBudget(input: CreateBudgetInput!): BudgetResponse!
   updateBudget(id: ID!, input: UpdateBudgetInput!): BudgetResponse!
   startPaydayCycle(input: StartPaydayCycleInput!): BudgetResponse!

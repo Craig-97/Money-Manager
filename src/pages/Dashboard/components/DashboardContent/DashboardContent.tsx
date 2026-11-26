@@ -1,3 +1,4 @@
+import { TourWelcome, useTourSteps } from '~/components/tour';
 import { MEDIA } from '~/constants';
 import { Budget } from '~/hooks/useBudget';
 import { useMediaQuery } from '~/hooks/useMediaQuery';
@@ -12,7 +13,7 @@ import {
   MonthlyStats,
   NextPaydayTile
 } from '../overview';
-import { PaydayPrompt } from '../payday';
+import { PaydayExample, PaydayPrompt } from '../payday';
 import { MobileDashboardList, DashboardTable } from '../payments';
 
 // Only one layout is rendered, so each control exists once
@@ -27,10 +28,13 @@ export const DashboardContent = ({ budget }: { budget: Budget }) => {
     payments: dashboard.payments,
     markPaid: dashboard.actions.pay
   });
+  const tour = useTourSteps();
 
   return (
     <>
       <PaydayPrompt prompt={prompt} />
+      <TourWelcome held={prompt.open} />
+      {tour.current?.example ? <PaydayExample /> : null}
       <BankBalanceDialog dialog={dashboard.bankBalanceDialog} today={dashboard.today} />
       <DashboardAlerts dashboard={dashboard} />
       {isDesktop ? (

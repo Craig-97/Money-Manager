@@ -33,8 +33,14 @@ import {
   suggestedBalance
 } from '../paydayCheck';
 
+// What the prompt reads from the budget, which the tour's example also has
+type PromptBudget = Pick<
+  Budget,
+  'id' | 'bankBalance' | 'accounts' | 'monthlyIncome' | 'cycleStartedOn' | 'payday'
+>;
+
 interface Options {
-  budget: Budget;
+  budget: PromptBudget;
   cycle: PayCycle;
   holidays: BankHolidays;
   today: Date;

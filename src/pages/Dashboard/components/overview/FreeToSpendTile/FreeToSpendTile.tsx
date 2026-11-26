@@ -1,4 +1,5 @@
 import { Calendar, Check, PenLine, Plus, TriangleAlert, X } from 'lucide-react';
+import { tourTarget } from '~/components/tour';
 import { Button, heroFigureClasses, HeroTile } from '~/components/ui';
 import { formatShortDate } from '~/lib/dates';
 import { formatBalance, formatMoney, splitPence } from '~/lib/format';
@@ -13,7 +14,7 @@ export const FreeToSpendTile = ({ dashboard }: { dashboard: Dashboard }) => {
   const overdrawn = summary.freeToSpend < 0;
 
   return (
-    <HeroTile aria-label="Free to spend">
+    <HeroTile aria-label="Free to spend" {...tourTarget('free-to-spend')}>
       <div className="relative flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2.5">
           <h2 className="text-[15px] font-bold text-hero-muted">Free to spend</h2>

@@ -25,6 +25,7 @@ export const DashboardTable = ({ dashboard }: { dashboard: Dashboard }) => {
   return (
     <PaymentsTile
       headingId="payments-title"
+      tour="payments"
       tabs={
         <SegmentedControl
           aria-label="Payment lists"
