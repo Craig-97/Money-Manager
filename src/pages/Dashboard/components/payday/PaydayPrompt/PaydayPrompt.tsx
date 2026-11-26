@@ -3,6 +3,7 @@ import { ArrowRight, Check, Clock, X } from 'lucide-react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { AmountInput } from '~/components/form';
 import { PaydayIcon } from '~/components/icons';
+import { tourTarget } from '~/components/tour';
 import { Button, footerShade, headerShade, IconButton, scrollBodyClasses } from '~/components/ui';
 import { MEDIA } from '~/constants';
 import { useMediaQuery } from '~/hooks/useMediaQuery';
@@ -20,9 +21,16 @@ const lateText = (days: number) => (days === 1 ? 'yesterday' : `${days} days ago
 
 /*
  * The payday prompt: check what's gone out, confirm the balance and start the next cycle. The
- * header and buttons stay put while the steps scroll between them.
+ * header and buttons stay put while the steps scroll between them. As the tour's example it's only
+ * a picture: always open, nothing in it can be used, and the tour's dim stands in for its own.
  */
-export const PaydayPrompt = ({ prompt }: { prompt: Prompt }) => {
+export const PaydayPrompt = ({
+  prompt,
+  example = false
+}: {
+  prompt: Prompt;
+  example?: boolean;
+}) => {
   const isDesktop = useMediaQuery(MEDIA.desktop);
   const { ref: bodyRef, top: shadeTop, bottom: shadeBottom } = useScrollShade();
   const { overdue } = prompt;
@@ -31,17 +39,38 @@ export const PaydayPrompt = ({ prompt }: { prompt: Prompt }) => {
 
   return (
     <Dialog.Root
-      open={prompt.open}
-      onOpenChange={open => (open ? undefined : prompt.done ? prompt.close() : prompt.skip())}>
+      open={example || prompt.open}
+      modal={!example}
+      onOpenChange={open =>
+        open || example ? undefined : prompt.done ? prompt.close() : prompt.skip()
+      }>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-90 bg-overlay data-[state=closed]:animate-fade-out data-[state=open]:animate-fade-in" />
+        {example ? null : (
+          <Dialog.Overlay className="fixed inset-0 z-90 bg-overlay data-[state=closed]:animate-fade-out data-[state=open]:animate-fade-in" />
+        )}
         <Dialog.Content
           aria-describedby={undefined}
+          onOpenAutoFocus={event => {
+            // It opens by itself on payday, so no control should look picked: focus starts on the
+            // dialog, and Tab goes to its first control. As the tour's example it takes no focus.
+            event.preventDefault();
+            if (!example) (event.currentTarget as HTMLElement).focus();
+          }}
+          {...(example
+            ? {
+                ...tourTarget('payday-example'),
+                inert: true,
+                'aria-hidden': true,
+                onEscapeKeyDown: (event: KeyboardEvent) => event.preventDefault()
+              }
+            : undefined)}
           className={cn(
             'fixed z-90 flex flex-col overflow-hidden border border-border bg-surface outline-none',
             isDesktop
               ? 'top-1/2 left-1/2 max-h-[calc(100dvh-48px)] w-[min(560px,calc(100%-48px))] -translate-1/2 rounded-[28px] shadow-[0_40px_80px_-30px_var(--shadow)] data-[state=closed]:animate-dialog-out data-[state=open]:animate-dialog-in'
-              : 'inset-x-0 bottom-0 max-h-[calc(100dvh-24px)] rounded-t-[28px] border-b-0 pt-2.5 shadow-[0_-30px_60px_-30px_var(--shadow)] data-[state=closed]:animate-sheet-out data-[state=open]:animate-sheet-in'
+              : 'inset-x-0 bottom-0 max-h-[calc(100dvh-24px)] rounded-t-[28px] border-b-0 pt-2.5 shadow-[0_-30px_60px_-30px_var(--shadow)] data-[state=closed]:animate-sheet-out data-[state=open]:animate-sheet-in',
+            // Room above it for the tour's card
+            example && !isDesktop && 'max-h-[55dvh]'
           )}>
           {isDesktop ? null : (
             <div

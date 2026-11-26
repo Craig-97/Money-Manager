@@ -1,4 +1,5 @@
 import { ArrowRight, PenLine, Repeat } from 'lucide-react';
+import { tourTarget } from '~/components/tour';
 import { Button, IconButton, Tile } from '~/components/ui';
 import { cn } from '~/lib/cn';
 import { formatShortDate } from '~/lib/dates';
@@ -25,7 +26,7 @@ export const NextPaydayTile = ({ dashboard }: { dashboard: Dashboard }) => {
   const openAdd = usePaymentDialogStore(s => s.openAdd);
 
   return (
-    <Tile aria-label="Next payday" className="gap-[22px] p-7 md:p-7">
+    <Tile aria-label="Next payday" className="gap-[22px] p-7 md:p-7" {...tourTarget('next-payday')}>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-[15px] font-bold text-muted">Next payday</h2>
         <div className="-my-1.5 -mr-2.5 inline-flex items-center gap-0.5">

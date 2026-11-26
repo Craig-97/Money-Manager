@@ -7,6 +7,7 @@ import { AccountDialogs } from '../../accounts';
 import { DebtDialogs } from '../../debts';
 import { NoteDialogs } from '../../notes';
 import { PaymentDialogs } from '../../payments';
+import { Tour } from '../../tour';
 import { Toaster } from '../../ui';
 import { BottomNav } from '../BottomNav';
 import { Sidebar } from '../Sidebar';
@@ -45,6 +46,8 @@ export const AppShell = () => {
       <DebtDialogs />
       <AccountDialogs />
       <NoteDialogs />
+      {/* Over everything, the sidebar and nav included */}
+      <Tour />
       {/* Above the mobile nav; on desktop, centred in the space beside the sidebar */}
       <Toaster className="bottom-[calc(104px+env(safe-area-inset-bottom))] md:bottom-[calc(24px+env(safe-area-inset-bottom))] md:left-[calc(var(--sidebar-w)+(100%-var(--sidebar-w))/2)]" />
     </div>

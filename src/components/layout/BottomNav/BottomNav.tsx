@@ -1,6 +1,7 @@
 import { Plus } from 'lucide-react';
 import { useAddAction } from '~/hooks/useAddAction';
 import { cn } from '~/lib/cn';
+import { tourTarget } from '../../tour/tourSteps';
 import { navItem } from '../navItems';
 import { BottomNavLink } from './BottomNavLink';
 import { MoreMenu } from './MoreMenu';
@@ -28,6 +29,7 @@ export const BottomNav = ({ className }: { className?: string }) => {
           aria-label={add.label}
           aria-haspopup="dialog"
           onClick={add.open}
+          {...tourTarget('add')}
           className="flex h-[52px] w-14 cursor-pointer items-center justify-center rounded-full border-0 bg-accent text-on-accent">
           <Plus size={22} strokeWidth={2.5} aria-hidden="true" />
         </button>

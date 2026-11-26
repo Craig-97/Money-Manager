@@ -281,6 +281,7 @@ export type Mutation = {
   logoutEverywhere: SuccessResponse;
   markPaymentsPaid: BudgetResponse;
   markPaymentsUnpaid: BudgetResponse;
+  markTourSeen: UserResponse;
   refreshSession: AuthData;
   registerAndLogin: AuthData;
   requestPasswordReset: SuccessResponse;
@@ -860,6 +861,7 @@ export type User = {
   id: Scalars['ID']['output'];
   surname: Scalars['String']['output'];
   theme: Maybe<ThemePreference>;
+  tourSeen: Scalars['Boolean']['output'];
 };
 
 export type UserDetailsInput = {

@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router';
 import { preloadPage } from '~/app/routes/pageModules';
 import { DashboardIcon } from '../../../icons';
+import { tourTarget } from '../../../tour/tourSteps';
 import { NavItem } from '../../navItems';
 
 /* One of the mobile nav's pages, as a round icon button */
@@ -15,6 +16,7 @@ export const BottomNavLink = ({ item }: { item: NavItem }) => {
       aria-label={label}
       onFocus={preload}
       onTouchStart={preload}
+      {...tourTarget(page)}
       className="flex h-[52px] w-14 items-center justify-center rounded-full text-nav-icon no-underline hover:text-nav-active-bg aria-[current=page]:bg-nav-active-bg aria-[current=page]:text-nav-active-text">
       {/* The mobile nav draws the dashboard tiles with rounder corners */}
       {page === 'dashboard' ? (

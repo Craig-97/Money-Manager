@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router';
 import { preloadPage } from '~/app/routes/pageModules';
 import { cn } from '~/lib/cn';
+import { tourTarget } from '../../../tour/tourSteps';
 import { Tooltip } from '../../../ui';
 import { NavItem } from '../../navItems';
 import { SidebarReminderCount } from '../SidebarReminderCount';
@@ -23,6 +24,7 @@ export const SidebarNavLink = ({ item, expanded, onNavigate }: SidebarNavLinkPro
         onClick={onNavigate}
         onMouseEnter={preload}
         onFocus={preload}
+        {...tourTarget(page)}
         // NavLink marks the active link with aria-current="page". A plain string class is needed
         // here because the tooltip trigger merges class names as strings.
         className={cn(

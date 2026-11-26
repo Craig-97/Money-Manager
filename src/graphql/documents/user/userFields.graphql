@@ -7,4 +7,5 @@ fragment UserFields on User {
   surname
   theme
   accent
+  tourSeen
 }

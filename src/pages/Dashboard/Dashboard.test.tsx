@@ -417,6 +417,14 @@ describe('payday prompt', () => {
   const outcomeOf = (dialog: HTMLElement, name: string) =>
     within(within(dialog).getByRole('radiogroup', { name: `What happened to ${name}` }));
 
+  it('opens with focus on the prompt itself, not its close button', async () => {
+    renderDashboard(paydayBudget());
+
+    const dialog = await screen.findByRole('dialog', { name: 'It’s payday' });
+
+    await waitFor(() => expect(dialog).toHaveFocus());
+  });
+
   it('keeps the summary on screen while it closes, not the payday steps', async () => {
     holdExitAnimations();
     const { user } = renderDashboard(paydayBudget());

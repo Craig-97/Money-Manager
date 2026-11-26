@@ -5,8 +5,10 @@ import { preloadPage } from '~/app/routes/pageModules';
 import { useReminders } from '~/hooks/useReminders';
 import { cn } from '~/lib/cn';
 import { MoreIcon } from '../../../icons';
+import { tourTarget } from '../../../tour/tourSteps';
 import { MoreSheet } from '../MoreSheet';
 import { MORE_LINKS } from './moreLinks';
+import { morePanelClasses } from './morePanelClasses';
 
 /*
  * The mobile nav's last button. It opens a sheet above the nav with the pages that don't fit in
@@ -27,6 +29,7 @@ export const MoreMenu = () => {
         <button
           ref={trigger}
           type="button"
+          {...tourTarget('more')}
           aria-label="More"
           // Says which of its pages is showing, as the other nav links do, and what the dot means
           aria-description={
@@ -58,7 +61,10 @@ export const MoreMenu = () => {
           onPointerDownOutside={event => {
             if (trigger.current?.contains(event.target as Node)) event.preventDefault();
           }}
-          className="fixed inset-x-3 bottom-[calc(104px+env(safe-area-inset-bottom))] z-45 rounded-[28px] border border-border bg-surface px-[18px] py-2 shadow-[0_30px_60px_-20px_var(--shadow)] outline-none data-[state=closed]:animate-fade-out data-[state=open]:animate-fade-in">
+          className={cn(
+            morePanelClasses,
+            'outline-none data-[state=closed]:animate-fade-out data-[state=open]:animate-fade-in'
+          )}>
           <Dialog.Title className="sr-only">More</Dialog.Title>
           <MoreSheet links={MORE_LINKS} current={current} onNavigate={() => setOpen(false)} />
         </Dialog.Content>

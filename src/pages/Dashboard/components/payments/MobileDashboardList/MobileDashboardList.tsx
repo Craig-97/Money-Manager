@@ -17,6 +17,7 @@ export const MobileDashboardList = ({ dashboard }: { dashboard: Dashboard }) => 
   return (
     <MobilePaymentsTile
       headingId="payments-title-mobile"
+      tour="payments"
       list={dashboard}
       isEmpty={dashboard.isEmpty}
       sort={sort}

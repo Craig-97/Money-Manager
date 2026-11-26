@@ -1,4 +1,5 @@
 import { ReactNode } from 'react';
+import { TourTarget, tourTarget } from '../../../tour/tourSteps';
 import { MobileBulkBar, MobileSortButton } from '../../PaymentControls';
 import { SortProps } from '../../PaymentControls/sortProps';
 import { bulkActions, PaymentList } from '../paymentList';
@@ -10,6 +11,8 @@ interface MobilePaymentsTileProps extends SortProps {
   isEmpty: boolean;
   // The lists it can show, under the title
   tabs: ReactNode;
+  // What the first-time tour calls it, on a page the tour visits
+  tour?: TourTarget;
   children: ReactNode;
 }
 
@@ -24,6 +27,7 @@ export const MobilePaymentsTile = ({
   tabs,
   sort,
   onSort,
+  tour,
   children
 }: MobilePaymentsTileProps) => {
   const { selection } = list;
@@ -31,6 +35,7 @@ export const MobilePaymentsTile = ({
   return (
     <article
       aria-labelledby={headingId}
+      {...(tour ? tourTarget(tour) : undefined)}
       className="flex flex-col gap-2 rounded-3xl border border-border bg-surface p-3">
       <div className="flex min-h-12 items-center justify-between pb-1 pl-2">
         <h2 id={headingId} className="scroll-mt-4 text-base font-extrabold tracking-[-0.02em]">

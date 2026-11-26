@@ -35,6 +35,8 @@ interface ModalProps {
   size?: keyof typeof WIDTHS;
   // The field to focus when it opens, in place of the first control
   initialFocusId?: string;
+  // It opens by itself, not from a button, e.g. the welcome after Setup
+  opensItself?: boolean;
 }
 
 /*
@@ -53,7 +55,8 @@ export const Modal = ({
   leading,
   subtitle,
   size = 'default',
-  initialFocusId
+  initialFocusId,
+  opensItself = false
 }: ModalProps) => {
   const isDesktop = useMediaQuery(MEDIA.desktop);
   const { ref: bodyRef, top: shadeTop, bottom: shadeBottom } = useScrollShade();
@@ -66,9 +69,15 @@ export const Modal = ({
           {...(description ? {} : { 'aria-describedby': undefined })}
           onOpenAutoFocus={event => {
             const field = initialFocusId ? document.getElementById(initialFocusId) : null;
-            if (!field) return;
-            event.preventDefault();
-            field.focus();
+            if (field) {
+              event.preventDefault();
+              field.focus();
+            } else if (opensItself) {
+              // Nothing was pressed to open it, so no control should look picked: focus starts on
+              // the dialog, and Tab goes to its first control
+              event.preventDefault();
+              (event.currentTarget as HTMLElement).focus();
+            }
           }}
           className={cn(
             'fixed z-90 flex flex-col overflow-hidden border border-border bg-surface outline-none',

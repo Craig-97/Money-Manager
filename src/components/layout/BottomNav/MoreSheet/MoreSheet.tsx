@@ -2,6 +2,7 @@ import { ChevronRight } from 'lucide-react';
 import { Link } from 'react-router';
 import { cn } from '~/lib/cn';
 import { useMoreSubtitles } from './useMoreSubtitles';
+import { tourTarget } from '../../../tour/tourSteps';
 import { MoreLink } from '../MoreMenu/moreLinks';
 
 interface MoreSheetProps {
@@ -23,6 +24,7 @@ export const MoreSheet = ({ links, current, onNavigate }: MoreSheetProps) => {
             key={to}
             to={to}
             onClick={onNavigate}
+            {...tourTarget(page)}
             aria-current={here ? 'page' : undefined}
             className={cn(
               '-mx-2.5 flex min-h-16 items-center gap-3 rounded-[18px] px-2.5 text-text no-underline transition-colors',

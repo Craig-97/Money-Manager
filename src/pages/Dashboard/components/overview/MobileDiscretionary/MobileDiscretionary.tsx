@@ -1,3 +1,4 @@
+import { tourTarget } from '~/components/tour';
 import { cn } from '~/lib/cn';
 import { formatBalance } from '~/lib/format';
 import { Dashboard } from '../../../hooks';
@@ -10,7 +11,9 @@ export const MobileDiscretionary = ({ dashboard }: { dashboard: Dashboard }) => 
   const overspent = summary.discretionary < 0;
 
   return (
-    <article className="flex flex-col gap-3.5 rounded-3xl border border-border bg-surface p-5">
+    <article
+      className="flex flex-col gap-3.5 rounded-3xl border border-border bg-surface p-5"
+      {...tourTarget('monthly')}>
       <div className="flex items-baseline justify-between gap-2">
         <h2 className="flex flex-wrap items-center gap-2 text-base font-extrabold tracking-[-0.02em]">
           Discretionary income

@@ -3,6 +3,7 @@ import {
   Bell,
   CalendarClock,
   CalendarDays,
+  CircleHelp,
   KeyRound,
   Palette,
   Settings,
@@ -19,5 +20,6 @@ export const SECTION_ICONS: Record<SectionId, ReactNode> = {
   balances: <Wallet size={18} aria-hidden="true" />,
   reminders: <Bell size={18} aria-hidden="true" />,
   appearance: <Palette size={18} aria-hidden="true" />,
+  help: <CircleHelp size={18} aria-hidden="true" />,
   account: <Settings size={18} aria-hidden="true" />
 };
