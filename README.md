@@ -16,24 +16,43 @@ Password: Test123!
 
 ## Desktop Preview
 
-### Homepage
+### Dashboard
 
-![image](https://user-images.githubusercontent.com/41014229/230735085-297652cc-3be5-410b-bcb1-71a0a75cf347.png)
+![Dashboard](docs/screenshots/dashboard.png)
 
+<details>
+<summary>Light mode</summary>
 
-## Mobile Preview
+![Dashboard, light mode](docs/screenshots/dashboard-light.png)
 
-### Homepage
+</details>
 
-![image](https://user-images.githubusercontent.com/41014229/230735145-3bec6012-64ea-4647-9f40-26b066857e6b.png) 
+### Recurring payments
+
+![Recurring payments](docs/screenshots/recurring.png)
 
 ### Forecast
 
-![image](https://user-images.githubusercontent.com/41014229/230735448-713b030d-3330-48d8-940f-fc8a07c7e8e3.png)
+![Forecast](docs/screenshots/forecast.png)
 
-### Notes
+### Accounts
 
-![image](https://user-images.githubusercontent.com/41014229/230735172-dab1532a-07ae-4857-829f-3c6b6aade036.png)
+![Accounts](docs/screenshots/accounts.png)
 
+### Debts
+
+![Debts](docs/screenshots/debts.png)
+
+### Reminders
+
+![Reminders](docs/screenshots/reminders.png)
+
+## Mobile Preview
+
+<p>
+  <img src="docs/screenshots/mobile-dashboard.png" width="260" alt="Dashboard on mobile">
+  <img src="docs/screenshots/mobile-forecast.png" width="260" alt="Forecast on mobile">
+  <img src="docs/screenshots/mobile-debts.png" width="260" alt="Debts on mobile">
+</p>
 
 [See Back-end API here](https://github.com/Craig-97/Money-Manager-API)
