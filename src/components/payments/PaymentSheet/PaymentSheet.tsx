@@ -15,7 +15,7 @@ import { formatMoney, plural } from '~/lib/format';
 import { noteColor } from '~/lib/notes';
 import { DebtsIcon } from '../../icons';
 import { ActionRow, ActionRows, ActionTile, ActionTiles, Modal } from '../../ui';
-import { PaymentSummary } from '../PaymentParts';
+import { NextChangeTag, PaymentSummary } from '../PaymentParts';
 import { usePaymentSheet } from './usePaymentSheet';
 
 /*
@@ -25,7 +25,7 @@ import { usePaymentSheet } from './usePaymentSheet';
 export const PaymentSheet = () => {
   const sheet = usePaymentSheet();
   if (!sheet.payment) return null;
-  const { payment, recurring, due, choices, edits, notes, dates } = sheet;
+  const { payment, recurring, due, change, choices, edits, notes, dates } = sheet;
   const firstNote = notes[0];
 
   return (
@@ -34,7 +34,10 @@ export const PaymentSheet = () => {
       onOpenChange={next => (next ? undefined : sheet.close())}
       title={payment.name}>
       {/* As the boards have it: the payment in a grey card, with its dates when there are several */}
-      <PaymentSummary payment={payment} due={due}>
+      <PaymentSummary
+        payment={payment}
+        due={due}
+        tag={change ? <NextChangeTag next={change} today={sheet.today} /> : null}>
         {dates.length ? (
           <div className="mt-0.5 flex basis-full flex-col gap-1.5 border-t border-border pt-2.5">
             <span className="text-xs font-extrabold text-muted">

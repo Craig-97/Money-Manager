@@ -18,6 +18,8 @@ interface PaymentSummaryProps {
   due: DueInfo;
   // Its name on top, where the title above is about something else, e.g. Change amount
   named?: boolean;
+  // A tag under the details, e.g. when it renews or ends
+  tag?: ReactNode;
   // More under it, across the card, e.g. its dates before payday
   children?: ReactNode;
 }
@@ -27,7 +29,13 @@ interface PaymentSummaryProps {
  * when it's due, red when that's today or overdue, then how often and what it's for, and whether
  * its date was moved off a weekend or bank holiday.
  */
-export const PaymentSummary = ({ payment, due, named = false, children }: PaymentSummaryProps) => {
+export const PaymentSummary = ({
+  payment,
+  due,
+  named = false,
+  tag,
+  children
+}: PaymentSummaryProps) => {
   const urgent = due.state === 'today' || due.state === 'overdue';
   return (
     <div className={summaryCardClasses}>
@@ -56,6 +64,7 @@ export const PaymentSummary = ({ payment, due, named = false, children }: Paymen
         {due.moved ? (
           <p className="mt-0.5 text-xs font-bold text-accent-text">{due.moved.label}</p>
         ) : null}
+        {tag ? <div className="mt-2 flex">{tag}</div> : null}
       </div>
       {children}
     </div>

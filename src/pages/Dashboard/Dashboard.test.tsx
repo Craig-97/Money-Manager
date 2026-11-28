@@ -184,6 +184,33 @@ describe('dashboard', () => {
     expect(api.db.budget?.bankBalance).toBe(1000);
   });
 
+  it('says in its quick view when a payment renews or ends', async () => {
+    const netflix = budget().recurringPayments[0];
+    const { user } = renderDashboard(
+      budget({
+        recurringPayments: [
+          { ...netflix, lastPaymentDate: apiDate('2026-12-08') },
+          {
+            ...netflix,
+            id: 'spotify',
+            name: 'Spotify',
+            renewalDate: apiDate('2027-01-19')
+          }
+        ]
+      })
+    );
+
+    await user.click(await screen.findByRole('button', { name: 'Netflix' }));
+    const netflixSheet = await screen.findByRole('dialog', { name: 'Netflix' });
+    expect(within(netflixSheet).getByText('Ends 8 Dec')).toBeInTheDocument();
+    await user.keyboard('{Escape}');
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+
+    await user.click(await screen.findByRole('button', { name: 'Spotify' }));
+    const spotifySheet = await screen.findByRole('dialog', { name: 'Spotify' });
+    expect(within(spotifySheet).getByText('Renews 19 Jan 2027')).toBeInTheDocument();
+  });
+
   it('checks a payment has a name and amount', async () => {
     const { user } = renderDashboard();
 

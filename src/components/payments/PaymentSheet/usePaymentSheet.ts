@@ -5,7 +5,14 @@ import { usePaymentActions } from '~/hooks/usePaymentActions';
 import { formatShortDate } from '~/lib/dates';
 import { isDebt } from '~/lib/debts';
 import { notesByPayment, toNotes } from '~/lib/notes';
-import { datesDue, dueInfo, paymentChoices, quickEdits, toPayments } from '~/lib/payments';
+import {
+  datesDue,
+  dueInfo,
+  nextChangeOf,
+  paymentChoices,
+  quickEdits,
+  toPayments
+} from '~/lib/payments';
 import { useDebtViewStore } from '~/state/debtView';
 import { useNoteDialogStore } from '~/state/noteDialog';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
@@ -57,6 +64,8 @@ export const usePaymentSheet = () => {
     recurring,
     today,
     due: dueInfo(payment, { today, cycle }),
+    // Whether it renews, stops or its rate ends, as the Recurring page's tag says
+    change: recurring ? nextChangeOf(recurring, today) : null,
     dates: dates.length > 1 ? dates : [],
     choices,
     edits: quickEdits(payment),
