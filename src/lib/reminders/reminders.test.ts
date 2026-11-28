@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { Note } from '../notes';
-import { DEFAULT_REMINDER_SETTINGS, OneOffPayment } from '../payments';
+import { DEFAULT_REMINDER_SETTINGS, OneOffPayment, RecurringPayment } from '../payments';
 import {
   canClear,
   filterReminders,
@@ -10,6 +10,8 @@ import {
   laterUntil,
   newReminders,
   overdueKey,
+  rateEndKey,
+  Reminder,
   ReminderSources,
   ReminderState,
   upcomingReminders
@@ -155,6 +157,112 @@ describe('new reminders', () => {
   it('puts payments away until tomorrow with Later, the rest for a few days', () => {
     expect(laterUntil({ kind: 'overdue' }, TODAY)).toEqual(day('2026-10-03'));
     expect(laterUntil({ kind: 'renewal' }, TODAY)).toEqual(day('2026-10-05'));
+  });
+});
+
+describe('rate ends', () => {
+  // A mortgage whose fixed rate ends on Thursday 31 December, 90 days from today
+  const mortgage = (rateEndsOn: string, overrides: Partial<RecurringPayment> = {}) =>
+    recurringPayment({
+      id: 'Mortgage',
+      amount: 750,
+      dueDate: day('2026-10-28'),
+      debt: {
+        balance: 148200,
+        startingBalance: 165000,
+        apr: 4.29,
+        balanceUpdatedAt: null,
+        paidOffThisCycle: 0,
+        accrued: 0,
+        accruedTo: null,
+        rateEndsOn: day(rateEndsOn)
+      },
+      ...overrides
+    });
+  const rateEnds = (list: Reminder[]) =>
+    list.filter(reminder => reminder.kind === 'rateEnds' || reminder.kind === 'rateEnded');
+  const fresh = (payment: RecurringPayment) =>
+    rateEnds(newReminders(sources({ payments: [payment] })));
+  const ahead = (payment: RecurringPayment) =>
+    rateEnds(upcomingReminders(sources({ payments: [payment] })));
+
+  it('goes off 3 months before unless the debt’s reminder says otherwise', () => {
+    const payment = mortgage('2026-12-31');
+
+    const [reminder] = fresh(payment);
+
+    expect(reminder).toMatchObject({
+      key: 'rateends:Mortgage:2026-12-31',
+      kind: 'rateEnds',
+      title: 'Mortgage rate ends on Thu 31 Dec',
+      name: 'Mortgage rate ends',
+      body: 'Check your new rate and payment',
+      timing: '3 months before',
+      firesOn: day('2026-10-02')
+    });
+    expect(
+      rateEndKey(payment, { date: day('2026-12-31'), days: 90, soon: true, passed: false })
+    ).toBe(reminder.key);
+    expect(kindText(reminder)).toBe('Rate ends');
+    // Not yet, a day further off
+    expect(fresh(mortgage('2027-01-01'))).toHaveLength(0);
+
+    const month = mortgage('2026-12-31', { renewalReminder: { off: false, days: 30 } });
+    expect(fresh(month)).toHaveLength(0);
+    expect(ahead(month)[0]).toMatchObject({
+      timing: '1 month before',
+      firesOn: day('2026-12-01')
+    });
+  });
+
+  it('is coming up while it is ahead, even with its reminder off', () => {
+    const off = mortgage('2027-03-01', { renewalReminder: { off: true, days: null } });
+
+    expect(ahead(off)[0]).toMatchObject({
+      name: 'Mortgage rate ends',
+      timing: 'Off',
+      firesOn: null
+    });
+    expect(fresh(off)).toHaveLength(0);
+  });
+
+  it('stays in New once it has gone by, but is no longer ahead', () => {
+    const payment = mortgage('2026-09-28');
+
+    expect(fresh(payment)).toHaveLength(1);
+    expect(fresh(payment)[0]).toMatchObject({
+      key: 'rateended:Mortgage:2026-09-28',
+      kind: 'rateEnded',
+      title: 'Mortgage rate has ended',
+      timing: 'Ended'
+    });
+    expect(ahead(payment)).toHaveLength(0);
+  });
+
+  it('goes away when cleared or put away, as a renewal does', () => {
+    const payment = mortgage('2026-12-31');
+    const key = 'rateends:Mortgage:2026-12-31';
+
+    const cleared = sources({
+      payments: [payment],
+      states: new Map([[key, state({ cleared: true })]])
+    });
+    const later = sources({
+      payments: [payment],
+      states: new Map([[key, state({ snoozedUntil: day('2026-10-05') })]])
+    });
+
+    expect(rateEnds(newReminders(cleared))).toHaveLength(0);
+    expect(rateEnds(newReminders(later))).toHaveLength(0);
+    expect(rateEnds(newReminders({ ...later, today: day('2026-10-05') }))).toHaveLength(1);
+  });
+
+  it('is put away for three days with Later, and filtered with the renewals', () => {
+    const [reminder] = fresh(mortgage('2026-12-31'));
+
+    expect(laterUntil(reminder, TODAY)).toEqual(day('2026-10-05'));
+    expect(filterReminders([reminder], 'renewals')).toHaveLength(1);
+    expect(filterReminders([reminder], 'payments')).toHaveLength(0);
   });
 });
 

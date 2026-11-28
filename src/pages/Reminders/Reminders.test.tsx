@@ -66,6 +66,120 @@ const reminderTitles = (list: HTMLElement) =>
     .getAllByRole('heading', { level: 3 })
     .map(heading => heading.textContent);
 
+// A mortgage whose fixed rate ends on Thursday 31 December, 90 days away
+const withMortgage = (rateEndsOn = '2026-12-31', fields: Partial<FakeRecurringPayment> = {}) => {
+  const data = budget();
+  data.recurringPayments.push(
+    monthly({
+      id: 'mortgage',
+      name: 'Mortgage',
+      amount: 750,
+      category: 'FINANCES',
+      nextDueDate: apiDate('2026-10-28'),
+      debt: {
+        balance: 148200,
+        startingBalance: 165000,
+        apr: 4.29,
+        balanceUpdatedAt: apiDate('2026-09-15'),
+        rateEndsOn: apiDate(rateEndsOn)
+      },
+      ...fields
+    })
+  );
+  return data;
+};
+
+describe('a debt’s rate ending', () => {
+  it('goes off 3 months before, to check the new rate and payment', async () => {
+    const { user, api } = renderReminders('/reminders', withMortgage());
+
+    const reminder = within(await newList()).getByRole('article', {
+      name: 'Mortgage rate ends on Thu 31 Dec'
+    });
+    expect(reminder).toHaveTextContent('Check your new rate and payment');
+    expect(screen.getByRole('button', { name: 'Reminders, 4 new' })).toBeInTheDocument();
+
+    await user.click(within(reminder).getByRole('button', { name: 'Later' }));
+
+    // Put away for three days, as a renewal is
+    expect(await screen.findByText('It’ll be back Mon 5 Oct')).toBeInTheDocument();
+    expect(api.callsTo('UpdateReminders')).toEqual([
+      {
+        input: {
+          budgetId: 'budget-1',
+          keys: ['rateends:mortgage:2026-12-31'],
+          action: 'LATER',
+          until: '2026-10-05'
+        }
+      }
+    ]);
+  });
+
+  it('clears with ×, with undo', async () => {
+    const { user, api } = renderReminders('/reminders', withMortgage());
+
+    await user.click(
+      within(await newList()).getByRole('button', {
+        name: 'Clear: Mortgage rate ends on Thu 31 Dec'
+      })
+    );
+
+    expect(api.callsTo('UpdateReminders')).toEqual([
+      { input: { budgetId: 'budget-1', keys: ['rateends:mortgage:2026-12-31'], action: 'CLEAR' } }
+    ]);
+    expect(screen.queryByText('Mortgage rate ends on Thu 31 Dec')).not.toBeInTheDocument();
+  });
+
+  it('opens the debt to update its rate', async () => {
+    const { user } = renderReminders('/reminders', withMortgage());
+
+    const reminder = within(await newList()).getByRole('article', {
+      name: 'Mortgage rate ends on Thu 31 Dec'
+    });
+    await user.click(within(reminder).getByRole('button', { name: 'Update rate' }));
+
+    const dialog = await screen.findByRole('dialog', { name: 'Edit recurring payment' });
+    expect(within(dialog).getByLabelText('Name')).toHaveValue('Mortgage');
+    expect(within(dialog).getByLabelText('Interest (APR)')).toHaveValue('4.29');
+    expect(within(dialog).getByLabelText('Rate ends')).toHaveTextContent('Thu 31 Dec');
+  });
+
+  it('is coming up before it goes off, with when it reminds changeable', async () => {
+    const { user, api } = renderReminders('/reminders?tab=up', withMortgage('2027-03-01'));
+
+    const upcoming = await screen.findByRole('region', { name: 'Coming up' });
+    expect(within(upcoming).getByText('Mortgage rate ends')).toBeInTheDocument();
+    expect(within(upcoming).getByText('Rate ends')).toBeInTheDocument();
+    expect(within(upcoming).getByText('3 months before')).toBeInTheDocument();
+
+    await user.click(
+      within(upcoming).getByRole('button', { name: 'More actions for Mortgage rate ends' })
+    );
+    await user.click(await screen.findByRole('menuitem', { name: 'Change when' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Remind me about Mortgage' });
+    // 3 months is the usual, so it's chosen; there is no separate usual
+    expect(within(dialog).getByRole('radio', { name: '3 months before' })).toBeChecked();
+    expect(within(dialog).queryByRole('radio', { name: /^Usual/ })).not.toBeInTheDocument();
+    await user.click(within(dialog).getByRole('radio', { name: '1 month before' }));
+    await user.click(within(dialog).getByRole('button', { name: 'Save' }));
+
+    await vi.waitFor(() =>
+      expect(api.callsTo('UpdateRecurringPayment')).toEqual([
+        { id: 'mortgage', input: { renewalReminder: { off: false, days: 30 } } }
+      ])
+    );
+  });
+
+  it('stays in New once it has ended, until the new rate end is set', async () => {
+    renderReminders('/reminders', withMortgage('2026-09-28'));
+
+    const reminder = within(await newList()).getByRole('article', {
+      name: 'Mortgage rate has ended'
+    });
+    expect(reminder).toHaveTextContent('update the APR and payment, then set the new rate end');
+  });
+});
+
 describe('reminders page', () => {
   it('lists what has gone off, an overdue payment first, and counts it on the bell', async () => {
     renderReminders();

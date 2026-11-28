@@ -162,6 +162,272 @@ describe('adding a recurring payment as a debt', () => {
   });
 });
 
+// A mortgage with its fixed rate ending on a given day
+const mortgageEnding = (rateEndsOn: string | null): FakeRecurringPayment => ({
+  id: 'mortgage',
+  name: 'Mortgage',
+  amount: 750,
+  category: 'FINANCES',
+  frequency: 'MONTHLY',
+  type: 'EXPENSE',
+  firstPaymentDate: apiDate('2025-10-28'),
+  lastPaymentDate: null,
+  nextDueDate: null,
+  thisCycle: [],
+  renewalDate: null,
+  debt: {
+    balance: 148200,
+    startingBalance: 165000,
+    apr: 4.29,
+    balanceUpdatedAt: null,
+    rateEndsOn: rateEndsOn ? apiDate(rateEndsOn) : null
+  }
+});
+
+const mortgageBudget = (rateEndsOn: string | null): FakeBudget =>
+  freshBudget({ recurringPayments: [mortgageEnding(rateEndsOn)] });
+
+describe('adding a debt with a rate end', () => {
+  const openAdd = async () => {
+    const view = renderAt('/debts');
+    await view.user.click(await screen.findByRole('button', { name: 'Add a debt' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Add a debt' });
+    await view.user.type(within(dialog).getByLabelText('Name'), 'Home loan');
+    await view.user.type(within(dialog).getByLabelText('Amount'), '750');
+    await view.user.type(within(dialog).getByLabelText('Balance left'), '148200');
+    await view.user.type(within(dialog).getByLabelText('Interest (APR)'), '4.29');
+    return { ...view, dialog };
+  };
+
+  it('asks when the rate ends under the APR, optionally, and says why', async () => {
+    const { dialog } = await openAdd();
+
+    expect(within(dialog).getByLabelText('Rate ends')).toHaveTextContent('Optional');
+    expect(
+      within(dialog).getByText(
+        'When a fixed or offer rate ends, like a mortgage fix or a 0% card. You’ll get a reminder before.'
+      )
+    ).toBeInTheDocument();
+    // Nothing to remind about until there is a date
+    const more = within(dialog).getByRole('button', { name: /More options/ });
+    expect(more).not.toHaveTextContent('rate ends');
+  });
+
+  it('reminds 3 months before by default, under More options, and sends the date', async () => {
+    const { user, api, dialog } = await openAdd();
+
+    await user.click(within(dialog).getByLabelText('Rate ends'));
+    await user.click(await screen.findByRole('button', { name: 'Friday, 30 October 2026' }));
+    expect(within(dialog).getByLabelText('Rate ends')).toHaveTextContent('Fri 30 Oct');
+
+    const more = within(dialog).getByRole('button', { name: /More options/ });
+    expect(more).toHaveTextContent('3 months before the rate ends');
+    await user.click(more);
+    const reminder = within(dialog).getByRole('combobox', {
+      name: 'Remind me before the rate ends'
+    });
+    expect(reminder).toHaveTextContent('3 months before');
+    await user.click(reminder);
+    expect((await screen.findAllByRole('option')).map(option => option.textContent)).toEqual([
+      '1 week before',
+      '2 weeks before',
+      '1 month before',
+      '3 months before',
+      'Off'
+    ]);
+    await user.keyboard('{Escape}');
+
+    await user.click(within(dialog).getByRole('button', { name: 'Add debt' }));
+
+    expect(await screen.findByText('Added Home loan')).toBeInTheDocument();
+    expect(api.callsTo('CreateRecurringPayment')[0].input).toMatchObject({
+      debt: { balance: 148200, apr: 4.29, rateEndsOn: '2026-10-30' },
+      renewalReminder: { off: false, days: 90 }
+    });
+  });
+
+  it('sends the reminder that was chosen', async () => {
+    const { user, api, dialog } = await openAdd();
+    await user.click(within(dialog).getByLabelText('Rate ends'));
+    await user.click(await screen.findByRole('button', { name: 'Friday, 30 October 2026' }));
+    await user.click(within(dialog).getByRole('button', { name: /More options/ }));
+    await user.click(
+      within(dialog).getByRole('combobox', { name: 'Remind me before the rate ends' })
+    );
+    await user.click(await screen.findByRole('option', { name: 'Off' }));
+    expect(within(dialog).getByRole('button', { name: /More options/ })).toHaveTextContent(
+      'no rate end reminder'
+    );
+
+    await user.click(within(dialog).getByRole('button', { name: 'Add debt' }));
+
+    expect(await screen.findByText('Added Home loan')).toBeInTheDocument();
+    expect(api.callsTo('CreateRecurringPayment')[0].input).toMatchObject({
+      renewalReminder: { off: true, days: null }
+    });
+  });
+
+  it('sends no rate end without one', async () => {
+    const { user, api, dialog } = await openAdd();
+
+    await user.click(within(dialog).getByRole('button', { name: 'Add debt' }));
+
+    expect(await screen.findByText('Added Home loan')).toBeInTheDocument();
+    const input = api.callsTo('CreateRecurringPayment')[0].input as {
+      debt: object;
+      renewalReminder: object;
+    };
+    expect(input.debt).not.toHaveProperty('rateEndsOn');
+    expect(input.renewalReminder).toEqual({ off: false, days: null });
+  });
+
+  it('leaves 3 months out of the reminder before a renewal', async () => {
+    const { user } = renderAt('/recurring');
+
+    await user.click(await screen.findByRole('button', { name: 'Recurring payment' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Add recurring payment' });
+    await user.click(within(dialog).getByRole('radio', { name: 'Renews' }));
+    await user.click(within(dialog).getByRole('button', { name: /More options/ }));
+    await user.click(within(dialog).getByRole('combobox', { name: 'Remind me before it renews' }));
+
+    expect((await screen.findAllByRole('option')).map(option => option.textContent)).toEqual([
+      'Usual · 1 month before',
+      '1 week before',
+      '2 weeks before',
+      '1 month before',
+      'Off'
+    ]);
+  });
+});
+
+describe('editing a debt with a rate end', () => {
+  it('shows the date and its reminder, and clearing the date stops the reminder', async () => {
+    const { user, api } = renderApp({ route: '/recurring', budget: mortgageBudget('2026-12-31') });
+
+    await editFromRow(user, 'Mortgage');
+    const dialog = await screen.findByRole('dialog', { name: 'Edit recurring payment' });
+
+    expect(within(dialog).getByLabelText('Rate ends')).toHaveTextContent('Thu 31 Dec');
+    // The usual timing for a rate end is 3 months before, so More options starts folded
+    expect(within(dialog).getByRole('button', { name: /More options/ })).toHaveTextContent(
+      '3 months before the rate ends'
+    );
+    expect(within(dialog).queryByText(/The rate ended on/)).not.toBeInTheDocument();
+
+    await user.click(within(dialog).getByLabelText('Rate ends'));
+    await user.click(await screen.findByRole('button', { name: 'Clear' }));
+    expect(within(dialog).getByLabelText('Rate ends')).toHaveTextContent('Optional');
+    expect(within(dialog).getByRole('button', { name: /More options/ })).not.toHaveTextContent(
+      'rate ends'
+    );
+    await user.click(within(dialog).getByRole('button', { name: 'Save changes' }));
+
+    expect(await screen.findByText('Saved Mortgage')).toBeInTheDocument();
+    expect(api.callsTo('UpdateRecurringPayment')[0].input).toMatchObject({
+      debt: { balance: 148200, apr: 4.29, startingBalance: 165000, rateEndsOn: null },
+      renewalReminder: { off: false, days: null }
+    });
+  });
+
+  it('opens More options when the reminder isn’t the usual 3 months', async () => {
+    const data = mortgageBudget('2026-12-31');
+    data.recurringPayments[0].renewalReminder = { off: false, days: 14 };
+    const { user } = renderApp({ route: '/recurring', budget: data });
+
+    await editFromRow(user, 'Mortgage');
+    const dialog = await screen.findByRole('dialog', { name: 'Edit recurring payment' });
+
+    expect(
+      within(dialog).getByRole('combobox', { name: 'Remind me before the rate ends' })
+    ).toHaveTextContent('2 weeks before');
+  });
+
+  it('sends nothing for a debt whose form is left as it was', async () => {
+    const { user, api } = renderApp({ route: '/recurring', budget: mortgageBudget('2026-12-31') });
+
+    await editFromRow(user, 'Mortgage');
+    const dialog = await screen.findByRole('dialog', { name: 'Edit recurring payment' });
+    await user.click(within(dialog).getByRole('button', { name: 'Save changes' }));
+
+    await vi.waitFor(() =>
+      expect(screen.queryByRole('dialog', { name: 'Edit recurring payment' })).toBeNull()
+    );
+    expect(api.callsTo('UpdateRecurringPayment')).toEqual([]);
+  });
+});
+
+describe('a rate end that has gone by', () => {
+  // The rate ended on Monday 28 September, before today
+  const openEdit = async (width?: number) => {
+    if (width) setViewportWidth(width);
+    const view = renderApp({ route: '/recurring', budget: mortgageBudget('2026-09-28') });
+    await editFromRow(view.user, 'Mortgage');
+    const dialog = await screen.findByRole('dialog', { name: 'Edit recurring payment' });
+    return { ...view, dialog };
+  };
+
+  it('asks about the new rate at the top of the form', async () => {
+    const { dialog } = await openEdit();
+
+    const prompt = within(dialog)
+      .getByText(/The rate ended on/)
+      .closest<HTMLElement>('[role="status"]')!;
+    expect(prompt).toHaveTextContent(
+      'The rate ended on Mon 28 Sep. Update the APR and payment, then set when the new rate ends.'
+    );
+    expect(within(prompt).getByRole('button', { name: 'Set new rate end' })).toBeInTheDocument();
+    expect(within(prompt).getByRole('button', { name: 'No end date' })).toBeInTheDocument();
+    // First in the form, above the name
+    expect(
+      prompt.compareDocumentPosition(within(dialog).getByLabelText('Name')) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+    // Not a reminder to set, as the rate has ended
+    expect(within(dialog).getByRole('button', { name: /More options/ })).not.toHaveTextContent(
+      'rate ends'
+    );
+  });
+
+  it('moves on a year with Set new rate end, which is then saved', async () => {
+    const { user, api, dialog } = await openEdit();
+
+    await user.click(within(dialog).getByRole('button', { name: 'Set new rate end' }));
+
+    expect(within(dialog).queryByText(/The rate ended on/)).not.toBeInTheDocument();
+    expect(within(dialog).getByLabelText('Rate ends')).toHaveTextContent('Tue 28 Sep 2027');
+    await user.click(within(dialog).getByRole('button', { name: 'Save changes' }));
+
+    expect(await screen.findByText('Saved Mortgage')).toBeInTheDocument();
+    expect(api.callsTo('UpdateRecurringPayment')[0].input).toMatchObject({
+      debt: { rateEndsOn: '2027-09-28' },
+      renewalReminder: { off: false, days: 90 }
+    });
+  });
+
+  it('clears the rate end with No end date', async () => {
+    const { user, api, dialog } = await openEdit();
+
+    await user.click(within(dialog).getByRole('button', { name: 'No end date' }));
+
+    expect(within(dialog).queryByText(/The rate ended on/)).not.toBeInTheDocument();
+    expect(within(dialog).getByLabelText('Rate ends')).toHaveTextContent('Optional');
+    await user.click(within(dialog).getByRole('button', { name: 'Save changes' }));
+
+    expect(await screen.findByText('Saved Mortgage')).toBeInTheDocument();
+    expect(api.callsTo('UpdateRecurringPayment')[0].input).toMatchObject({
+      debt: { rateEndsOn: null }
+    });
+  });
+
+  it('asks in the mobile sheet too', async () => {
+    const { user, dialog } = await openEdit(390);
+
+    expect(within(dialog).getByText(/The rate ended on Mon 28 Sep./)).toBeInTheDocument();
+    await user.click(within(dialog).getByRole('button', { name: 'Set new rate end' }));
+    expect(within(dialog).getByLabelText('Rate ends')).toHaveTextContent('Tue 28 Sep 2027');
+  });
+});
+
 describe('paying into savings', () => {
   const withSavings = (): FakeBudget => ({
     ...budget(),

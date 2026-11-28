@@ -114,6 +114,44 @@ describe('DatePicker', () => {
     );
   };
 
+  it('offers Clear only for an optional date that has been chosen', async () => {
+    const user = userEvent.setup();
+    const Optional = () => {
+      const [value, setValue] = useState('2026-10-28');
+      return (
+        <>
+          <DatePicker
+            aria-label="Ends"
+            value={value}
+            onChange={setValue}
+            onClear={() => setValue('')}
+          />
+          <output>{value}</output>
+        </>
+      );
+    };
+    render(<Optional />);
+
+    await user.click(screen.getByRole('button', { name: 'Ends' }));
+    await user.click(await screen.findByRole('button', { name: 'Clear' }));
+
+    expect(screen.getByRole('status')).toHaveTextContent('');
+    expect(screen.getByRole('button', { name: 'Ends' })).toHaveTextContent('Choose a date');
+    await user.click(screen.getByRole('button', { name: 'Ends' }));
+    expect(await screen.findByText('June 2026')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Clear' })).not.toBeInTheDocument();
+  });
+
+  it('has no Clear unless asked for', async () => {
+    const user = userEvent.setup();
+    render(<ControlledDatePicker initial="2026-10-28" />);
+
+    await user.click(screen.getByRole('button', { name: 'Due date' }));
+
+    expect(await screen.findByText('October 2026')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Clear' })).not.toBeInTheDocument();
+  });
+
   it('opens on the chosen month and picks a day as YYYY-MM-DD', async () => {
     const user = userEvent.setup();
     render(<ControlledDatePicker initial="2026-10-28" />);

@@ -967,6 +967,130 @@ describe('alerts', () => {
     expect(screen.queryByText(/Car insurance renews/)).not.toBeInTheDocument();
   });
 
+  // A mortgage whose fixed rate ends on Friday 1 January, 85 days away, inside its 3 months
+  const mortgageBudget = ({ rateEndsOn = '2027-01-01' } = {}, data = renewedBudget()) => {
+    data.recurringPayments.push({
+      ...data.recurringPayments[0],
+      id: 'mortgage',
+      name: 'Mortgage',
+      amount: 750,
+      category: 'FINANCES',
+      firstPaymentDate: apiDate('2025-10-28'),
+      nextDueDate: apiDate('2026-10-28'),
+      renewalDate: null,
+      debt: {
+        balance: 148200,
+        startingBalance: 165000,
+        apr: 4.29,
+        balanceUpdatedAt: apiDate('2026-09-15'),
+        rateEndsOn: apiDate(rateEndsOn)
+      }
+    });
+    return data;
+  };
+
+  it('flags a debt’s rate ending among the renewals by date, to update', async () => {
+    const { user } = renderDashboard(mortgageBudget());
+
+    const alerts = await screen.findByRole('region', { name: 'Alerts' });
+    // Due today, the renewal that has gone by, then the rate end
+    expect(within(alerts).getByText('1 of 3')).toBeInTheDocument();
+    await user.click(within(alerts).getByRole('button', { name: 'Next alert' }));
+    await user.click(within(alerts).getByRole('button', { name: 'Next alert' }));
+
+    const rate = within(alerts).getByRole('region', { name: 'Mortgage rate ends on Fri 1 Jan' });
+    expect(rate).toHaveTextContent('Check your new rate and payment');
+    await user.click(within(rate).getByRole('button', { name: 'Update rate' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Edit recurring payment' });
+    expect(within(dialog).getByLabelText('Rate ends')).toHaveTextContent('Fri 1 Jan');
+  });
+
+  it('puts a rate ending among the renewals by its date', async () => {
+    // Car insurance renews on 5 November, after the rate ends on 20 October
+    const data = mortgageBudget({ rateEndsOn: '2026-10-20' });
+    data.recurringPayments.push({
+      ...data.recurringPayments[0],
+      id: 'car',
+      name: 'Car insurance',
+      amount: 612,
+      firstPaymentDate: apiDate('2025-10-24'),
+      nextDueDate: apiDate('2026-10-24'),
+      renewalDate: apiDate('2026-11-05'),
+      renewalReminder: { off: false, days: 30 }
+    });
+    const { user } = renderDashboard(data);
+
+    const alerts = await screen.findByRole('region', { name: 'Alerts' });
+    expect(within(alerts).getByText('1 of 4')).toBeInTheDocument();
+    // Due today, the renewal that has gone by, then the rate end, then the later renewal
+    await user.click(within(alerts).getByRole('button', { name: 'Next alert' }));
+    await user.click(within(alerts).getByRole('button', { name: 'Next alert' }));
+    expect(
+      within(alerts).getByRole('region', { name: 'Mortgage rate ends on Tue 20 Oct' })
+    ).toBeInTheDocument();
+    await user.click(within(alerts).getByRole('button', { name: 'Next alert' }));
+    expect(
+      within(alerts).getByRole('region', { name: 'Car insurance renews in 28 days' })
+    ).toBeInTheDocument();
+  });
+
+  it('puts it away for three days with Later, and clears with ×, as its reminder does', async () => {
+    const { user, api } = renderDashboard(mortgageBudget());
+
+    const alerts = await screen.findByRole('region', { name: 'Alerts' });
+    await user.click(within(alerts).getByRole('button', { name: 'Next alert' }));
+    await user.click(within(alerts).getByRole('button', { name: 'Next alert' }));
+    await user.click(within(alerts).getByRole('button', { name: 'Later' }));
+
+    expect(api.callsTo('UpdateReminders')).toEqual([
+      {
+        input: {
+          budgetId: 'budget-1',
+          keys: ['rateends:mortgage:2027-01-01'],
+          action: 'LATER',
+          until: '2026-10-11'
+        }
+      }
+    ]);
+    expect(within(alerts).queryByText(/Mortgage rate ends/)).not.toBeInTheDocument();
+  });
+
+  it('clears it with ×, sharing its reminder’s key', async () => {
+    const { user, api } = renderDashboard(mortgageBudget());
+
+    const alerts = await screen.findByRole('region', { name: 'Alerts' });
+    await user.click(within(alerts).getByRole('button', { name: 'Next alert' }));
+    await user.click(within(alerts).getByRole('button', { name: 'Next alert' }));
+    await user.click(
+      within(alerts).getByRole('button', { name: 'Clear: Mortgage rate ends on Fri 1 Jan' })
+    );
+
+    expect(api.callsTo('UpdateReminders')).toEqual([
+      { input: { budgetId: 'budget-1', keys: ['rateends:mortgage:2027-01-01'], action: 'CLEAR' } }
+    ]);
+  });
+
+  it('stays away until it is inside its reminder', async () => {
+    // 91 days away, a day outside 3 months
+    renderDashboard(mortgageBudget({ rateEndsOn: '2027-01-07' }));
+    await screen.findByRole('region', { name: 'Alerts' });
+    expect(screen.queryByText(/Mortgage rate/)).not.toBeInTheDocument();
+  });
+
+  it('keeps an ended rate as an alert until the new one is set', async () => {
+    const { user, api } = renderDashboard(mortgageBudget({ rateEndsOn: '2026-10-01' }));
+
+    const alerts = await screen.findByRole('region', { name: 'Alerts' });
+    await user.click(within(alerts).getByRole('button', { name: 'Next alert' }));
+    await user.click(within(alerts).getByRole('button', { name: 'Next alert' }));
+    const ended = within(alerts).getByRole('region', { name: 'Mortgage rate has ended' });
+    await user.click(within(ended).getByRole('button', { name: 'Later' }));
+
+    expect(api.callsTo('UpdateReminders')[0].input).toMatchObject({
+      keys: ['rateended:mortgage:2026-10-01']
+    });
+  });
+
   it('asks again once the day it was put away until comes', async () => {
     vi.setSystemTime(new Date('2026-10-11T09:30:00'));
     renderDashboard(putAway(renewedBudget(), '2026-10-11'));

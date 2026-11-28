@@ -436,6 +436,73 @@ describe('debts on desktop', () => {
   });
 });
 
+// A mortgage with its fixed rate ending on Monday 1 March 2027
+const mortgage = () =>
+  debt({
+    id: 'mortgage',
+    name: 'Mortgage',
+    amount: 750,
+    firstPaymentDate: '2025-10-28',
+    figures: { balance: 148200, startingBalance: 165000, apr: 4.29 },
+    fields: {
+      debt: {
+        balance: 148200,
+        startingBalance: 165000,
+        apr: 4.29,
+        balanceUpdatedAt: apiDate('2026-09-15'),
+        rateEndsOn: apiDate('2027-03-01')
+      }
+    }
+  });
+
+describe('a debt’s rate end on desktop', () => {
+  it('says when the rate ends under the APR, and in the debt’s view', async () => {
+    const { user } = renderDebts('/debts', [card(), mortgage()]);
+
+    const table = await screen.findByRole('table', { name: 'Debts' });
+    const rows = within(table).getAllByRole('row').slice(1);
+    // With the second decimal the rate has, and only on the debt that has one
+    expect(rows[0]).toHaveTextContent('24.9%£150');
+    expect(rows[1]).toHaveTextContent('4.29%until 1 Mar 2027');
+    expect(rows[0]).not.toHaveTextContent('until');
+
+    await user.click(within(table).getByRole('button', { name: 'Mortgage' }));
+    const view = await screen.findByRole('dialog', { name: 'Mortgage' });
+    expect(view).toHaveTextContent('Fixed rate ends Mon 1 Mar 2027');
+  });
+
+  it('leaves the line out of a debt’s view with no rate end', async () => {
+    const { user } = renderDebts();
+
+    await user.click(
+      within(await screen.findByRole('table', { name: 'Debts' })).getByRole('button', {
+        name: 'Credit card'
+      })
+    );
+
+    expect(await screen.findByRole('dialog', { name: 'Credit card' })).not.toHaveTextContent(
+      'rate ends'
+    );
+  });
+});
+
+describe('a debt’s rate end on mobile', () => {
+  beforeEach(() => setViewportWidth(390));
+
+  it('says when the rate ends after the APR, and in the debt’s view', async () => {
+    const { user } = renderDebts('/debts', [card(), mortgage()]);
+
+    const list = await screen.findByRole('region', { name: 'Your debts · 2' });
+    const row = within(list).getByRole('button', { name: /^Mortgage/ });
+    expect(row).toHaveTextContent('4.29% until 1 Mar 2027 · £750 on the 28th');
+
+    await user.click(row);
+    expect(await screen.findByRole('dialog', { name: 'Mortgage' })).toHaveTextContent(
+      'Fixed rate ends Mon 1 Mar 2027'
+    );
+  });
+});
+
 describe('debts on mobile', () => {
   beforeEach(() => setViewportWidth(390));
 

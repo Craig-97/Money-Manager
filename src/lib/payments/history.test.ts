@@ -31,7 +31,8 @@ const card: RecurringPayment = {
     balanceUpdatedAt: null,
     paidOffThisCycle: 0,
     accrued: 0,
-    accruedTo: null
+    accruedTo: null,
+    rateEndsOn: null
   },
   account: null,
   paysInto: null,

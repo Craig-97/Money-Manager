@@ -13,6 +13,7 @@ import {
   simulatePayoff,
   startedAt
 } from './debts';
+import { aprText } from './labels';
 
 const debt = (
   id: string,
@@ -54,7 +55,8 @@ const debt = (
     balanceUpdatedAt: null,
     paidOffThisCycle: 0,
     accrued: 0,
-    accruedTo: null
+    accruedTo: null,
+    rateEndsOn: null
   },
   account: null,
   paysInto: null,
@@ -214,5 +216,15 @@ describe('extraPerPayment', () => {
   it("spreads a month's extra over each payment", () => {
     expect(extraPerPayment({ frequency: 'MONTHLY' }, 50)).toBe(50);
     expect(extraPerPayment({ frequency: 'WEEKLY' }, 52)).toBe(12);
+  });
+});
+
+describe('aprText', () => {
+  it('shows one decimal, or two when the rate has them', () => {
+    expect(aprText(24.9)).toBe('24.9%');
+    expect(aprText(0)).toBe('0.0%');
+    expect(aprText(6)).toBe('6.0%');
+    expect(aprText(4.29)).toBe('4.29%');
+    expect(aprText(0.99)).toBe('0.99%');
   });
 });
