@@ -18,7 +18,7 @@ interface PaymentSummaryProps {
   due: DueInfo;
   // Its name on top, where the title above is about something else, e.g. Change amount
   named?: boolean;
-  // A tag under the details, e.g. when it renews or ends
+  // A tag in the top right corner, e.g. when it renews or ends
   tag?: ReactNode;
   // More under it, across the card, e.g. its dates before payday
   children?: ReactNode;
@@ -64,8 +64,8 @@ export const PaymentSummary = ({
         {due.moved ? (
           <p className="mt-0.5 text-xs font-bold text-accent-text">{due.moved.label}</p>
         ) : null}
-        {tag ? <div className="mt-2 flex">{tag}</div> : null}
       </div>
+      {tag ? <div className="shrink-0 self-start">{tag}</div> : null}
       {children}
     </div>
   );
