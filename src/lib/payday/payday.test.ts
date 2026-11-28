@@ -1,0 +1,269 @@
+import { describe, expect, it } from 'vitest';
+import { PaydayConfig, toIsoDate } from '../dates';
+import {
+  BankHolidays,
+  countPaydays,
+  getNextPaydayDates,
+  getNextPaydays,
+  getPayCycle
+} from './payday';
+import { paidText } from './text';
+import { day } from '~/test/dates';
+
+const NO_HOLIDAYS = new Set<string>();
+
+const cycle = (
+  config: PaydayConfig,
+  { today, holidays = NO_HOLIDAYS }: { today: string; holidays?: BankHolidays }
+) => {
+  const { start, end, isPayday } = getPayCycle(config, { holidays, today: day(today) });
+  return { start: toIsoDate(start), end: toIsoDate(end), isPayday };
+};
+
+describe('getPayCycle', () => {
+  it('runs from the last payday to the next for last-Friday pay', () => {
+    expect(
+      cycle(
+        { frequency: 'MONTHLY', type: 'LAST_WEEKDAY', weekday: 'FRIDAY' },
+        { today: '2026-10-02' }
+      )
+    ).toEqual({
+      start: '2026-09-25',
+      end: '2026-10-30',
+      isPayday: false
+    });
+  });
+
+  it('finds the last Thursday of the month', () => {
+    // Last Thursdays: 24 Sep, 29 Oct (the 31st is a Saturday), 26 Nov 2026
+    const config: PaydayConfig = {
+      frequency: 'MONTHLY',
+      type: 'LAST_WEEKDAY',
+      weekday: 'THURSDAY'
+    };
+    expect(cycle(config, { today: '2026-10-02' })).toEqual({
+      start: '2026-09-24',
+      end: '2026-10-29',
+      isPayday: false
+    });
+    expect(cycle(config, { today: '2026-10-29' })).toMatchObject({
+      start: '2026-10-29',
+      isPayday: true
+    });
+    expect(cycle(config, { today: '2026-10-30' }).end).toBe('2026-11-26');
+  });
+
+  it('uses the last day itself when it is the chosen weekday', () => {
+    // 30 Apr 2026 is a Thursday
+    const config: PaydayConfig = {
+      frequency: 'MONTHLY',
+      type: 'LAST_WEEKDAY',
+      weekday: 'THURSDAY'
+    };
+    expect(cycle(config, { today: '2026-04-10' }).end).toBe('2026-04-30');
+  });
+
+  it('moves a last working day off the weekend', () => {
+    // 31 Oct 2026 is a Saturday
+    expect(
+      cycle({ frequency: 'MONTHLY', type: 'LAST_DAY' }, { today: '2026-10-02' })
+    ).toMatchObject({
+      start: '2026-09-30',
+      end: '2026-10-30'
+    });
+  });
+
+  it('moves payday off a bank holiday to the working day before', () => {
+    const holidays = new Set(['2026-12-25']);
+    expect(
+      cycle(
+        { frequency: 'MONTHLY', type: 'LAST_WEEKDAY', weekday: 'FRIDAY' },
+        { today: '2026-12-01', holidays: holidays }
+      ).end
+    ).toBe('2026-12-24');
+  });
+
+  it('uses the end of shorter months for a set day', () => {
+    // 28 Feb 2027 is a Sunday, so pay comes on Friday 26th
+    expect(
+      cycle({ frequency: 'MONTHLY', type: 'SET_DAY', dayOfMonth: 31 }, { today: '2027-02-10' }).end
+    ).toBe('2027-02-26');
+  });
+
+  it('knows when today is payday, with the cycle running to the next one', () => {
+    expect(
+      cycle(
+        { frequency: 'MONTHLY', type: 'LAST_WEEKDAY', weekday: 'FRIDAY' },
+        { today: '2026-10-30' }
+      )
+    ).toEqual({
+      start: '2026-10-30',
+      end: '2026-11-27',
+      isPayday: true
+    });
+  });
+
+  it('counts weekly pay from the first pay date on the chosen weekday', () => {
+    const weekly: PaydayConfig = {
+      frequency: 'WEEKLY',
+      type: 'SET_WEEKDAY',
+      weekday: 'FRIDAY',
+      firstPayDate: '2026-01-01'
+    };
+    expect(cycle(weekly, { today: '2026-10-07' })).toMatchObject({
+      start: '2026-10-02',
+      end: '2026-10-09'
+    });
+  });
+
+  it('counts fortnightly pay from the first pay date', () => {
+    const fortnightly: PaydayConfig = {
+      frequency: 'FORTNIGHTLY',
+      type: 'SET_WEEKDAY',
+      weekday: 'FRIDAY',
+      firstPayDate: '2026-01-02'
+    };
+    expect(cycle(fortnightly, { today: '2026-10-02' })).toMatchObject({
+      start: '2026-09-25',
+      end: '2026-10-09'
+    });
+  });
+
+  it('counts quarterly pay from the month of the first pay date', () => {
+    const quarterly: PaydayConfig = {
+      frequency: 'QUARTERLY',
+      type: 'LAST_DAY',
+      firstPayDate: '2026-03-31'
+    };
+    expect(cycle(quarterly, { today: '2026-10-02' })).toMatchObject({
+      start: '2026-09-30',
+      end: '2026-12-31'
+    });
+  });
+
+  it('reads a first pay date in the API format too', () => {
+    const weekly: PaydayConfig = {
+      frequency: 'WEEKLY',
+      type: 'SET_WEEKDAY',
+      weekday: 'FRIDAY',
+      firstPayDate: String(Date.UTC(2026, 0, 2))
+    };
+    expect(cycle(weekly, { today: '2026-10-07' }).start).toBe('2026-10-02');
+  });
+});
+
+describe('countPaydays', () => {
+  const monthly = { frequency: 'MONTHLY', type: 'LAST_DAY' } as const;
+  const count = (
+    { after, upTo }: { after: string; upTo: string },
+    config: PaydayConfig = monthly
+  ) => countPaydays(config, { holidays: NO_HOLIDAYS, after: day(after), upTo: day(upTo) });
+
+  it('counts the paydays after a date, up to and including another', () => {
+    expect(count({ after: '2026-07-31', upTo: '2026-09-30' })).toBe(2);
+    expect(count({ after: '2026-09-30', upTo: '2026-09-30' })).toBe(0);
+  });
+
+  it('counts from part way through a cycle, as setup starts one', () => {
+    expect(count({ after: '2026-07-12', upTo: '2026-09-30' })).toBe(3);
+  });
+
+  it('counts weekly pay across a long gap', () => {
+    const weekly: PaydayConfig = {
+      frequency: 'WEEKLY',
+      type: 'SET_WEEKDAY',
+      weekday: 'FRIDAY',
+      firstPayDate: '2026-01-02'
+    };
+    expect(count({ after: '2026-09-04', upTo: '2026-10-02' }, weekly)).toBe(4);
+  });
+});
+
+describe('getNextPaydays', () => {
+  it('lists the next paydays from a date', () => {
+    const next = getNextPaydays(
+      { frequency: 'MONTHLY', type: 'LAST_DAY' },
+      { holidays: NO_HOLIDAYS, from: day('2026-10-02'), count: 2 }
+    );
+    expect(next.map(toIsoDate)).toEqual(['2026-10-30', '2026-11-30']);
+  });
+});
+
+describe('moving a single payday', () => {
+  // The last Friday of December 2026 is Christmas Day, so pay arrives on Thursday the 24th
+  const christmas = new Set(['2026-12-25']);
+  const lastFriday: PaydayConfig = {
+    frequency: 'MONTHLY',
+    type: 'LAST_WEEKDAY',
+    weekday: 'FRIDAY',
+    overrides: [{ for: '2026-12-24', date: '2026-12-17' }]
+  };
+
+  it('brings the next payday forward, and remembers the usual date', () => {
+    const result = getPayCycle(lastFriday, { holidays: christmas, today: day('2026-12-04') });
+    expect(toIsoDate(result.end)).toBe('2026-12-17');
+    expect(toIsoDate(result.endUsual)).toBe('2026-12-24');
+  });
+
+  it('leaves the usual date alone when nothing is moved', () => {
+    const result = getPayCycle(
+      { ...lastFriday, overrides: [] },
+      { holidays: christmas, today: day('2026-12-04') }
+    );
+    expect(toIsoDate(result.end)).toBe('2026-12-24');
+    expect(result.endUsual).toEqual(result.end);
+  });
+
+  it('only moves the payday it was set for', () => {
+    const next = getNextPaydays(lastFriday, {
+      holidays: christmas,
+      from: day('2026-12-04'),
+      count: 3
+    });
+    expect(next.map(toIsoDate)).toEqual(['2026-12-17', '2027-01-29', '2027-02-26']);
+  });
+
+  it('marks which paydays were moved', () => {
+    const next = getNextPaydayDates(lastFriday, {
+      holidays: christmas,
+      from: day('2026-12-04'),
+      count: 2
+    });
+    expect(next.map(item => item.usual && toIsoDate(item.usual))).toEqual(['2026-12-24', null]);
+  });
+
+  it('ignores a move set for a date the rule no longer gives', () => {
+    const stale = { ...lastFriday, overrides: [{ for: '2026-12-31', date: '2026-12-17' }] };
+    expect(
+      toIsoDate(getPayCycle(stale, { holidays: christmas, today: day('2026-12-04') }).end)
+    ).toBe('2026-12-24');
+  });
+
+  it('starts a new cycle once the moved payday arrives', () => {
+    const result = getPayCycle(lastFriday, { holidays: christmas, today: day('2026-12-17') });
+    expect(toIsoDate(result.start)).toBe('2026-12-17');
+    expect(result.isPayday).toBe(true);
+    expect(toIsoDate(result.end)).toBe('2027-01-29');
+  });
+
+  it('can move a payday later too', () => {
+    const later = { ...lastFriday, overrides: [{ for: '2026-12-24', date: '2026-12-28' }] };
+    const result = getPayCycle(later, { holidays: christmas, today: day('2026-12-20') });
+    expect(toIsoDate(result.end)).toBe('2026-12-28');
+    expect(toIsoDate(result.endUsual)).toBe('2026-12-24');
+  });
+});
+
+describe('paidText', () => {
+  it('says how often and on which day', () => {
+    const payday: PaydayConfig = { frequency: 'MONTHLY', type: 'SET_DAY', dayOfMonth: 15 };
+    expect(paidText(payday)).toBe('Paid monthly · the 15th');
+    expect(paidText({ ...payday, type: 'LAST_WEEKDAY', weekday: 'FRIDAY' })).toBe(
+      'Paid monthly · last Friday'
+    );
+    expect(paidText({ frequency: 'WEEKLY', type: 'SET_WEEKDAY', weekday: 'THURSDAY' })).toBe(
+      'Paid weekly · Thursdays'
+    );
+    expect(paidText(null)).toBe('Paid monthly · last working day');
+  });
+});

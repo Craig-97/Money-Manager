@@ -1,0 +1,7 @@
+# The signed-in user's budget. With no id the API returns their default budget, and fails with
+# BUDGET_NOT_LINKED until setup is finished.
+query Budget {
+  budget {
+    ...BudgetFields
+  }
+}

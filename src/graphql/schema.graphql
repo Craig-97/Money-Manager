@@ -1,0 +1,736 @@
+type SuccessResponse {
+  success: Boolean!
+}
+
+type DeleteResponse {
+  success: Boolean!
+  deletedCount: Int!
+  ids: [ID!]!
+}
+
+enum ThemePreference {
+  DARK
+  LIGHT
+  SYSTEM
+}
+
+type Query {
+  tokenFindUser: User
+  passwordResetTokenValid(token: String!): PasswordResetTokenCheck!
+  budget(id: ID): Budget
+  account(id: ID!): Account
+  recurringPayment(id: ID!): RecurringPayment
+}
+
+type User {
+  id: ID!
+  budget: ID
+  email: String!
+  firstName: String!
+  surname: String!
+  theme: ThemePreference
+  accent: String
+  tourSeen: Boolean!
+}
+
+input RegisterInput {
+  email: String!
+  password: String!
+  firstName: String!
+  surname: String!
+}
+
+input UserDetailsInput {
+  firstName: String!
+  surname: String!
+  email: String!
+}
+
+type UserResponse {
+  user: User
+  budget: ID
+  success: Boolean!
+}
+
+type AuthData {
+  user: User!
+  token: String!
+  tokenExpiration: Int!
+}
+
+type PasswordResetTokenCheck {
+  valid: Boolean!
+  email: String
+}
+
+type Mutation {
+  login(email: String!, password: String!): AuthData!
+  refreshSession: AuthData!
+  logout: SuccessResponse!
+  logoutEverywhere: SuccessResponse!
+  registerAndLogin(input: RegisterInput!): AuthData!
+  requestPasswordReset(email: String!): SuccessResponse!
+  resetPassword(token: String!, password: String!): AuthData!
+  updateCurrentUser(input: UserDetailsInput!): UserResponse!
+  changePassword(currentPassword: String!, newPassword: String!): UserResponse!
+  deleteCurrentUser: UserResponse!
+  updatePreferences(theme: ThemePreference, accent: String): UserResponse!
+  markTourSeen: UserResponse!
+  createBudget(input: CreateBudgetInput!): BudgetResponse!
+  updateBudget(id: ID!, input: UpdateBudgetInput!): BudgetResponse!
+  startPaydayCycle(input: StartPaydayCycleInput!): BudgetResponse!
+  markPaymentsPaid(input: MarkPaymentsPaidInput!): BudgetResponse!
+  markPaymentsUnpaid(input: MarkPaymentsUnpaidInput!): BudgetResponse!
+  skipRecurringPayments(input: SkipRecurringPaymentsInput!): BudgetResponse!
+  logDebtOverpayment(input: LogDebtOverpaymentInput!): BudgetResponse!
+  undoDebtOverpayment(input: UndoDebtOverpaymentInput!): BudgetResponse!
+  createAccount(input: CreateAccountInput!): AccountResponse!
+  updateAccount(id: ID!, input: UpdateAccountInput!): AccountResponse!
+  deleteAccount(id: ID!): AccountResponse!
+  updateAccountBalances(input: UpdateAccountBalancesInput!): BudgetResponse!
+  catchUpInterest(budgetId: ID!): BudgetResponse!
+  assignPaymentAccounts(input: AssignPaymentAccountsInput!): BudgetResponse!
+  createOneOffPayment(input: CreateOneOffPaymentInput!): OneOffPaymentResponse!
+  updateOneOffPayment(id: ID!, input: UpdateOneOffPaymentInput!): OneOffPaymentResponse!
+  batchDeleteOneOffPayments(ids: [ID!]!): DeleteResponse!
+  createRecurringPayment(input: CreateRecurringPaymentInput!): RecurringPaymentResponse!
+  updateRecurringPayment(id: ID!, input: UpdateRecurringPaymentInput!): RecurringPaymentResponse!
+  batchDeleteRecurringPayments(ids: [ID!]!): DeleteResponse!
+  createNote(input: CreateNoteInput!): NoteResponse!
+  updateNote(id: ID!, input: UpdateNoteInput!): NoteResponse!
+  deleteNote(id: ID!): DeleteResponse!
+  updatePayday(id: ID!, input: PaydayInput!): PaydayResponse!
+  setPaydayOverride(id: ID!, for: String!, date: String): PaydayResponse!
+  updateReminderSettings(input: UpdateReminderSettingsInput!): BudgetResponse!
+  updateReminders(input: UpdateRemindersInput!): ReminderStatesResponse!
+  updateCalendarFeed(input: UpdateCalendarFeedInput!): BudgetResponse!
+  resetCalendarFeed(budgetId: ID!): BudgetResponse!
+}
+
+enum LeftOverOutcome {
+  PAID
+  SKIPPED
+  DUE
+}
+
+type Budget {
+  id: ID!
+  user: User
+  bankBalance: Float!
+  accounts: [Account!]!
+  monthlyIncome: Float!
+  oneOffPayments: [OneOffPayment]
+  recurringPayments: [RecurringPayment]
+  notes: [Note]
+  payday: Payday
+  cycleStartedOn: String
+  nonWorkingDay: NonWorkingDay!
+  reminderSettings: ReminderSettings!
+  reminderStates: [ReminderState!]!
+  calendarFeed: CalendarFeed!
+}
+
+input BudgetAccountInput {
+  key: String!
+  name: String!
+  kind: AccountKind
+  balance: Float!
+  counts: Boolean
+  interest: AccountInterestInput
+  purpose: String
+}
+
+input CreateBudgetInput {
+  bankBalance: Float!
+  paidIntoName: String
+  accounts: [BudgetAccountInput!]
+  monthlyIncome: Float!
+  oneOffPayments: [OneOffPaymentInput!]
+  recurringPayments: [RecurringPaymentInput!]
+  payday: PaydayInput
+}
+
+input UpdateBudgetInput {
+  monthlyIncome: Float
+  nonWorkingDay: NonWorkingDay
+}
+
+input MarkPaymentsPaidInput {
+  budgetId: ID!
+  recurringPaymentIds: [ID!]!
+  oneOffPaymentIds: [ID!]!
+}
+
+input MarkPaymentsUnpaidInput {
+  budgetId: ID!
+  recurringPaymentIds: [ID!]!
+  oneOffPaymentIds: [ID!]
+}
+
+input UndoDebtOverpaymentInput {
+  budgetId: ID!
+  recordId: ID!
+}
+
+input SkipRecurringPaymentsInput {
+  budgetId: ID!
+  recurringPaymentIds: [ID!]!
+  until: String
+}
+
+input LogDebtOverpaymentInput {
+  budgetId: ID!
+  recurringPaymentId: ID!
+  amount: Float!
+}
+
+input LeftOverPaymentInput {
+  recurringPaymentId: ID!
+  outcome: LeftOverOutcome!
+}
+
+input AlreadyPaidInput {
+  recurringPaymentIds: [ID!]!
+  oneOffPaymentIds: [ID!]!
+}
+
+input StartPaydayCycleInput {
+  budgetId: ID!
+  payday: String!
+  paidIntoBalance: Float!
+  accountBalances: [AccountBalanceInput!]
+  leftOver: [LeftOverPaymentInput!]!
+  alreadyPaid: AlreadyPaidInput
+}
+
+type BudgetResponse {
+  budget: Budget
+  success: Boolean!
+}
+
+enum AccountKind {
+  SPENDING
+  SAVINGS
+}
+
+enum AccountChangeKind {
+  OPENING
+  BALANCE_SET
+  INTEREST
+  PAYMENT
+  MOVE_IN
+  MOVE_OUT
+}
+
+enum InterestFrequency {
+  MONTHLY
+  QUARTERLY
+  YEARLY
+  MATURITY
+}
+
+type AccountInterest {
+  rate: Float!
+  frequency: InterestFrequency
+  day: Int
+  nextDate: String
+  accrued: Float!
+  accruedTo: String
+  added: [InterestAdded!]!
+}
+
+type InterestAdded {
+  date: String!
+  amount: Float!
+  balanceAfter: Float!
+}
+
+input AccountInterestInput {
+  rate: Float!
+  frequency: InterestFrequency
+  day: Int
+  nextDate: String
+}
+
+type Account {
+  id: ID!
+  name: String!
+  kind: AccountKind!
+  balance: Float!
+  counts: Boolean!
+  paidInto: Boolean!
+  interest: AccountInterest
+  purpose: String
+  iconUrl: String
+  balanceUpdatedAt: String!
+  history(limit: Int, year: Int): [AccountChange!]!
+  historyYears: [Int!]!
+}
+
+type AccountChange {
+  id: ID!
+  kind: AccountChangeKind!
+  date: String!
+  change: Float!
+  balanceAfter: Float!
+  name: String
+}
+
+input CreateAccountInput {
+  budgetId: ID!
+  name: String!
+  kind: AccountKind
+  balance: Float!
+  counts: Boolean
+  paidInto: Boolean
+  interest: AccountInterestInput
+  purpose: String
+  iconUrl: String
+}
+
+input UpdateAccountInput {
+  name: String
+  kind: AccountKind
+  balance: Float
+  counts: Boolean
+  paidInto: Boolean
+  interest: AccountInterestInput
+  purpose: String
+  iconUrl: String
+}
+
+input AccountBalanceInput {
+  accountId: ID!
+  balance: Float!
+}
+
+input UpdateAccountBalancesInput {
+  budgetId: ID!
+  balances: [AccountBalanceInput!]!
+}
+
+input PaymentAccountInput {
+  recurringPaymentId: ID!
+  accountId: ID
+}
+
+input AssignPaymentAccountsInput {
+  budgetId: ID!
+  payments: [PaymentAccountInput!]!
+}
+
+type AccountResponse {
+  account: Account
+  budget: Budget
+  success: Boolean!
+}
+
+type OneOffPayment {
+  id: ID!
+  budget: ID!
+  name: String!
+  amount: Float!
+  dueDate: String!
+  type: PaymentType!
+  category: PaymentCategory!
+  paidAt: String
+  dueReminder: ReminderTiming!
+  account: ID
+  iconUrl: String
+}
+
+input CreateOneOffPaymentInput {
+  budgetId: ID!
+  name: String!
+  amount: Float!
+  dueDate: String!
+  type: PaymentType!
+  category: PaymentCategory!
+  dueReminder: ReminderTimingInput
+  account: ID
+  iconUrl: String
+}
+
+input OneOffPaymentInput {
+  name: String!
+  amount: Float!
+  dueDate: String!
+  type: PaymentType!
+  category: PaymentCategory!
+  dueReminder: ReminderTimingInput
+  account: ID
+}
+
+input UpdateOneOffPaymentInput {
+  name: String
+  amount: Float
+  dueDate: String
+  type: PaymentType
+  category: PaymentCategory
+  dueReminder: ReminderTimingInput
+  account: ID
+  iconUrl: String
+}
+
+type OneOffPaymentResponse {
+  oneOffPayment: OneOffPayment
+  success: Boolean!
+}
+
+enum PaymentCategory {
+  BILLS
+  CHARITY
+  EATING_OUT
+  ENTERTAINMENT
+  EXPENSES
+  FAMILY
+  FINANCES
+  GENERAL
+  GIFTS
+  GROCERIES
+  HOLIDAYS
+  INCOME
+  PERSONAL_CARE
+  SAVINGS
+  SHOPPING
+  SUBSCRIPTIONS
+  TRANSFERS
+  TRANSPORT
+}
+
+enum PaymentFrequency {
+  WEEKLY
+  BIWEEKLY
+  MONTHLY
+  QUARTERLY
+  BIANNUALLY
+  ANNUALLY
+}
+
+enum PaymentType {
+  INCOME
+  EXPENSE
+}
+
+enum PaymentRecordKind {
+  PAID
+  SKIPPED
+  OVERPAYMENT
+  BALANCE_SET
+}
+
+enum NonWorkingDay {
+  NEXT
+  BEFORE
+  ON_DAY
+}
+
+type RecurringPayment {
+  id: ID!
+  budget: ID!
+  name: String!
+  amount: Float!
+  category: PaymentCategory!
+  frequency: PaymentFrequency!
+  type: PaymentType!
+  firstPaymentDate: String!
+  lastPaymentDate: String
+  nextDueDate: String
+  thisCycle: [PaymentRecord!]!
+  history(limit: Int, year: Int): [PaymentRecord!]!
+  historyYears: [Int!]!
+  renewalDate: String
+  dueReminder: ReminderTiming!
+  renewalReminder: ReminderTiming!
+  debt: Debt
+  account: ID
+  paysInto: ID
+  nonWorkingDay: NonWorkingDay
+  iconUrl: String
+}
+
+type Debt {
+  balance: Float!
+  startingBalance: Float
+  apr: Float!
+  balanceUpdatedAt: String
+  paidOffThisCycle: Float!
+  accrued: Float!
+  accruedTo: String
+  rateEndsOn: String
+}
+
+input DebtInput {
+  balance: Float!
+  startingBalance: Float
+  apr: Float!
+  rateEndsOn: String
+}
+
+type PaymentRecord {
+  id: ID!
+  kind: PaymentRecordKind!
+  dates: [String!]!
+  balanceChange: Float!
+  account: ID
+  debt: PaymentRecordDebt
+  transfer: PaymentRecordTransfer
+  open: Boolean!
+  createdAt: String!
+}
+
+type PaymentRecordTransfer {
+  account: ID!
+  amount: Float!
+}
+
+type PaymentRecordDebt {
+  interest: Float!
+  reduction: Float!
+  balanceAfter: Float!
+}
+
+input CreateRecurringPaymentInput {
+  budgetId: ID!
+  name: String!
+  amount: Float!
+  category: PaymentCategory!
+  frequency: PaymentFrequency!
+  type: PaymentType!
+  firstPaymentDate: String!
+  lastPaymentDate: String
+  renewalDate: String
+  dueReminder: ReminderTimingInput
+  renewalReminder: ReminderTimingInput
+  debt: DebtInput
+  account: ID
+  paysInto: ID
+  nonWorkingDay: NonWorkingDay
+  iconUrl: String
+}
+
+input RecurringPaymentInput {
+  name: String!
+  amount: Float!
+  category: PaymentCategory!
+  frequency: PaymentFrequency!
+  type: PaymentType!
+  firstPaymentDate: String!
+  lastPaymentDate: String
+  renewalDate: String
+  dueReminder: ReminderTimingInput
+  renewalReminder: ReminderTimingInput
+  debt: DebtInput
+  account: ID
+  paysInto: ID
+  nonWorkingDay: NonWorkingDay
+}
+
+input UpdateRecurringPaymentInput {
+  name: String
+  amount: Float
+  category: PaymentCategory
+  frequency: PaymentFrequency
+  type: PaymentType
+  firstPaymentDate: String
+  lastPaymentDate: String
+  renewalDate: String
+  dueReminder: ReminderTimingInput
+  renewalReminder: ReminderTimingInput
+  debt: DebtInput
+  account: ID
+  paysInto: ID
+  nonWorkingDay: NonWorkingDay
+  iconUrl: String
+}
+
+type RecurringPaymentResponse {
+  recurringPayment: RecurringPayment
+  success: Boolean!
+}
+
+enum NoteColor {
+  BLUE
+  GREEN
+  AMBER
+  ROSE
+  VIOLET
+}
+
+enum NoteRepeat {
+  NONE
+  MONTHLY
+  QUARTERLY
+  BIANNUALLY
+  YEARLY
+  WITH_PAYMENT
+}
+
+type Note {
+  id: ID!
+  budget: ID!
+  body: String!
+  color: NoteColor!
+  date: String
+  remind: [Int!]!
+  repeat: NoteRepeat!
+  payment: ID
+  createdAt: String!
+  updatedAt: String!
+}
+
+input CreateNoteInput {
+  budgetId: ID!
+  body: String!
+  color: NoteColor
+  date: String
+  remind: [Int!]
+  repeat: NoteRepeat
+  payment: ID
+}
+
+input UpdateNoteInput {
+  body: String
+  color: NoteColor
+  date: String
+  remind: [Int!]
+  repeat: NoteRepeat
+  payment: ID
+}
+
+type NoteResponse {
+  note: Note
+  success: Boolean!
+}
+
+enum PayFrequency {
+  WEEKLY
+  FORTNIGHTLY
+  FOUR_WEEKLY
+  MONTHLY
+  QUARTERLY
+  BIANNUAL
+  ANNUAL
+}
+
+enum PaydayType {
+  LAST_DAY
+  LAST_WEEKDAY
+  SET_DAY
+  SET_WEEKDAY
+}
+
+enum Weekday {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+}
+
+enum BankHolidayRegion {
+  ENGLAND_AND_WALES
+  SCOTLAND
+  NORTHERN_IRELAND
+}
+
+type PaydayOverride {
+  for: String!
+  date: String!
+}
+
+type Payday {
+  id: ID!
+  budget: ID!
+  frequency: PayFrequency!
+  type: PaydayType!
+  dayOfMonth: Int
+  weekday: Weekday
+  firstPayDate: String
+  bankHolidayRegion: BankHolidayRegion
+  overrides: [PaydayOverride!]!
+}
+
+input PaydayInput {
+  frequency: PayFrequency!
+  type: PaydayType!
+  dayOfMonth: Int
+  weekday: Weekday
+  firstPayDate: String
+  bankHolidayRegion: BankHolidayRegion
+}
+
+type PaydayResponse {
+  payday: Payday
+  success: Boolean!
+}
+
+enum ReminderAction {
+  READ
+  CLEAR
+  LATER
+  RESTORE
+}
+
+type ReminderTiming {
+  off: Boolean!
+  days: Int
+}
+
+input ReminderTimingInput {
+  off: Boolean!
+  days: Int
+}
+
+type ReminderSettings {
+  paymentDays: Int!
+  renewalDays: Int!
+  payday: Boolean!
+}
+
+type ReminderState {
+  key: String!
+  read: Boolean!
+  cleared: Boolean!
+  snoozedUntil: String
+}
+
+type CalendarFeed {
+  token: String
+  payments: Boolean!
+  paydays: Boolean!
+  renewals: Boolean!
+  notes: Boolean!
+  debtFree: Boolean!
+  showAmounts: Boolean!
+}
+
+input UpdateReminderSettingsInput {
+  budgetId: ID!
+  paymentDays: Int
+  renewalDays: Int
+  payday: Boolean
+}
+
+input UpdateRemindersInput {
+  budgetId: ID!
+  keys: [String!]!
+  action: ReminderAction!
+  until: String
+}
+
+input UpdateCalendarFeedInput {
+  budgetId: ID!
+  enabled: Boolean
+  payments: Boolean
+  paydays: Boolean
+  renewals: Boolean
+  notes: Boolean
+  debtFree: Boolean
+  showAmounts: Boolean
+}
+
+type ReminderStatesResponse {
+  states: [ReminderState!]!
+  success: Boolean!
+}

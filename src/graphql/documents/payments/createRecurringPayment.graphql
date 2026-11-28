@@ -1,0 +1,7 @@
+mutation CreateRecurringPayment($input: CreateRecurringPaymentInput!) {
+  createRecurringPayment(input: $input) {
+    recurringPayment {
+      ...RecurringPaymentFields
+    }
+  }
+}

@@ -1,0 +1,13 @@
+fragment PaydayFields on Payday {
+  id
+  frequency
+  type
+  dayOfMonth
+  weekday
+  firstPayDate
+  bankHolidayRegion
+  overrides {
+    for
+    date
+  }
+}

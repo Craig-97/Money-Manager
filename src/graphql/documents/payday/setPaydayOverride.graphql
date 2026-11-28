@@ -1,0 +1,7 @@
+mutation SetPaydayOverride($id: ID!, $for: String!, $date: String) {
+  setPaydayOverride(id: $id, for: $for, date: $date) {
+    payday {
+      ...PaydayFields
+    }
+  }
+}

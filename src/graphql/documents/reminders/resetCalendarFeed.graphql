@@ -1,0 +1,10 @@
+mutation ResetCalendarFeed($budgetId: ID!) {
+  resetCalendarFeed(budgetId: $budgetId) {
+    budget {
+      id
+      calendarFeed {
+        ...CalendarFeedFields
+      }
+    }
+  }
+}

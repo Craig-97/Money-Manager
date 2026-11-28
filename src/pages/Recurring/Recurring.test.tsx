@@ -1,0 +1,628 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { screen, within } from '@testing-library/react';
+import { fakeRecurring } from '~/test/builders';
+import { apiDate } from '~/test/dates';
+import { createFakeApi, FakeBudget, fakeRecord, freshBudget } from '~/test/fakeApi';
+import { editFromRow } from '~/test/paymentRow';
+import { renderApp } from '~/test/renderApp';
+import { resetViewport, setViewportWidth } from '~/test/viewport';
+
+// Friday 2 October 2026; payday is the last working day, Friday 30 October. Only Date is faked.
+beforeEach(() => {
+  vi.useFakeTimers({ toFake: ['Date'] });
+  vi.setSystemTime(new Date('2026-10-02T09:00:00'));
+});
+afterEach(() => {
+  vi.useRealTimers();
+  resetViewport();
+});
+
+const budget = (): FakeBudget =>
+  freshBudget({
+    cycleStartedOn: apiDate('2026-09-30'),
+    oneOffPayments: [],
+    recurringPayments: [
+      fakeRecurring({ id: 'netflix', name: 'Netflix' }),
+      fakeRecurring({
+        id: 'home',
+        name: 'Home insurance',
+        amount: 21,
+        category: 'FINANCES',
+        firstPaymentDate: apiDate('2025-02-20'),
+        renewalDate: apiDate('2027-02-02'),
+        renewalReminder: { off: false, days: 30 }
+      }),
+      fakeRecurring({
+        id: 'car',
+        name: 'Car insurance',
+        amount: 612,
+        category: 'FINANCES',
+        frequency: 'ANNUALLY',
+        firstPaymentDate: apiDate('2023-10-24'),
+        renewalReminder: { off: false, days: 30 }
+      }),
+      // Its renewal went by on Monday and hasn't been moved on
+      fakeRecurring({
+        id: 'breakdown',
+        name: 'Breakdown cover',
+        amount: 7.5,
+        category: 'TRANSPORT',
+        firstPaymentDate: apiDate('2025-09-28'),
+        renewalDate: apiDate('2026-09-28'),
+        renewalReminder: { off: false, days: 30 }
+      }),
+      // Every Wednesday: 7, 14, 21 and 28 October fall before payday
+      fakeRecurring({
+        id: 'cleaner',
+        name: 'Cleaner',
+        amount: 50,
+        category: 'BILLS',
+        frequency: 'WEEKLY',
+        firstPaymentDate: apiDate('2026-01-07')
+      })
+    ]
+  });
+
+// An ISA top-up paid into a Cash ISA
+const withSavings = (): FakeBudget => {
+  const data = budget();
+  return {
+    ...data,
+    accounts: [
+      {
+        id: 'isa',
+        name: 'Cash ISA',
+        kind: 'SAVINGS',
+        balance: 8650,
+        counts: false,
+        interest: { rate: 4.5, frequency: null, day: null, nextDate: null },
+        purpose: null,
+        balanceUpdatedAt: apiDate('2026-09-30')
+      }
+    ],
+    recurringPayments: [
+      ...data.recurringPayments,
+      fakeRecurring({ id: 'top-up', name: 'ISA top-up', amount: 250, paysInto: 'isa' })
+    ]
+  };
+};
+
+// A top-up into a joint account that counts too, so the money stays in the bank balance
+const withJoint = (): FakeBudget => {
+  const data = budget();
+  return {
+    ...data,
+    accounts: [
+      {
+        id: 'joint',
+        name: 'Joint bills',
+        kind: 'SPENDING',
+        balance: 2105,
+        counts: true,
+        interest: null,
+        purpose: null,
+        balanceUpdatedAt: apiDate('2026-09-30')
+      }
+    ],
+    recurringPayments: [
+      ...data.recurringPayments,
+      fakeRecurring({
+        id: 'joint-top-up',
+        name: 'Joint bills top-up',
+        amount: 600,
+        category: 'BILLS',
+        firstPaymentDate: apiDate('2026-01-04'),
+        paysInto: 'joint'
+      })
+    ]
+  };
+};
+
+// A mortgage whose fixed rate ends on a given day
+const mortgage = (rateEndsOn: string) =>
+  fakeRecurring({
+    id: 'mortgage',
+    name: 'Mortgage',
+    amount: 750,
+    category: 'FINANCES',
+    firstPaymentDate: apiDate('2025-10-26'),
+    debt: {
+      balance: 148200,
+      startingBalance: 165000,
+      apr: 4.29,
+      balanceUpdatedAt: null,
+      rateEndsOn: apiDate(rateEndsOn)
+    }
+  });
+
+// Greensleeves stops after a last payment in March, the gym after one next week, and the mortgage's
+// fixed rate ends on a given day
+const withEnds = (rateEndsOn = '2027-03-01'): FakeBudget => {
+  const data = budget();
+  return {
+    ...data,
+    recurringPayments: [
+      ...data.recurringPayments,
+      fakeRecurring({
+        id: 'sleeves',
+        name: 'Greensleeves',
+        category: 'FAMILY',
+        lastPaymentDate: apiDate('2027-03-01')
+      }),
+      fakeRecurring({
+        id: 'gym',
+        name: 'Gym membership',
+        category: 'PERSONAL_CARE',
+        firstPaymentDate: apiDate('2025-10-09'),
+        lastPaymentDate: apiDate('2026-10-09')
+      }),
+      mortgage(rateEndsOn)
+    ]
+  };
+};
+
+const renderRecurring = (data = budget()) => renderApp({ route: '/recurring', budget: data });
+
+describe('recurring page', () => {
+  it('sums up the recurring payments', async () => {
+    renderRecurring();
+
+    const summary = await screen.findByRole('region', { name: 'Summary' });
+    // £20 + £21 + £7.50 a month, and £50 a week at its monthly average
+    expect(summary).toHaveTextContent('About £265.17 /mo');
+    expect(summary).toHaveTextContent('5 recurring payments · + £612.00/yr annual');
+    // Netflix today, the cleaner four times, home insurance, car insurance and breakdown cover
+    expect(summary).toHaveTextContent('£860.505 payments by Fri 30 Oct');
+    expect(summary).toHaveTextContent('Next: Car insurance, Sat 24 Oct');
+  });
+
+  it('lists renewals, with one that has gone by first', async () => {
+    renderRecurring();
+
+    const tile = await screen.findByRole('region', { name: 'Renewals coming up' });
+    expect(within(tile).getByText('Next 6 months')).toBeInTheDocument();
+    const rows = within(tile)
+      .getAllByRole('button', { name: /insurance|cover/ })
+      .map(row => row.textContent);
+    expect(rows).toEqual([
+      expect.stringContaining('Breakdown coverRenewed Mon 28 Sep · £7.50 a monthNeeds renewing'),
+      expect.stringContaining('Car insuranceSat 24 Oct · £612.00 a year22 days'),
+      expect.stringContaining('Home insuranceTue 2 Feb 2027 · £21.00 a month18 weeks')
+    ]);
+  });
+
+  it('shows the renewals in the table from the tile', async () => {
+    const { user } = renderRecurring();
+
+    await user.click(await screen.findByRole('button', { name: 'View in payments' }));
+
+    expect(screen.getByRole('radio', { name: /Renewals/ })).toBeChecked();
+    const table = screen.getByRole('table', { name: 'Recurring payments' });
+    expect(within(table).queryByRole('button', { name: 'Netflix' })).not.toBeInTheDocument();
+    // Under its column heading without "Renews", and in full under the name for narrower screens
+    expect(within(table).getAllByText('In 22 days')).not.toHaveLength(0);
+    expect(within(table).getAllByText('Renews in 22 days')).not.toHaveLength(0);
+    expect(within(table).getByText('3 payments · renewing')).toBeInTheDocument();
+  });
+
+  it('tags what ends in the table: a stop in amber, a rate end like a renewal', async () => {
+    renderRecurring(withEnds());
+
+    const table = await screen.findByRole('table', { name: 'Recurring payments' });
+    expect(within(table).getByRole('columnheader', { name: 'Renews or ends' })).toBeInTheDocument();
+    // In the column, and again under the name for narrower screens
+    expect(within(table).getAllByText('Ends 1 Mar 2027')).toHaveLength(2);
+    expect(within(table).getAllByText('Last one in 7 days')).toHaveLength(2);
+    expect(within(table).getAllByText('Rate ends 1 Mar 2027')).toHaveLength(2);
+    expect(within(table).getAllByText('Ends 1 Mar 2027')[0]).toHaveClass('text-warn');
+    expect(within(table).getAllByText('Last one in 7 days')[0]).toHaveClass('text-warn');
+    expect(within(table).getAllByText('Rate ends 1 Mar 2027')[0]).not.toHaveClass('text-warn');
+  });
+
+  it('shows a rate end coming up in the accent, and one gone by in red', async () => {
+    const { unmount } = renderRecurring(withEnds('2026-11-20'));
+    const table = await screen.findByRole('table', { name: 'Recurring payments' });
+    expect(within(table).getAllByText('Rate ends in 49 days')[0]).toHaveClass('text-accent-text');
+    unmount();
+
+    renderRecurring(withEnds('2026-09-20'));
+    const after = await screen.findByRole('table', { name: 'Recurring payments' });
+    expect(within(after).getAllByText('Rate ended')[0]).toHaveClass('text-expense');
+  });
+
+  it('lists rate ends in the Renewals tab and tile, but not payments that stop', async () => {
+    const { user } = renderRecurring(withEnds('2026-10-20'));
+
+    const tile = await screen.findByRole('region', { name: 'Renewals coming up' });
+    expect(await within(tile).findByRole('button', { name: /Mortgage/ })).toHaveTextContent(
+      'MortgageTue 20 Oct · £750.00 a monthRate ends in 18 days'
+    );
+    expect(within(tile).queryByRole('button', { name: /Greensleeves/ })).not.toBeInTheDocument();
+    expect(within(tile).queryByRole('button', { name: /Gym/ })).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('radio', { name: /Renewals/ }));
+
+    const table = screen.getByRole('table', { name: 'Recurring payments' });
+    const names = within(table)
+      .getAllByRole('row')
+      .slice(1)
+      .map(row => within(row).getAllByRole('button')[0].textContent);
+    // In the table's usual order, by next due date
+    expect(names).toEqual(['Home insurance', 'Car insurance', 'Mortgage', 'Breakdown cover']);
+  });
+
+  it('shows where each payment stands before payday, leaving renewals to their own tab', async () => {
+    const { user } = renderRecurring();
+
+    await user.click(await screen.findByRole('radio', { name: /Before payday/ }));
+
+    const table = screen.getByRole('table', { name: 'Recurring payments' });
+    expect(within(table).getByRole('columnheader', { name: 'Status' })).toBeInTheDocument();
+    expect(
+      within(table).queryByRole('columnheader', { name: 'Renews or ends' })
+    ).not.toBeInTheDocument();
+    expect(within(table).queryByText('Renews in 22 days')).not.toBeInTheDocument();
+    expect(within(table).getAllByText('1 of 5 paid')).not.toHaveLength(0);
+  });
+
+  it('finds payments by name or category', async () => {
+    const { user } = renderRecurring();
+
+    await user.type(await screen.findByRole('searchbox', { name: 'Search payments' }), 'insur');
+
+    const table = screen.getByRole('table', { name: 'Recurring payments' });
+    expect(within(table).getByRole('button', { name: 'Home insurance' })).toBeInTheDocument();
+    expect(within(table).getByRole('button', { name: 'Car insurance' })).toBeInTheDocument();
+    expect(within(table).queryByRole('button', { name: 'Netflix' })).not.toBeInTheDocument();
+
+    await user.type(screen.getByRole('searchbox', { name: 'Search payments' }), 'x');
+    expect(within(table).getByText('No payments match')).toBeInTheDocument();
+  });
+
+  it('sorts by amount from the sort menu', async () => {
+    const { user } = renderRecurring();
+
+    await user.click(await screen.findByRole('button', { name: 'Sort: Date ↑' }));
+    await user.click(await screen.findByRole('menuitemradio', { name: 'Amount' }));
+
+    // Each row's first button is its name
+    const names = within(screen.getByRole('table', { name: 'Recurring payments' }))
+      .getAllByRole('row')
+      .slice(1)
+      .map(row => within(row).getAllByRole('button')[0].textContent);
+    expect(names).toEqual([
+      'Car insurance',
+      'Cleaner',
+      'Home insurance',
+      'Netflix',
+      'Breakdown cover'
+    ]);
+    expect(screen.getByRole('button', { name: 'Sort: Amount ↓' })).toBeInTheDocument();
+  });
+
+  it('keeps the category legend the same height on its last, shorter page', async () => {
+    // A fifth category makes two pages of four beside the renewals
+    const data = budget();
+    data.recurringPayments.push(
+      fakeRecurring({ id: 'gym', name: 'Gym', amount: 34, category: 'ENTERTAINMENT' })
+    );
+    const { user } = renderRecurring(data);
+
+    const tile = await screen.findByRole('region', { name: 'By category' });
+    const rows = () => tile.querySelectorAll('ul > li');
+    expect(within(tile).getByText('1–4 of 5')).toBeInTheDocument();
+    expect(rows()).toHaveLength(4);
+
+    await user.click(within(tile).getByRole('button', { name: 'Next categories' }));
+
+    expect(within(tile).getByText('5–5 of 5')).toBeInTheDocument();
+    // One category, and room kept for three more
+    expect(within(tile).getAllByRole('listitem')).toHaveLength(1);
+    expect(rows()).toHaveLength(4);
+  });
+
+  it('switches the categories to a month, keeping yearly payments apart', async () => {
+    const { user } = renderRecurring();
+
+    const tile = await screen.findByRole('region', { name: 'By category' });
+    // Finances is the loan and the car insurance, a year of each
+    expect(tile).toHaveTextContent('£3,794.00 a year');
+    expect(tile).toHaveTextContent('Finances£864.00');
+
+    await user.click(within(tile).getByRole('radio', { name: 'Month' }));
+
+    expect(within(tile).getByRole('group', { name: 'Monthly spend by category' })).toBeVisible();
+    // The weekly cleaner counts at its average, and the car insurance shows apart as a yearly figure
+    expect(tile).toHaveTextContent('≈ £265.17 a month · + £612.00/yr annual');
+    expect(tile).toHaveTextContent('Bills£216.67');
+    expect(tile).toHaveTextContent('Finances£21.00');
+  });
+
+  it('says which savings account a payment goes into, in place of its category', async () => {
+    renderRecurring(withSavings());
+
+    const row = (await screen.findByRole('button', { name: 'ISA top-up' })).closest('[role=row]')!;
+    expect(row).toHaveTextContent('Into Cash ISA');
+    expect(row).not.toHaveTextContent('Subscription');
+  });
+
+  it('leaves money moved between accounts that count out of the totals, as the dashboard does', async () => {
+    const { user } = renderRecurring(withJoint());
+
+    const summary = await screen.findByRole('region', { name: 'Summary' });
+    // The same as without the top-up, which is still counted as a payment
+    expect(summary).toHaveTextContent('About £265.17 /mo');
+    expect(summary).toHaveTextContent('6 recurring payments · + £612.00/yr annual');
+    expect(summary).toHaveTextContent('£860.505 payments by Fri 30 Oct');
+    // Nor is it spending by category: Bills is just the cleaner, £50 a week
+    const categories = screen.getByRole('region', { name: 'By category' });
+    expect(categories).toHaveTextContent('£2,600.00');
+    expect(categories).not.toHaveTextContent('£9,800.00');
+
+    const row = (await screen.findByRole('button', { name: 'Joint bills top-up' })).closest(
+      '[role=row]'
+    ) as HTMLElement;
+    expect(row).toHaveTextContent('Into Joint bills');
+    const amount = within(row).getByText('£600.00');
+    expect(amount).toHaveClass('text-muted');
+    await user.hover(amount);
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(
+      "Moves to Joint billsBoth accounts count, so it isn't in the totals"
+    );
+  });
+
+  it('shows the same monthly figure as the dashboard', async () => {
+    const api = createFakeApi({ budget: withJoint() });
+    const { unmount } = renderApp({ route: '/recurring', api });
+    const summary = await screen.findByRole('region', { name: 'Summary' });
+    expect(summary).toHaveTextContent('About £265.17 /mo');
+    unmount();
+
+    renderApp({ route: '/dashboard', api });
+    const monthly = await screen.findByRole('region', { name: 'Monthly money' });
+    expect(monthly).toHaveTextContent('About £265.17 /mo');
+    expect(monthly).toHaveTextContent('6 recurring payments');
+    // Its day on the cycle bar is grey, as it neither goes out nor comes in
+    const day = screen.getAllByRole('button', { name: /Joint bills top-up/ })[0];
+    expect(day.firstElementChild).toHaveClass('bg-muted');
+    expect(screen.getByText('Moved')).toBeInTheDocument();
+  });
+
+  it('sets a renewal on a payment', async () => {
+    const { user, api } = renderRecurring();
+
+    await editFromRow(user, 'Netflix');
+    const dialog = await screen.findByRole('dialog', { name: 'Edit recurring payment' });
+    await user.click(within(dialog).getByRole('radio', { name: 'Renews' }));
+
+    // A year from today, reminding a month before
+    expect(within(dialog).getByRole('button', { name: /Renews on/ })).toHaveTextContent(
+      'Sat 2 Oct 2027'
+    );
+    expect(within(dialog).getByRole('status')).toHaveTextContent('renews Sat 2 Oct 2027');
+    const more = within(dialog).getByRole('button', { name: /More options/ });
+    expect(more).toHaveTextContent('1 month before it renews');
+    await user.click(more);
+    await user.click(within(dialog).getByRole('combobox', { name: 'Remind me before it renews' }));
+    await user.click(await screen.findByRole('option', { name: '2 weeks before' }));
+    await user.click(within(dialog).getByRole('button', { name: 'Save changes' }));
+
+    expect(await screen.findByText('Saved Netflix')).toBeInTheDocument();
+    expect(api.callsTo('UpdateRecurringPayment')).toEqual([
+      {
+        id: 'netflix',
+        input: expect.objectContaining({
+          lastPaymentDate: null,
+          renewalDate: '2027-10-02',
+          renewalReminder: { off: false, days: 14 }
+        })
+      }
+    ]);
+  });
+
+  it('asks about a renewal that has gone by, and moves it on a year', async () => {
+    const { user, api } = renderRecurring();
+
+    await editFromRow(user, 'Breakdown cover');
+    const dialog = await screen.findByRole('dialog', { name: 'Edit recurring payment' });
+    expect(
+      within(dialog).getByText(
+        'Renewed on Mon 28 Sep. Has the price or date changed for next year?'
+      )
+    ).toBeInTheDocument();
+
+    await user.click(within(dialog).getByRole('button', { name: 'Set next renewal' }));
+    expect(
+      within(dialog).getByText('Check the amount above is your new price.')
+    ).toBeInTheDocument();
+    await user.click(within(dialog).getByRole('button', { name: 'Save changes' }));
+
+    expect(await screen.findByText('Saved Breakdown cover')).toBeInTheDocument();
+    expect(api.callsTo('UpdateRecurringPayment')[0].input).toMatchObject({
+      renewalDate: '2027-09-28',
+      renewalReminder: { off: false, days: 30 }
+    });
+  });
+
+  it('stops a payment that no longer renews after its last payment before the renewal', async () => {
+    const { user, api } = renderRecurring();
+
+    await editFromRow(user, 'Breakdown cover');
+    const dialog = await screen.findByRole('dialog', { name: 'Edit recurring payment' });
+    await user.click(within(dialog).getByRole('button', { name: 'No longer renews' }));
+    await user.click(within(dialog).getByRole('button', { name: 'Save changes' }));
+
+    expect(await screen.findByText('Saved Breakdown cover')).toBeInTheDocument();
+    expect(api.callsTo('UpdateRecurringPayment')[0].input).toMatchObject({
+      lastPaymentDate: '2026-09-28',
+      renewalDate: null
+    });
+  });
+
+  it('only offers keeping going or stopping for a yearly payment', async () => {
+    const { user } = renderRecurring();
+
+    await editFromRow(user, 'Car insurance');
+    const dialog = await screen.findByRole('dialog', { name: 'Edit recurring payment' });
+
+    expect(within(dialog).queryByRole('radio', { name: 'Renews' })).not.toBeInTheDocument();
+    expect(
+      within(dialog).getByText('Renews with each payment · next on Sat 24 Oct 2026')
+    ).toBeInTheDocument();
+    // Its own reminder, a month before
+    expect(
+      within(dialog).getByRole('combobox', { name: 'Remind me before it renews' })
+    ).toHaveTextContent('1 month before');
+    // Its payments follow the usual timing
+    expect(
+      within(dialog).getByRole('combobox', { name: 'Remind me before it’s due' })
+    ).toHaveTextContent('Usual · 1 day before');
+  });
+});
+
+// Netflix's pays this year: up from £18 in August, and July skipped
+const withHistory = (): FakeBudget => {
+  const data = budget();
+  const paid = (iso: string, amount: number) =>
+    fakeRecord('PAID', {
+      dates: [apiDate(iso)],
+      balanceChange: -amount,
+      account: 'account-current'
+    });
+  return {
+    ...data,
+    recurringPayments: data.recurringPayments.map(payment =>
+      payment.id === 'netflix'
+        ? {
+            ...payment,
+            history: [
+              paid('2026-09-02', 20),
+              paid('2026-08-02', 20),
+              fakeRecord('SKIPPED', { dates: [apiDate('2026-07-02')] }),
+              paid('2026-06-02', 18)
+            ]
+          }
+        : payment
+    )
+  };
+};
+
+describe("a payment's history", () => {
+  it("opens from the row's menu: a year of pays and skips, where the price went up and the total", async () => {
+    const { user } = renderRecurring(withHistory());
+
+    await user.click(await screen.findByRole('button', { name: 'More actions for Netflix' }));
+    await user.click(screen.getByRole('menuitem', { name: 'See payments' }));
+
+    const dialog = await screen.findByRole('dialog', { name: 'Netflix payments' });
+    const table = await within(dialog).findByRole('table', { name: 'Payments in 2026' });
+    expect(dialog).toHaveTextContent('£20.00 a month · £58.00 paid in 2026 · 1 skipped');
+    expect(within(table).getByText('Up from £18.00')).toBeInTheDocument();
+    expect(within(table).getByText('Skipped')).toBeInTheDocument();
+    // Due today, then the four records
+    expect(within(table).getAllByRole('row')).toHaveLength(1 + 1 + 4);
+    // One account to spend from, so nothing to say which; opened from the menu, so no way back
+    expect(within(table).queryByRole('columnheader', { name: 'From' })).not.toBeInTheDocument();
+    expect(
+      within(dialog).queryByRole('button', { name: 'Back to Netflix' })
+    ).not.toBeInTheDocument();
+  });
+});
+
+describe('recurring page on mobile', () => {
+  beforeEach(() => setViewportWidth(390));
+
+  it('adds a recurring payment straight from the nav', async () => {
+    const { user } = renderRecurring();
+
+    // The sidebar is in the page too, hidden by CSS on mobile
+    const nav = (await screen.findAllByRole('navigation', { name: 'Main' })).find(element =>
+      within(element).queryByRole('button', { name: 'Add recurring payment' })
+    )!;
+    expect(within(nav).getByRole('link', { name: 'Recurring' })).toHaveAttribute(
+      'aria-current',
+      'page'
+    );
+    expect(within(nav).queryByRole('link', { name: 'Profile' })).not.toBeInTheDocument();
+    await user.click(within(nav).getByRole('button', { name: 'Add recurring payment' }));
+
+    expect(
+      await screen.findByRole('dialog', { name: 'Add recurring payment' })
+    ).toBeInTheDocument();
+  });
+
+  it('says what ends under the name: a stop, a last one and a rate end', async () => {
+    renderRecurring(withEnds());
+
+    const row = async (name: string) => (await screen.findByRole('button', { name })).textContent;
+    expect(await row('Greensleeves')).toContain('Monthly · Ends 1 Mar 2027');
+    expect(await row('Gym membership')).toContain('Monthly · Last one in 7 days');
+    expect(await row('Mortgage')).toContain('Rate ends 1 Mar 2027');
+  });
+
+  it('says how often each payment goes, then its renewal or, before payday, where it stands', async () => {
+    const { user } = renderRecurring();
+
+    const row = async (name: string) => (await screen.findByRole('button', { name })).textContent;
+    expect(await row('Home insurance')).toContain('Monthly · Renews 2 Feb 2027');
+    expect(await row('Car insurance')).toContain('Annually · Renews in 22 days');
+    expect(await row('Breakdown cover')).toContain('Monthly · Needs renewing');
+    // No renewal: its category instead
+    expect(await row('Netflix')).toContain('Monthly · Subscriptions');
+
+    await user.click(screen.getByRole('radio', { name: /Before payday/ }));
+
+    expect(await row('Netflix')).toContain('Monthly · Unpaid');
+    // Its 30 September date was before it was added, so it counts as paid, as on the dashboard
+    expect(await row('Cleaner')).toContain('Weekly · 1 of 5 paid');
+  });
+
+  it("opens a payment's history from its sheet, with a way back to it", async () => {
+    const { user } = renderRecurring(withHistory());
+
+    await user.click(await screen.findByRole('button', { name: 'Netflix' }));
+    const sheet = await screen.findByRole('dialog', { name: 'Netflix' });
+    await user.click(within(sheet).getByRole('button', { name: 'See payments' }));
+
+    const payments = await screen.findByRole('dialog', { name: 'Netflix payments' });
+    expect(await within(payments).findByText('Due today')).toBeInTheDocument();
+    expect(within(payments).getByText('Up from £18.00')).toBeInTheDocument();
+    expect(within(payments).queryByRole('table')).not.toBeInTheDocument();
+
+    await user.click(within(payments).getByRole('button', { name: 'Back to Netflix' }));
+    expect(await screen.findByRole('dialog', { name: 'Netflix' })).toBeInTheDocument();
+  });
+
+  it('says which savings account a payment goes into', async () => {
+    renderRecurring(withSavings());
+
+    expect(await screen.findByRole('button', { name: 'ISA top-up' })).toHaveTextContent(
+      'Monthly · Into Cash ISA'
+    );
+  });
+
+  it('says money moved between accounts that count is not in the totals', async () => {
+    const { user } = renderRecurring(withJoint());
+
+    const row = await screen.findByRole('button', { name: 'Joint bills top-up' });
+    expect(row).toHaveTextContent('Monthly · Into Joint bills · Not in totals');
+    expect(within(row).getByText('£600.00')).toHaveClass('text-muted');
+    expect(within(row).getByText('J')).toHaveClass('text-muted');
+
+    // Its quick sheet reads the same payment, so it's grey there too
+    await user.click(row);
+    const sheet = await screen.findByRole('dialog', { name: 'Joint bills top-up' });
+    expect(within(sheet).getByText('J')).toHaveClass('text-muted');
+    expect(sheet).toHaveTextContent('Monthly · Into Joint bills · Not in totals');
+  });
+
+  it('steps the sort through date, amount and name', async () => {
+    const { user } = renderRecurring();
+
+    const sort = await screen.findByRole('button', { name: 'Sort by date, earliest first' });
+    await user.click(sort);
+    await user.click(sort);
+    expect(sort).toHaveAccessibleName('Sort by amount, highest first');
+    expect(sort).toHaveTextContent('Amount ↓');
+  });
+});

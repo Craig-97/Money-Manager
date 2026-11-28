@@ -1,0 +1,7 @@
+mutation UpdatePayday($id: ID!, $input: PaydayInput!) {
+  updatePayday(id: $id, input: $input) {
+    payday {
+      ...PaydayFields
+    }
+  }
+}

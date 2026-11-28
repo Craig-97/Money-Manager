@@ -1,0 +1,11 @@
+# The signed-in user. `budget` is their default budget's id, null until setup is finished.
+fragment UserFields on User {
+  id
+  budget
+  email
+  firstName
+  surname
+  theme
+  accent
+  tourSeen
+}

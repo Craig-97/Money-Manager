@@ -1,0 +1,19 @@
+# Takes the payments off the bank balance: recurring ones have their next date paid, and one-offs
+# are marked paid until payday. The budget comes back with its new balance and lists.
+mutation MarkPaymentsPaid($input: MarkPaymentsPaidInput!) {
+  markPaymentsPaid(input: $input) {
+    budget {
+      id
+      bankBalance
+      accounts {
+        ...AccountFields
+      }
+      recurringPayments {
+        ...RecurringPaymentFields
+      }
+      oneOffPayments {
+        ...OneOffPaymentFields
+      }
+    }
+  }
+}

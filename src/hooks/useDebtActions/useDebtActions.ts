@@ -1,0 +1,109 @@
+import { useApolloClient, useMutation } from '@apollo/client/react';
+import { ERRORS } from '~/constants';
+import {
+  LogDebtOverpaymentDocument,
+  PaymentHistoryDocument,
+  UndoDebtOverpaymentDocument,
+  UpdateRecurringPaymentDocument
+} from '~/graphql/generated';
+import { startOfToday } from '~/lib/dates';
+import { DebtPayment } from '~/lib/debts';
+import { getApiErrorMessage, hasErrorCode } from '~/lib/errors';
+import { formatMoney } from '~/lib/format';
+import { PER_PERIOD } from '~/lib/payments';
+import { showErrorToast, showToast } from '~/state/toast';
+import { usePaymentActions } from '../usePaymentActions';
+
+/* Overpaying a debt, taking an overpayment back, and paying more each time from the payoff plan */
+export const useDebtActions = (budgetId: string) => {
+  const client = useApolloClient();
+  const { remove, showPaidOff } = usePaymentActions(budgetId);
+  const [logOverpayment] = useMutation(LogDebtOverpaymentDocument);
+  const [undoOverpaymentMutation] = useMutation(UndoDebtOverpaymentDocument);
+  const [updateRecurring] = useMutation(UpdateRecurringPaymentDocument);
+
+  /* Puts an overpayment from this cycle back on the debt and the bank balance */
+  const undoOverpayment = async (recordId: string, name: string) => {
+    try {
+      await undoOverpaymentMutation({ variables: { input: { budgetId, recordId } } });
+      showToast({ message: `Took back the overpayment on ${name}` });
+    } catch (error) {
+      showErrorToast(error);
+    }
+  };
+
+  /*
+   * Pays extra off a debt today. It comes off the debt and the bank balance. Resolves to a message
+   * for the amount when the API turns it down (e.g. more than is left), otherwise null.
+   */
+  const overpay = async (debt: DebtPayment, amount: number): Promise<string | null> => {
+    try {
+      const { data } = await logOverpayment({
+        variables: { input: { budgetId, recurringPaymentId: debt.id, amount } }
+      });
+      const after = data?.logDebtOverpayment.budget?.recurringPayments?.find(
+        payment => payment?.id === debt.id
+      );
+      if (after?.debt?.balance === 0) {
+        showPaidOff(debt);
+        return null;
+      }
+      // The overpayment's record, so the toast can take it back
+      const history = await client.query({
+        query: PaymentHistoryDocument,
+        // This year's has the one just made
+        variables: { id: debt.id, year: startOfToday().getFullYear() },
+        fetchPolicy: 'network-only'
+      });
+      const record = history.data?.recurringPayment?.history.find(
+        item => item.kind === 'OVERPAYMENT' && item.open
+      );
+      showToast({
+        message: `${formatMoney(amount)} paid off ${debt.name} · off your balance`,
+        action: record
+          ? { label: 'Undo', onClick: () => void undoOverpayment(record.id, debt.name) }
+          : undefined
+      });
+      return null;
+    } catch (error) {
+      if (hasErrorCode(error, ERRORS.BAD_USER_INPUT)) return getApiErrorMessage(error);
+      showErrorToast(error);
+      return null;
+    }
+  };
+
+  /* The payoff plan's extra: the debt's payment goes up by it from the next one */
+  const payMore = async (debt: DebtPayment, amount: number) => {
+    try {
+      await updateRecurring({ variables: { id: debt.id, input: { amount } } });
+      showToast({
+        message: `${debt.name} is now ${formatMoney(amount)} ${PER_PERIOD[debt.frequency]}`
+      });
+    } catch (error) {
+      showErrorToast(error);
+    }
+  };
+
+  /* A new balance from a statement; the rate and what it started at stay as they are */
+  const updateBalance = async (debt: DebtPayment, balance: number) => {
+    try {
+      await updateRecurring({
+        variables: {
+          id: debt.id,
+          input: {
+            debt: { balance, apr: debt.debt.apr, startingBalance: debt.debt.startingBalance }
+          }
+        }
+      });
+      showToast({ message: `${debt.name} has ${formatMoney(balance)} left` });
+      return true;
+    } catch (error) {
+      showErrorToast(error);
+      return false;
+    }
+  };
+
+  return { overpay, undoOverpayment, payMore, updateBalance, remove };
+};
+
+export type DebtActions = ReturnType<typeof useDebtActions>;

@@ -1,0 +1,30 @@
+# A bank account: one to spend from, or savings. Balances are typed in, never linked to a bank.
+fragment AccountFields on Account {
+  id
+  name
+  kind
+  balance
+  counts
+  # Where pay lands
+  paidInto
+  # Savings only: its rate, and when it's paid when that's been said
+  interest {
+    rate
+    frequency
+    day
+    nextDate
+    # What's built up since it was last paid, counted to the start of accruedTo
+    accrued
+    accruedTo
+    # Payments the app added, to check against the bank
+    added {
+      date
+      amount
+      balanceAfter
+    }
+  }
+  purpose
+  # A logo shown in place of its letter; null shows the letter
+  iconUrl
+  balanceUpdatedAt
+}

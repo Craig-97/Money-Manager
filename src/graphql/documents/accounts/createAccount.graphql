@@ -1,0 +1,19 @@
+# A new savings account, kept out of free to spend unless switched on. A second account to spend
+# from records each recurring expense on where pay lands, so the payments come back too.
+mutation CreateAccount($input: CreateAccountInput!) {
+  createAccount(input: $input) {
+    account {
+      ...AccountFields
+    }
+    budget {
+      id
+      bankBalance
+      accounts {
+        ...AccountFields
+      }
+      recurringPayments {
+        ...RecurringPaymentFields
+      }
+    }
+  }
+}

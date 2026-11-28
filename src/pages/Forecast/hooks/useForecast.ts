@@ -1,0 +1,84 @@
+import { useState } from 'react';
+import { Budget } from '~/hooks/useBudget';
+import { usePayCycle } from '~/hooks/usePayCycle';
+import { forFreeToSpend } from '~/lib/accounts';
+import { daysBetween, formatLongMonthYear } from '~/lib/dates';
+import { pageOf } from '~/lib/paging';
+import { summarise, toPayments } from '~/lib/payments';
+import { defaultSpend, monthRows, project, spendLimit } from '../forecastModel';
+
+export const ROWS_PER_PAGE = [6, 12, 24] as const;
+export type RowsPerPage = (typeof ROWS_PER_PAGE)[number];
+
+/* The forecast from the budget: today's figures and where they're heading at a monthly spend */
+export const useForecast = (budget: Budget) => {
+  const { today, cycle, holidays } = usePayCycle(budget.payday);
+  const summary = summarise({
+    // A payment into savings that count only moves money within the bank balance
+    payments: forFreeToSpend(toPayments(budget, { today, holidays })),
+    bankBalance: budget.bankBalance,
+    monthlyIncome: budget.monthlyIncome,
+    cycle,
+    today
+  });
+  const income = budget.monthlyIncome;
+  const recurring = summary.monthlyRecurring;
+
+  const [spendChoice, setSpendChoice] = useState<number | null>(null);
+  const [afterPayday, setAfterPayday] = useState(false);
+  const [page, setPage] = useState(0);
+  const [perPage, setPerPage] = useState<RowsPerPage>(6);
+
+  // Spending more than comes in is allowed, to see how quickly the balance runs down
+  const spend = Math.max(0, spendChoice ?? defaultSpend(recurring));
+  const projection = project({ start: summary.freeToSpend, income, spend, recurring });
+  const rows = budget.payday
+    ? monthRows({
+        today,
+        start: summary.freeToSpend,
+        net: projection.net,
+        income,
+        afterPayday,
+        payday: budget.payday,
+        holidays
+      })
+    : [];
+  const table = pageOf(rows, { size: perPage, page });
+  const cycleDays = Math.max(1, daysBetween(cycle.start, cycle.end));
+
+  const inAYear = new Date(today.getFullYear() + 1, today.getMonth(), 1);
+
+  return {
+    today,
+    cycle,
+    bankBalance: budget.bankBalance,
+    // "October 2027", the month the 12-month projection reaches
+    yearLabel: formatLongMonthYear(inAYear),
+    summary,
+    payday: budget.payday,
+    income,
+    recurring,
+    spend,
+    spendMax: spendLimit({ income, recurring, spend }),
+    // A new spend goes back to the first page of the table
+    setSpend: (amount: number) => {
+      setSpendChoice(amount);
+      setPage(0);
+    },
+    projection,
+    cycleProgress: Math.min(100, (daysBetween(cycle.start, today) / cycleDays) * 100),
+    afterPayday,
+    setAfterPayday,
+    rows: table.items,
+    // Which rows are showing, and which way the table can page
+    paging: table,
+    setPage,
+    perPage,
+    setPerPage: (rows: RowsPerPage) => {
+      setPerPage(rows);
+      setPage(0);
+    }
+  };
+};
+
+export type Forecast = ReturnType<typeof useForecast>;

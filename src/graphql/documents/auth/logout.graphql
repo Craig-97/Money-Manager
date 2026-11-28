@@ -1,0 +1,6 @@
+# Ends this device's session and clears the refresh cookie
+mutation Logout {
+  logout {
+    success
+  }
+}

@@ -1,5 +1,0 @@
-export const EVENTS = {
-  GET_ACCOUNT_DETAILS: 'GET_ACCOUNT_DETAILS',
-  LOGIN: 'LOGIN',
-  LOGOUT: 'LOGOUT'
-} as const;

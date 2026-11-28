@@ -1,0 +1,68 @@
+import { useState } from 'react';
+import { useMutation } from '@apollo/client/react';
+import { UpdatePaydayDocument } from '~/graphql/generated';
+import { useBankHolidays } from '~/hooks/useBankHolidays';
+import { Budget } from '~/hooks/useBudget';
+import { startOfToday } from '~/lib/dates';
+import {
+  paydayErrors,
+  PaydayValues,
+  toPaydayConfig,
+  toPaydayInput,
+  toPaydayValues,
+  withFrequency
+} from '~/lib/payday';
+import { showErrorToast, showToast } from '~/state/toast';
+import { usePaydayDates } from './usePaydayDates';
+import { paydayPreview } from '../profileModel';
+
+/* The payday form, with the next few paydays it gives updating as it changes */
+export const usePaydaySettings = (budget: Budget) => {
+  const [updatePayday, { loading: saving }] = useMutation(UpdatePaydayDocument);
+  const [values, setValues] = useState(() => toPaydayValues(budget.payday));
+  const [submitted, setSubmitted] = useState(false);
+  // What was last saved, so the form knows when it has changed
+  const [saved, setSaved] = useState(values);
+  const holidays = useBankHolidays(values.region);
+
+  const errors = paydayErrors(values);
+  const valid = !errors.dayOfMonth && !errors.firstPayDate;
+  const today = startOfToday();
+
+  const preview = valid
+    ? paydayPreview(toPaydayConfig(values, budget.payday?.overrides), { holidays, today })
+    : [];
+
+  const isDirty = (Object.keys(values) as (keyof PaydayValues)[]).some(
+    key => values[key] !== saved[key]
+  );
+  const dates = usePaydayDates({ paydayId: budget.payday?.id, preview, locked: isDirty });
+
+  const save = async () => {
+    setSubmitted(true);
+    if (!valid || !budget.payday) return;
+    try {
+      await updatePayday({ variables: { id: budget.payday.id, input: toPaydayInput(values) } });
+      setSubmitted(false);
+      setSaved(values);
+      showToast({ message: 'Payday settings saved' });
+    } catch (error) {
+      showErrorToast(error, { fallback: "Couldn't save your payday. Try again." });
+    }
+  };
+
+  return {
+    values,
+    update: <K extends keyof PaydayValues>(key: K, value: PaydayValues[K]) =>
+      setValues(current => ({ ...current, [key]: value })),
+    setFrequency: (frequency: PaydayValues['frequency']) =>
+      setValues(current => withFrequency(current, frequency)),
+    // Errors show once they've tried to save
+    errors: submitted ? errors : {},
+    preview,
+    saving,
+    isDirty,
+    dates,
+    save: () => void save()
+  };
+};

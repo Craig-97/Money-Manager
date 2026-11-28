@@ -1,6 +1,0 @@
-@use '../abstracts' as *;
-
-.homepage {
-  @include flexbox($direction: column);
-  max-width: 1250px;
-}

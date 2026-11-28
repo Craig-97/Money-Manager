@@ -8,7 +8,11 @@
       "esnext",
       "es2015.promise"
     ],
-    "types": ["vite/client", "vite-plugin-svgr/client"],
+    "types": [
+      "vite/client",
+      "node",
+      "vitest/globals"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -17,15 +21,16 @@
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "resolveJsonModule": true,
-    "baseUrl": ".",
+    "resolveJsonModule": true
   },
   "include": [
     "src",
-    "src/**/*.ts"
+    "scripts",
+    "codegen.ts",
+    "graphql.config.ts"
   ]
 }

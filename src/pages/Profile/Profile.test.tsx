@@ -1,0 +1,275 @@
+import { describe, expect, it } from 'vitest';
+import { screen, within } from '@testing-library/react';
+import { usePrefsStore } from '~/state/prefs';
+import { DEFAULT_BUDGET, DEFAULT_PASSWORD, freshBudget } from '~/test/fakeApi';
+import { renderApp } from '~/test/renderApp';
+
+const renderProfile = () => renderApp({ route: '/profile', budget: freshBudget() });
+
+const section = (name: string) => screen.findByRole('region', { name });
+
+describe('profile', () => {
+  it('saves personal details', async () => {
+    const { user, api } = renderProfile();
+    const details = await section('Personal details');
+
+    const save = within(details).getByRole('button', { name: 'Save changes' });
+    expect(save).toBeDisabled();
+    const first = within(details).getByLabelText('First name');
+    await user.clear(first);
+    await user.type(first, 'Sam');
+    await user.click(save);
+
+    expect(await screen.findByText('Personal details saved')).toBeInTheDocument();
+    expect(api.callsTo('UpdateCurrentUser')).toEqual([
+      { input: { firstName: 'Sam', surname: 'Account', email: 'test@example.com' } }
+    ]);
+  });
+
+  it('checks the current password before changing it', async () => {
+    const { user, api } = renderProfile();
+    const password = await section('Password');
+    const update = within(password).getByRole('button', { name: 'Save changes' });
+    expect(update).toBeDisabled();
+
+    await user.type(within(password).getByLabelText('Current password'), 'wrong-one1');
+    await user.type(within(password).getByLabelText('New password'), 'better-pass2');
+    await user.type(within(password).getByLabelText('Confirm new password'), 'better-pass3');
+    await user.click(update);
+    expect(within(password).getByText('The passwords don’t match')).toBeInTheDocument();
+
+    const confirm = within(password).getByLabelText('Confirm new password');
+    await user.clear(confirm);
+    await user.type(confirm, 'better-pass2');
+    await user.click(update);
+    expect(
+      await within(password).findByText('That isn’t your current password.')
+    ).toBeInTheDocument();
+
+    const current = within(password).getByLabelText('Current password');
+    await user.clear(current);
+    await user.type(current, DEFAULT_PASSWORD);
+    await user.click(update);
+
+    expect(await screen.findByText('Password updated')).toBeInTheDocument();
+    expect(api.callsTo('ChangePassword').at(-1)).toEqual({
+      currentPassword: DEFAULT_PASSWORD,
+      newPassword: 'better-pass2'
+    });
+  });
+
+  it('saves a new payday rule', async () => {
+    const { user, api } = renderProfile();
+    const payday = await section('Payday');
+
+    const save = within(payday).getByRole('button', { name: 'Save changes' });
+    expect(save).toBeDisabled();
+
+    await user.click(within(payday).getByRole('radio', { name: /Set day/ }));
+    const day = within(payday).getByLabelText('Day of month');
+    await user.click(save);
+    expect(within(payday).getByText('Choose a day between 1 and 31')).toBeInTheDocument();
+
+    await user.type(day, '15');
+    await user.click(save);
+
+    expect(await screen.findByText('Payday settings saved')).toBeInTheDocument();
+    expect(api.callsTo('UpdatePayday')).toEqual([
+      {
+        id: 'payday-1',
+        input: expect.objectContaining({ frequency: 'MONTHLY', type: 'SET_DAY', dayOfMonth: 15 })
+      }
+    ]);
+  });
+
+  it('sets when payments on a weekend or bank holiday go out, with an example', async () => {
+    const { user, api } = renderProfile();
+    const payments = await section('Payments');
+
+    const field = within(payments).getByRole('combobox', { name: 'On a weekend or bank holiday' });
+    // The fake budget keeps payments on their dates
+    expect(field).toHaveTextContent('On the day');
+    const example = within(payments).getByText(/^Due Sat /).parentElement!;
+    // On the day, it goes out the Saturday it's due
+    expect(example.textContent).toMatch(/^Due (Sat .+)\1$/);
+
+    await user.click(field);
+    await user.click(await screen.findByRole('option', { name: 'Next working day' }));
+    expect(payments).toHaveTextContent('go out the next working day, as most direct debits do');
+    // The Saturday now goes out on the Monday
+    expect(example).toHaveTextContent(/^Due Sat .+Mon /);
+    await user.click(within(payments).getByRole('button', { name: 'Save changes' }));
+
+    expect(
+      await screen.findByText('Weekend payments now go out the next working day')
+    ).toBeInTheDocument();
+    expect(api.callsTo('UpdateBudget')).toEqual([
+      { id: DEFAULT_BUDGET.id, input: { nonWorkingDay: 'NEXT' } }
+    ]);
+    expect(within(payments).getByRole('button', { name: 'Save changes' })).toBeDisabled();
+  });
+
+  it('saves pay on the last Thursday of the month', async () => {
+    const { user, api } = renderProfile();
+    const payday = await section('Payday');
+
+    await user.click(within(payday).getByRole('radio', { name: /Last weekday/ }));
+    await user.click(within(payday).getByRole('button', { name: 'Thursday' }));
+    await user.click(within(payday).getByRole('button', { name: 'Save changes' }));
+
+    expect(await screen.findByText('Payday settings saved')).toBeInTheDocument();
+    expect(api.callsTo('UpdatePayday')).toEqual([
+      {
+        id: 'payday-1',
+        input: expect.objectContaining({ type: 'LAST_WEEKDAY', weekday: 'THURSDAY' })
+      }
+    ]);
+  });
+
+  it('moves a single payday and puts it back', async () => {
+    const { user, api } = renderProfile();
+    const payday = await section('Payday');
+
+    // The second payday is always ahead of today, so the day before is always allowed
+    await user.click(within(payday).getByRole('button', { name: /^Then,/ }));
+    const editor = within(payday).getByRole('group', { name: /^Change / });
+    await user.click(within(editor).getByRole('button', { name: 'Save date' }));
+
+    expect(await screen.findByText(/^Payday moved to /)).toBeInTheDocument();
+    const [call] = api.callsTo('SetPaydayOverride');
+    expect(call).toMatchObject({
+      id: 'payday-1',
+      for: expect.any(String),
+      date: expect.any(String)
+    });
+    expect(call.date).not.toBe(call.for);
+    const moved = await within(payday).findByRole('button', { name: /^Then,.*moved by you/ });
+
+    await user.click(moved);
+    await user.click(within(payday).getByRole('button', { name: 'Reset to usual' }));
+    expect(await screen.findByText(/^Payday back to /)).toBeInTheDocument();
+    expect(api.callsTo('SetPaydayOverride')[1]).toEqual({
+      id: 'payday-1',
+      for: call.for,
+      date: null
+    });
+  });
+
+  it('holds off moving a payday while the form has unsaved changes', async () => {
+    const { user } = renderProfile();
+    const payday = await section('Payday');
+
+    await user.click(within(payday).getByRole('radio', { name: /Set day/ }));
+    await user.type(within(payday).getByLabelText('Day of month'), '15');
+
+    expect(within(payday).getByRole('button', { name: /^Then,/ })).toBeDisabled();
+    expect(
+      within(payday).getByText('Save your changes to adjust a single payday')
+    ).toBeInTheDocument();
+  });
+
+  it('shows the bank balance from the accounts, and what new income means before saving it', async () => {
+    const { user, api } = renderProfile();
+    const balances = await section('Balances');
+    expect(within(balances).getByRole('link', { name: /Manage accounts/ })).toHaveAttribute(
+      'href',
+      '/accounts'
+    );
+    expect(within(balances).getByText('From 1 of your 1 account')).toBeInTheDocument();
+    const payday = () => within(balances).getByText('Payday balance').nextElementSibling;
+    const before = payday()?.textContent;
+
+    const save = within(balances).getByRole('button', { name: 'Save changes' });
+    expect(save).toBeDisabled();
+
+    const income = within(balances).getByLabelText('Monthly income');
+    await user.clear(income);
+    await user.type(income, '3000');
+    expect(payday()?.textContent).not.toBe(before);
+
+    await user.click(save);
+
+    expect(await screen.findByText('Income saved')).toBeInTheDocument();
+    expect(api.callsTo('UpdateBudget')).toEqual([
+      { id: 'budget-1', input: { monthlyIncome: 3000 } }
+    ]);
+  });
+
+  it('follows the device theme when System is picked', async () => {
+    const { user } = renderProfile();
+    const appearance = await section('Appearance');
+
+    await user.click(within(appearance).getByRole('button', { name: 'System' }));
+    expect(usePrefsStore.getState().theme).toBe('system');
+
+    await user.click(within(appearance).getByRole('button', { name: 'Teal' }));
+    expect(usePrefsStore.getState().accent).toBe('#0F9F8F');
+  });
+
+  it('signs out everywhere after confirming, and signs out here too', async () => {
+    const { user, api } = renderProfile();
+    const account = await section('Account');
+
+    await user.click(within(account).getByRole('button', { name: 'Sign out everywhere' }));
+    const dialog = screen.getByRole('dialog', { name: 'Sign out everywhere?' });
+    await user.click(within(dialog).getByRole('button', { name: 'Sign out everywhere' }));
+
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Welcome back' })
+    ).toBeInTheDocument();
+    expect(api.callsTo('LogoutEverywhere')).toHaveLength(1);
+  });
+
+  it('keeps the session when signing out everywhere is cancelled', async () => {
+    const { user, api } = renderProfile();
+    const account = await section('Account');
+
+    await user.click(within(account).getByRole('button', { name: 'Sign out everywhere' }));
+    const dialog = screen.getByRole('dialog', { name: 'Sign out everywhere?' });
+    await user.click(within(dialog).getByRole('button', { name: 'Stay signed in' }));
+
+    expect(api.callsTo('LogoutEverywhere')).toHaveLength(0);
+  });
+
+  it('deletes the account after confirming, and signs out', async () => {
+    const { user, api } = renderProfile();
+    const account = await section('Account');
+
+    await user.click(within(account).getByRole('button', { name: 'Delete account' }));
+    const dialog = screen.getByRole('dialog', { name: 'Delete your account?' });
+    await user.click(within(dialog).getByRole('button', { name: 'Delete everything' }));
+
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Welcome back' })
+    ).toBeInTheDocument();
+    expect(api.callsTo('DeleteCurrentUser')).toHaveLength(1);
+  });
+});
+
+describe('the calendar feed', () => {
+  it('is off until turned on, then gives a private link and chooses what it carries', async () => {
+    const { user, api } = renderProfile();
+    const reminders = await section('Reminders');
+    expect(within(reminders).queryByRole('button', { name: 'Copy' })).not.toBeInTheDocument();
+
+    await user.click(within(reminders).getByRole('switch', { name: 'Calendar feed' }));
+
+    expect(await within(reminders).findByRole('button', { name: 'Copy' })).toBeInTheDocument();
+    // The secret in the link isn't shown
+    expect(within(reminders).getByLabelText('Feed link, hidden')).not.toHaveTextContent(
+      'feed-token'
+    );
+    expect(within(reminders).getByRole('link', { name: 'Add to Apple Calendar' })).toHaveAttribute(
+      'href',
+      expect.stringMatching(/^webcal:\/\/.+\/cal\/feed-token-\d+\.ics$/)
+    );
+
+    await user.click(within(reminders).getByRole('checkbox', { name: 'Debt-free dates' }));
+
+    expect(within(reminders).getByRole('checkbox', { name: 'Debt-free dates' })).toBeChecked();
+    expect(api.callsTo('UpdateCalendarFeed')).toEqual([
+      { input: { budgetId: 'budget-1', enabled: true } },
+      { input: { budgetId: 'budget-1', debtFree: true } }
+    ]);
+  });
+});

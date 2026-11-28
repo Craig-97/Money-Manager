@@ -1,26 +1,32 @@
 import { defineConfig } from 'vite';
-import svgrPlugin from 'vite-plugin-svgr';
-import reactRefresh from '@vitejs/plugin-react';
-import viteTsconfigPaths from 'vite-tsconfig-paths';
+import babel from '@rolldown/plugin-babel';
+import tailwindcss from '@tailwindcss/vite';
+import react, { reactCompilerPreset } from '@vitejs/plugin-react';
+
+// The dev server proxies /graphql and the calendar feed (/cal) to the API, the local one by default
+const apiTarget = process.env.API_PROXY_TARGET ?? 'http://localhost:4000';
 
 export default defineConfig({
+  resolve: {
+    tsconfigPaths: true
+  },
+  optimizeDeps: {
+    include: ['@apollo/client']
+  },
   build: {
     outDir: 'build'
   },
-  plugins: [
-    reactRefresh(),
-    viteTsconfigPaths(),
-    svgrPlugin({
-      svgrOptions: {
-        icon: true
-      }
-    })
-  ],
-  css: {
-    preprocessorOptions: {
-      scss: {
-        api: 'modern'
+  server: {
+    proxy: {
+      '/graphql': {
+        target: apiTarget,
+        changeOrigin: true
+      },
+      '/cal': {
+        target: apiTarget,
+        changeOrigin: true
       }
     }
-  }
+  },
+  plugins: [react(), babel({ presets: [reactCompilerPreset()] }), tailwindcss()]
 });

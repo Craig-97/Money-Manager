@@ -1,0 +1,19 @@
+# Never the account pay lands in. Payments that used it move to that one, and ones that moved money
+# into it carry on as plain expenses.
+mutation DeleteAccount($id: ID!) {
+  deleteAccount(id: $id) {
+    budget {
+      id
+      bankBalance
+      accounts {
+        ...AccountFields
+      }
+      recurringPayments {
+        ...RecurringPaymentFields
+      }
+      oneOffPayments {
+        ...OneOffPaymentFields
+      }
+    }
+  }
+}

@@ -1,0 +1,15 @@
+import { PaydayFieldsFragment } from '~/graphql/generated';
+import { startOfToday } from '~/lib/dates';
+import { getPayCycle } from '~/lib/payday';
+import { useBankHolidays } from '../useBankHolidays';
+
+// Used when a budget has no payday saved: paid on the last working day of the month
+const DEFAULT_PAYDAY = { frequency: 'MONTHLY', type: 'LAST_DAY' } as const;
+
+/* Today and the pay cycle it falls in, from the budget's payday */
+export const usePayCycle = (payday: PaydayFieldsFragment | null | undefined) => {
+  const holidays = useBankHolidays(payday?.bankHolidayRegion);
+  const today = startOfToday();
+
+  return { today, holidays, cycle: getPayCycle(payday ?? DEFAULT_PAYDAY, { holidays, today }) };
+};

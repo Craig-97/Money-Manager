@@ -1,0 +1,85 @@
+import { describe, expect, it } from 'vitest';
+import { toIsoDate } from '~/lib/dates';
+import { paydayErrors, toPaydayInput, toPaydayValues, withFrequency } from '~/lib/payday';
+import { passwordStrength, paydayPreview } from './profileModel';
+
+describe('passwordStrength', () => {
+  it('scores length, numbers, mixed case and symbols', () => {
+    expect(passwordStrength('')).toEqual({ score: 0, label: '' });
+    expect(passwordStrength('abc')).toEqual({ score: 0, label: 'Weak' });
+    expect(passwordStrength('abcdefgh1')).toEqual({ score: 2, label: 'Fair' });
+    expect(passwordStrength('Abcdefgh1')).toEqual({ score: 3, label: 'Good' });
+    expect(passwordStrength('Abcdefgh1!')).toEqual({ score: 4, label: 'Strong' });
+  });
+});
+
+describe('payday form', () => {
+  const payday = {
+    __typename: 'Payday' as const,
+    id: 'p',
+    frequency: 'MONTHLY' as const,
+    type: 'SET_DAY' as const,
+    dayOfMonth: 15,
+    weekday: null,
+    firstPayDate: null,
+    bankHolidayRegion: 'SCOTLAND' as const,
+    overrides: []
+  };
+
+  it('starts from the saved payday and saves only what the rule needs', () => {
+    const values = toPaydayValues(payday);
+    expect(values).toMatchObject({ rule: 'SET_DAY', dayOfMonth: '15', region: 'SCOTLAND' });
+    expect(toPaydayInput(values)).toEqual({
+      frequency: 'MONTHLY',
+      type: 'SET_DAY',
+      dayOfMonth: 15,
+      weekday: null,
+      firstPayDate: null,
+      bankHolidayRegion: 'SCOTLAND'
+    });
+  });
+
+  it('moves to a rule that suits a new frequency', () => {
+    const weekly = withFrequency(toPaydayValues(payday), 'WEEKLY');
+    expect(weekly.rule).toBe('SET_WEEKDAY');
+    expect(paydayErrors(weekly).firstPayDate).toBe('Add the date of your next pay');
+  });
+
+  it('checks the day of the month', () => {
+    expect(paydayErrors({ ...toPaydayValues(payday), dayOfMonth: '32' }).dayOfMonth).toBe(
+      'Choose a day between 1 and 31'
+    );
+  });
+});
+
+describe('paydayPreview', () => {
+  it('shows the next three paydays and which a bank holiday moved', () => {
+    const preview = paydayPreview(
+      { frequency: 'MONTHLY', type: 'LAST_WEEKDAY', weekday: 'FRIDAY' },
+      { holidays: new Set(['2026-12-25']), today: new Date(2026, 9, 4) }
+    );
+    expect(preview.map(item => toIsoDate(item.date))).toEqual([
+      '2026-10-30',
+      '2026-11-27',
+      '2026-12-24'
+    ]);
+    expect(preview[0].movedFrom).toBeNull();
+    expect(toIsoDate(preview[2].movedFrom!)).toBe('2026-12-25');
+  });
+
+  it('marks a payday the user moved, keeping the date the rule gave', () => {
+    const preview = paydayPreview(
+      {
+        frequency: 'MONTHLY',
+        type: 'LAST_WEEKDAY',
+        weekday: 'FRIDAY',
+        overrides: [{ for: '2026-12-24', date: '2026-12-17' }]
+      },
+      { holidays: new Set(['2026-12-25']), today: new Date(2026, 11, 4) }
+    );
+    expect(preview[0]).toMatchObject({ moved: true, movedFrom: null });
+    expect(toIsoDate(preview[0].date)).toBe('2026-12-17');
+    expect(toIsoDate(preview[0].usual)).toBe('2026-12-24');
+    expect(preview[1]).toMatchObject({ moved: false });
+  });
+});

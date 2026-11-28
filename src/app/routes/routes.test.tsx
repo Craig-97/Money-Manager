@@ -1,0 +1,145 @@
+import { describe, expect, it, vi } from 'vitest';
+import { screen, waitFor } from '@testing-library/react';
+import { useAuthStore } from '~/state/auth';
+import { createFakeApi, DEFAULT_BUDGET, DEFAULT_USER } from '~/test/fakeApi';
+import { findPageHeading } from '~/test/queries';
+import { renderApp } from '~/test/renderApp';
+
+describe('routing', () => {
+  it('sends signed-out people to sign in', async () => {
+    renderApp({ route: '/dashboard', session: null });
+
+    expect(await findPageHeading('Welcome back')).toBeInTheDocument();
+  });
+
+  it('shows the landing page at home when signed out', async () => {
+    renderApp({ route: '/', session: null });
+
+    expect(await findPageHeading("Know what's left before payday.")).toBeInTheDocument();
+  });
+
+  it('keeps signed-in people out of the signed-out pages', async () => {
+    renderApp({ route: '/register' });
+
+    expect(await findPageHeading('Dashboard')).toBeInTheDocument();
+  });
+
+  it('opens the dashboard from the home page when signed in', async () => {
+    const { router } = renderApp({ route: '/' });
+
+    expect(await findPageHeading('Dashboard')).toBeInTheDocument();
+    expect(router.state.location.pathname).toBe('/dashboard');
+  });
+
+  it('starts each page at the top, however far down the last one was scrolled', async () => {
+    const { router } = renderApp({ route: '/dashboard' });
+    expect(await findPageHeading('Dashboard')).toBeInTheDocument();
+    // The pages scroll inside <main>, which stays from page to page
+    const main = document.getElementById('main')!;
+    main.scrollTop = 900;
+
+    await router.navigate('/notes');
+
+    expect(await findPageHeading('Notes')).toBeInTheDocument();
+    expect(main.scrollTop).toBe(0);
+  });
+
+  it('sends people without a budget to setup', async () => {
+    renderApp({ route: '/dashboard', budget: null });
+
+    expect(await findPageHeading('When do you get paid?')).toBeInTheDocument();
+  });
+
+  it('keeps people who finished setup out of setup', async () => {
+    renderApp({ route: '/setup' });
+
+    expect(await findPageHeading('Dashboard')).toBeInTheDocument();
+  });
+
+  it('sends unknown paths home', async () => {
+    renderApp({ route: '/nowhere' });
+
+    expect(await findPageHeading('Dashboard')).toBeInTheDocument();
+  });
+
+  it('knows whether setup is finished from the session, without waiting on the budget', async () => {
+    const { api } = renderApp({ route: '/dashboard' });
+
+    await findPageHeading('Dashboard');
+    expect(api.calls.map(call => call.operationName)).toEqual(['Budget']);
+  });
+
+  it('brings the user back on a page load, keeping setup closed once it is finished', async () => {
+    renderApp({ route: '/setup', reload: true });
+
+    expect(await findPageHeading('Dashboard')).toBeInTheDocument();
+    expect((await screen.findAllByText('Test Account')).length).toBeGreaterThan(0);
+  });
+
+  it('offers a retry when the user fails to load', async () => {
+    const api = createFakeApi();
+    api.failNext('CurrentUser', { code: 'INTERNAL_SERVER_ERROR' });
+    const { user } = renderApp({ route: '/dashboard', api, cacheUser: false });
+
+    expect(await screen.findByRole('alert')).toHaveTextContent("Couldn't load your account");
+    await user.click(screen.getByRole('button', { name: 'Try again' }));
+
+    expect(await findPageHeading('Dashboard')).toBeInTheDocument();
+  });
+
+  it('offers a retry when the budget fails to load', async () => {
+    const api = createFakeApi();
+    api.failNext('Budget', { code: 'INTERNAL_SERVER_ERROR' });
+    const { user } = renderApp({ route: '/dashboard', api });
+
+    await user.click(await screen.findByRole('button', { name: 'Try again' }));
+
+    expect(await findPageHeading('Dashboard')).toBeInTheDocument();
+  });
+});
+
+describe('sessions', () => {
+  it('logs out from the sidebar', async () => {
+    const { user } = renderApp({ route: '/dashboard' });
+
+    await findPageHeading('Dashboard');
+    await user.click(screen.getByRole('button', { name: 'Log out' }));
+
+    expect(await findPageHeading('Welcome back')).toBeInTheDocument();
+    expect(useAuthStore.getState()).toMatchObject({ session: null, endReason: 'signed-out' });
+    expect(screen.queryByText(/session has expired/)).not.toBeInTheDocument();
+  });
+
+  it('ends the session and explains why when the API says the token expired', async () => {
+    const api = createFakeApi();
+    api.failNext('Budget', {
+      code: 'UNAUTHENTICATED',
+      extensions: { expired: true }
+    });
+    renderApp({ route: '/dashboard', api });
+
+    expect(await findPageHeading('Welcome back')).toBeInTheDocument();
+    expect(screen.getByText(/session has expired/)).toBeInTheDocument();
+    await waitFor(() => expect(useAuthStore.getState().endReason).toBe('expired'));
+  });
+
+  it('swaps an expired token for a new one and carries on without signing out', async () => {
+    const api = createFakeApi();
+    api.failNext('Budget', {
+      code: 'UNAUTHENTICATED',
+      extensions: { expired: true }
+    });
+    const refresh = vi.fn(async () => ({
+      __typename: 'AuthData' as const,
+      token: 'fresh-token',
+      tokenExpiration: 1,
+      user: { ...DEFAULT_USER, budget: DEFAULT_BUDGET.id, __typename: 'User' as const }
+    }));
+    renderApp({ route: '/dashboard', api, refresh });
+
+    expect(await findPageHeading('Dashboard')).toBeInTheDocument();
+    expect(refresh).toHaveBeenCalledTimes(1);
+    expect(useAuthStore.getState().session?.token).toBe('fresh-token');
+    expect(screen.queryByText(/session has expired/)).not.toBeInTheDocument();
+  });
+});

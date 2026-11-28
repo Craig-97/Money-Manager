@@ -1,0 +1,48 @@
+fragment RecurringPaymentFields on RecurringPayment {
+  id
+  name
+  amount
+  category
+  frequency
+  type
+  firstPaymentDate
+  lastPaymentDate
+  nextDueDate
+  renewalDate
+  # When its reminders go off; days left out follow the usual timing
+  dueReminder {
+    off
+    days
+  }
+  renewalReminder {
+    off
+    days
+  }
+  # Its pays and skips this cycle, oldest first
+  thisCycle {
+    id
+    kind
+    dates
+    balanceChange
+  }
+  # The account it goes out of or into; null for the one pay lands in
+  account
+  # Another account it moves money into, like a standing order
+  paysInto
+  # When a date on a weekend or bank holiday goes out; null follows the budget's choice
+  nonWorkingDay
+  # A logo shown in place of its letter; null shows the letter
+  iconUrl
+  debt {
+    balance
+    startingBalance
+    apr
+    balanceUpdatedAt
+    paidOffThisCycle
+    # Interest built up since the last payment, counted to the start of accruedTo
+    accrued
+    accruedTo
+    # When a fixed or offer rate ends; its reminder is renewalReminder
+    rateEndsOn
+  }
+}

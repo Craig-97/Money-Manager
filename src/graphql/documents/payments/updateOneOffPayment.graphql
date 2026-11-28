@@ -1,0 +1,7 @@
+mutation UpdateOneOffPayment($id: ID!, $input: UpdateOneOffPaymentInput!) {
+  updateOneOffPayment(id: $id, input: $input) {
+    oneOffPayment {
+      ...OneOffPaymentFields
+    }
+  }
+}

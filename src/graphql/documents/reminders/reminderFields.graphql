@@ -1,0 +1,24 @@
+# When reminders go off for anything without its own timing
+fragment ReminderSettingsFields on ReminderSettings {
+  paymentDays
+  renewalDays
+  payday
+}
+
+# What the user did with one reminder: read, cleared, or put away until a day
+fragment ReminderStateFields on ReminderState {
+  key
+  read
+  cleared
+  snoozedUntil
+}
+
+fragment CalendarFeedFields on CalendarFeed {
+  token
+  payments
+  paydays
+  renewals
+  notes
+  debtFree
+  showAmounts
+}

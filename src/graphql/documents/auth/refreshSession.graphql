@@ -1,0 +1,7 @@
+# Swaps the refresh cookie for a new access token. Sent with fetch rather than through Apollo's
+# link chain, so a failed refresh can't trigger another one.
+mutation RefreshSession {
+  refreshSession {
+    ...AuthSession
+  }
+}

@@ -1,0 +1,73 @@
+import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router';
+import { MEDIA } from '~/constants';
+import { UserFieldsFragment } from '~/graphql/generated';
+import { Budget } from '~/hooks/useBudget';
+import { useLogout } from '~/hooks/useLogout';
+import { useMediaQuery } from '~/hooks/useMediaQuery';
+import { SECTIONS, SectionId } from '../../profileModel';
+import { ProfileJumpChips, ProfileNav } from '../nav';
+import { ProfileSummary } from '../ProfileSummary';
+import {
+  AccountSection,
+  AppearanceSection,
+  BalancesSection,
+  DetailsSection,
+  HelpSection,
+  PasswordSection,
+  PaydaySection,
+  PaymentsSection,
+  RemindersSection
+} from '../sections';
+
+export const ProfileContent = ({ user, budget }: { user: UserFieldsFragment; budget: Budget }) => {
+  const isDesktop = useMediaQuery(MEDIA.desktop);
+  const logout = useLogout();
+  const [current, setCurrent] = useState<SectionId>('personal');
+
+  const jump = (id: SectionId) => {
+    setCurrent(id);
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  // Arriving at a section's link, e.g. /profile#reminders from Reminders, goes to that section
+  const { hash } = useLocation();
+  useEffect(() => {
+    const section = SECTIONS.find(item => `#${item.id}` === hash);
+    if (!section) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- follows the address once it changes
+    setCurrent(section.id);
+    document.getElementById(section.id)?.scrollIntoView({ block: 'start' });
+  }, [hash]);
+
+  const sections = (
+    <div className="flex min-w-0 flex-col gap-3.5 md:gap-4">
+      <DetailsSection user={user} />
+      <PasswordSection />
+      <PaydaySection budget={budget} />
+      <PaymentsSection budget={budget} />
+      <BalancesSection budget={budget} />
+      <RemindersSection budget={budget} />
+      <AppearanceSection />
+      <HelpSection />
+      <AccountSection email={user.email} onLogout={logout} />
+    </div>
+  );
+
+  return (
+    <>
+      <ProfileSummary user={user} budget={budget} compact={!isDesktop} />
+      {isDesktop ? (
+        <div className="grid items-start gap-6 wide:grid-cols-[232px_minmax(0,1fr)]">
+          <ProfileNav current={current} onJump={jump} onLogout={logout} />
+          {sections}
+        </div>
+      ) : (
+        <>
+          <ProfileJumpChips current={current} onJump={jump} />
+          {sections}
+        </>
+      )}
+    </>
+  );
+};

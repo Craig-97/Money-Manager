@@ -1,0 +1,6 @@
+# Signs in, and the API sets the httpOnly refresh cookie
+mutation Login($email: String!, $password: String!) {
+  login(email: $email, password: $password) {
+    ...AuthSession
+  }
+}

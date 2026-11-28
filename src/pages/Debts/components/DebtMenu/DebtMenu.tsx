@@ -1,0 +1,69 @@
+import { ArrowUp, Ellipsis, History, PenLine, RefreshCw, Timer, Trash } from 'lucide-react';
+import { useShallow } from 'zustand/react/shallow';
+import {
+  IconButton,
+  Menu,
+  MenuContent,
+  MenuItem,
+  MenuSeparator,
+  MenuTrigger
+} from '~/components/ui';
+import { DebtActions } from '~/hooks/useDebtActions';
+import { DebtPayment } from '~/lib/debts';
+import { useDebtDialogStore } from '~/state/debtDialog';
+import { usePaymentDialogStore } from '~/state/paymentDialog';
+import { usePaymentHistoryStore } from '~/state/paymentHistory';
+
+interface DebtMenuProps {
+  debt: DebtPayment;
+  actions: DebtActions;
+}
+
+/*
+ * Edit, update the balance, overpay, pay off sooner, see payments and delete, from the row's more
+ * button
+ */
+export const DebtMenu = ({ debt, actions }: DebtMenuProps) => {
+  const openEdit = usePaymentDialogStore(s => s.openEdit);
+  const openPayments = usePaymentHistoryStore(s => s.openFor);
+  const { openBalance, openOverpayment, openPaySooner } = useDebtDialogStore(
+    useShallow(s => ({
+      openBalance: s.openBalance,
+      openOverpayment: s.openOverpayment,
+      openPaySooner: s.openPaySooner
+    }))
+  );
+
+  return (
+    <Menu>
+      <MenuTrigger>
+        <IconButton aria-label={`More actions for ${debt.name}`}>
+          <Ellipsis size={18} aria-hidden="true" />
+        </IconButton>
+      </MenuTrigger>
+      <MenuContent aria-label={`Actions for ${debt.name}`}>
+        <MenuItem
+          icon={<PenLine size={16} />}
+          onSelect={() => openEdit('recurring', { paymentId: debt.id, asDebt: true })}>
+          Edit
+        </MenuItem>
+        <MenuItem icon={<RefreshCw size={16} />} onSelect={() => openBalance(debt.id)}>
+          Update balance
+        </MenuItem>
+        <MenuItem icon={<ArrowUp size={16} />} onSelect={() => openOverpayment(debt.id)}>
+          Log an overpayment
+        </MenuItem>
+        <MenuItem icon={<Timer size={16} />} onSelect={() => openPaySooner(debt.id)}>
+          Pay sooner
+        </MenuItem>
+        <MenuItem icon={<History size={16} />} onSelect={() => openPayments(debt.id)}>
+          See payments
+        </MenuItem>
+        <MenuSeparator />
+        <MenuItem danger icon={<Trash size={16} />} onSelect={() => void actions.remove([debt])}>
+          Delete
+        </MenuItem>
+      </MenuContent>
+    </Menu>
+  );
+};

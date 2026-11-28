@@ -1,0 +1,23 @@
+# What's happened to a recurring payment in one year, newest first: pays, skips, and for a debt
+# its overpayments and balances set. Each covers its dates; it's in the year of the last one.
+# historyYears are the years it has any, for paging through them.
+query PaymentHistory($id: ID!, $year: Int!) {
+  recurringPayment(id: $id) {
+    id
+    historyYears
+    history(year: $year) {
+      id
+      kind
+      dates
+      balanceChange
+      account
+      open
+      createdAt
+      debt {
+        interest
+        reduction
+        balanceAfter
+      }
+    }
+  }
+}

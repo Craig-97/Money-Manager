@@ -1,0 +1,6 @@
+# Ends every device's session, this one included
+mutation LogoutEverywhere {
+  logoutEverywhere {
+    success
+  }
+}

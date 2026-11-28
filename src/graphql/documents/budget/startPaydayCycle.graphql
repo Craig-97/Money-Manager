@@ -1,0 +1,20 @@
+# Payday: sets the confirmed balance, records what happened to last cycle's left-over payments and
+# to ones gone out since payday, closes the last cycle's records and clears away paid one-offs
+mutation StartPaydayCycle($input: StartPaydayCycleInput!) {
+  startPaydayCycle(input: $input) {
+    budget {
+      id
+      bankBalance
+      accounts {
+        ...AccountFields
+      }
+      cycleStartedOn
+      recurringPayments {
+        ...RecurringPaymentFields
+      }
+      oneOffPayments {
+        ...OneOffPaymentFields
+      }
+    }
+  }
+}

@@ -1,0 +1,55 @@
+import { useState } from 'react';
+import { useShallow } from 'zustand/react/shallow';
+import { Budget } from '~/hooks/useBudget';
+import { useNoteActions } from '~/hooks/useNoteActions';
+import { usePayCycle } from '~/hooks/usePayCycle';
+import { formatMoney } from '~/lib/format';
+import { followPayments, toNotes } from '~/lib/notes';
+import { PER_PERIOD, toPayments } from '~/lib/payments';
+import { useNoteDialogStore } from '~/state/noteDialog';
+import { findNotes, NoteSort } from '../notesModel';
+
+/* The notes board: search, sort, opening a note to write or change, and the actions */
+export const useNotes = (budget: Budget) => {
+  const [query, setQuery] = useState('');
+  // Dated notes first, soonest first; the rest newest first
+  const [sort, setSort] = useState<NoteSort>('date');
+  // The dialog is opened from other pages too, so it lives in a store
+  const { openNew, openEdit } = useNoteDialogStore(
+    useShallow(s => ({ openNew: s.openNew, openEdit: s.openEdit }))
+  );
+  const actions = useNoteActions(budget.id);
+  const { today, holidays } = usePayCycle(budget.payday);
+
+  // Notes that follow a payment take its next date
+  const all = followPayments(toNotes(budget.notes), toPayments(budget, { today, holidays }));
+  const notes = findNotes(all, { query, sort, today });
+  const searching = query.trim().length > 0;
+
+  /* "Broadband · £32 a month", for a note linked to a payment that's still there */
+  const paymentLabel = (id: string) => {
+    const payment = budget.recurringPayments?.find(item => item?.id === id);
+    return payment
+      ? `${payment.name} · ${formatMoney(payment.amount, { whole: true })} ${PER_PERIOD[payment.frequency]}`
+      : null;
+  };
+
+  return {
+    notes,
+    today,
+    paymentLabel,
+    query,
+    setQuery,
+    clearQuery: () => setQuery(''),
+    searching,
+    noResults: searching && notes.length === 0,
+    empty: all.length === 0,
+    sort,
+    setSort,
+    openNew,
+    openEdit,
+    actions
+  };
+};
+
+export type NotesBoard = ReturnType<typeof useNotes>;

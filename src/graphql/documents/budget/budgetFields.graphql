@@ -1,0 +1,35 @@
+# Everything the signed-in pages show. Payments and notes are separate entities in the cache,
+# so a mutation that returns one updates every page that shows it.
+fragment BudgetFields on Budget {
+  id
+  # The accounts that count in free to spend, added up
+  bankBalance
+  accounts {
+    ...AccountFields
+  }
+  monthlyIncome
+  cycleStartedOn
+  # When a payment on a weekend or bank holiday goes out, unless it has its own choice
+  nonWorkingDay
+  payday {
+    ...PaydayFields
+  }
+  recurringPayments {
+    ...RecurringPaymentFields
+  }
+  oneOffPayments {
+    ...OneOffPaymentFields
+  }
+  notes {
+    ...NoteFields
+  }
+  reminderSettings {
+    ...ReminderSettingsFields
+  }
+  reminderStates {
+    ...ReminderStateFields
+  }
+  calendarFeed {
+    ...CalendarFeedFields
+  }
+}
