@@ -9,7 +9,7 @@ export * from './PaymentAmount';
 export * from './PaymentIcon';
 export * from './PaymentMenu';
 export * from './PaymentSummary';
-export * from './RenewalTag';
+export * from './NextChangeTag';
 export * from './StatusTag';
 export * from './TimesDue';
 export * from './tagClasses';

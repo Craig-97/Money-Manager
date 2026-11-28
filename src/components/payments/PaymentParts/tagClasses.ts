@@ -11,3 +11,4 @@ export const accentTagClasses = cn(
   tagClasses,
   'border-transparent bg-accent-soft text-accent-text'
 );
+export const warnTagClasses = cn(tagClasses, 'border-transparent bg-warn-bg text-warn');

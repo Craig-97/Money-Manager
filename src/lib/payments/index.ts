@@ -6,6 +6,7 @@ export * from './payments';
 export * from './recurrence';
 export * from './reminderTiming';
 export * from './rateEnds';
+export * from './nextChange';
 export * from './renewal';
 export * from './sort';
 export * from './summary';

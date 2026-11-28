@@ -4,7 +4,7 @@ import {
   DueCell,
   PaymentRowEnd,
   PaymentRowStart,
-  RenewalTag,
+  NextChangeTag,
   StatusTag
 } from '~/components/payments';
 import { cn } from '~/lib/cn';
@@ -14,7 +14,7 @@ import {
   dueInfo,
   intoText,
   RecurringPayment,
-  renewalOf,
+  nextChangeOf,
   scheduleText
 } from '~/lib/payments';
 import { rowClasses } from './rowClasses';
@@ -32,7 +32,7 @@ export const RecurringRow = ({
   // Before payday is about what's left to pay, so it shows where each payment stands this cycle.
   // Renewals have their own tab.
   const beforePayday = tab === 'cycle';
-  const renewal = beforePayday ? null : renewalOf(payment, today);
+  const next = beforePayday ? null : nextChangeOf(payment, today);
   const into = intoText(payment);
 
   return (
@@ -58,8 +58,8 @@ export const RecurringRow = ({
           )}
           {beforePayday ? (
             <StatusTag payment={payment} cycle={cycle} className="h-[22px] wide:hidden" />
-          ) : renewal ? (
-            <RenewalTag renewal={renewal} today={today} className="h-[22px] wide:hidden" />
+          ) : next ? (
+            <NextChangeTag next={next} today={today} className="h-[22px] wide:hidden" />
           ) : null}
         </div>
       </PaymentRowStart>
@@ -75,8 +75,8 @@ export const RecurringRow = ({
       <span role="cell" className="hidden wide:block">
         {beforePayday ? (
           <StatusTag payment={payment} cycle={cycle} />
-        ) : renewal ? (
-          <RenewalTag renewal={renewal} today={today} short />
+        ) : next ? (
+          <NextChangeTag next={next} today={today} form="short" />
         ) : (
           <span className="text-sm text-faint">—</span>
         )}

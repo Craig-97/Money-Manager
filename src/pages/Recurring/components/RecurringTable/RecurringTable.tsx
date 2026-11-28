@@ -38,7 +38,7 @@ export const RecurringTable = ({ recurring }: { recurring: Recurring }) => {
             </span>
             <span role="columnheader">Next due</span>
             <span role="columnheader" className="hidden wide:block">
-              {tab === 'cycle' ? 'Status' : 'Renewal'}
+              {tab === 'cycle' ? 'Status' : 'Renews or ends'}
             </span>
           </PaymentTableHead>
         ) : null}

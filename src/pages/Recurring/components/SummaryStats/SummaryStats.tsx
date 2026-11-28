@@ -13,7 +13,7 @@ const figureClasses = 'num text-[32px] leading-[1.1] font-extrabold';
 /* Desktop: monthly recurring, what's still to pay before payday, and renewals coming up */
 export const SummaryStats = ({ recurring }: { recurring: Recurring }) => {
   const { totals, renewals, cycle, today } = recurring;
-  const next = renewals.shown.find(item => !item.renewal.passed);
+  const next = renewals.shown.find(item => !item.next.passed);
 
   return (
     <section
@@ -58,7 +58,7 @@ export const SummaryStats = ({ recurring }: { recurring: Recurring }) => {
             <>
               Next:{' '}
               <span className="font-bold text-text">
-                {next.payment.name}, {formatShortDate(next.renewal.date, today)}
+                {next.payment.name}, {formatShortDate(next.next.date, today)}
               </span>
             </>
           ) : (

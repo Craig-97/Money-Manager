@@ -1,13 +1,13 @@
-import { accentTagClasses, PaymentIcon, redTagClasses, tagClasses } from '~/components/payments';
+import { NextChangeTag, PaymentIcon } from '~/components/payments';
 import { formatMoney } from '~/lib/format';
-import { renewalLine, renewalWhen } from '~/lib/payments';
+import { nextChangeLine } from '~/lib/payments';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
 import { RenewalItem } from '../../recurringModel';
 
-/* One renewal: what renews, when and for how much, opening the payment to check it */
+/* One renewal or rate end: what, when and for how much, opening the payment to check it */
 export const RenewalRow = ({ item, today }: { item: RenewalItem; today: Date }) => {
   const openEdit = usePaymentDialogStore(s => s.openEdit);
-  const { payment, renewal } = item;
+  const { payment, next } = item;
 
   return (
     <button
@@ -19,13 +19,10 @@ export const RenewalRow = ({ item, today }: { item: RenewalItem; today: Date }) 
       <span className="min-w-0 flex-1">
         <span className="block text-[15px] font-bold">{payment.name}</span>
         <span className="mt-0.5 block text-xs font-medium text-muted">
-          {renewalLine(payment, { renewal, today, money: formatMoney(payment.amount) })}
+          {nextChangeLine(payment, { next, today, money: formatMoney(payment.amount) })}
         </span>
       </span>
-      <span
-        className={renewal.passed ? redTagClasses : renewal.soon ? accentTagClasses : tagClasses}>
-        {renewalWhen(renewal)}
-      </span>
+      <NextChangeTag next={next} today={today} form="when" />
     </button>
   );
 };

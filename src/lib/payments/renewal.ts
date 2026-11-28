@@ -1,5 +1,5 @@
 import { PaymentFrequency } from '~/graphql/generated';
-import { daysBetween, formatDayMonth, formatMonthYear, formatShortDate, inDays } from '../dates';
+import { daysBetween, formatDayMonth, formatDayMonthYear, formatMonthYear, inDays } from '../dates';
 import { capitalise } from '../format';
 import { Payment, RecurringPayment } from './payments';
 
@@ -55,14 +55,14 @@ export const renewalOf = (payment: RecurringPayment, today: Date): Renewal | nul
   };
 };
 
+/* "19 Jan", with the year when it isn't this year: "1 Mar 2027" */
+export const dayMonthUnlessThisYear = (date: Date, today: Date) =>
+  date.getFullYear() === today.getFullYear() ? formatDayMonth(date) : formatDayMonthYear(date);
+
 /* For the Renewal column, whose heading says what it is: "In 22 days", "19 Jan", "Needs renewing" */
 export const renewalDay = (renewal: Renewal, today: Date) => {
   if (renewal.passed) return 'Needs renewing';
-  if (!renewal.soon) {
-    const year =
-      renewal.date.getFullYear() === today.getFullYear() ? '' : ` ${renewal.date.getFullYear()}`;
-    return `${formatDayMonth(renewal.date)}${year}`;
-  }
+  if (!renewal.soon) return dayMonthUnlessThisYear(renewal.date, today);
   return capitalise(inDays(renewal.days));
 };
 
@@ -86,6 +86,11 @@ export const renewalHeading = (
 export const renewalWhen = (renewal: Renewal) => {
   const { days } = renewal;
   if (renewal.passed) return 'Needs renewing';
+  return timeUntil(days);
+};
+
+/* "Today", "Tomorrow", "22 days", "17 weeks", "8 months", "2 years" */
+export const timeUntil = (days: number) => {
   if (days === 0) return 'Today';
   if (days === 1) return 'Tomorrow';
   if (days < 60) return `${days} days`;
@@ -93,13 +98,6 @@ export const renewalWhen = (renewal: Renewal) => {
   if (days < 730) return `${Math.round(days / 30.44)} months`;
   return `${Math.round(days / 365.25)} years`;
 };
-
-/* "Fri 2 Oct · £612.00 a year", or "Renewed Mon 28 Sep · …" once it has gone by */
-export const renewalLine = (
-  payment: RecurringPayment,
-  { renewal, today, money }: { renewal: Renewal; today: Date; money: string }
-) =>
-  `${renewal.passed ? 'Renewed ' : ''}${formatShortDate(renewal.date, today)} · ${money} ${PER_PERIOD[payment.frequency]}`;
 
 // The windows the renewals list can cover, shortest first
 const WINDOWS = [
@@ -127,25 +125,25 @@ const SHOWN = 3;
  * month when several are close, up to two years when they're spread out. Ones that need renewing
  * always come first and don't decide the window.
  */
-export const renewalWindow = <T extends { renewal: Renewal }>(items: T[]): RenewalWindow<T> => {
-  const sorted = items.toSorted((a, b) => a.renewal.date.getTime() - b.renewal.date.getTime());
-  const passed = sorted.filter(item => item.renewal.passed);
-  const coming = sorted.filter(item => !item.renewal.passed);
+export const renewalWindow = <T extends { next: Renewal }>(items: T[]): RenewalWindow<T> => {
+  const sorted = items.toSorted((a, b) => a.next.date.getTime() - b.next.date.getTime());
+  const passed = sorted.filter(item => item.next.passed);
+  const coming = sorted.filter(item => !item.next.passed);
   if (coming.length === 0)
     return { shown: passed.slice(0, SHOWN), count: passed.length, label: '' };
 
-  const target = coming[Math.min(SHOWN, coming.length) - 1].renewal.days;
+  const target = coming[Math.min(SHOWN, coming.length) - 1].next.days;
   // The window holding the soonest few; failing that, one holding at least the next
   const window =
-    WINDOWS.find(w => target <= w.days) ?? WINDOWS.find(w => coming[0].renewal.days <= w.days);
+    WINDOWS.find(w => target <= w.days) ?? WINDOWS.find(w => coming[0].next.days <= w.days);
   if (!window) {
     return {
       shown: [...passed, coming[0]].slice(0, SHOWN),
       count: passed.length,
-      label: `Next in ${formatMonthYear(coming[0].renewal.date)}`
+      label: `Next in ${formatMonthYear(coming[0].next.date)}`
     };
   }
-  const inWindow = coming.filter(item => item.renewal.days <= window.days);
+  const inWindow = coming.filter(item => item.next.days <= window.days);
   return {
     shown: [...passed, ...inWindow].slice(0, SHOWN),
     count: passed.length + inWindow.length,

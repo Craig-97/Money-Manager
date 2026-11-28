@@ -11,8 +11,8 @@ import {
   PER_MONTH,
   PER_YEAR,
   RecurringPayment,
-  Renewal,
-  renewalOf,
+  RenewalChange,
+  renewalChangeOf,
   renewalWindow,
   sortPayments,
   summarise
@@ -42,7 +42,7 @@ const inTab = (
 ) =>
   tab === 'all' ||
   (tab === 'cycle' && isInCycle(payment, cycle)) ||
-  (tab === 'renewals' && renewalOf(payment, today) !== null);
+  (tab === 'renewals' && renewalChangeOf(payment, today) !== null);
 
 /* The payments a tab lists, narrowed by the search and category, in the chosen order */
 export const filterPayments = (
@@ -196,14 +196,14 @@ const sliceColour = (index: number, count: number) => {
 
 export interface RenewalItem {
   payment: RecurringPayment;
-  renewal: Renewal;
+  next: RenewalChange;
 }
 
-/* The payments with a renewal, and the soonest few in a window that makes sense of them */
+/* The payments with a renewal or a rate end, and the soonest few in a window that makes sense of them */
 export const upcomingRenewals = (payments: RecurringPayment[], { today }: { today: Date }) => {
   const items = payments.flatMap(payment => {
-    const renewal = renewalOf(payment, today);
-    return renewal ? [{ payment, renewal }] : [];
+    const next = renewalChangeOf(payment, today);
+    return next ? [{ payment, next }] : [];
   });
   return { ...renewalWindow(items), total: items.length };
 };

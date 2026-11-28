@@ -309,6 +309,16 @@ const demoBudget = (scenario: string | null): FakeBudget => {
         startedInDays: -247
       }),
       mockPayment({
+        // Its next payment is its last, so the amber Last one tag shows
+        id: 'gym',
+        name: 'Gym membership',
+        amount: 32,
+        category: 'PERSONAL_CARE',
+        dueInDays: 12,
+        startedInDays: -353,
+        lastPaymentDate: fromToday(12)
+      }),
+      mockPayment({
         id: 'prime',
         name: 'Amazon Prime',
         amount: 95,
