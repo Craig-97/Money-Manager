@@ -118,6 +118,49 @@ const withJoint = (): FakeBudget => {
   };
 };
 
+// A mortgage whose fixed rate ends on a given day
+const mortgage = (rateEndsOn: string) =>
+  fakeRecurring({
+    id: 'mortgage',
+    name: 'Mortgage',
+    amount: 750,
+    category: 'FINANCES',
+    firstPaymentDate: apiDate('2025-10-26'),
+    debt: {
+      balance: 148200,
+      startingBalance: 165000,
+      apr: 4.29,
+      balanceUpdatedAt: null,
+      rateEndsOn: apiDate(rateEndsOn)
+    }
+  });
+
+// Greensleeves stops after a last payment in March, the gym after one next week, and the mortgage's
+// fixed rate ends on a given day
+const withEnds = (rateEndsOn = '2027-03-01'): FakeBudget => {
+  const data = budget();
+  return {
+    ...data,
+    recurringPayments: [
+      ...data.recurringPayments,
+      fakeRecurring({
+        id: 'sleeves',
+        name: 'Greensleeves',
+        category: 'FAMILY',
+        lastPaymentDate: apiDate('2027-03-01')
+      }),
+      fakeRecurring({
+        id: 'gym',
+        name: 'Gym membership',
+        category: 'PERSONAL_CARE',
+        firstPaymentDate: apiDate('2025-10-09'),
+        lastPaymentDate: apiDate('2026-10-09')
+      }),
+      mortgage(rateEndsOn)
+    ]
+  };
+};
+
 const renderRecurring = (data = budget()) => renderApp({ route: '/recurring', budget: data });
 
 describe('recurring page', () => {
@@ -162,6 +205,52 @@ describe('recurring page', () => {
     expect(within(table).getByText('3 payments · renewing')).toBeInTheDocument();
   });
 
+  it('tags what ends in the table: a stop in amber, a rate end like a renewal', async () => {
+    renderRecurring(withEnds());
+
+    const table = await screen.findByRole('table', { name: 'Recurring payments' });
+    expect(within(table).getByRole('columnheader', { name: 'Renews or ends' })).toBeInTheDocument();
+    // In the column, and again under the name for narrower screens
+    expect(within(table).getAllByText('Ends 1 Mar 2027')).toHaveLength(2);
+    expect(within(table).getAllByText('Last one in 7 days')).toHaveLength(2);
+    expect(within(table).getAllByText('Rate ends 1 Mar 2027')).toHaveLength(2);
+    expect(within(table).getAllByText('Ends 1 Mar 2027')[0]).toHaveClass('text-warn');
+    expect(within(table).getAllByText('Last one in 7 days')[0]).toHaveClass('text-warn');
+    expect(within(table).getAllByText('Rate ends 1 Mar 2027')[0]).not.toHaveClass('text-warn');
+  });
+
+  it('shows a rate end coming up in the accent, and one gone by in red', async () => {
+    const { unmount } = renderRecurring(withEnds('2026-11-20'));
+    const table = await screen.findByRole('table', { name: 'Recurring payments' });
+    expect(within(table).getAllByText('Rate ends in 49 days')[0]).toHaveClass('text-accent-text');
+    unmount();
+
+    renderRecurring(withEnds('2026-09-20'));
+    const after = await screen.findByRole('table', { name: 'Recurring payments' });
+    expect(within(after).getAllByText('Rate ended')[0]).toHaveClass('text-expense');
+  });
+
+  it('lists rate ends in the Renewals tab and tile, but not payments that stop', async () => {
+    const { user } = renderRecurring(withEnds('2026-10-20'));
+
+    const tile = await screen.findByRole('region', { name: 'Renewals coming up' });
+    expect(await within(tile).findByRole('button', { name: /Mortgage/ })).toHaveTextContent(
+      'MortgageTue 20 Oct · £750.00 a monthRate ends in 18 days'
+    );
+    expect(within(tile).queryByRole('button', { name: /Greensleeves/ })).not.toBeInTheDocument();
+    expect(within(tile).queryByRole('button', { name: /Gym/ })).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('radio', { name: /Renewals/ }));
+
+    const table = screen.getByRole('table', { name: 'Recurring payments' });
+    const names = within(table)
+      .getAllByRole('row')
+      .slice(1)
+      .map(row => within(row).getAllByRole('button')[0].textContent);
+    // In the table's usual order, by next due date
+    expect(names).toEqual(['Home insurance', 'Car insurance', 'Mortgage', 'Breakdown cover']);
+  });
+
   it('shows where each payment stands before payday, leaving renewals to their own tab', async () => {
     const { user } = renderRecurring();
 
@@ -169,7 +258,9 @@ describe('recurring page', () => {
 
     const table = screen.getByRole('table', { name: 'Recurring payments' });
     expect(within(table).getByRole('columnheader', { name: 'Status' })).toBeInTheDocument();
-    expect(within(table).queryByRole('columnheader', { name: 'Renewal' })).not.toBeInTheDocument();
+    expect(
+      within(table).queryByRole('columnheader', { name: 'Renews or ends' })
+    ).not.toBeInTheDocument();
     expect(within(table).queryByText('Renews in 22 days')).not.toBeInTheDocument();
     expect(within(table).getAllByText('1 of 5 paid')).not.toHaveLength(0);
   });
@@ -458,6 +549,15 @@ describe('recurring page on mobile', () => {
     expect(
       await screen.findByRole('dialog', { name: 'Add recurring payment' })
     ).toBeInTheDocument();
+  });
+
+  it('says what ends under the name: a stop, a last one and a rate end', async () => {
+    renderRecurring(withEnds());
+
+    const row = async (name: string) => (await screen.findByRole('button', { name })).textContent;
+    expect(await row('Greensleeves')).toContain('Monthly · Ends 1 Mar 2027');
+    expect(await row('Gym membership')).toContain('Monthly · Last one in 7 days');
+    expect(await row('Mortgage')).toContain('Rate ends 1 Mar 2027');
   });
 
   it('says how often each payment goes, then its renewal or, before payday, where it stands', async () => {

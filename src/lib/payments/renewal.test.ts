@@ -123,7 +123,7 @@ describe('renewal labels', () => {
 });
 
 describe('renewalWindow', () => {
-  const item = (days: number, passed = false) => ({ renewal: renewal(days, { passed }) });
+  const item = (days: number, passed = false) => ({ next: renewal(days, { passed }) });
 
   it('uses the shortest window that holds the soonest three', () => {
     const items = [item(5), item(12), item(20), item(200)];
@@ -143,12 +143,12 @@ describe('renewalWindow', () => {
 
   it('puts ones that need renewing first, without letting them set the window', () => {
     const result = renewalWindow([item(100), item(-3, true)]);
-    expect(result.shown.map(entry => entry.renewal.days)).toEqual([-3, 100]);
+    expect(result.shown.map(entry => entry.next.days)).toEqual([-3, 100]);
     expect(result).toMatchObject({ label: 'Next 6 months', count: 2 });
   });
 
   it('names the month when even the soonest is more than two years away', () => {
-    const far = { renewal: { ...renewal(900), date: day('2029-03-21') } };
+    const far = { next: { ...renewal(900), date: day('2029-03-21') } };
     expect(renewalWindow([far])).toMatchObject({
       label: 'Next in Mar 2029',
       count: 0
