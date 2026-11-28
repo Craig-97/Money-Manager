@@ -47,6 +47,9 @@ export interface Debt {
   // Interest built up since the last payment, unrounded, counted up to the start of accruedTo
   accrued: number;
   accruedTo: Date | null;
+  // When a fixed or offer rate ends, like a mortgage fix or a 0% card. Its reminder is the
+  // payment's renewalReminder.
+  rateEndsOn: Date | null;
 }
 
 interface BasePayment {
@@ -173,7 +176,8 @@ const toRecurringPayment = (
           balanceUpdatedAt: fromApiDate(payment.debt.balanceUpdatedAt),
           paidOffThisCycle: payment.debt.paidOffThisCycle,
           accrued: payment.debt.accrued,
-          accruedTo: fromApiDate(payment.debt.accruedTo)
+          accruedTo: fromApiDate(payment.debt.accruedTo),
+          rateEndsOn: fromApiDate(payment.debt.rateEndsOn)
         }
       : null,
     account: payment.account ?? null,

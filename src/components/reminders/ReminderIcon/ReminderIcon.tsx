@@ -15,6 +15,8 @@ const ICONS: Record<ReminderKind, typeof Clock> = {
   overdue: CircleAlert,
   renewal: RefreshCw,
   renewed: RefreshCw,
+  rateEnds: Percent,
+  rateEnded: Percent,
   note: FileText,
   payday: CalendarDays,
   balance: Landmark,

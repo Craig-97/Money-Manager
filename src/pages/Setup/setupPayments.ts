@@ -61,7 +61,8 @@ export const regularAsPayment = (
           balanceUpdatedAt: null,
           paidOffThisCycle: 0,
           accrued: 0,
-          accruedTo: null
+          accruedTo: null,
+          rateEndsOn: day(input.debt.rateEndsOn)
         }
       : null,
     account: input.account ?? null,

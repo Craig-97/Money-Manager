@@ -44,6 +44,9 @@ export const useReminderOpen = (budgetId: string) => {
         const next = editPayment('Set next renewal');
         return next ? { ...next, also: noteOpen } : noteOpen;
       }
+      case 'rateEnds':
+      case 'rateEnded':
+        return editPayment('Update rate');
       case 'note':
         return noteOpen;
       case 'payday':

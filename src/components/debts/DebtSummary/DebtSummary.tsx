@@ -10,7 +10,7 @@ import {
   simulatePayoff
 } from '~/lib/debts';
 import { formatMoney } from '~/lib/format';
-import { PER_PERIOD } from '~/lib/payments';
+import { PER_PERIOD, rateEndsLine } from '~/lib/payments';
 import { InterestStrip } from '../../accounts';
 import { PaymentIcon, summaryCardClasses } from '../../payments';
 import { DebtProgress } from '../DebtProgress';
@@ -47,6 +47,11 @@ export const DebtSummary = ({ debt, today, named = false }: DebtSummaryProps) =>
           {PER_PERIOD[debt.frequency]} ·{' '}
           {cleared === 'Never' ? 'not cleared at this payment' : `clears ${cleared}`}
         </p>
+        {!named && debt.debt.rateEndsOn ? (
+          <p className="mt-0.5 text-xs font-semibold text-muted">
+            {rateEndsLine(debt.debt.rateEndsOn, today)}
+          </p>
+        ) : null}
       </div>
       {named ? null : (
         <div className="flex basis-full items-center gap-2.5">

@@ -210,12 +210,14 @@ export type Debt = {
   balance: Scalars['Float']['output'];
   balanceUpdatedAt: Maybe<Scalars['String']['output']>;
   paidOffThisCycle: Scalars['Float']['output'];
+  rateEndsOn: Maybe<Scalars['String']['output']>;
   startingBalance: Maybe<Scalars['Float']['output']>;
 };
 
 export type DebtInput = {
   apr: Scalars['Float']['input'];
   balance: Scalars['Float']['input'];
+  rateEndsOn?: InputMaybe<Scalars['String']['input']>;
   startingBalance?: InputMaybe<Scalars['Float']['input']>;
 };
 

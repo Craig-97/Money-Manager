@@ -9,6 +9,7 @@ import {
   whenPaid
 } from '~/lib/debts';
 import { formatMoney } from '~/lib/format';
+import { rateUntilText } from '~/lib/payments';
 import { useDebtViewStore } from '~/state/debtView';
 import { Debts } from '../../hooks';
 import { DebtMenu } from '../DebtMenu';
@@ -45,8 +46,13 @@ export const DebtRow = ({ debt, debts }: { debt: DebtPayment; debts: Debts }) =>
           </p>
         </div>
       </div>
-      <span role="cell" className="num text-sm font-bold">
-        {aprText(debt.debt.apr)}
+      <span role="cell" className="flex min-w-0 flex-col">
+        <span className="num text-sm font-bold">{aprText(debt.debt.apr)}</span>
+        {debt.debt.rateEndsOn ? (
+          <span className="text-xs font-semibold text-muted">
+            {rateUntilText(debt.debt.rateEndsOn)}
+          </span>
+        ) : null}
       </span>
       <span role="cell" className="hidden num text-sm font-bold wide:block">
         {formatMoney(monthly, { whole: Number.isInteger(monthly) })}

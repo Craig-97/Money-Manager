@@ -33,12 +33,15 @@ import {
   Payment,
   PAYMENT_REMINDER_DAYS,
   PaymentKind,
+  RATE_ENDS_USUAL_DAYS,
+  rateEndsTimingOptions,
   reminderDays,
   ReminderSettings,
   RENEWAL_REMINDER_DAYS,
   scheduleText,
   TimingChoice,
   timingOptions,
+  toRateEndsChoice,
   toTimingChoice
 } from '~/lib/payments';
 import { showErrorToast, showToast } from '~/state/toast';
@@ -82,6 +85,8 @@ interface PaymentFormValues {
   balance: string;
   apr: string;
   started: string;
+  // When its fixed or offer rate ends; '' for no end
+  rateEnds: string;
 }
 
 type TouchedField = 'name' | 'amount' | 'balance' | 'apr' | 'started' | 'logo';
@@ -127,7 +132,8 @@ const initialValues = ({
     logo: '',
     balance: '',
     apr: '',
-    started: ''
+    started: '',
+    rateEnds: ''
   };
   if (!payment) return blank;
 
@@ -158,7 +164,8 @@ const initialValues = ({
         started:
           payment.debt?.startingBalance != null
             ? formatMoneyInput(payment.debt.startingBalance)
-            : ''
+            : '',
+        rateEnds: iso(payment.debt?.rateEndsOn ?? null)
       }
     : { ...common, date: iso(payment.dueDate) };
 };
@@ -175,29 +182,47 @@ const recurringEnding = (values: PaymentFormValues) => {
   return { yearly, ends, reminds: ends === 'renew' || (ends === 'keep' && yearly) };
 };
 
+/*
+ * The choice for the reminder before it renews, or for a debt before its rate ends, which is
+ * 3 months before unless chosen. 3 months is only for a rate end, so a payment that isn't a debt
+ * goes back to the usual timing.
+ */
+const reminderChoice = (values: PaymentFormValues): TimingChoice => {
+  if (values.tracked) return toRateEndsChoice(values.reminder);
+  return values.reminder === `${RATE_ENDS_USUAL_DAYS}` ? 'usual' : values.reminder;
+};
+
 /* A recurring payment's ending and reminders as the API takes them */
 const endingFields = (values: PaymentFormValues) => {
   const { ends } = recurringEnding(values);
+  // Without a rate end a debt has nothing to remind about
+  const choice = values.tracked && !values.rateEnds ? 'usual' : reminderChoice(values);
   return {
     lastPaymentDate: ends === 'stop' ? values.end : null,
     renewalDate: ends === 'renew' ? values.renewal : null,
     dueReminder: fromTimingChoice(values.dueReminder),
-    renewalReminder: fromTimingChoice(values.reminder)
+    renewalReminder: fromTimingChoice(choice)
   };
 };
 
 const sameEnding = (a: PaymentFormValues, b: PaymentFormValues) =>
   JSON.stringify(endingFields(a)) === JSON.stringify(endingFields(b));
 
-// A debt's figures as the API takes them, or null when it isn't one or they aren't filled in yet
-const debtFields = (values: PaymentFormValues) => {
+/*
+ * A debt's figures as the API takes them, or null when it isn't one or they aren't filled in yet.
+ * With no rate end they leave it out, which keeps one that's saved; given what the form started
+ * with, null clears a saved one.
+ */
+const debtFields = (values: PaymentFormValues, before?: PaymentFormValues) => {
   const balance = parseMoney(values.balance);
   const apr = parseApr(values.apr);
   if (!values.tracked || balance === null || apr === null) return null;
+  const rateEndsOn = values.rateEnds || (before?.rateEnds ? null : undefined);
   return {
     balance,
     apr,
-    startingBalance: values.started.trim() ? parseMoney(values.started) : null
+    startingBalance: values.started.trim() ? parseMoney(values.started) : null,
+    ...(rateEndsOn === undefined ? {} : { rateEndsOn })
   };
 };
 
@@ -205,7 +230,10 @@ const sameDebt = (a: PaymentFormValues, b: PaymentFormValues) => {
   const x = debtFields(a);
   const y = debtFields(b);
   return (
-    x?.balance === y?.balance && x?.apr === y?.apr && x?.startingBalance === y?.startingBalance
+    x?.balance === y?.balance &&
+    x?.apr === y?.apr &&
+    x?.startingBalance === y?.startingBalance &&
+    x?.rateEndsOn === y?.rateEndsOn
   );
 };
 
@@ -480,7 +508,8 @@ export const usePaymentForm = ({
       (several && !!start.account && start.account !== paidInto?.id) ||
       start.dueReminder !== 'usual' ||
       (kind === 'recurring' && start.nonWorkingDay !== 'usual') ||
-      (kind === 'recurring' && ending.reminds && start.reminder !== 'usual')
+      (kind === 'recurring' && ending.reminds && start.reminder !== 'usual') ||
+      (start.tracked && !!start.rateEnds && reminderChoice(start) !== `${RATE_ENDS_USUAL_DAYS}`)
     );
   };
   const [values, setValues] = useState(startValues);
@@ -575,6 +604,15 @@ export const usePaymentForm = ({
   const savedPassed = !!savedRenewal && savedRenewal < today;
   const renewalPassed = ends === 'renew' && savedPassed && values.renewal === iso(savedRenewal);
 
+  // The saved rate end has gone by and hasn't been moved on yet, so the form asks about the new one
+  const savedRateEnd = payment?.kind === 'recurring' ? (payment.debt?.rateEndsOn ?? null) : null;
+  const rateEndPassed =
+    values.tracked &&
+    !!savedRateEnd &&
+    savedRateEnd < today &&
+    values.rateEnds === iso(savedRateEnd);
+  const rateEnd = parseIsoDate(values.rateEnds);
+
   const errors = {
     name: nameTaken ?? (touched.name && !nameOk ? 'Enter a name' : undefined),
     amount: touched.amount && !amountOk ? 'Enter an amount above £0' : undefined,
@@ -608,6 +646,14 @@ export const usePaymentForm = ({
       ends: 'stop',
       end: lastBefore ? iso(lastBefore) : current.end
     }));
+  };
+
+  // Set new rate end: the same day a year on, or as many years on as it takes to reach today
+  const setNextRateEnd = () => {
+    if (!rateEnd) return;
+    let next = addYear(rateEnd);
+    while (next < today) next = addYear(next);
+    setValues(current => ({ ...current, rateEnds: iso(next) }));
   };
 
   const save = async () => {
@@ -702,7 +748,7 @@ export const usePaymentForm = ({
                 ...iconUrlField(payment.iconUrl),
                 // Sent when it's a debt, and as null to stop tracking one
                 ...(values.tracked
-                  ? { debt: debtFields(values) }
+                  ? { debt: debtFields(values, before) }
                   : before.tracked
                     ? { debt: null }
                     : {})
@@ -790,9 +836,15 @@ export const usePaymentForm = ({
         }
       : undefined;
 
-  // What's under More options, in one line: where it goes out of or into, then the reminders
-  const reminds = kind === 'recurring' && ending.reminds && !renewalPassed;
-  const renewalDays = reminderDays(fromTimingChoice(values.reminder), settings.renewalDays);
+  // What's under More options, in one line: where it goes out of or into, then the reminders. A
+  // debt with a rate end reminds before it, in place of a renewal.
+  const remindsRateEnd =
+    kind === 'recurring' && values.tracked && !!values.rateEnds && !rateEndPassed;
+  const reminds = remindsRateEnd || (kind === 'recurring' && ending.reminds && !renewalPassed);
+  const renewalDays = reminderDays(
+    fromTimingChoice(reminderChoice(values)),
+    remindsRateEnd ? RATE_ENDS_USUAL_DAYS : settings.renewalDays
+  );
   const moreSummary = [
     choices.several && choices.from
       ? `${values.type === 'INCOME' ? 'Into' : 'From'} ${choices.from.name}`
@@ -800,8 +852,10 @@ export const usePaymentForm = ({
     reminderText(values.dueReminder, settings.paymentDays),
     reminds
       ? renewalDays === null
-        ? 'no renewal reminder'
-        : `${daysBeforeText(renewalDays).toLowerCase()} it renews`
+        ? remindsRateEnd
+          ? 'no rate end reminder'
+          : 'no renewal reminder'
+        : `${daysBeforeText(renewalDays).toLowerCase()} ${remindsRateEnd ? 'the rate ends' : 'it renews'}`
       : null,
     move && values.nonWorkingDay !== 'usual' ? NON_WORKING_DAY_SUMMARY[values.nonWorkingDay] : null,
     logoSummary(logo)
@@ -856,7 +910,14 @@ export const usePaymentForm = ({
     // The choices for each reminder, saying what the usual timing is
     reminderOptions: {
       due: timingOptions({ days: PAYMENT_REMINDER_DAYS, usual: settings.paymentDays }),
-      renewal: timingOptions({ days: RENEWAL_REMINDER_DAYS, usual: settings.renewalDays })
+      // Before it renews, or before a debt's rate ends, which is 3 months before unless chosen
+      renewal: remindsRateEnd
+        ? rateEndsTimingOptions
+        : timingOptions({ days: RENEWAL_REMINDER_DAYS, usual: settings.renewalDays })
+    },
+    renewalReminder: {
+      label: remindsRateEnd ? 'Remind me before the rate ends' : 'Remind me before it renews',
+      value: reminderChoice(values)
     },
     // Opened from Debts: always a debt, so there's no switch to stop tracking it
     asDebt,
@@ -866,6 +927,10 @@ export const usePaymentForm = ({
     endsHint: endsHint(values, today),
     ending,
     renewalPassed,
+    // A rate end that has gone by without a new one, and the choices it prompts
+    rateEndPassed: rateEndPassed && rateEnd ? rateEnd : null,
+    setNextRateEnd,
+    noRateEnd: () => setValues(current => ({ ...current, rateEnds: '' })),
     // Moved on from a renewal that had gone by, so the price may have changed with it
     renewalMoved: ends === 'renew' && savedPassed && values.renewal !== iso(savedRenewal),
     setNextRenewal,

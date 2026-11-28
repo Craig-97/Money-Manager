@@ -5,7 +5,12 @@ import { Note, noteDateFrom, noteHeading, remindText, repeatText } from '../note
 import { PayCycle } from '../payday';
 import {
   Payment,
+  RateEnd,
+  rateEndHeading,
+  rateEndOf,
   ReminderSettings,
+  reminderDays,
+  RATE_ENDS_USUAL_DAYS,
   Renewal,
   renewalHeading,
   renewalOf,
@@ -27,6 +32,8 @@ export type ReminderKind =
   | 'overdue'
   | 'renewal'
   | 'renewed'
+  | 'rateEnds'
+  | 'rateEnded'
   | 'note'
   | 'payday'
   | 'balance'
@@ -116,6 +123,8 @@ const LATER_DAYS: Record<ReminderKind, number> = {
   overdue: 1,
   renewal: 3,
   renewed: 3,
+  rateEnds: 3,
+  rateEnded: 3,
   note: 3,
   payday: 1,
   balance: 3,
@@ -130,6 +139,10 @@ const keyOf = (kind: string, ...parts: (string | Date)[]) =>
 /* A renewal's key, shared by the dashboard's alert and the reminder */
 export const renewalKey = (payment: Pick<Payment, 'id'>, renewal: Renewal) =>
   keyOf(renewal.passed ? 'renewed' : 'renewal', payment.id, renewal.date);
+
+/* A rate end's key, shared by the dashboard's alert and the reminder */
+export const rateEndKey = (payment: Pick<Payment, 'id'>, rateEnd: RateEnd) =>
+  keyOf(rateEnd.passed ? 'rateended' : 'rateends', payment.id, rateEnd.date);
 
 /* A payment's due date's key, shared by the dashboard's due today alert and the reminder */
 export const dueKey = (payment: Pick<Payment, 'id'>, due: Date) => keyOf('due', payment.id, due);
@@ -244,6 +257,49 @@ const renewalEvents = ({ payments, notes, today }: ReminderSources) =>
         title: renewalHeading(payment, { renewal, today }),
         name: `${payment.name} renews`,
         body: `${formatShortDate(renewal.date, today)} · ${formatMoney(payment.amount)} · check the price${noteText}`
+      }
+    ];
+  });
+
+/* A debt's rate ending, like a renewal: check the new rate and payment */
+const rateEndEvents = ({ payments, today }: ReminderSources) =>
+  payments.flatMap((payment): Omit<Reminder, 'read'>[] => {
+    if (payment.kind !== 'recurring') return [];
+    const rateEnd = rateEndOf(payment, today);
+    if (!rateEnd) return [];
+    const base = {
+      key: rateEndKey(payment, rateEnd),
+      date: rateEnd.date,
+      amount: null,
+      payment,
+      note: null,
+      paymentNote: null
+    };
+
+    if (rateEnd.passed) {
+      return [
+        {
+          ...base,
+          kind: 'rateEnded',
+          firesOn: rateEnd.date,
+          timing: 'Ended',
+          title: rateEndHeading(payment, rateEnd),
+          name: `${payment.name} rate has ended`,
+          body: `${formatShortDate(rateEnd.date, today)} · update the APR and payment, then set the new rate end`
+        }
+      ];
+    }
+
+    const days = reminderDays(payment.renewalReminder, RATE_ENDS_USUAL_DAYS);
+    return [
+      {
+        ...base,
+        kind: 'rateEnds',
+        firesOn: days === null ? null : addDays(rateEnd.date, -days),
+        timing: timingText(days),
+        title: rateEndHeading(payment, rateEnd),
+        name: `${payment.name} rate ends`,
+        body: 'Check your new rate and payment'
       }
     ];
   });
@@ -432,11 +488,14 @@ const isPutAway = (state: ReminderState | undefined, today: Date) =>
 export const isAway = (state: ReminderState | undefined, today: Date) =>
   !!state?.cleared || isPutAway(state, today);
 
-/* The timing a payment's reminder goes by: the renewal's for a renewal, otherwise when it's due */
+/*
+ * The timing a payment's reminder goes by: the renewal's for a renewal or a rate end, otherwise
+ * when it's due
+ */
 export const timingOf = ({ kind, payment }: Pick<Reminder, 'kind' | 'payment'>) =>
   !payment
     ? null
-    : kind === 'renewal' && payment.kind === 'recurring'
+    : (kind === 'renewal' || kind === 'rateEnds') && payment.kind === 'recurring'
       ? payment.renewalReminder
       : payment.dueReminder;
 
@@ -467,6 +526,7 @@ const allReminders = (sources: ReminderSources): Reminder[] =>
   [
     ...paymentEvents(sources),
     ...renewalEvents(sources),
+    ...rateEndEvents(sources),
     ...noteEvents(sources),
     ...paydayEvents(sources),
     ...balanceEvents(sources),
@@ -499,6 +559,7 @@ export const upcomingReminders = (sources: ReminderSources) =>
         reminder.date >= sources.today &&
         reminder.kind !== 'overdue' &&
         reminder.kind !== 'renewed' &&
+        reminder.kind !== 'rateEnded' &&
         // Not events, only nudges once they're due
         reminder.kind !== 'balance' &&
         reminder.kind !== 'interestAdded' &&
@@ -508,7 +569,7 @@ export const upcomingReminders = (sources: ReminderSources) =>
 
 const FILTER_KINDS: Record<Exclude<ReminderFilter, 'all'>, ReminderKind[]> = {
   payments: ['due', 'overdue', 'payday', 'interest', 'interestAdded'],
-  renewals: ['renewal', 'renewed'],
+  renewals: ['renewal', 'renewed', 'rateEnds', 'rateEnded'],
   notes: ['note']
 };
 
@@ -539,6 +600,9 @@ export const kindText = (reminder: Reminder) => {
     case 'renewal':
     case 'renewed':
       return reminder.paymentNote ? 'Renewal · has a note' : 'Renewal';
+    case 'rateEnds':
+    case 'rateEnded':
+      return 'Rate ends';
     case 'note':
       return 'Note';
     case 'payday':

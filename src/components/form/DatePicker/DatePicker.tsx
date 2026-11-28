@@ -13,6 +13,8 @@ interface DatePickerProps {
   onChange: (value: string) => void;
   // The earliest date that can be picked, 'YYYY-MM-DD'
   min?: string;
+  // For a date that's optional: offers Clear once there's one
+  onClear?: () => void;
   placeholder?: string;
   invalid?: boolean;
   disabled?: boolean;
@@ -29,6 +31,7 @@ export const DatePicker = ({
   value,
   onChange,
   min,
+  onClear,
   placeholder = 'Choose a date',
   invalid = false,
   disabled,
@@ -44,6 +47,11 @@ export const DatePicker = ({
 
   const pick = (date: Date) => {
     onChange(toIsoDate(date));
+    setOpen(false);
+  };
+
+  const clear = () => {
+    onClear?.();
     setOpen(false);
   };
 
@@ -86,6 +94,14 @@ export const DatePicker = ({
               className={cn(footerButtonClasses, 'text-accent-text')}>
               Today
             </button>
+            {onClear && selected ? (
+              <button
+                type="button"
+                onClick={clear}
+                className={cn(footerButtonClasses, 'text-muted')}>
+                Clear
+              </button>
+            ) : null}
             <Popover.Close className={cn(footerButtonClasses, 'text-muted')}>Close</Popover.Close>
           </div>
         </Popover.Content>

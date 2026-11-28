@@ -36,6 +36,7 @@ export const formatShortDate = (date: Date, today: Date) =>
 /* "1 month", "2 weeks", "3 days": how long before something */
 export const spanText = (days: number) => {
   if (days === 30) return '1 month';
+  if (days === 90) return '3 months';
   if (days % 7 === 0) return plural(days / 7, 'week');
   return plural(days, 'day');
 };
@@ -46,6 +47,9 @@ export const inDays = (days: number) =>
 
 /* "9 Oct" */
 export const formatDayMonth = (date: Date) => `${date.getDate()} ${MONTHS[date.getMonth()]}`;
+
+/* "9 Oct 2026" */
+export const formatDayMonthYear = (date: Date) => `${formatDayMonth(date)} ${date.getFullYear()}`;
 
 /* "Sep" */
 export const formatShortMonth = (date: Date) => MONTHS[date.getMonth()];

@@ -9,6 +9,10 @@ import { useNoteDialogStore } from '~/state/noteDialog';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
 import { groupByMonth, RemindersTab } from '../remindersModel';
 
+// Reminders with a timing of their own on the payment
+const hasOwnTiming = ({ kind }: Pick<Reminder, 'kind'>) =>
+  kind === 'due' || kind === 'renewal' || kind === 'rateEnds';
+
 /*
  * The Reminders page: New and Coming up (?tab=up), the filter on Coming up, and what each
  * reminder's menu does.
@@ -52,7 +56,7 @@ export const useRemindersPage = () => {
         run: () => void actions.changeSettings({ payday: !settings.payday }, settings)
       };
     }
-    if (!payment || (reminder.kind !== 'due' && reminder.kind !== 'renewal')) return null;
+    if (!payment || !hasOwnTiming(reminder)) return null;
     const which = reminder.kind === 'due' ? 'dueReminder' : 'renewalReminder';
     const on = !timingOf(reminder)?.off;
     return {
@@ -84,8 +88,7 @@ export const useRemindersPage = () => {
       else setChanging(reminder);
     },
     canChangeWhen: (reminder: Reminder) =>
-      reminder.kind === 'note' ||
-      ((reminder.kind === 'due' || reminder.kind === 'renewal') && !!reminder.payment),
+      reminder.kind === 'note' || (hasOwnTiming(reminder) && !!reminder.payment),
     changing,
     stopChanging: () => setChanging(null)
   };

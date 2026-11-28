@@ -36,6 +36,9 @@ export const reminderDays = (timing: ReminderTiming, usual: number) =>
 // The days before that each kind of reminder can be set to
 export const PAYMENT_REMINDER_DAYS = [0, 1, 3, 7] as const;
 export const RENEWAL_REMINDER_DAYS = [7, 14, 30] as const;
+// A debt's rate ending also goes to 3 months before, which is its usual timing
+export const RATE_ENDS_REMINDER_DAYS = [7, 14, 30, 90] as const;
+export const RATE_ENDS_USUAL_DAYS = 90;
 
 /* "On the day", "1 day before", "2 weeks before", "1 month before" */
 export const daysBeforeText = (days: number) => {

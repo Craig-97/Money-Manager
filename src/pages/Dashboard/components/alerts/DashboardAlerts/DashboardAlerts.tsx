@@ -1,12 +1,16 @@
 import { AlertStack } from '~/components/alerts';
-import { renewalHeading } from '~/lib/payments';
+import { rateEndHeading, renewalHeading } from '~/lib/payments';
 import { usePaymentDialogStore } from '~/state/paymentDialog';
 import { Dashboard } from '../../../hooks';
 import { DueTodayAlert } from '../DueTodayAlert';
 import { OverdueAlert } from '../OverdueAlert';
+import { RateEndsAlert } from '../RateEndsAlert';
 import { RenewalAlert } from '../RenewalAlert';
 
-/* The dashboard's alerts, one at a time: overdue payments first, then due today, then renewals */
+/*
+ * The dashboard's alerts, one at a time: overdue payments first, then due today, then renewals and
+ * rate endings
+ */
 export const DashboardAlerts = ({ dashboard }: { dashboard: Dashboard }) => {
   const { alerts, index, go, later, clear } = dashboard.alerts;
   const openEdit = usePaymentDialogStore(s => s.openEdit);
@@ -46,20 +50,34 @@ export const DashboardAlerts = ({ dashboard }: { dashboard: Dashboard }) => {
                   />
                 )
               }
-            : {
-                key: `renewal:${item.payment.id}`,
-                label: renewalHeading(item.payment, { renewal: item.renewal, today }),
-                content: (
-                  <RenewalAlert
-                    payment={item.payment}
-                    renewal={item.renewal}
-                    today={today}
-                    onLater={() => later(item)}
-                    onUpdate={() => openEdit('recurring', { paymentId: item.payment.id })}
-                    onClear={() => clear(item)}
-                  />
-                )
-              }
+            : item.kind === 'rateEnds'
+              ? {
+                  key: `rateEnds:${item.payment.id}`,
+                  label: rateEndHeading(item.payment, item.rateEnd),
+                  content: (
+                    <RateEndsAlert
+                      payment={item.payment}
+                      rateEnd={item.rateEnd}
+                      onLater={() => later(item)}
+                      onUpdate={() => openEdit('recurring', { paymentId: item.payment.id })}
+                      onClear={() => clear(item)}
+                    />
+                  )
+                }
+              : {
+                  key: `renewal:${item.payment.id}`,
+                  label: renewalHeading(item.payment, { renewal: item.renewal, today }),
+                  content: (
+                    <RenewalAlert
+                      payment={item.payment}
+                      renewal={item.renewal}
+                      today={today}
+                      onLater={() => later(item)}
+                      onUpdate={() => openEdit('recurring', { paymentId: item.payment.id })}
+                      onClear={() => clear(item)}
+                    />
+                  )
+                }
       )}
     />
   );

@@ -26,7 +26,8 @@ import {
  *   away     - payday too, but the app wasn't opened for the last three, so it adds three pays
  *   empty    - a budget with no payments or notes
  *   overdrawn - more going out before payday than is in the bank
- *   debts    - the design's three debts: a credit card, car finance and a loan from family
+ *   debts    - the design's debts: a mortgage with its rate ending, a credit card, car finance and a
+ *              loan from family
  *   reminders - the design's reminders: Spotify overdue, renewals, dated notes
  *   interest - away for three months: three interest payments added at once, and the debts
  */
@@ -56,8 +57,9 @@ const mockPayment = ({
     dueInDays: number;
     startedInDays?: number;
     renewInDays?: number;
-    // Paid monthly, with a balance set from a statement a few weeks ago
-    debt?: { balance: number; startingBalance: number; apr: number };
+    // Paid monthly, with a balance set from a statement a few weeks ago, and perhaps a rate that
+    // ends some days from today
+    debt?: { balance: number; startingBalance: number; apr: number; rateEndsInDays?: number };
     // How many past payments a debt has, for its history
     paid?: number;
   }): FakeRecurringPayment =>
@@ -69,7 +71,10 @@ const mockPayment = ({
       history: pastPayments({ amount: fields.amount, dueInDays, debt, count: paid }),
       // Its last payment was a month before the next
       debt: {
-        ...debt,
+        balance: debt.balance,
+        startingBalance: debt.startingBalance,
+        apr: debt.apr,
+        rateEndsOn: debt.rateEndsInDays === undefined ? null : fromToday(debt.rateEndsInDays),
         balanceUpdatedAt: fromToday(-21),
         accrued: 0,
         accruedTo: fromToday(dueInDays - 30)
@@ -544,6 +549,15 @@ const pastPayments = ({
 };
 
 const demoDebts = () => [
+  // Its fixed rate ends in two months, inside its 3 month reminder
+  mockPayment({
+    id: 'mortgage',
+    name: 'Mortgage',
+    category: 'FINANCES',
+    amount: 750,
+    dueInDays: 20,
+    debt: { balance: 148200, startingBalance: 165000, apr: 4.29, rateEndsInDays: 60 }
+  }),
   mockPayment({
     id: 'credit-card',
     name: 'Credit card',

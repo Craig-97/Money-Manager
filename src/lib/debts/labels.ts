@@ -16,8 +16,8 @@ export const whenPaid = (debt: DebtPayment) =>
         ANNUALLY: 'yearly'
       }[debt.frequency];
 
-/* "24.9%", "0.0%" */
-export const aprText = (apr: number) => `${apr.toFixed(1)}%`;
+/* "24.9%", "0.0%", or with a second decimal when it has one: "4.29%" */
+export const aprText = (apr: number) => `${apr.toFixed(Number.isInteger(apr * 10) ? 1 : 2)}%`;
 
 /* The month a debt clears, or "Never" when its payment doesn't cover the interest */
 export const clearedText = (months: number | null | undefined, today: Date) =>

@@ -3,17 +3,19 @@ import { ChipGroup, Modal, ModalActions } from '~/components/ui';
 import {
   fromTimingChoice,
   PAYMENT_REMINDER_DAYS,
+  rateEndsTimingOptions,
   RENEWAL_REMINDER_DAYS,
   TimingChoice,
   timingOptions,
+  toRateEndsChoice,
   toTimingChoice
 } from '~/lib/payments';
 import { Reminder, timingOf } from '~/lib/reminders';
 import { RemindersPage } from '../../hooks';
 
 /*
- * Change when: one payment's reminder before it's due, or before it renews. The usual timing, a
- * number of days, or off.
+ * Change when: one payment's reminder before it's due, before it renews or before its rate ends. The
+ * usual timing, a number of days, or off.
  */
 export const TimingDialog = ({ page }: { page: RemindersPage }) => {
   // What it was opened for, kept while it closes so it reads the same as it animates away
@@ -26,15 +28,24 @@ export const TimingDialog = ({ page }: { page: RemindersPage }) => {
   if (changing && changing !== shown) {
     setShown(changing);
     const timing = timingOf(changing);
-    if (timing) setChoice(toTimingChoice(timing));
+    if (timing) {
+      setChoice(
+        changing.kind === 'rateEnds'
+          ? toRateEndsChoice(toTimingChoice(timing))
+          : toTimingChoice(timing)
+      );
+    }
   }
 
   const reminder = changing ?? shown;
   const payment = reminder?.payment;
   const due = reminder?.kind === 'due';
+  const rateEnds = reminder?.kind === 'rateEnds';
   const options = due
     ? timingOptions({ days: PAYMENT_REMINDER_DAYS, usual: settings.paymentDays })
-    : timingOptions({ days: RENEWAL_REMINDER_DAYS, usual: settings.renewalDays });
+    : rateEnds
+      ? rateEndsTimingOptions
+      : timingOptions({ days: RENEWAL_REMINDER_DAYS, usual: settings.renewalDays });
 
   const save = async () => {
     if (!payment) return;
@@ -60,7 +71,7 @@ export const TimingDialog = ({ page }: { page: RemindersPage }) => {
       }>
       <div>
         <p id="timing-choice" className="mb-2 text-[13px] font-bold text-muted">
-          {due ? 'Before each payment' : 'Before it renews'}
+          {due ? 'Before each payment' : rateEnds ? 'Before the rate ends' : 'Before it renews'}
         </p>
         <ChipGroup
           type="single"

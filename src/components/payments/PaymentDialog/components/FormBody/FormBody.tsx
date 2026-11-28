@@ -15,6 +15,7 @@ import { DebtFields } from '../DebtFields';
 import { FromAccount } from '../FromAccount';
 import { NonWorkingDayField } from '../NonWorkingDayField';
 import { PaymentTypeToggle } from '../PaymentTypeToggle';
+import { RateEndedPrompt } from '../RateEndedPrompt';
 import { RecurringEnding } from '../RecurringEnding';
 import { ReminderFields } from '../ReminderFields';
 import { RoleChoice } from '../RoleChoice';
@@ -52,6 +53,14 @@ export const FormBody = ({ form, kind }: { form: PaymentForm; kind: Payment['kin
 
   return (
     <>
+      {form.rateEndPassed ? (
+        <RateEndedPrompt
+          endedOn={form.rateEndPassed}
+          onSetNew={form.setNextRateEnd}
+          onNone={form.noRateEnd}
+        />
+      ) : null}
+
       <div className={nameAmountClasses}>
         <div>
           <Label tone="muted" htmlFor="payment-name">

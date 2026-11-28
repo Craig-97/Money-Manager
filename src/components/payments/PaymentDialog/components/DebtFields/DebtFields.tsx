@@ -1,9 +1,10 @@
-import { AmountInput, FieldError, FieldHint, Label, TextInput } from '../../../../form';
+import { AmountInput, DatePicker, FieldError, FieldHint, Label, TextInput } from '../../../../form';
 import { PaymentForm } from '../../usePaymentForm';
 
 /*
  * What's owed, its rate and what was borrowed, under the Debt choice: the balance across the top,
- * the other two side by side under it. The payoff date is worked out from them.
+ * the other two side by side under it, then when its rate ends. The payoff date is worked out from
+ * them.
  */
 export const DebtFields = ({ form }: { form: PaymentForm }) => {
   const { values, set, touch, errors } = form;
@@ -77,6 +78,24 @@ export const DebtFields = ({ form }: { form: PaymentForm }) => {
         </div>
         <FieldHint id="payment-started-hint">
           What you owed at the start, so Debts can show how far you’ve come.
+        </FieldHint>
+      </div>
+
+      <div>
+        <Label tone="muted" htmlFor="payment-rate-ends">
+          Rate ends
+        </Label>
+        <DatePicker
+          id="payment-rate-ends"
+          value={values.rateEnds}
+          onChange={date => set('rateEnds', date)}
+          onClear={() => set('rateEnds', '')}
+          placeholder="Optional"
+          aria-describedby="payment-rate-ends-hint"
+        />
+        <FieldHint id="payment-rate-ends-hint">
+          When a fixed or offer rate ends, like a mortgage fix or a 0% card. You’ll get a reminder
+          before.
         </FieldHint>
       </div>
     </>

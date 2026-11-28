@@ -457,12 +457,14 @@ type Debt {
   paidOffThisCycle: Float!
   accrued: Float!
   accruedTo: String
+  rateEndsOn: String
 }
 
 input DebtInput {
   balance: Float!
   startingBalance: Float
   apr: Float!
+  rateEndsOn: String
 }
 
 type PaymentRecord {

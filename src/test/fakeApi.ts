@@ -47,6 +47,8 @@ export interface FakeDebt {
   // Interest built up since the last payment; left out, a period's worth goes on when it's paid
   accrued?: number;
   accruedTo?: string | null;
+  // When its fixed or offer rate ends; left out, none
+  rateEndsOn?: string | null;
 }
 
 export interface FakeRecurringPayment {
@@ -328,7 +330,8 @@ const FIELD_DEFAULTS: Record<string, Record<string, (value: Loose) => unknown>> 
   },
   Debt: {
     accrued: d => d.accrued ?? 0,
-    accruedTo: d => d.accruedTo ?? null
+    accruedTo: d => d.accruedTo ?? null,
+    rateEndsOn: d => d.rateEndsOn ?? null
   },
   Budget: {
     accounts: b => accountsOf(b as unknown as FakeBudget),
@@ -715,9 +718,10 @@ export const createFakeApi = ({
     } else if (input.debt) {
       const previous = payment.debt ? payment.debt.balance : null;
       const moved = previous !== input.debt.balance;
+      const debt = debtFrom(input.debt, payment.debt);
       payment.debt = moved
-        ? debtFrom(input.debt)
-        : { ...debtFrom(input.debt), balanceUpdatedAt: payment.debt?.balanceUpdatedAt ?? null };
+        ? debt
+        : { ...debt, balanceUpdatedAt: payment.debt?.balanceUpdatedAt ?? null };
       if (moved) balanceSet(payment, previous);
     }
     for (const [key, value] of Object.entries(input)) {
@@ -754,11 +758,18 @@ export const createFakeApi = ({
     iconUrl: input.iconUrl ?? null
   });
 
-  const debtFrom = (input: Args): FakeDebt => ({
+  // As the API: a rate end the input leaves out stays as it was, and null clears it
+  const debtFrom = (input: Args, before?: FakeDebt | null): FakeDebt => ({
     balance: input.balance,
     startingBalance: input.startingBalance ?? null,
     apr: input.apr,
-    balanceUpdatedAt: String(Date.now())
+    balanceUpdatedAt: String(Date.now()),
+    rateEndsOn:
+      input.rateEndsOn === undefined
+        ? (before?.rateEndsOn ?? null)
+        : input.rateEndsOn
+          ? fromInput(input.rateEndsOn)
+          : null
   });
 
   // As the API: notes a debt's balance being set by hand, and how far it moved

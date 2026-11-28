@@ -100,6 +100,7 @@ export type AssignPaymentAccountsMutation = {
           paidOffThisCycle: number;
           accrued: number;
           accruedTo: string | null;
+          rateEndsOn: string | null;
         } | null;
       } | null> | null;
     } | null;
@@ -247,6 +248,7 @@ export type CreateAccountMutation = {
           paidOffThisCycle: number;
           accrued: number;
           accruedTo: string | null;
+          rateEndsOn: string | null;
         } | null;
       } | null> | null;
     } | null;
@@ -325,6 +327,7 @@ export type DeleteAccountMutation = {
           paidOffThisCycle: number;
           accrued: number;
           accruedTo: string | null;
+          rateEndsOn: string | null;
         } | null;
       } | null> | null;
       oneOffPayments: Array<{
@@ -444,6 +447,7 @@ export type UpdateAccountMutation = {
           paidOffThisCycle: number;
           accrued: number;
           accruedTo: string | null;
+          rateEndsOn: string | null;
         } | null;
       } | null> | null;
       oneOffPayments: Array<{
@@ -726,6 +730,7 @@ export type BudgetQuery = {
         paidOffThisCycle: number;
         accrued: number;
         accruedTo: string | null;
+        rateEndsOn: string | null;
       } | null;
     } | null> | null;
     oneOffPayments: Array<{
@@ -858,6 +863,7 @@ export type BudgetFieldsFragment = {
       paidOffThisCycle: number;
       accrued: number;
       accruedTo: string | null;
+      rateEndsOn: string | null;
     } | null;
   } | null> | null;
   oneOffPayments: Array<{
@@ -996,6 +1002,7 @@ export type CreateBudgetMutation = {
           paidOffThisCycle: number;
           accrued: number;
           accruedTo: string | null;
+          rateEndsOn: string | null;
         } | null;
       } | null> | null;
       oneOffPayments: Array<{
@@ -1122,6 +1129,7 @@ export type LogDebtOverpaymentMutation = {
           paidOffThisCycle: number;
           accrued: number;
           accruedTo: string | null;
+          rateEndsOn: string | null;
         } | null;
       } | null> | null;
     } | null;
@@ -1200,6 +1208,7 @@ export type MarkPaymentsPaidMutation = {
           paidOffThisCycle: number;
           accrued: number;
           accruedTo: string | null;
+          rateEndsOn: string | null;
         } | null;
       } | null> | null;
       oneOffPayments: Array<{
@@ -1291,6 +1300,7 @@ export type MarkPaymentsUnpaidMutation = {
           paidOffThisCycle: number;
           accrued: number;
           accruedTo: string | null;
+          rateEndsOn: string | null;
         } | null;
       } | null> | null;
       oneOffPayments: Array<{
@@ -1354,6 +1364,7 @@ export type SkipRecurringPaymentsMutation = {
           paidOffThisCycle: number;
           accrued: number;
           accruedTo: string | null;
+          rateEndsOn: string | null;
         } | null;
       } | null> | null;
     } | null;
@@ -1433,6 +1444,7 @@ export type StartPaydayCycleMutation = {
           paidOffThisCycle: number;
           accrued: number;
           accruedTo: string | null;
+          rateEndsOn: string | null;
         } | null;
       } | null> | null;
       oneOffPayments: Array<{
@@ -1524,6 +1536,7 @@ export type UndoDebtOverpaymentMutation = {
           paidOffThisCycle: number;
           accrued: number;
           accruedTo: string | null;
+          rateEndsOn: string | null;
         } | null;
       } | null> | null;
     } | null;
@@ -1749,6 +1762,7 @@ export type CreateRecurringPaymentMutation = {
         paidOffThisCycle: number;
         accrued: number;
         accruedTo: string | null;
+        rateEndsOn: string | null;
       } | null;
     } | null;
   };
@@ -1831,6 +1845,7 @@ export type RecurringPaymentFieldsFragment = {
     paidOffThisCycle: number;
     accrued: number;
     accruedTo: string | null;
+    rateEndsOn: string | null;
   } | null;
 };
 
@@ -1900,6 +1915,7 @@ export type UpdateRecurringPaymentMutation = {
         paidOffThisCycle: number;
         accrued: number;
         accruedTo: string | null;
+        rateEndsOn: string | null;
       } | null;
     } | null;
   };
@@ -2323,7 +2339,8 @@ export const RecurringPaymentFieldsFragmentDoc = {
                 { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'paidOffThisCycle' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'accrued' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'accruedTo' } }
+                { kind: 'Field', name: { kind: 'Name', value: 'accruedTo' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'rateEndsOn' } }
               ]
             }
           }
@@ -2688,7 +2705,8 @@ export const BudgetFieldsFragmentDoc = {
                 { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'paidOffThisCycle' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'accrued' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'accruedTo' } }
+                { kind: 'Field', name: { kind: 'Name', value: 'accruedTo' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'rateEndsOn' } }
               ]
             }
           }
@@ -2993,7 +3011,8 @@ export const AssignPaymentAccountsDocument = {
                 { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'paidOffThisCycle' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'accrued' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'accruedTo' } }
+                { kind: 'Field', name: { kind: 'Name', value: 'accruedTo' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'rateEndsOn' } }
               ]
             }
           }
@@ -3313,7 +3332,8 @@ export const CreateAccountDocument = {
                 { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'paidOffThisCycle' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'accrued' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'accruedTo' } }
+                { kind: 'Field', name: { kind: 'Name', value: 'accruedTo' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'rateEndsOn' } }
               ]
             }
           }
@@ -3525,7 +3545,8 @@ export const DeleteAccountDocument = {
                 { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'paidOffThisCycle' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'accrued' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'accruedTo' } }
+                { kind: 'Field', name: { kind: 'Name', value: 'accruedTo' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'rateEndsOn' } }
               ]
             }
           }
@@ -3790,7 +3811,8 @@ export const UpdateAccountDocument = {
                 { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'paidOffThisCycle' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'accrued' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'accruedTo' } }
+                { kind: 'Field', name: { kind: 'Name', value: 'accruedTo' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'rateEndsOn' } }
               ]
             }
           }
@@ -4555,7 +4577,8 @@ export const BudgetDocument = {
                 { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'paidOffThisCycle' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'accrued' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'accruedTo' } }
+                { kind: 'Field', name: { kind: 'Name', value: 'accruedTo' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'rateEndsOn' } }
               ]
             }
           }
@@ -4941,7 +4964,8 @@ export const CreateBudgetDocument = {
                 { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'paidOffThisCycle' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'accrued' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'accruedTo' } }
+                { kind: 'Field', name: { kind: 'Name', value: 'accruedTo' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'rateEndsOn' } }
               ]
             }
           }
@@ -5326,7 +5350,8 @@ export const LogDebtOverpaymentDocument = {
                 { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'paidOffThisCycle' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'accrued' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'accruedTo' } }
+                { kind: 'Field', name: { kind: 'Name', value: 'accruedTo' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'rateEndsOn' } }
               ]
             }
           }
@@ -5538,7 +5563,8 @@ export const MarkPaymentsPaidDocument = {
                 { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'paidOffThisCycle' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'accrued' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'accruedTo' } }
+                { kind: 'Field', name: { kind: 'Name', value: 'accruedTo' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'rateEndsOn' } }
               ]
             }
           }
@@ -5780,7 +5806,8 @@ export const MarkPaymentsUnpaidDocument = {
                 { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'paidOffThisCycle' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'accrued' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'accruedTo' } }
+                { kind: 'Field', name: { kind: 'Name', value: 'accruedTo' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'rateEndsOn' } }
               ]
             }
           }
@@ -5949,7 +5976,8 @@ export const SkipRecurringPaymentsDocument = {
                 { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'paidOffThisCycle' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'accrued' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'accruedTo' } }
+                { kind: 'Field', name: { kind: 'Name', value: 'accruedTo' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'rateEndsOn' } }
               ]
             }
           }
@@ -6162,7 +6190,8 @@ export const StartPaydayCycleDocument = {
                 { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'paidOffThisCycle' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'accrued' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'accruedTo' } }
+                { kind: 'Field', name: { kind: 'Name', value: 'accruedTo' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'rateEndsOn' } }
               ]
             }
           }
@@ -6391,7 +6420,8 @@ export const UndoDebtOverpaymentDocument = {
                 { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'paidOffThisCycle' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'accrued' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'accruedTo' } }
+                { kind: 'Field', name: { kind: 'Name', value: 'accruedTo' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'rateEndsOn' } }
               ]
             }
           }
@@ -7159,7 +7189,8 @@ export const CreateRecurringPaymentDocument = {
                 { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'paidOffThisCycle' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'accrued' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'accruedTo' } }
+                { kind: 'Field', name: { kind: 'Name', value: 'accruedTo' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'rateEndsOn' } }
               ]
             }
           }
@@ -7490,7 +7521,8 @@ export const UpdateRecurringPaymentDocument = {
                 { kind: 'Field', name: { kind: 'Name', value: 'balanceUpdatedAt' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'paidOffThisCycle' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'accrued' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'accruedTo' } }
+                { kind: 'Field', name: { kind: 'Name', value: 'accruedTo' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'rateEndsOn' } }
               ]
             }
           }

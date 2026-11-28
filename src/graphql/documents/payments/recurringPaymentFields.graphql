@@ -42,5 +42,7 @@ fragment RecurringPaymentFields on RecurringPayment {
     # Interest built up since the last payment, counted to the start of accruedTo
     accrued
     accruedTo
+    # When a fixed or offer rate ends; its reminder is renewalReminder
+    rateEndsOn
   }
 }

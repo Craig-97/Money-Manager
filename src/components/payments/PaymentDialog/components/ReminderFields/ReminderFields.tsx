@@ -2,9 +2,12 @@ import { cn } from '~/lib/cn';
 import { Label, Select } from '../../../../form';
 import { PaymentForm } from '../../usePaymentForm';
 
-/* When to be reminded before it's due, and before it renews when it does. Under More options. */
+/*
+ * When to be reminded before it's due, and before it renews when it does, or before a debt's rate
+ * ends. Under More options.
+ */
 export const ReminderFields = ({ form }: { form: PaymentForm }) => {
-  const { values, set, reminderOptions } = form;
+  const { values, set, reminderOptions, renewalReminder } = form;
   const { reminds } = form.more;
 
   return (
@@ -24,11 +27,11 @@ export const ReminderFields = ({ form }: { form: PaymentForm }) => {
       {reminds ? (
         <div>
           <Label tone="muted" htmlFor="payment-reminder">
-            Remind me before it renews
+            {renewalReminder.label}
           </Label>
           <Select
             id="payment-reminder"
-            value={values.reminder}
+            value={renewalReminder.value}
             onValueChange={value => set('reminder', value)}
             options={reminderOptions.renewal}
             className="bg-surface"

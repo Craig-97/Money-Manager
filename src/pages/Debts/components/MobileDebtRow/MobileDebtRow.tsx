@@ -3,6 +3,7 @@ import { DebtProgress } from '~/components/debts';
 import { PaymentIcon } from '~/components/payments';
 import { aprText, clearedText, DebtPayment, paidOffShare, paymentText } from '~/lib/debts';
 import { formatMoney } from '~/lib/format';
+import { rateUntilText } from '~/lib/payments';
 import { useDebtViewStore } from '~/state/debtView';
 
 interface MobileDebtRowProps {
@@ -36,7 +37,9 @@ export const MobileDebtRow = ({ debt, clearedIn, today }: MobileDebtRowProps) =>
         <DebtProgress share={paidOffShare(debt)} />
         <span className="flex items-center justify-between gap-2 text-xs font-medium text-muted">
           <span className="min-w-0 [overflow-wrap:anywhere]">
-            {debt.debt.apr ? aprText(debt.debt.apr) : 'No interest'} · {paymentText(debt)}
+            {debt.debt.apr ? aprText(debt.debt.apr) : 'No interest'}
+            {debt.debt.rateEndsOn ? ` ${rateUntilText(debt.debt.rateEndsOn)}` : ''} ·{' '}
+            {paymentText(debt)}
           </span>
           <span className="shrink-0 font-semibold">{clearedText(clearedIn, today)}</span>
         </span>
